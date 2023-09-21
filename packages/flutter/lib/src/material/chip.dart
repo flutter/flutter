@@ -2051,12 +2051,12 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     if (needsCompositing) {
        _avatarOpacityLayerHandler.layer = context.pushOpacity(offset, disabledColorAlpha, paintWithOverlay, oldLayer: _avatarOpacityLayerHandler.layer);
     } else {
+      _avatarOpacityLayerHandler.layer = null;
       if (disabledColorAlpha != 0xff) {
         context.canvas.saveLayer(
           _boxRect(avatar).shift(offset).inflate(20.0),
           Paint()..color = disabledColor,
         );
-        _avatarOpacityLayerHandler.layer = null;
       }
       paintWithOverlay(context, offset);
       if (disabledColorAlpha != 0xff) {
