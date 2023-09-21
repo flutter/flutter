@@ -131,7 +131,7 @@ class TextFormField extends FormField<String> {
     int? minLines,
     bool expands = false,
     int? maxLength,
-    ValueChanged<String>? onChanged,
+    this.onChanged,
     GestureTapCallback? onTap,
     TapRegionCallback? onTapOutside,
     VoidCallback? onEditingComplete,
@@ -193,9 +193,7 @@ class TextFormField extends FormField<String> {
                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
            void onChangedHandler(String value) {
              field.didChange(value);
-             if (onChanged != null) {
-               onChanged(value);
-             }
+             onChanged?.call(value);
            }
            return UnmanagedRestorationScope(
              bucket: field.bucket,
@@ -271,6 +269,12 @@ class TextFormField extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
+  /// {@template flutter.material.TextFormField.onChanged}
+  /// Called when the user initiates a change to the TextField's
+  /// value: when they have inserted or deleted text or reset the form.
+  /// {@endtemplate}
+  final ValueChanged<String>? onChanged;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
@@ -365,10 +369,11 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   @override
   void reset() {
-    // setState will be called in the superclass, so even though state is being
-    // manipulated, no setState call is needed here.
+    // Set the controller value before calling super.reset() to let
+    // _handleControllerChanged suppress the change.
     _effectiveController.text = widget.initialValue ?? '';
     super.reset();
+    _textFormField.onChanged?.call(_effectiveController.text);
   }
 
   void _handleControllerChanged() {
