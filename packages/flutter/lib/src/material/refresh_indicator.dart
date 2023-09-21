@@ -242,7 +242,7 @@ class RefreshIndicator extends StatefulWidget {
   ///   done,     while animating the indicator's fade-out after refreshing.
   ///   canceled, while animating the indicator's fade-out after not arming.
   ///```
-  final Function(String? mode)? onModeChange;
+  final void Function(String? mode)? onModeChange;
 
   /// The progress indicator's foreground color. The current theme's
   /// [ColorScheme.primary] by default.
