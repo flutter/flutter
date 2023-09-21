@@ -327,14 +327,21 @@ class FlutterView {
 
   /// Updates the view's rendering on the GPU with the newly provided [Scene].
   ///
-  /// This function must be called within the scope of the
-  /// [PlatformDispatcher.onBeginFrame] or [PlatformDispatcher.onDrawFrame]
-  /// callbacks being invoked.
+  /// ## Requirement for calling this method
   ///
-  /// If this function is called a second time during a single
-  /// [PlatformDispatcher.onBeginFrame]/[PlatformDispatcher.onDrawFrame]
-  /// callback sequence or called outside the scope of those callbacks, the call
-  /// will be ignored.
+  /// This method must be called within the synchronous scope of the
+  /// [PlatformDispatcher.onBeginFrame] or [PlatformDispatcher.onDrawFrame]
+  /// callbacks. Calls out of this scope will be ignored. To use this method,
+  /// create a callback that calls this method instead, and assign it to either
+  /// of the fields above; then schedule a frame, which is done typically with
+  /// [PlatformDispatcher.scheduleFrame]. Also, make sure the callback does not
+  /// have `await` before the `FlutterWindow.render` call.
+  ///
+  /// Additionally, this method can only be called once for each view during a
+  /// single [PlatformDispatcher.onBeginFrame]/[PlatformDispatcher.onDrawFrame]
+  /// callback sequence. Duplicate calls will be ignored in production.
+  ///
+  /// ## How to record a scene
   ///
   /// To record graphical operations, first create a [PictureRecorder], then
   /// construct a [Canvas], passing that [PictureRecorder] to its constructor.
@@ -353,7 +360,14 @@ class FlutterView {
   ///   scheduling of frames.
   /// * [RendererBinding], the Flutter framework class which manages layout and
   ///   painting.
-  void render(Scene scene) => _render(scene as _NativeScene);
+  void render(Scene scene) {
+    if (platformDispatcher._renderedViews?.add(this) != true) {
+      // Duplicated calls or calls outside of onBeginFrame/onDrawFrame
+      // (indicated by _renderedViews being null) are ignored, as documented.
+      return;
+    }
+    _render(scene as _NativeScene);
+  }
 
   @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::Render')
   external static void _render(_NativeScene scene);

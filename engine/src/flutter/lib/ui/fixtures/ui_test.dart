@@ -1076,3 +1076,45 @@ external void _callHook(
   Object? arg20,
   Object? arg21,
 ]);
+
+Scene _createRedBoxScene(Size size) {
+  final SceneBuilder builder = SceneBuilder();
+  builder.pushOffset(0.0, 0.0);
+  final Paint paint = Paint()
+    ..color = Color.fromARGB(255, 255, 0, 0)
+    ..style = PaintingStyle.fill;
+  final PictureRecorder baseRecorder = PictureRecorder();
+  final Canvas canvas = Canvas(baseRecorder);
+  canvas.drawRect(Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
+  final Picture picture = baseRecorder.endRecording();
+  builder.addPicture(Offset(0.0, 0.0), picture);
+  builder.pop();
+  return builder.build();
+}
+
+@pragma('vm:entry-point')
+void incorrectImmediateRender() {
+  PlatformDispatcher.instance.views.first.render(_createRedBoxScene(Size(2, 2)));
+  _finish();
+  // Don't schedule a frame here. This test only checks if the
+  // [FlutterView.render] call is propagated to PlatformConfiguration.render
+  // and thus doesn't need anything from `Animator` or `Engine`, which,
+  // besides, are not even created in the native side at all.
+}
+
+@pragma('vm:entry-point')
+void incorrectDoubleRender() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration value) {
+    PlatformDispatcher.instance.views.first.render(_createRedBoxScene(Size(2, 2)));
+    PlatformDispatcher.instance.views.first.render(_createRedBoxScene(Size(3, 3)));
+  };
+  PlatformDispatcher.instance.onDrawFrame = () {
+    PlatformDispatcher.instance.views.first.render(_createRedBoxScene(Size(4, 4)));
+    PlatformDispatcher.instance.views.first.render(_createRedBoxScene(Size(5, 5)));
+  };
+  _finish();
+  // Don't schedule a frame here. This test only checks if the
+  // [FlutterView.render] call is propagated to PlatformConfiguration.render
+  // and thus doesn't need anything from `Animator` or `Engine`, which,
+  // besides, are not even created in the native side at all.
+}
