@@ -28,7 +28,7 @@ class DlMetalSurfaceInstance : public DlSurfaceInstance {
 bool DlMetalSurfaceProvider::InitializeSurface(size_t width,
                                                size_t height,
                                                PixelFormat format) {
-  if (format != kN32Premul_PixelFormat) {
+  if (format != kN32PremulPixelFormat) {
     return false;
   }
   metal_context_ = std::make_unique<TestMetalContext>();

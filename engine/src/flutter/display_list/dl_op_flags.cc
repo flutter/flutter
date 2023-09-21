@@ -21,7 +21,7 @@ const DisplayListSpecialGeometryFlags DisplayListAttributeFlags::WithPathEffect(
           // end caps to areas that might not have had them before so all
           // we need to do is to indicate the potential for diagonal
           // end caps and move on.
-          return special_flags_.with(kMayHaveCaps_ | kMayHaveDiagonalCaps_);
+          return special_flags_.with(kMayHaveCaps | kMayHaveDiagonalCaps);
         }
       }
     }
