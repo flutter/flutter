@@ -125,12 +125,6 @@ class CupertinoSwitchTheme extends InheritedWidget {
 
   /// Returns the configuration [data] from the closest [CupertinoSwitchTheme] ancestor.
   /// If there is no ancestor, it returns [CupertinoTheme.switchTheme].
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// CupertinoSwitchThemeData theme = CupertinoSwitchTheme.of(context);
-  /// ```
   static CupertinoSwitchThemeData? of(BuildContext context) {
     final CupertinoSwitchTheme? switchTheme = context.dependOnInheritedWidgetOfExactType<CupertinoSwitchTheme>();
     return (switchTheme?.data ?? CupertinoTheme.of(context).switchTheme) ?? Theme.of(context).cupertinoOverrideTheme?.switchTheme;
