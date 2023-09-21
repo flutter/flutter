@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'theme.dart';
@@ -126,7 +126,7 @@ class CupertinoSwitchTheme extends InheritedWidget {
   /// If there is no ancestor, it returns [CupertinoTheme.switchTheme].
   static CupertinoSwitchThemeData? of(BuildContext context) {
     final CupertinoSwitchTheme? switchTheme = context.dependOnInheritedWidgetOfExactType<CupertinoSwitchTheme>();
-    return (switchTheme?.data ?? CupertinoTheme.of(context).switchTheme) ?? Theme.of(context).cupertinoOverrideTheme?.switchTheme;
+    return switchTheme?.data ?? CupertinoTheme.of(context).switchTheme;
   }
 
   @override

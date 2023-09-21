@@ -365,8 +365,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
-
-    /// Proirty of color :
+    /// Priority of color :
     /// 1. CupertinoSwitch properties
     /// 2. Closest CupertinoSwitchTheme
     /// 3. CupertinoTheme's data primary color
