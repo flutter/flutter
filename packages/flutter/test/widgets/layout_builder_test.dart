@@ -699,6 +699,29 @@ void main() {
     await pumpTestWidget(const Size(10.0, 10.0));
     expect(childSize, const Size(10.0, 10.0));
   });
+
+  testWidgetsWithLeakTracking('LayoutBuilder render object child can be visited', (WidgetTester tester) async {
+    bool hasChildBeenVisited = false;
+    final UniqueKey layoutBuilderKey = UniqueKey();
+
+    await tester.pumpWidget(
+      LayoutBuilder(
+        key: layoutBuilderKey,
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return const SizedBox.shrink();
+          },
+        ),
+    );
+
+    final Finder finder = find.byKey(layoutBuilderKey);
+    final RenderBox renderBox = tester.firstRenderObject<RenderBox>(finder);
+
+    renderBox.visitChildren((RenderObject child) {
+      hasChildBeenVisited = true;
+    });
+
+    assert(hasChildBeenVisited, isTrue);
+  });
 }
 
 class _LayoutSpy extends LeafRenderObjectWidget {
