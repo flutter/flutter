@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icon_theme_data.dart';
-import 'text_theme.dart';
 import 'switch_theme.dart';
+import 'text_theme.dart';
 
 export 'package:flutter/foundation.dart' show Brightness;
 

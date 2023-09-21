@@ -14,9 +14,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'switch_theme.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
-import 'switch_theme.dart';
 
 // Examples can assume:
 // bool _lights = false;

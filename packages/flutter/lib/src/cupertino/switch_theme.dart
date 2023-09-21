@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+
 import 'colors.dart';
 import 'theme.dart';
-import '../material/theme.dart';
-import '../material/theme_data.dart';
 
 /// Defines default property values for descendant [CupertinoSwitch] widgets.
 ///
