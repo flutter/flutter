@@ -6,13 +6,13 @@ import 'dart:convert' show LineSplitter, jsonDecode;
 import 'dart:io' as io show File, stderr, stdout;
 
 import 'package:engine_repo_tools/engine_repo_tools.dart';
+import 'package:git_repo_tools/git_repo_tools.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:process_runner/process_runner.dart';
 
 import 'src/command.dart';
-import 'src/git_repo.dart';
 import 'src/options.dart';
 
 const String _linterOutputHeader = '''
@@ -211,7 +211,7 @@ class ClangTidy {
         .toList();
     }
 
-    final GitRepo repo = GitRepo(
+    final GitRepo repo = GitRepo.fromRoot(
       options.repoPath,
       processManager: _processManager,
       verbose: options.verbose,
