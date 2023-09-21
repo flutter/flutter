@@ -424,7 +424,6 @@ void main() {
           selectedIndex = i;
         },
       ),
-      useMaterial3: true,
     );
 
     await tester.pumpWidget(widget);

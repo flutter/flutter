@@ -231,6 +231,8 @@ class NavigationDrawerDestination extends StatelessWidget {
   final Widget label;
 
   /// Indicates that this destination is selectable.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   @override
@@ -332,6 +334,9 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// animation is decreasing or dismissed.
   final WidgetBuilder buildLabel;
 
+  /// Indicates that this destination is selectable.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   @override
