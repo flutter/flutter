@@ -185,7 +185,7 @@ class BuildInfo {
   final bool assumeInitializeFromDillUpToDate;
 
   /// If set, builds native assets with `build.dart` from all packages.
-  /// 
+  ///
   /// Set to false in g3, because native assets are not build via `build.dart`.
   final bool buildNativeAssets;
 
