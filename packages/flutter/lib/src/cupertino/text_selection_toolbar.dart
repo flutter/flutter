@@ -1033,7 +1033,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         BoxConstraints(
           maxWidth: (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - paginationButtonsWidth,
           minHeight: greatestHeight,
-          maxHeight: constraints.maxHeight,
+          maxHeight: greatestHeight,
         ),
         parentUsesSize: true,
       );
@@ -1049,7 +1049,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
           BoxConstraints(
             maxWidth: firstPageWidth - paginationButtonsWidth,
             minHeight: greatestHeight,
-            maxHeight: constraints.maxHeight,
+            maxHeight: greatestHeight,
           ),
           parentUsesSize: true,
         );
