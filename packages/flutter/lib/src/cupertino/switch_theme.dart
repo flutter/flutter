@@ -58,14 +58,13 @@ class CupertinoSwitchThemeData with Diagnosticable {
     );
   }
 
-  CupertinoSwitchThemeData resolveFrom(BuildContext context){
-    return this.copyWith(
+  CupertinoSwitchThemeData resolveFrom(BuildContext context) {
+    return copyWith(
         activeColor: CupertinoDynamicColor.maybeResolve(
-            this.activeColor, context),
+            activeColor, context),
         thumbColor: CupertinoDynamicColor.maybeResolve(
-            this.thumbColor, context),
-        trackColor: CupertinoDynamicColor.maybeResolve(
-            this.trackColor, context));
+            thumbColor, context),
+        trackColor: CupertinoDynamicColor.maybeResolve(trackColor, context));
   }
 
   @override
