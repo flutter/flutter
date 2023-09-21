@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Widget _buildScroller({ required List<String> log }) {
   return NotificationListener<ScrollNotification>(
@@ -38,7 +39,7 @@ void main() {
     scrollable.position.jumpTo(newScrollOffset);
   }
 
-  testWidgets('Scroll event drag', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll event drag', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -57,7 +58,7 @@ void main() {
     expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end']));
   });
 
-  testWidgets('Scroll animateTo', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll animateTo', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -74,7 +75,7 @@ void main() {
     expect(completer.isCompleted, isTrue);
   });
 
-  testWidgets('Scroll jumpTo', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll jumpTo', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -85,7 +86,7 @@ void main() {
     expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end']));
   });
 
-  testWidgets('Scroll jumpTo during animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll jumpTo during animation', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -110,7 +111,7 @@ void main() {
     expect(completer.isCompleted, isTrue);
   });
 
-  testWidgets('Scroll scrollTo during animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll scrollTo during animation', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -134,7 +135,7 @@ void main() {
     expect(completer.isCompleted, isTrue);
   });
 
-  testWidgets('fling, fling generates two start/end pairs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling, fling generates two start/end pairs', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -157,7 +158,7 @@ void main() {
     expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start', 'scroll-end']));
   });
 
-  testWidgets('fling, pause, fling generates two start/end pairs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling, pause, fling generates two start/end pairs', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -176,7 +177,7 @@ void main() {
     expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start', 'scroll-end']));
   });
 
-  testWidgets('fling up ends', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling up ends', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
