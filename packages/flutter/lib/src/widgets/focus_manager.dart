@@ -417,9 +417,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
-  /// arguments must not be null.
-  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
