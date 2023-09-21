@@ -1050,10 +1050,11 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         currentButtonPosition = _backButton!.size.width + dividerWidth;
         paginationButtonsWidth = _backButton!.size.width + _nextButton!.size.width;
         child.layout(
-          BoxConstraints.loose(Size(
-            firstPageWidth - paginationButtonsWidth,
-            constraints.maxHeight,
-          )),
+          BoxConstraints(
+            maxWidth: firstPageWidth - paginationButtonsWidth,
+            minHeight: greatestHeight,
+            maxHeight: constraints.maxHeight,
+          ),
           parentUsesSize: true,
         );
       }
