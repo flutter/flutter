@@ -11,8 +11,6 @@ import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 import 'base/common.dart';
-import 'base/config.dart';
-import 'base/context.dart' as context;
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -291,14 +289,7 @@ void ensureNoLinkModeStatic(List<Asset> nativeAssets) {
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all macOS.
 Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
-  final Config? config = context.context.get<Config>();
-  final String buildDir;
-  if (config != null) {
-    buildDir = build_info.getBuildDirectory();
-  } else {
-    // Expression compilation doesn't have a config in the context in g3.
-    buildDir = 'build';
-  }
+  final String buildDir = build_info.getBuildDirectory();
   return projectUri.resolve('$buildDir/native_assets/$os/');
 }
 

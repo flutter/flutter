@@ -46,6 +46,7 @@ class BuildInfo {
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
+    this.buildNativeAssets = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -182,6 +183,11 @@ class BuildInfo {
   /// If set, assumes that the file passed in [initializeFromDill] is up to date
   /// and skips the check and potential invalidation of files.
   final bool assumeInitializeFromDillUpToDate;
+
+  /// If set, builds native assets with `build.dart` from all packages.
+  /// 
+  /// Set to false in g3, because native assets are not build via `build.dart`.
+  final bool buildNativeAssets;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

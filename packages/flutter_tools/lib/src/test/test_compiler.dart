@@ -168,36 +168,40 @@ class TestCompiler {
       }
 
       Uri? nativeAssetsYaml;
-      final Uri projectUri = FlutterProject.current().directory.uri;
-      final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
-        projectUri,
-        buildInfo.packageConfig,
-        globals.fs,
-        globals.logger,
-      );
-      if (globals.platform.isMacOS) {
-        (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
-          buildMode: BuildMode.debug,
-          projectUri: projectUri,
-          flutterTester: true,
-          fileSystem: globals.fs,
-          buildRunner: buildRunner,
-        );
-      } else if (globals.platform.isLinux) {
-        (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
-          buildMode: BuildMode.debug,
-          projectUri: projectUri,
-          flutterTester: true,
-          fileSystem: globals.fs,
-          buildRunner: buildRunner,
-        );
+      if (!buildInfo.buildNativeAssets) {
+        nativeAssetsYaml = null;
       } else {
-        await ensureNoNativeAssetsOrOsIsSupported(
+        final Uri projectUri = FlutterProject.current().directory.uri;
+        final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
           projectUri,
-          const LocalPlatform().operatingSystem,
+          buildInfo.packageConfig,
           globals.fs,
-          buildRunner,
+          globals.logger,
         );
+        if (globals.platform.isMacOS) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else if (globals.platform.isLinux) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else {
+          await ensureNoNativeAssetsOrOsIsSupported(
+            projectUri,
+            const LocalPlatform().operatingSystem,
+            globals.fs,
+            buildRunner,
+          );
+        }
       }
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(
