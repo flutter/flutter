@@ -93,11 +93,8 @@ class MatchesGoldenFile extends AsyncMatcher {
         assert(!renderObject.debugNeedsPaint);
         final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
         final ui.Image image = await layer.toImage(renderObject.paintBounds);
-        print('GOT IMAGE FROM ELEMENT');
-        print(image);
         try {
           final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-          print('BYTES = $bytes');
           if (bytes == null) {
             return 'could not encode screenshot.';
           }
