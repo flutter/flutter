@@ -877,7 +877,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// It accommodates the [elevation] of the indicator.
   final EdgeInsetsGeometry indicatorMargin;
 
-  /// The amount of space by which to inset the inner [CircularProgressIndicator].
+  /// The amount of space by which to inset the inner refresh indicator.
   final EdgeInsetsGeometry indicatorPadding;
 
   /// Default stroke width.
