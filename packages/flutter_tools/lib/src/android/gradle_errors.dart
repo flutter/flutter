@@ -288,7 +288,7 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
       final Directory userGradle = globals.fs.directory(globals.fs.path.join(homeDir, '.gradle'));
       globals.logger.printStatus('Deleting ${userGradle.path}');
       try {
-        ErrorHandlingFileSystem.deleteIfExists(userGradle, recursive: true);
+       // ErrorHandlingFileSystem.deleteIfExists(userGradle, recursive: true);
       } on FileSystemException catch (err) {
         globals.printTrace('Failed to delete Gradle cache: $err');
       }
