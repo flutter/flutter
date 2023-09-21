@@ -235,7 +235,7 @@ DEFINE_SET_CLEAR_DLATTR_OP(PathEffect, PathEffect, effect)
 struct SetImageColorSourceOp : DLOp {
   static const auto kType = DisplayListOpType::kSetImageColorSource;
 
-  SetImageColorSourceOp(const DlImageColorSource* source)
+  explicit SetImageColorSourceOp(const DlImageColorSource* source)
       : source(source->image(),
                source->horizontal_tile_mode(),
                source->vertical_tile_mode(),
@@ -254,7 +254,8 @@ struct SetImageColorSourceOp : DLOp {
 struct SetRuntimeEffectColorSourceOp : DLOp {
   static const auto kType = DisplayListOpType::kSetRuntimeEffectColorSource;
 
-  SetRuntimeEffectColorSourceOp(const DlRuntimeEffectColorSource* source)
+  explicit SetRuntimeEffectColorSourceOp(
+      const DlRuntimeEffectColorSource* source)
       : source(source->runtime_effect(),
                source->samplers(),
                source->uniform_data()) {}
@@ -295,7 +296,7 @@ struct SetSceneColorSourceOp : DLOp {
 struct SetSharedImageFilterOp : DLOp {
   static const auto kType = DisplayListOpType::kSetSharedImageFilter;
 
-  SetSharedImageFilterOp(const DlImageFilter* filter)
+  explicit SetSharedImageFilterOp(const DlImageFilter* filter)
       : filter(filter->shared()) {}
 
   const std::shared_ptr<DlImageFilter> filter;
@@ -315,7 +316,7 @@ struct SetSharedImageFilterOp : DLOp {
 struct SaveOpBase : DLOp {
   SaveOpBase() : options(), restore_index(0) {}
 
-  SaveOpBase(const SaveLayerOptions options)
+  explicit SaveOpBase(const SaveLayerOptions& options)
       : options(options), restore_index(0) {}
 
   // options parameter is only used by saveLayer operations, but since
@@ -347,7 +348,7 @@ struct SaveOp final : SaveOpBase {
 struct SaveLayerOp final : SaveOpBase {
   static const auto kType = DisplayListOpType::kSaveLayer;
 
-  explicit SaveLayerOp(const SaveLayerOptions options) : SaveOpBase(options) {}
+  explicit SaveLayerOp(const SaveLayerOptions& options) : SaveOpBase(options) {}
 
   void dispatch(DispatchContext& ctx) const {
     if (save_needed(ctx)) {
@@ -359,7 +360,7 @@ struct SaveLayerOp final : SaveOpBase {
 struct SaveLayerBoundsOp final : SaveOpBase {
   static const auto kType = DisplayListOpType::kSaveLayerBounds;
 
-  SaveLayerBoundsOp(const SaveLayerOptions options, const SkRect& rect)
+  SaveLayerBoundsOp(const SaveLayerOptions& options, const SkRect& rect)
       : SaveOpBase(options), rect(rect) {}
 
   const SkRect rect;
@@ -374,7 +375,7 @@ struct SaveLayerBoundsOp final : SaveOpBase {
 struct SaveLayerBackdropOp final : SaveOpBase {
   static const auto kType = DisplayListOpType::kSaveLayerBackdrop;
 
-  explicit SaveLayerBackdropOp(const SaveLayerOptions options,
+  explicit SaveLayerBackdropOp(const SaveLayerOptions& options,
                                const DlImageFilter* backdrop)
       : SaveOpBase(options), backdrop(backdrop->shared()) {}
 
@@ -396,7 +397,7 @@ struct SaveLayerBackdropOp final : SaveOpBase {
 struct SaveLayerBackdropBoundsOp final : SaveOpBase {
   static const auto kType = DisplayListOpType::kSaveLayerBackdropBounds;
 
-  SaveLayerBackdropBoundsOp(const SaveLayerOptions options,
+  SaveLayerBackdropBoundsOp(const SaveLayerOptions& options,
                             const SkRect& rect,
                             const DlImageFilter* backdrop)
       : SaveOpBase(options), rect(rect), backdrop(backdrop->shared()) {}
@@ -603,7 +604,7 @@ DEFINE_CLIP_SHAPE_OP(RRect, Difference)
   struct Clip##clipop##PathOp final : TransformClipOpBase {              \
     static const auto kType = DisplayListOpType::kClip##clipop##Path;    \
                                                                          \
-    Clip##clipop##PathOp(SkPath path, bool is_aa)                        \
+    Clip##clipop##PathOp(const SkPath& path, bool is_aa)                 \
         : is_aa(is_aa), path(path) {}                                    \
                                                                          \
     const bool is_aa;                                                    \
@@ -689,7 +690,7 @@ DEFINE_DRAW_1ARG_OP(RRect, SkRRect, rrect)
 struct DrawPathOp final : DrawOpBase {
   static const auto kType = DisplayListOpType::kDrawPath;
 
-  explicit DrawPathOp(SkPath path) : path(path) {}
+  explicit DrawPathOp(const SkPath& path) : path(path) {}
 
   const SkPath path;
 
@@ -787,7 +788,7 @@ DEFINE_DRAW_POINTS_OP(Polygon, kPolygon);
 struct DrawVerticesOp final : DrawOpBase {
   static const auto kType = DisplayListOpType::kDrawVertices;
 
-  DrawVerticesOp(DlBlendMode mode) : mode(mode) {}
+  explicit DrawVerticesOp(DlBlendMode mode) : mode(mode) {}
 
   const DlBlendMode mode;
 
@@ -806,7 +807,7 @@ struct DrawVerticesOp final : DrawOpBase {
   struct name##Op final : DrawOpBase {                                   \
     static const auto kType = DisplayListOpType::k##name;                \
                                                                          \
-    name##Op(const sk_sp<DlImage> image,                                 \
+    name##Op(const sk_sp<DlImage>& image,                                \
              const SkPoint& point,                                       \
              DlImageSampling sampling)                                   \
         : point(point), sampling(sampling), image(std::move(image)) {}   \
@@ -837,7 +838,7 @@ DEFINE_DRAW_IMAGE_OP(DrawImageWithAttr, true)
 struct DrawImageRectOp final : DrawOpBase {
   static const auto kType = DisplayListOpType::kDrawImageRect;
 
-  DrawImageRectOp(const sk_sp<DlImage> image,
+  DrawImageRectOp(const sk_sp<DlImage>& image,
                   const SkRect& src,
                   const SkRect& dst,
                   DlImageSampling sampling,
@@ -848,7 +849,7 @@ struct DrawImageRectOp final : DrawOpBase {
         sampling(sampling),
         render_with_attributes(render_with_attributes),
         constraint(constraint),
-        image(std::move(image)) {}
+        image(image) {}
 
   const SkRect src;
   const SkRect dst;
@@ -879,7 +880,7 @@ struct DrawImageRectOp final : DrawOpBase {
   struct name##Op final : DrawOpBase {                                     \
     static const auto kType = DisplayListOpType::k##name;                  \
                                                                            \
-    name##Op(const sk_sp<DlImage> image,                                   \
+    name##Op(const sk_sp<DlImage>& image,                                  \
              const SkIRect& center,                                        \
              const SkRect& dst,                                            \
              DlFilterMode mode)                                            \
@@ -916,7 +917,7 @@ DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNineWithAttr, true)
 // DlColor list only packs well if the count is even, otherwise there
 // can be 4 unusued bytes at the end.
 struct DrawAtlasBaseOp : DrawOpBase {
-  DrawAtlasBaseOp(const sk_sp<DlImage> atlas,
+  DrawAtlasBaseOp(const sk_sp<DlImage>& atlas,
                   int count,
                   DlBlendMode mode,
                   DlImageSampling sampling,
@@ -927,7 +928,7 @@ struct DrawAtlasBaseOp : DrawOpBase {
         has_colors(has_colors),
         render_with_attributes(render_with_attributes),
         sampling(sampling),
-        atlas(std::move(atlas)) {}
+        atlas(atlas) {}
 
   const int count;
   const uint16_t mode_index;
@@ -959,7 +960,7 @@ struct DrawAtlasBaseOp : DrawOpBase {
 struct DrawAtlasOp final : DrawAtlasBaseOp {
   static const auto kType = DisplayListOpType::kDrawAtlas;
 
-  DrawAtlasOp(const sk_sp<DlImage> atlas,
+  DrawAtlasOp(const sk_sp<DlImage>& atlas,
               int count,
               DlBlendMode mode,
               DlImageSampling sampling,
@@ -1000,7 +1001,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
 struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
   static const auto kType = DisplayListOpType::kDrawAtlasCulled;
 
-  DrawAtlasCulledOp(const sk_sp<DlImage> atlas,
+  DrawAtlasCulledOp(const sk_sp<DlImage>& atlas,
                     int count,
                     DlBlendMode mode,
                     DlImageSampling sampling,
@@ -1044,9 +1045,9 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
 struct DrawDisplayListOp final : DrawOpBase {
   static const auto kType = DisplayListOpType::kDrawDisplayList;
 
-  explicit DrawDisplayListOp(const sk_sp<DisplayList> display_list,
+  explicit DrawDisplayListOp(const sk_sp<DisplayList>& display_list,
                              SkScalar opacity)
-      : opacity(opacity), display_list(std::move(display_list)) {}
+      : opacity(opacity), display_list(display_list) {}
 
   SkScalar opacity;
   const sk_sp<DisplayList> display_list;
@@ -1070,8 +1071,8 @@ struct DrawDisplayListOp final : DrawOpBase {
 struct DrawTextBlobOp final : DrawOpBase {
   static const auto kType = DisplayListOpType::kDrawTextBlob;
 
-  DrawTextBlobOp(const sk_sp<SkTextBlob> blob, SkScalar x, SkScalar y)
-      : x(x), y(y), blob(std::move(blob)) {}
+  DrawTextBlobOp(const sk_sp<SkTextBlob>& blob, SkScalar x, SkScalar y)
+      : x(x), y(y), blob(blob) {}
 
   const SkScalar x;
   const SkScalar y;

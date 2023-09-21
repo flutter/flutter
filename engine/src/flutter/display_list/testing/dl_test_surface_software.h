@@ -26,7 +26,7 @@ class DlSoftwareSurfaceProvider : public DlSurfaceProvider {
       size_t height,
       PixelFormat format) const override;
   const std::string backend_name() const override { return "Software"; }
-  BackendType backend_type() const override { return kSoftware_Backend; }
+  BackendType backend_type() const override { return kSoftwareBackend; }
   bool supports(PixelFormat format) const override { return true; }
 
  private:

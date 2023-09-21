@@ -32,10 +32,8 @@ class DisplayListMetalComplexityCalculator
  private:
   class MetalHelper : public ComplexityCalculatorHelper {
    public:
-    MetalHelper(unsigned int ceiling)
-        : ComplexityCalculatorHelper(ceiling),
-          save_layer_count_(0),
-          draw_text_blob_count_(0) {}
+    explicit MetalHelper(unsigned int ceiling)
+        : ComplexityCalculatorHelper(ceiling) {}
 
     void saveLayer(const SkRect* bounds,
                    const SaveLayerOptions options,
@@ -85,8 +83,8 @@ class DisplayListMetalComplexityCalculator
     unsigned int BatchedComplexity() override;
 
    private:
-    unsigned int save_layer_count_;
-    unsigned int draw_text_blob_count_;
+    unsigned int save_layer_count_ = 0;
+    unsigned int draw_text_blob_count_ = 0;
   };
 
   DisplayListMetalComplexityCalculator()

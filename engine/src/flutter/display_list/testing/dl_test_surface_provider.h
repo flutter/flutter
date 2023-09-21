@@ -5,6 +5,8 @@
 #ifndef FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_PROVIDER_H_
 #define FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_PROVIDER_H_
 
+#include <utility>
+
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
 
@@ -25,7 +27,8 @@ class DlSurfaceInstance {
 
 class DlSurfaceInstanceBase : public DlSurfaceInstance {
  public:
-  DlSurfaceInstanceBase(sk_sp<SkSurface> surface) : surface_(surface) {}
+  explicit DlSurfaceInstanceBase(sk_sp<SkSurface> surface)
+      : surface_(std::move(surface)) {}
   ~DlSurfaceInstanceBase() = default;
 
   sk_sp<SkSurface> sk_surface() const override { return surface_; }
@@ -36,18 +39,14 @@ class DlSurfaceInstanceBase : public DlSurfaceInstance {
 
 class DlSurfaceProvider {
  public:
-  typedef enum { kN32Premul_PixelFormat, k565_PixelFormat } PixelFormat;
-  typedef enum {
-    kSoftware_Backend,
-    kOpenGL_Backend,
-    kMetal_Backend
-  } BackendType;
+  typedef enum { kN32PremulPixelFormat, k565PixelFormat } PixelFormat;
+  typedef enum { kSoftwareBackend, kOpenGlBackend, kMetalBackend } BackendType;
 
   static SkImageInfo MakeInfo(PixelFormat format, int w, int h) {
     switch (format) {
-      case kN32Premul_PixelFormat:
+      case kN32PremulPixelFormat:
         return SkImageInfo::MakeN32Premul(w, h);
-      case k565_PixelFormat:
+      case k565PixelFormat:
         return SkImageInfo::Make(SkISize::Make(w, h), kRGB_565_SkColorType,
                                  kOpaque_SkAlphaType);
     }
@@ -63,12 +62,12 @@ class DlSurfaceProvider {
   virtual bool InitializeSurface(
       size_t width,
       size_t height,
-      PixelFormat format = kN32Premul_PixelFormat) = 0;
+      PixelFormat format = kN32PremulPixelFormat) = 0;
   virtual std::shared_ptr<DlSurfaceInstance> GetPrimarySurface() const = 0;
   virtual std::shared_ptr<DlSurfaceInstance> MakeOffscreenSurface(
       size_t width,
       size_t height,
-      PixelFormat format = kN32Premul_PixelFormat) const = 0;
+      PixelFormat format = kN32PremulPixelFormat) const = 0;
 
   virtual bool Snapshot(std::string& filename) const;
 

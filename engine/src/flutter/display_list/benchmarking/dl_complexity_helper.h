@@ -96,8 +96,8 @@ class ComplexityCalculatorHelper
       public virtual IgnoreClipDispatchHelper,
       public virtual IgnoreTransformDispatchHelper {
  public:
-  ComplexityCalculatorHelper(unsigned int ceiling)
-      : is_complex_(false), ceiling_(ceiling), complexity_score_(0) {}
+  explicit ComplexityCalculatorHelper(unsigned int ceiling)
+      : ceiling_(ceiling) {}
 
   virtual ~ComplexityCalculatorHelper() = default;
 
@@ -261,10 +261,10 @@ class ComplexityCalculatorHelper
   // If we exceed the ceiling (defaults to the largest number representable
   // by unsigned int), then set the is_complex_ bool and we no longer
   // accumulate.
-  bool is_complex_;
+  bool is_complex_ = false;
   unsigned int ceiling_;
 
-  unsigned int complexity_score_;
+  unsigned int complexity_score_ = 0;
 };
 
 }  // namespace flutter
