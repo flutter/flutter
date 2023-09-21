@@ -123,6 +123,7 @@ BuildApp() {
     "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
     "-dTrackWidgetCreation=${TRACK_WIDGET_CREATION}"
     "-dAction=${ACTION}"
+    "-dFrontendServerStarterPath=${FRONTEND_SERVER_STARTER_PATH}"
     "--DartDefines=${DART_DEFINES}"
     "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
     "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"

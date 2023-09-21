@@ -121,6 +121,7 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       dartDefines: buildInfo.dartDefines,
       packagesPath: buildInfo.packagesPath,
+      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,

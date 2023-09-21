@@ -964,6 +964,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
+        String frontendServerStarterPathValue = null
+        if (project.hasProperty('frontend-server-starter-path')) {
+            frontendServerStarterPathValue = project.property('frontend-server-starter-path')
+        }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -1052,6 +1056,7 @@ class FlutterPlugin implements Plugin<Project> {
                 targetPlatformValues = targetPlatforms
                 sourceDir getFlutterSourceDirectory()
                 intermediateDir project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/")
+                frontendServerStarterPath frontendServerStarterPathValue
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
@@ -1290,6 +1295,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Internal
     File intermediateDir
     @Optional @Input
+    String frontendServerStarterPath
+    @Optional @Input
     String extraFrontEndOptions
     @Optional @Input
     String extraGenSnapshotOptions
@@ -1393,6 +1400,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
+            }
+            if (frontendServerStarterPath != null) {
+                args "-dFrontendServerStarterPath=${frontendServerStarterPath}"
             }
             if (extraFrontEndOptions != null) {
                 args "--ExtraFrontEndOptions=${extraFrontEndOptions}"
