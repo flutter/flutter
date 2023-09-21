@@ -432,16 +432,16 @@ class NoDefaultCupertinoThemeData {
   ///
   /// Derived from [primaryColor] if unspecified.
   final CupertinoTextThemeData? textTheme;
-  
+
   /// A theme for customizing the appearance and layout of [CupertinoSwitch] widgets.
-  /// 
-  /// The priorty color of track  when the switch is on is :
+  ///
+  /// The priority color of track  when the switch is on is :
   /// [CupertinoSwitch.activeColor] > [CupertinoSwitchThemeData.activeColor] > [CupertinoThemeData.primaryColor] ([CupertinoSwitch.applyTheme] is true) > [CupertinoColors.systemGreen]
   ///
-  /// The priorty color of track when the switch is off is :
+  /// The priority color of track when the switch is off is :
   /// [CupertinoSwitch.trackColor] > [CupertinoSwitchThemeData.trackColor]> [CupertinoThemeData.primaryContrastingColor] > [CupertinoColors.secondarySystemFill]
   ///
-  /// The priorty color of thumb is:
+  /// The priority color of thumb is:
   /// [CupertinoSwitchThemeData.thumbColor] > [CupertinoColors.white]
   final CupertinoSwitchThemeData? switchTheme;
 
