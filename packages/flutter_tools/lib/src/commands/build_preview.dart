@@ -60,9 +60,7 @@ class BuildPreviewCommand extends BuildSubCommand {
       buildInfo,
     );
     final File previewDevice = targetDir
-        // TODO this can be broken by config build-dir
-        .childDirectory('build')
-        .childDirectory('windows')
+        .childDirectory(getWindowsBuildDirectory(TargetPlatform.windows_x64))
         .childDirectory('runner')
         .childDirectory('Debug')
         .childFile('$appName.exe');

@@ -578,9 +578,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('TODO!'); // TODO
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
