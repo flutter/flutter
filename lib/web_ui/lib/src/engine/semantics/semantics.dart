@@ -1980,9 +1980,8 @@ class EngineSemanticsOwner {
   }
 
   /// Receives DOM events from the pointer event system to correlate with the
-  /// semantics events.
-  ///
-  /// Returns true if the event should be forwarded to the framework.
+  /// semantics events; returns true if the event should be forwarded to the
+  /// framework.
   ///
   /// The browser sends us both raw pointer events and gestures from
   /// [SemanticsObject.element]s. There could be three possibilities:
