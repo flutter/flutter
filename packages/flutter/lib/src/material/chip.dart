@@ -2069,25 +2069,19 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
-  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
-
   void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
-    final OpacityLayer? oldLayer = _childOpacityLayerHandler.layer;
-    _childOpacityLayerHandler.layer = null;
-
     if (child == null) {
       return;
     }
     final int disabledColorAlpha = _disabledColor.alpha;
     if (!enableAnimation.isCompleted) {
       if (needsCompositing) {
-        _childOpacityLayerHandler.layer = context.pushOpacity(
-          offset,
-          disabledColorAlpha,
+        context.pushLayer(
+          OpacityLayer(alpha: disabledColorAlpha),
           (PaintingContext context, Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
-          oldLayer: oldLayer,
+          offset,
         );
       } else {
         final Rect childRect = _boxRect(child).shift(offset);
