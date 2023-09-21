@@ -133,7 +133,8 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
         _listeners.forEach(widget.delegate!.addListener);
       }
       if (oldWidget.delegate?.value != widget.delegate?.value) {
-        for (final VoidCallback listener in _listeners) {
+        // Avoid concurrent modification.
+        for (final VoidCallback listener in _listeners.toList(growable: false)) {
           listener();
         }
       }

@@ -13,7 +13,7 @@ Widget wrapForChip({
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
-  bool useMaterial3 = false,
+  bool? useMaterial3,
 }) {
   return MaterialApp(
     theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
@@ -101,6 +101,101 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
+  testWidgets('InputChip.color resolves material states', (WidgetTester tester) async {
+    const Color disabledSelectedColor = Color(0xffffff00);
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: InputChip(
+          onSelected: enabled ? (bool value) { } : null,
+          selected: selected,
+          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+              return disabledSelectedColor;
+            }
+            if (states.contains(MaterialState.disabled)) {
+              return disabledColor;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return selectedColor;
+            }
+            return backgroundColor;
+          }),
+          label: const Text('InputChip'),
+        ),
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled chip should have the provided backgroundColor.
+    expect(getMaterialBox(tester), paints..rrect(color: backgroundColor));
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled chip should have the provided disabledColor.
+    expect(getMaterialBox(tester), paints..rrect(color: disabledColor));
+
+    // Test enabled & selected chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected chip should have the provided selectedColor.
+    expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
+
+      // Test disabled & selected chip.
+    await tester.pumpWidget(buildApp(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+
+    // Disabled & selected chip should have the provided disabledSelectedColor.
+    expect(getMaterialBox(tester), paints..rrect(color: disabledSelectedColor));
+  });
+
+  testWidgets('InputChip uses provided state color properties', (WidgetTester tester) async {
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: InputChip(
+          onSelected: enabled ? (bool value) { } : null,
+          selected: selected,
+          disabledColor: disabledColor,
+          backgroundColor: backgroundColor,
+          selectedColor: selectedColor,
+          label: const Text('InputChip'),
+        ),
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled chip should have the provided backgroundColor.
+    expect(getMaterialBox(tester), paints..rrect(color: backgroundColor));
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled chip should have the provided disabledColor.
+    expect(getMaterialBox(tester), paints..rrect(color: disabledColor));
+
+    // Test enabled & selected chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected chip should have the provided selectedColor.
+    expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
+  });
+
   testWidgets('InputChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(

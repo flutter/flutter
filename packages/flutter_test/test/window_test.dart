@@ -243,7 +243,6 @@ void main() {
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
-  Locale? locale;
 
   @override
   void didChangeLocales(List<Locale>? locales) {

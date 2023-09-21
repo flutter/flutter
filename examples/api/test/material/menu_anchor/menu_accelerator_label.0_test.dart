@@ -29,7 +29,7 @@ void main() {
     expect(find.text('About', findRichText: true), findsOneWidget);
     expect(
       tester.getRect(findMenu('About')),
-      equals(const Rect.fromLTRB(4.0, 48.0, 98.0, 208.0)),
+      equals(const Rect.fromLTRB(4.0, 48.0, 111.0, 208.0)),
     );
     expect(find.text('Save', findRichText: true), findsOneWidget);
     expect(find.text('Quit', findRichText: true), findsOneWidget);
@@ -45,10 +45,10 @@ void main() {
     expect(find.text('Quit', findRichText: true), findsNothing);
     expect(find.text('Magnify', findRichText: true), findsNothing);
     expect(find.text('Minify', findRichText: true), findsNothing);
-    expect(find.text('CLOSE'), findsOneWidget);
+    expect(find.text('Close'), findsOneWidget);
 
-    await tester.tap(find.text('CLOSE'));
+    await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
-    expect(find.text('CLOSE'), findsNothing);
+    expect(find.text('Close'), findsNothing);
   });
 }

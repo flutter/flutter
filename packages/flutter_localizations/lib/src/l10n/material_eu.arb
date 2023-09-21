@@ -25,6 +25,7 @@
   "continueButtonLabel": "Egin aurrera",
   "copyButtonLabel": "Kopiatu",
   "cutButtonLabel": "Ebaki",
+  "scanTextButtonLabel": "Eskaneatu testua",
   "okButtonLabel": "Ados",
   "pasteButtonLabel": "Itsatsi",
   "selectAllButtonLabel": "Hautatu guztiak",
@@ -133,5 +134,11 @@
   "scrimLabel": "Barrera",
   "bottomSheetLabel": "Behealdeko orria",
   "scrimOnTapHint": "Itxi $modalRouteContentName",
-  "keyboardKeyShift": "Maius"
+  "keyboardKeyShift": "Maius",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

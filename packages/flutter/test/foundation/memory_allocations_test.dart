@@ -210,12 +210,8 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   changeNotifier.dispose(); count++;
   picture.dispose(); count++;
 
-  // TODO(polina-c): Remove the condition after
-  // https://github.com/flutter/flutter/issues/110599 is fixed.
-  if (!kIsWeb) {
-    final Image image = await _createImage(); count++; count++; count++;
-    image.dispose(); count++;
-  }
+  final Image image = await _createImage(); count++; count++; count++;
+  image.dispose(); count++;
 
   return count;
 }

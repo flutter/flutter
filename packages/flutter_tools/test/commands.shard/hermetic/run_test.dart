@@ -228,7 +228,7 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -404,11 +404,11 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
+          containsIgnoringWhitespace('The following devices were found, but are not supported by this project:'),
         );
         expect(
           testLogger.statusText,
@@ -831,7 +831,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with only iOS network device', () async {
+      testUsingContext('with only iOS wireless device', () async {
         final List<Device> devices = <Device>[
           FakeIOSDevice(
             connectionInterface: DeviceConnectionInterface.wireless,
@@ -875,7 +875,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with both iOS usb and network devices', () async {
+      testUsingContext('with both iOS usb and wireless devices', () async {
         final List<Device> devices = <Device>[
           FakeIOSDevice(
             connectionInterface: DeviceConnectionInterface.wireless,
@@ -929,7 +929,7 @@ void main() {
     });
 
     test('auto web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
@@ -945,7 +945,7 @@ void main() {
 
     test('auto web-renderer with existing dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
@@ -1096,6 +1096,7 @@ void main() {
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-embedder-api',
+      '--ci',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -1114,6 +1115,7 @@ void main() {
     expect(options.impellerForceGL, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
+    expect(options.usingCISystem, true);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1146,10 +1148,8 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required this.logger}) : super(logger: logger);
+  TestDeviceManager({required super.logger});
   List<Device> devices = <Device>[];
-
-  final Logger logger;
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
@@ -1278,10 +1278,10 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
-    if (startAppSuccess == false) {
+    if (!startAppSuccess) {
       return LaunchResult.failed();
     }
-    if (startAppSuccess == true) {
+    if (startAppSuccess) {
       return LaunchResult.succeeded();
     }
     final String dartFlags = debuggingOptions.dartFlags;

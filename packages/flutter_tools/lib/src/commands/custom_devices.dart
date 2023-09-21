@@ -25,6 +25,7 @@ import '../custom_devices/custom_devices_config.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 
 /// just the function signature of the [print] function.
 /// The Object arg may be null.
@@ -123,7 +124,7 @@ class CustomDevicesCommand extends FlutterCommand {
 
   final CustomDevicesConfig _customDevicesConfig;
   final FeatureFlags _featureFlags;
-  final void Function(Object) _usagePrintFn;
+  final PrintFn _usagePrintFn;
 
   @override
   String get description {
@@ -537,7 +538,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     String? description,
     bool defaultsTo = true,
   }) async {
-    final String defaultsToStr = defaultsTo == true ? '[Y/n]' : '[y/N]';
+    final String defaultsToStr = defaultsTo ? '[Y/n]' : '[y/N]';
     logger.printStatus('$description $defaultsToStr (empty for default)');
     while (true) {
       final String input = await inputs.next;
@@ -784,7 +785,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     if (stringArg(_kJson) != null) {
       return runNonInteractively();
     }
-    if (boolArg(_kSsh) == true) {
+    if (boolArg(_kSsh)) {
       return runInteractivelySsh();
     }
     throw UnsupportedError('Unknown run mode');
@@ -811,7 +812,7 @@ Delete a device from the config file.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    final String? id = globalResults!['device-id'] as String?;
+    final String? id = globalResults![FlutterGlobalOptions.kDeviceIdOption] as String?;
     if (id == null || !customDevicesConfig.contains(id)) {
       throwToolExit('Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"');
     }

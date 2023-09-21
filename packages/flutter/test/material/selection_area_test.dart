@@ -38,6 +38,37 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123378
+    await tester.pumpWidget(
+      const MaterialApp(
+        color: Color(0xFF2196F3),
+        title: 'Demo',
+        home: Scaffold(
+          body: SelectionArea(
+            child: Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Text('Hello World'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture dragging = await tester.startGesture(const Offset(10, 10));
+    addTearDown(dragging.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await dragging.moveTo(const Offset(90, 90));
+    await dragging.up();
+
+    final TestGesture longpress = await tester.startGesture(const Offset(20,20));
+    addTearDown(longpress.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await longpress.up();
+
+    expect(tester.takeException(), isNull);
+  });
+
+
   testWidgets('builds the default context menu by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -47,6 +78,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
@@ -80,6 +112,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byKey(key), findsNothing);
@@ -134,6 +167,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Padding(
             padding: const EdgeInsets.only(top: 64),
@@ -151,6 +185,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
     addTearDown(gesture.removePointer);

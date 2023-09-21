@@ -682,7 +682,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
         if (fontKey is! String) {
           errors.add('Expected "$fontKey" under "fonts" to be a string.');
         }
-        switch(fontKey) {
+        switch (fontKey) {
           case 'asset':
             if (kvp.value is! String) {
               errors.add('Expected font asset ${kvp.value} ((${kvp.value.runtimeType})) to be a string.');

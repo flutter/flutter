@@ -132,64 +132,64 @@ class CustomDimensions {
 
   /// Convert to a map that will be used to upload to the analytics backend.
   Map<String, String> toMap() => <String, String>{
-      if (sessionHostOsDetails != null) cdKey(CustomDimensionsEnum.sessionHostOsDetails): sessionHostOsDetails.toString(),
-      if (sessionChannelName != null) cdKey(CustomDimensionsEnum.sessionChannelName): sessionChannelName.toString(),
-      if (commandRunIsEmulator != null) cdKey(CustomDimensionsEnum.commandRunIsEmulator): commandRunIsEmulator.toString(),
-      if (commandRunTargetName != null) cdKey(CustomDimensionsEnum.commandRunTargetName): commandRunTargetName.toString(),
-      if (hotEventReason != null) cdKey(CustomDimensionsEnum.hotEventReason): hotEventReason.toString(),
-      if (hotEventFinalLibraryCount != null) cdKey(CustomDimensionsEnum.hotEventFinalLibraryCount): hotEventFinalLibraryCount.toString(),
-      if (hotEventSyncedLibraryCount != null) cdKey(CustomDimensionsEnum.hotEventSyncedLibraryCount): hotEventSyncedLibraryCount.toString(),
-      if (hotEventSyncedClassesCount != null) cdKey(CustomDimensionsEnum.hotEventSyncedClassesCount): hotEventSyncedClassesCount.toString(),
-      if (hotEventSyncedProceduresCount != null) cdKey(CustomDimensionsEnum.hotEventSyncedProceduresCount): hotEventSyncedProceduresCount.toString(),
-      if (hotEventSyncedBytes != null) cdKey(CustomDimensionsEnum.hotEventSyncedBytes): hotEventSyncedBytes.toString(),
-      if (hotEventInvalidatedSourcesCount != null) cdKey(CustomDimensionsEnum.hotEventInvalidatedSourcesCount): hotEventInvalidatedSourcesCount.toString(),
-      if (hotEventTransferTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventTransferTimeInMs): hotEventTransferTimeInMs.toString(),
-      if (hotEventOverallTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventOverallTimeInMs): hotEventOverallTimeInMs.toString(),
-      if (commandRunProjectType != null) cdKey(CustomDimensionsEnum.commandRunProjectType): commandRunProjectType.toString(),
-      if (commandRunProjectHostLanguage != null) cdKey(CustomDimensionsEnum.commandRunProjectHostLanguage): commandRunProjectHostLanguage.toString(),
-      if (commandCreateAndroidLanguage != null) cdKey(CustomDimensionsEnum.commandCreateAndroidLanguage): commandCreateAndroidLanguage.toString(),
-      if (commandCreateIosLanguage != null) cdKey(CustomDimensionsEnum.commandCreateIosLanguage): commandCreateIosLanguage.toString(),
-      if (commandRunProjectModule != null) cdKey(CustomDimensionsEnum.commandRunProjectModule): commandRunProjectModule.toString(),
-      if (commandCreateProjectType != null) cdKey(CustomDimensionsEnum.commandCreateProjectType): commandCreateProjectType.toString(),
-      if (commandPackagesNumberPlugins != null) cdKey(CustomDimensionsEnum.commandPackagesNumberPlugins): commandPackagesNumberPlugins.toString(),
-      if (commandPackagesProjectModule != null) cdKey(CustomDimensionsEnum.commandPackagesProjectModule): commandPackagesProjectModule.toString(),
-      if (commandRunTargetOsVersion != null) cdKey(CustomDimensionsEnum.commandRunTargetOsVersion): commandRunTargetOsVersion.toString(),
-      if (commandRunModeName != null) cdKey(CustomDimensionsEnum.commandRunModeName): commandRunModeName.toString(),
-      if (commandBuildBundleTargetPlatform != null) cdKey(CustomDimensionsEnum.commandBuildBundleTargetPlatform): commandBuildBundleTargetPlatform.toString(),
-      if (commandBuildBundleIsModule != null) cdKey(CustomDimensionsEnum.commandBuildBundleIsModule): commandBuildBundleIsModule.toString(),
-      if (commandResult != null) cdKey(CustomDimensionsEnum.commandResult): commandResult.toString(),
-      if (hotEventTargetPlatform != null) cdKey(CustomDimensionsEnum.hotEventTargetPlatform): hotEventTargetPlatform.toString(),
-      if (hotEventSdkName != null) cdKey(CustomDimensionsEnum.hotEventSdkName): hotEventSdkName.toString(),
-      if (hotEventEmulator != null) cdKey(CustomDimensionsEnum.hotEventEmulator): hotEventEmulator.toString(),
-      if (hotEventFullRestart != null) cdKey(CustomDimensionsEnum.hotEventFullRestart): hotEventFullRestart.toString(),
-      if (commandHasTerminal != null) cdKey(CustomDimensionsEnum.commandHasTerminal): commandHasTerminal.toString(),
-      if (enabledFlutterFeatures != null) cdKey(CustomDimensionsEnum.enabledFlutterFeatures): enabledFlutterFeatures.toString(),
-      if (localTime != null) cdKey(CustomDimensionsEnum.localTime): localTime.toString(),
-      if (commandBuildAarTargetPlatform != null) cdKey(CustomDimensionsEnum.commandBuildAarTargetPlatform): commandBuildAarTargetPlatform.toString(),
-      if (commandBuildAarProjectType != null) cdKey(CustomDimensionsEnum.commandBuildAarProjectType): commandBuildAarProjectType.toString(),
-      if (buildEventCommand != null) cdKey(CustomDimensionsEnum.buildEventCommand): buildEventCommand.toString(),
-      if (buildEventSettings != null) cdKey(CustomDimensionsEnum.buildEventSettings): buildEventSettings.toString(),
-      if (commandBuildApkTargetPlatform != null) cdKey(CustomDimensionsEnum.commandBuildApkTargetPlatform): commandBuildApkTargetPlatform.toString(),
-      if (commandBuildApkBuildMode != null) cdKey(CustomDimensionsEnum.commandBuildApkBuildMode): commandBuildApkBuildMode.toString(),
-      if (commandBuildApkSplitPerAbi != null) cdKey(CustomDimensionsEnum.commandBuildApkSplitPerAbi): commandBuildApkSplitPerAbi.toString(),
-      if (commandBuildAppBundleTargetPlatform != null) cdKey(CustomDimensionsEnum.commandBuildAppBundleTargetPlatform): commandBuildAppBundleTargetPlatform.toString(),
-      if (commandBuildAppBundleBuildMode != null) cdKey(CustomDimensionsEnum.commandBuildAppBundleBuildMode): commandBuildAppBundleBuildMode.toString(),
-      if (buildEventError != null) cdKey(CustomDimensionsEnum.buildEventError): buildEventError.toString(),
-      if (commandResultEventMaxRss != null) cdKey(CustomDimensionsEnum.commandResultEventMaxRss): commandResultEventMaxRss.toString(),
-      if (commandRunAndroidEmbeddingVersion != null) cdKey(CustomDimensionsEnum.commandRunAndroidEmbeddingVersion): commandRunAndroidEmbeddingVersion.toString(),
-      if (commandPackagesAndroidEmbeddingVersion != null) cdKey(CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion): commandPackagesAndroidEmbeddingVersion.toString(),
-      if (nullSafety != null) cdKey(CustomDimensionsEnum.nullSafety): nullSafety.toString(),
-      if (fastReassemble != null) cdKey(CustomDimensionsEnum.fastReassemble): fastReassemble.toString(),
-      if (nullSafeMigratedLibraries != null) cdKey(CustomDimensionsEnum.nullSafeMigratedLibraries): nullSafeMigratedLibraries.toString(),
-      if (nullSafeTotalLibraries != null) cdKey(CustomDimensionsEnum.nullSafeTotalLibraries): nullSafeTotalLibraries.toString(),
-      if (hotEventCompileTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventCompileTimeInMs): hotEventCompileTimeInMs.toString(),
-      if (hotEventFindInvalidatedTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs): hotEventFindInvalidatedTimeInMs.toString(),
-      if (hotEventScannedSourcesCount != null) cdKey(CustomDimensionsEnum.hotEventScannedSourcesCount): hotEventScannedSourcesCount.toString(),
-      if (hotEventReassembleTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReassembleTimeInMs): hotEventReassembleTimeInMs.toString(),
-      if (hotEventReloadVMTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReloadVMTimeInMs): hotEventReloadVMTimeInMs.toString(),
-      if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableImpeller): commandRunEnableImpeller.toString(),
-      if (commandRunIOSInterfaceType != null) cdKey(CustomDimensionsEnum.commandRunIOSInterfaceType): commandRunIOSInterfaceType.toString(),
-      if (commandRunIsTest != null) cdKey(CustomDimensionsEnum.commandRunIsTest): commandRunIsTest.toString(),
+      if (sessionHostOsDetails != null) CustomDimensionsEnum.sessionHostOsDetails.cdKey: sessionHostOsDetails.toString(),
+      if (sessionChannelName != null) CustomDimensionsEnum.sessionChannelName.cdKey: sessionChannelName.toString(),
+      if (commandRunIsEmulator != null) CustomDimensionsEnum.commandRunIsEmulator.cdKey: commandRunIsEmulator.toString(),
+      if (commandRunTargetName != null) CustomDimensionsEnum.commandRunTargetName.cdKey: commandRunTargetName.toString(),
+      if (hotEventReason != null) CustomDimensionsEnum.hotEventReason.cdKey: hotEventReason.toString(),
+      if (hotEventFinalLibraryCount != null) CustomDimensionsEnum.hotEventFinalLibraryCount.cdKey: hotEventFinalLibraryCount.toString(),
+      if (hotEventSyncedLibraryCount != null) CustomDimensionsEnum.hotEventSyncedLibraryCount.cdKey: hotEventSyncedLibraryCount.toString(),
+      if (hotEventSyncedClassesCount != null) CustomDimensionsEnum.hotEventSyncedClassesCount.cdKey: hotEventSyncedClassesCount.toString(),
+      if (hotEventSyncedProceduresCount != null) CustomDimensionsEnum.hotEventSyncedProceduresCount.cdKey: hotEventSyncedProceduresCount.toString(),
+      if (hotEventSyncedBytes != null) CustomDimensionsEnum.hotEventSyncedBytes.cdKey: hotEventSyncedBytes.toString(),
+      if (hotEventInvalidatedSourcesCount != null) CustomDimensionsEnum.hotEventInvalidatedSourcesCount.cdKey: hotEventInvalidatedSourcesCount.toString(),
+      if (hotEventTransferTimeInMs != null) CustomDimensionsEnum.hotEventTransferTimeInMs.cdKey: hotEventTransferTimeInMs.toString(),
+      if (hotEventOverallTimeInMs != null) CustomDimensionsEnum.hotEventOverallTimeInMs.cdKey: hotEventOverallTimeInMs.toString(),
+      if (commandRunProjectType != null) CustomDimensionsEnum.commandRunProjectType.cdKey: commandRunProjectType.toString(),
+      if (commandRunProjectHostLanguage != null) CustomDimensionsEnum.commandRunProjectHostLanguage.cdKey: commandRunProjectHostLanguage.toString(),
+      if (commandCreateAndroidLanguage != null) CustomDimensionsEnum.commandCreateAndroidLanguage.cdKey: commandCreateAndroidLanguage.toString(),
+      if (commandCreateIosLanguage != null) CustomDimensionsEnum.commandCreateIosLanguage.cdKey: commandCreateIosLanguage.toString(),
+      if (commandRunProjectModule != null) CustomDimensionsEnum.commandRunProjectModule.cdKey: commandRunProjectModule.toString(),
+      if (commandCreateProjectType != null) CustomDimensionsEnum.commandCreateProjectType.cdKey: commandCreateProjectType.toString(),
+      if (commandPackagesNumberPlugins != null) CustomDimensionsEnum.commandPackagesNumberPlugins.cdKey: commandPackagesNumberPlugins.toString(),
+      if (commandPackagesProjectModule != null) CustomDimensionsEnum.commandPackagesProjectModule.cdKey: commandPackagesProjectModule.toString(),
+      if (commandRunTargetOsVersion != null) CustomDimensionsEnum.commandRunTargetOsVersion.cdKey: commandRunTargetOsVersion.toString(),
+      if (commandRunModeName != null) CustomDimensionsEnum.commandRunModeName.cdKey: commandRunModeName.toString(),
+      if (commandBuildBundleTargetPlatform != null) CustomDimensionsEnum.commandBuildBundleTargetPlatform.cdKey: commandBuildBundleTargetPlatform.toString(),
+      if (commandBuildBundleIsModule != null) CustomDimensionsEnum.commandBuildBundleIsModule.cdKey: commandBuildBundleIsModule.toString(),
+      if (commandResult != null) CustomDimensionsEnum.commandResult.cdKey: commandResult.toString(),
+      if (hotEventTargetPlatform != null) CustomDimensionsEnum.hotEventTargetPlatform.cdKey: hotEventTargetPlatform.toString(),
+      if (hotEventSdkName != null) CustomDimensionsEnum.hotEventSdkName.cdKey: hotEventSdkName.toString(),
+      if (hotEventEmulator != null) CustomDimensionsEnum.hotEventEmulator.cdKey: hotEventEmulator.toString(),
+      if (hotEventFullRestart != null) CustomDimensionsEnum.hotEventFullRestart.cdKey: hotEventFullRestart.toString(),
+      if (commandHasTerminal != null) CustomDimensionsEnum.commandHasTerminal.cdKey: commandHasTerminal.toString(),
+      if (enabledFlutterFeatures != null) CustomDimensionsEnum.enabledFlutterFeatures.cdKey: enabledFlutterFeatures.toString(),
+      if (localTime != null) CustomDimensionsEnum.localTime.cdKey: localTime.toString(),
+      if (commandBuildAarTargetPlatform != null) CustomDimensionsEnum.commandBuildAarTargetPlatform.cdKey: commandBuildAarTargetPlatform.toString(),
+      if (commandBuildAarProjectType != null) CustomDimensionsEnum.commandBuildAarProjectType.cdKey: commandBuildAarProjectType.toString(),
+      if (buildEventCommand != null) CustomDimensionsEnum.buildEventCommand.cdKey: buildEventCommand.toString(),
+      if (buildEventSettings != null) CustomDimensionsEnum.buildEventSettings.cdKey: buildEventSettings.toString(),
+      if (commandBuildApkTargetPlatform != null) CustomDimensionsEnum.commandBuildApkTargetPlatform.cdKey: commandBuildApkTargetPlatform.toString(),
+      if (commandBuildApkBuildMode != null) CustomDimensionsEnum.commandBuildApkBuildMode.cdKey: commandBuildApkBuildMode.toString(),
+      if (commandBuildApkSplitPerAbi != null) CustomDimensionsEnum.commandBuildApkSplitPerAbi.cdKey: commandBuildApkSplitPerAbi.toString(),
+      if (commandBuildAppBundleTargetPlatform != null) CustomDimensionsEnum.commandBuildAppBundleTargetPlatform.cdKey: commandBuildAppBundleTargetPlatform.toString(),
+      if (commandBuildAppBundleBuildMode != null) CustomDimensionsEnum.commandBuildAppBundleBuildMode.cdKey: commandBuildAppBundleBuildMode.toString(),
+      if (buildEventError != null) CustomDimensionsEnum.buildEventError.cdKey: buildEventError.toString(),
+      if (commandResultEventMaxRss != null) CustomDimensionsEnum.commandResultEventMaxRss.cdKey: commandResultEventMaxRss.toString(),
+      if (commandRunAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandRunAndroidEmbeddingVersion.cdKey: commandRunAndroidEmbeddingVersion.toString(),
+      if (commandPackagesAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion.cdKey: commandPackagesAndroidEmbeddingVersion.toString(),
+      if (nullSafety != null) CustomDimensionsEnum.nullSafety.cdKey: nullSafety.toString(),
+      if (fastReassemble != null) CustomDimensionsEnum.fastReassemble.cdKey: fastReassemble.toString(),
+      if (nullSafeMigratedLibraries != null) CustomDimensionsEnum.nullSafeMigratedLibraries.cdKey: nullSafeMigratedLibraries.toString(),
+      if (nullSafeTotalLibraries != null) CustomDimensionsEnum.nullSafeTotalLibraries.cdKey: nullSafeTotalLibraries.toString(),
+      if (hotEventCompileTimeInMs != null) CustomDimensionsEnum.hotEventCompileTimeInMs.cdKey: hotEventCompileTimeInMs.toString(),
+      if (hotEventFindInvalidatedTimeInMs != null) CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs.cdKey: hotEventFindInvalidatedTimeInMs.toString(),
+      if (hotEventScannedSourcesCount != null) CustomDimensionsEnum.hotEventScannedSourcesCount.cdKey: hotEventScannedSourcesCount.toString(),
+      if (hotEventReassembleTimeInMs != null) CustomDimensionsEnum.hotEventReassembleTimeInMs.cdKey: hotEventReassembleTimeInMs.toString(),
+      if (hotEventReloadVMTimeInMs != null) CustomDimensionsEnum.hotEventReloadVMTimeInMs.cdKey: hotEventReloadVMTimeInMs.toString(),
+      if (commandRunEnableImpeller != null) CustomDimensionsEnum.commandRunEnableImpeller.cdKey: commandRunEnableImpeller.toString(),
+      if (commandRunIOSInterfaceType != null) CustomDimensionsEnum.commandRunIOSInterfaceType.cdKey: commandRunIOSInterfaceType.toString(),
+      if (commandRunIsTest != null) CustomDimensionsEnum.commandRunIsTest.cdKey: commandRunIsTest.toString(),
     };
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
@@ -323,13 +323,13 @@ class CustomDimensions {
     );
 
   static bool? _extractBool(Map<String, String> map, CustomDimensionsEnum field) =>
-    map.containsKey(cdKey(field))? map[cdKey(field)] == 'true' : null;
+    map.containsKey(field.cdKey)? map[field.cdKey] == 'true' : null;
 
   static String? _extractString(Map<String, String> map, CustomDimensionsEnum field) =>
-    map.containsKey(cdKey(field))? map[cdKey(field)] : null;
+    map.containsKey(field.cdKey)? map[field.cdKey] : null;
 
   static int? _extractInt(Map<String, String> map, CustomDimensionsEnum field) =>
-    map.containsKey(cdKey(field))? int.parse(map[cdKey(field)]!) : null;
+    map.containsKey(field.cdKey)? int.parse(map[field.cdKey]!) : null;
 
   @override
   String toString() => toMap().toString();
@@ -407,7 +407,7 @@ enum CustomDimensionsEnum {
   hotEventReloadVMTimeInMs,  // cd55
   commandRunEnableImpeller,  // cd56
   commandRunIOSInterfaceType,  // cd57
-  commandRunIsTest, // cd58
-}
+  commandRunIsTest; // cd58
 
-String cdKey(CustomDimensionsEnum cd) => 'cd${cd.index + 1}';
+  String get cdKey => 'cd${index + 1}';
+}

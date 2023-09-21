@@ -13,9 +13,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:matcher/expect.dart' as matcher;
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -31,12 +30,12 @@ void main() {
       future.then<void>((void value) {
         result = '123';
       });
-      test_package.expect(result, isNull);
+      matcher.expect(result, isNull);
       completer.complete();
-      test_package.expect(result, isNull);
+      matcher.expect(result, isNull);
       await future;
       await tester.pump();
-      test_package.expect(result, '123');
+      matcher.expect(result, '123');
     });
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
@@ -46,10 +45,28 @@ void main() {
       future.then<void>((_) {
         completed = true;
       });
-      test_package.expect(completed, isFalse);
+      matcher.expect(completed, isFalse);
       await future;
-      test_package.expect(completed, isTrue);
+      matcher.expect(completed, isTrue);
     });
+  });
+
+  group('group retry flag allows test to run multiple times', () {
+    bool retried = false;
+    group('the group with retry flag', () {
+      testWidgets('the test inside it', (WidgetTester tester) async {
+        addTearDown(() => retried = true);
+        expect(retried, isTrue);
+      });
+    }, retry: 1);
+  });
+
+  group('testWidget retry flag allows test to run multiple times', () {
+    bool retried = false;
+    testWidgets('the test with retry flag', (WidgetTester tester) async {
+      addTearDown(() => retried = true);
+      expect(retried, isTrue);
+    }, retry: 1);
   });
 
   group('respects the group skip flag', () {

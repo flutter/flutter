@@ -572,7 +572,7 @@ void main() {
     ));
 
     // Children are painted two times for whatever reason
-    expect(paintedChildren, <int>[0, 0, 1, 1]);
+    expect(paintedChildren, <int>[0, 1, 0, 1]);
 
     // Expect hitting 0 and 1, which are painted
     await tester.tap(find.byKey(const ValueKey<int>(0)));

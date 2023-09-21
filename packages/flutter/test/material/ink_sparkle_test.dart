@@ -116,6 +116,7 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
   final Key buttonKey = UniqueKey();
 
   await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(useMaterial3: false),
     home: Scaffold(
       body: Center(
         child: RepaintBoundary(

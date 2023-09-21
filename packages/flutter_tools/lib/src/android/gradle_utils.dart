@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -33,15 +32,15 @@ const String templateAndroidGradlePluginVersion = '7.3.0';
 const String templateDefaultGradleVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
-// These versions should match the values in flutter.gradle (FlutterExtension).
+// These versions should match the values in Flutter Gradle Plugin (FlutterExtension).
 // The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
 // using (include_flutter.groovy).
 // The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory
 // `.android` is always regenerated after flutter pub get, so new versions are picked up after a
 // Flutter upgrade.
-const String compileSdkVersion = '31';
-const String minSdkVersion = '16';
-const String targetSdkVersion = '31';
+const String compileSdkVersion = '33';
+const String minSdkVersion = '19';
+const String targetSdkVersion = '33';
 const String ndkVersion = '23.1.7779620';
 
 // Update this when new versions of Gradle come out including minor versions
@@ -221,6 +220,7 @@ Future<String?> getGradleVersion(
 
   if (propertiesFile.existsSync()) {
     final String wrapperFileContent = propertiesFile.readAsStringSync();
+
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
     if (distributionUrl != null) {

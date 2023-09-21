@@ -1,16 +1,15 @@
 # Specify analysis options.
 #
-# For a list of lints, see: http://dart-lang.github.io/linter/lints/
-# See the configuration guide for more
-# https://github.com/dart-lang/sdk/tree/main/pkg/analyzer#configuring-the-analyzer
+# For a list of lints, see: https://dart.dev/lints
+# For guidelines on configuring static analysis, see:
+# https://dart.dev/guides/language/analysis-options
 #
 # There are other similar analysis options files in the flutter repos,
 # which should be kept in sync with this file:
 #
 #   - analysis_options.yaml (this file)
-#   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
-#   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
-#   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/engine/blob/main/analysis_options.yaml
+#   - https://github.com/flutter/packages/blob/main/analysis_options.yaml
 #
 # This file contains the analysis options used for code in the flutter/flutter
 # repository.
@@ -31,7 +30,7 @@ analyzer:
 linter:
   rules:
     # This list is derived from the list of all available lints located at
-    # https://github.com/dart-lang/linter/blob/master/example/all.yaml
+    # https://github.com/dart-lang/linter/blob/main/example/all.yaml
     - always_declare_return_types
     - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
@@ -42,7 +41,7 @@ linter:
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
     # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/3023
-    # avoid_classes_with_only_static_members # # we do this commonly for `abstract final class`es
+    # - avoid_classes_with_only_static_members # we do this commonly for `abstract final class`es
     - avoid_double_and_int_checks
     - avoid_dynamic_calls
     - avoid_empty_else
@@ -93,6 +92,7 @@ linter:
     - dangling_library_doc_comments
     - depend_on_referenced_packages
     - deprecated_consistency
+    # - deprecated_member_use_from_same_package # we allow self-references to deprecated members
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
     - directives_ordering
     # - discarded_futures # too many false positives, similar to unawaited_futures
@@ -107,8 +107,8 @@ linter:
     - hash_and_equals
     - implementation_imports
     - implicit_call_tearoffs
+    - implicit_reopen
     - invalid_case_patterns
-    - iterable_contains_unrelated_type
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
     - library_annotations
@@ -116,16 +116,19 @@ linter:
     - library_prefixes
     - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
-    - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/linter/issues/453
+    # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     - no_default_cases
     - no_duplicate_case_values
     - no_leading_underscores_for_library_prefixes
     - no_leading_underscores_for_local_identifiers
+    - no_literal_bool_comparisons
     - no_logic_in_create_state
     # - no_runtimeType_toString # ok in tests; we enable this only in packages/
+    - no_self_assignments
+    - no_wildcard_variable_uses
     - non_constant_identifier_names
     - noop_primitive_operations
     - null_check_on_nullable_type_parameter
@@ -154,7 +157,7 @@ linter:
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
-    # - prefer_final_parameters # we should enable this one day when it can be auto-fixed (https://github.com/dart-lang/linter/issues/3104), see also parameter_assignments
+    # - prefer_final_parameters # adds too much verbosity
     - prefer_for_elements_to_map_fromIterable
     - prefer_foreach
     - prefer_function_declarations_over_variables
@@ -194,6 +197,7 @@ linter:
     - tighten_type_of_initializing_formals
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
+    - type_literal_in_constant_pattern
     # - unawaited_futures # too many false positives, especially with the way AnimationController works
     - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
@@ -219,7 +223,7 @@ linter:
     - unnecessary_string_interpolations
     - unnecessary_this
     - unnecessary_to_list_in_spreads
-    # - unreachable_from_main # Do not enable this rule until it is un-marked as "experimental" and carefully re-evaluated.
+    - unreachable_from_main
     - unrelated_type_equality_checks
     - unsafe_html
     - use_build_context_synchronously

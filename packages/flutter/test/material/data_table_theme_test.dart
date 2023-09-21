@@ -13,6 +13,16 @@ void main() {
     expect(const DataTableThemeData().hashCode, const DataTableThemeData().copyWith().hashCode);
   });
 
+  test('DataTableThemeData copyWith dataRowHeight', () {
+    const DataTableThemeData themeData = DataTableThemeData(
+      dataRowMinHeight: 10,
+      dataRowMaxHeight: 10,
+    );
+    expect(themeData, themeData.copyWith());
+    expect(themeData.copyWith(dataRowMinHeight: 20, dataRowMaxHeight: 20),
+           themeData.copyWith(dataRowHeight: 20));
+  });
+
   test('DataTableThemeData lerp special cases', () {
     const DataTableThemeData data = DataTableThemeData();
     expect(identical(DataTableThemeData.lerp(data, data, 0.5), data), true);

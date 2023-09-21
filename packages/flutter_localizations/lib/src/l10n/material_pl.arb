@@ -31,6 +31,7 @@
   "continueButtonLabel": "Dalej",
   "copyButtonLabel": "Kopiuj",
   "cutButtonLabel": "Wytnij",
+  "scanTextButtonLabel": "Zeskanuj tekst",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Wklej",
   "selectAllButtonLabel": "Zaznacz wszystko",
@@ -140,5 +141,11 @@
   "scrimLabel": "Siatka",
   "bottomSheetLabel": "Plansza dolna",
   "scrimOnTapHint": "Zamknij: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

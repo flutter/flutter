@@ -8,7 +8,6 @@ void main() => runApp(const MagnifierExampleApp());
 
 class MagnifierExampleApp extends StatefulWidget {
   const MagnifierExampleApp({super.key});
-  static const Size loupeSize = Size(200, 200);
 
   @override
   State<MagnifierExampleApp> createState() => _MagnifierExampleAppState();

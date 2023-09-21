@@ -139,6 +139,7 @@ Future<int> computeInstanceMethod(int square) {
 
 Future<int> computeInvalidInstanceMethod(int square) {
   final ComputeTestSubject subject = ComputeTestSubject(square, ReceivePort());
+  expect(subject.additional, isA<ReceivePort>());
   return compute(subject.method, square);
 }
 

@@ -470,7 +470,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       _removeChild(j);
     }
     while (i < newChildren.length) {
-      _insertChild(j, newChildren[i]);
+      final MergeableMaterialItem newChild = newChildren[i];
+      _insertChild(j, newChild);
+
+      if (newChild is MaterialGap) {
+        _animationTuples[newChild.key]!.controller.forward();
+      }
 
       i += 1;
       j += 1;

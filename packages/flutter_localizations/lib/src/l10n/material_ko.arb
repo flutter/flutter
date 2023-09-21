@@ -25,6 +25,7 @@
   "continueButtonLabel": "계속",
   "copyButtonLabel": "복사",
   "cutButtonLabel": "잘라냄",
+  "scanTextButtonLabel": "스캔 텍스트",
   "okButtonLabel": "확인",
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",
@@ -134,5 +135,11 @@
   "scrimLabel": "스크림",
   "bottomSheetLabel": "하단 시트",
   "scrimOnTapHint": "$modalRouteContentName 닫기",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

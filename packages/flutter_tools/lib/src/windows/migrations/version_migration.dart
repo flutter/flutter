@@ -5,6 +5,7 @@
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
+import 'utils.dart';
 
 const String _cmakeFileBefore = r'''
 # Apply the standard set of build settings. This can be removed for applications
@@ -96,7 +97,7 @@ This indicates non-trivial changes have been made to the Windows runner in the
 
     // Migrate the windows/runner/CMakeLists.txt file.
     final String originalCmakeContents = _cmakeFile.readAsStringSync();
-    final String newCmakeContents = _replaceFirst(
+    final String newCmakeContents = replaceFirst(
       originalCmakeContents,
       _cmakeFileBefore,
       _cmakeFileAfter,
@@ -108,40 +109,16 @@ This indicates non-trivial changes have been made to the Windows runner in the
 
     // Migrate the windows/runner/Runner.rc file.
     final String originalResourceFileContents = _resourceFile.readAsStringSync();
-    final String newResourceFileContents = _replaceFirst(
+    final String newResourceFileContents = replaceFirst(
       originalResourceFileContents,
       _resourceFileBefore,
       _resourceFileAfter,
     );
     if (originalResourceFileContents != newResourceFileContents) {
       logger.printStatus(
-        'windows/runner/Runner.rc does not define use Flutter version information, updating.',
+        'windows/runner/Runner.rc does not use Flutter version information, updating.',
       );
       _resourceFile.writeAsStringSync(newResourceFileContents);
     }
   }
-}
-
-  /// Creates a new string with the first occurrence of [before] replaced by
-  /// [after].
-  ///
-  /// If the [originalContents] uses CRLF line endings, the [before] and [after]
-  /// will be converted to CRLF line endings before the replacement is made.
-  /// This is necessary for users that have git autocrlf enabled.
-  ///
-  /// Example:
-  /// ```dart
-  /// 'a\n'.replaceFirst('a\n', 'b\n'); // 'b\n'
-  /// 'a\r\n'.replaceFirst('a\n', 'b\n'); // 'b\r\n'
-  /// ```
-String _replaceFirst(String originalContents, String before, String after) {
-  final String result = originalContents.replaceFirst(before, after);
-  if (result != originalContents) {
-    return result;
-  }
-
-  final String beforeCrlf = before.replaceAll('\n', '\r\n');
-  final String afterCrlf = after.replaceAll('\n', '\r\n');
-
-  return originalContents.replaceFirst(beforeCrlf, afterCrlf);
 }

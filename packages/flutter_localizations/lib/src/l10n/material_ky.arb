@@ -25,6 +25,7 @@
   "continueButtonLabel": "Улантуу",
   "copyButtonLabel": "Көчүрүү",
   "cutButtonLabel": "Кесүү",
+  "scanTextButtonLabel": "Текстти скандоо",
   "okButtonLabel": "Макул",
   "pasteButtonLabel": "Чаптоо",
   "selectAllButtonLabel": "Баарын тандоо",
@@ -133,5 +134,11 @@
   "scrimLabel": "Кенеп",
   "bottomSheetLabel": "Ылдыйкы экран",
   "scrimOnTapHint": "$modalRouteContentName жабуу",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,7 +28,7 @@ class _ManyRelayoutBoundaries extends StatelessWidget {
 void rebuildLayoutBuilderSubtree(RenderBox descendant) {
   assert(descendant is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>);
 
-  AbstractNode? node = descendant.parent;
+  RenderObject? node = descendant.parent;
   while (node != null) {
     if (node is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>) {
       node = node.parent;
@@ -74,7 +73,7 @@ List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
     if (node.runtimeType.toString() == '_RenderTheater') {
       results.add(node);
     }
-    final AbstractNode? parent = node.parent;
+    final RenderObject? parent = node.parent;
     node = parent is RenderObject? parent : null;
   }
   return results;
@@ -163,6 +162,97 @@ void main() {
 
     await tester.pumpWidget(widget);
     await tester.pumpWidget(SizedBox(child: widget));
+  });
+
+  testWidgets('Safe to hide overlay child and remove OverlayPortal in the same frame', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/129025.
+    final Widget widget = Directionality(
+      key: GlobalKey(debugLabel: 'key'),
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return OverlayPortal(
+                controller: controller1,
+                overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                child: const SizedBox(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    controller1.show();
+    await tester.pumpWidget(widget);
+
+    controller1.hide();
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Safe to hide overlay child and reparent OverlayPortal in the same frame', (WidgetTester tester) async {
+    final OverlayPortal overlayPortal = OverlayPortal(
+      key: GlobalKey(debugLabel: 'key'),
+      controller: controller1,
+      overlayChildBuilder: (BuildContext context) => const SizedBox(),
+      child: const SizedBox(),
+    );
+
+    List<Widget> children = <Widget>[ const SizedBox(), overlayPortal ];
+
+    late StateSetter setState;
+    final Widget widget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          OverlayStatefulEntry(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Column(children: children);
+            },
+          ),
+        ],
+      ),
+    );
+
+    controller1.show();
+    await tester.pumpWidget(widget);
+
+    controller1.hide();
+    setState(() {
+      children = <Widget>[ overlayPortal, const SizedBox() ];
+    });
+    await tester.pumpWidget(widget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Safe to hide overlay child and reparent OverlayPortal in the same frame 2', (WidgetTester tester) async {
+    final Widget widget = Directionality(
+      key: GlobalKey(debugLabel: 'key'),
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return OverlayPortal(
+                controller: controller1,
+                overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                child: const SizedBox(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    controller1.show();
+    await tester.pumpWidget(widget);
+
+    controller1.hide();
+    await tester.pumpWidget(SizedBox(child: widget));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Throws when the same controller is attached to multiple OverlayPortal', (WidgetTester tester) async {
@@ -563,6 +653,63 @@ void main() {
     expect(layoutCount, 1);
     expect(overlayLayoutCounter.layoutCount, 1);
     verifyTreeIsClean();
+  });
+
+  testWidgets('Adding/Removing OverlayPortal in LayoutBuilder during layout', (WidgetTester tester) async {
+    final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
+    final GlobalKey overlayKey = GlobalKey(debugLabel: 'overlay');
+    controller1.hide();
+    late StateSetter setState;
+    Size size = Size.zero;
+
+    final Widget overlayPortal = OverlayPortal(
+      key: widgetKey,
+      controller: controller1,
+      overlayChildBuilder: (BuildContext context) => const Placeholder(),
+      child: const Placeholder(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter stateSetter) {
+                    setState = stateSetter;
+                    return Center(
+                      child: SizedBox.fromSize(
+                        size: size,
+                        child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                          // This layout callback adds/removes an OverlayPortal during layout.
+                          return constraints.maxHeight > 0 ? overlayPortal : const SizedBox();
+                        }),
+                      ),
+                    );
+                  }
+                );
+              }
+            ),
+          ],
+        ),
+      ),
+    );
+    controller1.show();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    // Adds the OverlayPortal from within a LayoutBuilder, in a layout callback.
+    setState(() { size = const Size(300, 300); });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    // Removes the OverlayPortal from within a LayoutBuilder, in a layout callback.
+    setState(() { size = Size.zero; });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Change overlay constraints', (WidgetTester tester) async {
@@ -1408,6 +1555,64 @@ void main() {
         expect(counter2.layoutCount, 3);
       });
     });
+
+    testWidgets('Safe to move the overlay child to a different Overlay and remove the old Overlay', (WidgetTester tester) async {
+      controller1.show();
+      final GlobalKey key = GlobalKey(debugLabel: 'key');
+      final GlobalKey oldOverlayKey = GlobalKey(debugLabel: 'old overlay');
+      final GlobalKey newOverlayKey = GlobalKey(debugLabel: 'new overlay');
+      final GlobalKey overlayChildKey = GlobalKey(debugLabel: 'overlay child key');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            key: oldOverlayKey,
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return OverlayPortal(
+                    key: key,
+                    controller: controller1,
+                    overlayChildBuilder: (BuildContext context) => SizedBox(key: overlayChildKey),
+                    child: const SizedBox(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.byKey(overlayChildKey), findsOneWidget);
+      expect(find.byKey(newOverlayKey), findsNothing);
+      expect(find.byKey(oldOverlayKey), findsOneWidget);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            key: newOverlayKey,
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return OverlayPortal(
+                    key: key,
+                    controller: controller1,
+                    overlayChildBuilder: (BuildContext context) => SizedBox(key: overlayChildKey),
+                    child: const SizedBox(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(overlayChildKey), findsOneWidget);
+      expect(find.byKey(newOverlayKey), findsOneWidget);
+      expect(find.byKey(oldOverlayKey), findsNothing);
+    });
   });
 
   group('Paint order', () {
@@ -1525,14 +1730,14 @@ void main() {
       final List<RenderObject> childrenVisited = <RenderObject>[];
       theater.visitChildren(childrenVisited.add);
       expect(childrenVisited.length, 3);
-      expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
+      expect(childrenVisited, containsAllInOrder(<RenderObject>[child1Box.parent!, child2Box.parent!]));
       childrenVisited.clear();
 
       setState(() { reparented = true; });
       await tester.pump();
       theater.visitChildren(childrenVisited.add);
       // The child list stays the same.
-      expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
+      expect(childrenVisited, containsAllInOrder(<RenderObject>[child1Box.parent!, child2Box.parent!]));
     });
   });
 }

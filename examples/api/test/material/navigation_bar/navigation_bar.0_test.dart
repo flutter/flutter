@@ -16,20 +16,20 @@ void main() {
     final NavigationBar navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
 
     /// NavigationDestinations must be rendered
-    expect(find.text('Explore'), findsOneWidget);
-    expect(find.text('Commute'), findsOneWidget);
-    expect(find.text('Saved'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Business'), findsOneWidget);
+    expect(find.text('School'), findsOneWidget);
 
     /// initial index must be zero
     expect(navigationBarWidget.selectedIndex, 0);
 
     /// switch to second tab
-    await tester.tap(find.text('Commute'));
+    await tester.tap(find.text('Business'));
     await tester.pumpAndSettle();
     expect(find.text('Page 2'), findsOneWidget);
 
     /// switch to third tab
-    await tester.tap(find.text('Saved'));
+    await tester.tap(find.text('School'));
     await tester.pumpAndSettle();
     expect(find.text('Page 3'), findsOneWidget);
   });

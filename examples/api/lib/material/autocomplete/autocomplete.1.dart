@@ -18,8 +18,14 @@ class AutocompleteExampleApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Autocomplete Basic User'),
         ),
-        body: const Center(
-          child: AutocompleteBasicUserExample(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Type below to autocomplete the following possible results: ${AutocompleteBasicUserExample._userOptions}.'),
+              const AutocompleteBasicUserExample(),
+            ],
+          ),
         ),
       ),
     );

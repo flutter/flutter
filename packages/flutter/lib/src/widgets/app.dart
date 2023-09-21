@@ -1362,7 +1362,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
         _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
-            location: _initialRouteName,
+            uri: Uri.parse(_initialRouteName),
           ),
         );
       } else {
@@ -1484,7 +1484,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> didPushRoute(String route) async {
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
@@ -1496,7 +1496,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (navigator == null) {
       return false;
     }
-    navigator.pushNamed(route);
+    final Uri uri = routeInformation.uri;
+    navigator.pushNamed(
+      Uri.decodeComponent(
+        Uri(
+          path: uri.path.isEmpty ? '/' : uri.path,
+          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          fragment: uri.fragment.isEmpty ? null : uri.fragment,
+        ).toString(),
+      ),
+    );
     return true;
   }
 

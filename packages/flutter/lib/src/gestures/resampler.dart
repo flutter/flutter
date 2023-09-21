@@ -54,6 +54,7 @@ class PointerEventResampler {
     int buttons,
   ) {
     return PointerHoverEvent(
+      viewId: event.viewId,
       timeStamp: timeStamp,
       kind: event.kind,
       device: event.device,
@@ -86,6 +87,7 @@ class PointerEventResampler {
     int buttons,
   ) {
     return PointerMoveEvent(
+      viewId: event.viewId,
       timeStamp: timeStamp,
       pointer: pointerIdentifier,
       kind: event.kind,

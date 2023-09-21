@@ -604,6 +604,41 @@ void main() {
       // centered.
       expect(viewport.childCount, 13);
     });
+
+    testWidgets('Active children are laid out with correct offset', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/123497
+      Future<void> buildWidget(double width) async {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListWheelScrollView(
+              itemExtent: 100.0,
+              children: <Widget>[
+                SizedBox(
+                  width: width,
+                  child: const Center(child: Text('blah')),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      double getSizedBoxWidth() => tester.getSize(find.byType(SizedBox)).width;
+      double getSizedBoxCenterX() => tester.getCenter(find.byType(SizedBox)).dx;
+
+      await buildWidget(200.0);
+      expect(getSizedBoxWidth(), 200.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(100.0);
+      expect(getSizedBoxWidth(), 100.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(300.0);
+      expect(getSizedBoxWidth(), 300.0);
+      expect(getSizedBoxCenterX(), 400.0);
+    });
   });
 
   group('pre-transform viewport', () {
@@ -1609,7 +1644,7 @@ void main() {
     });
 
     testWidgets('ListWheelScrollView does not crash and does not allow taps on children that were laid out, but not painted', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/12649
+      // Regression test for https://github.com/flutter/flutter/issues/126491
 
       final FixedExtentScrollController controller = FixedExtentScrollController();
       final List<int> children = List<int>.generate(100, (int index) => index);
@@ -1666,5 +1701,20 @@ void main() {
       await tester.tap(find.byKey(const ValueKey<int>(2)), warnIfMissed: false);
       expect(tappedChildren, const <int>[0, 1]);
     });
+  });
+
+  testWidgets('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ListWheelScrollView(
+        overAndUnderCenterOpacity: 0.5,
+        itemExtent: 20.0,
+        children: <Widget>[
+          for (int i = 0; i < 20; i++)
+            Container(),
+        ],
+      ),
+    );
+
+    expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
   });
 }

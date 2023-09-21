@@ -183,12 +183,12 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -395,12 +395,12 @@ class FakeIosPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -490,7 +490,7 @@ class FakeHtmlPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -503,6 +503,7 @@ class FakeHtmlPlatformViewsController {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
+    final Object? params = args['params'];
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -522,7 +523,7 @@ class FakeHtmlPlatformViewsController {
       await createCompleter!.future;
     }
 
-    _views[id] = FakeHtmlPlatformView(id, viewType);
+    _views[id] = FakeHtmlPlatformView(id, viewType, params);
     return Future<int?>.sync(() => null);
   }
 
@@ -658,10 +659,11 @@ class FakeUiKitView {
 
 @immutable
 class FakeHtmlPlatformView {
-  const FakeHtmlPlatformView(this.id, this.type);
+  const FakeHtmlPlatformView(this.id, this.type, [this.creationParams]);
 
   final int id;
   final String type;
+  final Object? creationParams;
 
   @override
   bool operator ==(Object other) {
@@ -670,14 +672,15 @@ class FakeHtmlPlatformView {
     }
     return other is FakeHtmlPlatformView
         && other.id == id
-        && other.type == type;
+        && other.type == type
+        && other.creationParams == creationParams;
   }
 
   @override
-  int get hashCode => Object.hash(id, type);
+  int get hashCode => Object.hash(id, type, creationParams);
 
   @override
   String toString() {
-    return 'FakeHtmlPlatformView(id: $id, type: $type)';
+    return 'FakeHtmlPlatformView(id: $id, type: $type, params: $creationParams)';
   }
 }

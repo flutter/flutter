@@ -23,12 +23,12 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
         with:
           persist-credentials: false
 
       - name: "Run analysis"
-        uses: ossf/scorecard-action@80e868c13c90f172d68d1f4501dee99e2479f7af
+        uses: ossf/scorecard-action@08b4669551908b1024bb425080c797723083c031
         with:
           results_file: results.sarif
           results_format: sarif

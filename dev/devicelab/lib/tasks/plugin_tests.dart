@@ -252,7 +252,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     // build files.
     await build(buildTarget, validateNativeBuildProject: false);
 
-    switch(buildTarget) {
+    switch (buildTarget) {
       case 'apk':
         if (await exec(
           path.join('.', 'gradlew'),

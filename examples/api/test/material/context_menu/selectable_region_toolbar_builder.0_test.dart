@@ -18,7 +18,7 @@ void main() {
     expect(BrowserContextMenu.enabled, !kIsWeb);
 
     // Allow the selection overlay geometry to be created.
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 

@@ -81,6 +81,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             key: dragTarget,
@@ -161,8 +162,7 @@ void main() {
     );
 
     final dynamic backgroundOpacity = tester.firstWidget(
-      find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity')
-    );
+      find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity'));
     // accessing private type member.
     // ignore: avoid_dynamic_calls
     expect(backgroundOpacity.opacity, 1.0);
@@ -173,6 +173,7 @@ void main() {
     const double expandedHeight = 200;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -414,8 +415,6 @@ void main() {
                               label: 'Item 6',
                               textDirection: TextDirection.ltr,
                             ),
-
-
                           ],
                         ),
                       ],
@@ -441,6 +440,7 @@ void main() {
     late double width;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -470,18 +470,16 @@ void main() {
       ),
     );
 
+    final double textWidth = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? width
+      : (width / 1.5).floorToDouble() * 1.5;
     // The title is scaled and transformed to be 1.5 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 1.5 times smaller than the full width. The height of the text is the same
     // as the font size, with 10 dps bottom margin.
     expect(
       tester.getRect(find.byType(Text)),
-      Rect.fromLTRB(
-        0,
-        height - titleFontSize - 10,
-        (width / 1.5).floorToDouble() * 1.5,
-        height,
-      ),
+      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - 10, textWidth, height), epsilon: 0.0001),
     );
   });
 
@@ -491,6 +489,7 @@ void main() {
     const double expandedTitleScale = 3.0;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -542,18 +541,16 @@ void main() {
     // bottom edge.
     const double bottomMargin = titleFontSize * (expandedTitleScale - 1);
 
+    final double textWidth = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? collapsedWidth
+      : (collapsedWidth / 3).floorToDouble() * 3;
     // The title is scaled and transformed to be 3 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 3 times smaller than the full width. The height of the text is the same
     // as the font size, with 40 dps bottom margin to maintain its bottom position.
     expect(
       tester.getRect(title),
-      Rect.fromLTRB(
-        0,
-        height - titleFontSize - bottomMargin,
-        (collapsedWidth / 3).floorToDouble() * 3,
-        height,
-      ),
+      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - bottomMargin, textWidth, height), epsilon: 0.0001),
     );
   });
 
@@ -562,6 +559,7 @@ void main() {
     const double height = 300.0;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -622,6 +620,7 @@ void main() {
     const double expandedTitleScale = 3.0;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -681,7 +680,7 @@ void main() {
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
-        theme: ThemeData(platform: platform),
+        theme: ThemeData(platform: platform, useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: FlexibleSpaceBar(
@@ -731,7 +730,7 @@ void main() {
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
-        theme: ThemeData(platform: platform),
+        theme: ThemeData(platform: platform, useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: FlexibleSpaceBar(
@@ -802,14 +801,29 @@ void main() {
     ));
 
     expect(RenderRebuildTracker.count, 1);
+    expect(
+      tester.layers.lastWhere((Layer element) => element is OpacityLayer),
+      isA<OpacityLayer>().having((OpacityLayer p0) => p0.alpha, 'alpha', 255),
+    );
 
     // We drag up to fully collapse the space bar.
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 9; i++) {
+      await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
+      await tester.pumpAndSettle();
+    }
+
+    expect(
+      tester.layers.lastWhere((Layer element) => element is OpacityLayer),
+      isA<OpacityLayer>().having((OpacityLayer p0) => p0.alpha, 'alpha', lessThan(255)),
+    );
+
+    for (int i = 0; i < 11; i++) {
       await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
       await tester.pumpAndSettle();
     }
 
     expect(RenderRebuildTracker.count, greaterThan(1));
+    expect(tester.layers.whereType<OpacityLayer>(), isEmpty);
   });
 }
 

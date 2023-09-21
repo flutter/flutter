@@ -15,13 +15,13 @@ class ListTileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: const LisTileExample(),
+      home: const ListTileExample(),
     );
   }
 }
 
-class LisTileExample extends StatelessWidget {
-  const LisTileExample({super.key});
+class ListTileExample extends StatelessWidget {
+  const ListTileExample({super.key});
 
   @override
   Widget build(BuildContext context) {

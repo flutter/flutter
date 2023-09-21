@@ -27,6 +27,7 @@
   "continueButtonLabel": "Жалғастыру",
   "copyButtonLabel": "Көшіру",
   "cutButtonLabel": "Қию",
+  "scanTextButtonLabel": "Мәтінді сканерлеу",
   "okButtonLabel": "Иә",
   "pasteButtonLabel": "Қою",
   "selectAllButtonLabel": "Барлығын таңдау",
@@ -135,5 +136,11 @@
   "scrimLabel": "Кенеп",
   "bottomSheetLabel": "Төменгі парақша",
   "scrimOnTapHint": "$modalRouteContentName жабу",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -31,6 +31,7 @@
   "continueButtonLabel": "Naprej",
   "copyButtonLabel": "Kopiraj",
   "cutButtonLabel": "Izreži",
+  "scanTextButtonLabel": "Skeniraj besedilo",
   "okButtonLabel": "V REDU",
   "pasteButtonLabel": "Prilepi",
   "selectAllButtonLabel": "Izberi vse",
@@ -140,5 +141,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Razdelek na dnu zaslona",
   "scrimOnTapHint": "Zapiranje »$modalRouteContentName«",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -439,7 +439,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDismissUpdateValueChanged() {
-    if(widget.onUpdate != null) {
+    if (widget.onUpdate != null) {
       final bool oldDismissThresholdReached = _dismissThresholdReached;
       _dismissThresholdReached = _moveController!.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold);
       final DismissUpdateDetails details = DismissUpdateDetails(

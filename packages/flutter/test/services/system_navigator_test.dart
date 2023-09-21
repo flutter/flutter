@@ -45,15 +45,15 @@ void main() {
     ]);
 
     await verify(() => SystemNavigator.routeInformationUpdated(location: 'a'), <Object>[
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': null, 'replace': false }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'a', 'state': null, 'replace': false }),
     ]);
 
     await verify(() => SystemNavigator.routeInformationUpdated(location: 'a', state: true), <Object>[
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': false }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'a', 'state': true, 'replace': false }),
     ]);
 
     await verify(() => SystemNavigator.routeInformationUpdated(location: 'a', state: true, replace: true), <Object>[
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': true }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'a', 'state': true, 'replace': true }),
     ]);
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, null);

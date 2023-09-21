@@ -426,6 +426,7 @@ void main() {
       }
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: CustomScrollView(
               slivers: <Widget> [
@@ -866,6 +867,22 @@ void main() {
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       await tester.tap(find.byType(GestureDetector));
       expect(events, equals(<String>['tap']));
+      semantics.dispose();
+    });
+
+    testWidgets('ignoring only block semantics actions', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(boilerPlate(
+        SliverIgnorePointer(
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () { },
+            ),
+          ),
+        ),
+      ));
+      expect(semantics, includesNodeWith(label: 'a', actions: <SemanticsAction>[]));
       semantics.dispose();
     });
 

@@ -443,7 +443,7 @@ mixin class ChangeNotifier implements Listenable {
           if (_listeners[i] == null) {
             // We swap this item with the next not null item.
             int swapIndex = i + 1;
-            while(_listeners[swapIndex] == null) {
+            while (_listeners[swapIndex] == null) {
               swapIndex += 1;
             }
             _listeners[i] = _listeners[swapIndex];

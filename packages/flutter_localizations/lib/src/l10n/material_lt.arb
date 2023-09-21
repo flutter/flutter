@@ -31,6 +31,7 @@
   "continueButtonLabel": "Tęsti",
   "copyButtonLabel": "Kopijuoti",
   "cutButtonLabel": "Iškirpti",
+  "scanTextButtonLabel": "Nuskaityti tekstą",
   "okButtonLabel": "GERAI",
   "pasteButtonLabel": "Įklijuoti",
   "selectAllButtonLabel": "Pasirinkti viską",
@@ -140,5 +141,11 @@
   "scrimLabel": "Užsklanda",
   "bottomSheetLabel": "Apatinis lapas",
   "scrimOnTapHint": "Uždaryti „$modalRouteContentName“",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

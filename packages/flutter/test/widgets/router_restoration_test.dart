@@ -51,7 +51,7 @@ void main() {
     expect(delegate().newRoutePaths, <String>['/home']);
     expect(delegate().restoredRoutePaths, isEmpty);
 
-    provider().value = const RouteInformation(location: '/foo');
+    provider().value = RouteInformation(uri: Uri(path: '/foo'));
     await tester.pumpAndSettle();
     expect(find.text('Current config: /foo'), findsOneWidget);
     expect(delegate().newRoutePaths, <String>['/home', '/foo']);
@@ -64,7 +64,7 @@ void main() {
 
     final TestRestorationData restorationData = await tester.getRestorationData();
 
-    provider().value = const RouteInformation(location: '/bar');
+    provider().value = RouteInformation(uri: Uri.parse('/bar'));
     await tester.pumpAndSettle();
     expect(find.text('Current config: /bar'), findsOneWidget);
     expect(delegate().newRoutePaths, <String>['/bar']);
@@ -80,12 +80,12 @@ void main() {
 class _TestRouteInformationParser extends RouteInformationParser<String> {
   @override
   Future<String> parseRouteInformation(RouteInformation routeInformation) {
-    return SynchronousFuture<String>(routeInformation.location!);
+    return SynchronousFuture<String>(routeInformation.uri.toString());
   }
 
   @override
   RouteInformation? restoreRouteInformation(String configuration) {
-    return RouteInformation(location: configuration);
+    return RouteInformation(uri: Uri.parse(configuration));
   }
 }
 
@@ -130,7 +130,7 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
 class _TestRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   @override
   RouteInformation get value => _value;
-  RouteInformation _value = const RouteInformation(location: '/home');
+  RouteInformation _value = RouteInformation(uri: Uri.parse('/home'));
   set value(RouteInformation value) {
     if (value == _value) {
       return;

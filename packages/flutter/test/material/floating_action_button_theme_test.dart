@@ -19,8 +19,10 @@ void main() {
     expect(identical(FloatingActionButtonThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Material3: Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.from(useMaterial3: true, colorScheme: colorScheme),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () { },
@@ -29,10 +31,33 @@ void main() {
       ),
     ));
 
-    // The color scheme values are guaranteed to be non null since the default
-    // [ThemeData] creates it with [ColorScheme.fromSwatch].
-    expect(_getRawMaterialButton(tester).fillColor, ThemeData().colorScheme.secondary);
-    expect(_getRichText(tester).text.style!.color, ThemeData().colorScheme.onSecondary);
+    expect(_getRawMaterialButton(tester).fillColor, colorScheme.primaryContainer);
+    expect(_getRichText(tester).text.style!.color, colorScheme.onPrimaryContainer);
+
+    // These defaults come directly from the [FloatingActionButton].
+    expect(_getRawMaterialButton(tester).elevation, 6);
+    expect(_getRawMaterialButton(tester).highlightElevation, 6);
+    expect(_getRawMaterialButton(tester).shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))));
+    expect(_getRawMaterialButton(tester).splashColor, colorScheme.onPrimaryContainer.withOpacity(0.12));
+    expect(_getRawMaterialButton(tester).constraints, const BoxConstraints.tightFor(width: 56.0, height: 56.0));
+    expect(_getIconSize(tester).width, 24.0);
+    expect(_getIconSize(tester).height, 24.0);
+  });
+
+  testWidgets('Material2: Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.from(useMaterial3: false, colorScheme: colorScheme),
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () { },
+          child: const Icon(Icons.add),
+        ),
+      ),
+    ));
+
+    expect(_getRawMaterialButton(tester).fillColor, colorScheme.secondary);
+    expect(_getRichText(tester).text.style!.color, colorScheme.onSecondary);
 
     // These defaults come directly from the [FloatingActionButton].
     expect(_getRawMaterialButton(tester).elevation, 6);
@@ -191,7 +216,8 @@ void main() {
     expect(_getIconSize(tester).height, iconSize);
   });
 
-  testWidgets('FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
+  testWidgets('Material3: FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
@@ -200,7 +226,43 @@ void main() {
     const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData().copyWith(
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: colorScheme,
+      ).copyWith(
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          extendedSizeConstraints: constraints,
+          extendedIconLabelSpacing: iconLabelSpacing,
+          extendedPadding: padding,
+          extendedTextStyle: textStyle,
+        ),
+      ),
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () { },
+          label: const Text('Extended', key: labelKey),
+          icon: const Icon(Icons.add, key: iconKey),
+        ),
+      ),
+    ));
+
+    expect(_getRawMaterialButton(tester).constraints, constraints);
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
+    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: colorScheme.onPrimaryContainer));
+  });
+
+  testWidgets('Material2: FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
+    const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
+    const double iconLabelSpacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+    const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false).copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           extendedSizeConstraints: constraints,
           extendedIconLabelSpacing: iconLabelSpacing,
@@ -225,7 +287,8 @@ void main() {
     expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const Color(0xffffffff)));
   });
 
-  testWidgets('FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
+  testWidgets('Material3: FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
+    const ColorScheme colorScheme = ColorScheme.light();
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const double iconLabelSpacing = 33.0;
@@ -233,7 +296,43 @@ void main() {
     const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData().copyWith(
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: colorScheme,
+      ).copyWith(
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          extendedIconLabelSpacing: 25.0,
+          extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
+          extendedTextStyle: TextStyle(letterSpacing: 3.0),
+        ),
+      ),
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () { },
+          label: const Text('Extended', key: labelKey),
+          icon: const Icon(Icons.add, key: iconKey),
+          extendedIconLabelSpacing: iconLabelSpacing,
+          extendedPadding: padding,
+          extendedTextStyle: textStyle,
+        ),
+      ),
+    ));
+
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
+    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: colorScheme.onPrimaryContainer));
+  });
+
+  testWidgets('Material2: FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
+    const double iconLabelSpacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+    const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false).copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           extendedIconLabelSpacing: 25.0,
           extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),

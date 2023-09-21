@@ -207,9 +207,7 @@ class ElevatedButton extends ButtonStyleButton {
     final MaterialStateProperty<double>? elevationValue = (elevation == null)
       ? null
       : _ElevatedButtonDefaultElevation(elevation);
-    final MaterialStateProperty<MouseCursor?>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
-      : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
+    final MaterialStateProperty<MouseCursor?> mouseCursor = _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
@@ -428,10 +426,13 @@ class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
 
   @override
   Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.pressed)) {
+      return overlay.withOpacity(0.24);
+    }
     if (states.contains(MaterialState.hovered)) {
       return overlay.withOpacity(0.08);
     }
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+    if (states.contains(MaterialState.focused)) {
       return overlay.withOpacity(0.24);
     }
     return null;
@@ -449,14 +450,14 @@ class _ElevatedButtonDefaultElevation extends MaterialStateProperty<double> with
     if (states.contains(MaterialState.disabled)) {
       return 0;
     }
+    if (states.contains(MaterialState.pressed)) {
+      return elevation + 6;
+    }
     if (states.contains(MaterialState.hovered)) {
       return elevation + 2;
     }
     if (states.contains(MaterialState.focused)) {
       return elevation + 2;
-    }
-    if (states.contains(MaterialState.pressed)) {
-      return elevation + 6;
     }
     return elevation;
   }
@@ -542,8 +543,6 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   _ElevatedButtonDefaultsM3(this.context)
    : super(
@@ -580,13 +579,13 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
+      }
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.primary.withOpacity(0.12);
       }
       return null;
@@ -606,13 +605,13 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return 0.0;
       }
+      if (states.contains(MaterialState.pressed)) {
+        return 1.0;
+      }
       if (states.contains(MaterialState.hovered)) {
         return 3.0;
       }
       if (states.contains(MaterialState.focused)) {
-        return 1.0;
-      }
-      if (states.contains(MaterialState.pressed)) {
         return 1.0;
       }
       return 1.0;

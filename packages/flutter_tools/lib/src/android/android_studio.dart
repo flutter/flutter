@@ -28,18 +28,6 @@ import 'android_studio_validator.dart';
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
-// TODO(andrewkolos): this global variable is used in several places to provide
-// a java binary to multiple Java-dependent tools, including the Android SDK
-// and Gradle. If this is null, these tools will implicitly fall back to current
-// JAVA_HOME env variable and then to any java found on PATH.
-//
-// This logic is consistent with that used by flutter doctor to find a valid JDK,
-// but this consistency is fragile--the implementations of this logic
-// exist independently of each other.
-//
-// See https://github.com/flutter/flutter/issues/124252.
-String? get javaPath => globals.androidStudio?.javaPath;
-
 class AndroidStudio {
   /// A [version] value of null represents an unknown version.
   AndroidStudio(
@@ -52,7 +40,10 @@ class AndroidStudio {
     _initAndValidate();
   }
 
-  static AndroidStudio? fromMacOSBundle(String bundlePath) {
+  static AndroidStudio? fromMacOSBundle(
+    String bundlePath, {
+    String? configuredPath,
+  }) {
     final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
     final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
     final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
@@ -99,7 +90,12 @@ class AndroidStudio {
         );
       }
     }
-    return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
+    return AndroidStudio(
+      studioPath,
+      version: version,
+      presetPluginsPath: presetPluginsPath,
+      configuredPath: configuredPath,
+    );
   }
 
   static AndroidStudio? fromHomeDot(Directory homeDotDir) {
@@ -162,6 +158,12 @@ class AndroidStudio {
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
 
+  /// The path of the JDK bundled with Android Studio.
+  ///
+  /// This will be null if the bundled JDK could not be found or run.
+  ///
+  /// If you looking to invoke the java binary or add it to the system
+  /// environment variables, consider using the [Java] class instead.
   String? get javaPath => _javaPath;
 
   bool get isValid => _isValid;
@@ -234,32 +236,24 @@ class AndroidStudio {
   /// Android Studio found at that location is always returned, even if it is
   /// invalid.
   static AndroidStudio? latestValid() {
-    final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudioPath != null) {
-      String correctedConfiguredStudioPath = configuredStudioPath;
-      if (globals.platform.isMacOS && !correctedConfiguredStudioPath.endsWith('Contents')) {
-        correctedConfiguredStudioPath = globals.fs.path.join(correctedConfiguredStudioPath, 'Contents');
-      }
-
-      if (!globals.fs.directory(correctedConfiguredStudioPath).existsSync()) {
-        throwToolExit('''
-Could not find the Android Studio installation at the manually configured path "$configuredStudioPath".
-Please verify that the path is correct and update it by running this command: flutter config --android-studio-dir '<path>'
-
-To have flutter search for Android Studio installations automatically, remove
-the configured path by running this command: flutter config --android-studio-dir ''
-''');
-      }
-
-      return AndroidStudio(correctedConfiguredStudioPath,
-          configuredPath: configuredStudioPath);
-    }
+    final Directory? configuredStudioDir = _configuredDir();
 
     // Find all available Studio installations.
     final List<AndroidStudio> studios = allInstalled();
     if (studios.isEmpty) {
       return null;
     }
+
+    final AndroidStudio? manuallyConfigured = studios
+      .where((AndroidStudio studio) => studio.configuredPath != null &&
+        configuredStudioDir != null &&
+        _pathsAreEqual(studio.configuredPath!, configuredStudioDir.path))
+      .firstOrNull;
+
+    if (manuallyConfigured != null) {
+      return manuallyConfigured;
+    }
+
     AndroidStudio? newest;
     for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
       if (newest == null) {
@@ -320,15 +314,14 @@ the configured path by running this command: flutter config --android-studio-dir
       ));
     }
 
-    final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
+    Directory? configuredStudioDir = _configuredDir();
     if (configuredStudioDir != null) {
-      FileSystemEntity configuredStudio = globals.fs.file(configuredStudioDir);
-      if (configuredStudio.basename == 'Contents') {
-        configuredStudio = configuredStudio.parent;
+      if (configuredStudioDir.basename == 'Contents') {
+        configuredStudioDir = configuredStudioDir.parent;
       }
       if (!candidatePaths
-          .any((FileSystemEntity e) => e.path == configuredStudio.path)) {
-        candidatePaths.add(configuredStudio);
+          .any((FileSystemEntity e) => _pathsAreEqual(e.path, configuredStudioDir!.path))) {
+        candidatePaths.add(configuredStudioDir);
       }
     }
 
@@ -352,9 +345,18 @@ the configured path by running this command: flutter config --android-studio-dir
     }
 
     return candidatePaths
-        .map<AndroidStudio?>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
-        .whereType<AndroidStudio>()
-        .toList();
+      .map<AndroidStudio?>((FileSystemEntity e) {
+        if (configuredStudioDir == null) {
+          return AndroidStudio.fromMacOSBundle(e.path);
+        }
+
+        return AndroidStudio.fromMacOSBundle(
+          e.path,
+          configuredPath: _pathsAreEqual(configuredStudioDir.path, e.path) ? configuredStudioDir.path : null,
+        );
+      })
+      .whereType<AndroidStudio>()
+      .toList();
   }
 
   static List<AndroidStudio> _allLinuxOrWindows() {
@@ -437,7 +439,7 @@ the configured path by running this command: flutter config --android-studio-dir
                 studioAppName: title,
               );
               if (!alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
-                studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+                studios.removeWhere((AndroidStudio other) => _pathsAreEqual(other.directory, studio.directory));
                 studios.add(studio);
               }
             }
@@ -447,9 +449,23 @@ the configured path by running this command: flutter config --android-studio-dir
     }
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudioDir != null && !alreadyFoundStudioAt(configuredStudioDir)) {
-      studios.add(AndroidStudio(configuredStudioDir,
+    if (configuredStudioDir != null) {
+      final AndroidStudio? matchingAlreadyFoundInstall = studios
+        .where((AndroidStudio other) => _pathsAreEqual(configuredStudioDir, other.directory))
+        .firstOrNull;
+      if (matchingAlreadyFoundInstall != null) {
+        studios.remove(matchingAlreadyFoundInstall);
+        studios.add(
+          AndroidStudio(
+            configuredStudioDir,
+            configuredPath: configuredStudioDir,
+            version: matchingAlreadyFoundInstall.version,
+          ),
+        );
+      } else {
+        studios.add(AndroidStudio(configuredStudioDir,
           configuredPath: configuredStudioDir));
+      }
     }
 
     if (globals.platform.isLinux) {
@@ -464,6 +480,38 @@ the configured path by running this command: flutter config --android-studio-dir
       checkWellKnownPath('${globals.fsUtils.homeDirPath}/android-studio');
     }
     return studios;
+  }
+
+  /// Gets the Android Studio install directory set by the user, if it is configured.
+  ///
+  /// The returned [Directory], if not null, is guaranteed to have existed during
+  /// this function's execution.
+  static Directory? _configuredDir() {
+    final String? configuredPath = globals.config.getValue('android-studio-dir') as String?;
+    if (configuredPath == null) {
+      return null;
+    }
+    final Directory result = globals.fs.directory(configuredPath);
+
+    bool? configuredStudioPathExists;
+    String? exceptionMessage;
+    try {
+      configuredStudioPathExists = result.existsSync();
+    } on FileSystemException catch (e) {
+      exceptionMessage = e.toString();
+    }
+
+    if (configuredStudioPathExists == false || exceptionMessage != null) {
+      throwToolExit('''
+Could not find the Android Studio installation at the manually configured path "$configuredPath".
+${exceptionMessage == null ? '' : 'Encountered exception: $exceptionMessage\n\n'}
+Please verify that the path is correct and update it by running this command: flutter config --android-studio-dir '<path>'
+To have flutter search for Android Studio installations automatically, remove
+the configured path by running this command: flutter config --android-studio-dir
+''');
+    }
+
+    return result;
   }
 
   static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
@@ -487,16 +535,17 @@ the configured path by running this command: flutter config --android-studio-dir
     if (globals.platform.isMacOS) {
       if (version != null && version!.major < 2020) {
         javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-      } else if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
-      } else {
+      } else if (version != null && version!.major < 2022) {
         javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
+      // See https://github.com/flutter/flutter/issues/125246 for more context.
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
       }
     } else {
-      if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr');
-      } else {
+      if (version != null && version!.major < 2022) {
         javaPath = globals.fs.path.join(directory, 'jre');
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jbr');
       }
     }
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
@@ -523,4 +572,8 @@ the configured path by running this command: flutter config --android-studio-dir
 
   @override
   String toString() => 'Android Studio ($version)';
+}
+
+bool _pathsAreEqual(String path, String other) {
+  return globals.fs.path.canonicalize(path) == globals.fs.path.canonicalize(other);
 }

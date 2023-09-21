@@ -8,7 +8,6 @@ import 'dart:ui' as ui show FlutterView, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
@@ -405,61 +404,6 @@ void debugFlushLastFrameImageSizeInfo() {
   }());
 }
 
-/// Information that describes how to tile an image for a given [ImageRepeat]
-/// enum.
-///
-/// Used with [createTilingInfo].
-@visibleForTesting
-@immutable
-class ImageTilingInfo {
-  /// Create a new [ImageTilingInfo] object.
-  const ImageTilingInfo({
-    required this.tmx,
-    required this.tmy,
-    required this.transform,
-  });
-
-  /// The tile mode for the x-axis.
-  final TileMode tmx;
-
-  /// The tile mode for the y-axis.
-  final TileMode tmy;
-
-  /// The transform to apply to the image shader.
-  final Matrix4 transform;
-
-  @override
-  String toString() {
-    if (!kDebugMode) {
-      return 'ImageTilingInfo';
-    }
-    return 'ImageTilingInfo($tmx, $tmy, $transform)';
-  }
-}
-
-/// Create the [ImageTilingInfo] for a given [ImageRepeat], canvas [rect],
-/// [destinationRect], and [sourceRect].
-@visibleForTesting
-ImageTilingInfo createTilingInfo(ImageRepeat repeat, Rect rect, Rect destinationRect, Rect sourceRect) {
-  assert(repeat != ImageRepeat.noRepeat);
-  final TileMode tmx = (repeat == ImageRepeat.repeatX || repeat == ImageRepeat.repeat)
-    ? TileMode.repeated
-    : TileMode.decal;
-  final TileMode tmy = (repeat == ImageRepeat.repeatY || repeat == ImageRepeat.repeat)
-    ? TileMode.repeated
-    : TileMode.decal;
-  final Rect data = _generateImageTileRects(rect, destinationRect, repeat).first;
-  final Matrix4 transform = Matrix4.identity()
-    ..scale(data.width / sourceRect.width, data.height / sourceRect.height)
-    ..setTranslationRaw(data.topLeft.dx, data.topLeft.dy, 0);
-
-  return ImageTilingInfo(
-    tmx: tmx,
-    tmy: tmy,
-    transform: transform,
-  );
-}
-
 /// Paints an image into the given rectangle on the canvas.
 ///
 /// The arguments have the following meanings:
@@ -669,7 +613,7 @@ void paintImage({
         developer.postEvent(
           'Flutter.ImageSizesForFrame',
           <String, Object>{
-            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
+            for (final ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
               imageSizeInfo.source!: imageSizeInfo.toJson(),
           },
         );
@@ -682,8 +626,7 @@ void paintImage({
   if (needSave) {
     canvas.save();
   }
-  if (repeat != ImageRepeat.noRepeat && centerSlice != null) {
-    // Don't clip if an image shader is used.
+  if (repeat != ImageRepeat.noRepeat) {
     canvas.clipRect(rect);
   }
   if (flipHorizontally) {
@@ -699,12 +642,9 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      final ImageTilingInfo info = createTilingInfo(repeat, rect, destinationRect, sourceRect);
-      final ImageShader shader = ImageShader(image, info.tmx, info.tmy, info.transform.storage, filterQuality: filterQuality);
-      canvas.drawRect(
-        rect,
-        paint..shader = shader
-      );
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat)) {
+        canvas.drawImageRect(image, sourceRect, tileRect, paint);
+      }
     }
   } else {
     canvas.scale(1 / scale);
@@ -725,7 +665,7 @@ void paintImage({
   }
 }
 
-List<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
+Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
   int startX = 0;
   int startY = 0;
   int stopX = 0;

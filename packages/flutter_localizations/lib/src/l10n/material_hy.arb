@@ -30,6 +30,7 @@
   "continueButtonLabel": "Շարունակել",
   "copyButtonLabel": "Պատճենել",
   "cutButtonLabel": "Կտրել",
+  "scanTextButtonLabel": "Սկանավորեք տեքստը",
   "okButtonLabel": "Եղավ",
   "pasteButtonLabel": "Տեղադրել",
   "selectAllButtonLabel": "Նշել բոլորը",
@@ -139,5 +140,11 @@
   "scrimLabel": "Դիմակ",
   "bottomSheetLabel": "Ներքևի էկրան",
   "scrimOnTapHint": "Փակել՝ $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

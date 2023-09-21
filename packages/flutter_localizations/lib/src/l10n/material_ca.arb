@@ -25,6 +25,7 @@
   "continueButtonLabel": "Continua",
   "copyButtonLabel": "Copia",
   "cutButtonLabel": "Retalla",
+  "scanTextButtonLabel": "Escaneja el text",
   "okButtonLabel": "D'ACORD",
   "pasteButtonLabel": "Enganxa",
   "selectAllButtonLabel": "Selecciona-ho tot",
@@ -134,5 +135,11 @@
   "scrimLabel": "Fons atenuat",
   "bottomSheetLabel": "Full inferior",
   "scrimOnTapHint": "Tanca $modalRouteContentName",
-  "keyboardKeyShift": "Maj"
+  "keyboardKeyShift": "Maj",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

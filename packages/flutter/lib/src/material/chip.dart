@@ -14,6 +14,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -135,6 +136,13 @@ abstract interface class ChipAttributes {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   bool get autofocus;
+
+  /// The color that fills the chip, in all [MaterialState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.disabled].
+  MaterialStateProperty<Color?>? get color;
 
   /// Color to be used for the unselected, enabled chip's background.
   ///
@@ -274,6 +282,8 @@ abstract interface class DeletableChipAttributes {
 ///  * [InputChip], a chip that represents a complex piece of information, such
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
+///  * [ChoiceChip], allows a single selection from a set of options. Choice
+///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * <https://material.io/design/components/chips.html>
 abstract interface class CheckmarkableChipAttributes {
@@ -558,6 +568,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -591,6 +602,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final FocusNode? focusNode;
   @override
   final bool autofocus;
+  @override
+  final MaterialStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -641,6 +654,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
+      color: color,
       backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
@@ -726,6 +740,7 @@ class RawChip extends StatefulWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.color,
     this.backgroundColor,
     this.materialTapTargetSize,
     this.elevation,
@@ -794,6 +809,8 @@ class RawChip extends StatefulWidget
   final FocusNode? focusNode;
   @override
   final bool autofocus;
+  @override
+  final MaterialStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -872,7 +889,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     setMaterialState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
-      value: widget.selected == true ? 1.0 : 0.0,
+      value: widget.selected ? 1.0 : 0.0,
       vsync: this,
     );
     selectionFade = CurvedAnimation(
@@ -881,7 +898,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     );
     avatarDrawerController = AnimationController(
       duration: _kDrawerDuration,
-      value: hasAvatar || widget.selected == true ? 1.0 : 0.0,
+      value: hasAvatar || widget.selected ? 1.0 : 0.0,
       vsync: this,
     );
     deleteDrawerController = AnimationController(
@@ -984,23 +1001,47 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     return resolvedShape.copyWith(side: resolvedSide);
   }
 
+  Color? resolveColor({
+    MaterialStateProperty<Color?>? color,
+    Color? selectedColor,
+    Color? backgroundColor,
+    Color? disabledColor,
+    MaterialStateProperty<Color?>? defaultColor,
+  }) {
+    return _IndividualOverrides(
+      color: color,
+      selectedColor: selectedColor,
+      backgroundColor: backgroundColor,
+      disabledColor: disabledColor,
+    ).resolve(materialStates) ?? defaultColor?.resolve(materialStates);
+  }
+
   /// Picks between three different colors, depending upon the state of two
   /// different animations.
   Color? _getBackgroundColor(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
     if (theme.useMaterial3) {
+      final Color? disabledColor = resolveColor(
+        color: widget.color ?? chipTheme.color,
+        disabledColor: widget.disabledColor ?? chipTheme.disabledColor,
+        defaultColor: chipDefaults.color,
+      );
+      final Color? backgroundColor = resolveColor(
+        color: widget.color ?? chipTheme.color,
+        backgroundColor: widget.backgroundColor ?? chipTheme.backgroundColor,
+        defaultColor: chipDefaults.color,
+      );
+      final Color? selectedColor = resolveColor(
+        color: widget.color ?? chipTheme.color,
+        selectedColor: widget.selectedColor ?? chipTheme.selectedColor,
+        defaultColor: chipDefaults.color,
+      );
       final ColorTween backgroundTween = ColorTween(
-        begin: widget.disabledColor
-          ?? chipTheme.disabledColor
-          ?? chipDefaults.disabledColor,
-        end: widget.backgroundColor
-          ?? chipTheme.backgroundColor
-          ?? chipDefaults.backgroundColor,
+        begin: disabledColor,
+        end: backgroundColor,
       );
       final ColorTween selectTween = ColorTween(
         begin: backgroundTween.evaluate(enableController),
-        end: widget.selectedColor
-          ?? chipTheme.selectedColor
-          ?? chipDefaults.selectedColor,
+        end: selectedColor,
       );
       return selectTween.evaluate(selectionFade);
     } else {
@@ -1039,7 +1080,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     }
     if (oldWidget.avatar != widget.avatar || oldWidget.selected != widget.selected) {
       setState(() {
-        if (hasAvatar || widget.selected == true) {
+        if (hasAvatar || widget.selected) {
           avatarDrawerController.forward();
         } else {
           avatarDrawerController.reverse();
@@ -1049,7 +1090,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     if (oldWidget.selected != widget.selected) {
       setState(() {
         setMaterialState(MaterialState.selected, widget.selected);
-        if (widget.selected == true) {
+        if (widget.selected) {
           selectController.forward();
         } else {
           selectController.reverse();
@@ -1210,7 +1251,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget? child) {
-            return Container(
+            return Ink(
               decoration: ShapeDecoration(
                 shape: resolvedShape,
                 color: _getBackgroundColor(theme, chipTheme, chipDefaults),
@@ -1292,6 +1333,37 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 }
 
+class _IndividualOverrides extends MaterialStateProperty<Color?> {
+  _IndividualOverrides({
+    this.color,
+    this.backgroundColor,
+    this.selectedColor,
+    this.disabledColor,
+  });
+
+  final MaterialStateProperty<Color?>? color;
+  final Color? backgroundColor;
+  final Color? selectedColor;
+  final Color? disabledColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (color != null) {
+      return color!.resolve(states);
+    }
+    if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+      return selectedColor;
+    }
+    if (states.contains(MaterialState.disabled)) {
+      return disabledColor;
+    }
+    if (states.contains(MaterialState.selected)) {
+      return selectedColor;
+    }
+    return backgroundColor;
+  }
+}
+
 /// Redirects the [buttonRect.dy] passed to [RenderBox.hitTest] to the vertical
 /// center of the widget.
 ///
@@ -1339,7 +1411,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   }
 }
 
-class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ChipSlot> {
+class _ChipRenderWidget extends SlottedMultiChildRenderObjectWidget<_ChipSlot, RenderBox> {
   const _ChipRenderWidget({
     required this.theme,
     this.value,
@@ -1390,7 +1462,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
   }
 
   @override
-  SlottedContainerRenderObjectMixin<_ChipSlot> createRenderObject(BuildContext context) {
+  SlottedContainerRenderObjectMixin<_ChipSlot, RenderBox> createRenderObject(BuildContext context) {
     return _RenderChip(
       theme: theme,
       textDirection: Directionality.of(context),
@@ -1475,7 +1547,7 @@ class _ChipRenderTheme {
   );
 }
 
-class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot> {
+class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot, RenderBox> {
   _RenderChip({
     required _ChipRenderTheme theme,
     required TextDirection textDirection,
@@ -1976,7 +2048,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       _paintSelectionOverlay(context, offset);
     }
 
-    if (theme.showAvatar == false && avatarDrawerAnimation.isDismissed) {
+    if (!theme.showAvatar && avatarDrawerAnimation.isDismissed) {
       return;
     }
     final Color disabledColor = _disabledColor;
@@ -2156,8 +2228,6 @@ bool _hitIsOnDeleteIcon({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _ChipDefaultsM3 extends ChipThemeData {
   _ChipDefaultsM3(this.context, this.isEnabled)
     : super(
@@ -2175,7 +2245,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
-  Color? get backgroundColor => null;
+  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
 
   @override
   Color? get shadowColor => Colors.transparent;
@@ -2184,13 +2254,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get selectedColor => null;
-
-  @override
   Color? get checkmarkColor => null;
-
-  @override
-  Color? get disabledColor => null;
 
   @override
   Color? get deleteIconColor => null;
@@ -2212,7 +2276,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
   /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+  /// gets closer to 2, the label padding is linearly interpolated from 8px to 4px.
   /// Once the widget has a text scaling of 2 or higher than the label padding
   /// remains 4px.
   @override

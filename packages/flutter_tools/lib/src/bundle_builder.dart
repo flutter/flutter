@@ -21,7 +21,6 @@ import 'devfs.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
-
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
   /// Builds the bundle for the given target platform.
@@ -90,11 +89,7 @@ class BundleBuilder {
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
-    final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
-    depfileService.writeToFile(depfile, outputDepfile);
+    environment.depFileService.writeToFile(depfile, outputDepfile);
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {

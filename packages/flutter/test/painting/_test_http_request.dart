@@ -2,19 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/services/dom.dart';
-import 'package:js/js.dart';
-import 'package:js/js_util.dart' as js_util;
+import 'dart:js_interop';
 
-void createGetter<T>(Object mock, String key, T Function() get) {
+import 'package:flutter/src/services/dom.dart';
+
+/// Defines a new property on an Object.
+@JS('Object.defineProperty')
+external JSVoid objectDefineProperty(JSAny o, JSString symbol, JSAny desc);
+
+void createGetter(JSAny mock, String key, JSAny? Function() get) {
   objectDefineProperty(
-      mock,
-      key,
-      js_util.jsify(
-          <dynamic, dynamic>{
-            'get': allowInterop(() => get())
-          }
-      ));
+    mock,
+    key.toJS,
+    <String, JSFunction>{
+      'get': (() => get()).toJS,
+    }.jsify()!,
+  );
 }
 
 @JS()
@@ -22,46 +25,52 @@ void createGetter<T>(Object mock, String key, T Function() get) {
 @anonymous
 class DomXMLHttpRequestMock {
   external factory DomXMLHttpRequestMock({
-    void Function(String method, String url, bool async)? open,
-    String responseType = 'invalid',
-    int timeout = 10,
-    bool withCredentials = false,
-    void Function()? send,
-    void Function(String name, String value)? setRequestHeader,
-    void Function(String type, DomEventListener listener) addEventListener,
+    JSFunction? open,
+    JSString responseType,
+    JSNumber timeout,
+    JSBoolean withCredentials,
+    JSFunction? send,
+    JSFunction? setRequestHeader,
+    JSFunction addEventListener,
   });
 }
 
 class TestHttpRequest {
   TestHttpRequest() {
     _mock = DomXMLHttpRequestMock(
-        open: allowInterop(open),
-        send: allowInterop(send),
-        setRequestHeader: allowInterop(setRequestHeader),
-        addEventListener: allowInterop(addEventListener),
+        open: open.toJS,
+        send: send.toJS,
+        setRequestHeader: setRequestHeader.toJS,
+        addEventListener: addEventListener.toJS,
     );
-    createGetter(_mock, 'headers', () => headers);
-    createGetter(_mock, 'responseHeaders', () => responseHeaders);
-    createGetter(_mock, 'status', () => status);
-    createGetter(_mock, 'response', () => response);
+    // TODO(srujzs): This is needed for when we reify JS types. Right now, JSAny
+    // is a typedef for Object?, but when we reify, it'll be its own type.
+    final JSAny mock = _mock as JSAny;
+    createGetter(mock, 'headers', () => headers.jsify());
+    createGetter(mock,
+        'responseHeaders', () => responseHeaders.jsify());
+    createGetter(mock, 'status', () => status.toJS);
+    createGetter(mock, 'response', () => response.jsify());
   }
 
   late DomXMLHttpRequestMock _mock;
   MockEvent? mockEvent;
   Map<String, String> headers = <String, String>{};
   int status = -1;
-  dynamic response;
+  Object? response;
 
   Map<String, String> get responseHeaders => headers;
-  void open(String method, String url, bool async) {}
-  void send() {}
-  void setRequestHeader(String name, String value) {
-    headers[name] = value;
+  JSVoid open(JSString method, JSString url, JSBoolean async) {}
+  JSVoid send() {}
+  JSVoid setRequestHeader(JSString name, JSString value) {
+    headers[name.toDart] = value.toDart;
   }
 
-  void addEventListener(String type, DomEventListener listener) {
-    if (type == mockEvent?.type) {
-      listener(mockEvent!.event);
+  JSVoid addEventListener(JSString type, DomEventListener listener) {
+    if (type.toDart == mockEvent?.type) {
+      final DartDomEventListener dartListener =
+        (listener as JSExportedDartFunction).toDart as DartDomEventListener;
+      dartListener(mockEvent!.event);
     }
   }
 

@@ -108,8 +108,6 @@ void main() {
         'material_color_utilities',
         'url_launcher_android',
         'archive',
-        'path_provider_android',
-        'flutter_plugin_android_lifecycle',
       ]),
     );
   });

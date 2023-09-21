@@ -24,6 +24,7 @@ class PlistParser {
   final Logger _logger;
   final ProcessUtils _processUtils;
 
+  // info.pList keys
   static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
   static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
   static const String kCFBundleExecutableKey = 'CFBundleExecutable';
@@ -31,6 +32,9 @@ class PlistParser {
   static const String kCFBundleDisplayNameKey = 'CFBundleDisplayName';
   static const String kMinimumOSVersionKey = 'MinimumOSVersion';
   static const String kNSPrincipalClassKey = 'NSPrincipalClass';
+
+  // entitlement file keys
+  static const String kAssociatedDomainsKey = 'com.apple.developer.associated-domains';
 
   static const String _plutilExecutable = '/usr/bin/plutil';
 
@@ -126,7 +130,7 @@ class PlistParser {
     for (final XmlNode child in node.children) {
       if (child is XmlElement) {
         if (child.name.local == 'key') {
-          lastKey = child.text;
+          lastKey = child.innerText;
         } else {
           assert(lastKey != null);
           result[lastKey!] = _parseXmlNode(child)!;
@@ -143,19 +147,19 @@ class PlistParser {
   Object? _parseXmlNode(XmlElement node) {
     switch (node.name.local){
       case 'string':
-        return node.text;
+        return node.innerText;
       case 'real':
-        return double.parse(node.text);
+        return double.parse(node.innerText);
       case 'integer':
-        return int.parse(node.text);
+        return int.parse(node.innerText);
       case 'true':
         return true;
       case 'false':
         return false;
       case 'date':
-        return DateTime.parse(node.text);
+        return DateTime.parse(node.innerText);
       case 'data':
-        return base64.decode(node.text.replaceAll(_nonBase64Pattern, ''));
+        return base64.decode(node.innerText.replaceAll(_nonBase64Pattern, ''));
       case 'array':
         return node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList();
       case 'dict':
@@ -164,8 +168,8 @@ class PlistParser {
     return null;
   }
 
-  /// Parses the Plist file located at [plistFilePath] and returns the string
-  /// value that's associated with the specified [key] within the property list.
+  /// Parses the Plist file located at [plistFilePath] and returns the value
+  /// that's associated with the specified [key] within the property list.
   ///
   /// If [plistFilePath] points to a non-existent file or a file that's not a
   /// valid property list file, this will return null.
@@ -173,8 +177,8 @@ class PlistParser {
   /// If [key] is not found in the property list, this will return null.
   ///
   /// The [plistFilePath] and [key] arguments must not be null.
-  String? getStringValueFromFile(String plistFilePath, String key) {
+  T? getValueFromFile<T>(String plistFilePath, String key) {
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
-    return parsed[key] as String?;
+    return parsed[key] as T?;
   }
 }

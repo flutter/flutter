@@ -454,6 +454,7 @@ abstract class Route<T> {
   @protected
   void dispose() {
     _navigator = null;
+    _restorationScopeId.dispose();
   }
 
   /// Whether this route is the top-most route on the navigator.
@@ -463,10 +464,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    final _RouteEntry? currentRouteEntry = _navigator!._history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? currentRouteEntry = _navigator!._lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (currentRouteEntry == null) {
       return false;
     }
@@ -481,10 +479,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    final _RouteEntry? currentRouteEntry = _navigator!._history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? currentRouteEntry = _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (currentRouteEntry == null) {
       return false;
     }
@@ -521,10 +516,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    return _navigator!._history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isRoutePredicate(this)(e),
-      orElse: () => null,
-    )?.isPresent ?? false;
+    return _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ?? false;
   }
 }
 
@@ -2794,6 +2786,7 @@ class Navigator extends StatefulWidget {
 //                              \     |
 //                              dispose*
 //                                 |
+//                              disposing
 //                                 |
 //                              disposed
 //                                 |
@@ -2829,6 +2822,9 @@ enum _RouteLifecycle {
   removing, // we are waiting for subsequent routes to be done animating, then will switch to dispose
   // routes that are completely removed from the navigator and overlay.
   dispose, // we will dispose the route momentarily
+  disposing, // The entry is waiting for its widget subtree to be disposed
+             // first. It is stored in _entryWaitingForSubTreeDisposal while
+             // awaiting that.
   disposed, // we have disposed the route
 }
 
@@ -3055,9 +3051,26 @@ class _RouteEntry extends RouteTransitionRecord {
     currentState = _RouteLifecycle.dispose;
   }
 
-  void dispose() {
+  /// Disposes this route entry and its [route] immediately.
+  ///
+  /// This method does not wait for the widget subtree of the [route] to unmount
+  /// before disposing.
+  void forcedDispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
     currentState = _RouteLifecycle.disposed;
+    route.dispose();
+  }
+
+  /// Disposes this route entry and its [route].
+  ///
+  /// This method waits for the widget subtree of the [route] to unmount before
+  /// disposing. If subtree is already unmounted, this method calls
+  /// [forcedDispose] immediately.
+  ///
+  /// Use [forcedDispose] if the [route] need to be disposed immediately.
+  void dispose() {
+    assert(currentState.index < _RouteLifecycle.disposing.index);
+    currentState = _RouteLifecycle.disposing;
 
     // If the overlay entries are still mounted, widgets in the route's subtree
     // may still reference resources from the route and we delay disposal of
@@ -3068,24 +3081,43 @@ class _RouteEntry extends RouteTransitionRecord {
     final Iterable<OverlayEntry> mountedEntries = route.overlayEntries.where((OverlayEntry e) => e.mounted);
 
     if (mountedEntries.isEmpty) {
-      route.dispose();
-    } else {
-      int mounted = mountedEntries.length;
-      assert(mounted > 0);
-      for (final OverlayEntry entry in mountedEntries) {
-        late VoidCallback listener;
-        listener = () {
-          assert(mounted > 0);
-          assert(!entry.mounted);
-          mounted--;
-          entry.removeListener(listener);
-          if (mounted == 0) {
-            assert(route.overlayEntries.every((OverlayEntry e) => !e.mounted));
-            route.dispose();
-          }
-        };
-        entry.addListener(listener);
-      }
+      forcedDispose();
+      return;
+    }
+
+    int mounted = mountedEntries.length;
+    assert(mounted > 0);
+    final NavigatorState navigator = route._navigator!;
+    navigator._entryWaitingForSubTreeDisposal.add(this);
+    for (final OverlayEntry entry in mountedEntries) {
+      late VoidCallback listener;
+      listener = () {
+        assert(mounted > 0);
+        assert(!entry.mounted);
+        mounted--;
+        entry.removeListener(listener);
+        if (mounted == 0) {
+          assert(route.overlayEntries.every((OverlayEntry e) => !e.mounted));
+          // This is a listener callback of one of the overlayEntries in this
+          // route. Disposing the route also disposes its overlayEntries and
+          // violates the rule that a change notifier can't be disposed during
+          // its notifying callback.
+          //
+          // Use a microtask to ensure the overlayEntries have finished
+          // notifying their listeners before disposing.
+          return scheduleMicrotask(() {
+            if (!navigator._entryWaitingForSubTreeDisposal.remove(this)) {
+              // This route must have been destroyed as a result of navigator
+              // force dispose.
+              assert(route._navigator == null && !navigator.mounted);
+              return;
+            }
+            assert(currentState == _RouteLifecycle.disposing);
+            forcedDispose();
+          });
+        }
+      };
+      entry.addListener(listener);
     }
   }
 
@@ -3265,6 +3297,15 @@ class _NavigatorReplaceObservation extends _NavigatorObservation {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   List<_RouteEntry> _history = <_RouteEntry>[];
+  /// A set for entries that are waiting to dispose until their subtrees are
+  /// disposed.
+  ///
+  /// These entries are not considered to be in the _history and will usually
+  /// remove themselves from this set once they can dispose.
+  ///
+  /// The navigator keep track of these entries so that, in case the navigator
+  /// itself is disposed, it can dispose these entries immediately.
+  final Set<_RouteEntry> _entryWaitingForSubTreeDisposal = <_RouteEntry>{};
   final _HistoryProperty _serializableHistory = _HistoryProperty();
   final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
   final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
@@ -3346,9 +3387,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     registerForRestoration(_serializableHistory, 'history');
 
     // Delete everything in the old history and clear the overlay.
-    while (_history.isNotEmpty) {
-      _history.removeLast().dispose();
-    }
+    _forcedDisposeAllRouteEntries();
     assert(_history.isEmpty);
     _overlayKey = GlobalKey<OverlayState>();
 
@@ -3428,6 +3467,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       entry.route.changedExternalState();
+    }
+  }
+
+  /// Dispose all lingering router entries immediately.
+  void _forcedDisposeAllRouteEntries() {
+    _entryWaitingForSubTreeDisposal.removeWhere((_RouteEntry entry) {
+      entry.forcedDispose();
+      return true;
+    });
+    while (_history.isNotEmpty) {
+      _disposeRouteEntry(_history.removeLast(), graceful: false);
+    }
+  }
+
+  static void _disposeRouteEntry(_RouteEntry entry, {required bool graceful}) {
+    for (final OverlayEntry overlayEntry in entry.route.overlayEntries) {
+      overlayEntry.remove();
+    }
+    if (graceful) {
+      entry.dispose();
+    } else {
+      entry.forcedDispose();
     }
   }
 
@@ -3603,9 +3664,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     _updateHeroController(null);
     focusNode.dispose();
-    for (final _RouteEntry entry in _history) {
-      entry.dispose();
-    }
+    _forcedDisposeAllRouteEntries();
+    _rawNextPagelessRestorationScopeId.dispose();
+    _serializableHistory.dispose();
+    userGestureInProgressNotifier.dispose();
     super.dispose();
     // don't unlock, so that the object becomes unusable
     assert(_debugLocked);
@@ -3727,7 +3789,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
       // We found the page for all the consecutive pageless routes below. Attach these
       // pageless routes to the page.
-      if(unattachedPagelessRoutes.isNotEmpty) {
+      if (unattachedPagelessRoutes.isNotEmpty) {
          pageRouteToPagelessRoutes.putIfAbsent(
           oldEntry,
           () =>  List<_RouteEntry>.from(unattachedPagelessRoutes),
@@ -4027,6 +4089,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // Delay disposal until didChangeNext/didChangePrevious have been sent.
           toBeDisposed.add(_history.removeAt(index));
           entry = next;
+        case _RouteLifecycle.disposing:
         case _RouteLifecycle.disposed:
         case _RouteLifecycle.staging:
           assert(false);
@@ -4045,12 +4108,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
-      final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e), orElse: () => null,
-      );
+      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       final String? routeName = lastEntry?.route.settings.name;
       if (routeName != null && routeName != _lastAnnouncedRouteName) {
-        SystemNavigator.routeInformationUpdated(location: routeName);
+        SystemNavigator.routeInformationUpdated(uri: Uri.parse(routeName));
         _lastAnnouncedRouteName = routeName;
       }
     }
@@ -4058,10 +4119,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // Lastly, removes the overlay entries of all marked entries and disposes
     // them.
     for (final _RouteEntry entry in toBeDisposed) {
-      for (final OverlayEntry overlayEntry in entry.route.overlayEntries) {
-        overlayEntry.remove();
-      }
-      entry.dispose();
+      _disposeRouteEntry(entry, graceful: true);
     }
     if (rearrangeOverlay) {
       overlay?.rearrange(_allRouteOverlayEntries);
@@ -4120,7 +4178,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   int _getIndexBefore(int index, _RouteEntryPredicate predicate) {
-    while(index >= 0 && !predicate(_history[index])) {
+    while (index >= 0 && !predicate(_history[index])) {
       index -= 1;
     }
     return index;
@@ -4925,10 +4983,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object?>([ T? result ]) async {
-    final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry == null) {
       return false;
     }
@@ -4938,10 +4993,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       // Forget about this pop, we were disposed in the meantime.
       return true;
     }
-    final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? newLastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry != newLastEntry) {
       // Forget about this pop, something happened to our history in the meantime.
       return true;
@@ -5025,19 +5077,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    _RouteEntry? candidate = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
-    while(candidate != null) {
+    _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    while (candidate != null) {
       if (predicate(candidate.route)) {
         return;
       }
       pop();
-      candidate = _history.cast<_RouteEntry?>().lastWhere(
-        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-        orElse: () => null,
-      );
+      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }
 
@@ -5061,10 +5107,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     if (wasCurrent) {
       _afterNavigation(
-        _history.cast<_RouteEntry?>().lastWhere(
-          (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-          orElse: () => null,
-        )?.route,
+        _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate)?.route,
       );
     }
   }
@@ -5138,10 +5181,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   @optionalTypeArgs
   Route<T>? _getRouteById<T>(String id) {
-    return _history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? entry) => entry!.restorationId == id,
-      orElse: () => null,
-    )?.route as Route<T>?;
+    return _firstRouteEntryWhereOrNull((_RouteEntry entry) => entry.restorationId == id)?.route as Route<T>?;
   }
 
   int get _userGesturesInProgress => _userGesturesInProgressCount;
@@ -5227,6 +5267,27 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       });
     }
     _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
+  }
+
+  /// Gets first route entry satisfying the predicate, or null if not found.
+  _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+    for (final _RouteEntry element in _history) {
+      if (test(element)) {
+        return element;
+      }
+    }
+    return null;
+  }
+
+  /// Gets last route entry satisfying the predicate, or null if not found.
+  _RouteEntry? _lastRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+    _RouteEntry? result;
+    for (final _RouteEntry element in _history) {
+      if (test(element)) {
+        result = element;
+      }
+    }
+    return result;
   }
 
   @override

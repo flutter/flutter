@@ -42,11 +42,13 @@ class IconTreeShaker {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    required TargetPlatform targetPlatform,
   }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts,
-       _fontManifest = fontManifest?.string {
+       _fontManifest = fontManifest?.string,
+       _targetPlatform = targetPlatform {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError('Font subsetting is not supported in debug mode. The '
@@ -82,6 +84,7 @@ class IconTreeShaker {
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  final TargetPlatform _targetPlatform;
 
   /// Whether font subsetting should be used for this [Environment].
   bool get enabled => _fontManifest != null
@@ -129,15 +132,21 @@ class IconTreeShaker {
     }
 
     final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
+    const int kSpacePoint = 32;
     for (final MapEntry<String, String> entry in fonts.entries) {
       final List<int>? codePoints = iconData[entry.key];
       if (codePoints == null) {
         throw IconTreeShakerException._('Expected to font code points for ${entry.key}, but none were found.');
       }
+
+      // Add space as an optional code point, as web uses it to measure the font height.
+      final List<int> optionalCodePoints = _targetPlatform == TargetPlatform.web_javascript
+        ? <int>[kSpacePoint] : <int>[];
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
         relativePath: entry.value,
         codePoints: codePoints,
+        optionalCodePoints: optionalCodePoints,
       );
     }
     _iconData = result;
@@ -155,7 +164,6 @@ class IconTreeShaker {
     required String outputPath,
     required String relativePath,
   }) async {
-
     if (!enabled) {
       return false;
     }
@@ -189,12 +197,17 @@ class IconTreeShaker {
       outputPath,
       input.path,
     ];
-    final String codePoints = iconTreeShakerData.codePoints.join(' ');
+    final Iterable<String> requiredCodePointStrings = iconTreeShakerData.codePoints
+      .map((int codePoint) => codePoint.toString());
+    final Iterable<String> optionalCodePointStrings = iconTreeShakerData.optionalCodePoints
+      .map((int codePoint) => 'optional:$codePoint');
+    final String codePointsString = requiredCodePointStrings
+      .followedBy(optionalCodePointStrings).join(' ');
     _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
-                       'using codepoints $codePoints');
+                       'using codepoints $codePointsString');
     final Process fontSubsetProcess = await _processManager.start(cmd);
     try {
-      fontSubsetProcess.stdin.writeln(codePoints);
+      fontSubsetProcess.stdin.writeln(codePointsString);
       await fontSubsetProcess.stdin.flush();
       await fontSubsetProcess.stdin.close();
     } on Exception {
@@ -361,6 +374,7 @@ class _IconTreeShakerData {
     required this.family,
     required this.relativePath,
     required this.codePoints,
+    required this.optionalCodePoints,
   });
 
   /// The font family name, e.g. "MaterialIcons".
@@ -371,6 +385,10 @@ class _IconTreeShakerData {
 
   /// The list of code points for the font.
   final List<int> codePoints;
+
+  /// The list of code points to be optionally added, if they exist in the
+  /// input font. Otherwise, the tool will silently omit them.
+  final List<int> optionalCodePoints;
 
   @override
   String toString() => 'FontSubsetData($family, $relativePath, $codePoints)';

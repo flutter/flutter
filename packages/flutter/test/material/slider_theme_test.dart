@@ -63,6 +63,7 @@ void main() {
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
       mouseCursor: MaterialStateMouseCursor.clickable,
+      allowedInteraction: SliderInteraction.tapOnly,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -99,6 +100,7 @@ void main() {
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
       'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'allowedInteraction: tapOnly'
     ]);
   });
 
@@ -240,6 +242,7 @@ void main() {
       const Color customColor2 = Color(0xdeadbeef);
       const Color customColor3 = Color(0xdecaface);
       final ThemeData theme = ThemeData(
+        useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
         sliderTheme: const SliderThemeData(
@@ -274,6 +277,7 @@ void main() {
               value = d;
             };
         return MaterialApp(
+          theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -892,6 +896,7 @@ void main() {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
+        useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
       );
@@ -902,6 +907,7 @@ void main() {
       );
       Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
         return MaterialApp(
+          theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
@@ -1074,6 +1080,7 @@ void main() {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
+        useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
       );
@@ -1084,6 +1091,7 @@ void main() {
       );
       Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
         return MaterialApp(
+          theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
@@ -1427,6 +1435,51 @@ void main() {
         ))
         // The thumb.
         ..circle(x: 400.0, y: 300.0, radius: 10.0),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/125467
+  testWidgets('The RangeSlider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      overlayShape: SliderComponentShape.noOverlay,
+    );
+
+    await tester.pumpWidget(_buildRangeApp(sliderTheme, values: const RangeValues(0.0, 1.0)));
+
+    final MaterialInkController material = Material.of(
+      tester.element(find.byType(RangeSlider)),
+    );
+
+    // The track rectangle begins at 10 pixels from the left of the screen and ends 10 pixels from the right
+    // (790 pixels from the left). The main check here it that the track itself should be centered on
+    // the 800 pixel-wide screen.
+    expect(
+      material,
+      paints
+        // active track RRect. Starts 10 pixels from left of screen.
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          10.0,
+          298.0,
+          10.0,
+          302.0,
+          topLeft: const Radius.circular(2.0),
+          bottomLeft: const Radius.circular(2.0),
+        ))
+      // active track RRect Start 10 pixels from left screen.
+        ..rect(rect:const Rect.fromLTRB(10.0, 297.0, 790.0, 303.0),)
+        // inactive track RRect. Ends 10 pixels from right of screen.
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          790.0,
+          298.0,
+          790.0,
+          302.0,
+          topRight: const Radius.circular(2.0),
+          bottomRight: const Radius.circular(2.0),
+        ))
+        // The thumb Left.
+        ..circle(x: 10.0, y: 300.0, radius: 10.0)
+        // The thumb Right.
+        ..circle(x: 790.0, y: 300.0, radius: 10.0),
     );
   });
 
@@ -1862,6 +1915,113 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
+  testWidgets('SliderTheme.allowedInteraction is themeable', (WidgetTester tester) async {
+    double value = 0.0;
+
+    Widget buildApp({
+      bool isAllowedInteractionInThemeNull = false,
+      bool isAllowedInteractionInSliderNull = false,
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SliderTheme(
+              data: ThemeData().sliderTheme.copyWith(
+                  allowedInteraction: isAllowedInteractionInThemeNull
+                      ? null
+                      : SliderInteraction.slideOnly,
+              ),
+              child: StatefulBuilder(
+                  builder: (_, void Function(void Function()) setState) {
+                    return Slider(
+                      value: value,
+                      allowedInteraction: isAllowedInteractionInSliderNull
+                          ? null
+                          : SliderInteraction.tapOnly,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    );
+                  }
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final TestGesture gesture = await tester.createGesture();
+
+    // when theme and parameter are specified, parameter is used [tapOnly].
+    await tester.pumpWidget(buildApp());
+    // tap is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.5)); // changes
+    await gesture.up();
+    // slide isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, equals(0.0)); // no change
+    await gesture.up();
+
+    // when only parameter is specified, parameter is used [tapOnly].
+    await tester.pumpWidget(buildApp(isAllowedInteractionInThemeNull: true));
+    // tap is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.5)); // changes
+    await gesture.up();
+    // slide isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, equals(0.0)); // no change
+    await gesture.up();
+
+    // when theme is specified but parameter is null, theme is used [slideOnly].
+    await tester.pumpWidget(buildApp(isAllowedInteractionInSliderNull: true));
+    // tap isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.0)); // no change
+    await gesture.up();
+    // slide isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, greaterThan(0.0)); // changes
+    await gesture.up();
+
+    // when both theme and parameter are null, default is used [tapAndSlide].
+    await tester.pumpWidget(buildApp(
+      isAllowedInteractionInSliderNull: true,
+      isAllowedInteractionInThemeNull: true,
+    ));
+    // tap is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.5));
+    await gesture.up();
+    // slide is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, greaterThan(0.0)); // changes
+    await gesture.up();
+  });
+
   testWidgets('Default value indicator color', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
@@ -1921,12 +2081,13 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Slider defaults', (WidgetTester tester) async {
       debugDisableShadows = false;
-      final ThemeData theme  = ThemeData();
+      final ThemeData theme  = ThemeData(useMaterial3: false);
       const double trackHeight = 4.0;
       final ColorScheme colorScheme = theme.colorScheme;
       final Color activeTrackColor = Color(colorScheme.primary.value);
@@ -1956,6 +2117,7 @@ void main() {
                 value = d;
               };
           return MaterialApp(
+            theme: theme,
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: Material(
@@ -2077,6 +2239,7 @@ void main() {
       debugDisableShadows = false;
       try {
         final ThemeData theme = ThemeData(
+          useMaterial3: false,
           platform: TargetPlatform.android,
         );
         Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {

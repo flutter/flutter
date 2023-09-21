@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController;
+import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
@@ -40,7 +41,7 @@ class MockTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     throw UnimplementedError();
@@ -80,7 +81,7 @@ class PathBoundsMatcher extends Matcher {
     final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
     final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
 
-    for(int idx = 0; idx < matchers.length; idx++) {
+    for (int idx = 0; idx < matchers.length; idx++) {
       if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
         failedMatcher[matchers[idx]!] = values[idx];
       }
@@ -199,11 +200,55 @@ void main() {
   Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
+
+
+  testWidgets(
+    'Live Text button shows and hides correctly when LiveTextStatus changes',
+    (WidgetTester tester) async {
+      final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
+
+      final TextEditingController controller = TextEditingController(text: '');
+      const Key key = ValueKey<String>('TextField');
+      final FocusNode focusNode = FocusNode();
+      final Widget app = MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: Center(
+            child: CupertinoTextField(
+              key: key,
+              controller: controller,
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+      await tester.pumpWidget(app);
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(
+        findLiveTextButton(),
+        kIsWeb ? findsNothing : findsOneWidget,
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = false;
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(findLiveTextButton(), findsNothing);
+    },
+  );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -1545,7 +1590,7 @@ void main() {
 
     Text text = tester.widget<Text>(find.text('Paste'));
     expect(text.style!.color!.value, CupertinoColors.black.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
 
@@ -1577,7 +1622,7 @@ void main() {
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
     expect(text.style!.color!.value, CupertinoColors.white.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
@@ -2245,8 +2290,15 @@ void main() {
       await gesture.moveTo(hPos);
       await tester.pumpAndSettle();
 
+      // Toolbar should be hidden during a drag.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.baseOffset, testValue.indexOf('d'));
       expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
+
+      // Toolbar should re-appear after a drag.
+      await gesture.up();
+      await tester.pump();
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
   );
 
@@ -5365,6 +5417,51 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
+  testWidgets('Cursor should not move on a quick touch drag when touch does not begin on previous selection (iOS)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for [kDoubleTapTimeout] after the up event, so our next down
+    // event does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // The position we tap during a drag start is not on the collapsed selection,
+    // so the cursor should not move.
+    await gesture.down(textOffsetToPosition(tester, 7));
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -6485,7 +6582,7 @@ void main() {
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             leftMatcher: moreOrLessEquals(8),
             rightMatcher: lessThanOrEqualTo(400 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
           ),
         ),
       );
@@ -6545,7 +6642,7 @@ void main() {
           pathMatcher: PathBoundsMatcher(
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             rightMatcher: moreOrLessEquals(400.0 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
         ),
@@ -6598,7 +6695,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6667,7 +6764,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6740,7 +6837,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -7444,6 +7541,8 @@ void main() {
       ),
       matchesSemantics(
         hasEnabledState: true,
+        isTextField: true,
+        isReadOnly: true,
       ),
     );
   });
@@ -8905,6 +9004,105 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
+    testWidgets('Can drag to show, unshow, and update magnifier', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              magnifierConfiguration: TextMagnifierConfiguration(
+                magnifierBuilder: (
+                    _,
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierInfo> localMagnifierInfo
+                  ) {
+                    magnifierInfo = localMagnifierInfo;
+                    return fakeMagnifier;
+                  },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      await tester.pumpAndSettle();
+
+      // Tap at '|a' to move the selection to position 0.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 0);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a drag gesture to move the selection to the dragged position, showing
+      // the magnifier.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 0));
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 5);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      Offset firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a double-tap select the word at the tapped position.
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 3);
+
+      // Start a drag gesture to extend the selection word-by-word, showing the
+      // magnifier.
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 7);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
     testWidgets('Can long press to show, unshow, and update magnifier on non-Apple platforms', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
@@ -9359,5 +9557,50 @@ void main() {
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 8),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // After the gesture is down but not up, the toolbar is already gone.
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+  },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
 }

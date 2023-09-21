@@ -75,7 +75,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int vmServicePort = await getFreePort();
     int ddsPort = await getFreePort();
-    while(ddsPort == vmServicePort) {
+    while (ddsPort == vmServicePort) {
       ddsPort = await getFreePort();
     }
     // If both --dds-port and --vm-service-port are provided, --dds-port will be used by

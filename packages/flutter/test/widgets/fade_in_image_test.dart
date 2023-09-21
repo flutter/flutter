@@ -30,16 +30,6 @@ class FadeInImageParts {
     expect(animatedFadeOutFadeInElement, isNotNull);
     return animatedFadeOutFadeInElement!.state;
   }
-
-  Element? get semanticsElement {
-    Element? result;
-    fadeInImageElement.visitChildren((Element child) {
-      if (child.widget is Semantics) {
-        result = child;
-      }
-    });
-    return result;
-  }
 }
 
 class FadeInImageElements {

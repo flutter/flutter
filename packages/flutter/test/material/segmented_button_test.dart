@@ -4,10 +4,13 @@
 
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({required Widget child}) {
@@ -481,5 +484,108 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+              ],
+              selected: const <int>{1},
+              onSelectionChanged: (Set<int> selected) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    ));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.text('2'));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(material.textStyle?.color, theme.colorScheme.onSurface);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(material.textStyle?.color, theme.colorScheme.onSurface);
+  });
+
+  testWidgets('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+                ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNothing);
+  });
+
+  testWidgets('SegmentedButton has correct tooltips', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2'), tooltip: 't2'),
+                ButtonSegment<int>(
+                    value: 3,
+                    label: Text('3'),
+                    tooltip: 't3',
+                    enabled: false,
+                ),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNWidgets(2));
+    expect(find.byTooltip('t2'), findsOneWidget);
+    expect(find.byTooltip('t3'), findsOneWidget);
   });
 }

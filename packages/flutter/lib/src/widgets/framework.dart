@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1760,7 +1759,7 @@ abstract class InheritedWidget extends ProxyWidget {
 ///
 ///  * [MultiChildRenderObjectWidget], which configures a [RenderObject] with
 ///    a single list of children.
-///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
+///  * [SlottedMultiChildRenderObjectWidget], which configures a
 ///    [RenderObject] that organizes its children in different named slots.
 abstract class RenderObjectWidget extends Widget {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -1854,7 +1853,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 ///  * [Stack], which uses [MultiChildRenderObjectWidget].
 ///  * [RenderStack], for an example implementation of the associated render
 ///    object.
-///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
+///  * [SlottedMultiChildRenderObjectWidget], which configures a
 ///    [RenderObject] that instead of having a single list of children organizes
 ///    its children in named slots.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
@@ -2576,7 +2575,7 @@ class BuildOwner {
           ErrorHint(
             'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
             'indicates a bug in the widgets framework. Please report it:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
           ),
         ]);
       }
@@ -2700,7 +2699,7 @@ class BuildOwner {
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         'BUILD',
         arguments: debugTimelineArguments
       );
@@ -2771,7 +2770,7 @@ class BuildOwner {
             }
             return true;
           }());
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '${element.widget.runtimeType}',
             arguments: debugTimelineArguments,
           );
@@ -2794,7 +2793,7 @@ class BuildOwner {
           );
         }
         if (isTimelineTracked) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
         index += 1;
         if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting!) {
@@ -2832,7 +2831,7 @@ class BuildOwner {
       _scheduledFlushDirtyElements = false;
       _dirtyElementsNeedsResorting = null;
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
       assert(_debugBuilding);
       assert(() {
@@ -3044,7 +3043,7 @@ class BuildOwner {
   @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     if (!kReleaseMode) {
-      Timeline.startSync('FINALIZE TREE');
+      FlutterTimeline.startSync('FINALIZE TREE');
     }
     try {
       lockState(_inactiveElements._unmountAll); // this unregisters the GlobalKeys
@@ -3140,7 +3139,7 @@ class BuildOwner {
       _reportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -3153,7 +3152,7 @@ class BuildOwner {
   /// This is expensive and should not be called except during development.
   void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
     if (!kReleaseMode) {
-      Timeline.startSync('Preparing Hot Reload (widgets)');
+      FlutterTimeline.startSync('Preparing Hot Reload (widgets)');
     }
     try {
       assert(root._parent == null);
@@ -3162,7 +3161,7 @@ class BuildOwner {
       root.reassemble();
     } finally {
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -3678,14 +3677,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             }
             return true;
           }());
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '${newWidget.runtimeType}',
             arguments: debugTimelineArguments,
           );
         }
         child.update(newWidget);
         if (isTimelineTracked) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
         assert(child.widget == newWidget);
         assert(() {
@@ -3721,6 +3720,218 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }());
 
     return newChild;
+  }
+
+  /// Updates the children of this element to use new widgets.
+  ///
+  /// Attempts to update the given old children list using the given new
+  /// widgets, removing obsolete elements and introducing new ones as necessary,
+  /// and then returns the new child list.
+  ///
+  /// During this function the `oldChildren` list must not be modified. If the
+  /// caller wishes to remove elements from `oldChildren` reentrantly while
+  /// this function is on the stack, the caller can supply a `forgottenChildren`
+  /// argument, which can be modified while this function is on the stack.
+  /// Whenever this function reads from `oldChildren`, this function first
+  /// checks whether the child is in `forgottenChildren`. If it is, the function
+  /// acts as if the child was not in `oldChildren`.
+  ///
+  /// This function is a convenience wrapper around [updateChild], which updates
+  /// each individual child. If `slots` is non-null, the value for the `newSlot`
+  /// argument of [updateChild] is retrieved from that list using the index that
+  /// the currently processed `child` corresponds to in the `newWidgets` list
+  /// (`newWidgets` and `slots` must have the same length). If `slots` is null,
+  /// an [IndexedSlot<Element>] is used as the value for the `newSlot` argument.
+  /// In that case, [IndexedSlot.index] is set to the index that the currently
+  /// processed `child` corresponds to in the `newWidgets` list and
+  /// [IndexedSlot.value] is set to the [Element] of the previous widget in that
+  /// list (or null if it is the first child).
+  ///
+  /// When the [slot] value of an [Element] changes, its
+  /// associated [renderObject] needs to move to a new position in the child
+  /// list of its parents. If that [RenderObject] organizes its children in a
+  /// linked list (as is done by the [ContainerRenderObjectMixin]) this can
+  /// be implemented by re-inserting the child [RenderObject] into the
+  /// list after the [RenderObject] associated with the [Element] provided as
+  /// [IndexedSlot.value] in the [slot] object.
+  ///
+  /// Using the previous sibling as a [slot] is not enough, though, because
+  /// child [RenderObject]s are only moved around when the [slot] of their
+  /// associated [RenderObjectElement]s is updated. When the order of child
+  /// [Element]s is changed, some elements in the list may move to a new index
+  /// but still have the same previous sibling. For example, when
+  /// `[e1, e2, e3, e4]` is changed to `[e1, e3, e4, e2]` the element e4
+  /// continues to have e3 as a previous sibling even though its index in the list
+  /// has changed and its [RenderObject] needs to move to come before e2's
+  /// [RenderObject]. In order to trigger this move, a new [slot] value needs to
+  /// be assigned to its [Element] whenever its index in its
+  /// parent's child list changes. Using an [IndexedSlot<Element>] achieves
+  /// exactly that and also ensures that the underlying parent [RenderObject]
+  /// knows where a child needs to move to in a linked list by providing its new
+  /// previous sibling.
+  @protected
+  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element>? forgottenChildren, List<Object?>? slots }) {
+    assert(slots == null || newWidgets.length == slots.length);
+
+    Element? replaceWithNullIfForgotten(Element child) {
+      return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
+    }
+
+    Object? slotFor(int newChildIndex, Element? previousChild) {
+      return slots != null
+          ? slots[newChildIndex]
+          : IndexedSlot<Element?>(newChildIndex, previousChild);
+    }
+
+    // This attempts to diff the new child list (newWidgets) with
+    // the old child list (oldChildren), and produce a new list of elements to
+    // be the new list of child elements of this element. The called of this
+    // method is expected to update this render object accordingly.
+
+    // The cases it tries to optimize for are:
+    //  - the old list is empty
+    //  - the lists are identical
+    //  - there is an insertion or removal of one or more widgets in
+    //    only one place in the list
+    // If a widget with a key is in both lists, it will be synced.
+    // Widgets without keys might be synced but there is no guarantee.
+
+    // The general approach is to sync the entire new list backwards, as follows:
+    // 1. Walk the lists from the top, syncing nodes, until you no longer have
+    //    matching nodes.
+    // 2. Walk the lists from the bottom, without syncing nodes, until you no
+    //    longer have matching nodes. We'll sync these nodes at the end. We
+    //    don't sync them now because we want to sync all the nodes in order
+    //    from beginning to end.
+    // At this point we narrowed the old and new lists to the point
+    // where the nodes no longer match.
+    // 3. Walk the narrowed part of the old list to get the list of
+    //    keys and sync null with non-keyed items.
+    // 4. Walk the narrowed part of the new list forwards:
+    //     * Sync non-keyed items with null
+    //     * Sync keyed items with the source if it exists, else with null.
+    // 5. Walk the bottom of the list again, syncing the nodes.
+    // 6. Sync null with any items in the list of keys that are still
+    //    mounted.
+
+    int newChildrenTop = 0;
+    int oldChildrenTop = 0;
+    int newChildrenBottom = newWidgets.length - 1;
+    int oldChildrenBottom = oldChildren.length - 1;
+
+    final List<Element> newChildren = List<Element>.filled(newWidgets.length, _NullElement.instance);
+
+    Element? previousChild;
+
+    // Update the top of the list.
+    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
+      final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
+      final Widget newWidget = newWidgets[newChildrenTop];
+      assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
+      if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
+        break;
+      }
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
+      newChildren[newChildrenTop] = newChild;
+      previousChild = newChild;
+      newChildrenTop += 1;
+      oldChildrenTop += 1;
+    }
+
+    // Scan the bottom of the list.
+    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
+      final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenBottom]);
+      final Widget newWidget = newWidgets[newChildrenBottom];
+      assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
+      if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
+        break;
+      }
+      oldChildrenBottom -= 1;
+      newChildrenBottom -= 1;
+    }
+
+    // Scan the old children in the middle of the list.
+    final bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
+    Map<Key, Element>? oldKeyedChildren;
+    if (haveOldChildren) {
+      oldKeyedChildren = <Key, Element>{};
+      while (oldChildrenTop <= oldChildrenBottom) {
+        final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
+        assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
+        if (oldChild != null) {
+          if (oldChild.widget.key != null) {
+            oldKeyedChildren[oldChild.widget.key!] = oldChild;
+          } else {
+            deactivateChild(oldChild);
+          }
+        }
+        oldChildrenTop += 1;
+      }
+    }
+
+    // Update the middle of the list.
+    while (newChildrenTop <= newChildrenBottom) {
+      Element? oldChild;
+      final Widget newWidget = newWidgets[newChildrenTop];
+      if (haveOldChildren) {
+        final Key? key = newWidget.key;
+        if (key != null) {
+          oldChild = oldKeyedChildren![key];
+          if (oldChild != null) {
+            if (Widget.canUpdate(oldChild.widget, newWidget)) {
+              // we found a match!
+              // remove it from oldKeyedChildren so we don't unsync it later
+              oldKeyedChildren.remove(key);
+            } else {
+              // Not a match, let's pretend we didn't see it for now.
+              oldChild = null;
+            }
+          }
+        }
+      }
+      assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
+      assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
+      newChildren[newChildrenTop] = newChild;
+      previousChild = newChild;
+      newChildrenTop += 1;
+    }
+
+    // We've scanned the whole list.
+    assert(oldChildrenTop == oldChildrenBottom + 1);
+    assert(newChildrenTop == newChildrenBottom + 1);
+    assert(newWidgets.length - newChildrenTop == oldChildren.length - oldChildrenTop);
+    newChildrenBottom = newWidgets.length - 1;
+    oldChildrenBottom = oldChildren.length - 1;
+
+    // Update the bottom of the list.
+    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
+      final Element oldChild = oldChildren[oldChildrenTop];
+      assert(replaceWithNullIfForgotten(oldChild) != null);
+      assert(oldChild._lifecycleState == _ElementLifecycle.active);
+      final Widget newWidget = newWidgets[newChildrenTop];
+      assert(Widget.canUpdate(oldChild.widget, newWidget));
+      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
+      assert(oldChild == newChild || oldChild._lifecycleState != _ElementLifecycle.active);
+      newChildren[newChildrenTop] = newChild;
+      previousChild = newChild;
+      newChildrenTop += 1;
+      oldChildrenTop += 1;
+    }
+
+    // Clean up any of the remaining middle nodes from the old list.
+    if (haveOldChildren && oldKeyedChildren!.isNotEmpty) {
+      for (final Element oldChild in oldKeyedChildren.values) {
+        if (forgottenChildren == null || !forgottenChildren.contains(oldChild)) {
+          deactivateChild(oldChild);
+        }
+      }
+    }
+    assert(newChildren.every((Element element) => element is! _NullElement));
+    return newChildren;
   }
 
   /// Add this element to the tree in the given slot of the given parent.
@@ -3941,7 +4152,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         '${newWidget.runtimeType}',
         arguments: debugTimelineArguments,
       );
@@ -3974,7 +4185,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return newChild;
     } finally {
       if (isTimelineTracked) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -4583,7 +4794,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final List<DiagnosticsNode> diagnosticsDependencies = sortedDependencies
         .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
         .toList();
-      properties.add(DiagnosticsProperty<List<DiagnosticsNode>>('dependencies', diagnosticsDependencies));
+      properties.add(DiagnosticsProperty<Set<InheritedElement>>('dependencies', deps, description: diagnosticsDependencies.toString()));
     }
   }
 
@@ -5979,218 +6190,6 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     super.performRebuild(); // clears the "dirty" flag
-  }
-
-  /// Updates the children of this element to use new widgets.
-  ///
-  /// Attempts to update the given old children list using the given new
-  /// widgets, removing obsolete elements and introducing new ones as necessary,
-  /// and then returns the new child list.
-  ///
-  /// During this function the `oldChildren` list must not be modified. If the
-  /// caller wishes to remove elements from `oldChildren` reentrantly while
-  /// this function is on the stack, the caller can supply a `forgottenChildren`
-  /// argument, which can be modified while this function is on the stack.
-  /// Whenever this function reads from `oldChildren`, this function first
-  /// checks whether the child is in `forgottenChildren`. If it is, the function
-  /// acts as if the child was not in `oldChildren`.
-  ///
-  /// This function is a convenience wrapper around [updateChild], which updates
-  /// each individual child. If `slots` is non-null, the value for the `newSlot`
-  /// argument of [updateChild] is retrieved from that list using the index that
-  /// the currently processed `child` corresponds to in the `newWidgets` list
-  /// (`newWidgets` and `slots` must have the same length). If `slots` is null,
-  /// an [IndexedSlot<Element>] is used as the value for the `newSlot` argument.
-  /// In that case, [IndexedSlot.index] is set to the index that the currently
-  /// processed `child` corresponds to in the `newWidgets` list and
-  /// [IndexedSlot.value] is set to the [Element] of the previous widget in that
-  /// list (or null if it is the first child).
-  ///
-  /// When the [slot] value of an [Element] changes, its
-  /// associated [renderObject] needs to move to a new position in the child
-  /// list of its parents. If that [RenderObject] organizes its children in a
-  /// linked list (as is done by the [ContainerRenderObjectMixin]) this can
-  /// be implemented by re-inserting the child [RenderObject] into the
-  /// list after the [RenderObject] associated with the [Element] provided as
-  /// [IndexedSlot.value] in the [slot] object.
-  ///
-  /// Using the previous sibling as a [slot] is not enough, though, because
-  /// child [RenderObject]s are only moved around when the [slot] of their
-  /// associated [RenderObjectElement]s is updated. When the order of child
-  /// [Element]s is changed, some elements in the list may move to a new index
-  /// but still have the same previous sibling. For example, when
-  /// `[e1, e2, e3, e4]` is changed to `[e1, e3, e4, e2]` the element e4
-  /// continues to have e3 as a previous sibling even though its index in the list
-  /// has changed and its [RenderObject] needs to move to come before e2's
-  /// [RenderObject]. In order to trigger this move, a new [slot] value needs to
-  /// be assigned to its [Element] whenever its index in its
-  /// parent's child list changes. Using an [IndexedSlot<Element>] achieves
-  /// exactly that and also ensures that the underlying parent [RenderObject]
-  /// knows where a child needs to move to in a linked list by providing its new
-  /// previous sibling.
-  @protected
-  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element>? forgottenChildren, List<Object?>? slots }) {
-    assert(slots == null || newWidgets.length == slots.length);
-
-    Element? replaceWithNullIfForgotten(Element child) {
-      return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
-    }
-
-    Object? slotFor(int newChildIndex, Element? previousChild) {
-      return slots != null
-        ? slots[newChildIndex]
-        : IndexedSlot<Element?>(newChildIndex, previousChild);
-    }
-
-    // This attempts to diff the new child list (newWidgets) with
-    // the old child list (oldChildren), and produce a new list of elements to
-    // be the new list of child elements of this element. The called of this
-    // method is expected to update this render object accordingly.
-
-    // The cases it tries to optimize for are:
-    //  - the old list is empty
-    //  - the lists are identical
-    //  - there is an insertion or removal of one or more widgets in
-    //    only one place in the list
-    // If a widget with a key is in both lists, it will be synced.
-    // Widgets without keys might be synced but there is no guarantee.
-
-    // The general approach is to sync the entire new list backwards, as follows:
-    // 1. Walk the lists from the top, syncing nodes, until you no longer have
-    //    matching nodes.
-    // 2. Walk the lists from the bottom, without syncing nodes, until you no
-    //    longer have matching nodes. We'll sync these nodes at the end. We
-    //    don't sync them now because we want to sync all the nodes in order
-    //    from beginning to end.
-    // At this point we narrowed the old and new lists to the point
-    // where the nodes no longer match.
-    // 3. Walk the narrowed part of the old list to get the list of
-    //    keys and sync null with non-keyed items.
-    // 4. Walk the narrowed part of the new list forwards:
-    //     * Sync non-keyed items with null
-    //     * Sync keyed items with the source if it exists, else with null.
-    // 5. Walk the bottom of the list again, syncing the nodes.
-    // 6. Sync null with any items in the list of keys that are still
-    //    mounted.
-
-    int newChildrenTop = 0;
-    int oldChildrenTop = 0;
-    int newChildrenBottom = newWidgets.length - 1;
-    int oldChildrenBottom = oldChildren.length - 1;
-
-    final List<Element> newChildren = List<Element>.filled(newWidgets.length, _NullElement.instance);
-
-    Element? previousChild;
-
-    // Update the top of the list.
-    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
-      final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
-      final Widget newWidget = newWidgets[newChildrenTop];
-      assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
-      if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
-        break;
-      }
-      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
-      assert(newChild._lifecycleState == _ElementLifecycle.active);
-      newChildren[newChildrenTop] = newChild;
-      previousChild = newChild;
-      newChildrenTop += 1;
-      oldChildrenTop += 1;
-    }
-
-    // Scan the bottom of the list.
-    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
-      final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenBottom]);
-      final Widget newWidget = newWidgets[newChildrenBottom];
-      assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
-      if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
-        break;
-      }
-      oldChildrenBottom -= 1;
-      newChildrenBottom -= 1;
-    }
-
-    // Scan the old children in the middle of the list.
-    final bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
-    Map<Key, Element>? oldKeyedChildren;
-    if (haveOldChildren) {
-      oldKeyedChildren = <Key, Element>{};
-      while (oldChildrenTop <= oldChildrenBottom) {
-        final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
-        assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
-        if (oldChild != null) {
-          if (oldChild.widget.key != null) {
-            oldKeyedChildren[oldChild.widget.key!] = oldChild;
-          } else {
-            deactivateChild(oldChild);
-          }
-        }
-        oldChildrenTop += 1;
-      }
-    }
-
-    // Update the middle of the list.
-    while (newChildrenTop <= newChildrenBottom) {
-      Element? oldChild;
-      final Widget newWidget = newWidgets[newChildrenTop];
-      if (haveOldChildren) {
-        final Key? key = newWidget.key;
-        if (key != null) {
-          oldChild = oldKeyedChildren![key];
-          if (oldChild != null) {
-            if (Widget.canUpdate(oldChild.widget, newWidget)) {
-              // we found a match!
-              // remove it from oldKeyedChildren so we don't unsync it later
-              oldKeyedChildren.remove(key);
-            } else {
-              // Not a match, let's pretend we didn't see it for now.
-              oldChild = null;
-            }
-          }
-        }
-      }
-      assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
-      assert(newChild._lifecycleState == _ElementLifecycle.active);
-      assert(oldChild == newChild || oldChild == null || oldChild._lifecycleState != _ElementLifecycle.active);
-      newChildren[newChildrenTop] = newChild;
-      previousChild = newChild;
-      newChildrenTop += 1;
-    }
-
-    // We've scanned the whole list.
-    assert(oldChildrenTop == oldChildrenBottom + 1);
-    assert(newChildrenTop == newChildrenBottom + 1);
-    assert(newWidgets.length - newChildrenTop == oldChildren.length - oldChildrenTop);
-    newChildrenBottom = newWidgets.length - 1;
-    oldChildrenBottom = oldChildren.length - 1;
-
-    // Update the bottom of the list.
-    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
-      final Element oldChild = oldChildren[oldChildrenTop];
-      assert(replaceWithNullIfForgotten(oldChild) != null);
-      assert(oldChild._lifecycleState == _ElementLifecycle.active);
-      final Widget newWidget = newWidgets[newChildrenTop];
-      assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
-      assert(newChild._lifecycleState == _ElementLifecycle.active);
-      assert(oldChild == newChild || oldChild._lifecycleState != _ElementLifecycle.active);
-      newChildren[newChildrenTop] = newChild;
-      previousChild = newChild;
-      newChildrenTop += 1;
-      oldChildrenTop += 1;
-    }
-
-    // Clean up any of the remaining middle nodes from the old list.
-    if (haveOldChildren && oldKeyedChildren!.isNotEmpty) {
-      for (final Element oldChild in oldKeyedChildren.values) {
-        if (forgottenChildren == null || !forgottenChildren.contains(oldChild)) {
-          deactivateChild(oldChild);
-        }
-      }
-    }
-    assert(newChildren.every((Element element) => element is! _NullElement));
-    return newChildren;
   }
 
   @override

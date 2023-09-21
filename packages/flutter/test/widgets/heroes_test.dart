@@ -1182,22 +1182,20 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    bool isVisible(Element node) {
-      bool visible = true;
-      node.visitAncestorElements((Element ancestor) {
-        final RenderObject r = ancestor.renderObject!;
-        if (r is RenderAnimatedOpacity && r.opacity.value == 0) {
-          visible = false;
+    bool isVisible(RenderObject node) {
+      RenderObject? currentNode = node;
+      while (currentNode != null) {
+        if (currentNode is RenderAnimatedOpacity && currentNode.opacity.value == 0) {
           return false;
         }
-        return true;
-      });
-      return visible;
+        currentNode = currentNode.parent;
+      }
+      return true;
     }
 
     // Of all heroes only one should be visible now.
-    final Iterable<Element> elements = find.text('Hero').evaluate();
-    expect(elements.where(isVisible).length, 1);
+    final Iterable<RenderObject> renderObjects = find.text('Hero').evaluate().map((Element e) => e.renderObject!);
+    expect(renderObjects.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
@@ -2921,7 +2919,7 @@ Future<void> main() async {
     final ScrollController controller = ScrollController();
 
     RenderAnimatedOpacity? findRenderAnimatedOpacity() {
-      AbstractNode? parent = tester.renderObject(find.byType(Placeholder));
+      RenderObject? parent = tester.renderObject(find.byType(Placeholder));
       while (parent is RenderObject && parent is! RenderAnimatedOpacity) {
         parent = parent.parent;
       }

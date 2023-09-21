@@ -583,7 +583,7 @@ void main() {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 125.5 : 126.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -858,7 +858,7 @@ void main() {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 125.5 : 126.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -3048,6 +3048,81 @@ void main() {
     );
   });
 
+  testWidgets('NavigationRail indicator renders properly with long labels', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/128005.
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('ABC'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+
+    // Default values from M3 specification.
+    const double indicatorHeight = 32.0;
+    const double destinationWidth = 72.0;
+    const double destinationHorizontalPadding = 8.0;
+    const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
+
+    // The navigation rail width is larger than default because of the first destination long label.
+    final double railWidth = tester.getSize(find.byType(NavigationRail)).width;
+
+    // Expected indicator position.
+    final double indicatorLeft = (railWidth - indicatorWidth) / 2;
+    final double indicatorRight = (railWidth + indicatorWidth) / 2;
+    final Rect indicatorRect = Rect.fromLTRB(indicatorLeft, 0.0, indicatorRight, indicatorHeight);
+    final Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(indicatorLeft, 72.0, indicatorRight, 104.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
   testWidgets('NavigationRail indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
     Future<void> buildWidget() async {
@@ -3136,8 +3211,55 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, shape);
   });
 
+  testWidgets("Destination's respect their disabled state", (WidgetTester tester) async {
+    late int selectedIndex;
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Bcd'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Cde'),
+            disabled: true,
+          ),
+        ],
+        onDestinationSelected: (int index) {
+          selectedIndex = index;
+        },
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    await tester.tap(find.text('Abc'));
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Bcd'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Cde'));
+    expect(selectedIndex, 1);
+
+    // Wait for any pending shader compilation.
+    tester.pumpAndSettle();
+  });
+
   group('Material 2', () {
-    // Original Material 2 tests. Remove this group after `useMaterial3` has been deprecated.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
     testWidgets('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,

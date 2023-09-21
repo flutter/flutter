@@ -13,9 +13,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:matcher/expect.dart' show fail;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/expect.dart' show fail;
-import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
+import 'package:test_api/scaffolding.dart' as test_package show Timeout;
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -107,7 +107,13 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 
   @override
   TestDefaultBinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+    Future<ByteData?> keyboardHandler(ByteData? message) async {
+      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{});
+    }
+    return TestDefaultBinaryMessenger(
+      super.createBinaryMessenger(),
+      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
+    );
   }
 }
 
@@ -304,19 +310,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get registerTestTextInput => true;
 
-  /// This method has no effect.
-  ///
-  /// This method was previously used to change the timeout of the test. However,
-  /// in practice having short timeouts was found to be nothing but trouble,
-  /// primarily being a cause flakes rather than helping debug tests.
-  ///
-  /// For this reason, this method has been deprecated.
-  @Deprecated(
-    'This method has no effect. '
-    'This feature was deprecated after v2.6.0-1.0.pre.'
-  )
-  void addTime(Duration duration) { }
-
   /// Delay for `duration` of time.
   ///
   /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
@@ -373,7 +366,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
-    // This is intialized here because it's needed for the `super.initInstances`
+    // This is initialized here because it's needed for the `super.initInstances`
     // call. It can't be handled as a ctor initializer because it's dependent
     // on `platformDispatcher`. It can't be handled in the ctor itself because
     // the base class ctor is called first and calls `initInstances`.
@@ -459,17 +452,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
-  ///
-  /// The `additionalTime` argument was previously used with
-  /// [AutomatedTestWidgetsFlutterBinding.addTime] but now has no effect.
-  Future<T?> runAsync<T>(
-    Future<T> Function() callback, {
-    @Deprecated(
-      'This parameter has no effect. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration additionalTime = const Duration(milliseconds: 1000),
-  });
+  Future<T?> runAsync<T>(Future<T> Function() callback);
 
   /// Artificially calls dispatchLocalesChanged on the Widget binding,
   /// then flushes microtasks.
@@ -491,6 +474,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       assert(inTest);
       dispatchLocalesChanged(locales);
     });
+  }
+
+  @override
+  Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
+    switch (exitType) {
+      case ui.AppExitType.cancelable:
+        // The test framework shouldn't actually exit when requested.
+        return ui.AppExitResponse.cancel;
+      case ui.AppExitType.required:
+        throw FlutterError('Unexpected application exit request while running test');
+    }
   }
 
   /// Re-attempts the initialization of the lifecycle state after providing
@@ -557,17 +551,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  /// Convert the given point from the global coordinate space to the local
-  /// one.
+  /// Convert the given point from the global coordinate space of the provided
+  /// [RenderView] to its local one.
+  ///
+  /// This method operates in logical pixels for both coordinate spaces. It does
+  /// not apply the device pixel ratio (used to translate to/from physical
+  /// pixels).
   ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
-  Offset globalToLocal(Offset point) => point;
+  Offset globalToLocal(Offset point, RenderView view) => point;
 
   /// Convert the given point from the local coordinate space to the global
-  /// one.
+  /// coordinate space of the [RenderView].
+  ///
+  /// This method operates in logical pixels for both coordinate spaces. It does
+  /// not apply the device pixel ratio to translate to physical pixels.
   ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
-  Offset localToGlobal(Offset point) => point;
+  Offset localToGlobal(Offset point, RenderView view) => point;
 
   /// The source of the current pointer event.
   ///
@@ -755,11 +756,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   });
 
   /// This is called during test execution before and after the body has been
@@ -921,8 +917,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       try {
         treeDump = rootElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
         // We try to stringify the tree dump here (though we immediately discard the result) because
-        // we want to make sure that if it can't be serialised, we replace it with a message that
-        // says the tree could not be serialised. Otherwise, the real exception might get obscured
+        // we want to make sure that if it can't be serialized, we replace it with a message that
+        // says the tree could not be serialized. Otherwise, the real exception might get obscured
         // by side-effects of the underlying issues causing the tree dumping code to flail.
         treeDump.toStringDeep();
       } catch (exception) {
@@ -1142,6 +1138,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
+    // ignore: invalid_use_of_visible_for_testing_member
+    ServicesBinding.instance.resetLifecycleState();
   }
 }
 
@@ -1227,7 +1225,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
       _phase = newPhase;
       if (hasScheduledFrame) {
-        addTime(const Duration(milliseconds: 500));
         _currentFakeAsync!.flushMicrotasks();
         handleBeginFrame(Duration(
           milliseconds: _clock!.now().millisecondsSinceEpoch,
@@ -1241,10 +1238,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T?> runAsync<T>(
-    Future<T> Function() callback, {
-    Duration additionalTime = const Duration(milliseconds: 1000),
-  }) {
+  Future<T?> runAsync<T>(Future<T> Function() callback) {
     assert(() {
       if (_pendingAsyncTasks == null) {
         return true;
@@ -1270,8 +1264,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         },
       ),
     );
-
-    addTime(additionalTime);
 
     return realAsyncZone.run<Future<T?>>(() {
       final Completer<T?> result = Completer<T?>();
@@ -1426,11 +1418,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   }) {
     assert(!inTest);
     assert(_currentFakeAsync == null);
@@ -1642,6 +1629,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
+
+    RenderView.debugAddPaintCallback(_handleRenderViewPaint);
   }
 
   /// The current [LiveTestWidgetsFlutterBinding], if one has been created.
@@ -1770,21 +1759,68 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
-  @override
-  void initRenderView() {
-    renderView = _LiveTestRenderView(
-      configuration: createViewConfiguration(),
-      onNeedPaint: _handleViewNeedsPaint,
-      view: platformDispatcher.implicitView!,
-    );
-    renderView.prepareInitialFrame();
-  }
-
-  _LiveTestRenderView get _liveTestRenderView => super.renderView as _LiveTestRenderView;
-
-  void _handleViewNeedsPaint() {
+  void _markViewNeedsPaint() {
     _viewNeedsPaint = true;
     renderView.markNeedsPaint();
+  }
+
+  TextPainter? _label;
+  static const TextStyle _labelStyle = TextStyle(
+    fontFamily: 'sans-serif',
+    fontSize: 10.0,
+  );
+
+  void _setDescription(String value) {
+    if (value.isEmpty) {
+      _label = null;
+      return;
+    }
+    // TODO(ianh): Figure out if the test name is actually RTL.
+    _label ??= TextPainter(textAlign: TextAlign.left, textDirection: TextDirection.ltr);
+    _label!.text = TextSpan(text: value, style: _labelStyle);
+    _label!.layout();
+    _markViewNeedsPaint();
+  }
+
+  final Map<int, _LiveTestPointerRecord> _pointerIdToPointerRecord = <int, _LiveTestPointerRecord>{};
+
+  void _handleRenderViewPaint(PaintingContext context, Offset offset, RenderView renderView) {
+    assert(offset == Offset.zero);
+
+    if (_pointerIdToPointerRecord.isNotEmpty) {
+      final double radius = renderView.configuration.size.shortestSide * 0.05;
+      final Path path = Path()
+        ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
+        ..moveTo(0.0, -radius * 2.0)
+        ..lineTo(0.0, radius * 2.0)
+        ..moveTo(-radius * 2.0, 0.0)
+        ..lineTo(radius * 2.0, 0.0);
+      final Canvas canvas = context.canvas;
+      final Paint paint = Paint()
+        ..strokeWidth = radius / 10.0
+        ..style = PaintingStyle.stroke;
+      bool dirty = false;
+      for (final _LiveTestPointerRecord record in _pointerIdToPointerRecord.values) {
+        paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
+        canvas.drawPath(path.shift(record.position), paint);
+        if (record.decay < 0) {
+          dirty = true;
+        }
+        record.decay += 1;
+      }
+      _pointerIdToPointerRecord
+          .keys
+          .where((int pointer) => _pointerIdToPointerRecord[pointer]!.decay == 0)
+          .toList()
+          .forEach(_pointerIdToPointerRecord.remove);
+      if (dirty) {
+        scheduleMicrotask(() {
+          _markViewNeedsPaint();
+        });
+      }
+    }
+
+    _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
 
   /// An object to which real device events should be routed.
@@ -1810,19 +1846,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void handlePointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
-        final _LiveTestPointerRecord? record = _liveTestRenderView._pointers[event.pointer];
+        final _LiveTestPointerRecord? record = _pointerIdToPointerRecord[event.pointer];
         if (record != null) {
           record.position = event.position;
           if (!event.down) {
             record.decay = _kPointerDecay;
           }
-          _handleViewNeedsPaint();
+          _markViewNeedsPaint();
         } else if (event.down) {
-          _liveTestRenderView._pointers[event.pointer] = _LiveTestPointerRecord(
+          _pointerIdToPointerRecord[event.pointer] = _LiveTestPointerRecord(
             event.pointer,
             event.position,
           );
-          _handleViewNeedsPaint();
+          _markViewNeedsPaint();
         }
         super.handlePointerEvent(event);
       case TestBindingEventSource.device:
@@ -1834,7 +1870,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           // The pointer events received with this source has a global position
           // (see [handlePointerEventForSource]). Transform it to the local
           // coordinate space used by the testing widgets.
-          final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position));
+          final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position, renderView));
           withPointerEventSource(TestBindingEventSource.device,
             () => super.handlePointerEvent(localEvent)
           );
@@ -1886,10 +1922,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T?> runAsync<T>(
-    Future<T> Function() callback, {
-    Duration additionalTime = const Duration(milliseconds: 1000),
-  }) async {
+  Future<T?> runAsync<T>(Future<T> Function() callback) async {
     assert(() {
       if (!_runningAsyncTasks) {
         return true;
@@ -1923,15 +1956,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   }) {
     assert(!inTest);
     _inTest = true;
-    _liveTestRenderView._setDescription(description);
+    _setDescription(description);
     return _runTest(testBody, invariantTester, description);
   }
 
@@ -1967,24 +1995,42 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Offset globalToLocal(Offset point) {
-    final Matrix4 transform = _liveTestRenderView.configuration.toHitTestMatrix();
+  Offset globalToLocal(Offset point, RenderView view) {
+    // The method is expected to translate the given point expressed in logical
+    // pixels in the global coordinate space to the local coordinate space (also
+    // expressed in logical pixels).
+    // The inverted transform translates from the global coordinate space in
+    // physical pixels to the local coordinate space in logical pixels.
+    final Matrix4 transform = view.configuration.toMatrix();
     final double det = transform.invert();
     assert(det != 0.0);
-    final Offset result = MatrixUtils.transformPoint(transform, point);
-    return result;
+    // In order to use the transform, we need to translate the point first into
+    // the physical coordinate space by applying the device pixel ratio.
+    return MatrixUtils.transformPoint(
+      transform,
+      point * view.configuration.devicePixelRatio,
+    );
   }
 
   @override
-  Offset localToGlobal(Offset point) {
-    final Matrix4 transform = _liveTestRenderView.configuration.toHitTestMatrix();
-    return MatrixUtils.transformPoint(transform, point);
+  Offset localToGlobal(Offset point, RenderView view) {
+    // The method is expected to translate the given point expressed in logical
+    // pixels in the local coordinate space to the global coordinate space (also
+    // expressed in logical pixels).
+    // The transform translates from the local coordinate space in logical
+    // pixels to the global coordinate space in physical pixels.
+    final Matrix4 transform = view.configuration.toMatrix();
+    final Offset pointInPhysicalPixels = MatrixUtils.transformPoint(transform, point);
+    // We need to apply the device pixel ratio to get back to logical pixels.
+    return pointInPhysicalPixels / view.configuration.devicePixelRatio;
   }
 }
 
-/// A [ViewConfiguration] that pretends the display is of a particular size. The
-/// size is in logical pixels. The resulting ViewConfiguration maps the given
-/// size onto the actual display using the [BoxFit.contain] algorithm.
+/// A [ViewConfiguration] that pretends the display is of a particular size (in
+/// logical pixels).
+///
+/// The resulting ViewConfiguration maps the given size onto the actual display
+/// using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Deprecated. Will be removed in a future version of Flutter.
   ///
@@ -2009,7 +2055,6 @@ class TestViewConfiguration extends ViewConfiguration {
   /// The [size] defaults to 800x600.
   TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
-        _hitTestMatrix = _getMatrix(size, 1.0, view),
         super(devicePixelRatio: view.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
@@ -2037,20 +2082,9 @@ class TestViewConfiguration extends ViewConfiguration {
   }
 
   final Matrix4 _paintMatrix;
-  final Matrix4 _hitTestMatrix;
 
   @override
   Matrix4 toMatrix() => _paintMatrix.clone();
-
-  /// Provides the transformation matrix that converts coordinates in the test
-  /// coordinate space to coordinates in logical pixels on the real display.
-  ///
-  /// This is essentially the same as [toMatrix] but ignoring the device pixel
-  /// ratio.
-  ///
-  /// This is useful because pointers are described in logical pixels, as
-  /// opposed to graphics which are expressed in physical pixels.
-  Matrix4 toHitTestMatrix() => _hitTestMatrix.clone();
 
   @override
   String toString() => 'TestViewConfiguration';
@@ -2068,76 +2102,4 @@ class _LiveTestPointerRecord {
   final Color color;
   Offset position;
   int decay; // >0 means down, <0 means up, increases by one each time, removed at 0
-}
-
-class _LiveTestRenderView extends RenderView {
-  _LiveTestRenderView({
-    required super.configuration,
-    required this.onNeedPaint,
-    required super.view,
-  });
-
-  @override
-  TestViewConfiguration get configuration => super.configuration as TestViewConfiguration;
-  @override
-  set configuration(covariant TestViewConfiguration value) { super.configuration = value; }
-
-  final VoidCallback onNeedPaint;
-
-  final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
-
-  TextPainter? _label;
-  static const TextStyle _labelStyle = TextStyle(
-    fontFamily: 'sans-serif',
-    fontSize: 10.0,
-  );
-  void _setDescription(String value) {
-    if (value.isEmpty) {
-      _label = null;
-      return;
-    }
-    // TODO(ianh): Figure out if the test name is actually RTL.
-    _label ??= TextPainter(textAlign: TextAlign.left, textDirection: TextDirection.ltr);
-    _label!.text = TextSpan(text: value, style: _labelStyle);
-    _label!.layout();
-    onNeedPaint();
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    assert(offset == Offset.zero);
-    super.paint(context, offset);
-    if (_pointers.isNotEmpty) {
-      final double radius = configuration.size.shortestSide * 0.05;
-      final Path path = Path()
-        ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
-        ..moveTo(0.0, -radius * 2.0)
-        ..lineTo(0.0, radius * 2.0)
-        ..moveTo(-radius * 2.0, 0.0)
-        ..lineTo(radius * 2.0, 0.0);
-      final Canvas canvas = context.canvas;
-      final Paint paint = Paint()
-        ..strokeWidth = radius / 10.0
-        ..style = PaintingStyle.stroke;
-      bool dirty = false;
-      for (final int pointer in _pointers.keys) {
-        final _LiveTestPointerRecord record = _pointers[pointer]!;
-        paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
-        canvas.drawPath(path.shift(record.position), paint);
-        if (record.decay < 0) {
-          dirty = true;
-        }
-        record.decay += 1;
-      }
-      _pointers
-        .keys
-        .where((int pointer) => _pointers[pointer]!.decay == 0)
-        .toList()
-        .forEach(_pointers.remove);
-      if (dirty) {
-        scheduleMicrotask(onNeedPaint);
-      }
-    }
-    _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
-  }
 }

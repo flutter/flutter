@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_delegate.dart';
 import 'scroll_physics.dart';
@@ -28,6 +29,35 @@ import 'ticker_provider.dart';
 /// items are removed or added to the list.
 ///
 /// ** See code in examples/api/lib/widgets/animated_list/animated_list.0.dart **
+/// {@end-tool}
+///
+/// By default, [AnimatedList] will automatically pad the limits of the
+/// list's scrollable to avoid partial obstructions indicated by
+/// [MediaQuery]'s padding. To avoid this behavior, override with a
+/// zero [padding] property.
+///
+/// {@tool snippet}
+/// The following example demonstrates how to override the default top and
+/// bottom padding using [MediaQuery.removePadding].
+///
+/// ```dart
+/// Widget myWidget(BuildContext context) {
+///   return MediaQuery.removePadding(
+///     context: context,
+///     removeTop: true,
+///     removeBottom: true,
+///     child: AnimatedList(
+///       initialItemCount: 50,
+///       itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///         return Card(
+///           color: Colors.amber,
+///           child: Center(child: Text('$index')),
+///         );
+///       }
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -176,6 +206,7 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
       ),
+      widget.scrollDirection,
     );
   }
 }
@@ -194,6 +225,38 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
 /// items are removed or added to the grid.
 ///
 /// ** See code in examples/api/lib/widgets/animated_grid/animated_grid.0.dart **
+/// {@end-tool}
+///
+/// By default, [AnimatedGrid] will automatically pad the limits of the
+/// grid's scrollable to avoid partial obstructions indicated by
+/// [MediaQuery]'s padding. To avoid this behavior, override with a
+/// zero [padding] property.
+///
+/// {@tool snippet}
+/// The following example demonstrates how to override the default top and
+/// bottom padding using [MediaQuery.removePadding].
+///
+/// ```dart
+/// Widget myWidget(BuildContext context) {
+///   return MediaQuery.removePadding(
+///     context: context,
+///     removeTop: true,
+///     removeBottom: true,
+///     child: AnimatedGrid(
+///       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+///         crossAxisCount: 3,
+///       ),
+///       initialItemCount: 50,
+///       itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///         return Card(
+///           color: Colors.amber,
+///           child: Center(child: Text('$index')),
+///         );
+///       }
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -353,6 +416,7 @@ class AnimatedGridState extends _AnimatedScrollViewState<AnimatedGrid> {
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
       ),
+      widget.scrollDirection,
     );
   }
 }
@@ -529,7 +593,35 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     _sliverAnimatedMultiBoxKey.currentState!.removeAllItems(builder, duration: duration);
   }
 
-  Widget _wrap(Widget sliver) {
+  Widget _wrap(Widget sliver, Axis direction) {
+    EdgeInsetsGeometry? effectivePadding = widget.padding;
+    if (widget.padding == null) {
+      final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
+      if (mediaQuery != null) {
+        // Automatically pad sliver with padding from MediaQuery.
+        final EdgeInsets mediaQueryHorizontalPadding =
+            mediaQuery.padding.copyWith(top: 0.0, bottom: 0.0);
+        final EdgeInsets mediaQueryVerticalPadding =
+            mediaQuery.padding.copyWith(left: 0.0, right: 0.0);
+        // Consume the main axis padding with SliverPadding.
+        effectivePadding = direction == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
+        // Leave behind the cross axis padding.
+        sliver = MediaQuery(
+          data: mediaQuery.copyWith(
+            padding: direction == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
+          ),
+          child: sliver,
+        );
+      }
+    }
+
+    if (effectivePadding != null) {
+      sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
+    }
     return CustomScrollView(
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
@@ -538,12 +630,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       physics: widget.physics,
       clipBehavior: widget.clipBehavior,
       shrinkWrap: widget.shrinkWrap,
-      slivers: <Widget>[
-        SliverPadding(
-          padding: widget.padding ?? EdgeInsets.zero,
-          sliver: sliver,
-        ),
-      ],
+      slivers: <Widget>[ sliver ],
     );
   }
 }
@@ -1137,7 +1224,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
   void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    for(int i = _itemsCount - 1 ; i >= 0; i--) {
+    for (int i = _itemsCount - 1 ; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
     }
   }

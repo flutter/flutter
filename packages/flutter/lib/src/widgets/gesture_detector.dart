@@ -1240,7 +1240,7 @@ class GestureDetector extends StatelessWidget {
 /// A widget that detects gestures described by the given gesture
 /// factories.
 ///
-/// For common gestures, use a [GestureRecognizer].
+/// For common gestures, use a [GestureDetector].
 /// [RawGestureDetector] is useful primarily when developing your
 /// own gesture recognizers.
 ///

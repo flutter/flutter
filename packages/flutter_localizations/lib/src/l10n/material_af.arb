@@ -25,6 +25,7 @@
   "continueButtonLabel": "Gaan voort",
   "copyButtonLabel": "Kopieer",
   "cutButtonLabel": "Knip",
+  "scanTextButtonLabel": "Skena umbhalo",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Plak",
   "selectAllButtonLabel": "Kies alles",
@@ -133,5 +134,11 @@
   "scrimLabel": "Skerm",
   "bottomSheetLabel": "Onderste blad",
   "scrimOnTapHint": "Maak $modalRouteContentName toe",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

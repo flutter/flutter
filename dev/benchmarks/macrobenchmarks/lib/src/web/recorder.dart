@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
-import 'dart:js_util' as js_util;
+import 'dart:js_interop';
+// The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
+// for `JSObject.[]=`.
+// ignore: unused_import
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -15,6 +18,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+import 'package:web/web.dart' as web;
 
 /// The default number of samples from warm-up iterations.
 ///
@@ -422,12 +426,18 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     _runCompleter!.completeError(error, stackTrace);
   }
 
+  late final _RecordingWidgetsBinding _binding;
+
+  @override
+  @mustCallSuper
+  Future<void> setUpAll() async {
+    _binding = _RecordingWidgetsBinding.ensureInitialized();
+  }
+
   @override
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
-    final _RecordingWidgetsBinding binding =
-        _RecordingWidgetsBinding.ensureInitialized();
     final Widget widget = createWidget();
 
     registerEngineBenchmarkValueListener(kProfilePrerollFrame, (num value) {
@@ -445,7 +455,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
       );
     });
 
-    binding._beginRecording(this, widget);
+    _binding._beginRecording(this, widget);
 
     try {
       await _runCompleter!.future;
@@ -504,6 +514,14 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
     }
   }
 
+  late final _RecordingWidgetsBinding _binding;
+
+  @override
+  @mustCallSuper
+  Future<void> setUpAll() async {
+    _binding = _RecordingWidgetsBinding.ensureInitialized();
+  }
+
   @override
   @mustCallSuper
   void frameWillDraw() {
@@ -542,9 +560,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name);
-    final _RecordingWidgetsBinding binding =
-        _RecordingWidgetsBinding.ensureInitialized();
-    binding._beginRecording(this, _WidgetBuildRecorderHost(this));
+    _binding._beginRecording(this, _WidgetBuildRecorderHost(this));
 
     try {
       await _runCompleter!.future;
@@ -655,7 +671,8 @@ class Timeseries {
     final double dirtyStandardDeviation = _computeStandardDeviationForPopulation(name, candidateValues);
 
     // Any value that's higher than this is considered an outlier.
-    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation;
+    // Two standard deviations captures 95% of a normal distribution.
+    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation * 2;
 
     // Candidates with outliers removed.
     final Iterable<double> cleanValues = candidateValues.where((double value) => value <= outlierCutOff);
@@ -941,6 +958,15 @@ class Profile {
       // auto-stopping logic.
       _autoUpdateBenchmarkPhase();
     }
+  }
+
+  /// A convenience wrapper over [addDataPoint] for adding [AggregatedTimedBlock]
+  /// to the profile.
+  ///
+  /// Uses [AggregatedTimedBlock.name] as the name of the data point, and
+  /// [AggregatedTimedBlock.duration] as the duration.
+  void addTimedBlock(AggregatedTimedBlock timedBlock, { required bool reported }) {
+    addDataPoint(timedBlock.name, Duration(microseconds: timedBlock.duration.toInt()), reported: reported);
   }
 
   /// Checks the samples collected so far and sets the appropriate benchmark phase.
@@ -1253,8 +1279,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
-
+    web.window.performance.mark('measured_frame_start#$_currentFrameNumber');
     _isMeasuringFrame = true;
   }
 }
@@ -1276,10 +1301,10 @@ void endMeasureFrame() {
 
   if (_isMeasuringFrame) {
     // Tell the browser to mark the end of the frame, and measure the duration.
-    html.window.performance.mark('measured_frame_end#$_currentFrameNumber');
-    html.window.performance.measure(
+    web.window.performance.mark('measured_frame_end#$_currentFrameNumber');
+    web.window.performance.measure(
       'measured_frame',
-      'measured_frame_start#$_currentFrameNumber',
+      'measured_frame_start#$_currentFrameNumber'.toJS,
       'measured_frame_end#$_currentFrameNumber',
     );
 
@@ -1310,9 +1335,11 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 
   if (_engineBenchmarkListeners.isEmpty) {
     // The first listener is being registered. Register the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', _dispatchEngineBenchmarkValue);
+    web.window['_flutter_internal_on_benchmark'.toJS] =
+        // Upcast to [Object] to export.
+        // ignore: unnecessary_cast
+        (_dispatchEngineBenchmarkValue as Object).toJS;
   }
-
   _engineBenchmarkListeners[name] = listener;
 }
 
@@ -1320,8 +1347,9 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 void stopListeningToEngineBenchmarkValues(String name) {
   _engineBenchmarkListeners.remove(name);
   if (_engineBenchmarkListeners.isEmpty) {
+
     // The last listener unregistered. Remove the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', null);
+    web.window['_flutter_internal_on_benchmark'.toJS] = null;
   }
 }
 

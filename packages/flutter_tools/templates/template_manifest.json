@@ -339,6 +339,15 @@
         "templates/skeleton/README.md.tmpl",
         "templates/skeleton/test/implementation_test.dart.test.tmpl",
         "templates/skeleton/test/unit_test.dart.tmpl",
-        "templates/skeleton/test/widget_test.dart.tmpl"
+        "templates/skeleton/test/widget_test.dart.tmpl",
+
+        "templates/xcode/ios/custom_application_bundle/Runner.xcworkspace.tmpl/contents.xcworkspacedata",
+        "templates/xcode/ios/custom_application_bundle/Runner.xcworkspace.tmpl/xcshareddata/IDEWorkspaceChecks.plist",
+        "templates/xcode/ios/custom_application_bundle/Runner.xcworkspace.tmpl/xcshareddata/WorkspaceSettings.xcsettings",
+        "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/project.pbxproj",
+        "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/project.xcworkspace/contents.xcworkspacedata",
+        "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+        "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+        "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/xcshareddata/xcschemes/Runner.xcscheme.tmpl"
     ]
 }

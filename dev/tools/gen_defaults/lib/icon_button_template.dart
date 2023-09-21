@@ -95,26 +95,29 @@ class IconButtonTemplate extends TokenTemplate {
 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('$tokenGroup.toggle.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor('$tokenGroup.toggle.selected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
         }
         if (states.contains(MaterialState.focused)) {
           return ${componentColor('$tokenGroup.toggle.selected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${componentColor('$tokenGroup.toggle.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
-        }
       }
       if (toggleable) { // toggleable but unselected case
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('$tokenGroup.toggle.unselected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor('$tokenGroup.toggle.unselected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
         }
         if (states.contains(MaterialState.focused)) {
           return ${componentColor('$tokenGroup.toggle.unselected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${componentColor('$tokenGroup.toggle.unselected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
-        }
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return ${componentColor('$tokenGroup.pressed.state-layer')};
       }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('$tokenGroup.hover.state-layer')};
@@ -122,33 +125,30 @@ class IconButtonTemplate extends TokenTemplate {
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('$tokenGroup.focus.state-layer')};
       }
-      if (states.contains(MaterialState.pressed)) {
-        return ${componentColor('$tokenGroup.pressed.state-layer')};
-      }
       return Colors.transparent;
     })''';
       case 'md.comp.outlined-icon-button':
         return '''
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('$tokenGroup.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor('$tokenGroup.selected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
         }
         if (states.contains(MaterialState.focused)) {
           return ${componentColor('$tokenGroup.selected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${componentColor('$tokenGroup.selected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
-        }
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return ${componentColor('$tokenGroup.unselected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
       }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('$tokenGroup.unselected.hover.state-layer')}.withOpacity(${opacity('$tokenGroup.hover.state-layer.opacity')});
       }
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('$tokenGroup.unselected.focus.state-layer')}.withOpacity(${opacity('$tokenGroup.focus.state-layer.opacity')});
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return ${componentColor('$tokenGroup.unselected.pressed.state-layer')}.withOpacity(${opacity('$tokenGroup.pressed.state-layer.opacity')});
       }
       return Colors.transparent;
     })''';
@@ -157,24 +157,24 @@ class IconButtonTemplate extends TokenTemplate {
 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('$tokenGroup.selected.pressed.state-layer')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor('$tokenGroup.selected.hover.state-layer')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${componentColor('$tokenGroup.selected.focus.state-layer')};
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${componentColor('$tokenGroup.selected.pressed.state-layer')};
-        }
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return ${componentColor('$tokenGroup.unselected.pressed.state-layer')};
       }
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('$tokenGroup.unselected.hover.state-layer')};
       }
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('$tokenGroup.unselected.focus.state-layer')};
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return ${componentColor('$tokenGroup.unselected.pressed.state-layer')};
       }
       return Colors.transparent;
     })''';
@@ -185,19 +185,19 @@ class IconButtonTemplate extends TokenTemplate {
   }
 
   String _minimumSize() {
-    if (tokens.containsKey('$tokenGroup.container.size')) {
+    if (tokenAvailable('$tokenGroup.container.size')) {
       return '''
 
-    const MaterialStatePropertyAll<Size>(Size(${tokens['$tokenGroup.container.size']}, ${tokens['$tokenGroup.container.size']}))''';
+    const MaterialStatePropertyAll<Size>(Size(${getToken('$tokenGroup.container.size')}, ${getToken('$tokenGroup.container.size')}))''';
     } else {
       return '''
 
-    const MaterialStatePropertyAll<Size>(Size(${tokens['$tokenGroup.state-layer.size']}, ${tokens['$tokenGroup.state-layer.size']}))''';
+    const MaterialStatePropertyAll<Size>(Size(${getToken('$tokenGroup.state-layer.size')}, ${getToken('$tokenGroup.state-layer.size')}))''';
     }
   }
 
   String _shape() {
-    if (tokens.containsKey('$tokenGroup.container.shape')) {
+    if (tokenAvailable('$tokenGroup.container.shape')) {
       return '''
 
     const MaterialStatePropertyAll<OutlinedBorder>(${shape("$tokenGroup.container", "")})''';
@@ -209,7 +209,7 @@ class IconButtonTemplate extends TokenTemplate {
   }
 
   String _side() {
-    if (tokens.containsKey('$tokenGroup.unselected.outline.color')) {
+    if (tokenAvailable('$tokenGroup.unselected.outline.color')) {
       return '''
 
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -227,7 +227,7 @@ class IconButtonTemplate extends TokenTemplate {
   }
 
   String _elevationColor(String token) {
-    if (tokens.containsKey(token)) {
+    if (tokenAvailable(token)) {
       return 'MaterialStatePropertyAll<Color>(${color(token)})';
     } else {
       return 'const MaterialStatePropertyAll<Color>(Colors.transparent)';
@@ -286,7 +286,7 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<double>? get iconSize =>
-    const MaterialStatePropertyAll<double>(${tokens["$tokenGroup.icon.size"]});
+    const MaterialStatePropertyAll<double>(${getToken("$tokenGroup.icon.size")});
 
   @override
   MaterialStateProperty<BorderSide?>? get side =>${_side()};

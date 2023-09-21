@@ -12,6 +12,37 @@ import 'dialog.dart';
 /// An end-aligned row of buttons, laying out into a column if there is not
 /// enough horizontal space.
 ///
+/// ## Updating to [OverflowBar]
+///
+/// [ButtonBar] has been replace by a more efficient widget, [OverflowBar].
+///
+/// ```dart
+/// // Before
+/// ButtonBar(
+///   alignment: MainAxisAlignment.spaceEvenly,
+///   children: <Widget>[
+///     TextButton( child: const Text('Button 1'), onPressed: () {}),
+///     TextButton( child: const Text('Button 2'), onPressed: () {}),
+///     TextButton( child: const Text('Button 3'), onPressed: () {}),
+///   ],
+/// );
+/// ```
+/// ```dart
+/// // After
+/// OverflowBar(
+///   alignment: MainAxisAlignment.spaceEvenly,
+///   children: <Widget>[
+///     TextButton( child: const Text('Button 1'), onPressed: () {}),
+///     TextButton( child: const Text('Button 2'), onPressed: () {}),
+///     TextButton( child: const Text('Button 3'), onPressed: () {}),
+///   ],
+/// );
+/// ```
+///
+/// See the [OverflowBar] documentation for more details.
+///
+/// ## Using [ButtonBar]
+///
 /// Places the buttons horizontally according to the [buttonPadding]. The
 /// children are laid out in a [Row] with [MainAxisAlignment.end]. When the
 /// [Directionality] is [TextDirection.ltr], the button bar's children are

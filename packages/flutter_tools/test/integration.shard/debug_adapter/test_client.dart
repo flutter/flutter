@@ -4,9 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dds/src/dap/logging.dart';
-import 'package:dds/src/dap/protocol_generated.dart';
-import 'package:dds/src/dap/protocol_stream.dart';
+import 'package:dds/dap.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 
 import 'test_server.dart';
@@ -111,6 +109,11 @@ class DapTestClient {
   /// Sends a custom request to the debug adapter to trigger a Hot Reload.
   Future<Response> hotReload() {
     return custom('hotReload');
+  }
+
+  /// Sends a custom request with custom syntax convention to the debug adapter to trigger a Hot Reload.
+  Future<Response> customSyntaxHotReload() {
+    return custom(r'$/hotReload');
   }
 
   /// Sends a custom request to the debug adapter to trigger a Hot Restart.

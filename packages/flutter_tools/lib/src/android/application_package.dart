@@ -109,9 +109,9 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     if (buildInfo == null) {
       filename = 'app.apk';
     } else if (buildInfo.flavor == null) {
-      filename = 'app-${buildInfo.mode.name}.apk';
+      filename = 'app-${buildInfo.mode.cliName}.apk';
     } else {
-      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.name}.apk';
+      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.cliName}.apk';
     }
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
@@ -119,7 +119,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       if (androidProject.parent.isModule) {
         // Module builds output the apk in a subdirectory that corresponds
         // to the buildmode of the apk.
-        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.name);
+        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.cliName);
       }
       apkFile = apkDirectory.childFile(filename);
       if (apkFile.existsSync()) {

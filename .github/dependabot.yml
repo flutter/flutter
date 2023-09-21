@@ -8,7 +8,8 @@ updates:
     schedule:
       interval: "weekly"
     reviewers:
-      - "jmagman"
+      - "christopherfujino"
+      - "vashworth"
       - "keyonghan"
       - "yusuf-goog"
     labels:

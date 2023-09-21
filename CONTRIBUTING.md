@@ -121,6 +121,7 @@ presented.
 5. [Flutter design doc template](https://flutter.dev/go/template),
    which should be used when proposing a new technical design.  This is a good
    practice to do before coding more intricate changes.
+   See also our [guidance for writing design docs](https://github.com/flutter/flutter/wiki/Design-Documents).
 
 [![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/0.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
 

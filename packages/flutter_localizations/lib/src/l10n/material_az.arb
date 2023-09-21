@@ -25,6 +25,7 @@
   "continueButtonLabel": "Davam edin",
   "copyButtonLabel": "Kopyalayın",
   "cutButtonLabel": "Kəsin",
+  "scanTextButtonLabel": "Mətni skan edin",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Yerləşdirin",
   "selectAllButtonLabel": "Hamısını seçin",
@@ -133,5 +134,11 @@
   "scrimLabel": "Kətan",
   "bottomSheetLabel": "Aşağıdakı Vərəq",
   "scrimOnTapHint": "Bağlayın: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -25,6 +25,7 @@
   "continueButtonLabel": "Jätka",
   "copyButtonLabel": "Kopeeri",
   "cutButtonLabel": "Lõika",
+  "scanTextButtonLabel": "Skanni teksti",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Kleebi",
   "selectAllButtonLabel": "Vali kõik",
@@ -134,5 +135,11 @@
   "scrimLabel": "Sirm",
   "bottomSheetLabel": "Alumine leht",
   "scrimOnTapHint": "Sule $modalRouteContentName",
-  "keyboardKeyShift": "Tõstuklahv"
+  "keyboardKeyShift": "Tõstuklahv",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
