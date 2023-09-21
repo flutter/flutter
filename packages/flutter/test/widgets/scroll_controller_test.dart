@@ -409,7 +409,10 @@ void main() {
     expect(isScrolling, isTrue);
   });
 
-  test('$ScrollController dispatches object creation in constructor', () {
-    expect(() => ScrollController().dispose(), dispatchesMemoryEvents(ScrollController));
+  test('$ScrollController dispatches object creation in constructor', () async {
+    await expectLater(
+      await memoryEvents(() => ScrollController().dispose(), ScrollController),
+      areCreateAndDispose,
+    );
   });
 }
