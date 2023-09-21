@@ -1,5 +1,5 @@
 name: a11y_assessments
-description: "A new Flutter project."
+description: A new Flutter project
 
 environment:
   sdk: '>=3.2.0-22.0.dev <4.0.0'

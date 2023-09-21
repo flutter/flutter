@@ -36,6 +36,7 @@ class _MainWidgetState extends State<_MainWidget> {
       ),
       body: Center(
         child: TextButton(
+          autofocus: true,
           onPressed: () => showDatePicker(
             context: context,
             initialEntryMode: DatePickerEntryMode.calendarOnly,
