@@ -63,7 +63,8 @@ class FakePlistUtils extends Fake implements PlistParser {
 
   @override
   T? getValueFromFile<T>(String plistFilePath, String key) {
-    return fileContents[plistFilePath]![key] as T?;
+    final Map<String, Object>? plistFile = fileContents[plistFilePath];
+    return plistFile == null ? null : plistFile[key] as T?;
   }
 }
 
