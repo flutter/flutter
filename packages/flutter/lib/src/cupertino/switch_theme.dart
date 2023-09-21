@@ -123,7 +123,7 @@ class CupertinoSwitchTheme extends InheritedWidget {
   final CupertinoSwitchThemeData data;
 
   /// Returns the configuration [data] from the closest [CupertinoSwitchTheme] ancestor.
-  /// If there is no ancestor, it returns [CupertinoTheme.switchTheme].
+  /// If there is no ancestor, it returns [CupertinoThemeData.switchTheme].
   static CupertinoSwitchThemeData? of(BuildContext context) {
     final CupertinoSwitchTheme? switchTheme = context.dependOnInheritedWidgetOfExactType<CupertinoSwitchTheme>();
     return switchTheme?.data ?? CupertinoTheme.of(context).switchTheme;
