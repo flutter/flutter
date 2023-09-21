@@ -80,6 +80,7 @@ std::unique_ptr<Surface> SurfaceContextVK::AcquireNextSurface() {
   if (auto allocator = parent_->GetResourceAllocator()) {
     allocator->DidAcquireSurfaceFrame();
   }
+  parent_->GetCommandPoolRecycler()->Dispose();
   return surface;
 }
 
