@@ -124,7 +124,7 @@ class DisplayListMatrixClipTracker {
     virtual void resetBounds(const SkRect& cull_rect);
 
    protected:
-    Data(const SkRect& rect) : cull_rect_(rect) {}
+    explicit Data(const SkRect& rect) : cull_rect_(rect) {}
 
     virtual bool has_perspective() const = 0;
 

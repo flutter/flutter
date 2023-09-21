@@ -26,9 +26,9 @@ class DlMetalSurfaceProvider : public DlSurfaceProvider {
       size_t height,
       PixelFormat format) const override;
   const std::string backend_name() const override { return "Metal"; }
-  BackendType backend_type() const override { return kMetal_Backend; }
+  BackendType backend_type() const override { return kMetalBackend; }
   bool supports(PixelFormat format) const override {
-    return format == kN32Premul_PixelFormat;
+    return format == kN32PremulPixelFormat;
   }
 
  private:

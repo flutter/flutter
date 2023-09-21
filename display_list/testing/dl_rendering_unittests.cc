@@ -456,11 +456,11 @@ class RenderEnvironment {
   }
 
   static RenderEnvironment Make565(const DlSurfaceProvider* provider) {
-    return RenderEnvironment(provider, PixelFormat::k565_PixelFormat);
+    return RenderEnvironment(provider, PixelFormat::k565PixelFormat);
   }
 
   static RenderEnvironment MakeN32(const DlSurfaceProvider* provider) {
-    return RenderEnvironment(provider, PixelFormat::kN32Premul_PixelFormat);
+    return RenderEnvironment(provider, PixelFormat::kN32PremulPixelFormat);
   }
 
   void init_ref(SkRenderer& sk_renderer,
@@ -1540,7 +1540,7 @@ class CanvasCompareTester {
     // See https://bugs.chromium.org/p/skia/issues/detail?id=14046
     bool no_hairlines =
         testP.is_draw_path() &&
-        env.provider()->backend_type() != BackendType::kSoftware_Backend;
+        env.provider()->backend_type() != BackendType::kSoftwareBackend;
     RenderWith(testP, env, tolerance,
                CaseParameters(
                    "Stroke + defaults",
@@ -2082,10 +2082,10 @@ class CanvasCompareTester {
   }
 
   static int groupOpacityFudgeFactor(const RenderEnvironment& env) {
-    if (env.format() == PixelFormat::k565_PixelFormat) {
+    if (env.format() == PixelFormat::k565PixelFormat) {
       return 9;
     }
-    if (env.provider()->backend_type() == BackendType::kOpenGL_Backend) {
+    if (env.provider()->backend_type() == BackendType::kOpenGlBackend) {
       // OpenGL gets a little fuzzy at times. Still, "within 5" (aka +/-4)
       // for byte samples is not bad, though the other backends give +/-1
       return 5;
@@ -2421,7 +2421,7 @@ class DisplayListCanvasTestBase : public BaseT, protected DisplayListOpFlags {
       return;
     }
     provider->InitializeSurface(kTestWidth, kTestHeight,
-                                PixelFormat::kN32Premul_PixelFormat);
+                                PixelFormat::kN32PremulPixelFormat);
     CanvasCompareTester::kTestProviders.push_back(std::move(provider));
   }
 
@@ -2446,13 +2446,13 @@ class DisplayListCanvasTestBase : public BaseT, protected DisplayListOpFlags {
       }
     }
     if (do_software) {
-      AddProvider(BackendType::kSoftware_Backend, "Software");
+      AddProvider(BackendType::kSoftwareBackend, "Software");
     }
     if (do_opengl) {
-      AddProvider(BackendType::kOpenGL_Backend, "OpenGL");
+      AddProvider(BackendType::kOpenGlBackend, "OpenGL");
     }
     if (do_metal) {
-      AddProvider(BackendType::kMetal_Backend, "Metal");
+      AddProvider(BackendType::kMetalBackend, "Metal");
     }
     std::string providers = "";
     auto begin = CanvasCompareTester::kTestProviders.cbegin();
@@ -3501,7 +3501,7 @@ TEST_F(DisplayListCanvas, SaveLayerConsolidation) {
   std::vector<std::unique_ptr<RenderEnvironment>> environments;
   for (auto& provider : CanvasCompareTester::kTestProviders) {
     auto env = std::make_unique<RenderEnvironment>(
-        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+        provider.get(), PixelFormat::kN32PremulPixelFormat);
     environments.push_back(std::move(env));
   }
 
@@ -3645,7 +3645,7 @@ TEST_F(DisplayListCanvas, MatrixColorFilterModifyTransparencyCheck) {
   std::vector<std::unique_ptr<RenderEnvironment>> environments;
   for (auto& provider : CanvasCompareTester::kTestProviders) {
     auto env = std::make_unique<RenderEnvironment>(
-        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+        provider.get(), PixelFormat::kN32PremulPixelFormat);
     environments.push_back(std::move(env));
   }
 
@@ -3719,7 +3719,7 @@ TEST_F(DisplayListCanvas, MatrixColorFilterOpacityCommuteCheck) {
   std::vector<std::unique_ptr<RenderEnvironment>> environments;
   for (auto& provider : CanvasCompareTester::kTestProviders) {
     auto env = std::make_unique<RenderEnvironment>(
-        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+        provider.get(), PixelFormat::kN32PremulPixelFormat);
     environments.push_back(std::move(env));
   }
 
@@ -3836,7 +3836,7 @@ TEST_F(DisplayListCanvas, BlendColorFilterModifyTransparencyCheck) {
   std::vector<std::unique_ptr<RenderEnvironment>> environments;
   for (auto& provider : CanvasCompareTester::kTestProviders) {
     auto env = std::make_unique<RenderEnvironment>(
-        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+        provider.get(), PixelFormat::kN32PremulPixelFormat);
     environments.push_back(std::move(env));
   }
 
@@ -3898,7 +3898,7 @@ TEST_F(DisplayListCanvas, BlendColorFilterOpacityCommuteCheck) {
   std::vector<std::unique_ptr<RenderEnvironment>> environments;
   for (auto& provider : CanvasCompareTester::kTestProviders) {
     auto env = std::make_unique<RenderEnvironment>(
-        provider.get(), PixelFormat::kN32Premul_PixelFormat);
+        provider.get(), PixelFormat::kN32PremulPixelFormat);
     environments.push_back(std::move(env));
   }
 
@@ -4196,7 +4196,7 @@ class DisplayListNopTest : public DisplayListCanvas {
     for (auto& provider : CanvasCompareTester::kTestProviders) {
       auto result_surface = provider->MakeOffscreenSurface(
           test_image->width(), test_image->height(),
-          DlSurfaceProvider::kN32Premul_PixelFormat);
+          DlSurfaceProvider::kN32PremulPixelFormat);
       SkCanvas* result_canvas = result_surface->sk_surface()->getCanvas();
       result_canvas->clear(SK_ColorTRANSPARENT);
       result_canvas->drawImage(test_image.get(), 0, 0);
@@ -4257,7 +4257,7 @@ class DisplayListNopTest : public DisplayListCanvas {
     sk_paint.setImageFilter(ToSk(image_filter));
     for (auto& provider : CanvasCompareTester::kTestProviders) {
       auto result_surface = provider->MakeOffscreenSurface(
-          w, h, DlSurfaceProvider::kN32Premul_PixelFormat);
+          w, h, DlSurfaceProvider::kN32PremulPixelFormat);
       SkCanvas* result_canvas = result_surface->sk_surface()->getCanvas();
       result_canvas->clear(SK_ColorTRANSPARENT);
       result_canvas->drawImage(test_image_dst_data->image(), 0, 0);

@@ -592,7 +592,7 @@ class DlColorFilterImageFilter final : public DlImageFilter {
       : DlColorFilterImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(
-      std::shared_ptr<const DlColorFilter> filter) {
+      const std::shared_ptr<const DlColorFilter>& filter) {
     if (filter) {
       return std::make_shared<DlColorFilterImageFilter>(filter);
     }

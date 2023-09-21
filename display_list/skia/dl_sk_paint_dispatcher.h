@@ -15,7 +15,7 @@ namespace flutter {
 // which can be accessed at any time via paint().
 class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
  public:
-  DlSkPaintDispatchHelper(SkScalar opacity = SK_Scalar1)
+  explicit DlSkPaintDispatchHelper(SkScalar opacity = SK_Scalar1)
       : current_color_(SK_ColorBLACK), opacity_(opacity) {
     if (opacity < SK_Scalar1) {
       paint_.setAlphaf(opacity);
@@ -76,7 +76,7 @@ class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
   sk_sp<SkColorFilter> makeColorFilter() const;
 
   struct SaveInfo {
-    SaveInfo(SkScalar opacity) : opacity(opacity) {}
+    explicit SaveInfo(SkScalar opacity) : opacity(opacity) {}
 
     SkScalar opacity;
   };

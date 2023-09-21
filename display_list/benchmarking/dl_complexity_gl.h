@@ -32,7 +32,7 @@ class DisplayListGLComplexityCalculator
  private:
   class GLHelper : public ComplexityCalculatorHelper {
    public:
-    GLHelper(unsigned int ceiling)
+    explicit GLHelper(unsigned int ceiling)
         : ComplexityCalculatorHelper(ceiling),
           save_layer_count_(0),
           draw_text_blob_count_(0) {}

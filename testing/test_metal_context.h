@@ -41,7 +41,7 @@ class TestMetalContext {
   void* device_;
   void* command_queue_;
   sk_sp<GrDirectContext> skia_context_;
-  std::mutex textures_mutex;
+  std::mutex textures_mutex_;
   int64_t texture_id_ctr_ = 1;                 // guarded by textures_mutex
   std::map<int64_t, sk_cfp<void*>> textures_;  // guarded by textures_mutex
 };

@@ -25,7 +25,7 @@ static void TestEquals(T& source1, T& source2) {
 }
 
 template <class T>
-static void TestNotEquals(T& source1, T& source2, std::string label) {
+static void TestNotEquals(T& source1, T& source2, const std::string& label) {
   ASSERT_FALSE(source1 == source2) << label;
   ASSERT_FALSE(source2 == source1) << label;
   ASSERT_TRUE(source1 != source2) << label;
