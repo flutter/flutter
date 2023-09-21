@@ -597,12 +597,12 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     // Wrap the children and the chevron painters in Center with widthFactor
     // and heightFactor of 1.0 so _CupertinoTextSelectionToolbarItems can get
     // the natural size of the buttons and then expand vertically as needed.
-    final Widget backButton = CupertinoTextSelectionToolbarButton(
-      onPressed: _handlePreviousPage,
-      child: IgnorePointer(
-        child: Center(
-          widthFactor: 1.0,
-          heightFactor: 1.0,
+    final Widget backButton = Center(
+      widthFactor: 1.0,
+      heightFactor: 1.0,
+      child: CupertinoTextSelectionToolbarButton(
+        onPressed: _handlePreviousPage,
+        child: IgnorePointer(
           child: CustomPaint(
             painter: _LeftCupertinoChevronPainter(color: chevronColor),
             size: const Size.square(_kToolbarChevronSize),
@@ -610,12 +610,12 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
         ),
       ),
     );
-    final Widget nextButton = CupertinoTextSelectionToolbarButton(
-      onPressed: _handleNextPage,
-      child: IgnorePointer(
-        child: Center(
-          widthFactor: 1.0,
-          heightFactor: 1.0,
+    final Widget nextButton = Center(
+      widthFactor: 1.0,
+      heightFactor: 1.0,
+      child: CupertinoTextSelectionToolbarButton(
+        onPressed: _handleNextPage,
+        child: IgnorePointer(
           child: CustomPaint(
             painter: _RightCupertinoChevronPainter(color: chevronColor),
             size: const Size.square(_kToolbarChevronSize),
@@ -988,13 +988,12 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     _backButton!.layout(constraints.loosen(), parentUsesSize: true);
     _nextButton!.layout(constraints.loosen(), parentUsesSize: true);
 
-    // Require the children to have at least the height of the nav buttons.
-    final double minHeight = clampDouble(constraints.minHeight, _backButton!.size.height, _nextButton!.size.height);
-
     final double subsequentPageButtonsWidth = _backButton!.size.width + _nextButton!.size.width;
     double currentButtonPosition = 0.0;
     late double toolbarWidth; // The width of the whole widget.
-    late double greatestHeight = 0.0;
+    late double greatestHeight = _backButton!.size.height > _nextButton!.size.height
+        ? _backButton!.size.height
+        : _nextButton!.size.height;
     late double firstPageWidth;
     int currentPage = 0;
     int i = -1;
@@ -1022,7 +1021,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       child.layout(
         BoxConstraints(
           maxWidth: (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - paginationButtonsWidth,
-          minHeight: minHeight,
           maxHeight: constraints.maxHeight,
         ),
         parentUsesSize: true,
