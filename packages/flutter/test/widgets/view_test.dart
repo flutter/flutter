@@ -7,9 +7,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Widgets running with runApp can find View', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Widgets running with runApp can find View', (WidgetTester tester) async {
     FlutterView? viewOf;
     FlutterView? viewMaybeOf;
 
@@ -29,7 +30,7 @@ void main() {
     expect(viewMaybeOf, isA<FlutterView>());
   });
 
-  testWidgets('Widgets running with pumpWidget can find View', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Widgets running with pumpWidget can find View', (WidgetTester tester) async {
     FlutterView? view;
     FlutterView? viewMaybeOf;
 
@@ -49,7 +50,7 @@ void main() {
     expect(viewMaybeOf, isA<FlutterView>());
   });
 
-  testWidgets('cannot find View behind a LookupBoundary', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cannot find View behind a LookupBoundary', (WidgetTester tester) async {
     await tester.pumpWidget(
       LookupBoundary(
         child: Container(),
@@ -69,7 +70,7 @@ void main() {
     );
   });
 
-  testWidgets('child of view finds view, parentPipelineOwner, mediaQuery', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('child of view finds view, parentPipelineOwner, mediaQuery', (WidgetTester tester) async {
     FlutterView? outsideView;
     FlutterView? insideView;
     PipelineOwner? outsideParent;
@@ -111,7 +112,7 @@ void main() {
     expect(pipelineOwners.single, equals(insideParent));
   });
 
-  testWidgets('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewCollection(
@@ -138,11 +139,11 @@ void main() {
     );
   });
 
-  testWidgets('ViewCollection must have one view', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewCollection must have one view', (WidgetTester tester) async {
     expect(() => ViewCollection(views: const <Widget>[]), throwsAssertionError);
   });
 
-  testWidgets('ViewAnchor.child does not see surrounding view', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewAnchor.child does not see surrounding view', (WidgetTester tester) async {
     FlutterView? inside;
     FlutterView? outside;
     await tester.pumpWidget(
@@ -165,7 +166,7 @@ void main() {
     expect(outside, isNotNull);
   });
 
-  testWidgets('ViewAnchor layout order', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewAnchor layout order', (WidgetTester tester) async {
     Finder findSpyWidget(int label) {
       return find.byWidgetPredicate((Widget w) => w is SpyRenderWidget && w.label == label);
     }
@@ -192,7 +193,7 @@ void main() {
     expect(log, <String>['layout 1', 'layout 3', 'layout 2']);
   });
 
-  testWidgets('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
         view: View(
@@ -221,7 +222,7 @@ void main() {
     expect(children, hasLength(1));
   });
 
-  testWidgets('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewCollection(
@@ -267,7 +268,7 @@ void main() {
   });
 
   group('renderObject getter', () {
-    testWidgets('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
       await pumpWidgetWithoutViewWrapper(
         tester: tester,
@@ -289,7 +290,7 @@ void main() {
       expect(tester.element(find.byType(Builder)).renderObject, renderObject);
     });
 
-    testWidgets('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
       await pumpWidgetWithoutViewWrapper(
         tester: tester,
@@ -317,7 +318,7 @@ void main() {
       expect(tester.element(find.byType(Builder)).renderObject, isNull);
     });
 
-    testWidgets('ancestors of a ViewAnchor see the right RenderObject', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ancestors of a ViewAnchor see the right RenderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
       await tester.pumpWidget(
         Builder(
@@ -342,7 +343,7 @@ void main() {
     });
   });
 
-  testWidgets('correctly switches between view configurations', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correctly switches between view configurations', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: View(
@@ -401,7 +402,7 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('attaches itself correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('attaches itself correctly', (WidgetTester tester) async {
     final Key viewKey = UniqueKey();
     late final PipelineOwner parentPipelineOwner;
     await tester.pumpWidget(
