@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
@@ -106,7 +107,7 @@ void main() {
     );
   }
 
-  testWidgets('chevrons point to the correct side', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('chevrons point to the correct side', (WidgetTester tester) async {
     // Add enough TestBoxes to need 3 pages.
     final List<Widget> children = List<Widget>.generate(15, (int i) => const TestBox());
     await tester.pumpWidget(
@@ -146,7 +147,7 @@ void main() {
     expect(findOverflowBackButton(), overflowBackPaintPattern());
   }, skip: kIsWeb); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
 
-  testWidgets('paginates children if they overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
     await tester.pumpWidget(
@@ -241,7 +242,7 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('does not paginate if children fit with zero margin', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
     final double spacerWidth = 1.0 / tester.view.devicePixelRatio;
     final double dividerWidth = 1.0 / tester.view.devicePixelRatio;
@@ -268,7 +269,7 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 50.0;
     const double anchorBelowY = 500.0;
@@ -334,7 +335,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height + _kToolbarArrowSize.height - _kToolbarContentDistance));
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can create and use a custom toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Select me custom menu',
     );
@@ -369,7 +370,7 @@ void main() {
 
   for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
     for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
-      testWidgets('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             theme: CupertinoThemeData(
@@ -426,7 +427,7 @@ void main() {
     }
   }
 
-  testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 50.0;
     double anchorAboveY = 0.0;
