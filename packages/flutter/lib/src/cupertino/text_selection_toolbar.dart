@@ -349,7 +349,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     return path;
   }
 
-  // The path is described in the toolbar's coordinate system.
+  // The path is described in the toolbar child's coordinate system.
   Path _clipPath(RenderBox child, RRect rrect) {
     final Path path = Path();
     // If there isn't enough width for the arrow + radii, ignore the arrow.
