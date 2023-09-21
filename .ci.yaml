@@ -569,7 +569,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"}
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: framework_tests
       subshard: slow
@@ -951,10 +952,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "1_4"
@@ -977,10 +976,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "2_4"
@@ -1003,10 +1000,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "3_4"
@@ -1029,10 +1024,8 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "4_4"
@@ -1148,6 +1141,8 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1168,6 +1163,8 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1188,6 +1185,8 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1208,6 +1207,8 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1228,6 +1229,8 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1248,6 +1251,8 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1268,6 +1273,8 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1288,6 +1295,8 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1308,6 +1317,8 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1328,6 +1339,8 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1348,6 +1361,8 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1368,6 +1383,8 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1388,6 +1405,8 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1408,6 +1427,8 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1428,6 +1449,8 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1448,6 +1471,8 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1468,6 +1493,8 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1488,6 +1515,8 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1508,6 +1537,8 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1528,6 +1559,8 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1548,6 +1581,8 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1569,6 +1604,8 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/flutter_tools/**

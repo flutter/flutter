@@ -490,4 +490,43 @@ void main() {
     final CupertinoTextField rtlTextFieldWidget = tester.widget(rtlTextFieldFinder);
     expect(rtlTextFieldWidget.textDirection, TextDirection.rtl);
   });
+
+ testWidgets('CupertinoTextFormFieldRow onChanged is called when the form is reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123009.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String value = 'initialValue';
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: Form(
+            key: formKey,
+            child: CupertinoTextFormFieldRow(
+              key: stateKey,
+              initialValue: value,
+              onChanged: (String newValue) {
+                value = newValue;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial value is 'initialValue'.
+    expect(stateKey.currentState!.value, 'initialValue');
+    expect(value, 'initialValue');
+
+    // Change value to 'changedValue'.
+    await tester.enterText(find.byType(CupertinoTextField), 'changedValue');
+    expect(stateKey.currentState!.value,'changedValue');
+    expect(value, 'changedValue');
+
+    // Should be back to 'initialValue' when the form is reset.
+    formKey.currentState!.reset();
+    await tester.pump();
+    expect(stateKey.currentState!.value,'initialValue');
+    expect(value, 'initialValue');
+  });
 }
