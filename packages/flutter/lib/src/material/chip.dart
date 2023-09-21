@@ -2037,27 +2037,26 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   final LayerHandle<OpacityLayer> _avatarOpacityLayerHandler = LayerHandle<OpacityLayer>();
 
   void _paintAvatar(PaintingContext context, Offset offset) {
-    final OpacityLayer? oldLayer = _avatarOpacityLayerHandler.layer;
-    _avatarOpacityLayerHandler.layer = null;
-
     void paintWithOverlay(PaintingContext context, Offset offset) {
       context.paintChild(avatar!, _boxParentData(avatar!).offset + offset);
       _paintSelectionOverlay(context, offset);
     }
 
     if (!theme.showAvatar && avatarDrawerAnimation.isDismissed) {
+      _avatarOpacityLayerHandler.layer = null;
       return;
     }
     final Color disabledColor = _disabledColor;
     final int disabledColorAlpha = disabledColor.alpha;
     if (needsCompositing) {
-       _avatarOpacityLayerHandler.layer = context.pushOpacity(offset, disabledColorAlpha, paintWithOverlay, oldLayer: oldLayer);
+       _avatarOpacityLayerHandler.layer = context.pushOpacity(offset, disabledColorAlpha, paintWithOverlay, oldLayer: _avatarOpacityLayerHandler.layer);
     } else {
       if (disabledColorAlpha != 0xff) {
         context.canvas.saveLayer(
           _boxRect(avatar).shift(offset).inflate(20.0),
           Paint()..color = disabledColor,
         );
+        _avatarOpacityLayerHandler.layer = null;
       }
       paintWithOverlay(context, offset);
       if (disabledColorAlpha != 0xff) {
