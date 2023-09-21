@@ -1001,7 +1001,6 @@ void main() {
           onDestinationSelected: (int i) => selectedIndex = i,
           selectedIndex: selectedIndex,
         ),
-        useMaterial3: true,
       )
     );
 
