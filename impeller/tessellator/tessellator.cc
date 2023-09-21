@@ -21,7 +21,7 @@ static void HeapFree(void* userData, void* ptr) {
 }
 
 // Note: these units are "number of entities" for bucket size and not in KB.
-static TESSalloc alloc = {
+static const TESSalloc kAlloc = {
     HeapAlloc, HeapRealloc, HeapFree, 0, /* =userData */
     16,                                  /* =meshEdgeBucketSize */
     16,                                  /* =meshVertexBucketSize */
@@ -31,8 +31,14 @@ static TESSalloc alloc = {
     0                                    /* =extraVertices */
 };
 
-Tessellator::Tessellator()
-    : c_tessellator_(::tessNewTess(&alloc), &DestroyTessellator) {}
+Tessellator::Tessellator() : c_tessellator_(nullptr, &DestroyTessellator) {
+  TESSalloc alloc = kAlloc;
+  {
+    // libTess2 copies the TESSalloc despite the non-const argument.
+    CTessellator tessellator(::tessNewTess(&alloc), &DestroyTessellator);
+    c_tessellator_ = std::move(tessellator);
+  }
+}
 
 Tessellator::~Tessellator() = default;
 
