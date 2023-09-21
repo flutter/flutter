@@ -19,6 +19,7 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   private int bufferWidth = 0;
   private int bufferHeight = 0;
   private static final String TAG = "ImageReaderPlatformViewRenderTarget";
+  private static final int MAX_IMAGES = 3;
 
   private void closeReader() {
     if (this.reader != null) {
@@ -39,7 +40,7 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
           try {
             image = reader.acquireLatestImage();
           } catch (IllegalStateException e) {
-            Log.e(TAG, "New image available that could not be acquired: " + e.toString());
+            Log.e(TAG, "New image available but it could not be acquired: " + e.toString());
           }
           if (image == null) {
             return;
@@ -52,7 +53,7 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   protected ImageReader createImageReader33() {
     final ImageReader.Builder builder = new ImageReader.Builder(bufferWidth, bufferHeight);
     // Allow for double buffering.
-    builder.setMaxImages(3);
+    builder.setMaxImages(MAX_IMAGES);
     // Use PRIVATE image format so that we can support video decoding.
     // TODO(johnmccutchan): Should we always use PRIVATE here? It may impact our
     // ability to read back texture data. If we don't always want to use it, how do
@@ -78,7 +79,7 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
             bufferWidth,
             bufferHeight,
             ImageFormat.PRIVATE,
-            3,
+            MAX_IMAGES,
             HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
     reader.setOnImageAvailableListener(this.onImageAvailableListener, onImageAvailableHandler);
     return reader;
