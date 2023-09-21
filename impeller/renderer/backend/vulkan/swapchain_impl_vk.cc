@@ -424,13 +424,6 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
   ///
-
-  // Increment the frame count right before allocating the cmd buffer below to
-  // force this to use the next frame's pool. This cmd buffer is completely
-  // untracked, and so we may end up resetting the cmd pool before all buffers
-  // have been collected.
-  context.GetCommandPoolRecycler()->Dispose();
-
   sync->final_cmd_buffer = context.CreateCommandBuffer();
   if (!sync->final_cmd_buffer) {
     return false;
@@ -477,7 +470,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     }
   }
 
-  auto task = [&, index, image, current_frame = current_frame_] {
+  auto task = [&, index, current_frame = current_frame_] {
     auto context_strong = context_.lock();
     if (!context_strong) {
       return;
