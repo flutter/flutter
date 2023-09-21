@@ -855,8 +855,9 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kFrontendServerStarterPath,
       help: 'When this value is provided, the frontend server will be started '
             'in JIT mode from the specified file, instead of from the AOT '
-            'snapshot shipped with the Dart SDK. This option does not affect '
-            'web builds.',
+            'snapshot shipped with the Dart SDK. The specified file can either '
+            'be a Dart source file, or an AppJIT snapshot. This option does '
+            'not affect web builds.',
       hide: !verboseHelp,
     );
   }
