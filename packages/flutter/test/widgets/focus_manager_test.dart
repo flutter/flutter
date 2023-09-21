@@ -1770,12 +1770,18 @@ void main() {
     tester.binding.focusManager.removeListener(handleFocusChange);
   });
 
-  test('$FocusManager dispatches object creation in constructor', () {
-    expect(()=> FocusManager().dispose(), dispatchesMemoryEvents(FocusManager));
+  test('$FocusManager dispatches object creation in constructor', () async {
+    await expectLater(
+      await memoryEvents(() => FocusManager().dispose(), FocusManager),
+      areCreateAndDispose,
+    );
   });
 
-  test('$FocusNode dispatches object creation in constructor', () {
-    expect(()=> FocusNode().dispose(), dispatchesMemoryEvents(FocusNode));
+  test('$FocusNode dispatches object creation in constructor', () async {
+    await expectLater(
+      await memoryEvents(() => FocusNode().dispose(), FocusNode),
+      areCreateAndDispose,
+    );
   });
 
   testWidgetsWithLeakTracking('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {

@@ -1584,14 +1584,16 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     });
   });
 
-  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () {
-    void createAndDispose() {
+  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () async {
+    Future<void> createAndDispose() async {
       PlatformRouteInformationProvider(
         initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
       ).dispose();
     }
-
-    expect(createAndDispose, dispatchesMemoryEvents(PlatformRouteInformationProvider));
+    await expectLater(
+      await memoryEvents(createAndDispose, PlatformRouteInformationProvider),
+      areCreateAndDispose,
+    );
   });
 }
 

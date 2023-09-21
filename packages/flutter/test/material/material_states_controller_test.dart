@@ -13,8 +13,11 @@ void main() {
     expect(MaterialStatesController(<MaterialState>{MaterialState.selected}).value, <MaterialState>{MaterialState.selected});
   });
 
-  test('MaterialStatesController dispatches memory events', () {
-    expect(()=> MaterialStatesController().dispose(), dispatchesMemoryEvents(MaterialStatesController));
+  test('MaterialStatesController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => MaterialStatesController().dispose(), MaterialStatesController),
+      areCreateAndDispose,
+    );
   });
 
   test('MaterialStatesController update, listener', () {

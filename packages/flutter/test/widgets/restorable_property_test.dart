@@ -59,7 +59,10 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('$RestorableProperty dispatches creation in constructor', (WidgetTester widgetTester) async {
-    expect(() => RestorableDateTimeN(null).dispose(), dispatchesMemoryEvents(RestorableDateTimeN));
+    await expectLater(
+      await memoryEvents(() => RestorableDateTimeN(null).dispose(), RestorableDateTimeN),
+      areCreateAndDispose,
+    );
   });
 
   testWidgetsWithLeakTracking('work when not in restoration scope', (WidgetTester tester) async {

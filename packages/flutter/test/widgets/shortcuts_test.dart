@@ -672,8 +672,11 @@ void main() {
       expect(pressedKeys, isEmpty);
     });
 
-    test('$ShortcutManager dispatches object creation in constructor', () {
-      expect(()=> ShortcutManager().dispose(), dispatchesMemoryEvents(ShortcutManager));
+    test('$ShortcutManager dispatches object creation in constructor', () async {
+      await expectLater(
+        await memoryEvents(() => ShortcutManager().dispose(), ShortcutManager),
+        areCreateAndDispose,
+      );
     });
 
     testWidgetsWithLeakTracking("Shortcuts passes to the next Shortcuts widget if it doesn't map the key", (WidgetTester tester) async {
@@ -1872,8 +1875,11 @@ void main() {
       token.dispose();
     });
 
-    test('dispatches object creation in constructor', () {
-      expect(()=> ShortcutRegistry().dispose(), dispatchesMemoryEvents(ShortcutRegistry));
+    test('dispatches object creation in constructor', () async {
+      await expectLater(
+        await memoryEvents(() => ShortcutRegistry().dispose(), ShortcutRegistry),
+        areCreateAndDispose,
+      );
     });
   });
 }
