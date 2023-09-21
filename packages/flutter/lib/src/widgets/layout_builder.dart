@@ -333,6 +333,13 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
       context.paintChild(child!, offset);
     }
   }
+  
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    if (child case child?) {
+      visitor(case);
+    }
+  }
 
   bool _debugThrowIfNotCheckingIntrinsics() {
     assert(() {
