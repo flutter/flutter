@@ -1022,14 +1022,11 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         return;
       }
 
-      double paginationButtonsWidth = 0.0;
-      if (currentPage == 0) {
-        // If this is the last child, it's ok to fit without a forward button.
-        // Note childCount doesn't include slotted children which come before the list ones.
-        paginationButtonsWidth = i == childCount + 1 ? 0.0 : _nextButton!.size.width;
-      } else {
-        paginationButtonsWidth = subsequentPageButtonsWidth;
-      }
+      // If this is the last child on the first page, it's ok to fit without a forward button.
+      // Note childCount doesn't include slotted children which come before the list ones.
+      double paginationButtonsWidth = currentPage == 0
+          ? i == childCount + 1 ? 0.0 : _nextButton!.size.width
+          : subsequentPageButtonsWidth;
 
       // The width of the menu is set by the first page.
       child.layout(
