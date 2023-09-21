@@ -1099,8 +1099,8 @@ void main() {
               onRefresh: refresh,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: <String>['A', 'B', 'C', 'D', 'E', 'F']
-                    .map<Widget>((String item) {
+                children:
+                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
                   return SizedBox(
                     height: 200.0,
                     child: Text(item),
@@ -1125,7 +1125,7 @@ void main() {
           expect(modeArmed, true);
           expect(modeDone, true);
         });
-  });
+    });
 
   testWidgetsWithLeakTracking('RefreshIndicator manipulates value color opacity correctly', (WidgetTester tester) async {
     final List<Color> colors = <Color>[
