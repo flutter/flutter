@@ -125,7 +125,7 @@ vars = {
   # Upstream URLs for third party dependencies, used in
   # determining common ancestor commit for vulnerability scanning
   # prefixed with 'upstream_' in order to be identified by parsing tool.
-  # The vulnerabiity database being used in this scan can be browsed
+  # The vulnerability database being used in this scan can be browsed
   # using this UI https://osv.dev/list
   # If a new dependency needs to be added, the upstream (non-mirrored)
   # git URL for that dependency should be added to this list
@@ -221,6 +221,7 @@ vars = {
   "upstream_stream_channel": "https://github.com/dart-lang/stream_channel.git",
   "upstream_string_scanner": "https://github.com/dart-lang/string_scanner.git",
   "upstream_SwiftShader": "https://swiftshader.googlesource.com/SwiftShader.git",
+  "upstream_tar": "https://github.com/simolus3/tar.git",
   "upstream_term_glyph": "https://github.com/dart-lang/term_glyph.git",
   "upstream_test_reflective_loader": "https://github.com/dart-lang/test_reflective_loader.git",
   "upstream_test": "https://github.com/dart-lang/test.git",
@@ -469,6 +470,9 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/string_scanner':
    Var('dart_git') + '/string_scanner.git@da9142cf9809e7e1364144b8193ec60d87f0a4b8',
+
+   'src/third_party/dart/third_party/pkg/tar':
+   Var('dart_git') + '/external/github.com/simolus3/tar.git@3c68cba8e51c569428222b9185469249206172c6',
 
   'src/third_party/dart/third_party/pkg/term_glyph':
    Var('dart_git') + '/term_glyph.git@1b28285a7e818b8e87c4d2119d968c5b36d73c7a',
