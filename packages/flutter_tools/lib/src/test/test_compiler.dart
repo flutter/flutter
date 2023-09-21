@@ -16,7 +16,6 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../linux/native_assets.dart';
 import '../macos/native_assets.dart';
 import '../native_assets.dart';
 import '../project.dart';
@@ -182,15 +181,7 @@ class TestCompiler {
           flutterTester: true,
           fileSystem: globals.fs,
           buildRunner: buildRunner,
-        );
-      } else if (globals.platform.isLinux) {
-        (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
-          buildMode: BuildMode.debug,
-          projectUri: projectUri,
-          flutterTester: true,
-          fileSystem: globals.fs,
-          buildRunner: buildRunner,
-        );
+      );
       } else {
         await ensureNoNativeAssetsOrOsIsSupported(
           projectUri,

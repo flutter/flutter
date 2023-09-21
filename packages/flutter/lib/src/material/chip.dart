@@ -137,7 +137,7 @@ abstract interface class ChipAttributes {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   Clip get clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -333,7 +333,7 @@ abstract interface class SelectableChipAttributes {
   /// If [onSelected] is not null, this value will be used to determine if the
   /// select check mark will be shown or not.
   ///
-  /// Must not be null. Defaults to false.
+  /// Defaults to false.
   bool get selected;
 
   /// Called when the chip should change between selected and de-selected
@@ -447,7 +447,7 @@ abstract interface class DisabledChipAttributes {
   /// For classes which don't have this as a constructor argument, [isEnabled]
   /// returns true if their user action callback is set.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   bool get isEnabled;
 
   /// The color used for the chip's background to indicate that it is not
@@ -561,7 +561,6 @@ abstract interface class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a Material Design chip.
   ///
-  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// The [elevation] must be null or non-negative.
   const Chip({
     super.key,
@@ -707,10 +706,8 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
-  /// arguments must not be null. The [pressElevation] and [elevation] must be
-  /// null or non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const RawChip({
     super.key,
     this.defaultProperties,
