@@ -1000,7 +1000,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     final BoxConstraints slottedConstraints = BoxConstraints(
       maxWidth: constraints.maxWidth,
       minHeight: greatestHeight,
-      maxHeight: constraints.maxHeight,
+      maxHeight: greatestHeight,
     );
     _backButton!.layout(slottedConstraints, parentUsesSize: true);
     _nextButton!.layout(slottedConstraints, parentUsesSize: true);
