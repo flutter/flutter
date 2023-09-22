@@ -213,6 +213,11 @@ class DlDispatcher final : public flutter::DlOpReceiver {
                     SkScalar y) override;
 
   // |flutter::DlOpReceiver|
+  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
+                     SkScalar x,
+                     SkScalar y) override;
+
+  // |flutter::DlOpReceiver|
   void drawShadow(const SkPath& path,
                   const flutter::DlColor color,
                   const SkScalar elevation,
