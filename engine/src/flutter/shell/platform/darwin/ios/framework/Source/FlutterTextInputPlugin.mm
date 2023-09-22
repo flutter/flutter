@@ -878,9 +878,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     self.keyboardAppearance = UIKeyboardAppearanceDefault;
   }
   NSString* autocorrect = configuration[kAutocorrectionType];
-  self.autocorrectionType = autocorrect && ![autocorrect boolValue]
-                                ? UITextAutocorrectionTypeNo
-                                : UITextAutocorrectionTypeDefault;
+  bool autocorrectIsDisabled = autocorrect && ![autocorrect boolValue];
+  self.autocorrectionType =
+      autocorrectIsDisabled ? UITextAutocorrectionTypeNo : UITextAutocorrectionTypeDefault;
+  self.spellCheckingType =
+      autocorrectIsDisabled ? UITextSpellCheckingTypeNo : UITextSpellCheckingTypeDefault;
   self.autofillId = AutofillIdFromDictionary(configuration);
   if (autofill == nil) {
     self.textContentType = @"";
