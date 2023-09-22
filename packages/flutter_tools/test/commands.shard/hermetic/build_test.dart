@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -36,9 +37,11 @@ void main() {
     late BufferLogger logger;
     late ProcessManager processManager;
     late ProcessUtils processUtils;
+    late Artifacts artifacts;
 
     setUp(() {
       fs = MemoryFileSystem.test();
+      artifacts = Artifacts.test(fileSystem: fs);
       fs.file('/package/pubspec.yaml').createSync(recursive: true);
       fs.currentDirectory = '/package';
       Cache.disableLocking();
@@ -52,6 +55,7 @@ void main() {
 
     testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
       command = FakeBuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -75,6 +79,7 @@ void main() {
 
     testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
       command = FakeBuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -98,6 +103,7 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
       command = FakeBuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -118,6 +124,7 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
       command = FakeBuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -165,6 +172,7 @@ class FakeBuildCommand extends BuildCommand {
     required Logger logger,
     required super.androidSdk,
     required super.processUtils,
+    required super.artifacts,
     bool verboseHelp = false,
   }) : super(logger: logger) {
     addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
