@@ -17,6 +17,7 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart' show fileSystem, platform;
@@ -56,10 +57,8 @@ const String packageName = 'package_with_native_assets';
 
 const String exampleAppName = '${packageName}_example';
 
-const String dylibName = 'lib$packageName.dylib';
-
 void main() {
-  if (!platform.isMacOS) {
+  if (!platform.isMacOS && !platform.isLinux) {
     // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
     return;
   }
@@ -148,6 +147,9 @@ void main() {
           if (device == 'macos') {
             expectDylibIsBundledMacOS(exampleDirectory, buildMode);
           }
+          if (device == 'linux') {
+            expectDylibIsBundledLinux(exampleDirectory, buildMode);
+          }
           if (device == hostOs) {
             expectCCompilerIsConfigured(exampleDirectory);
           }
@@ -201,6 +203,8 @@ void main() {
             expectDylibIsBundledMacOS(exampleDirectory, buildMode);
           } else if (buildSubcommand == 'ios') {
             expectDylibIsBundledIos(exampleDirectory, buildMode);
+          } else if (buildSubcommand == 'linux') {
+            expectDylibIsBundledLinux(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
@@ -278,7 +282,7 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory dylibsFolder = appBundle.childDirectory('Contents/Frameworks');
   expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(dylibName);
+  final File dylib = dylibsFolder.childFile(OS.macOS.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -287,7 +291,21 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory dylibsFolder = appBundle.childDirectory('Frameworks');
   expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(dylibName);
+  final File dylib = dylibsFolder.childFile(OS.iOS.dylibFileName(packageName));
+  expect(dylib, exists);
+}
+
+/// Checks that dylibs are bundled.
+///
+/// Sample path: build/linux/x64/release/bundle/lib/libmy_package.so
+void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
+  // Linux does not support cross compilation, so always only check current architecture.
+  final String architecture = Architecture.current.dartPlatform;
+  final Directory appBundle = appDirectory.childDirectory('build/$hostOs/$architecture/$buildMode/bundle/');
+  expect(appBundle, exists);
+  final Directory dylibsFolder = appBundle.childDirectory('lib/');
+  expect(dylibsFolder, exists);
+  final File dylib = dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -296,7 +314,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
-  final File dylib = frameworksFolder.childFile(dylibName);
+  final File dylib = frameworksFolder.childFile(OS.macOS.dylibFileName(packageName));
   expect(dylib, exists);
 }
 

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -177,9 +178,15 @@ Future<ProcessTestResult> runFlutter(
       minutes:
           10), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
 }) async {
+  const LocalPlatform platform = LocalPlatform();
   final Stopwatch clock = Stopwatch()..start();
   final Process process = await processManager.start(
-    <String>[flutterBin, ...arguments],
+    <String>[
+      // In a container with no X display, use the virtual framebuffer.
+      if (platform.isLinux && (platform.environment['DISPLAY'] ?? '').isEmpty) '/usr/bin/xvfb-run',
+      flutterBin,
+      ...arguments,
+    ],
     workingDirectory: workingDirectory,
   );
   final List<LogLine> logs = <LogLine>[];
