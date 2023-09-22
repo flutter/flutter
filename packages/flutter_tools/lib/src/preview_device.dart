@@ -15,7 +15,6 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'bundle_builder.dart';
-import 'cache.dart';
 import 'desktop_device.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -55,15 +54,19 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   Future<List<Device>> devices({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
-  }) async => <Device>[
-    if (_platform.isWindows)
-      PreviewDevice(
-        artifacts: _artifacts,
-        fileSystem: _fileSystem,
-        logger: _logger,
-        processManager: _processManager,
-      )
-  ];
+  }) async {
+    // TODO add logic to detect support
+    return <Device>[
+      if (_platform.isWindows)
+        PreviewDevice(
+          artifacts: _artifacts,
+          fileSystem: _fileSystem,
+          logger: _logger,
+          processManager: _processManager,
+          previewBinary: _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice)),
+        )
+    ];
+  }
 
   @override
   Future<List<Device>> discoverDevices({
@@ -91,8 +94,10 @@ class PreviewDevice extends Device {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    required File previewBinary,
     @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
-  }) : _processManager = processManager,
+  }) : _previewBinary = previewBinary,
+       _processManager = processManager,
        _logger = logger,
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
@@ -104,6 +109,7 @@ class PreviewDevice extends Device {
   final FileSystem _fileSystem;
   final BundleBuilderFactory _bundleBuilderFactory;
   final Artifacts _artifacts;
+  final File _previewBinary;
 
   @override
   void clearLogs() { }
@@ -180,11 +186,7 @@ class PreviewDevice extends Device {
     }
 
     // Merge with precompiled executable.
-    final File previewBinary = _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
-    // TODO check it exists
-    previewBinary.copySync(assetDirectory.childFile(previewBinary.basename).path);
-    //final Directory precompiledDirectory = _fileSystem.directory(_fileSystem.path.join(Cache.flutterRoot!, 'artifacts_temp', 'Debug'));
-    //copyDirectory(precompiledDirectory, assetDirectory);
+    _previewBinary.copySync(assetDirectory.childFile(_previewBinary.basename).path);
 
     final String windowsPath = _artifacts
       .getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);

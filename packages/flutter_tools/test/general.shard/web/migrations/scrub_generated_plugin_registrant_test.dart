@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -27,6 +28,7 @@ void main() {
     late File registrant;
 
     // Environment overrides
+    late Artifacts artifacts;
     late FileSystem fileSystem;
     late ProcessManager processManager;
     late BuildSystem buildSystem;
@@ -36,6 +38,7 @@ void main() {
     setUp(() {
       // Prepare environment overrides
       fileSystem = MemoryFileSystem.test();
+      artifacts = Artifacts.test(fileSystem: fileSystem);
       processManager = FakeProcessManager.any();
       logger = BufferLogger.test();
       processUtils = ProcessUtils(
@@ -56,6 +59,7 @@ void main() {
       expect(registrant.existsSync(), isFalse);
 
       await createTestCommandRunner(BuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -80,6 +84,7 @@ void main() {
       expect(contentsBeforeBuild, isNot(contains('lib/generated_plugin_registrant.dart')));
 
       await createTestCommandRunner(BuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -103,6 +108,7 @@ void main() {
       expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
       await createTestCommandRunner(BuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -125,6 +131,7 @@ void main() {
       expect(registrant.existsSync(), isTrue);
 
       await createTestCommandRunner(BuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
@@ -149,6 +156,7 @@ void main() {
       expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
       await createTestCommandRunner(BuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
