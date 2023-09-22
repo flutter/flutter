@@ -12,6 +12,7 @@ import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../ios/native_assets.dart';
+import '../../linux/native_assets.dart';
 import '../../macos/native_assets.dart';
 import '../../macos/xcode.dart';
 import '../../native_assets.dart';
@@ -118,12 +119,36 @@ class NativeAssets extends Target {
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+        final String? environmentBuildMode = environment.defines[kBuildMode];
+        if (environmentBuildMode == null) {
+          throw MissingDefineException(kBuildMode, name);
+        }
+        final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        (_, dependencies) = await buildNativeAssetsLinux(
+          targetPlatform: targetPlatform,
+          buildMode: buildMode,
+          projectUri: projectUri,
+          yamlParentDirectory: environment.buildDir.uri,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
       case TargetPlatform.tester:
         if (const LocalPlatform().isMacOS) {
           (_, dependencies) = await buildNativeAssetsMacOS(
             buildMode: BuildMode.debug,
             projectUri: projectUri,
             codesignIdentity: environment.defines[kCodesignIdentity],
+            yamlParentDirectory: environment.buildDir.uri,
+            fileSystem: fileSystem,
+            buildRunner: buildRunner,
+            flutterTester: true,
+          );
+        } else if (const LocalPlatform().isLinux) {
+          (_, dependencies) = await buildNativeAssetsLinux(
+            buildMode: BuildMode.debug,
+            projectUri: projectUri,
             yamlParentDirectory: environment.buildDir.uri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
@@ -142,8 +167,6 @@ class NativeAssets extends Target {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
         // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
