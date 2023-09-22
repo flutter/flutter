@@ -39,3 +39,11 @@ CheckOptions:
     value: "lower_case"
   - key: readability-identifier-naming.PrivateMemberSuffix
     value: "_"
+
+# Lint headers within paths that contain "/flutter/" but not:
+# - gen         (generated code, the fact it compiles is good enough™)
+# - third_party (we didn't author most of the code, and can't fix the lints)
+#
+# Note this is because of our buildroot setup, so the full path of a lint is:
+# "../../flutter/impeller/core/runtime_types.h:1:1" as reported.
+HeaderFilterRegex: "(!third_party/)(!gen/).*/flutter/.*"
