@@ -186,7 +186,8 @@ class PreviewDevice extends Device {
     }
 
     // Merge with precompiled executable.
-    _previewBinary.copySync(assetDirectory.childFile(_previewBinary.basename).path);
+    final String copiedPreviewBinaryPath = assetDirectory.childFile(_previewBinary.basename).path;
+    _previewBinary.copySync(copiedPreviewBinaryPath);
 
     final String windowsPath = _artifacts
       .getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
@@ -196,9 +197,7 @@ class PreviewDevice extends Device {
     icu.copySync(assetDirectory.childDirectory('data').childFile('icudtl.dat').path);
 
     final Process process = await _processManager.start(
-      <String>[
-        assetDirectory.childFile('flutter_preview').path,
-      ],
+      <String>[copiedPreviewBinaryPath],
     );
     _process = process;
     _logReader.initializeProcess(process);

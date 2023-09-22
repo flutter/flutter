@@ -26,11 +26,14 @@ import '../src/context.dart';
 void main() {
   String? flutterRootBackup;
   late MemoryFileSystem fs;
+  late File previewBinary;
 
   setUp(() {
     fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    flutterRootBackup = Cache.flutterRoot;
     Cache.flutterRoot = r'C:\path\to\flutter';
+    previewBinary = fs.file('${Cache.flutterRoot}\\bin\\cache\\artifacts\\flutter_preview\\flutter_preview.exe');
+    previewBinary.createSync(recursive: true);
+    flutterRootBackup = Cache.flutterRoot;
   });
 
   tearDown(() {
@@ -42,6 +45,7 @@ void main() {
       artifacts: Artifacts.test(),
       fileSystem: fs,
       processManager: FakeProcessManager.any(),
+      previewBinary: previewBinary,
       logger: BufferLogger.test(),
     );
 
@@ -66,10 +70,11 @@ void main() {
     final PreviewDevice device = PreviewDevice(
       artifacts: Artifacts.test(),
       fileSystem: fs,
+      previewBinary: previewBinary,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
-            '/.tmp_rand0/flutter_preview.rand0/splash',
+            r'C:\.tmp_rand0\flutter_preview.rand0\flutter_preview.exe',
           ],
           stdout: 'The Dart VM service is listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
           completer: completer,
@@ -83,10 +88,11 @@ void main() {
       .childDirectory('Debug')
       .createSync(recursive: true);
     final Directory previewDeviceCacheDir = fs
-      .directory(Cache.flutterRoot)
-      .childDirectory('Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
+      //.directory(Cache.flutterRoot)
+      .directory('Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
       ..createSync(recursive: true);
     previewDeviceCacheDir.childFile('flutter_windows.dll').writeAsStringSync('1010101');
+    previewDeviceCacheDir.childFile('icudtl.dat').writeAsStringSync('1010101');
 
     final LaunchResult result = await device.startApp(
       FakeApplicationPackage(),
