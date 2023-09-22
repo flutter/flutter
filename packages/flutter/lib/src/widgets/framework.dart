@@ -6270,26 +6270,148 @@ abstract class RenderObjectElement extends Element {
     return ancestor as RenderObjectElement?;
   }
 
+  void _debugCheckCompetingAncestors(
+    List<ParentDataElement<ParentData>> result,
+    Set<Type> debugAncestorTypes,
+    List<Type> debugAncestorCulprits,
+  ) {
+    assert(() {
+      // This method returns the competing ancestors as defined in point 1 above.
+      List<ParentDataElement<ParentData>> getCompetingAncestors() {
+        return result.where((ParentDataElement<ParentData> ancestor) {
+          return debugAncestorCulprits.contains(ancestor.runtimeType);
+        }).toList();
+      }
+      // Check that no other ParentDataWidgets of the same
+      // type want to provide parent data.
+      if (debugAncestorTypes.length != result.length) {
+        // This can only occur if the Set of ancestors was provided a dupe and
+        // did not add it.
+        assert(debugAncestorTypes.length < result.length);
+        try {
+          // We explicitly throw here (even though we immediately redirect the
+          // exception elsewhere) so that debuggers will notice it when they
+          // have "break on exception" enabled.
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Incorrect use of ParentDataWidget.'),
+            ErrorDescription(
+              'Competing ParentDataWidgets are providing parent data to the '
+              'same RenderObject:'
+            ),
+            for (final ParentDataElement<ParentData> ancestor in getCompetingAncestors())
+              ErrorDescription(
+                '- ${ancestor.widget} (typically placed directly inside a '
+                '${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} '
+                'widget)'
+              ),
+            ErrorDescription(
+              'A RenderObject can receive parent data from multiple '
+              'ParentDataWidgets, but they must all be of different types.'
+            ),
+            ErrorHint(
+              'Usually, this indicates that one or more of the offending '
+              "ParentDataWidgets listed above isn't placed inside a dedicated "
+              "compatible ancestor widget that it isn't sharing with another "
+              'ParentDataWidget of the same type.'
+            ),
+            ErrorDescription(
+              'The ownership chain for the RenderObject that received the '
+              'parent data was:\n  ${debugGetCreatorChain(10)}'
+            ),
+          ]);
+        } on FlutterError catch (error) {
+          _reportException(
+            ErrorSummary('while looking for parent data.'),
+            error,
+            error.stackTrace,
+          );
+        }
+      }
+      return true;
+    }());
+  }
+
+  void _debugCheckCompetingParentData(
+    List<ParentDataElement<ParentData>> result,
+    Set<Type> debugParentDataTypes,
+    List<Type> debugParentDataCulprits,
+  ) {
+    assert((){
+      List<ParentDataElement<ParentData>> getCompetingParentData() {
+        return result.where((ParentDataElement<ParentData> ancestor) {
+          return debugParentDataCulprits.contains(ancestor.parentDataType);
+        }).toList();
+      }
+      // Check that no other ParentData of the same type are possibly
+      // overwriting each other.
+      if (debugParentDataTypes.length != result.length) {
+        // This can only occur if the Set of ParentData types was provided a
+        // dupe and did not add it.
+        assert(debugParentDataTypes.length < result.length);
+        try {
+          // We explicitly throw here (even though we immediately redirect the
+          // exception elsewhere) so that debuggers will notice it when they
+          // have "break on exception" enabled.
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Incorrect use of ParentDataWidget.'),
+            ErrorDescription(
+              'Multiple ParentDataWidgets are providing competing ParentData '
+              'to the same RenderObject:'
+            ),
+            for (final ParentDataElement<ParentData> ancestor in getCompetingParentData())
+              ErrorDescription(
+                '- ${ancestor.widget} which writes ParentData of type '
+                '${ancestor.parentDataType}'
+              ),
+            ErrorDescription(
+              'A RenderObject can receive parent data from multiple '
+              'ParentDataWidgets, but the Type of ParentData must be unique to '
+              'prevent one overwriting another.'
+            ),
+            ErrorDescription(
+              'The ownership chain for the RenderObject that received the '
+              'parent data was:\n  ${debugGetCreatorChain(10)}'
+            ),
+          ]);
+        } on FlutterError catch (error) {
+          _reportException(
+            ErrorSummary('while looking for parent data.'),
+            error,
+            error.stackTrace,
+          );
+        }
+      }
+      return true;
+    }());
+  }
+
   List<ParentDataElement<ParentData>> _findAncestorParentDataElements() {
-    // More than one ParentDataWidget can contribute ParentData, but there are
-    // some constraints.
-    // 1. ParentData can only be written by unique ParentDataWidget types.
-    //    For example, two KeepAlive ParentDataWidgets trying to write to the
-    //    same child is not allowed.
-    // 2. The ParentData itself must be compatible with all ParentDataWidgets
-    //    writing to it.
-    //    For example, TwoDimensionalViewportParentData uses the
-    //    KeepAliveParentDataMixin, so it could be compatible with both
-    //    KeepAlive, and another ParentDataWidget with ParentData type
-    //    TwoDimensionalViewportParentData or a subclass thereof.
-    // The first case is verified here. The second is verified in
-    // debugIsValidRenderObject.
     Element? ancestor = _parent;
     final List<ParentDataElement<ParentData>> result = <ParentDataElement<ParentData>>[];
     final Set<Type> debugAncestorTypes = <Type>{};
     final Set<Type> debugParentDataTypes = <Type>{};
     final List<Type> debugAncestorCulprits = <Type>[];
     final List<Type> debugParentDataCulprits = <Type>[];
+
+    // More than one ParentDataWidget can contribute ParentData, but there are
+    // some constraints.
+    // 1. ParentData can only be written by unique ParentDataWidget types.
+    //    For example, two KeepAlive ParentDataWidgets trying to write to the
+    //    same child is not allowed.
+    // 2. Each contributing ParentDataWidget must contribute to a unique
+    //    ParentData type, less ParentData be overwritten.
+    //    For example, there cannot be two ParentDataWidgets that both write
+    //    ParentData of type KeepAliveParentDataMixin, if the first check was
+    //    subverted by a subclassing of the KeepAlive ParentDataWidget.
+    // 3. The ParentData itself must be compatible with all ParentDataWidgets
+    //    writing to it.
+    //    For example, TwoDimensionalViewportParentData uses the
+    //    KeepAliveParentDataMixin, so it could be compatible with both
+    //    KeepAlive, and another ParentDataWidget with ParentData type
+    //    TwoDimensionalViewportParentData or a subclass thereof.
+    // The first and second cases are verified here. The third is verified in
+    // debugIsValidRenderObject.
+
     while (ancestor != null && ancestor is! RenderObjectElement) {
       if (ancestor is ParentDataElement<ParentData>) {
         assert(() {
@@ -6320,51 +6442,18 @@ abstract class RenderObjectElement extends Element {
       if (result.isEmpty || ancestor == null) {
         return true;
       }
-      // Check that no other ParentDataWidgets of the same type want to provide
-      // parent data.
-      if (debugAncestorTypes.length != result.length) {
-        // This can only occur if the Set of ancestors was provided a dupe and
-        // did not add it.
-        assert(debugAncestorTypes.length < result.length);
-        try {
-          // We explicitly throw here (even though we immediately redirect the
-          // exception elsewhere) so that debuggers will notice it when they
-          // have "break on exception" enabled.
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Incorrect use of ParentDataWidget.'),
-            ErrorDescription(
-              'Competing ParentDataWidgets are providing parent data to the '
-              'same RenderObject:'
-            ),
-            for (final ParentDataElement<ParentData> ancestor in result)
-              ErrorDescription(
-                '- ${ancestor.widget} (typically placed directly inside a '
-                '${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} '
-                'widget)'
-              ),
-            ErrorDescription(
-              'A RenderObject can receive parent data from multiple '
-              'ParentDataWidgets, but they must be all of different types.'
-            ),
-            ErrorHint(
-              'Usually, this indicates that at least one of the offending '
-              "ParentDataWidgets listed above isn't placed inside a dedicated "
-              "compatible ancestor widget that it isn't sharing with another "
-              'ParentDataWidget of the same type.'
-            ),
-            ErrorDescription(
-              'The ownership chain for the RenderObject that received the '
-              'parent data was:\n  ${debugGetCreatorChain(10)}'
-            ),
-          ]);
-        } on FlutterError catch (error) {
-          _reportException(
-            ErrorSummary('while looking for parent data.'),
-            error,
-            error.stackTrace,
-          );
-        }
-      }
+      // Validate point 1 from above.
+      _debugCheckCompetingAncestors(
+        result,
+        debugAncestorTypes,
+        debugAncestorCulprits,
+      );
+      // Validate point 2 from above.
+      _debugCheckCompetingParentData(
+        result,
+        debugParentDataTypes,
+        debugParentDataCulprits,
+      );
       return true;
     }());
     return result;
