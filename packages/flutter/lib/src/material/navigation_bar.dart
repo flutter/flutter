@@ -356,8 +356,8 @@ class NavigationDestination extends StatelessWidget {
       enabled: enabled,
       buildIcon: (BuildContext context) {
         final IconThemeData selectedIconTheme =
-          navigationBarTheme.iconTheme?.resolve(selectedState) ??
-          defaults.iconTheme!.resolve(selectedState)!;
+          navigationBarTheme.iconTheme?.resolve(selectedState)
+          ?? defaults.iconTheme!.resolve(selectedState)!;
         final IconThemeData unselectedIconTheme =
           navigationBarTheme.iconTheme?.resolve(unselectedState)
           ?? defaults.iconTheme!.resolve(unselectedState)!;
@@ -1364,8 +1364,7 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(color:
-        states.contains(MaterialState.disabled)
+      return style.apply(color: states.contains(MaterialState.disabled)
         ? _colors.onSurfaceVariant.withOpacity(0.38)
         : states.contains(MaterialState.selected)
             ? _colors.onSurface
