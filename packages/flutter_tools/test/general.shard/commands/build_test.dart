@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -117,10 +118,12 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.empty(),
     );
+    final MemoryFileSystem fs = MemoryFileSystem.test();
     final BuildCommand command = BuildCommand(
+      artifacts: Artifacts.test(fileSystem: fs),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fs,
       logger: logger,
       processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
