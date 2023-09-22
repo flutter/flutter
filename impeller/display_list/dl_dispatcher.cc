@@ -851,7 +851,7 @@ void DlDispatcher::drawPath(const SkPath& path) {
 
   // We can't "optimize" a path into a rectangle if it's open.
   bool closed;
-  if (path.isRect(&rect, &closed); closed) {
+  if (path.isRect(&rect, &closed) && closed) {
     canvas_.DrawRect(skia_conversions::ToRect(rect), paint_);
     return;
   }
