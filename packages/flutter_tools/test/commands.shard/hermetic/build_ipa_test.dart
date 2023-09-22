@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -76,6 +77,7 @@ void main() {
   late ProcessUtils processUtils;
   late FakePlistUtils plistUtils;
   late BufferLogger logger;
+  late Artifacts artifacts;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -83,6 +85,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    artifacts = Artifacts.test(fileSystem: fileSystem);
     usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
@@ -204,6 +207,7 @@ void main() {
 
   testUsingContext('ipa build fails when there is no ios project', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -225,6 +229,7 @@ void main() {
 
   testUsingContext('ipa build fails in debug with code analysis', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -246,6 +251,7 @@ void main() {
 
   testUsingContext('ipa build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -273,6 +279,7 @@ void main() {
   testUsingContext('ipa build fails when export plist does not exist',
       () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -304,6 +311,7 @@ void main() {
   testUsingContext('ipa build fails when export plist is not a file', () async {
     final Directory bogus = fileSystem.directory('bogus')..createSync();
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -332,6 +340,7 @@ void main() {
 
   testUsingContext('ipa build fails when --export-options-plist and --export-method are used together', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -362,6 +371,7 @@ void main() {
 
   testUsingContext('ipa build reports when IPA fails', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -412,6 +422,7 @@ void main() {
   testUsingContext('ipa build invokes xcodebuild and archives for app store', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -463,6 +474,7 @@ void main() {
   testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc distribution', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -514,6 +526,7 @@ void main() {
   testUsingContext('ipa build invokes xcodebuild and archives for enterprise distribution', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -564,6 +577,7 @@ void main() {
 
   testUsingContext('ipa build invokes xcode build with verbosity', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -592,6 +606,7 @@ void main() {
 
   testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -643,6 +658,7 @@ void main() {
 
   testUsingContext('code size analysis fails when app not found', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -668,6 +684,7 @@ void main() {
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -727,6 +744,7 @@ void main() {
     final File exportOptions = fileSystem.file('ExportOptions.plist')
       ..createSync();
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -763,6 +781,7 @@ void main() {
 
   testUsingContext('Trace error if xcresult is empty.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -796,6 +815,7 @@ void main() {
 
   testUsingContext('Display xcresult issues on console if parsed.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -830,6 +850,7 @@ void main() {
 
   testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -866,6 +887,7 @@ void main() {
 
   testUsingContext('Trace if xcresult bundle does not exist.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -897,6 +919,7 @@ void main() {
 
   testUsingContext('Extra error message for provision profile issue in xcresulb bundle.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -951,6 +974,7 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1009,6 +1033,7 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1066,6 +1091,7 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1119,6 +1145,7 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1161,6 +1188,7 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1244,6 +1272,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1325,6 +1354,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1386,6 +1416,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1447,6 +1478,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1509,6 +1541,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1571,6 +1604,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1678,6 +1712,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1761,6 +1796,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
@@ -1841,6 +1877,7 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: logger,
