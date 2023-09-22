@@ -5470,7 +5470,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   /// Gets first route entry satisfying the predicate, or null if not found.
-  _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+  _RouteEntry? _firstRouteEntryWhereOrNull(_RouteEntryPredicate test) {
     for (final _RouteEntry element in _history) {
       if (test(element)) {
         return element;
@@ -5480,7 +5480,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   /// Gets last route entry satisfying the predicate, or null if not found.
-  _RouteEntry? _lastRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+  _RouteEntry? _lastRouteEntryWhereOrNull(_RouteEntryPredicate test) {
     _RouteEntry? result;
     for (final _RouteEntry element in _history) {
       if (test(element)) {

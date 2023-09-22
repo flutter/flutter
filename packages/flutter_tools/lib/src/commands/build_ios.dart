@@ -20,6 +20,7 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -723,6 +724,21 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     if (result.output != null) {
       globals.printStatus('Built ${result.output}.');
+
+      // When an app is successfully built, record to analytics whether Impeller
+      // is enabled or disabled.
+      final BuildableIOSApp app = await buildableIOSApp;
+      final String plistPath = app.project.infoPlist.path;
+      final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+        plistPath, PlistParser.kFLTEnableImpellerKey,
+      );
+      BuildEvent(
+        impellerEnabled == false
+          ? 'plist-impeller-disabled'
+          : 'plist-impeller-enabled',
+        type: 'ios',
+        flutterUsage: globals.flutterUsage,
+      ).send();
 
       return FlutterCommandResult.success();
     }
