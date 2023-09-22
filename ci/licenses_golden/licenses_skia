@@ -1,4 +1,4 @@
-Signature: bbb68f045a2faf5e7d01c829521ffdf9
+Signature: 912dc22e56cc897ba0f02da09dd5c2b3
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8840,6 +8840,7 @@ ORIGIN: ../../../third_party/skia/src/base/SkRectMemcpy.h + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/base/SkSafeMath.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkTime.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkTime.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkImageGenerator_FromEncoded.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_opts.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp + ../../../third_party/skia/LICENSE
@@ -9101,6 +9102,7 @@ FILE: ../../../third_party/skia/src/base/SkRectMemcpy.h
 FILE: ../../../third_party/skia/src/base/SkSafeMath.cpp
 FILE: ../../../third_party/skia/src/base/SkTime.cpp
 FILE: ../../../third_party/skia/src/base/SkTime.h
+FILE: ../../../third_party/skia/src/codec/SkImageGenerator_FromEncoded.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_opts.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp
