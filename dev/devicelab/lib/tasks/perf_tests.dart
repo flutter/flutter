@@ -1357,7 +1357,6 @@ const List<String> _kCommonScoreKeys = <String>[
   '90th_percentile_picture_cache_memory',
   '99th_percentile_picture_cache_memory',
   'worst_picture_cache_memory',
-  'new_gen_gc_count',
   'old_gen_gc_count',
 ];
 
