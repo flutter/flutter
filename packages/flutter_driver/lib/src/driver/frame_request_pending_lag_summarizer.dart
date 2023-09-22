@@ -52,7 +52,6 @@ class FrameRequestPendingLagSummarizer {
 				if (id != null) {
 					starts[id] = event.timestampMicros!;
 				}
-        continue;
       }
 			else if (event.phase == 'e') {
 				final int? start = starts[event.json['id']];
