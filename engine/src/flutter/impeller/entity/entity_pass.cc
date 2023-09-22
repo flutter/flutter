@@ -124,10 +124,43 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
 
       std::optional<Rect> unfiltered_coverage =
           GetSubpassCoverage(subpass, std::nullopt);
+
+      // If the current pass elements have any coverage so far and there's a
+      // backdrop filter, then incorporate the backdrop filter in the
+      // pre-filtered coverage of the subpass.
+      if (result.has_value() && subpass.backdrop_filter_proc_) {
+        std::shared_ptr<FilterContents> backdrop_filter =
+            subpass.backdrop_filter_proc_(FilterInput::Make(result.value()),
+                                          subpass.xformation_,
+                                          Entity::RenderingMode::kSubpass);
+        if (backdrop_filter) {
+          auto backdrop_coverage = backdrop_filter->GetCoverage({});
+          backdrop_coverage->origin += result->origin;
+          if (backdrop_coverage.has_value()) {
+            if (unfiltered_coverage.has_value()) {
+              unfiltered_coverage = coverage->Union(*backdrop_coverage);
+            } else {
+              unfiltered_coverage = backdrop_coverage;
+            }
+          }
+        } else {
+          VALIDATION_LOG << "The EntityPass backdrop filter proc didn't return "
+                            "a valid filter.";
+        }
+      }
+
       if (!unfiltered_coverage.has_value()) {
         continue;
       }
 
+      // Additionally, subpass textures may be passed through filters, which may
+      // modify the coverage.
+      //
+      // Note that we currently only assume that ImageFilters (such as blurs and
+      // matrix transforms) may modify coverage, although it's technically
+      // possible ColorFilters to affect coverage as well. For example: A
+      // ColorMatrixFilter could output a completely transparent result, and
+      // we could potentially detect this case as zero coverage in the future.
       std::shared_ptr<FilterContents> image_filter =
           subpass.delegate_->WithImageFilter(*unfiltered_coverage,
                                              subpass.xformation_);
