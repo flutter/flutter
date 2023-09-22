@@ -117,7 +117,7 @@ class TabController extends ChangeNotifier {
          vsync: vsync,
        ) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
