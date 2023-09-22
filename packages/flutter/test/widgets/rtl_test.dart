@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Padding RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Padding RTL', (WidgetTester tester) async {
     const Widget child = Padding(
       padding: EdgeInsetsDirectional.only(start: 10.0),
       child: Placeholder(),
@@ -43,7 +44,7 @@ void main() {
     );
   });
 
-  testWidgets('Container padding/margin RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Container padding/margin RTL', (WidgetTester tester) async {
     final Widget child = Container(
       padding: const EdgeInsetsDirectional.only(start: 6.0),
       margin: const EdgeInsetsDirectional.only(end: 20.0, start: 4.0),
@@ -63,7 +64,7 @@ void main() {
     expect(tester.getTopRight(find.byType(Placeholder)), const Offset(790.0, 0.0));
   });
 
-  testWidgets('Container padding/margin mixed RTL/absolute', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Container padding/margin mixed RTL/absolute', (WidgetTester tester) async {
     final Widget child = Container(
       padding: const EdgeInsets.only(left: 6.0),
       margin: const EdgeInsetsDirectional.only(end: 20.0, start: 4.0),
@@ -83,7 +84,7 @@ void main() {
     expect(tester.getTopRight(find.byType(Placeholder)), const Offset(796.0, 0.0));
   });
 
-  testWidgets('EdgeInsetsDirectional without Directionality', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('EdgeInsetsDirectional without Directionality', (WidgetTester tester) async {
     await tester.pumpWidget(const Padding(padding: EdgeInsetsDirectional.zero));
     expect(tester.takeException(), isAssertionError);
   });

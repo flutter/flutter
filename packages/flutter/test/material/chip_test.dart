@@ -138,7 +138,6 @@ Widget chipWithOptionalDeleteButton({
   Key? labelKey,
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
-  bool useDeleteButtonTooltip = true,
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
   VoidCallback? onPressed = doNothing,
@@ -154,7 +153,6 @@ Widget chipWithOptionalDeleteButton({
           onPressed: onPressed,
           onDeleted: deletable ? doNothing : null,
           deleteIcon: Icon(Icons.close, key: deleteButtonKey),
-          useDeleteButtonTooltip: useDeleteButtonTooltip,
           deleteButtonTooltipMessage: deleteButtonTooltipMessage,
           label: Text(
             deletable
@@ -217,7 +215,7 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('M2 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
 
     Widget buildFrame(Brightness brightness) {
@@ -292,7 +290,12 @@ void main() {
     expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134394
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?>{'OpacityLayer': 2},
+  ));
 
   testWidgetsWithLeakTracking('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
@@ -700,11 +703,13 @@ void main() {
     expect(calledDelete, isFalse);
   });
 
-  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
-        OverlayEntry(
+        entry = OverlayEntry(
           builder: (BuildContext context) {
             return Material(
               child: Chip(
@@ -879,11 +884,14 @@ void main() {
   testWidgets('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
+
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
       wrapForChip(
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Material(
                   child: Center(
@@ -915,12 +923,16 @@ void main() {
   testWidgets('Chip padding - RTL', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
+
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       wrapForChip(
         textDirection: TextDirection.rtl,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Material(
                   child: Center(
@@ -3197,31 +3209,6 @@ void main() {
     await tester.pumpAndSettle();
     box = tester.getRect(find.byKey(key));
     expect(box.size, equals(const Size(128, 24.0 + 16.0)));
-  });
-
-  testWidgetsWithLeakTracking('Chip delete button tooltip can be disabled using useDeleteButtonTooltip', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      chipWithOptionalDeleteButton(
-        deletable: true,
-        useDeleteButtonTooltip: false,
-      ),
-    );
-
-    // Tap at the delete icon of the chip, which is at the right side of the
-    // chip
-    final Offset topRightOfInkwell = tester.getTopLeft(find.byType(InkWell).first);
-    final Offset tapLocationOfDeleteButton = topRightOfInkwell + const Offset(8, 8);
-    final TestGesture tapGesture = await tester.startGesture(tapLocationOfDeleteButton);
-
-    await tester.pump();
-
-    // Wait for some more time while pressing and holding the delete button
-    await tester.pumpAndSettle();
-
-    // There should be no delete button tooltip
-    expect(findTooltipContainer('Delete'), findsNothing);
-
-    await tapGesture.up();
   });
 
   testWidgetsWithLeakTracking('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty', (WidgetTester tester) async {
