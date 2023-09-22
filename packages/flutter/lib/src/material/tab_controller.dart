@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../foundation/memory_allocations.dart';
 import 'constants.dart';
 
 // Examples can assume:
@@ -114,7 +115,11 @@ class TabController extends ChangeNotifier {
        _animationController = AnimationController.unbounded(
          value: initialIndex.toDouble(),
          vsync: vsync,
-       );
+       ) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
