@@ -308,6 +308,13 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createVeryLongPictureScrollingPerfE2ETest({required bool enableImpeller}) {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/very_long_picture_scrolling_perf_e2e.dart',
+    enableImpeller: enableImpeller,
+  ).run;
+}
 TaskFunction createSlidersPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -894,6 +901,7 @@ class StartupTest {
             testDirectory,
             'build',
             'windows',
+            'x64',
             'runner',
             'Profile',
             '$basename.exe'
@@ -1645,6 +1653,7 @@ class CompileTest {
           cwd,
           'build',
           'windows',
+          'x64',
           'runner',
           'release',
           '$basename.exe');

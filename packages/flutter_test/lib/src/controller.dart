@@ -1426,7 +1426,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null.
+  /// else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1471,7 +1471,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null.
+  /// else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US

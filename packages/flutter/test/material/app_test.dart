@@ -57,7 +57,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgets('Can place app inside FocusScope', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can place app inside FocusScope', (WidgetTester tester) async {
     final FocusScopeNode focusScopeNode = FocusScopeNode();
 
     await tester.pumpWidget(FocusScope(
@@ -69,6 +69,7 @@ void main() {
     ));
 
     expect(find.text('Home'), findsOneWidget);
+    focusScopeNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Can show grid without losing sync', (WidgetTester tester) async {
@@ -310,7 +311,7 @@ void main() {
     expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Initial route with missing step', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Initial route with missing step', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),
@@ -1082,12 +1083,13 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgets('MaterialApp.router works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1099,6 +1101,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
@@ -1111,9 +1114,14 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
-  testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1125,6 +1133,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
@@ -1136,7 +1145,12 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
   testWidgetsWithLeakTracking('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -1150,6 +1164,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
@@ -1161,6 +1176,7 @@ void main() {
       routerDelegate: delegate,
     ));
     expect(tester.takeException(), isAssertionError);
+    provider.dispose();
   });
 
   testWidgetsWithLeakTracking('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
@@ -1175,6 +1191,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(MaterialApp.router(
@@ -1184,15 +1201,19 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router router config works', (WidgetTester tester) async {
+    late SimpleNavigatorRouterDelegate routerDelegate;
+    addTearDown(() => routerDelegate.dispose());
+    late PlatformRouteInformationProvider provider;
+    addTearDown(() => provider.dispose());
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
-        routeInformationProvider: PlatformRouteInformationProvider(
+        routeInformationProvider: provider = PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
             uri: Uri.parse('initial'),
           ),
         ),
         routeInformationParser: SimpleRouteInformationParser(),
-        routerDelegate: SimpleNavigatorRouterDelegate(
+        routerDelegate: routerDelegate = SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
             return Text(information.uri.toString());
           },
@@ -1215,7 +1236,12 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
   testWidgetsWithLeakTracking('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;
@@ -1543,7 +1569,9 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   SimpleNavigatorRouterDelegate({
     required this.builder,
     required this.onPopPage,
-  });
+  }) {
+    ChangeNotifier.maybeDispatchObjectCreation(this);
+  }
 
   @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

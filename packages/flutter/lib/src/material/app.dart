@@ -202,8 +202,6 @@ class MaterialApp extends StatefulWidget {
   /// unsupported route.
   ///
   /// This class creates an instance of [WidgetsApp].
-  ///
-  /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const MaterialApp({
     super.key,
     this.navigatorKey,
@@ -878,6 +876,12 @@ class _MaterialAppState extends State<MaterialApp> {
   void initState() {
     super.initState();
     _heroController = MaterialApp.createMaterialHeroController();
+  }
+
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
   }
 
   // Combine the Localizations for Material with the ones contributed

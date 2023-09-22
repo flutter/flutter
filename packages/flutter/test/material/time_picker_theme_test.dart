@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('TimePickerThemeData copyWith, ==, hashCode basics', () {
@@ -20,25 +21,31 @@ void main() {
   test('TimePickerThemeData null fields by default', () {
     const TimePickerThemeData timePickerTheme = TimePickerThemeData();
     expect(timePickerTheme.backgroundColor, null);
-    expect(timePickerTheme.hourMinuteTextColor, null);
-    expect(timePickerTheme.hourMinuteColor, null);
-    expect(timePickerTheme.dayPeriodTextColor, null);
-    expect(timePickerTheme.dayPeriodColor, null);
-    expect(timePickerTheme.dialHandColor, null);
-    expect(timePickerTheme.dialBackgroundColor, null);
-    expect(timePickerTheme.dialTextColor, null);
-    expect(timePickerTheme.entryModeIconColor, null);
-    expect(timePickerTheme.hourMinuteTextStyle, null);
-    expect(timePickerTheme.dayPeriodTextStyle, null);
-    expect(timePickerTheme.helpTextStyle, null);
-    expect(timePickerTheme.shape, null);
-    expect(timePickerTheme.hourMinuteShape, null);
-    expect(timePickerTheme.dayPeriodShape, null);
+    expect(timePickerTheme.cancelButtonStyle, null);
+    expect(timePickerTheme.confirmButtonStyle, null);
     expect(timePickerTheme.dayPeriodBorderSide, null);
+    expect(timePickerTheme.dayPeriodColor, null);
+    expect(timePickerTheme.dayPeriodShape, null);
+    expect(timePickerTheme.dayPeriodTextColor, null);
+    expect(timePickerTheme.dayPeriodTextStyle, null);
+    expect(timePickerTheme.dialBackgroundColor, null);
+    expect(timePickerTheme.dialHandColor, null);
+    expect(timePickerTheme.dialTextColor, null);
+    expect(timePickerTheme.dialTextStyle, null);
+    expect(timePickerTheme.elevation, null);
+    expect(timePickerTheme.entryModeIconColor, null);
+    expect(timePickerTheme.helpTextStyle, null);
+    expect(timePickerTheme.hourMinuteColor, null);
+    expect(timePickerTheme.hourMinuteShape, null);
+    expect(timePickerTheme.hourMinuteTextColor, null);
+    expect(timePickerTheme.hourMinuteTextStyle, null);
     expect(timePickerTheme.inputDecorationTheme, null);
+    expect(timePickerTheme.entryModeIconColor, null);
+    expect(timePickerTheme.padding, null);
+    expect(timePickerTheme.shape, null);
   });
 
-  testWidgets('Default TimePickerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default TimePickerThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData().debugFillProperties(builder);
 
@@ -50,25 +57,39 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('TimePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TimePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData(
-      backgroundColor: Color(0xFFFFFFFF),
-      hourMinuteTextColor: Color(0xFFFFFFFF),
-      hourMinuteColor: Color(0xFFFFFFFF),
-      dayPeriodTextColor: Color(0xFFFFFFFF),
-      dayPeriodColor: Color(0xFFFFFFFF),
-      dialHandColor: Color(0xFFFFFFFF),
-      dialBackgroundColor: Color(0xFFFFFFFF),
-      dialTextColor: Color(0xFFFFFFFF),
-      entryModeIconColor: Color(0xFFFFFFFF),
-      hourMinuteTextStyle: TextStyle(),
-      dayPeriodTextStyle: TextStyle(),
-      helpTextStyle: TextStyle(),
-      shape: RoundedRectangleBorder(),
-      hourMinuteShape: RoundedRectangleBorder(),
-      dayPeriodShape: RoundedRectangleBorder(),
-      dayPeriodBorderSide: BorderSide(),
+      backgroundColor: Color(0xfffffff0),
+      cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1))),
+      confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2))),
+      dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3)),
+      dayPeriodColor: Color(0xfffffff4),
+      dayPeriodShape: RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xfffffff5)),
+      ),
+      dayPeriodTextColor: Color(0xfffffff6),
+      dayPeriodTextStyle: TextStyle(color: Color(0xfffffff7)),
+      dialBackgroundColor: Color(0xfffffff8),
+      dialHandColor: Color(0xfffffff9),
+      dialTextColor: Color(0xfffffffa),
+      dialTextStyle: TextStyle(color: Color(0xfffffffb)),
+      elevation: 1.0,
+      entryModeIconColor: Color(0xfffffffc),
+      helpTextStyle: TextStyle(color: Color(0xfffffffd)),
+      hourMinuteColor: Color(0xfffffffe),
+      hourMinuteShape: RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffffffff)),
+      ),
+      hourMinuteTextColor: Color(0xfffffff0),
+      hourMinuteTextStyle: TextStyle(color: Color(0xfffffff1)),
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: TextStyle(color: Color(0xfffffff2)),
+      ),
+      padding: EdgeInsets.all(1.0),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xfffffff3)),
+      ),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -76,27 +97,33 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
-      'backgroundColor: Color(0xffffffff)',
-      'dayPeriodBorderSide: BorderSide',
-      'dayPeriodColor: Color(0xffffffff)',
-      'dayPeriodShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'dayPeriodTextColor: Color(0xffffffff)',
-      'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
-      'dialBackgroundColor: Color(0xffffffff)',
-      'dialHandColor: Color(0xffffffff)',
-      'dialTextColor: Color(0xffffffff)',
-      'entryModeIconColor: Color(0xffffffff)',
-      'helpTextStyle: TextStyle(<all styles inherited>)',
-      'hourMinuteColor: Color(0xffffffff)',
-      'hourMinuteShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'hourMinuteTextColor: Color(0xffffffff)',
-      'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
-      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)'
-    ]);
+    expect(description, equalsIgnoringHashCodes(<String>[
+      'backgroundColor: Color(0xfffffff0)',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff1)))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff2)))',
+      'dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3))',
+      'dayPeriodColor: Color(0xfffffff4)',
+      'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff5)), BorderRadius.zero)',
+      'dayPeriodTextColor: Color(0xfffffff6)',
+      'dayPeriodTextStyle: TextStyle(inherit: true, color: Color(0xfffffff7))',
+      'dialBackgroundColor: Color(0xfffffff8)',
+      'dialHandColor: Color(0xfffffff9)',
+      'dialTextColor: Color(0xfffffffa)',
+      'dialTextStyle: TextStyle(inherit: true, color: Color(0xfffffffb))',
+      'elevation: 1.0',
+      'entryModeIconColor: Color(0xfffffffc)',
+      'helpTextStyle: TextStyle(inherit: true, color: Color(0xfffffffd))',
+      'hourMinuteColor: Color(0xfffffffe)',
+      'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: Color(0xffffffff)), BorderRadius.zero)',
+      'hourMinuteTextColor: Color(0xfffffff0)',
+      'hourMinuteTextStyle: TextStyle(inherit: true, color: Color(0xfffffff1))',
+      'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: Color(0xfffffff2)))',
+      'padding: EdgeInsets.all(1.0)',
+      'shape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff3)), BorderRadius.zero)'
+    ]));
   });
 
-  testWidgets('Material2 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme));
     await tester.tap(find.text('X'));
@@ -221,9 +248,15 @@ void main() {
       entryModeIconButton.color,
       defaultTheme.colorScheme.onSurface.withOpacity(0.6),
     );
+
+    final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'CANCEL');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+
+    final ButtonStyle confirmButtonStyle = _actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material3 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme));
     await tester.tap(find.text('X'));
@@ -363,6 +396,12 @@ void main() {
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
     expect(entryModeIconButton.color, null);
+
+    final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'Cancel');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+
+    final ButtonStyle confirmButtonStyle = _actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
   testWidgets('Material2 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
@@ -399,6 +438,12 @@ void main() {
       Typography.material2014().englishLike.displayMedium!
         .merge(defaultTheme.textTheme.displayMedium!.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36)))
     );
+
+    final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'CANCEL');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+
+    final ButtonStyle confirmButtonStyle= _actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
   testWidgets('Material3 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
@@ -438,9 +483,15 @@ void main() {
       hourDecoration.hintStyle,
       TextStyle(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))
     );
+
+    final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'Cancel');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+
+    final ButtonStyle confirmButtonStyle = _actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material2 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme, useMaterial3: false);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
@@ -555,9 +606,15 @@ void main() {
       entryModeIconButton.color,
       timePickerTheme.entryModeIconColor,
     );
+
+    final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'CANCEL');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(timePickerTheme.cancelButtonStyle.toString()));
+
+    final ButtonStyle confirmButtonStyle = _actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(timePickerTheme.confirmButtonStyle.toString()));
   });
 
-  testWidgets('Material3 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme, useMaterial3: true);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
@@ -672,6 +729,12 @@ void main() {
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
     expect(entryModeIconButton.color, null);
+
+    final ButtonStyle cancelButtonStyle = _actionButtonStyle(tester, 'Cancel');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(timePickerTheme.cancelButtonStyle.toString()));
+
+    final ButtonStyle confirmButtonStyle = _actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(timePickerTheme.confirmButtonStyle.toString()));
   });
 
   testWidgets('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (WidgetTester tester) async {
@@ -713,6 +776,8 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
   final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);
   return TimePickerThemeData(
     backgroundColor: Colors.orange,
+    cancelButtonStyle: TextButton.styleFrom(primary: Colors.red),
+    confirmButtonStyle: TextButton.styleFrom(primary: Colors.green),
     hourMinuteTextColor: materialStateColor,
     hourMinuteColor: materialStateColor,
     dayPeriodTextColor: materialStateColor,
@@ -807,3 +872,7 @@ final Finder findDialPaint = find.descendant(
   of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
   matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
 );
+
+ButtonStyle _actionButtonStyle(WidgetTester tester, String text) {
+  return tester.widget<TextButton>(find.widgetWithText(TextButton, text)).style!;
+}
