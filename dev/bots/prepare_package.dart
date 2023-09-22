@@ -17,7 +17,7 @@ import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
-const String gobMirror = 'https://github.com/christopherfujino/flutter.git'; // TODO
+const String gobMirror = 'https://flutter.googlesource.com/mirrors/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
@@ -55,8 +55,7 @@ enum Branch {
   beta,
   stable,
   master,
-  main,
-  preview;
+  main;
 }
 
 /// A helper class for classes that want to run a process, optionally have the
@@ -404,9 +403,8 @@ class ArchiveCreator {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
-    //await _runGit(<String>['clone', '-b', branch.name, gobMirror], workingDirectory: tempDir);
-    await _runGit(<String>['clone', '-b', 'preview-device-in-tool-from-scratch', gobMirror], workingDirectory: tempDir);
-    //await _runGit(<String>['reset', '--hard', revision]); // TODO
+    await _runGit(<String>['clone', '-b', branch.name, gobMirror], workingDirectory: tempDir);
+    await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
     await _runGit(<String>['remote', 'set-url', 'origin', githubRepo]);
@@ -531,14 +529,6 @@ class ArchiveCreator {
     await _runFlutter(<String>['update-packages']);
     await _runFlutter(<String>['precache']);
     await _runFlutter(<String>['ide-config']);
-    if (platform.isWindows) {
-      await _runFlutter(
-        <String>['build', '_preview', '-v'],
-        workingDirectory: Directory(
-          '${flutterRoot.path}\\packages\\flutter_tools',
-        ), // TODO figure this out better
-      );
-    }
 
     // Create each of the templates, since they will call 'pub get' on
     // themselves when created, and this will warm the cache with their
@@ -624,7 +614,7 @@ class ArchiveCreator {
     List<String> commandLine;
     if (platform.isWindows) {
       commandLine = <String>[
-        '7z', // TODO
+        '7za',
         'x',
         archive.absolute.path,
       ];
@@ -647,7 +637,7 @@ class ArchiveCreator {
         workingDirectory: Directory(source.absolute.path),
       );
       commandLine = <String>[
-        '7z',
+        '7za',
         'a',
         '-tzip',
         '-mx=9',
@@ -968,9 +958,9 @@ Future<void> main(List<String> rawArguments) async {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
-  //if (!parsedArguments.wasParsed('branch')) {
-  //  errorExit('Invalid argument: --branch must be specified.');
-  //}
+  if (!parsedArguments.wasParsed('branch')) {
+    errorExit('Invalid argument: --branch must be specified.');
+  }
 
   final String? tempDirArg = parsedArguments['temp_dir'] as String?;
   Directory tempDir;
@@ -997,8 +987,7 @@ Future<void> main(List<String> rawArguments) async {
 
   final bool publish = parsedArguments['publish'] as bool;
   final bool dryRun = parsedArguments['dry_run'] as bool;
-  //final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
-  const Branch branch = Branch.preview;
+  final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
   final ArchiveCreator creator = ArchiveCreator(
     tempDir,
     outputDir,
