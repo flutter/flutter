@@ -769,6 +769,23 @@ FLUTTER_ASSERT_ARC
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
 }
 
+- (void)testDisablingAutocorrectDisablesSpellChecking {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+
+  // Disable the interactive selection.
+  NSDictionary* config = self.mutableTemplateCopy;
+  [inputView configureWithDictionary:config];
+
+  XCTAssertEqual(inputView.autocorrectionType, UITextAutocorrectionTypeDefault);
+  XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeDefault);
+
+  [config setValue:@(NO) forKey:@"autocorrect"];
+  [inputView configureWithDictionary:config];
+
+  XCTAssertEqual(inputView.autocorrectionType, UITextAutocorrectionTypeNo);
+  XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeNo);
+}
+
 #pragma mark - TextEditingDelta tests
 - (void)testTextEditingDeltasAreGeneratedOnTextInput {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
