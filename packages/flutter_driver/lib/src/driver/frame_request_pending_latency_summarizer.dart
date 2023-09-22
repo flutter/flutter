@@ -10,8 +10,8 @@ const String kFrameRequestPendingEvent = 'Frame Request Pending';
 
 /// Summarizes [TimelineEvents]s corresponding to [kFrameRequestPendingEvent] events.
 ///
-/// `FrameRequestPendingLatency` is the time between when a new frame is requested
-/// to when the frame starts getting built by the Flutter Engine.
+/// `FrameRequestPendingLatency` is the time between `Animator::RequestFrame`
+/// and `Animator::BeginFrame` for each frame built by the Flutter engine.
 class FrameRequestPendingLatencySummarizer {
   /// Creates a FrameRequestPendingLatencySummarizer given the timeline events.
   FrameRequestPendingLatencySummarizer(this.frameRequestPendingEvents);

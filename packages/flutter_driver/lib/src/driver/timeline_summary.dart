@@ -259,12 +259,14 @@ class TimelineSummary {
   /// * "worst_picture_cache_memory": The worst (highest) value seen for the
   ///   memory used for the engine picture cache entries.
   ///   See [RasterCacheSummarizer.computeWorstPictureMemory].
-  /// * "average_frame_request_pending_latency": Computes the average of the time between
-  ///   frame request and frame start time.
-  ///   See [FrameRequestPendingLagSummarizer.computeAverageFrameRequestPendingLag].
-  /// * "90th_percentile_frame_request_pending_latency" and "99th_percentile_frame_request_pending_latency":
-  ///   The 90/99-th percentile delay between frame request and frame start time.
-  ///   See [FrameRequestPendingLagSummarizer.computePercentileFrameRequestPendingLag].
+  /// * "average_frame_request_pending_latency": Computes the average of the delay
+  ///   between `Animator::RequestFrame` and `Animator::BeginFrame` in the engine.
+  ///   See [FrameRequestPendingLatencySummarizer.computeAverageFrameRequestPendingLatency].
+  /// * "90th_percentile_frame_request_pending_latency" and
+  ///   "99th_percentile_frame_request_pending_latency": The 90/99-th percentile
+  ///   delay between `Animator::RequestFrame` and `Animator::BeginFrame` in the
+  ///   engine.
+  ///   See [FrameRequestPendingLatencySummarizer.computePercentileFrameRequestPendingLatency].
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
     final VsyncFrameLagSummarizer vsyncFrameLagSummarizer = _vsyncFrameLagSummarizer();
