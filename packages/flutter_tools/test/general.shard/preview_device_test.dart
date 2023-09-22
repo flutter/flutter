@@ -88,7 +88,6 @@ void main() {
       .childDirectory('Debug')
       .createSync(recursive: true);
     final Directory previewDeviceCacheDir = fs
-      //.directory(Cache.flutterRoot)
       .directory('Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
       ..createSync(recursive: true);
     previewDeviceCacheDir.childFile('flutter_windows.dll').writeAsStringSync('1010101');
