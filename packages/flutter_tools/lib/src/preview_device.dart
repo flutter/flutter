@@ -180,8 +180,11 @@ class PreviewDevice extends Device {
     }
 
     // Merge with precompiled executable.
-    final Directory precompiledDirectory = _fileSystem.directory(_fileSystem.path.join(Cache.flutterRoot!, 'artifacts_temp', 'Debug'));
-    copyDirectory(precompiledDirectory, assetDirectory);
+    final File previewBinary = _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
+    // TODO check it exists
+    previewBinary.copySync(assetDirectory.childFile(previewBinary.basename).path);
+    //final Directory precompiledDirectory = _fileSystem.directory(_fileSystem.path.join(Cache.flutterRoot!, 'artifacts_temp', 'Debug'));
+    //copyDirectory(precompiledDirectory, assetDirectory);
 
     final String windowsPath = _artifacts
       .getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);

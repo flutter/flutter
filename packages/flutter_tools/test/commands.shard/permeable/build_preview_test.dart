@@ -41,6 +41,7 @@ void main() {
         fs: globals.fs,
         processUtils: globals.processUtils,
         flutterRoot: Cache.flutterRoot!,
+        artifacts: globals.artifacts!,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[

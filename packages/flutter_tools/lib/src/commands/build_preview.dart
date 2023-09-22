@@ -1,5 +1,6 @@
 import 'package:file/file.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -17,6 +18,7 @@ class BuildPreviewCommand extends BuildSubCommand {
     required this.fs,
     required this.flutterRoot,
     required this.processUtils,
+    required this.artifacts,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
   }
@@ -38,6 +40,7 @@ class BuildPreviewCommand extends BuildSubCommand {
   final FileSystem fs;
   final String flutterRoot;
   final ProcessUtils processUtils;
+  final Artifacts artifacts;
 
   static const BuildInfo buildInfo = BuildInfo(
     BuildMode.debug,
@@ -64,12 +67,13 @@ class BuildPreviewCommand extends BuildSubCommand {
         .childDirectory('runner')
         .childDirectory('Debug')
         .childFile('$appName.exe');
-    previewDevice.copySync(fs.path.join(
-      flutterRoot,
-      'artifacts_temp',
-      'Debug',
-      'flutter_preview.exe',
-    ));
+    previewDevice.copySync(artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
+    //previewDevice.copySync(fs.path.join( // TODO
+    //  flutterRoot,
+    //  'artifacts_temp',
+    //  'Debug',
+    //  'flutter_preview.exe',
+    //));
     return FlutterCommandResult.success();
   }
 

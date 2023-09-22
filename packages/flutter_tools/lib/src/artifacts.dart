@@ -217,7 +217,7 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
     case Artifact.flutterToolsFileGenerators:
       return '';
     case Artifact.flutterPreviewDevice:
-      return 'TODO'; // TODO
+      return 'flutter_preview$exe';
   }
 }
 
@@ -618,9 +618,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('TODO!'); // TODO
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
@@ -671,9 +670,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('TODO!'); // TODO
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
@@ -756,7 +754,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
       case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('TODO!'); // TODO
+        assert(platform == TargetPlatform.windows_x64);
+        return _cache.getArtifactDirectory('flutter_preview').childFile('flutter_preview.exe').path;
     }
   }
 

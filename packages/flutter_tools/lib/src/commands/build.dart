@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -28,6 +29,7 @@ import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
+    required Artifacts artifacts,
     required FileSystem fileSystem,
     required BuildSystem buildSystem,
     required OperatingSystemUtils osUtils,
@@ -72,6 +74,7 @@ class BuildCommand extends FlutterCommand {
     ));
     _addSubcommand(BuildWindowsCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildPreviewCommand(
+      artifacts: artifacts,
       flutterRoot: Cache.flutterRoot!,
       fs: fileSystem,
       logger: logger,
