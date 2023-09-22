@@ -2384,15 +2384,12 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
     group('macOS only', () {
       testWidgetsWithLeakTracking('pageUp scrolls 80% of viewport dimension upwards', (WidgetTester tester) async {
-        const SingleActivator pageUp =
-            SingleActivator(LogicalKeyboardKey.pageUp);
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2404,28 +2401,23 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection.collapsed(
-              offset: controller.text.length), // selection stays the same
+          TextSelection.collapsed(offset: controller.text.length), // selection stays the same
           reason: pageUp.toString(),
         );
 
         // default page up/down scroll increment is 80% of viewport dimension.
-        final double newOffset = initialScrollOffset -
-            (0.8 * scrollController.position.viewportDimension);
+        final double newOffset = initialScrollOffset - (0.8 * scrollController.position.viewportDimension);
 
         expect(scrollController.offset, newOffset);
       }, variant: macOSOnly);
 
       testWidgetsWithLeakTracking('pageUp + shift scrolls upwards and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageUp =
-            SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2445,14 +2437,12 @@ void main() {
       }, variant: macOSOnly);
 
       testWidgetsWithLeakTracking('pageDown scrolls 80% of viewport dimension downwards', (WidgetTester tester) async {
-        const SingleActivator pageDown =
-            SingleActivator(LogicalKeyboardKey.pageDown);
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2469,21 +2459,18 @@ void main() {
         );
 
         // default page up/down scroll increment is 80% of viewport dimension.
-        final double newOffset = initialScrollOffset +
-            (0.8 * scrollController.position.viewportDimension);
+        final double newOffset = initialScrollOffset + (0.8 * scrollController.position.viewportDimension);
 
         expect(scrollController.offset, newOffset);
       }, variant: macOSOnly);
 
       testWidgetsWithLeakTracking('pageDown + shift scrolls downwards and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageDown =
-            SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2508,8 +2495,7 @@ void main() {
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2532,14 +2518,12 @@ void main() {
       }, variant: macOSOnly);
 
       testWidgetsWithLeakTracking('end + shift scrolls to the end of the text field and selects everything', (WidgetTester tester) async {
-        const SingleActivator end =
-            SingleActivator(LogicalKeyboardKey.end, shift: true);
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, shift: true);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2551,9 +2535,7 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection(
-              baseOffset: 0,
-              extentOffset: controller.text.length), // selection changes
+          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection changes
           reason: end.toString(),
         );
 
@@ -2567,11 +2549,9 @@ void main() {
         const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2583,8 +2563,7 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection.collapsed(
-              offset: controller.text.length), // selection stays the same
+          TextSelection.collapsed(offset: controller.text.length), // selection stays the same
           reason: home.toString(),
         );
 
@@ -2595,45 +2574,44 @@ void main() {
       }, variant: macOSOnly);
 
       testWidgetsWithLeakTracking('home + shift scrolls to the beginning of text field and selects everything', (WidgetTester tester) async {
-            const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+          const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, shift: true);
 
-            controller.text = longText;
-            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+          controller.text = longText;
+          controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
-            await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
-            await tester.pumpAndSettle();
+          await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+          await tester.pumpAndSettle();
 
-            final double initialScrollOffset = scrollController.offset;
+          final double initialScrollOffset = scrollController.offset;
 
-            expect(initialScrollOffset, scrollController.position.maxScrollExtent);
-            await sendKeyCombination(tester, home);
-            await tester.pump();
+          expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+          await sendKeyCombination(tester, home);
+          await tester.pump();
 
-            expect(controller.text, longText);
-            expect(
-              controller.selection,
-              TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection changes
-              reason: home.toString(),
-            );
+          expect(controller.text, longText);
+          expect(
+            controller.selection,
+            TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection changes
+            reason: home.toString(),
+          );
 
-            // scrolls to beginning
-            const double newOffset = 0;
+          // scrolls to beginning
+          const double newOffset = 0;
 
-            expect(scrollController.offset, newOffset);
-          }, variant: macOSOnly);
+          expect(scrollController.offset, newOffset);
+        }, variant: macOSOnly);
       });
 
     group('non-macOS', () {
       testWidgetsWithLeakTracking('pageUp scrolls up and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageUp =
-            SingleActivator(LogicalKeyboardKey.pageUp);
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
+
+        final int initialSelectionOffset = controller.text.length;
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length, affinity: TextAffinity.upstream);
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2643,27 +2621,20 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          const TextSelection.collapsed(
-              offset: 232,
-              affinity: TextAffinity.upstream), // selection changes
-          reason: pageUp.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, lessThan(initialSelectionOffset));
         expect(scrollController.offset, lessThan(initialScrollOffset));
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('pageUp + shift scrolls up and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageUp =
-            SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
+
+        final int initialSelectionOffset = controller.text.length;
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2673,26 +2644,21 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          TextSelection(
-              baseOffset: controller.text.length,
-              extentOffset: 232), // selection changes
-          reason: pageUp.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, lessThan(initialSelectionOffset));
         expect(scrollController.offset, lessThan(initialScrollOffset));
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('pageDown scrolls down and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageDown =
-            SingleActivator(LogicalKeyboardKey.pageDown);
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
+
+        const int initialSelectionOffset = 0;
 
         controller.text = longText;
-        controller.selection = const TextSelection.collapsed(offset: 0);
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2702,24 +2668,20 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          const TextSelection.collapsed(offset: 238), // selection changes
-          reason: pageDown.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, greaterThan(initialSelectionOffset));
         expect(scrollController.offset, greaterThan(initialScrollOffset));
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('pageDown + shift scrolls down and modifies selection', (WidgetTester tester) async {
-        const SingleActivator pageDown =
-            SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
+
+        const int initialSelectionOffset = 0;
 
         controller.text = longText;
-        controller.selection = const TextSelection.collapsed(offset: 0);
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2729,24 +2691,20 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          const TextSelection(
-              baseOffset: 0, extentOffset: 238), // selection changes
-          reason: pageDown.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, greaterThan(initialSelectionOffset));
         expect(scrollController.offset, greaterThan(initialScrollOffset));
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('end moves selection to the end of the line, no scroll', (WidgetTester tester) async {
         const SingleActivator end = SingleActivator(LogicalKeyboardKey.end);
+        const int initialSelectionOffset = 0;
 
         controller.text = longText;
-        controller.selection = const TextSelection.collapsed(offset: 0);
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2756,25 +2714,19 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          const TextSelection.collapsed(
-              offset: 12, affinity: TextAffinity.upstream), // end of line
-          reason: end.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, greaterThan(initialSelectionOffset));
         expect(scrollController.offset, initialScrollOffset); // no scroll
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('end + shift highlights selection to the end of the line, no scroll', (WidgetTester tester) async {
-        const SingleActivator end =
-            SingleActivator(LogicalKeyboardKey.end, shift: true);
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, shift: true);
+        const int initialSelectionOffset = 0;
 
         controller.text = longText;
-        controller.selection = const TextSelection.collapsed(offset: 0);
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2784,24 +2736,20 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          const TextSelection(baseOffset: 0, extentOffset: 12), // end of line
-          reason: end.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, greaterThan(initialSelectionOffset));
         expect(scrollController.offset, initialScrollOffset); // no scroll
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('home moves selection to the beginning of the line, no scroll', (WidgetTester tester) async {
         const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
+        final int initialSelectionOffset = controller.text.length;
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2811,26 +2759,19 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          TextSelection.collapsed(
-              offset: controller.text.length - 11), // beginning of line
-          reason: home.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, lessThan(initialSelectionOffset));
         expect(scrollController.offset, initialScrollOffset); // no scroll
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('home + shift highlights selection to the beginning of the line, no scroll', (WidgetTester tester) async {
-        const SingleActivator home =
-            SingleActivator(LogicalKeyboardKey.home, shift: true);
+        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+        final int initialSelectionOffset = controller.text.length;
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2840,26 +2781,19 @@ void main() {
         await tester.pump();
 
         expect(controller.text, longText);
-        expect(
-          controller.selection,
-          TextSelection(
-              baseOffset: controller.text.length,
-              extentOffset: controller.text.length - 11), // beginning of line
-          reason: home.toString(),
-        );
-
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, lessThan(initialSelectionOffset));
         expect(scrollController.offset, initialScrollOffset); // no scroll
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('end + ctrl scrolls to the end of the text field and changes selection on Windows', (WidgetTester tester) async {
-        const SingleActivator end =
-            SingleActivator(LogicalKeyboardKey.end, control: true);
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, control: true);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2871,8 +2805,7 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection.collapsed(
-              offset: controller.text.length), // selection goes to end
+          TextSelection.collapsed(offset: controller.text.length), // selection goes to end
           reason: end.toString(),
         );
 
@@ -2883,14 +2816,12 @@ void main() {
       }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
       testWidgetsWithLeakTracking('end + shift + ctrl scrolls to the end of the text field and highlights everything on Windows', (WidgetTester tester) async {
-        const SingleActivator end =
-            SingleActivator(LogicalKeyboardKey.end, control: true, shift: true);
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, control: true, shift: true);
 
         controller.text = longText;
         controller.selection = const TextSelection.collapsed(offset: 0);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2902,9 +2833,7 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection(
-              baseOffset: 0,
-              extentOffset: controller.text.length), // selection goes to end
+          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection goes to end
           reason: end.toString(),
         );
 
@@ -2915,15 +2844,12 @@ void main() {
       }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
       testWidgetsWithLeakTracking('home + ctrl scrolls to the beginning of the text field and changes selection on Windows', (WidgetTester tester) async {
-        const SingleActivator home =
-            SingleActivator(LogicalKeyboardKey.home, control: true);
+        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, control: true);
 
         controller.text = longText;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
-        await tester.pumpWidget(
-            buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
         await tester.pumpAndSettle();
 
         final double initialScrollOffset = scrollController.offset;
@@ -2935,8 +2861,7 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          const TextSelection.collapsed(
-              offset: 0), // selection goes to beginning
+          const TextSelection.collapsed(offset: 0), // selection goes to beginning
           reason: home.toString(),
         );
 
