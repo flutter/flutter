@@ -2068,10 +2068,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
-    final OpacityLayer? oldLayer = _childOpacityLayerHandler.layer;
-    _childOpacityLayerHandler.layer = null;
-
     if (child == null) {
+      _childOpacityLayerHandler.layer = null;
       return;
     }
     final int disabledColorAlpha = _disabledColor.alpha;
@@ -2083,9 +2081,10 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           (PaintingContext context, Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
-          oldLayer: oldLayer,
+          oldLayer: _childOpacityLayerHandler.layer,
         );
       } else {
+        _childOpacityLayerHandler.layer = null;
         final Rect childRect = _boxRect(child).shift(offset);
         context.canvas.saveLayer(childRect.inflate(20.0), Paint()..color = _disabledColor);
         context.paintChild(child, _boxParentData(child).offset + offset);
