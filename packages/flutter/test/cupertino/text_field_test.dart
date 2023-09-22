@@ -6837,7 +6837,7 @@ void main() {
             includes: <Offset> [
               // Expected center of the arrow. The arrow should stay clear of
               // the edges of the selection toolbar.
-              Offset(26.0, bottomLeftSelectionPosition.dy + 7.0 + 8.0 + 0.1),
+              Offset(26.0, bottomLeftSelectionPosition.dy + 8.0 + 0.1),
             ],
           ),
         ),
@@ -6847,10 +6847,10 @@ void main() {
         find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 7 + 8, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             leftMatcher: moreOrLessEquals(8),
             rightMatcher: lessThanOrEqualTo(400 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 44, epsilon: 0.01),
           ),
         ),
       );
@@ -6898,7 +6898,7 @@ void main() {
             ],
             includes: <Offset> [
               // Expected center of the arrow.
-              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 7 + 8 + 0.1),
+              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
             ],
           ),
         ),
@@ -6908,9 +6908,9 @@ void main() {
         find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 7 + 8, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             rightMatcher: moreOrLessEquals(400.0 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 44, epsilon: 0.01),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
         ),
@@ -6963,7 +6963,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 44, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -7032,7 +7032,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 44, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -7105,7 +7105,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 44, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
