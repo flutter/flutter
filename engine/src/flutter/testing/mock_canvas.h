@@ -273,6 +273,10 @@ class MockCanvas final : public DlCanvas {
                     SkScalar x,
                     SkScalar y,
                     const DlPaint& paint) override;
+  void DrawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
+                     SkScalar x,
+                     SkScalar y,
+                     const DlPaint& paint) override;
   void DrawShadow(const SkPath& path,
                   const DlColor color,
                   const SkScalar elevation,

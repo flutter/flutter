@@ -8,7 +8,6 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
-#include "include/core/SkFontTypes.h"
 #include "include/core/SkRect.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMetrics.h"
@@ -39,16 +38,10 @@ static Rect ToRect(const SkRect& rect) {
 
 static constexpr Scalar kScaleSize = 100000.0f;
 
-std::optional<TextFrame> MakeTextFrameFromTextBlobSkia(
+std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
     const sk_sp<SkTextBlob>& blob) {
-  // Handling nullptr text blobs feels overly defensive here, as I don't
-  // actually know if this happens.
-  if (!blob) {
-    return {};
-  }
-
-  std::vector<TextRun> runs;
   bool has_color = false;
+  std::vector<TextRun> runs;
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
     // TODO(jonahwilliams): ask Skia for a public API to look this up.
     // https://github.com/flutter/flutter/issues/112005
@@ -95,7 +88,7 @@ std::optional<TextFrame> MakeTextFrameFromTextBlobSkia(
         continue;
     }
   }
-  return TextFrame(runs, ToRect(blob->bounds()), has_color);
+  return std::make_shared<TextFrame>(runs, ToRect(blob->bounds()), has_color);
 }
 
 }  // namespace impeller

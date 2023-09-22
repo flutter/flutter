@@ -546,7 +546,7 @@ void Canvas::SaveLayer(const Paint& paint,
   }
 }
 
-void Canvas::DrawTextFrame(const TextFrame& text_frame,
+void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
   Entity entity;
@@ -554,7 +554,7 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
   entity.SetBlendMode(paint.blend_mode);
 
   auto text_contents = std::make_shared<TextContents>();
-  text_contents->SetTextFrame(TextFrame(text_frame));
+  text_contents->SetTextFrame(text_frame);
   text_contents->SetColor(paint.color);
 
   entity.SetTransformation(GetCurrentTransformation() *

@@ -270,6 +270,13 @@ void DlSkCanvasDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
   canvas_->drawTextBlob(blob, x, y, paint());
 }
 
+void DlSkCanvasDispatcher::drawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y) {
+  FML_CHECK(false);
+}
+
 void DlSkCanvasDispatcher::DrawShadow(SkCanvas* canvas,
                                       const SkPath& path,
                                       DlColor color,
