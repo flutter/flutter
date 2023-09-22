@@ -2604,7 +2604,7 @@ void main() {
             await tester.pumpAndSettle();
 
             final double initialScrollOffset = scrollController.offset;
-            
+
             expect(initialScrollOffset, scrollController.position.maxScrollExtent);
             await sendKeyCombination(tester, home);
             await tester.pump();
@@ -2956,7 +2956,7 @@ void main() {
             await tester.pumpAndSettle();
 
             final double initialScrollOffset = scrollController.offset;
-            
+
             expect(initialScrollOffset, scrollController.position.maxScrollExtent);
             await sendKeyCombination(tester, home);
             await tester.pump();
