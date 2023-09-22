@@ -52,8 +52,7 @@ class FrameRequestPendingLatencySummarizer {
         if (id != null) {
           starts[id] = event.timestampMicros!;
         }
-      }
-      else if (event.phase == 'e') {
+      } else if (event.phase == 'e') {
         final int? start = starts[event.json['id']];
         if (start != null) {
           result.add((event.timestampMicros! - start).toDouble());
