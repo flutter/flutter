@@ -1302,6 +1302,48 @@ void DisplayListBuilder::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
   drawTextBlob(blob, x, y);
 }
+
+void DisplayListBuilder::drawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y) {
+  DisplayListAttributeFlags flags = kDrawTextBlobFlags;
+  OpResult result = PaintResult(current_, flags);
+  if (result == OpResult::kNoEffect) {
+    return;
+  }
+  impeller::Rect bounds = text_frame->GetBounds();
+  SkRect sk_bounds = SkRect::MakeLTRB(bounds.GetLeft(), bounds.GetTop(),
+                                      bounds.GetRight(), bounds.GetBottom());
+  bool unclipped = AccumulateOpBounds(sk_bounds.makeOffset(x, y), flags);
+  // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
+  // unit tests can use Fuchsia's font manager instead of the empty default.
+  // Until then we might encounter empty bounds for otherwise valid text and
+  // thus we ignore the results from AccumulateOpBounds.
+#if defined(OS_FUCHSIA)
+  unclipped = true;
+#endif  // OS_FUCHSIA
+  if (unclipped) {
+    Push<DrawTextFrameOp>(0, 1, text_frame, x, y);
+    // There is no way to query if the glyphs of a text blob overlap and
+    // there are no current guarantees from either Skia or Impeller that
+    // they will protect overlapping glyphs from the effects of overdraw
+    // so we must make the conservative assessment that this DL layer is
+    // not compatible with group opacity inheritance.
+    UpdateLayerOpacityCompatibility(false);
+    UpdateLayerResult(result);
+  }
+}
+
+void DisplayListBuilder::DrawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y,
+    const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawTextBlobFlags);
+  drawTextFrame(text_frame, x, y);
+}
+
 void DisplayListBuilder::DrawShadow(const SkPath& path,
                                     const DlColor color,
                                     const SkScalar elevation,

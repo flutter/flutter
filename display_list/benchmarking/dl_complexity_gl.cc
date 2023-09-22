@@ -637,6 +637,11 @@ void DisplayListGLComplexityCalculator::GLHelper::drawTextBlob(
   draw_text_blob_count_++;
 }
 
+void DisplayListGLComplexityCalculator::GLHelper::drawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y) {}
+
 void DisplayListGLComplexityCalculator::GLHelper::drawShadow(
     const SkPath& path,
     const DlColor color,
