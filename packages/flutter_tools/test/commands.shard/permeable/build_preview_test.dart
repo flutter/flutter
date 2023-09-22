@@ -17,38 +17,37 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   Cache.disableLocking();
 
-  group('Usage', () {
-    late Directory tempDir;
-    late BufferLogger logger;
+  late Directory tempDir;
+  late BufferLogger logger;
+  final FileSystem fs = LocalFileSystemBlockingSetCurrentDirectory();
 
-    setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      logger = BufferLogger.test();
-    });
-
-    tearDown(() {
-      tryToDelete(tempDir);
-    });
-
-    testUsingContext('foo bar', () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=app'],
-      );
-      final BuildPreviewCommand command = BuildPreviewCommand(
-        logger: logger,
-        verboseHelp: true,
-        fs: globals.fs,
-        processUtils: globals.processUtils,
-        flutterRoot: Cache.flutterRoot!,
-        artifacts: globals.artifacts!,
-      );
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>[
-        '_preview',
-        '--no-pub',
-        globals.fs.path.join(projectPath, 'lib', 'main.dart'),
-      ]);
-    }, skip: !const LocalPlatform().isWindows);
+  setUp(() {
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+    logger = BufferLogger.test();
   });
+
+  tearDown(() {
+    tryToDelete(tempDir);
+  });
+
+  testUsingContext('foo bar', () async {
+    final String projectPath = await createProject(
+      tempDir,
+      arguments: <String>['--no-pub', '--template=app'],
+    );
+    final BuildPreviewCommand command = BuildPreviewCommand(
+      logger: logger,
+      verboseHelp: true,
+      fs: fs,
+      processUtils: globals.processUtils,
+      flutterRoot: Cache.flutterRoot!,
+      artifacts: globals.artifacts!,
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>[
+      '_preview',
+      '--no-pub',
+      fs.path.join(projectPath, 'lib', 'main.dart'),
+    ]);
+  }, skip: !const LocalPlatform().isWindows);
 }

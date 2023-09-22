@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
@@ -100,6 +101,63 @@ void main() {
 
     expect(result.started, true);
     expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:64494/fZ_B2N6JRwY=/'));
+  });
+
+  group('PreviewDeviceDiscovery', () {
+    late Artifacts artifacts;
+    late ProcessManager processManager;
+    final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
+    final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
+    final FakePlatform linuxPlatform = FakePlatform();
+
+    setUp(() {
+      artifacts = Artifacts.test(fileSystem: fs);
+      processManager = FakeProcessManager.empty();
+    });
+
+    testWithoutContext('PreviewDeviceDiscovery on linux', () async {
+      final PreviewDeviceDiscovery discovery = PreviewDeviceDiscovery(
+        artifacts: artifacts,
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+        platform: linuxPlatform,
+      );
+
+      final List<Device> devices = await discovery.devices();
+
+      expect(devices, isEmpty);
+    });
+
+    testWithoutContext('PreviewDeviceDiscovery on macOS', () async {
+      final PreviewDeviceDiscovery discovery = PreviewDeviceDiscovery(
+        artifacts: artifacts,
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+        platform: macPlatform,
+      );
+
+      final List<Device> devices = await discovery.devices();
+
+      expect(devices, isEmpty);
+    });
+
+    testWithoutContext('PreviewDeviceDiscovery on Windows', () async {
+      final PreviewDeviceDiscovery discovery = PreviewDeviceDiscovery(
+        artifacts: artifacts,
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+        platform: windowsPlatform,
+      );
+
+      final List<Device> devices = await discovery.devices();
+
+      expect(devices, hasLength(1));
+      final Device previewDevice = devices.first;
+      expect(previewDevice, isA<PreviewDevice>());
+    });
   });
 }
 
