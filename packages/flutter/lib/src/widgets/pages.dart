@@ -70,9 +70,6 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 ///  * [Route], which documents the meaning of the `T` generic type argument.
 class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
-  ///
-  /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
-  /// [maintainState], and [fullscreenDialog] arguments must not be null.
   PageRouteBuilder({
     super.settings,
     required this.pageBuilder,

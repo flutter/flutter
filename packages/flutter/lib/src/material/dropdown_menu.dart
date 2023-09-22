@@ -432,21 +432,28 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
     final List<Widget> result = <Widget>[];
-    final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
-    final ButtonStyle defaultStyle;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
-        );
-      case TextDirection.ltr:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
-        );
-    }
-
     for (int i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
+
+      // By default, when the text field has a leading icon but a menu entry doesn't
+      // have one, the label of the entry should have extra padding to be aligned
+      // with the text in the text input field. When both the text field and the
+      // menu entry have leading icons, the menu entry should remove the extra
+      // paddings so its leading icon will be aligned with the leading icon of
+      // the text field.
+      final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
+      final ButtonStyle defaultStyle;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
+          );
+        case TextDirection.ltr:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
+          );
+      }
+
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;

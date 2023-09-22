@@ -170,7 +170,6 @@ enum HeroFlightDirection {
 class Hero extends StatefulWidget {
   /// Create a hero.
   ///
-  /// The [tag] and [child] parameters must not be null.
   /// The [child] parameter and all of the its descendants must not be [Hero]es.
   const Hero({
     super.key,
@@ -259,7 +258,7 @@ class Hero extends StatefulWidget {
   /// [PageRoute.maintainState] set to true for a gesture triggered hero
   /// transition to work.
   ///
-  /// Defaults to false and cannot be null.
+  /// Defaults to false.
   final bool transitionOnUserGestures;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
@@ -1061,8 +1060,6 @@ class HeroController extends NavigatorObserver {
 /// hero animations, as usual.
 class HeroMode extends StatelessWidget {
   /// Creates a widget that enables or disables [Hero]es.
-  ///
-  /// The [child] and [enabled] arguments must not be null.
   const HeroMode({
     super.key,
     required this.child,
@@ -1077,7 +1074,7 @@ class HeroMode extends StatelessWidget {
   /// If this property is false, the [Hero]es in this subtree will not animate
   /// on route changes. Otherwise, they will animate as usual.
   ///
-  /// Defaults to true and must not be null.
+  /// Defaults to true.
   final bool enabled;
 
   @override

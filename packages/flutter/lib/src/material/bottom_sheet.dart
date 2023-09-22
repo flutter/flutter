@@ -440,7 +440,7 @@ class _DragHandle extends StatelessWidget {
   });
 
   final VoidCallback? onSemanticsTap;
-  final Function(bool) handleHover;
+  final ValueChanged<bool> handleHover;
   final Set<MaterialState> materialState;
   final Color? dragHandleColor;
   final Size? dragHandleSize;
