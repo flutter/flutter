@@ -441,6 +441,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
   void dispose() {
     _coordinator!.dispose();
     _coordinator = null;
+    _absorberHandle.dispose();
     super.dispose();
   }
 
@@ -1620,6 +1621,13 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 ///    [SliverOverlapAbsorber] to align its children, and which shows sample
 ///    usage for this class.
 class SliverOverlapAbsorberHandle extends ChangeNotifier {
+  /// Creates a [SliverOverlapAbsorberHandle].
+  SliverOverlapAbsorberHandle() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   // Incremented when a RenderSliverOverlapAbsorber takes ownership of this
   // object, decremented when it releases it. This allows us to find cases where
   // the same handle is being passed to two render objects.
