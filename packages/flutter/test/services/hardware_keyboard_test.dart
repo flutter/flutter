@@ -8,9 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
     await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
@@ -68,7 +69,7 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {
       events.add(event);
@@ -96,8 +97,9 @@ void main() {
     expect(events[1].synthesized, false);
   });
 
-  testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -201,8 +203,9 @@ void main() {
   // _CastError on _hardwareKeyboard.lookUpLayout(key). The original scenario
   // that this is triggered on Android is unknown. Here we make up a scenario
   // where a ShiftLeft key down is dispatched but the modifier bit is not set.
-  testWidgets('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<KeyEvent> events = <KeyEvent>[];
 
     await tester.pumpWidget(
@@ -244,8 +247,9 @@ void main() {
     KeyDataTransitMode.rawKeyData,
   }));
 
-  testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -276,19 +280,22 @@ void main() {
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+  testWidgetsWithLeakTracking('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
+    final FocusNode keyboardListenerFocusNode = FocusNode();
+    addTearDown(keyboardListenerFocusNode.dispose);
+    final FocusNode rawKeyboardListenerFocusNode = FocusNode();
+    addTearDown(rawKeyboardListenerFocusNode.dispose);
     final List<String> logs = <String>[];
 
     await tester.pumpWidget(
       RawKeyboardListener(
-        focusNode: FocusNode(),
+        focusNode: rawKeyboardListenerFocusNode,
         onKey: (RawKeyEvent event) {
           logs.add('${event.runtimeType}');
         },
         child: KeyboardListener(
           autofocus: true,
-          focusNode: focusNode,
+          focusNode: keyboardListenerFocusNode,
           child: Container(),
           onKeyEvent: (KeyEvent event) {
             logs.add('${event.runtimeType}');
@@ -331,7 +338,7 @@ void main() {
   // In that case, the key data should not be converted to any [KeyEvent]s,
   // but is only used so that *a* key data comes before the raw key message
   // and makes [KeyEventManager] infer [KeyDataTransitMode.keyDataThenRawKeyData].
-  testWidgets('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     final List<RawKeyEvent> rawEvents = <RawKeyEvent>[];
     tester.binding.keyboard.addHandler((KeyEvent event) {
@@ -383,7 +390,7 @@ void main() {
     expect(rawEvents.length, 2);
   });
 
-  testWidgets('Exceptions from keyMessageHandler are caught and reported', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Exceptions from keyMessageHandler are caught and reported', (WidgetTester tester) async {
     final KeyMessageHandler? oldKeyMessageHandler = tester.binding.keyEventManager.keyMessageHandler;
     addTearDown(() {
       tester.binding.keyEventManager.keyMessageHandler = oldKeyMessageHandler;
@@ -426,7 +433,7 @@ void main() {
     expect(record, isNull);
   });
 
-  testWidgets('Exceptions from HardwareKeyboard handlers are caught and reported', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Exceptions from HardwareKeyboard handlers are caught and reported', (WidgetTester tester) async {
     bool throwingCallback(KeyEvent event) {
       throw 1;
     }
@@ -466,7 +473,7 @@ void main() {
     expect(record, isNull);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {
     final bool oldDebugPrintKeyboardEvents = debugPrintKeyboardEvents;
     final DebugPrintCallback oldDebugPrint = debugPrint;
     final StringBuffer messages = StringBuffer();
