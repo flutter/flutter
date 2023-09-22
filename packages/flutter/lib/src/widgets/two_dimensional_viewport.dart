@@ -1178,7 +1178,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    final ViewportOffset offset = switch(axisDirectionToAxis(axisDirection)) {
+    final ViewportOffset offset = switch (axisDirectionToAxis(axisDirection)) {
       Axis.vertical => viewport.verticalOffset,
       Axis.horizontal => viewport.horizontalOffset,
     };
