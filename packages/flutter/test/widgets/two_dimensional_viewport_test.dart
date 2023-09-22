@@ -901,7 +901,7 @@ void main() {
       expect(horizontal.widget.controller, isNotNull);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
       final List<Object> exceptions = <Object>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {

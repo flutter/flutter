@@ -6287,12 +6287,12 @@ abstract class RenderObjectElement extends Element {
     List<Type> debugAncestorCulprits,
   ) {
     assert(() {
-      // This method returns the competing ancestors as defined in point 1 above.
       List<ParentDataElement<ParentData>> getCompetingAncestors() {
         return result.where((ParentDataElement<ParentData> ancestor) {
           return debugAncestorCulprits.contains(ancestor.runtimeType);
         }).toList();
       }
+
       // Check that no other ParentDataWidgets of the same
       // type want to provide parent data.
       if (debugAncestorTypes.length != result.length) {
@@ -6353,6 +6353,7 @@ abstract class RenderObjectElement extends Element {
           return debugParentDataCulprits.contains(ancestor.parentDataType);
         }).toList();
       }
+
       // Check that no other ParentData of the same type are possibly
       // overwriting each other.
       if (debugParentDataTypes.length != result.length) {
