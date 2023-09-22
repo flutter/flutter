@@ -2630,7 +2630,7 @@ void main() {
 
         controller.text = longText;
         controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+            TextSelection.collapsed(offset: controller.text.length, affinity: TextAffinity.upstream);
 
         await tester.pumpWidget(
             buildEditableText(style: const TextStyle(fontSize: 12)));
