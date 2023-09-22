@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -32,6 +33,7 @@ void main() {
   late ProcessUtils processUtils;
   late BufferLogger logger;
   late ProcessManager processManager;
+  late Artifacts artifacts;
 
   setUpAll(() {
     Cache.flutterRoot = '';
@@ -46,6 +48,7 @@ void main() {
     fileSystem.file('.packages').createSync();
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
@@ -57,6 +60,7 @@ void main() {
   testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -78,6 +82,7 @@ void main() {
 
   testUsingContext('Refuses to build a debug build for web', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -96,6 +101,7 @@ void main() {
 
   testUsingContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -117,6 +123,7 @@ void main() {
 
   testUsingContext('Setup for a web build with default output directory', () async {
     final BuildCommand buildCommand = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -158,6 +165,7 @@ void main() {
 
   testUsingContext('Does not allow -O0 optimization level', () async {
     final BuildCommand buildCommand = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -206,6 +214,7 @@ void main() {
   testUsingContext('Setup for a web build with a user specified output directory',
       () async {
     final BuildCommand buildCommand = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,

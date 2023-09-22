@@ -69,6 +69,7 @@ void main() {
   late ProcessUtils processUtils;
   late BufferLogger logger;
   late XcodeProjectInterpreter xcodeProjectInterpreter;
+  late Artifacts artifacts;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -76,6 +77,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
     usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
@@ -147,6 +149,7 @@ STDERR STUFF
 
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -170,6 +173,7 @@ STDERR STUFF
 
   testUsingContext('macOS build successfully with renamed .xcodeproj/.xcworkspace files', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -194,6 +198,7 @@ STDERR STUFF
 
   testUsingContext('macOS build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -217,6 +222,7 @@ STDERR STUFF
 
   testUsingContext('macOS build fails when feature is disabled', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -240,6 +246,7 @@ STDERR STUFF
 
   testUsingContext('macOS build forwards error stdout to status logger error', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -271,6 +278,7 @@ STDERR STUFF
 
   testUsingContext('macOS build invokes xcode build (debug)', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -294,6 +302,7 @@ STDERR STUFF
 
   testUsingContext('macOS build invokes xcode build (debug) with verbosity', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -318,6 +327,7 @@ STDERR STUFF
 
   testUsingContext('macOS build invokes xcode build (profile)', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -342,6 +352,7 @@ STDERR STUFF
 
   testUsingContext('macOS build invokes xcode build (release)', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -365,6 +376,7 @@ STDERR STUFF
 
   testUsingContext('macOS build supports standard desktop build options', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -457,6 +469,7 @@ STDERR STUFF
     ]);
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -480,6 +493,7 @@ STDERR STUFF
 
   testUsingContext('macOS build supports build-name and build-number', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -516,6 +530,7 @@ STDERR STUFF
 
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -547,6 +562,7 @@ STDERR STUFF
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
