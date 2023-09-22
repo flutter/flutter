@@ -525,9 +525,9 @@ void main() {
             '90hz_frame_percentage': 0,
             '120hz_frame_percentage': 0,
             'illegal_refresh_rate_frame_count': 0,
-            'average_frame_request_pending_lag': 2000.0,
-            '90th_percentile_frame_request_pending_lag': 3000.0,
-            '99th_percentile_frame_request_pending_lag': 3000.0,
+            'average_frame_request_pending_latency': 2000.0,
+            '90th_percentile_frame_request_pending_latency': 3000.0,
+            '99th_percentile_frame_request_pending_latency': 3000.0,
           },
         );
       });
@@ -656,9 +656,9 @@ void main() {
           '90hz_frame_percentage': 0,
           '120hz_frame_percentage': 0,
           'illegal_refresh_rate_frame_count': 0,
-          'average_frame_request_pending_lag': 2000.0,
-          '90th_percentile_frame_request_pending_lag': 3000.0,
-          '99th_percentile_frame_request_pending_lag': 3000.0,
+          'average_frame_request_pending_latency': 2000.0,
+          '90th_percentile_frame_request_pending_latency': 3000.0,
+          '99th_percentile_frame_request_pending_latency': 3000.0,
         });
       });
     });

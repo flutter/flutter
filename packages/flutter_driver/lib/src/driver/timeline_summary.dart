@@ -9,7 +9,7 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
-import 'frame_request_pending_lag_summarizer.dart';
+import 'frame_request_pending_latency_summarizer.dart';
 import 'gc_summarizer.dart';
 import 'percentile_utils.dart';
 import 'profiling_summarizer.dart';
@@ -259,10 +259,10 @@ class TimelineSummary {
   /// * "worst_picture_cache_memory": The worst (highest) value seen for the
   ///   memory used for the engine picture cache entries.
   ///   See [RasterCacheSummarizer.computeWorstPictureMemory].
-  /// * "average_frame_request_pending_lag": Computes the average of the time between
+  /// * "average_frame_request_pending_latency": Computes the average of the time between
   ///   frame request and frame start time.
   ///   See [FrameRequestPendingLagSummarizer.computeAverageFrameRequestPendingLag].
-  /// * "90th_percentile_frame_request_pending_lag" and "99th_percentile_frame_request_pending_lag":
+  /// * "90th_percentile_frame_request_pending_latency" and "99th_percentile_frame_request_pending_latency":
   ///   The 90/99-th percentile delay between frame request and frame start time.
   ///   See [FrameRequestPendingLagSummarizer.computePercentileFrameRequestPendingLag].
   Map<String, dynamic> get summaryJson {
@@ -272,7 +272,7 @@ class TimelineSummary {
     final RasterCacheSummarizer rasterCacheSummarizer = _rasterCacheSummarizer();
     final GCSummarizer gcSummarizer = _gcSummarizer();
     final RefreshRateSummary refreshRateSummary = RefreshRateSummary(vsyncEvents: _extractNamedEvents(kUIThreadVsyncProcessEvent));
-    final FrameRequestPendingLagSummarizer frameRequestPendingLagSummarizer = _frameRequestPendingLagSummarizer();
+    final FrameRequestPendingLatencySummarizer frameRequestPendingLatencySummarizer = _frameRequestPendingLatencySummarizer();
 
     final Map<String, dynamic> timelineSummary = <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
@@ -311,9 +311,9 @@ class TimelineSummary {
       'average_layer_cache_count': rasterCacheSummarizer.computeAverageLayerCount(),
       '90th_percentile_layer_cache_count': rasterCacheSummarizer.computePercentileLayerCount(90.0),
       '99th_percentile_layer_cache_count': rasterCacheSummarizer.computePercentileLayerCount(99.0),
-      'average_frame_request_pending_lag': frameRequestPendingLagSummarizer.computeAverageFrameRequestPendingLag(),
-      '90th_percentile_frame_request_pending_lag': frameRequestPendingLagSummarizer.computePercentileFrameRequestPendingLag(90.0),
-      '99th_percentile_frame_request_pending_lag': frameRequestPendingLagSummarizer.computePercentileFrameRequestPendingLag(99.0),
+      'average_frame_request_pending_latency': frameRequestPendingLatencySummarizer.computeAverageFrameRequestPendingLatency(),
+      '90th_percentile_frame_request_pending_latency': frameRequestPendingLatencySummarizer.computePercentileFrameRequestPendingLatency(90.0),
+      '99th_percentile_frame_request_pending_latency': frameRequestPendingLatencySummarizer.computePercentileFrameRequestPendingLatency(99.0),
       'worst_layer_cache_count': rasterCacheSummarizer.computeWorstLayerCount(),
       'average_layer_cache_memory': rasterCacheSummarizer.computeAverageLayerMemory(),
       '90th_percentile_layer_cache_memory': rasterCacheSummarizer.computePercentileLayerMemory(90.0),
@@ -502,7 +502,7 @@ class TimelineSummary {
 
   RasterCacheSummarizer _rasterCacheSummarizer() => RasterCacheSummarizer(_extractNamedEvents(kRasterCacheEvent));
 
-  FrameRequestPendingLagSummarizer _frameRequestPendingLagSummarizer() => FrameRequestPendingLagSummarizer(_extractNamedEvents(kFrameRequestPendingEvent));
+  FrameRequestPendingLatencySummarizer _frameRequestPendingLatencySummarizer() => FrameRequestPendingLatencySummarizer(_extractNamedEvents(kFrameRequestPendingEvent));
 
   GCSummarizer _gcSummarizer() => GCSummarizer.fromEvents(_extractEventsWithNames(kGCRootEvents));
 }
