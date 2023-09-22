@@ -6379,6 +6379,12 @@ abstract class RenderObjectElement extends Element {
               'ParentDataWidgets, but the Type of ParentData must be unique to '
               'prevent one overwriting another.'
             ),
+            ErrorHint(
+              'This can be resolved by using mixins to separate aspects of a '
+              'ParentData class into separate types, mixing them all in on the '
+              'full ParentData Object, such as KeepAlive does with '
+              'KeepAliveParentDataMixin.'
+            ),
             ErrorDescription(
               'The ownership chain for the RenderObject that received the '
               'parent data was:\n  ${debugGetCreatorChain(10)}'
@@ -6434,14 +6440,12 @@ abstract class RenderObjectElement extends Element {
             debugAncestorCulprits.add(ancestor.runtimeType);
           }
 
-          if (!debugParentDataTypes.add(
-            (ancestor! as ParentDataElement<ParentData>).parentDataType
-          )) {
+          if (!debugParentDataTypes.add((ancestor! as ParentDataElement<ParentData>).parentDataType)) {
             if (!debugParentDataCulprits.contains((ancestor as ParentDataElement<ParentData>).parentDataType)) {
               // Add the first one we had put in the Set of Types.
-              debugAncestorCulprits.add(ancestor.parentDataType);
+              debugParentDataCulprits.add(ancestor.parentDataType);
             }
-            debugAncestorCulprits.add(ancestor.parentDataType);
+            debugParentDataCulprits.add(ancestor.parentDataType);
           }
           return true;
         }());
