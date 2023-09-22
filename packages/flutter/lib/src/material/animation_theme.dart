@@ -26,17 +26,15 @@ import 'package:flutter/material.dart';
 class AnimationThemeData with Diagnosticable {
   /// Creates the set of color, style, and size properties used to configure [Badge].
   const AnimationThemeData({
-    this.animationCurve = Curves.easeInOut,
-    this.animationDuration = const Duration(milliseconds: 250),
+    this.animationCurve,
+    this.animationDuration,
   });
 
   /// Set value for [animationCurve],
-  /// defaults to [Curves.easeInOut].
-  final Curve animationCurve;
+  final Curve? animationCurve;
 
   /// Set value for [animationDuration],
-  /// defaults to 250 milliseconds.
-  final Duration animationDuration;
+  final Duration? animationDuration;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -61,8 +59,8 @@ class AnimationThemeData with Diagnosticable {
       return a;
     }
     return AnimationThemeData(
-      animationCurve: a!.animationCurve,
-      animationDuration: a.animationDuration,
+      animationCurve: a?.animationCurve,
+      animationDuration: a?.animationDuration,
     );
   }
 
@@ -88,12 +86,10 @@ class AnimationThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Curve>(
       'animationCurve',
       animationCurve,
-      defaultValue: Curves.easeInOut,
     ));
     properties.add(DiagnosticsProperty<Duration>(
       'animationDuration',
       animationDuration,
-      defaultValue: const Duration(milliseconds: 250),
     ));
   }
 }
@@ -103,7 +99,7 @@ class AnimationThemeData with Diagnosticable {
 /// parameters for [Animation]s in this widget's subtree.
 ///
 class AnimationTheme extends InheritedTheme {
-  /// Creates a theme that overrides the default color parameters for [Badge]s
+  /// Creates a theme that overrides the default parameters
   /// in this widget's subtree.
   const AnimationTheme({
     super.key,

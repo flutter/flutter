@@ -242,6 +242,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    AnimationThemeData? animationTheme,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
@@ -335,8 +336,6 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
-    // ANIMATION THEME
-    AnimationThemeData? animationTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -367,6 +366,7 @@ class ThemeData with Diagnosticable {
     Color? bottomAppBarColor,
   }) {
     // GENERAL CONFIGURATION
+    animationTheme ??= const AnimationThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     extensions ??= <ThemeExtension<dynamic>>[];
     inputDecorationTheme ??= const InputDecorationTheme();
@@ -537,9 +537,6 @@ class ThemeData with Diagnosticable {
     toggleButtonsTheme ??= const ToggleButtonsThemeData();
     tooltipTheme ??= const TooltipThemeData();
 
-    // ANIMATION THEME
-    animationTheme ??= const AnimationThemeData();
-
     // DEPRECATED (newest deprecations at the bottom)
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
@@ -552,6 +549,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      animationTheme: animationTheme,
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       extensions: _themeExtensionIterableToMap(extensions),
@@ -636,8 +634,6 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
-      //ANIMATION THEME
-      animationTheme: animationTheme,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor,
       selectedRowColor: selectedRowColor,
@@ -661,6 +657,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    required this.animationTheme,
     required this.applyElevationOverlayColor,
     required this.cupertinoOverrideTheme,
     required this.extensions,
@@ -748,8 +745,6 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
-    // ANIMATION THEME
-    required this.animationTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -889,6 +884,8 @@ class ThemeData with Diagnosticable {
   // alphabetical by symbol name.
 
   // GENERAL CONFIGURATION
+  /// A theme for customizing the properties of [Animation]s.
+  final AnimationThemeData animationTheme;
 
   /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
@@ -1444,8 +1441,6 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
-  /// A theme for customizing the properties of [Animation]s.
-  final AnimationThemeData animationTheme;
 
   // DEPRECATED (newest deprecations at the bottom)
 
@@ -1495,6 +1490,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    AnimationThemeData? animationTheme,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
@@ -1582,7 +1578,6 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
-    AnimationThemeData? animationTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1628,6 +1623,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      animationTheme: animationTheme ?? this.animationTheme,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
@@ -1712,7 +1708,6 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
-      animationTheme: animationTheme ?? this.animationTheme,
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
@@ -1820,6 +1815,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      animationTheme: AnimationThemeData.lerp(a.animationTheme, b.animationTheme, t),
       applyElevationOverlayColor:t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       cupertinoOverrideTheme:t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       extensions: _lerpThemeExtensions(a, b, t),
@@ -1904,7 +1900,6 @@ class ThemeData with Diagnosticable {
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
-      animationTheme: AnimationThemeData.lerp(a.animationTheme, b.animationTheme, t),
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
