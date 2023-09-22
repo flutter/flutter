@@ -1,4 +1,4 @@
-Signature: 5dd5036cb866bb763a221b801ecf54e3
+Signature: a795ab472b70cf976a84738499986b31
 
 ====================================================================================================
 LIBRARY: etc1
@@ -389,7 +389,6 @@ FILE: ../../../third_party/skia/relnotes/directcontext_submit.md
 FILE: ../../../third_party/skia/relnotes/minify-mesh.md
 FILE: ../../../third_party/skia/relnotes/patheffects.md
 FILE: ../../../third_party/skia/relnotes/shadowflags.md
-FILE: ../../../third_party/skia/relnotes/skpicture_png.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.unoptimized.sksl
