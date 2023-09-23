@@ -1200,7 +1200,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Can get size, progress and pixels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can convert between size, progress, and pixels', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1216,6 +1216,39 @@ void main() {
 
     expect(controller.sizeToPixels(.25), .25*screenHeight);
     expect(controller.pixelsToSize(.25*screenHeight), .25);
+    expect(controller.sizeToProgress(.25), 0);
+    expect(controller.progressToSize(0), .25);
+
+    // Test the edge cases for when max and min size are the same.
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      minChildSize: .5,
+      maxChildSize: .5,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    expect(controller.sizeToProgress(.2), 0);
+    expect(controller.sizeToProgress(.5), 1);
+    expect(controller.sizeToProgress(.6), 1);
+    expect(controller.progressToSize(0), .5);
+    expect(controller.progressToSize(1), .5);
+  });
+
+  testWidgetsWithLeakTracking('Can get size, progress and pixels', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
 
     expect(controller.size, closeTo(.5, precisionErrorTolerance));
     expect(controller.progress, closeTo((.5 - .25) / .75, precisionErrorTolerance));

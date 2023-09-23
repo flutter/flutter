@@ -83,6 +83,26 @@ class DraggableScrollableController extends ChangeNotifier {
     return _attachedController!.extent.sizeToPixels(size);
   }
 
+  /// Convert a sheet's pixel height to size (fractional value of parent container height).
+  double pixelsToSize(double pixels) {
+    _assertAttached();
+    return _attachedController!.extent.pixelsToSize(pixels);
+  }
+
+  /// Convert a sheet's size (fractional value of parent container height) to
+  /// (fractional value of the distance between min and max size).
+  double sizeToProgress(double size) {
+    _assertAttached();
+    return _attachedController!.extent.sizeToProgress(size);
+  }
+
+  /// Convert a sheet's progress (fractional value of the distance between min and max size) to 
+  /// size (fractional value of parent container height).
+  double progressToSize(double progress) {
+    _assertAttached();
+    return _attachedController!.extent.progressToSize(progress);
+  }
+
   /// Returns Whether any [DraggableScrollableController] objects have attached themselves to the
   /// [DraggableScrollableSheet].
   ///
@@ -90,12 +110,6 @@ class DraggableScrollableController extends ChangeNotifier {
   /// such as [sizeToPixels], [size], [animateTo], and [jumpTo], must not be
   /// called.
   bool get isAttached => _attachedController != null && _attachedController!.hasClients;
-
-  /// Convert a sheet's pixel height to size (fractional value of parent container height).
-  double pixelsToSize(double pixels) {
-    _assertAttached();
-    return _attachedController!.extent.pixelsToSize(pixels);
-  }
 
   /// Animates the attached sheet from its current size to the given [size], a
   /// fractional value of the parent container's height.
@@ -553,7 +567,7 @@ class _DraggableSheetExtent {
 
   double get currentSize => _currentSize.value;
   // If min and max size are the same, consider the sheet to be fully extended.
-  double get currentProgress => maxSize == minSize ? 1 : (_currentSize.value - minSize) / (maxSize - minSize);
+  double get currentProgress => sizeToProgress(_currentSize.value);
   double get currentPixels => sizeToPixels(_currentSize.value);
 
   List<double> get pixelSnapSizes => snapSizes.map(sizeToPixels).toList();
@@ -615,6 +629,22 @@ class _DraggableSheetExtent {
 
   double sizeToPixels(double size) {
     return size / maxSize * availablePixels;
+  }
+  
+  double progressToSize(double progress) {
+    return progress * (maxSize - minSize) + minSize;
+  }
+  
+  double sizeToProgress(double size) {
+    // Check the end conditions to avoid division by zero in the case where max
+    // size and min size are the same.
+    if (size >= maxSize) {
+      return 1;
+    }
+    if (size <= minSize) {
+      return 0;
+    }
+    return maxSize == minSize ? 1 : (_currentSize.value - minSize) / (maxSize - minSize);
   }
 
   void dispose() {
