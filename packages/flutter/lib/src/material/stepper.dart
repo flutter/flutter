@@ -828,13 +828,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           ),
         ),
         if (!_isLast(i))
-          Expanded(
-            child: Container(
-              key: Key('line$i'),
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: widget.connectorThickness ?? 1.0,
-              color: _connectorColor(widget.steps[i+1].isActive),
-            ),
+          Container(
+            key: Key('line$i'),
+            margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            height: widget.connectorThickness ?? 1.0,
+            color: _connectorColor(widget.steps[i+1].isActive),
           ),
       ],
     ];
@@ -854,10 +852,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       children: <Widget>[
         Material(
           elevation: widget.elevation ?? 2,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Row(
-              children: children,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                children: children,
+              ),
             ),
           ),
         ),

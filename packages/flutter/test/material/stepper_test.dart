@@ -166,6 +166,81 @@ void main() {
     expect(box.size.height, 600.0);
   });
 
+  testWidgetsWithLeakTracking('Stepper horizontal size test with list of steps widgets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
+              type: StepperType.horizontal,
+              steps: const <Step>[
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                Step(
+                  title: Text('Step 2'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                Step(
+                  title: Text('Step 3'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                Step(
+                  title: Text('Step 4'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                Step(
+                  title: Text('Step 5'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                Step(
+                  title: Text('Step 6'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                Step(
+                  title: Text('Step 7'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                Step(
+                  title: Text('Step 8'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(Stepper));
+    expect(box.size.height, 600.0);
+  });
+
   testWidgetsWithLeakTracking('Stepper visibility test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
