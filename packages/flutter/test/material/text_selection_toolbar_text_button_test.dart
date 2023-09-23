@@ -123,5 +123,72 @@ void main() {
         customForegroundColor,
       );
     });
+
+    testWidgetsWithLeakTracking('background color by default', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/133027
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme,
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbarTextButton(
+                padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                child: const Text('button'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TextButton), findsOneWidget);
+
+      final TextButton textButton = tester.widget(find.byType(TextButton));
+      // The background color is hardcoded to transparent by default so the buttons
+      // are the color of the container behind them. For example TextSelectionToolbar
+      // hardcodes the color value, and TextSelectionToolbarTextButton that are its
+      // children should be that color.
+      expect(
+        textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
+        Colors.transparent,
+      );
+    });
+
+    testWidgetsWithLeakTracking('textButtonTheme should not override default background color', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/133027
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme,
+            textButtonTheme: const TextButtonThemeData(
+              style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
+              ),
+            ),
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbarTextButton(
+                padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                child: const Text('button'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TextButton), findsOneWidget);
+
+      final TextButton textButton = tester.widget(find.byType(TextButton));
+      // The background color is hardcoded to transparent by default so the buttons
+      // are the color of the container behind them. For example TextSelectionToolbar
+      // hardcodes the color value, and TextSelectionToolbarTextButton that are its
+      // children should be that color.
+      expect(
+        textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
+        Colors.transparent,
+      );
+    });
   }
 }

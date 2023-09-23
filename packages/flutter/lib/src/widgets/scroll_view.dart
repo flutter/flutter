@@ -24,6 +24,7 @@ import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'sliver.dart';
 import 'sliver_prototype_extent_list.dart';
+import 'sliver_varied_extent_list.dart';
 import 'viewport.dart';
 
 // Examples can assume:
@@ -96,9 +97,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// If the [shrinkWrap] argument is true, the [center] argument must be null.
   ///
-  /// The [scrollDirection], [reverse], and [shrinkWrap] arguments must not be null.
-  ///
-  /// The [anchor] argument must be non-null and in the range 0.0 to 1.0.
+  /// The [anchor] argument must be in the range zero to one, inclusive.
   const ScrollView({
     super.key,
     this.scrollDirection = Axis.vertical,
@@ -1230,6 +1229,7 @@ class ListView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1242,8 +1242,10 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
   }) : assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both.',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
        childrenDelegate = SliverChildListDelegate(
          children,
@@ -1303,6 +1305,7 @@ class ListView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
@@ -1319,8 +1322,10 @@ class ListView extends BoxScrollView {
   }) : assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount!),
        assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both.',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
@@ -1408,6 +1413,7 @@ class ListView extends BoxScrollView {
     super.clipBehavior,
   }) : assert(itemCount >= 0),
        itemExtent = null,
+       itemExtentBuilder = null,
        prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
@@ -1528,6 +1534,7 @@ class ListView extends BoxScrollView {
     super.padding,
     this.itemExtent,
     this.prototypeItem,
+    this.itemExtentBuilder,
     required this.childrenDelegate,
     super.cacheExtent,
     super.semanticChildCount,
@@ -1536,8 +1543,10 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
   }) : assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        );
 
   /// {@template flutter.widgets.list_view.itemExtent}
@@ -1556,8 +1565,37 @@ class ListView extends BoxScrollView {
   ///    extent along the main axis.
   ///  * The [prototypeItem] property, which allows forcing the children's
   ///    extent to be the same as the given widget.
+  ///  * The [itemExtentBuilder] property, which allows forcing the children's
+  ///    extent to be the value returned by the callback.
   /// {@endtemplate}
   final double? itemExtent;
+
+  /// {@template flutter.widgets.list_view.itemExtentBuilder}
+  /// If non-null, forces the children to have the corresponding extent returned
+  /// by the builder.
+  ///
+  /// Specifying an [itemExtentBuilder] is more efficient than letting the children
+  /// determine their own extent because the scrolling machinery can make use of
+  /// the foreknowledge of the children's extent to save work, for example when
+  /// the scroll position changes drastically.
+  ///
+  /// This will be called multiple times during the layout phase of a frame to find
+  /// the items that should be loaded by the lazy loading process.
+  ///
+  /// Unlike [itemExtent] or [prototypeItem], this allows children to have
+  /// different extents.
+  ///
+  /// See also:
+  ///
+  ///  * [SliverVariedExtentList], the sliver used internally when this property
+  ///    is provided. It constrains its box children to have a specific given
+  ///    extent along the main axis.
+  ///  * The [itemExtent] property, which allows forcing the children's extent
+  ///    to a given value.
+  ///  * The [prototypeItem] property, which allows forcing the children's
+  ///    extent to be the same as the given widget.
+  /// {@endtemplate}
+  final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@template flutter.widgets.list_view.prototypeItem}
   /// If non-null, forces the children to have the same extent as the given
@@ -1575,6 +1613,8 @@ class ListView extends BoxScrollView {
   ///    extent as a prototype item along the main axis.
   ///  * The [itemExtent] property, which allows forcing the children's extent
   ///    to a given value.
+  ///  * The [itemExtentBuilder] property, which allows forcing the children's
+  ///    extent to be the value returned by the callback.
   /// {@endtemplate}
   final Widget? prototypeItem;
 
@@ -1592,6 +1632,11 @@ class ListView extends BoxScrollView {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent!,
+      );
+    } else if (itemExtentBuilder != null) {
+      return SliverVariedExtentList(
+        delegate: childrenDelegate,
+        itemExtentBuilder: itemExtentBuilder!,
       );
     } else if (prototypeItem != null) {
       return SliverPrototypeExtentList(
@@ -1860,8 +1905,6 @@ class GridView extends BoxScrollView {
   /// Creates a scrollable, 2D array of widgets with a custom
   /// [SliverGridDelegate].
   ///
-  /// The [gridDelegate] argument must not be null.
-  ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
@@ -1960,8 +2003,6 @@ class GridView extends BoxScrollView {
   ///
   /// To use an [IndexedWidgetBuilder] callback to build children, either use
   /// a [SliverChildBuilderDelegate] or use the [GridView.builder] constructor.
-  ///
-  /// The [gridDelegate] and [childrenDelegate] arguments must not be null.
   const GridView.custom({
     super.key,
     super.scrollDirection,

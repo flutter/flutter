@@ -308,6 +308,13 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createVeryLongPictureScrollingPerfE2ETest({required bool enableImpeller}) {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/very_long_picture_scrolling_perf_e2e.dart',
+    enableImpeller: enableImpeller,
+  ).run;
+}
 TaskFunction createSlidersPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -894,6 +901,7 @@ class StartupTest {
             testDirectory,
             'build',
             'windows',
+            'x64',
             'runner',
             'Profile',
             '$basename.exe'
@@ -1349,7 +1357,6 @@ const List<String> _kCommonScoreKeys = <String>[
   '90th_percentile_picture_cache_memory',
   '99th_percentile_picture_cache_memory',
   'worst_picture_cache_memory',
-  'new_gen_gc_count',
   'old_gen_gc_count',
 ];
 
@@ -1645,6 +1652,7 @@ class CompileTest {
           cwd,
           'build',
           'windows',
+          'x64',
           'runner',
           'release',
           '$basename.exe');

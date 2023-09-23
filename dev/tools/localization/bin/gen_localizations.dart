@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This program generates a getMaterialTranslation() and a
-// getCupertinoTranslation() function that look up the translations provided by
+// This program generates getMaterialTranslation(), getCupertinoTranslation(),
+// and getWidgetsTranslation() functions that look up the translations provided by
 // the arb files. The returned value is a generated instance of a
-// GlobalMaterialLocalizations or a GlobalCupertinoLocalizations that
-// corresponds to a single locale.
+// GlobalMaterialLocalizations, GlobalCupertinoLocalizations, or
+// GlobalWidgetsLocalizations object that corresponds to a single locale.
 //
 // The *.arb files are in packages/flutter_localizations/lib/src/l10n.
 //
@@ -40,8 +40,8 @@
 // ```
 //
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
-// packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart
-// and packages/flutter_localizations/lib/src/l10n/generated_cupertino_localizations.dart file:
+// generated_material_localizations.dart, generated_cupertino_localizations.dart,
+// and generated_widgets_localizations.dart files in packages/flutter_localizations/lib/src/l10n/:
 //
 // ```
 // dart dev/tools/localization/bin/gen_localizations.dart --overwrite
@@ -543,19 +543,19 @@ void main(List<String> rawArgs) {
 
   // Maps of locales to resource key/value pairs for Widgets ARBs.
   final Map<LocaleInfo, Map<String, String>> widgetsLocaleToResources = <LocaleInfo, Map<String, String>>{};
-  // Maps of locales to resource key/attributes pairs for Widgets ARBs..
+  // Maps of locales to resource key/attributes pairs for Widgets ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
   final Map<LocaleInfo, Map<String, dynamic>> widgetsLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Material ARBs.
   final Map<LocaleInfo, Map<String, String>> materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
-  // Maps of locales to resource key/attributes pairs for Material ARBs..
+  // Maps of locales to resource key/attributes pairs for Material ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
   final Map<LocaleInfo, Map<String, dynamic>> materialLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
   // Maps of locales to resource key/value pairs for Cupertino ARBs.
   final Map<LocaleInfo, Map<String, String>> cupertinoLocaleToResources = <LocaleInfo, Map<String, String>>{};
-  // Maps of locales to resource key/attributes pairs for Cupertino ARBs..
+  // Maps of locales to resource key/attributes pairs for Cupertino ARBs.
   // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
   final Map<LocaleInfo, Map<String, dynamic>> cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 

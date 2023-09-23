@@ -59,9 +59,6 @@ enum PerformanceOverlayOption {
 /// to true.
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
-  ///
-  /// The [optionsMask], [rasterizerThreshold], [checkerboardRasterCacheImages],
-  /// and [checkerboardOffscreenLayers] arguments must not be null.
   RenderPerformanceOverlay({
     int optionsMask = 0,
     int rasterizerThreshold = 0,
