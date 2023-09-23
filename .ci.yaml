@@ -1722,17 +1722,16 @@ targets:
   - name: Linux_pixel_7pro backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: backdrop_filter_perf__timeline_summary
 
-
   - name: Linux_pixel_7pro draw_atlas_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+     # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1744,6 +1743,7 @@ targets:
   - name: Linux_pixel_7pro draw_atlas_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1755,6 +1755,7 @@ targets:
   - name: Linux_pixel_7pro dynamic_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1766,6 +1767,7 @@ targets:
   - name: Linux_pixel_7pro static_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1777,6 +1779,7 @@ targets:
   - name: Linux_pixel_7pro hello_world_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1959,7 +1962,6 @@ targets:
   - name: Linux_pixel_7pro cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1978,7 +1980,6 @@ targets:
   - name: Linux_pixel_7pro cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2250,7 +2251,6 @@ targets:
   - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2556,7 +2556,6 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2625,7 +2624,6 @@ targets:
   - name: Linux_pixel_7pro textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2767,6 +2765,7 @@ targets:
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2778,6 +2777,7 @@ targets:
   - name: Linux_pixel_7pro animated_advanced_blend_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2789,6 +2789,7 @@ targets:
   - name: Linux_pixel_7pro animated_advanced_blend_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2810,6 +2811,7 @@ targets:
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2821,6 +2823,7 @@ targets:
   - name: Linux_pixel_7pro draw_vertices_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller
     bringup: true
     timeout: 60
     properties:
@@ -2832,6 +2835,7 @@ targets:
   - name: Linux_pixel_7pro draw_vertices_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
