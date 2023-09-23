@@ -599,11 +599,14 @@ void main() {
       await gesture.up();
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('mouse can select single text on mobile platforms', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('mouse can select single text on mobile platforms', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text('How are you'),
@@ -923,11 +926,14 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('collapsing selection should clear selection of all other selectables', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('collapsing selection should clear selection of all other selectables', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
