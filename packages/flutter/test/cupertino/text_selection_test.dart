@@ -671,8 +671,8 @@ void main() {
         final Offset textFieldOffset =
             tester.getTopLeft(find.byType(CupertinoTextField));
 
-        // 7.0 + 45.0 + 8.0 - 8.0 = _kToolbarArrowSize + _kToolbarHeight + _kToolbarContentDistance - padding
-        expect(selectionOffset.dy + 7.0 + 45.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
+        // 7.0 + 44.0 + 8.0 - 8.0 = _kToolbarArrowSize + text_button_height + _kToolbarContentDistance - padding
+        expect(selectionOffset.dy + 7.0 + 44.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
       },
       skip: isBrowser, // [intended] the selection menu isn't required by web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
