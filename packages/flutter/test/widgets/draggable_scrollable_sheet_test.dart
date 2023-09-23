@@ -1200,7 +1200,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Can get size and pixels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can get size, progress and pixels', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1217,6 +1217,10 @@ void main() {
     expect(controller.sizeToPixels(.25), .25*screenHeight);
     expect(controller.pixelsToSize(.25*screenHeight), .25);
 
+    expect(controller.size, closeTo(.5, precisionErrorTolerance));
+    expect(controller.progress, closeTo((.5 - .25) / .75, precisionErrorTolerance));
+    expect(controller.pixels, closeTo(.5*screenHeight, precisionErrorTolerance));
+
     controller.animateTo(.6, duration: const Duration(milliseconds: 200), curve: Curves.linear);
     await tester.pumpAndSettle();
     expect(
@@ -1224,11 +1228,24 @@ void main() {
       closeTo(.6, precisionErrorTolerance),
     );
     expect(controller.size, closeTo(.6, precisionErrorTolerance));
+    expect(controller.progress, closeTo((.6 - .25) / .75, precisionErrorTolerance));
     expect(controller.pixels, closeTo(.6*screenHeight, precisionErrorTolerance));
 
     await tester.drag(find.text('Item 5'), Offset(0, .2*screenHeight));
     expect(controller.size, closeTo(.4, precisionErrorTolerance));
+    expect(controller.progress, closeTo((.4 - .25) / .75, precisionErrorTolerance));
     expect(controller.pixels, closeTo(.4*screenHeight, precisionErrorTolerance));
+
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      maxChildSize: .5,
+      minChildSize: .5,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    // Make sure we don't get a division by zero error.
+    expect(controller.progress, closeTo(1, precisionErrorTolerance));
   });
 
   testWidgets('Cannot attach a controller to multiple sheets', (WidgetTester tester) async {

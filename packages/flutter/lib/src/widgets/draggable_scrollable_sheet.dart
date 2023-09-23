@@ -67,6 +67,16 @@ class DraggableScrollableController extends ChangeNotifier {
     return _attachedController!.extent.currentPixels;
   }
 
+  /// Get the attached sheet's current progress between the minimum extent and
+  /// the maximum extent of the sheet.
+  ///
+  /// If the sheet is at it's minimum extent, [progress] returns 0.0. If it is
+  /// at its max, it returns 1.0.
+  double get progress {
+    _assertAttached();
+    return _attachedController!.extent.currentProgress;
+  }
+
   /// Convert a sheet's size (fractional value of parent container height) to pixels.
   double sizeToPixels(double size) {
     _assertAttached();
@@ -542,6 +552,8 @@ class _DraggableSheetExtent {
   bool get isAtMax => maxSize <= _currentSize.value;
 
   double get currentSize => _currentSize.value;
+  // If min and max size are the same, consider the sheet to be fully extended.
+  double get currentProgress => maxSize == minSize ? 1 : (_currentSize.value - minSize) / (maxSize - minSize);
   double get currentPixels => sizeToPixels(_currentSize.value);
 
   List<double> get pixelSnapSizes => snapSizes.map(sizeToPixels).toList();
