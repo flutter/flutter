@@ -37,6 +37,7 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: Center(
         child: Slider(
+          autofocus: true,
           value: currentSliderValue,
           max: 100,
           divisions: 5,
