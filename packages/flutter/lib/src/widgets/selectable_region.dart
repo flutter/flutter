@@ -2419,12 +2419,18 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       return true;
     }());
     SelectionResult? finalResult;
+    // Determines if the edge being adjusted is within the current viewport.
+    //  - If so, we begin the search for the new selection edge position at the
+    //    currentSelectionEndIndex/currentSelectionStartIndex.
+    //  - If not, we attempt to locate the new selection edge starting from
+    //    the opposite end.
+    //  - If neither edge is in the current viewport, the search for the new
+    //    selection edge position begins at 0.
+    //
+    // This can happen when there is a scrollable child and the edge being adjusted
+    // has been scrolled out of view.
     final bool isCurrentEdgeWithinViewport = isEnd ? _selectionGeometry.endSelectionPoint != null : _selectionGeometry.startSelectionPoint != null;
     final bool isOppositeEdgeWithinViewport = isEnd ? _selectionGeometry.startSelectionPoint != null : _selectionGeometry.endSelectionPoint != null;
-    // Determines if the edge being adjusted is within the current viewport.
-    // If it is not, we attempt to locate the selection edge starting from the opposite end.
-    // In cases where neither edge is within the viewport, the search for the new edge position
-    // begins at 0.
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
       (true, true, true) => currentSelectionEndIndex,
       (true, true, false) => currentSelectionEndIndex,
@@ -2437,10 +2443,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     };
     bool? forward;
     late SelectionResult currentSelectableResult;
-    // This loop sends the selection event to the
-    // currentSelectionEndIndex/currentSelectionStartIndex to determine the
-    // direction of the search. If the result is `SelectionResult.next`, this
-    // loop look backward. Otherwise, it looks forward.
+    // This loop sends the selection event to one of the following to determine
+    // the direction of the search.
+    //  - currentSelectionEndIndex/currentSelectionStartIndex if the current edge
+    //    is in the current viewport.
+    //  - The opposite edge index if the current edge is not in the current viewport.
+    //  - Index 0 if neither edge is in the current viewport.
+    //
+    // If the result is `SelectionResult.next`, this loop look backward.
+    // Otherwise, it looks forward.
     //
     // The terminate condition are:
     // 1. the selectable returns end, pending, none.
