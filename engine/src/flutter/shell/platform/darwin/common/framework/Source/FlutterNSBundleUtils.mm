@@ -54,7 +54,7 @@ NSBundle* FLTFrameworkBundleWithIdentifier(NSString* flutterFrameworkBundleID) {
 }
 
 NSString* FLTAssetPath(NSBundle* bundle) {
-  return [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"] ?: @"flutter_assets";
+  return [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"] ?: kDefaultAssetPath;
 }
 
 NSString* FLTAssetsPathFromBundle(NSBundle* bundle) {
