@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -16,7 +17,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('scrollable exposes the correct semantic actions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('scrollable exposes the correct semantic actions', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -42,7 +43,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('showOnScreen works in scrollable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showOnScreen works in scrollable', (WidgetTester tester) async {
     semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 40.0;
@@ -57,6 +58,7 @@ void main() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: kItemHeight / 2,
     );
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -80,7 +82,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('showOnScreen works with pinned app bar and sliver list', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showOnScreen works with pinned app bar and sliver list', (WidgetTester tester) async {
     semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
@@ -96,6 +98,7 @@ void main() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: kItemHeight / 2,
     );
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -142,7 +145,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('showOnScreen works with pinned app bar and individual slivers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showOnScreen works with pinned app bar and individual slivers', (WidgetTester tester) async {
     semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
@@ -166,6 +169,7 @@ void main() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: 2.5 * kItemHeight,
     );
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -210,7 +214,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('correct scrollProgress', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correct scrollProgress', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(Directionality(
@@ -253,7 +257,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('correct scrollProgress for unbound', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correct scrollProgress for unbound', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(Directionality(
@@ -303,7 +307,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
 
     final List<Widget> children = List<Widget>.generate(80, (int i) => SizedBox(
@@ -328,7 +332,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -434,7 +438,7 @@ void main() {
 
     });
 
-    testWidgets('brings item above leading edge to leading edge', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('brings item above leading edge to leading edge', (WidgetTester tester) async {
       semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
@@ -450,7 +454,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('brings item below trailing edge to trailing edge', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('brings item below trailing edge to trailing edge', (WidgetTester tester) async {
       semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
@@ -466,7 +470,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('does not change position of items already fully on-screen', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not change position of items already fully on-screen', (WidgetTester tester) async {
       semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
@@ -536,10 +540,13 @@ void main() {
           ),
         ),
       );
-
     });
 
-    testWidgets('brings item above leading edge to leading edge', (WidgetTester tester) async {
+    tearDown(() {
+      scrollController.dispose();
+    });
+
+    testWidgetsWithLeakTracking('brings item above leading edge to leading edge', (WidgetTester tester) async {
       semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
@@ -555,7 +562,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('brings item below trailing edge to trailing edge', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('brings item below trailing edge to trailing edge', (WidgetTester tester) async {
       semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
@@ -571,7 +578,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('does not change position of items already fully on-screen', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not change position of items already fully on-screen', (WidgetTester tester) async {
       semantics = SemanticsTester(tester); // enables semantics tree generation
 
       await tester.pumpWidget(widgetUnderTest);
@@ -589,7 +596,7 @@ void main() {
 
   });
 
-  testWidgets('transform of inner node from useTwoPaneSemantics scrolls correctly with nested scrollables', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('transform of inner node from useTwoPaneSemantics scrolls correctly with nested scrollables', (WidgetTester tester) async {
     semantics = SemanticsTester(tester); // enables semantics tree generation
 
     // Context: https://github.com/flutter/flutter/issues/61631
