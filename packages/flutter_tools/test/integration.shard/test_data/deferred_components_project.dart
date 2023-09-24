@@ -13,7 +13,7 @@ class DeferredComponentsProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=3.0.0-0 <4.0.0'
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -232,7 +232,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
 
   @override
   String get androidGradleProperties => '''
-  org.gradle.jvmargs=-Xmx1536M
+  org.gradle.jvmargs=-Xmx4G
   android.useAndroidX=true
   android.enableJetifier=true
   android.enableR8=true

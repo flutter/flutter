@@ -446,6 +446,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
 
     _floatingOptions?.remove();
+    _floatingOptions?.dispose();
     if (_shouldShowOptions) {
       final OverlayEntry newFloatingOptions = OverlayEntry(
         builder: (BuildContext context) {
@@ -562,7 +563,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _focusNode.dispose();
     }
     _floatingOptions?.remove();
+    _floatingOptions?.dispose();
     _floatingOptions = null;
+    _highlightedOptionIndex.dispose();
     super.dispose();
   }
 

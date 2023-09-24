@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'keyboard_utils.dart';
 
@@ -14,6 +15,9 @@ void main() {
     required FocusNode editableFocusNode,
     required FocusNode spyFocusNode,
   }) {
+    final TextEditingController controller = TextEditingController(text: 'dummy text');
+    addTearDown(controller.dispose);
+
     return MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
@@ -24,7 +28,7 @@ void main() {
           child: ActionSpy(
             focusNode: spyFocusNode,
             child: EditableText(
-              controller: TextEditingController(text: 'dummy text'),
+              controller: controller,
               showSelectionHandles: true,
               autofocus: true,
               focusNode: editableFocusNode,
@@ -50,7 +54,7 @@ void main() {
     final FocusNode editable = FocusNode();
     final FocusNode spy = FocusNode();
 
-    testWidgets('backspace with and without word modifier', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('backspace with and without word modifier', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -74,7 +78,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: iOS);
 
-    testWidgets('delete with and without word modifier', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('delete with and without word modifier', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -98,7 +102,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: iOS);
 
-    testWidgets('Exception: deleting to line boundary is handled by the framework', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Exception: deleting to line boundary is handled by the framework', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -128,13 +132,15 @@ void main() {
   group('macOS does not accept shortcuts if focus under EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -151,13 +157,15 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -174,13 +182,15 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -197,13 +207,15 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -220,13 +232,15 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -255,13 +269,15 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -293,13 +309,15 @@ void main() {
   group('macOS does accept shortcuts if focus above EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -316,13 +334,15 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -339,13 +359,15 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -362,13 +384,15 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -385,13 +409,15 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,
@@ -422,13 +448,15 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
       });
       final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
       await tester.pumpWidget(
         buildSpyAboveEditableText(
           editableFocusNode: editable,

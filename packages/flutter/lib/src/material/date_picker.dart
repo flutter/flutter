@@ -70,7 +70,7 @@ const double _kMaxTextScaleFactor = 1.3;
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a calendar month grid)
 /// or [DatePickerEntryMode.input] (a text input field) mode.
-/// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+/// It defaults to [DatePickerEntryMode.calendar].
 ///
 /// {@template flutter.material.date_picker.switchToInputEntryModeIcon}
 /// An optional [switchToInputEntryModeIcon] argument can be used to
@@ -117,7 +117,6 @@ const double _kMaxTextScaleFactor = 1.3;
 /// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
 /// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
 /// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -417,6 +416,14 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
 
   @override
+  void dispose() {
+    _selectedDate.dispose();
+    _entryMode.dispose();
+    _autovalidateMode.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -543,6 +550,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         spacing: 8,
         children: <Widget>[
           TextButton(
+            style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
             onPressed: _handleCancel,
             child: Text(widget.cancelText ?? (
               useMaterial3
@@ -551,6 +559,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
             )),
           ),
           TextButton(
+            style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
             onPressed: _handleOk,
             child: Text(widget.confirmText ?? localizations.okButtonLabel),
           ),
@@ -674,7 +683,12 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           // Constrain the textScaleFactor to the largest supported value to prevent
           // layout issues.
           maxScaleFactor: _kMaxTextScaleFactor,
-          child: Builder(builder: (BuildContext context) {
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+
             switch (orientation) {
               case Orientation.portrait:
                 return Column(
@@ -683,8 +697,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   children: <Widget>[
                     header,
                     if (useMaterial3) Divider(height: 0, color: datePickerTheme.dividerColor),
-                    Expanded(child: picker),
-                    actions,
+                    if (isFullyPortrait) ...<Widget>[
+                      Expanded(child: picker),
+                      actions,
+                    ],
                   ],
                 );
               case Orientation.landscape:
@@ -926,7 +942,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// before or on `initialDateRange.end`.
 ///
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
-/// allowable date. Both must be non-null.
+/// allowable date.
 ///
 /// If an initial date range is provided, `initialDateRange.start`
 /// and `initialDateRange.end` must both fall between or on [firstDate] and
@@ -940,7 +956,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a scrollable calendar month
 /// grid) or [DatePickerEntryMode.input] (two text input fields) mode.
-/// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+/// It defaults to [DatePickerEntryMode.calendar].
 ///
 /// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
 ///
@@ -979,7 +995,6 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
 /// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
 /// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -1220,7 +1235,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// scrollable calendar month grid) or [DatePickerEntryMode.input] (two text
   /// input fields) mode.
   ///
-  /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+  /// It defaults to [DatePickerEntryMode.calendar].
   final DatePickerEntryMode initialEntryMode;
 
   /// The label on the cancel button for the text input mode.
@@ -2093,14 +2108,11 @@ class _DayHeaders extends StatelessWidget {
   ///
   List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
     final List<Widget> result = <Widget>[];
-    for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
+    for (int i = localizations.firstDayOfWeekIndex; result.length < DateTime.daysPerWeek; i = (i + 1) % DateTime.daysPerWeek) {
       final String weekday = localizations.narrowWeekdays[i];
       result.add(ExcludeSemantics(
         child: Center(child: Text(weekday, style: headerStyle)),
       ));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % 7) {
-        break;
-      }
     }
     return result;
   }
@@ -2512,13 +2524,9 @@ class _MonthItemState extends State<_MonthItem> {
     final double gridHeight = weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;
     final List<Widget> dayItems = <Widget>[];
 
-    for (int i = 0; true; i += 1) {
-      // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
-      // a leap year.
-      final int day = i - dayOffset + 1;
-      if (day > daysInMonth) {
-        break;
-      }
+    // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
+    // a leap year.
+    for (int day = 0 - dayOffset + 1; day <= daysInMonth; day += 1) {
       if (day < 1) {
         dayItems.add(Container());
       } else {
@@ -2782,14 +2790,25 @@ class _InputDateRangePickerDialog extends StatelessWidget {
 
     switch (orientation) {
       case Orientation.portrait:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            header,
-            Expanded(child: picker),
-            actions,
-          ],
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                header,
+                if (isFullyPortrait) ...<Widget>[
+                  Expanded(child: picker),
+                  actions,
+                ],
+              ],
+            );
+          }
         );
 
       case Orientation.landscape:

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Simple router basic functionality - synchronized', (WidgetTester tester) async {
@@ -1582,6 +1583,18 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       expect(info2.location, '/abc?def=ghi&def=jkl#mno');
     });
   });
+
+  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () async {
+    Future<void> createAndDispose() async {
+      PlatformRouteInformationProvider(
+        initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
+      ).dispose();
+    }
+    await expectLater(
+      await memoryEvents(createAndDispose, PlatformRouteInformationProvider),
+      areCreateAndDispose,
+    );
+  });
 }
 
 Widget buildBoilerPlate(Widget child) {
@@ -1633,7 +1646,11 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.builder,
     this.onPopRoute,
     this.reportConfiguration = false,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;
@@ -1717,7 +1734,11 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 class SimpleRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   SimpleRouteInformationProvider({
     this.onRouterReport,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   RouterReportRouterInformation? onRouterReport;
 
@@ -1773,7 +1794,11 @@ class CompleterRouteInformationParser extends RouteInformationParser<RouteInform
 class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
   SimpleAsyncRouterDelegate({
     required this.builder,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;

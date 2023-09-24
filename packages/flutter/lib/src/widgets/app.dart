@@ -264,8 +264,6 @@ class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
   ///
-  /// The boolean arguments, [color], and [navigatorObservers] must not be null.
-  ///
   /// Most callers will want to use the [home] or [routes] parameters, or both.
   /// The [home] parameter is a convenience for the following [routes] map:
   ///
@@ -1346,12 +1344,18 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   /// the platform with [NavigationNotification.canHandlePop] and stops
   /// bubbling.
   bool _defaultOnNavigationNotification(NavigationNotification notification) {
-    // Don't do anything with navigation notifications if there is no engine
-    // attached.
-    if (_appLifecycleState != AppLifecycleState.detached) {
-      SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+    switch (_appLifecycleState) {
+      case null:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.inactive:
+        // Avoid updating the engine when the app isn't ready.
+        return true;
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+        return true;
     }
-    return true;
   }
 
   @override
@@ -1366,6 +1370,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     _updateRouting();
     _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
+    _appLifecycleState = WidgetsBinding.instance.lifecycleState;
   }
 
   @override

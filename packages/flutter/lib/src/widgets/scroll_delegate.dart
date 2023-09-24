@@ -670,22 +670,22 @@ class SliverChildListDelegate extends SliverChildDelegate {
     }
     // Lazily fill the [_keyToIndex].
     if (!_keyToIndex!.containsKey(key)) {
-      int index = _keyToIndex![null]!;
+      int index = _keyToIndex[null]!;
       while (index < children.length) {
         final Widget child = children[index];
         if (child.key != null) {
-          _keyToIndex![child.key] = index;
+          _keyToIndex[child.key] = index;
         }
         if (child.key == key) {
           // Record current index for next function call.
-          _keyToIndex![null] = index + 1;
+          _keyToIndex[null] = index + 1;
           return index;
         }
         index += 1;
       }
-      _keyToIndex![null] = index;
+      _keyToIndex[null] = index;
     } else {
-      return _keyToIndex![key];
+      return _keyToIndex[key];
     }
     return null;
   }

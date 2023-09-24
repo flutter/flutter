@@ -211,7 +211,7 @@ class ChildSemanticsConfigurationsResultBuilder {
 class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
   ///
-  /// The [label] must not be null or the empty string.
+  /// The [label] must not be empty.
   const CustomSemanticsAction({required String this.label})
     : assert(label != ''),
       hint = null,
@@ -220,7 +220,7 @@ class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction] that overrides a standard semantics
   /// action.
   ///
-  /// The [hint] must not be null or the empty string.
+  /// The [hint] must not be empty.
   const CustomSemanticsAction.overridingAction({required String this.hint, required SemanticsAction this.action})
     : assert(hint != ''),
       label = null;
@@ -410,8 +410,6 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
 @immutable
 class SemanticsData with Diagnosticable {
   /// Creates a semantics data object.
-  ///
-  /// The [flags], [actions], [label], and [Rect] arguments must not be null.
   ///
   /// If [label] is not empty, then [textDirection] must also not be null.
   SemanticsData({
@@ -4994,7 +4992,7 @@ abstract class SemanticsSortKey with Diagnosticable implements Comparable<Semant
 class OrdinalSortKey extends SemanticsSortKey {
   /// Creates a const semantics sort key that uses a [double] as its key value.
   ///
-  /// The [order] must be a finite number, and must not be null.
+  /// The [order] must be a finite number.
   const OrdinalSortKey(
     this.order, {
     super.name,

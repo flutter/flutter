@@ -67,6 +67,7 @@ class FlutterDevice {
          targetModel: targetModel,
          dartDefines: buildInfo.dartDefines,
          packagesPath: buildInfo.packagesPath,
+         frontendServerStarterPath: buildInfo.frontendServerStarterPath,
          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
          artifacts: globals.artifacts!,
          processManager: globals.processManager,
@@ -155,6 +156,7 @@ class FlutterDevice {
         ),
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
+        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
@@ -185,6 +187,7 @@ class FlutterDevice {
         fileSystemScheme: buildInfo.fileSystemScheme,
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
+        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
         extraFrontEndOptions: extraFrontEndOptions,
         initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
@@ -1690,7 +1693,7 @@ class TerminalHandler {
       _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
         _logger.printTrace('Writing pid to: $_pidFile');
-        _actualPidFile = _processInfo.writePidFile(_pidFile!);
+        _actualPidFile = _processInfo.writePidFile(_pidFile);
       }
     }
   }
@@ -1877,19 +1880,17 @@ class DebugConnectionInfo {
 /// These values must match what is available in
 /// `packages/flutter/lib/src/foundation/binding.dart`.
 String nextPlatform(String currentPlatform) {
-  switch (currentPlatform) {
-    case 'android':
-      return 'iOS';
-    case 'iOS':
-      return 'fuchsia';
-    case 'fuchsia':
-      return 'macOS';
-    case 'macOS':
-      return 'android';
-    default:
-      assert(false); // Invalid current platform.
-      return 'android';
-  }
+  const List<String> platforms = <String>[
+    'android',
+    'iOS',
+    'windows',
+    'macOS',
+    'linux',
+    'fuchsia',
+  ];
+  final int index = platforms.indexOf(currentPlatform);
+  assert(index >= 0, 'unknown platform "$currentPlatform"');
+  return platforms[(index + 1) % platforms.length];
 }
 
 /// A launcher for the devtools debugger and analysis tool.

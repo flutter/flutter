@@ -18,6 +18,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import 'migrations/build_architecture_migration.dart';
 import 'migrations/show_window_migration.dart';
 import 'migrations/version_migration.dart';
 import 'visual_studio.dart';
@@ -52,10 +53,17 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'to learn about adding Windows support to a project.');
   }
 
+  // TODO(pbo-linaro): Add support for windows-arm64 platform, https://github.com/flutter/flutter/issues/129807
+  const TargetPlatform targetPlatform = TargetPlatform.windows_x64;
+  final Directory buildDirectory = globals.fs.directory(
+    getWindowsBuildDirectory(targetPlatform)
+  );
+
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
     VersionMigration(windowsProject, globals.logger),
     ShowWindowMigration(windowsProject, globals.logger),
+    BuildArchitectureMigration(windowsProject, buildDirectory, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -79,7 +87,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 
   final String buildModeName = buildInfo.mode.cliName;
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
   );
@@ -89,6 +96,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       generator: cmakeGenerator,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
+      targetPlatform: targetPlatform,
     );
     if (visualStudio.displayVersion == '17.1.0') {
       _fixBrokenCmakeGeneration(buildDirectory);
@@ -124,7 +132,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path.join(getWindowsBuildDirectory(), 'runner', 'Release'),
+        globals.fs.path.join(
+          buildDirectory.path,
+          'runner',
+          'Release'
+        ),
       ),
       precompilerTrace: precompilerTrace,
       type: 'windows',
@@ -153,11 +165,18 @@ Future<void> _runCmakeGeneration({
   required String generator,
   required Directory buildDir,
   required Directory sourceDir,
+  required TargetPlatform targetPlatform,
 }) async {
+  if (targetPlatform != TargetPlatform.windows_x64) {
+    throwToolExit('Windows build supports only x64 target architecture');
+  }
+
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
   int result;
+  const String arch = 'x64';
+  const String flutterTargetPlatform = 'windows-x64';
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -168,6 +187,9 @@ Future<void> _runCmakeGeneration({
         buildDir.path,
         '-G',
         generator,
+        '-A',
+        arch,
+        '-DFLUTTER_TARGET_PLATFORM=$flutterTargetPlatform',
       ],
       trace: true,
     );

@@ -743,7 +743,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - CheckboxListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - CheckboxListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
@@ -859,7 +859,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - CheckboxListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - CheckboxListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
