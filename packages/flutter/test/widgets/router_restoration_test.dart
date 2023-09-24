@@ -188,7 +188,7 @@ class _TestWidgetState extends State<_TestWidget> {
         restorationScopeId: 'router',
         routerDelegate: _delegate,
         routeInformationParser: _TestRouteInformationParser(),
-        routeInformationProvider: widget.withInformationProvider ? _TestRouteInformationProvider() : null,
+        routeInformationProvider: widget.withInformationProvider ? _routeInformationProvider : null,
       ),
     );
   }
