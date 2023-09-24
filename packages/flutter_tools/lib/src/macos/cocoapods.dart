@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
+import '../migrations/cocoapods_toolchain_directory_migration.dart';
 import '../reporting/reporting.dart';
 import '../xcode_project.dart';
 
@@ -172,6 +173,11 @@ class CocoaPods {
       // This migrator works around a CocoaPods bug, and should be run after `pod install` is run.
       final ProjectMigration postPodMigration = ProjectMigration(<ProjectMigrator>[
         CocoaPodsScriptReadlink(xcodeProject, _xcodeProjectInterpreter, _logger),
+        CocoaPodsToolchainDirectoryMigration(
+          xcodeProject,
+          _xcodeProjectInterpreter,
+          _logger,
+        ),
       ]);
       postPodMigration.run();
 

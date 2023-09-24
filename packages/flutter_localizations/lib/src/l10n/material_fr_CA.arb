@@ -1,4 +1,12 @@
 {
+  "scanTextButtonLabel": "Balayer un texte",
+  "menuDismissLabel": "Ignorer le menu",
+  "expansionTileExpandedHint": "toucher deux fois pour réduire",
+  "expansionTileCollapsedHint": "toucher deux fois pour développer",
+  "expansionTileExpandedTapHint": "Réduire",
+  "expansionTileCollapsedTapHint": "Développer le panneau pour plus de détails",
+  "expandedHint": "Réduit",
+  "collapsedHint": "Développé",
   "scrimLabel": "Grille",
   "bottomSheetLabel": "Zone de contenu dans le bas de l'écran",
   "scrimOnTapHint": "Fermer $modalRouteContentName",

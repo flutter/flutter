@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "$tabCount ടാബിൽ $tabIndex-ാമത്തേത്",
   "modalBarrierDismissLabel": "നിരസിക്കുക",
   "searchTextFieldPlaceholderLabel": "തിരയുക",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "റീപ്ലേസ്‌മെന്റുകളൊന്നും കണ്ടെത്തിയില്ല",
+  "menuDismissLabel": "മെനു ഡിസ്മിസ് ചെയ്യുക",
+  "lookUpButtonLabel": "മുകളിലേക്ക് നോക്കുക",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

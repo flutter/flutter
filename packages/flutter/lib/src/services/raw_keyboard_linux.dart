@@ -22,9 +22,6 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for Linux.
-  ///
-  /// The [keyHelper], [scanCode], [unicodeScalarValues], [keyCode], and [modifiers],
-  /// arguments must not be null.
   const RawKeyEventDataLinux({
     required this.keyHelper,
     this.unicodeScalarValues = 0,

@@ -9,6 +9,7 @@ import 'task_result.dart';
 const String kBenchmarkTypeKeyName = 'benchmark_type';
 const String kBenchmarkVersionKeyName = 'version';
 const String kLocalEngineKeyName = 'local_engine';
+const String kLocalEngineHostKeyName = 'local_engine_host';
 const String kTaskNameKeyName = 'task_name';
 const String kRunStartKeyName = 'run_start';
 const String kRunEndKeyName = 'run_end';
@@ -24,13 +25,14 @@ enum FieldJustification { LEFT, RIGHT, CENTER }
 ///
 /// See [printSummary] for more.
 class ABTest {
-  ABTest(this.localEngine, this.taskName)
+  ABTest({required this.localEngine, required this.localEngineHost, required this.taskName})
       : runStart = DateTime.now(),
         _aResults = <String, List<double>>{},
         _bResults = <String, List<double>>{};
 
   ABTest.fromJsonMap(Map<String, dynamic> jsonResults)
       : localEngine = jsonResults[kLocalEngineKeyName] as String,
+        localEngineHost = jsonResults[kLocalEngineHostKeyName] as String,
         taskName = jsonResults[kTaskNameKeyName] as String,
         runStart = DateTime.parse(jsonResults[kRunStartKeyName] as String),
         _runEnd = DateTime.parse(jsonResults[kRunEndKeyName] as String),
@@ -38,6 +40,7 @@ class ABTest {
         _bResults = _convertFrom(jsonResults[kBResultsKeyName] as Map<String, dynamic>);
 
   final String localEngine;
+  final String localEngineHost;
   final String taskName;
   final DateTime runStart;
   DateTime? _runEnd;
@@ -86,6 +89,7 @@ class ABTest {
     kBenchmarkTypeKeyName:     kBenchmarkResultsType,
     kBenchmarkVersionKeyName:  kBenchmarkABVersion,
     kLocalEngineKeyName:       localEngine,
+    kLocalEngineHostKeyName:   localEngineHost,
     kTaskNameKeyName:          taskName,
     kRunStartKeyName:          runStart.toIso8601String(),
     kRunEndKeyName:            runEnd!.toIso8601String(),

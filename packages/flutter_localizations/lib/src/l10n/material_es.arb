@@ -137,10 +137,14 @@
   "bottomSheetLabel": "Hoja inferior",
   "scrimOnTapHint": "Cerrar $modalRouteContentName",
   "keyboardKeyShift": "Mayús",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "toca dos veces para contraer",
+  "expansionTileCollapsedHint": "toca dos veces para desplegar",
+  "expansionTileExpandedTapHint": "Contraer",
+  "expansionTileCollapsedTapHint": "Desplegar para ver más detalles",
+  "expandedHint": "Contraído",
+  "collapsedHint": "Desplegado",
+  "menuDismissLabel": "Cerrar menú",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -22,8 +22,7 @@ enum _ChipVariant { flat, elevated }
 /// [ChoiceChip]s represent a single choice from a set. Choice chips contain
 /// related descriptive text or categories.
 ///
-/// Requires one of its ancestors to be a [Material] widget. The [selected] and
-/// [label] arguments must not be null.
+/// Requires one of its ancestors to be a [Material] widget.
 ///
 /// {@tool dartpad}
 /// This example shows how to create [ChoiceChip]s with [onSelected]. When the
@@ -338,7 +337,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
   )!;
 }
 

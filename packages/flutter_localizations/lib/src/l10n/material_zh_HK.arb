@@ -1,4 +1,13 @@
 {
+  "scanTextButtonLabel": "掃瞄文字",
+  "lookUpButtonLabel": "查詢",
+  "menuDismissLabel": "閂選單",
+  "expansionTileExpandedHint": "㩒兩下就可以收合",
+  "expansionTileCollapsedHint": "㩒兩下就可以展開",
+  "expansionTileExpandedTapHint": "收合",
+  "expansionTileCollapsedTapHint": "展開就可以查看詳情",
+  "expandedHint": "已收合",
+  "collapsedHint": "已展開",
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "頁底面板",
   "scrimOnTapHint": "關閉 $modalRouteContentName",

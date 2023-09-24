@@ -136,10 +136,14 @@
   "bottomSheetLabel": "Alsó lap",
   "scrimOnTapHint": "$modalRouteContentName bezárása",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "duplán koppintva összecsukhatja",
+  "expansionTileCollapsedHint": "duplán koppintva kibonthatja",
+  "expansionTileExpandedTapHint": "Összecsukás",
+  "expansionTileCollapsedTapHint": "Bontsa ki a további részletek megtekintéséhez",
+  "expandedHint": "Összecsukva",
+  "collapsedHint": "Kibontva",
+  "menuDismissLabel": "Menü bezárása",
+  "lookUpButtonLabel": "Felfelé nézés",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

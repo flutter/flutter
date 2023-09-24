@@ -27,5 +27,9 @@
   "tabSemanticsLabel": "Fila $tabIndex din $tabCount",
   "modalBarrierDismissLabel": "Închideți",
   "searchTextFieldPlaceholderLabel": "Căutați",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Nu s-au găsit înlocuiri",
+  "menuDismissLabel": "Respingeți meniul",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

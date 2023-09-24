@@ -42,6 +42,16 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/input_chip/input_chip.0.dart **
 /// {@end-tool}
 ///
+///
+/// {@tool dartpad}
+/// The following example shows how to generate [InputChip]s from
+/// user text input. When the user enters a pizza topping in the text field,
+/// the user is presented with a list of suggestions. When selecting one of the
+/// suggestions, an [InputChip] is generated in the text field.
+///
+/// ** See code in examples/api/lib/material/input_chip/input_chip.1.dart **
+/// {@end-tool}
+///
 /// ## Material Design 3
 ///
 /// [InputChip] can be used for Input chips from Material Design 3.
@@ -73,10 +83,8 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
-  /// arguments must not be null. The [pressElevation] and [elevation] must be
-  /// null or non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const InputChip({
     super.key,
     this.avatar,
@@ -113,11 +121,6 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated(
-      'Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.'
-    )
-    this.useDeleteButtonTooltip = true,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -189,12 +192,6 @@ class InputChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
-  @override
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +210,6 @@ class InputChip extends StatelessWidget
       deleteIcon: resolvedDeleteIcon,
       onDeleted: onDeleted,
       deleteIconColor: deleteIconColor,
-      useDeleteButtonTooltip: useDeleteButtonTooltip,
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       onSelected: onSelected,
       onPressed: onPressed,
@@ -321,7 +317,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
   )!;
 }
 

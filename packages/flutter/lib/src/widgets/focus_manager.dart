@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
@@ -416,9 +417,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
-  /// arguments must not be null.
-  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
@@ -436,6 +434,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         _descendantsAreTraversable = descendantsAreTraversable {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
+
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
   }
 
   /// If true, tells the focus traversal policy to skip over this node for
@@ -1462,6 +1464,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// handlers, callers must call [registerGlobalHandlers]. See the
   /// documentation in that method for caveats to watch out for.
   FocusManager() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     rootScope._manager = this;
   }
 
@@ -1479,6 +1484,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void dispose() {
     _highlightManager.dispose();
+    rootScope.dispose();
     super.dispose();
   }
 
@@ -1601,10 +1607,32 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _haveScheduledUpdate = true;
-    scheduleMicrotask(_applyFocusChange);
+    scheduleMicrotask(applyFocusChangesIfNeeded);
   }
 
-  void _applyFocusChange() {
+  /// Applies any pending focus changes and notifies listeners that the focus
+  /// has changed.
+  ///
+  /// Must not be called during the build phase. This method is meant to be
+  /// called in a post-frame callback or microtask when the pending focus
+  /// changes need to be resolved before something else occurs.
+  ///
+  /// It can't be called during the build phase because not all listeners are
+  /// safe to be called with an update during a build.
+  ///
+  /// Typically, this is called automatically by the [FocusManager], but
+  /// sometimes it is necessary to ensure that no focus changes are pending
+  /// before executing an action. For example, the [MenuAnchor] class uses this
+  /// to make sure that the previous focus has been restored before executing a
+  /// menu callback when a menu item is selected.
+  ///
+  /// It is safe to call this if no focus changes are pending.
+  void applyFocusChangesIfNeeded() {
+    assert(
+      SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks,
+      'applyFocusChangesIfNeeded() should not be called during the build phase.'
+    );
+
     _haveScheduledUpdate = false;
     final FocusNode? previousFocus = _primaryFocus;
 

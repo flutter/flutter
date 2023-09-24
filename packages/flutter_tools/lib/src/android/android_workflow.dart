@@ -53,12 +53,12 @@ class AndroidWorkflow implements Workflow {
 
   @override
   bool get canListDevices => appliesToHostPlatform && _androidSdk != null
-    && _androidSdk?.adbPath != null;
+    && _androidSdk.adbPath != null;
 
   @override
   bool get canLaunchDevices => appliesToHostPlatform && _androidSdk != null
-    && _androidSdk?.adbPath != null
-    && (_androidSdk?.validateSdkWellFormed().isEmpty ?? false);
+    && _androidSdk.adbPath != null
+    && _androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
@@ -105,13 +105,13 @@ class AndroidValidator extends DoctorValidator {
         return false;
       }
       messages.add(ValidationMessage(_userMessages.androidJdkLocation(_java!.binaryPath)));
-      if (!_java!.canRun()) {
-        messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java!.binaryPath)));
+      if (!_java.canRun()) {
+        messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java.binaryPath)));
         return false;
       }
       Version? javaVersion;
       try {
-        javaVersion = _java!.version;
+        javaVersion = _java.version;
       } on Exception catch (error) {
         _logger.printTrace(error.toString());
       }
@@ -253,13 +253,13 @@ class AndroidLicenseValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
-    if (_androidSdk == null || _androidSdk?.latestVersion == null ||
-        _androidSdk!.validateSdkWellFormed().isNotEmpty ||
+    if (_androidSdk == null || _androidSdk.latestVersion == null ||
+        _androidSdk.validateSdkWellFormed().isNotEmpty ||
         ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    final String sdkVersionText = _userMessages.androidStatusInfo(_androidSdk!.latestVersion!.buildToolsVersionName);
+    final String sdkVersionText = _userMessages.androidStatusInfo(_androidSdk.latestVersion!.buildToolsVersionName);
 
     // Check for licenses.
     switch (await licensesAccepted) {
@@ -371,7 +371,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     try {
       final Process process = await _processManager.start(
-        <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
+        <String>[_androidSdk.sdkManagerPath!, '--licenses'],
         environment: _java?.environment,
       );
 
@@ -404,7 +404,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       final int exitCode = await process.exitCode;
       if (exitCode != 0) {
         throwToolExit(_userMessages.androidCannotRunSdkManager(
-          _androidSdk?.sdkManagerPath ?? '',
+          _androidSdk.sdkManagerPath ?? '',
           'exited code $exitCode',
           _platform,
         ));
@@ -412,7 +412,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return true;
     } on ProcessException catch (e) {
       throwToolExit(_userMessages.androidCannotRunSdkManager(
-        _androidSdk?.sdkManagerPath ?? '',
+        _androidSdk.sdkManagerPath ?? '',
         e.toString(),
         _platform,
       ));

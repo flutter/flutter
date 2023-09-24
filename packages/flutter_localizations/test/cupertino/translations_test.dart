@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
@@ -32,6 +33,11 @@ void main() {
       expect(localizations.datePickerMonth(2), isNotNull);
       expect(localizations.datePickerMonth(11), isNotNull);
       expect(localizations.datePickerMonth(12), isNotNull);
+
+      expect(localizations.datePickerStandaloneMonth(1), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(2), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(11), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(12), isNotNull);
 
       expect(localizations.datePickerDayOfMonth(0), isNotNull);
       expect(localizations.datePickerDayOfMonth(1), isNotNull);
@@ -194,4 +200,66 @@ void main() {
       expect(file.readAsStringSync(), encodedArbFile);
     }
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/110451.
+  testWidgets('Finnish translation for tab label', (WidgetTester tester) async {
+    const Locale locale = Locale('fi');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationFi>());
+    expect(localizations.tabSemanticsLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/130874.
+  testWidgets('buildButtonItems builds a localized "No Replacements found" button when no suggestions', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        locale: const Locale('ru'),
+        localizationsDelegates: GlobalCupertinoLocalizations.delegates,
+        supportedLocales: const <Locale>[Locale('en'), Locale('ru')],
+        home: _FakeEditableText()
+      ),
+    );
+    final _FakeEditableTextState editableTextState =
+        tester.state(find.byType(_FakeEditableText));
+    final List<ContextMenuButtonItem>? buttonItems =
+        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
+
+    expect(buttonItems, isNotNull);
+    expect(buttonItems, hasLength(1));
+    expect(buttonItems!.first.label, 'Варианты замены не найдены');
+    expect(buttonItems.first.onPressed, isNull);
+  });
+
+}
+
+class _FakeEditableText extends EditableText {
+  _FakeEditableText() : super(
+    controller: TextEditingController(),
+    focusNode: FocusNode(),
+    backgroundCursorColor: CupertinoColors.white,
+    cursorColor: CupertinoColors.white,
+    style: const TextStyle(),
+  );
+
+  @override
+  _FakeEditableTextState createState() => _FakeEditableTextState();
+}
+
+class _FakeEditableTextState extends EditableTextState {
+  _FakeEditableTextState();
+
+  @override
+  TextEditingValue get currentTextEditingValue => TextEditingValue.empty;
+
+  @override
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    return const SuggestionSpan(
+      TextRange(
+        start: 0,
+        end: 0,
+      ),
+      <String>[],
+    );
+  }
 }

@@ -1,4 +1,13 @@
 {
+  "scanTextButtonLabel": "Digitalizar texto",
+  "lookUpButtonLabel": "Procurar",
+  "menuDismissLabel": "Ignorar menu",
+  "expansionTileExpandedHint": "toque duas vezes para reduzir",
+  "expansionTileCollapsedHint": "toque duas vezes para expandir",
+  "expansionTileExpandedTapHint": "Reduzir",
+  "expansionTileCollapsedTapHint": "Expandir para obter mais detalhes",
+  "expandedHint": "Reduzido",
+  "collapsedHint": "Expandido",
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Secção inferior",
   "scrimOnTapHint": "Fechar $modalRouteContentName",

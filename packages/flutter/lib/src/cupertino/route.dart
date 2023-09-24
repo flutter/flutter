@@ -122,6 +122,12 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  void dispose() {
+    _previousTitle?.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangePrevious(Route<dynamic>? previousRoute) {
     final String? previousTitleString = previousRoute is CupertinoRouteTransitionMixin
       ? previousRoute.title
@@ -196,7 +202,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     }
     // If attempts to dismiss this route might be vetoed such as in a page
     // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (route.hasScopedWillPopCallback) {
+    if (route.hasScopedWillPopCallback
+        || route.popDisposition == RoutePopDisposition.doNotPop) {
       return false;
     }
     // Fullscreen dialogs aren't dismissible by back swipe.
@@ -310,6 +317,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 /// the route is popped from the stack via [Navigator.pop] when an optional
 /// `result` can be provided.
 ///
+/// If `barrierDismissible` is true, then pressing the escape key on the keyboard
+/// will cause the current route to be popped with null as the value.
+///
 /// See also:
 ///
 ///  * [CupertinoRouteTransitionMixin], for a mixin that provides iOS transition
@@ -333,6 +343,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
+    super.barrierDismissible = false,
   }) {
     assert(opaque);
   }
@@ -702,8 +713,6 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
 /// detector controller is associated.
 class _CupertinoBackGestureController<T> {
   /// Creates a controller for an iOS-style back gesture.
-  ///
-  /// The [navigator] and [controller] arguments must not be null.
   _CupertinoBackGestureController({
     required this.navigator,
     required this.controller,
@@ -724,8 +733,6 @@ class _CupertinoBackGestureController<T> {
   /// [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double velocity) {
     // Fling in the appropriate direction.
-    // AnimationController.fling is guaranteed to
-    // take at least one frame.
     //
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
@@ -836,16 +843,16 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       return b!._colors == null ? b : _CupertinoEdgeShadowDecoration._(b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)!).toList());
     }
     if (b == null) {
-      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors!.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
+      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
     }
     assert(b._colors != null || a._colors != null);
     // If it ever becomes necessary, we could allow decorations with different
     // length' here, similarly to how it is handled in [LinearGradient.lerp].
-    assert(b._colors == null || a._colors == null || a._colors!.length == b._colors!.length);
+    assert(b._colors == null || a._colors == null || a._colors.length == b._colors.length);
     return _CupertinoEdgeShadowDecoration._(
       <Color>[
         for (int i = 0; i < b._colors!.length; i += 1)
-          Color.lerp(a._colors?[i], b._colors?[i], t)!,
+          Color.lerp(a._colors?[i], b._colors[i], t)!,
       ],
     );
   }
@@ -895,7 +902,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
     this._decoration,
     super.onChanged,
-  ) : assert(_decoration._colors == null || _decoration._colors!.length > 1);
+  ) : assert(_decoration._colors == null || _decoration._colors.length > 1);
 
   final _CupertinoEdgeShadowDecoration _decoration;
 

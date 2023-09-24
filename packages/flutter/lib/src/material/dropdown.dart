@@ -15,6 +15,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -101,9 +102,11 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
     required this.constraints,
     required this.itemIndex,
     required this.enableFeedback,
+    required this.scrollController,
   });
 
   final _DropdownRoute<T> route;
+  final ScrollController scrollController;
   final EdgeInsets? padding;
   final Rect buttonRect;
   final BoxConstraints constraints;
@@ -130,7 +133,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         widget.constraints.maxHeight,
         widget.itemIndex,
       );
-      widget.route.scrollController!.animateTo(
+      widget.scrollController.animateTo(
         menuLimits.scrollOffset,
         curve: Curves.easeInOut,
         duration: const Duration(milliseconds: 100),
@@ -204,6 +207,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     this.dropdownColor,
     required this.enableFeedback,
     this.borderRadius,
+    required this.scrollController,
   });
 
   final _DropdownRoute<T> route;
@@ -213,6 +217,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final Color? dropdownColor;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
+  final ScrollController scrollController;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -263,6 +268,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           constraints: widget.constraints,
           itemIndex: itemIndex,
           enableFeedback: widget.enableFeedback,
+          scrollController: widget.scrollController,
         ),
       ];
 
@@ -303,7 +309,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                   platform: Theme.of(context).platform,
                 ),
                 child: PrimaryScrollController(
-                  controller: widget.route.scrollController!,
+                  controller: widget.scrollController,
                   child: Scrollbar(
                     thumbVisibility: true,
                     child: ListView(
@@ -446,7 +452,6 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final BorderRadius? borderRadius;
 
   final List<double> itemHeights;
-  ScrollController? scrollController;
 
   @override
   Duration get transitionDuration => _kDropdownMenuDuration;
@@ -571,7 +576,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   }
 }
 
-class _DropdownRoutePage<T> extends StatelessWidget {
+class _DropdownRoutePage<T> extends StatefulWidget {
   const _DropdownRoutePage({
     super.key,
     required this.route,
@@ -602,8 +607,15 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
+  State<_DropdownRoutePage<T>> createState() => _DropdownRoutePageState<T>();
+}
+
+class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
+  late ScrollController _scrollSontroller;
+
+  @override
+  void initState(){
+    super.initState();
 
     // Computing the initialScrollOffset now, before the items have been laid
     // out. This only works if the item heights are effectively fixed, i.e. either
@@ -611,20 +623,25 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     // and all of the items' intrinsic heights are less than kMinInteractiveDimension.
     // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractiveDimension.
-    if (route.scrollController == null) {
-      final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, constraints.maxHeight, selectedIndex);
-      route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
-    }
+    final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.selectedIndex);
+    _scrollSontroller = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
 
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final Widget menu = _DropdownMenu<T>(
-      route: route,
-      padding: padding.resolve(textDirection),
-      buttonRect: buttonRect,
-      constraints: constraints,
-      dropdownColor: dropdownColor,
-      enableFeedback: enableFeedback,
-      borderRadius: borderRadius,
+      route: widget.route,
+      padding: widget.padding.resolve(textDirection),
+      buttonRect: widget.buttonRect,
+      constraints: widget.constraints,
+      dropdownColor: widget.dropdownColor,
+      enableFeedback: widget.enableFeedback,
+      borderRadius: widget.borderRadius,
+      scrollController: _scrollSontroller,
     );
 
     return MediaQuery.removePadding(
@@ -637,15 +654,21 @@ class _DropdownRoutePage<T> extends StatelessWidget {
         builder: (BuildContext context) {
           return CustomSingleChildLayout(
             delegate: _DropdownMenuRouteLayout<T>(
-              buttonRect: buttonRect,
-              route: route,
+              buttonRect: widget.buttonRect,
+              route: widget.route,
               textDirection: textDirection,
             ),
-            child: capturedThemes.wrap(menu),
+            child: widget.capturedThemes.wrap(menu),
           );
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollSontroller.dispose();
+    super.dispose();
   }
 }
 
@@ -707,7 +730,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   /// Defines how the item is positioned within the container.
   ///
-  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
+  /// Defaults to [AlignmentDirectional.centerStart].
   ///
   /// See also:
   ///
@@ -888,12 +911,6 @@ class DropdownButton<T> extends StatefulWidget {
   /// If [value] is null and the button is disabled, [disabledHint] will be displayed
   /// if it is non-null. If [disabledHint] is null, then [hint] will be displayed
   /// if it is non-null.
-  ///
-  /// The [elevation] and [iconSize] arguments must not be null (they both have
-  /// defaults, so do not need to be specified). The boolean [isDense] and
-  /// [isExpanded] arguments must not be null.
-  ///
-  /// The [autofocus] argument must not be null.
   ///
   /// The [dropdownColor] argument specifies the background color of the
   /// dropdown when it is open. If it is null, the current theme's
@@ -1192,7 +1209,7 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// Defines how the hint or the selected item is positioned within the button.
   ///
-  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
+  /// Defaults to [AlignmentDirectional.centerStart].
   ///
   /// See also:
   ///
@@ -1355,9 +1372,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
-    final double scaledFontSize = textScaleFactor * fontSize;
+    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
@@ -1567,9 +1583,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
   /// parameters, see [FormField]. For the rest (other than [decoration]), see
   /// [DropdownButton].
-  ///
-  /// The `items`, `elevation`, `iconSize`, `isDense`, `isExpanded`,
-  /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
     super.key,
     required List<DropdownMenuItem<T>>? items,
@@ -1634,6 +1647,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              }
            }
            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+           final bool hasError = effectiveDecoration.errorText != null;
 
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
@@ -1641,6 +1655,33 @@ class DropdownButtonFormField<T> extends FormField<T> {
              canRequestFocus: false,
              skipTraversal: true,
              child: Builder(builder: (BuildContext context) {
+                final bool isFocused = Focus.of(context).hasFocus;
+                InputBorder? resolveInputBorder() {
+                  if (hasError) {
+                    if (isFocused) {
+                      return effectiveDecoration.focusedErrorBorder;
+                    }
+                    return effectiveDecoration.errorBorder;
+                  }
+                  if (isFocused) {
+                    return effectiveDecoration.focusedBorder;
+                  }
+                  if (effectiveDecoration.enabled) {
+                    return effectiveDecoration.enabledBorder;
+                  }
+                  return effectiveDecoration.border;
+                }
+                BorderRadius? effectiveBorderRadius() {
+                  final InputBorder? inputBorder = resolveInputBorder();
+                  if (inputBorder is OutlineInputBorder) {
+                    return inputBorder.borderRadius;
+                  }
+                  if (inputBorder is UnderlineInputBorder) {
+                    return inputBorder.borderRadius;
+                  }
+                  return null;
+                }
+
                return DropdownButtonHideUnderline(
                  child: DropdownButton<T>._formField(
                    items: items,
@@ -1666,10 +1707,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    menuMaxHeight: menuMaxHeight,
                    enableFeedback: enableFeedback,
                    alignment: alignment,
-                   borderRadius: borderRadius,
+                   borderRadius: borderRadius ?? effectiveBorderRadius(),
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
-                   isFocused: Focus.of(context).hasFocus,
+                   isFocused: isFocused,
                    padding: padding,
                  ),
                );
@@ -1695,13 +1736,12 @@ class DropdownButtonFormField<T> extends FormField<T> {
 }
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
+  DropdownButtonFormField<T> get _dropdownButtonFormField => widget as DropdownButtonFormField<T>;
 
   @override
   void didChange(T? value) {
     super.didChange(value);
-    final DropdownButtonFormField<T> dropdownButtonFormField = widget as DropdownButtonFormField<T>;
-    assert(dropdownButtonFormField.onChanged != null);
-    dropdownButtonFormField.onChanged!(value);
+    _dropdownButtonFormField.onChanged!(value);
   }
 
   @override
@@ -1710,5 +1750,11 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
     if (oldWidget.initialValue != widget.initialValue) {
       setValue(widget.initialValue);
     }
+  }
+
+ @override
+  void reset() {
+    super.reset();
+    _dropdownButtonFormField.onChanged!(value);
   }
 }

@@ -69,7 +69,7 @@ class CrashReporter {
 
   /// Prints instructions for filing a bug about the crash.
   Future<void> informUser(CrashDetails details, File crashFile) async {
-    _logger.printError('A crash report has been written to ${crashFile.path}.');
+    _logger.printError('A crash report has been written to ${crashFile.path}');
     _logger.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
     final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(details.error.toString());

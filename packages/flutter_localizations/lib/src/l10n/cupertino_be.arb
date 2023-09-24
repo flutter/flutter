@@ -32,5 +32,9 @@
   "tabSemanticsLabel": "Укладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Адхіліць",
   "searchTextFieldPlaceholderLabel": "Пошук",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Замен не знойдзена",
+  "menuDismissLabel": "Закрыць меню",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

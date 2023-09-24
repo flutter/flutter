@@ -136,10 +136,14 @@
   "bottomSheetLabel": "ボトムシート",
   "scrimOnTapHint": "$modalRouteContentName を閉じる",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "ダブルタップすると閉じます",
+  "expansionTileCollapsedHint": "開くにはダブルタップします",
+  "expansionTileExpandedTapHint": "閉じる",
+  "expansionTileCollapsedTapHint": "開いて詳細を表示",
+  "expandedHint": "閉じました",
+  "collapsedHint": "開きました",
+  "menuDismissLabel": "メニューを閉じる",
+  "lookUpButtonLabel": "調べる",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

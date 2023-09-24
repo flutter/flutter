@@ -12,15 +12,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matcher/expect.dart';
 import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
 import 'binding.dart';
+import 'controller.dart';
 import 'finders.dart';
 import 'goldens.dart';
 import 'widget_tester.dart' show WidgetTester;
 
-/// Asserts that the [Finder] matches no widgets in the widget tree.
+/// Asserts that the [FinderBase] matches nothing in the available candidates.
 ///
 /// ## Sample code
 ///
@@ -30,13 +32,15 @@ import 'widget_tester.dart' show WidgetTester;
 ///
 /// See also:
 ///
-///  * [findsWidgets], when you want the finder to find one or more widgets.
-///  * [findsOneWidget], when you want the finder to find exactly one widget.
-///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
-const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
+///  * [findsAny], when you want the finder to find one or more candidates.
+///  * [findsOne], when you want the finder to find exactly one candidate.
+///  * [findsExactly], when you want the finder to find a specific number of candidates.
+///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
+const Matcher findsNothing = _FindsCountMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
+///
+/// This is equivalent to the preferred [findsAny] method.
 ///
 /// ## Sample code
 ///
@@ -47,12 +51,30 @@ const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 /// See also:
 ///
 ///  * [findsNothing], when you want the finder to not find anything.
-///  * [findsOneWidget], when you want the finder to find exactly one widget.
-///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
-const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
+///  * [findsOne], when you want the finder to find exactly one candidate.
+///  * [findsExactly], when you want the finder to find a specific number of candidates.
+///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
+const Matcher findsWidgets = _FindsCountMatcher(1, null);
+
+/// Asserts that the [FinderBase] locates at least one matching candidate.
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(find.text('Save'), findsAny);
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsOne], when you want the finder to find exactly one candidate.
+///  * [findsExactly], when you want the finder to find a specific number of candidates.
+///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
+const Matcher findsAny = _FindsCountMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
+///
+/// This is equivalent to the preferred [findsOne] method.
 ///
 /// ## Sample code
 ///
@@ -63,12 +85,30 @@ const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 /// See also:
 ///
 ///  * [findsNothing], when you want the finder to not find anything.
-///  * [findsWidgets], when you want the finder to find one or more widgets.
-///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
-const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
+///  * [findsAny], when you want the finder to find one or more candidates.
+///  * [findsExactly], when you want the finder to find a specific number of candidates.
+///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
+const Matcher findsOneWidget = _FindsCountMatcher(1, 1);
+
+/// Asserts that the [FinderBase] finds exactly one matching candidate.
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(find.text('Save'), findsOne);
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsAny], when you want the finder to find one or more candidates.
+///  * [findsExactly], when you want the finder to find a specific number candidates.
+///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
+const Matcher findsOne = _FindsCountMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
+///
+/// This is equivalent to the preferred [findsExactly] method.
 ///
 /// ## Sample code
 ///
@@ -79,12 +119,30 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 /// See also:
 ///
 ///  * [findsNothing], when you want the finder to not find anything.
-///  * [findsWidgets], when you want the finder to find one or more widgets.
-///  * [findsOneWidget], when you want the finder to find exactly one widget.
-///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
-Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
+///  * [findsAny], when you want the finder to find one or more candidates.
+///  * [findsOne], when you want the finder to find exactly one candidate.
+///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
+Matcher findsNWidgets(int n) => _FindsCountMatcher(n, n);
+
+/// Asserts that the [FinderBase] locates the specified number of candidates.
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(find.text('Save'), findsExactly(2));
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsAny], when you want the finder to find one or more candidates.
+///  * [findsOne], when you want the finder to find exactly one candidates.
+///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
+Matcher findsExactly(int n) => _FindsCountMatcher(n, n);
 
 /// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+///
+/// This is equivalent to the preferred [findsAtLeast] method.
 ///
 /// ## Sample code
 ///
@@ -95,10 +153,26 @@ Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 /// See also:
 ///
 ///  * [findsNothing], when you want the finder to not find anything.
-///  * [findsWidgets], when you want the finder to find one or more widgets.
-///  * [findsOneWidget], when you want the finder to find exactly one widget.
-///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-Matcher findsAtLeastNWidgets(int n) => _FindsWidgetMatcher(n, null);
+///  * [findsAny], when you want the finder to find one or more candidates.
+///  * [findsOne], when you want the finder to find exactly one candidate.
+///  * [findsExactly], when you want the finder to find a specific number of candidates.
+Matcher findsAtLeastNWidgets(int n) => _FindsCountMatcher(n, null);
+
+/// Asserts that the [FinderBase] locates at least the given number of candidates.
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(find.text('Save'), findsAtLeast(2));
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsAny], when you want the finder to find one or more candidates.
+///  * [findsOne], when you want the finder to find exactly one candidates.
+///  * [findsExactly], when you want the finder to find a specific number of candidates.
+Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 
 /// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
@@ -272,8 +346,22 @@ Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolera
 ///
 ///  * [moreOrLessEquals], which is for [double]s.
 ///  * [offsetMoreOrLessEquals], which is for [Offset]s.
+///  * [matrix3MoreOrLessEquals], which is for [Matrix3]s.
 Matcher matrixMoreOrLessEquals(Matrix4 value, { double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Matrix4>(_matrixDistance, value, epsilon);
+}
+
+/// Asserts that two [Matrix3]s are equal, within some tolerated error.
+///
+/// {@macro flutter.flutter_test.moreOrLessEquals}
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [offsetMoreOrLessEquals], which is for [Offset]s.
+///  * [matrixMoreOrLessEquals], which is for [Matrix4]s.
+Matcher matrix3MoreOrLessEquals(Matrix3 value, { double epsilon = precisionErrorTolerance }) {
+  return _IsWithinDistance<Matrix3>(_matrix3Distance, value, epsilon);
 }
 
 /// Asserts that two [Offset]s are equal, within some tolerated error.
@@ -330,6 +418,13 @@ Matcher isMethodCall(String name, { required dynamic arguments }) {
 /// the path draws outside the expected area.
 Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
+
+// Examples can assume:
+// late Image image;
+// late Future<Image> imageFuture;
+// typedef MyWidget = Placeholder;
+// late Future<ByteData> someFont;
+// late WidgetTester tester;
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
 /// golden image file identified by [key], with an optional [version] number.
@@ -404,18 +499,18 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// {@tool snippet}
 /// How to load a custom font for golden images.
 /// ```dart
-/// testWidgets('Creating a golden image with a custom font', (tester) async {
+/// testWidgets('Creating a golden image with a custom font', (WidgetTester tester) async {
 ///   // Assuming the 'Roboto.ttf' file is declared in the pubspec.yaml file
-///   final font = rootBundle.load('path/to/font-file/Roboto.ttf');
+///   final Future<ByteData> font = rootBundle.load('path/to/font-file/Roboto.ttf');
 ///
-///   final fontLoader = FontLoader('Roboto')..addFont(font);
+///   final FontLoader fontLoader = FontLoader('Roboto')..addFont(font);
 ///   await fontLoader.load();
 ///
-///   await tester.pumpWidget(const SomeWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///
 ///   await expectLater(
-///     find.byType(SomeWidget),
-///     matchesGoldenFile('someWidget.png'),
+///     find.byType(MyWidget),
+///     matchesGoldenFile('myWidget.png'),
 ///   );
 /// });
 /// ```
@@ -431,7 +526,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```dart
 /// Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 ///   setUpAll(() async {
-///     final fontLoader = FontLoader('SomeFont')..addFont(someFont);
+///     final FontLoader fontLoader = FontLoader('SomeFont')..addFont(someFont);
 ///     await fontLoader.load();
 ///   });
 ///
@@ -473,18 +568,22 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 /// ## Sample code
 ///
 /// ```dart
-/// final ui.Paint paint = ui.Paint()
-///   ..style = ui.PaintingStyle.stroke
-///   ..strokeWidth = 1.0;
-/// final ui.PictureRecorder recorder = ui.PictureRecorder();
-/// final ui.Canvas pictureCanvas = ui.Canvas(recorder);
-/// pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
-/// final ui.Picture picture = recorder.endRecording();
-/// ui.Image referenceImage = picture.toImage(50, 50);
+/// testWidgets('matchesReferenceImage', (WidgetTester tester) async {
+///   final ui.Paint paint = ui.Paint()
+///     ..style = ui.PaintingStyle.stroke
+///     ..strokeWidth = 1.0;
+///   final ui.PictureRecorder recorder = ui.PictureRecorder();
+///   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+///   pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+///   final ui.Picture picture = recorder.endRecording();
+///   addTearDown(picture.dispose);
+///   ui.Image referenceImage = await picture.toImage(50, 50);
+///   addTearDown(referenceImage.dispose);
 ///
-/// await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
-/// await expectLater(image, matchesReferenceImage(referenceImage);
-/// await expectLater(imageFuture, matchesReferenceImage(referenceImage));
+///   await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
+///   await expectLater(image, matchesReferenceImage(referenceImage));
+///   await expectLater(imageFuture, matchesReferenceImage(referenceImage));
+/// });
 /// ```
 ///
 /// See also:
@@ -508,14 +607,17 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// ## Sample code
 ///
 /// ```dart
-/// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
-/// handle.dispose();
+/// testWidgets('matchesSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
+///   handle.dispose();
+/// });
 /// ```
 ///
 /// See also:
 ///
-///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [containsSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
   String? label,
@@ -564,6 +666,8 @@ Matcher matchesSemantics({
   bool hasToggledState = false,
   bool isToggled = false,
   bool hasImplicitScrolling = false,
+  bool hasExpandedState = false,
+  bool isExpanded = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -640,6 +744,8 @@ Matcher matchesSemantics({
     hasToggledState: hasToggledState,
     isToggled: isToggled,
     hasImplicitScrolling: hasImplicitScrolling,
+    hasExpandedState: hasExpandedState,
+    isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
     hasLongPressAction: hasLongPressAction,
@@ -681,14 +787,17 @@ Matcher matchesSemantics({
 /// ## Sample code
 ///
 /// ```dart
-/// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), hasSemantics(label: 'hello'));
-/// handle.dispose();
+/// testWidgets('containsSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   expect(tester.getSemantics(find.text('hello')), containsSemantics(label: 'hello'));
+///   handle.dispose();
+/// });
 /// ```
 ///
 /// See also:
 ///
-///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
 Matcher containsSemantics({
   String? label,
@@ -737,6 +846,8 @@ Matcher containsSemantics({
   bool? hasToggledState,
   bool? isToggled,
   bool? hasImplicitScrolling,
+  bool? hasExpandedState,
+  bool? isExpanded,
   // Actions
   bool? hasTapAction,
   bool? hasLongPressAction,
@@ -813,6 +924,8 @@ Matcher containsSemantics({
     hasToggledState: hasToggledState,
     isToggled: isToggled,
     hasImplicitScrolling: hasImplicitScrolling,
+    hasExpandedState: hasExpandedState,
+    isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
     hasLongPressAction: hasLongPressAction,
@@ -851,9 +964,12 @@ Matcher containsSemantics({
 /// ## Sample code
 ///
 /// ```dart
-/// final SemanticsHandle handle = tester.ensureSemantics();
-/// await expectLater(tester, meetsGuideline(textContrastGuideline));
-/// handle.dispose();
+/// testWidgets('containsSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   await expectLater(tester, meetsGuideline(textContrastGuideline));
+///   handle.dispose();
+/// });
 /// ```
 ///
 /// Supported accessibility guidelines:
@@ -874,19 +990,19 @@ AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
   return _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
-class _FindsWidgetMatcher extends Matcher {
-  const _FindsWidgetMatcher(this.min, this.max);
+class _FindsCountMatcher extends Matcher {
+  const _FindsCountMatcher(this.min, this.max);
 
   final int? min;
   final int? max;
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant FinderBase<dynamic> finder, Map<dynamic, dynamic> matchState) {
     assert(min != null || max != null);
     assert(min == null || max == null || min! <= max!);
-    matchState[Finder] = finder;
+    matchState[FinderBase] = finder;
     int count = 0;
-    final Iterator<Element> iterator = finder.evaluate().iterator;
+    final Iterator<dynamic> iterator = finder.evaluate().iterator;
     if (min != null) {
       while (count < min! && iterator.moveNext()) {
         count += 1;
@@ -911,26 +1027,26 @@ class _FindsWidgetMatcher extends Matcher {
     assert(min != null || max != null);
     if (min == max) {
       if (min == 1) {
-        return description.add('exactly one matching node in the widget tree');
+        return description.add('exactly one matching candidate');
       }
-      return description.add('exactly $min matching nodes in the widget tree');
+      return description.add('exactly $min matching candidates');
     }
     if (min == null) {
       if (max == 0) {
-        return description.add('no matching nodes in the widget tree');
+        return description.add('no matching candidates');
       }
       if (max == 1) {
-        return description.add('at most one matching node in the widget tree');
+        return description.add('at most one matching candidate');
       }
-      return description.add('at most $max matching nodes in the widget tree');
+      return description.add('at most $max matching candidates');
     }
     if (max == null) {
       if (min == 1) {
-        return description.add('at least one matching node in the widget tree');
+        return description.add('at least one matching candidate');
       }
-      return description.add('at least $min matching nodes in the widget tree');
+      return description.add('at least $min matching candidates');
     }
-    return description.add('between $min and $max matching nodes in the widget tree (inclusive)');
+    return description.add('between $min and $max matching candidates (inclusive)');
   }
 
   @override
@@ -940,8 +1056,8 @@ class _FindsWidgetMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final Finder finder = matchState[Finder] as Finder;
-    final int count = finder.evaluate().length;
+    final FinderBase<dynamic> finder = matchState[FinderBase] as FinderBase<dynamic>;
+    final int count = finder.found.length;
     if (count == 0) {
       assert(min != null && min! > 0);
       if (min == 1 && max == 1) {
@@ -1339,6 +1455,14 @@ double _rectDistance(Rect a, Rect b) {
 double _matrixDistance(Matrix4 a, Matrix4 b) {
   double delta = 0.0;
   for (int i = 0; i < 16; i += 1) {
+    delta = math.max<double>((a[i] - b[i]).abs(), delta);
+  }
+  return delta;
+}
+
+double _matrix3Distance(Matrix3 a, Matrix3 b) {
+  double delta = 0.0;
+  for (int i = 0; i < 9; i += 1) {
     delta = math.max<double>((a[i] - b[i]).abs(), delta);
   }
   return delta;
@@ -2017,10 +2141,13 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image>) {
       imageFuture = item;
+      disposeImage = false;
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
+      disposeImage = false;
     } else {
       final Finder finder = item as Finder;
       final Iterable<Element> elements = finder.evaluate();
@@ -2030,30 +2157,37 @@ class _MatchesReferenceImage extends AsyncMatcher {
         return 'matched too many widgets';
       }
       imageFuture = captureImage(elements.single);
+      disposeImage = true;
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData? bytes = await image.toByteData();
-      if (bytes == null) {
-        return 'could not be encoded.';
-      }
+      try {
+        final ByteData? bytes = await image.toByteData();
+        if (bytes == null) {
+          return 'could not be encoded.';
+        }
 
-      final ByteData? referenceBytes = await referenceImage.toByteData();
-      if (referenceBytes == null) {
-        return 'could not have its reference image encoded.';
-      }
+        final ByteData? referenceBytes = await referenceImage.toByteData();
+        if (referenceBytes == null) {
+          return 'could not have its reference image encoded.';
+        }
 
-      if (referenceImage.height != image.height || referenceImage.width != image.width) {
-        return 'does not match as width or height do not match. $image != $referenceImage';
-      }
+        if (referenceImage.height != image.height || referenceImage.width != image.width) {
+          return 'does not match as width or height do not match. $image != $referenceImage';
+        }
 
-      final int countDifferentPixels = _countDifferentPixels(
-        Uint8List.view(bytes.buffer),
-        Uint8List.view(referenceBytes.buffer),
-      );
-      return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+        final int countDifferentPixels = _countDifferentPixels(
+          Uint8List.view(bytes.buffer),
+          Uint8List.view(referenceBytes.buffer),
+        );
+        return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+      } finally {
+        if (disposeImage) {
+          image.dispose();
+        }
+      }
     });
   }
 
@@ -2111,6 +2245,8 @@ class _MatchesSemanticsData extends Matcher {
     required bool? hasToggledState,
     required bool? isToggled,
     required bool? hasImplicitScrolling,
+    required bool? hasExpandedState,
+    required bool? isExpanded,
     // Actions
     required bool? hasTapAction,
     required bool? hasLongPressAction,
@@ -2166,6 +2302,8 @@ class _MatchesSemanticsData extends Matcher {
           if (isToggled != null) SemanticsFlag.isToggled: isToggled,
           if (hasImplicitScrolling != null) SemanticsFlag.hasImplicitScrolling: hasImplicitScrolling,
           if (isSlider != null) SemanticsFlag.isSlider: isSlider,
+          if (hasExpandedState != null) SemanticsFlag.hasExpandedState: hasExpandedState,
+          if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
         },
         actions = <SemanticsAction, bool>{
           if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
