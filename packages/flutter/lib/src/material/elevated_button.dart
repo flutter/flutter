@@ -62,8 +62,6 @@ import 'theme_data.dart';
 ///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
   /// Create an ElevatedButton.
-  ///
-  /// The [autofocus] and [clipBehavior] arguments must not be null.
   const ElevatedButton({
     super.key,
     required super.onPressed,
@@ -83,8 +81,6 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
-  ///
-  /// The [icon] and [label] arguments must not be null.
   factory ElevatedButton.icon({
     Key? key,
     required VoidCallback? onPressed,

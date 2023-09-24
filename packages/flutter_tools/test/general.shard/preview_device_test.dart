@@ -99,6 +99,7 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
+    Uri? nativeAssets,
     @visibleForTesting BuildSystem? buildSystem
   }) async {
     final Directory assetDirectory = fileSystem

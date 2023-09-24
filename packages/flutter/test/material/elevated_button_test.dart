@@ -160,7 +160,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default ElevatedButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ElevatedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(

@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_widgets.dart';
 
@@ -133,7 +134,7 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Legal times for setState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Legal times for setState', (WidgetTester tester) async {
     final GlobalKey flipKey = GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
     await tester.pumpWidget(const ProbeWidget(key: Key('a')));
@@ -171,7 +172,7 @@ void main() {
     expect(tester.takeException(), isNotNull);
   });
 
-  testWidgets('Dirty element list sort order', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dirty element list sort order', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
     final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 
