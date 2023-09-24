@@ -13,17 +13,18 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Image at default filterQuality', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image at default filterQuality', (WidgetTester tester) async {
     await testImageQuality(tester, null);
   });
 
-  testWidgets('Image at high filterQuality', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image at high filterQuality', (WidgetTester tester) async {
     await testImageQuality(tester, ui.FilterQuality.high);
   });
 
-  testWidgets('Image at none filterQuality', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image at none filterQuality', (WidgetTester tester) async {
     await testImageQuality(tester, ui.FilterQuality.none);
   });
 }
@@ -137,7 +138,7 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }

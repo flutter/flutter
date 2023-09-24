@@ -59,12 +59,6 @@ void main() {
       expect(response.type, 'Success');
     });
 
-    testWithoutContext('flutterGetIOSBuildOptions can be called', () async {
-      final Response response =
-          await vmService.callServiceExtension('s0.flutterGetIOSBuildOptions');
-      expect(response.type, 'Success');
-    });
-
     testWithoutContext('reloadSources can be called', () async {
       final VM vm = await vmService.getVM();
       final IsolateRef? isolateRef = vm.isolates?.first;

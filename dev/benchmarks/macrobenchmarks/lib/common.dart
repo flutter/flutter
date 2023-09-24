@@ -13,6 +13,7 @@ const String kLargeImageChangerRouteName = '/large_image_changer';
 const String kLargeImagesRouteName = '/large_images';
 const String kPathTessellationRouteName = '/path_tessellation';
 const String kTextRouteName = '/text';
+const String kVeryLongPictureScrollingRouteName = '/very_long_picture_scrolling';
 const String kFullscreenTextRouteName = '/fullscreen_text';
 const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
 const String kClipperCacheRouteName = '/clipper_cache';

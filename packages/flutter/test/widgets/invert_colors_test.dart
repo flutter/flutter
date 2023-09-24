@@ -10,9 +10,10 @@ library;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('InvertColors',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InvertColors',  (WidgetTester tester) async {
     await tester.pumpWidget(const RepaintBoundary(
       child: SizedBox(
         width: 200.0,
@@ -29,7 +30,7 @@ void main() {
     );
   });
 
-  testWidgets('InvertColors and ColorFilter',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InvertColors and ColorFilter',  (WidgetTester tester) async {
     await tester.pumpWidget(const RepaintBoundary(
       child: SizedBox(
         width: 200.0,

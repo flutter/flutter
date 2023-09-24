@@ -72,7 +72,7 @@ class TimePickerThemeData with Diagnosticable {
   /// The style of the cancel button of a [TimePickerDialog].
   final ButtonStyle? cancelButtonStyle;
 
-  /// The style of the conform (OK) button of a [TimePickerDialog].
+  /// The style of the confirm (OK) button of a [TimePickerDialog].
   final ButtonStyle? confirmButtonStyle;
 
   /// The color and weight of the day period's outline.
@@ -300,8 +300,6 @@ class TimePickerThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two time picker themes.
-  ///
-  /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TimePickerThemeData lerp(TimePickerThemeData? a, TimePickerThemeData? b, double t) {

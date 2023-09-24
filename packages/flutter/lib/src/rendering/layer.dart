@@ -919,9 +919,9 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
+///  * [TextureRegistry](/javadoc/io/flutter/view/TextureRegistry.html)
 ///    for how to create and manage backend textures on Android.
-///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * [TextureRegistry Protocol](/ios-embedder/protocol_flutter_texture_registry-p.html)
 ///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
@@ -974,8 +974,6 @@ class TextureLayer extends Layer {
 /// on iOS.
 class PlatformViewLayer extends Layer {
   /// Creates a platform view layer.
-  ///
-  /// The `rect` and `viewId` parameters must not be null.
   PlatformViewLayer({
     required this.rect,
     required this.viewId,
@@ -1411,8 +1409,6 @@ class ContainerLayer extends Layer {
   /// may explicitly allow null as a value, for example if they know that they
   /// transform all their children identically.
   ///
-  /// The `transform` argument must not be null.
-  ///
   /// Used by [FollowerLayer] to transform its child to a [LeaderLayer]'s
   /// position.
   void applyTransform(Layer? child, Matrix4 transform) {
@@ -1610,7 +1606,7 @@ class ClipRectLayer extends ContainerLayer {
   /// The [clipRect] argument must not be null before the compositing phase of
   /// the pipeline.
   ///
-  /// The [clipBehavior] argument must not be null, and must not be [Clip.none].
+  /// The [clipBehavior] argument must not be [Clip.none].
   ClipRectLayer({
     Rect? clipRect,
     Clip clipBehavior = Clip.hardEdge,
@@ -2368,9 +2364,8 @@ class LayerLink {
 class LeaderLayer extends ContainerLayer {
   /// Creates a leader layer.
   ///
-  /// The [link] property must not be null, and must not have been provided to
-  /// any other [LeaderLayer] layers that are [attached] to the layer tree at
-  /// the same time.
+  /// The [link] property must not have been provided to any other [LeaderLayer]
+  /// layers that are [attached] to the layer tree at the same time.
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
@@ -2479,8 +2474,6 @@ class LeaderLayer extends ContainerLayer {
 /// layer at a distance rather than directly overlapping it.
 class FollowerLayer extends ContainerLayer {
   /// Creates a follower layer.
-  ///
-  /// The [link] property must not be null.
   ///
   /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
   /// must be non-null before the compositing phase of the pipeline.
@@ -2805,8 +2798,6 @@ class FollowerLayer extends ContainerLayer {
 /// if [opaque] is true and the layer's annotation is added.
 class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
   /// Creates a new layer that annotates its children with [value].
-  ///
-  /// The [value] provided cannot be null.
   AnnotatedRegionLayer(
     this.value, {
     this.size,

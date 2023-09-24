@@ -83,18 +83,21 @@ Catch {
     $ProgressPreference = $OriginalProgressPreference
 }
 
-Write-Host "Expanding downloaded archive..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
+    Write-Host "Expanding downloaded archive with 7z..."
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
     & 7z x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command 7za -errorAction SilentlyContinue) {
+    Write-Host "Expanding downloaded archive with 7za..."
     # Use 7-Zip's standalone version 7za.exe, if available.
     & 7za x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command Microsoft.PowerShell.Archive\Expand-Archive -errorAction SilentlyContinue) {
+    Write-Host "Expanding downloaded archive with PowerShell..."
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
     $global:ProgressPreference='SilentlyContinue'
     Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $cachePath
 } Else {
+    Write-Host "Expanding downloaded archive with Windows..."
     # As last resort: fall back to the Windows GUI.
     $shell = New-Object -com shell.application
     $zip = $shell.NameSpace($dartSdkZip)

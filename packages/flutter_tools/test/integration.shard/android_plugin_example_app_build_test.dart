@@ -112,7 +112,7 @@ void main() {
     expect(gradleProperties, exists);
 
     gradleProperties.writeAsStringSync('''
-org.gradle.jvmargs=-Xmx1536M
+org.gradle.jvmargs=-Xmx4G
 android.useAndroidX=true
 android.enableJetifier=true
 android.enableR8=true''');

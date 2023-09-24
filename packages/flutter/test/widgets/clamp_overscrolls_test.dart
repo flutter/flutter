@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // Assuming that the test container is 800x600. The height of the
 // viewport's contents is 650.0, the top and bottom text children
@@ -32,7 +33,7 @@ Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController })
 }
 
 void main() {
-  testWidgets('ClampingScrollPhysics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClampingScrollPhysics', (WidgetTester tester) async {
 
     // Scroll the target text widget by offset and then return its origin
     // in global coordinates.
@@ -59,7 +60,7 @@ void main() {
     expect(origin.dy, equals(500.0));
   });
 
-  testWidgets('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {
 
     // BouncingScrollPhysics
 
@@ -91,9 +92,10 @@ void main() {
     expect(scrollable.position.pixels, equals(50.0));
   });
 
-  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClampingScrollPhysics handles out of bounds ScrollPosition', (WidgetTester tester) async {
     Future<void> testOutOfBounds(ScrollPhysics physics, double initialOffset, double expectedOffset) async {
       final ScrollController scrollController = ScrollController(initialScrollOffset: initialOffset);
+      addTearDown(scrollController.dispose);
       await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
       final ScrollableState scrollable = tester.state(find.byType(Scrollable));
 
