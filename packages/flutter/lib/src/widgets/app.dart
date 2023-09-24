@@ -264,8 +264,6 @@ class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
   ///
-  /// The boolean arguments, [color], and [navigatorObservers] must not be null.
-  ///
   /// Most callers will want to use the [home] or [routes] parameters, or both.
   /// The [home] parameter is a convenience for the following [routes] map:
   ///
@@ -1685,7 +1683,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             },
           onUnknownRoute: _onUnknownRoute,
           observers: widget.navigatorObservers!,
-          routeTraversalEdgeBehavior: kIsWeb ? TraversalEdgeBehavior.leaveFlutterView : TraversalEdgeBehavior.parentScope,
           reportsRouteUpdateToEngine: true,
         ),
       );

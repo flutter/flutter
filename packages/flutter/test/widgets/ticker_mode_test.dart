@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Nested TickerMode cannot turn tickers back on', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Nested TickerMode cannot turn tickers back on', (WidgetTester tester) async {
     int outerTickCount = 0;
     int innerTickCount = 0;
 
@@ -99,7 +100,7 @@ void main() {
     expect(innerTickCount, 0);
   });
 
-  testWidgets('Changing TickerMode does not rebuild widgets with SingleTickerProviderStateMixin', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing TickerMode does not rebuild widgets with SingleTickerProviderStateMixin', (WidgetTester tester) async {
     Widget widgetUnderTest({required bool tickerEnabled}) {
       return TickerMode(
         enabled: tickerEnabled,
@@ -121,7 +122,7 @@ void main() {
     expect(state().buildCount, 1);
   });
 
-  testWidgets('Changing TickerMode does not rebuild widgets with TickerProviderStateMixin', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing TickerMode does not rebuild widgets with TickerProviderStateMixin', (WidgetTester tester) async {
     Widget widgetUnderTest({required bool tickerEnabled}) {
       return TickerMode(
         enabled: tickerEnabled,
@@ -143,7 +144,7 @@ void main() {
     expect(state().buildCount, 1);
   });
 
-  testWidgets('Moving widgets with SingleTickerProviderStateMixin to a new TickerMode ancestor works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Moving widgets with SingleTickerProviderStateMixin to a new TickerMode ancestor works', (WidgetTester tester) async {
     final GlobalKey tickingWidgetKey = GlobalKey();
     Widget widgetUnderTest({required LocalKey tickerModeKey, required bool tickerEnabled}) {
       return TickerMode(
@@ -164,7 +165,7 @@ void main() {
     expect(tickingState.ticker.isTicking, isFalse);
   });
 
-  testWidgets('Moving widgets with TickerProviderStateMixin to a new TickerMode ancestor works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Moving widgets with TickerProviderStateMixin to a new TickerMode ancestor works', (WidgetTester tester) async {
     final GlobalKey tickingWidgetKey = GlobalKey();
     Widget widgetUnderTest({required LocalKey tickerModeKey, required bool tickerEnabled}) {
       return TickerMode(
@@ -185,7 +186,7 @@ void main() {
     expect(tickingState.ticker.isTicking, isFalse);
   });
 
-  testWidgets('Ticking widgets in old route do not rebuild when new route is pushed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Ticking widgets in old route do not rebuild when new route is pushed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       routes: <String, WidgetBuilder>{
         '/foo' : (BuildContext context) => const Text('New route'),
