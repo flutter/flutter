@@ -255,9 +255,6 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
 class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderInlineChildrenContainerDefaults, RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
-  /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
-  /// [textScaler] arguments must not be null.
-  ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   RenderParagraph(InlineSpan text, {
@@ -391,6 +388,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _lastSelectableFragments ??= _getSelectableFragments();
     _lastSelectableFragments!.forEach(_registrar!.add);
+    if (_lastSelectableFragments!.isNotEmpty) {
+      markNeedsCompositingBitsUpdate();
+    }
   }
 
   void _removeSelectionRegistrarSubscription() {
@@ -429,6 +429,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   @override
+  bool get alwaysNeedsCompositing => _lastSelectableFragments?.isNotEmpty ?? false;
+
+  @override
   void markNeedsLayout() {
     _lastSelectableFragments?.forEach((_SelectableFragment element) => element.didChangeParagraphLayout());
     super.markNeedsLayout();
@@ -463,8 +466,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
-  ///
-  /// This must not be null.
   TextDirection get textDirection => _textPainter.textDirection!;
   set textDirection(TextDirection value) {
     if (_textPainter.textDirection == value) {
@@ -941,8 +942,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   ///
   /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
   /// the shape of the [TextBox]es. These properties default to
-  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively.
   ///
   /// A given selection might have more than one rect if the [RenderParagraph]
   /// contains multiple [InlineSpan]s or bidirectional text, because logically
@@ -1321,7 +1321,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.range,
   }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     _selectionGeometry = _getSelectionGeometry();
   }

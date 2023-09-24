@@ -464,7 +464,7 @@ void main() {
   });
 
   test('ColorSwatch.lerp identical a,b', () {
-    expect(ColorSwatch.lerp(null, null, 0), null);
+    expect(ColorSwatch.lerp<Object?>(null, null, 0), null);
     const ColorSwatch<int> color = ColorSwatch<int>(0x00000000, <int, Color>{1: Color(0x00000000)});
     expect(identical(ColorSwatch.lerp(color, color, 0.5), color), true);
   });

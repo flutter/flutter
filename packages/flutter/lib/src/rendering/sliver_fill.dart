@@ -27,8 +27,6 @@ import 'sliver_fixed_extent_list.dart';
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverFillViewport({
     required super.childManager,
     double viewportFraction = 1.0,

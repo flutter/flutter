@@ -47,8 +47,6 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
 ///    with a [CupertinoThemeData] derived from the Material [ThemeData].
 class CupertinoTheme extends StatelessWidget {
   /// Creates a [CupertinoTheme] to change descendant Cupertino widgets' styling.
-  ///
-  /// The [data] and [child] parameters must not be null.
   const CupertinoTheme({
     super.key,
     required this.data,
