@@ -899,8 +899,6 @@ class BoxHitTestResult extends HitTestResult {
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
-  ///
-  /// The [localPosition] argument must not be null.
   BoxHitTestEntry(super.target, this.localPosition);
 
   /// The position of the hit test in the local coordinates of [target].

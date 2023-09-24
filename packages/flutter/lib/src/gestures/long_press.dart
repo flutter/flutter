@@ -107,8 +107,6 @@ typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details)
 class LongPressDownDetails {
   /// Creates the details for a [GestureLongPressDownCallback].
   ///
-  /// The `globalPosition` argument must not be null.
-  ///
   /// If the `localPosition` argument is not specified, it will default to the
   /// global position.
   const LongPressDownDetails({
@@ -136,8 +134,6 @@ class LongPressDownDetails {
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
 class LongPressStartDetails {
   /// Creates the details for a [GestureLongPressStartCallback].
-  ///
-  /// The [globalPosition] argument must not be null.
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
@@ -159,8 +155,6 @@ class LongPressStartDetails {
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
 class LongPressMoveUpdateDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
-  ///
-  /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
   const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
@@ -195,8 +189,6 @@ class LongPressMoveUpdateDetails {
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
 class LongPressEndDetails {
   /// Creates the details for a [GestureLongPressEndCallback].
-  ///
-  /// The [globalPosition] argument must not be null.
   const LongPressEndDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,

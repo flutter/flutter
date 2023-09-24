@@ -391,6 +391,38 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2JSTarget ignores frontend server starter path option when calling dart2js', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kFrontendServerStarterPath] = 'path/to/frontend_server_starter.dart';
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        '--no-source-maps',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.dart_tool/package_config.json',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        '--no-minify',
+        '--no-source-maps',
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await Dart2JSTarget(WebRendererMode.auto).build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
 
   test('Dart2JSTarget calls dart2js with expected args with enabled experiment', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';

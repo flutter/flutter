@@ -290,12 +290,7 @@ void main() {
     expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134394
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{'OpacityLayer': 2},
-  ));
+  });
 
   testWidgetsWithLeakTracking('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
@@ -703,11 +698,13 @@ void main() {
     expect(calledDelete, isFalse);
   });
 
-  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
-        OverlayEntry(
+        entry = OverlayEntry(
           builder: (BuildContext context) {
             return Material(
               child: Chip(
@@ -882,11 +879,14 @@ void main() {
   testWidgets('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
+
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
       wrapForChip(
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Material(
                   child: Center(
@@ -918,12 +918,16 @@ void main() {
   testWidgets('Chip padding - RTL', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
+
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       wrapForChip(
         textDirection: TextDirection.rtl,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Material(
                   child: Center(

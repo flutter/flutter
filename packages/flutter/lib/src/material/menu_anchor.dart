@@ -1189,7 +1189,7 @@ class CheckboxMenuButton extends StatelessWidget {
   /// The checkbox will have different default container color and check color when
   /// this is true. This is only used when [ThemeData.useMaterial3] is set to true.
   ///
-  /// Must not be null. Defaults to false.
+  /// Defaults to false.
   final bool isError;
 
   /// Called when the value of the checkbox should change.
@@ -3214,7 +3214,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       } else if (offBottom(y)) {
         final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
-          // Only move the menu up if its parent is horizontal (MenuAchor/MenuBar).
+          // Only move the menu up if its parent is horizontal (MenuAnchor/MenuBar).
           if (parentOrientation == Axis.horizontal) {
             y = newY - alignmentOffset.dy;
           } else {

@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('PageStorage read and write', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageStorage read and write', (WidgetTester tester) async {
     const Key builderKey = PageStorageKey<String>('builderKey');
     late StateSetter setState;
     int storedValue = 0;
@@ -37,7 +38,7 @@ void main() {
     expect(PageStorage.of(builderElement).readState(builderElement), equals(storedValue));
   });
 
-  testWidgets('PageStorage read and write by identifier', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageStorage read and write by identifier', (WidgetTester tester) async {
     late StateSetter setState;
     int storedValue = 0;
 

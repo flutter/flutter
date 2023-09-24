@@ -573,7 +573,7 @@ class AndroidProject extends FlutterProjectPlatform {
   ///
   /// This is expected to be called from
   /// flutter_tools/lib/src/project_validator.dart.
-  Future<ProjectValidatorResult> validateJavaGradleAgpVersions() async {
+  Future<ProjectValidatorResult> validateJavaAndGradleAgpVersions() async {
     // Constructing ProjectValidatorResult happens here and not in
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
@@ -599,7 +599,7 @@ class AndroidProject extends FlutterProjectPlatform {
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    final String? javaVersion = _versionToParsableString(globals.java?.version);
+    final String? javaVersion = versionToParsableString(globals.java?.version);
 
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
@@ -607,7 +607,7 @@ class AndroidProject extends FlutterProjectPlatform {
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
         gradleV: gradleVersion, agpV: agpVersion);
 
-    final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger,
+    final bool compatibleJavaGradle = gradle.validateJavaAndGradle(globals.logger,
         javaV: javaVersion, gradleV: gradleVersion);
 
     // Begin description formatting.
@@ -722,9 +722,9 @@ $javaGradleCompatUrl
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
         'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
         'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
         'gradleVersion': gradle.templateDefaultGradleVersion,
-        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
         'compileSdkVersion': gradle.compileSdkVersion,
         'minSdkVersion': gradle.minSdkVersion,
         'ndkVersion': gradle.ndkVersion,
@@ -923,7 +923,7 @@ class CompatibilityResult {
 }
 
 /// Converts a [Version] to a string that can be parsed by [Version.parse].
-String? _versionToParsableString(Version? version) {
+String? versionToParsableString(Version? version) {
   if (version == null) {
     return null;
   }
