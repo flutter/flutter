@@ -2664,7 +2664,7 @@ void main() {
     okNode.dispose();
   });
 
-  testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog.adaptive(
       content: Container(
         height: 5000.0,

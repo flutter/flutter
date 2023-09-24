@@ -28,14 +28,28 @@ class _MainWidget extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('TextField'),
       ),
-      body: const Center(
-        child: TextField(
-          decoration: InputDecoration(
-            labelText: 'Email',
-            suffixText: '@gmail.com',
-            hintText: 'Enter your email',
+      body: ListView(
+        children: <Widget>[
+          const TextField(
+            key: Key('enabled text field'),
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              suffixText: '@gmail.com',
+              hintText: 'Enter your email',
+            ),
           ),
-        )
+          TextField(
+            key: const Key('disabled text field'),
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              suffixText: '@gmail.com',
+              hintText: 'Enter your email',
+            ),
+            enabled: false,
+            controller: TextEditingController(text: 'xyz'),
+          ),
+        ],
       ),
     );
   }

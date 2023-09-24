@@ -787,6 +787,42 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
+  testWidgets('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            autofocus: true,
+            decoration: InputDecoration(
+              error: Text('error'),
+              errorStyle: TextStyle(color: Colors.teal),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.cursorColor, Colors.teal);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            autofocus: true,
+            decoration: InputDecoration(
+              errorText: 'error',
+              errorStyle: TextStyle(color: Colors.teal),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.cursorColor, Colors.teal);
+  });
+
   testWidgetsWithLeakTracking('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
 
     // True

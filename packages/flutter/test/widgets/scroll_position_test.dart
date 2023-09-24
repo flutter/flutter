@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 ScrollController _controller = ScrollController(
   initialScrollOffset: 110.0,
@@ -140,7 +141,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
-  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
@@ -159,15 +160,22 @@ void main() {
     expect(count, 1);
   });
 
-  testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('whether we remember our scroll position', (WidgetTester tester) async {
     await performTest(tester, true);
     await performTest(tester, false);
   });
 
-  testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
     final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+    addTearDown(() {
+      for (final FocusNode node in nodes) {
+        node.dispose();
+      }
+    });
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
@@ -226,7 +234,7 @@ void main() {
     expect(controller.position.pixels, equals(0.0));
   });
 
-  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('jumpTo recommends deferred loading', (WidgetTester tester) async {
     int loadedWithDeferral = 0;
     int buildCount = 0;
     const double height = 500;
