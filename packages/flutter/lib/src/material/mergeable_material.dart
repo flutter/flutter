@@ -19,8 +19,6 @@ import 'theme.dart';
 abstract class MergeableMaterialItem {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  ///
-  /// The argument is the [key], which must not be null.
   const MergeableMaterialItem(this.key);
 
   /// The key for this item of the list.

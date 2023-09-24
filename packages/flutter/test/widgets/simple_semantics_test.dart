@@ -6,11 +6,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Simple tree is simple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Simple tree is simple', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -34,7 +35,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Simple tree is simple - material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Simple tree is simple - material', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // Not using Text widget because of https://github.com/flutter/flutter/issues/12357.
