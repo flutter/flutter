@@ -7,6 +7,7 @@ import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'convert.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'ios/code_signing.dart';
@@ -214,22 +215,29 @@ class IosProject extends XcodeBasedProject {
     return parent.isModule || _editableDirectory.existsSync();
   }
 
-  Future<XcodeUniversalLinkSettings> universalLinkSettings({
+  /// Outputs universal link related project settings of the iOS sub-project into
+  /// a json file.
+  ///
+  /// The return future will resolve to string path to the output file.
+  Future<String> outputsUniversalLinkSettings({
     required String configuration,
-    required String scheme,
     required String target,
   }) async {
     final XcodeProjectBuildContext context = XcodeProjectBuildContext(
       configuration: configuration,
-      scheme: scheme,
       target: target,
     );
+    final File file = await parent.buildDirectory
+        .childDirectory('deeplink_data')
+        .childFile('universal-link-settings-$configuration-$target.json')
+        .create(recursive: true);
 
-    return XcodeUniversalLinkSettings(
-      bundleIdentifier: await _productBundleIdentifierWithBuildContext(context),
-      teamIdentifier: await _getTeamIdentifier(context),
-      associatedDomains: await _getAssociatedDomains(context),
-    );
+    await file.writeAsString(jsonEncode(<String, Object?>{
+      'bundleIdentifier': await _productBundleIdentifierWithBuildContext(context),
+      'teamIdentifier': await _getTeamIdentifier(context),
+      'associatedDomains': await _getAssociatedDomains(context),
+    }));
+    return file.absolute.path;
   }
 
   /// The product bundle identifier of the host app, or null if not set or if
