@@ -298,7 +298,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
 class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   /// Creates a render object that insets its child in a viewport.
   ///
-  /// The [padding] argument must not be null and must have non-negative insets.
+  /// The [padding] argument must have non-negative insets.
   RenderSliverPadding({
     required EdgeInsetsGeometry padding,
     TextDirection? textDirection,

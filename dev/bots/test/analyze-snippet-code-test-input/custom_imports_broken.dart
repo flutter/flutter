@@ -16,6 +16,6 @@ String? bar;
 
 /// error: widgets library was not imported (not even implicitly).
 /// ```dart
-/// print(Widget);
+/// print(Widget); // error (undefined_identifier)
 /// ```
 String? foo;

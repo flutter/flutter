@@ -29,6 +29,7 @@ class ScrollbarExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scrollbar(
       child: GridView.builder(
+        primary: true,
         itemCount: 120,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
         itemBuilder: (BuildContext context, int index) {
