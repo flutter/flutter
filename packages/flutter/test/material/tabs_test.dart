@@ -2224,6 +2224,57 @@ void main() {
     expect(tabController.index, 0);
   });
 
+  testWidgets('On going TabBarView animation can be interrupted by a new animation', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/132293.
+
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    // First page is visible.
+    expect(tabController.index, 0);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+
+    // Animate to the second page.
+    tabController.animateTo(1);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Animate back to the first page before the previous animation ends.
+    tabController.animateTo(0);
+    await tester.pumpAndSettle();
+
+    // First page should be visible.
+    expect(tabController.index, 0);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+  });
+
   testWidgets('Can switch to non-neighboring tab in nested TabBarView without crashing', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/18756
     final TabController mainTabController = _tabController(length: 4, vsync: const TestVSync());
@@ -6385,6 +6436,118 @@ void main() {
     expect(tester.getSize(find.byType(TabBar)).width, 360);
     // Test divider width.
     expect(tester.getSize(find.byType(CustomPaint).at(1)).width, 360);
+  });
+
+  testWidgets('TabBar labels use colors from labelStyle & unselectedLabelStyle', (WidgetTester tester) async {
+    const String tab1 = 'Tab 1';
+    const String tab2 = 'Tab 2';
+
+    const TextStyle labelStyle = TextStyle(
+      color: Color(0xff0000ff),
+      fontStyle: FontStyle.italic,
+    );
+    const TextStyle unselectedLabelStyle = TextStyle(
+      color: Color(0x950000ff),
+      fontStyle: FontStyle.italic,
+    );
+
+    // Test tab bar with labeStyle & unselectedLabelStyle.
+    await tester.pumpWidget(boilerplate(
+      child: const DefaultTabController(
+        length: 2,
+        child: TabBar(
+          labelStyle: labelStyle,
+          unselectedLabelStyle: unselectedLabelStyle,
+          tabs: <Widget>[
+            Tab(text: tab1),
+            Tab(text: tab2),
+          ],
+        ),
+      ),
+    ));
+
+    final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
+    final IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
+    final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+
+    // Selected tab should use the labelStyle color.
+    expect(selectedTabIcon.color, labelStyle.color);
+    expect(selectedTextStyle.color, labelStyle.color);
+    expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
+    // Unselected tab should use the unselectedLabelStyle color.
+    expect(uselectedTabIcon.color, unselectedLabelStyle.color);
+    expect(unselectedTextStyle.color, unselectedLabelStyle.color);
+    expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
+  });
+
+  testWidgets('labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors', (WidgetTester tester) async {
+    const String tab1 = 'Tab 1';
+    const String tab2 = 'Tab 2';
+
+    const Color labelColor = Color(0xfff00000);
+    const Color unselectedLabelColor = Color(0x95ff0000);
+    const TextStyle labelStyle = TextStyle(
+      color: Color(0xff0000ff),
+      fontStyle: FontStyle.italic,
+    );
+    const TextStyle unselectedLabelStyle = TextStyle(
+      color: Color(0x950000ff),
+      fontStyle: FontStyle.italic,
+    );
+
+    Widget buildTabBar({ Color? labelColor, Color? unselectedLabelColor }) {
+      return boilerplate(
+        child: DefaultTabController(
+          length: 2,
+          child: TabBar(
+            labelColor: labelColor,
+            unselectedLabelColor: unselectedLabelColor,
+            labelStyle: labelStyle,
+            unselectedLabelStyle: unselectedLabelStyle,
+            tabs: const <Widget>[
+              Tab(text: tab1),
+              Tab(text: tab2),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Test tab bar with labeStyle & unselectedLabelStyle.
+    await tester.pumpWidget(buildTabBar());
+
+    IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
+    IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
+    TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+
+    // Selected tab should use labelStyle color.
+    expect(selectedTabIcon.color, labelStyle.color);
+    expect(selectedTextStyle.color, labelStyle.color);
+    expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
+    // Unselected tab should use unselectedLabelStyle color.
+    expect(uselectedTabIcon.color, unselectedLabelStyle.color);
+    expect(unselectedTextStyle.color, unselectedLabelStyle.color);
+    expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
+
+    // Update tab bar with labelColor & unselectedLabelColor.
+    await tester.pumpWidget(buildTabBar(labelColor: labelColor, unselectedLabelColor: unselectedLabelColor));
+    await tester.pumpAndSettle();
+
+    selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
+    uselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
+    selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
+    unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+
+    // Selected tab should use the labelColor.
+    expect(selectedTabIcon.color, labelColor);
+    expect(selectedTextStyle.color, labelColor);
+    expect(selectedTextStyle.fontStyle, labelStyle.fontStyle);
+    // Unselected tab should use the unselectedLabelColor.
+    expect(uselectedTabIcon.color, unselectedLabelColor);
+    expect(unselectedTextStyle.color, unselectedLabelColor);
+    expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
   });
 
   group('Material 2', () {
