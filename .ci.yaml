@@ -1780,7 +1780,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     # Uses Impeller.
-    bringup: true
     timeout: 60
     properties:
       tags: >
