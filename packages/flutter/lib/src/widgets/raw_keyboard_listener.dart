@@ -36,10 +36,6 @@ class RawKeyboardListener extends StatefulWidget {
   ///
   /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).
-  ///
-  /// The [focusNode] and [child] arguments are required and must not be null.
-  ///
-  /// The [autofocus] argument must not be null.
   const RawKeyboardListener({
     super.key,
     required this.focusNode,

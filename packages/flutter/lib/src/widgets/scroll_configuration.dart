@@ -337,8 +337,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 /// decorations used by descendants of [child].
 class ScrollConfiguration extends InheritedWidget {
   /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
-  ///
-  /// The [behavior] and [child] arguments must not be null.
   const ScrollConfiguration({
     super.key,
     required this.behavior,
