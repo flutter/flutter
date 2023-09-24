@@ -256,7 +256,6 @@ targets:
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
     timeout: 30
-    bringup: true # https://github.com/flutter/flutter/issues/131968
     enabled_branches:
       # Don't run this on release branches
       - master
@@ -952,8 +951,10 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "1_4"
@@ -976,8 +977,10 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "2_4"
@@ -1000,8 +1003,10 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "3_4"
@@ -1024,8 +1029,10 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "4_4"
@@ -1715,17 +1722,16 @@ targets:
   - name: Linux_pixel_7pro backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: backdrop_filter_perf__timeline_summary
 
-
   - name: Linux_pixel_7pro draw_atlas_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+     # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1737,6 +1743,7 @@ targets:
   - name: Linux_pixel_7pro draw_atlas_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1748,6 +1755,7 @@ targets:
   - name: Linux_pixel_7pro dynamic_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1759,6 +1767,7 @@ targets:
   - name: Linux_pixel_7pro static_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1770,6 +1779,7 @@ targets:
   - name: Linux_pixel_7pro hello_world_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1952,7 +1962,6 @@ targets:
   - name: Linux_pixel_7pro cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1971,7 +1980,6 @@ targets:
   - name: Linux_pixel_7pro cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2096,6 +2104,7 @@ targets:
       task_name: flutter_gallery__start_up
 
   - name: Linux_android flutter_gallery__start_up_delayed
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/134631
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2243,7 +2252,6 @@ targets:
   - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2512,6 +2520,7 @@ targets:
       task_name: slider_perf_android
 
   - name: Linux_android platform_channels_benchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2549,7 +2558,6 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2618,7 +2626,6 @@ targets:
   - name: Linux_pixel_7pro textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2693,6 +2700,7 @@ targets:
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
 
   - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135118
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2760,6 +2768,7 @@ targets:
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2771,6 +2780,7 @@ targets:
   - name: Linux_pixel_7pro animated_advanced_blend_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2782,6 +2792,7 @@ targets:
   - name: Linux_pixel_7pro animated_advanced_blend_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2803,6 +2814,7 @@ targets:
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2814,6 +2826,7 @@ targets:
   - name: Linux_pixel_7pro draw_vertices_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller
     bringup: true
     timeout: 60
     properties:
@@ -2825,6 +2838,7 @@ targets:
   - name: Linux_pixel_7pro draw_vertices_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
