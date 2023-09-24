@@ -2493,7 +2493,6 @@ targets:
 
   - name: Linux_pixel_7pro picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
