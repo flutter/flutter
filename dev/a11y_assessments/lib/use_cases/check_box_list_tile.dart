@@ -30,16 +30,29 @@ class _MainWidgetState extends State<_MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('CheckBoxListTile')),
-      body: Center(
-        child: CheckboxListTile(
-          value: _checked,
-          onChanged: (bool? value) {
-            setState(() {
-              _checked = value!;
-            });
-          },
-          title: const Text('a check box list title'),
-        ),
+      body: ListView(
+        children: <Widget>[
+          CheckboxListTile(
+            autofocus: true,
+            value: _checked,
+            onChanged: (bool? value) {
+              setState(() {
+                _checked = value!;
+              });
+            },
+            title: const Text('a check box list title'),
+          ),
+          CheckboxListTile(
+            value: _checked,
+            onChanged: (bool? value) {
+              setState(() {
+                _checked = value!;
+              });
+            },
+            title: const Text('a disabled check box list title'),
+            enabled: false,
+          ),
+        ],
       ),
     );
   }

@@ -91,8 +91,6 @@ class TextButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [TextButton]s below the overall [Theme].
 class TextButtonTheme extends InheritedTheme {
   /// Create a [TextButtonTheme].
-  ///
-  /// The [data] parameter must not be null.
   const TextButtonTheme({
     super.key,
     required this.data,

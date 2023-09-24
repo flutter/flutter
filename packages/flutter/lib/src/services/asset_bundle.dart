@@ -88,8 +88,8 @@ abstract class AssetBundle {
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
-    // on a Pixel 4.
-    if (data.lengthInBytes < 50 * 1024) {
+    // on a Pixel 4. On the web we can't bail to isolates, though...
+    if (data.lengthInBytes < 50 * 1024 || kIsWeb) {
       return utf8.decode(Uint8List.sublistView(data));
     }
     // For strings larger than 50 KB, run the computation in an isolate to
