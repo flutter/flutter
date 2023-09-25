@@ -1,4 +1,4 @@
-Signature: 13b69111adbe0bfca5e7742b99d45757
+Signature: 196bf3fa5cc648e9d0999bfc2ca4da8a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -385,6 +385,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/relnotes/directcontext_gl.md
 FILE: ../../../third_party/skia/relnotes/directcontext_submit.md
 FILE: ../../../third_party/skia/relnotes/mesh-child-effect.md
 FILE: ../../../third_party/skia/relnotes/mesh-child-params.md
@@ -8807,6 +8808,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/ganesh/SkImageGanesh.h + ../../../
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/SkMeshGanesh.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/mtl/SkSurfaceMetal.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/BackendSemaphore.h + ../../../third_party/skia/LICENSE
@@ -8921,6 +8923,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/effects/GrPerlinNoise2Effect.h 
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/AHardwareBufferGL.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLBackendSurface.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLBackendSurfacePriv.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLDirectContext.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/image/GrImageUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/image/GrImageUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/image/GrTextureGenerator.cpp + ../../../third_party/skia/LICENSE
@@ -9070,6 +9073,7 @@ FILE: ../../../third_party/skia/include/gpu/ganesh/SkImageGanesh.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/SkMeshGanesh.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h
+FILE: ../../../third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/mtl/SkSurfaceMetal.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h
 FILE: ../../../third_party/skia/include/gpu/graphite/BackendSemaphore.h
@@ -9184,6 +9188,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrPerlinNoise2Effect.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/AHardwareBufferGL.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLBackendSurface.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLBackendSurfacePriv.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLDirectContext.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/image/GrImageUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/image/GrImageUtils.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/image/GrTextureGenerator.cpp
