@@ -549,8 +549,11 @@ void main() {
 
   testWidgetsWithLeakTracking('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       Material(
         child: MaterialApp(
