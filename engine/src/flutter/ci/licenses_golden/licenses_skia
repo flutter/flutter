@@ -1,4 +1,4 @@
-Signature: 3f10d187ba859bfd6e1f2be9531b1a3c
+Signature: 13b69111adbe0bfca5e7742b99d45757
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,9 +386,12 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/directcontext_submit.md
+FILE: ../../../third_party/skia/relnotes/mesh-child-effect.md
+FILE: ../../../third_party/skia/relnotes/mesh-child-params.md
 FILE: ../../../third_party/skia/relnotes/minify-mesh.md
 FILE: ../../../third_party/skia/relnotes/patheffects.md
 FILE: ../../../third_party/skia/relnotes/shadowflags.md
+FILE: ../../../third_party/skia/relnotes/skpicture_png.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.unoptimized.sksl
