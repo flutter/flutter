@@ -25,13 +25,13 @@
             "contexts": [
                 "android_virtual_device"
             ],
-	    "parameters": [
-                "--android-variant",
-                "android_debug_x64",
-                "--type",
-                "android"
-	    ],
-            "script": "flutter/testing/run_tests.py"
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                    "--android-variant",
+                    "android_debug_x64",
+                    "--type",
+                    "android"
+            ]
         },
         {
             "language": "bash",
@@ -39,10 +39,10 @@
             "contexts": [
                 "android_virtual_device"
             ],
-	    "parameters": [
-                "android_debug_x64"
-	    ],
-            "script": "flutter/testing/scenario_app/run_android_tests.sh"
+            "script": "flutter/testing/scenario_app/run_android_tests.sh",
+            "parameters": [
+                    "android_debug_x64"
+            ]
         }
     ]
 }

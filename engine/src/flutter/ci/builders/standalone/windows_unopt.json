@@ -26,14 +26,14 @@
         {
             "language": "python3",
             "name": "test: Host Tests for host_debug_unopt",
+            "script": "flutter/testing/run_tests.py",
             "parameters": [
                 "--variant",
                 "host_debug_unopt",
                 "--type",
                 "engine",
                 "--engine-capture-core-dump"
-            ],
-            "script": "flutter/testing/run_tests.py"
+            ]
         }
     ]
 }

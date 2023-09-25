@@ -40,14 +40,14 @@
                 {
                     "language": "python3",
                     "name": "Host Tests for host_debug_unopt",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
                         "host_debug_unopt",
                         "--type",
-                        "dart,engine",
+                        "dart,dart-host,engine",
                         "--engine-capture-core-dump"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
+                    ]
                 }
             ]
         },
@@ -96,6 +96,7 @@
                 {
                     "language": "python3",
                     "name": "Tests for ios_debug_sim",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
                         "ios_debug_sim",
@@ -104,8 +105,7 @@
                         "--engine-capture-core-dump",
                         "--ios-variant",
                         "ios_debug_sim"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
+                    ]
                 },
                 {
                     "name": "Scenario App Integration Tests",
@@ -205,6 +205,7 @@
                 {
                     "language": "python3",
                     "name": "Tests for ios_debug_sim_arm64",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
                         "ios_debug_sim_arm64",
@@ -213,8 +214,7 @@
                         "--engine-capture-core-dump",
                         "--ios-variant",
                         "ios_debug_sim_arm64"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
+                    ]
                 },
                 {
                     "name": "Scenario App Integration Tests",
@@ -276,6 +276,7 @@
                 {
                     "language": "python3",
                     "name": "Tests for ios_debug_sim_arm64_extension_safe",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
                         "ios_debug_sim_arm64_extension_safe",
@@ -284,8 +285,7 @@
                         "--engine-capture-core-dump",
                         "--ios-variant",
                         "ios_debug_sim_arm64_extension_safe"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
+                    ]
                 },
                 {
                     "name": "Scenario App Integration Tests",
