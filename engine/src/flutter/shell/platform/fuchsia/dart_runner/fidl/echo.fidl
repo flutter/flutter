@@ -7,9 +7,9 @@ library dart.test;
 const MAX_STRING_LENGTH uint64 = 32;
 
 @discoverable
-protocol Echo {
+closed protocol Echo {
     /// Returns the input.
-    EchoString(struct {
+    strict EchoString(struct {
         value string:<MAX_STRING_LENGTH, optional>;
     }) -> (struct {
         response string:<MAX_STRING_LENGTH, optional>;
