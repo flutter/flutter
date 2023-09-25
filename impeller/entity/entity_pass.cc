@@ -783,7 +783,16 @@ bool EntityPass::OnRender(
     // rendered output will actually be used, and so we set this to the current
     // stencil coverage (which is the max clip bounds). The contents may
     // optionally use this hint to avoid unnecessary rendering work.
-    element_entity.GetContents()->SetCoverageHint(current_stencil_coverage);
+    if (element_entity.GetContents()->GetCoverageHint().has_value()) {
+      // If the element already has a coverage hint (because its an advanced
+      // blend), then we need to intersect the stencil coverage hint with the
+      // existing coverage hint.
+      element_entity.GetContents()->SetCoverageHint(
+          current_stencil_coverage->Intersection(
+              element_entity.GetContents()->GetCoverageHint().value()));
+    } else {
+      element_entity.GetContents()->SetCoverageHint(current_stencil_coverage);
+    }
 
     switch (stencil_coverage.type) {
       case Contents::StencilCoverage::Type::kNoChange:

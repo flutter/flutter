@@ -343,7 +343,8 @@ class ContentContext {
  public:
   explicit ContentContext(
       std::shared_ptr<Context> context,
-      std::shared_ptr<TypographerContext> typographer_context);
+      std::shared_ptr<TypographerContext> typographer_context,
+      std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr);
 
   ~ContentContext();
 
