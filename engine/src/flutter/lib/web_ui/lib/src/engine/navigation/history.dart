@@ -217,7 +217,12 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
     _isTornDown = true;
 
     // Restores the html browser history.
-    assert(_hasSerialCount(currentState));
+    assert(
+      _hasSerialCount(currentState),
+      currentState == null
+          ? 'unexpected null history state'
+          : "history state is missing field 'serialCount'",
+    );
     final int backCount = _currentSerialCount;
     if (backCount > 0) {
       await urlStrategy!.go(-backCount);
