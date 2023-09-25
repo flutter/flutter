@@ -57,38 +57,6 @@ class CommandArguments {
   constructor(args) {
     this.command = this.validatedCommand(args[0]);
 
-    // For each command, if an argument flag is a key, than that flag is
-    // allowed for that command. If the value for the key is true, then it is
-    // required for the command.
-    this.argumentSettings = {
-      'check-workspace-opened': {
-        '--xcode-path': true,
-        '--project-path': true,
-        '--workspace-path': true,
-        '--verbose': false,
-      },
-      'debug': {
-        '--xcode-path': true,
-        '--project-path': true,
-        '--workspace-path': true,
-        '--project-name': true,
-        '--expected-configuration-build-dir': false,
-        '--device-id': true,
-        '--scheme': true,
-        '--skip-building': true,
-        '--launch-args': true,
-        '--verbose': false,
-      },
-      'stop': {
-        '--xcode-path': true,
-        '--project-path': true,
-        '--workspace-path': true,
-        '--close-window': true,
-        '--prompt-to-save': true,
-        '--verbose': false,
-      },
-    };
-
     const parsedArguments = this.parseArguments(args);
 
     this.xcodePath = this.validatedStringArgument('--xcode-path', parsedArguments['--xcode-path']);
@@ -126,6 +94,45 @@ class CommandArguments {
   }
 
   /**
+   * Returns map of commands to map of allowed arguments. For each command, if
+   * an argument flag is a key, than that flag is allowed for that command. If
+   * the value for the key is true, then it is required for the command.
+   *
+   * @returns {!string} Map of commands to allowed and optionally required
+   *     arguments.
+   */
+  argumentSettings() {
+    return {
+      'check-workspace-opened': {
+        '--xcode-path': true,
+        '--project-path': true,
+        '--workspace-path': true,
+        '--verbose': false,
+      },
+      'debug': {
+        '--xcode-path': true,
+        '--project-path': true,
+        '--workspace-path': true,
+        '--project-name': true,
+        '--expected-configuration-build-dir': false,
+        '--device-id': true,
+        '--scheme': true,
+        '--skip-building': true,
+        '--launch-args': true,
+        '--verbose': false,
+      },
+      'stop': {
+        '--xcode-path': true,
+        '--project-path': true,
+        '--workspace-path': true,
+        '--close-window': true,
+        '--prompt-to-save': true,
+        '--verbose': false,
+      },
+    };
+  }
+
+  /**
    * Validates the flag is allowed for the current command.
    *
    * @param {!string} flag
@@ -135,7 +142,7 @@ class CommandArguments {
    *     command and the value is not null, undefined, or empty.
    */
   isArgumentAllowed(flag, value) {
-    const isAllowed = this.argumentSettings[this.command].hasOwnProperty(flag);
+    const isAllowed = this.argumentSettings()[this.command].hasOwnProperty(flag);
     if (isAllowed === false && (value != null && value !== '')) {
       throw `The flag ${flag} is not allowed for the command ${this.command}.`;
     }
@@ -151,7 +158,7 @@ class CommandArguments {
    *     command and the value is not null, undefined, or empty.
    */
   validateRequiredArgument(flag, value) {
-    const isRequired = this.argumentSettings[this.command][flag] === true;
+    const isRequired = this.argumentSettings()[this.command][flag] === true;
     if (isRequired === true && (value == null || value === '')) {
       throw `Missing value for ${flag}`;
     }
