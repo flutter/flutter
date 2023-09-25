@@ -117,4 +117,10 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   return true;
 }
 
+bool SolidRRectBlurContents::ApplyColorFilter(
+    const ColorFilterProc& color_filter_proc) {
+  color_ = color_filter_proc(color_);
+  return true;
+}
+
 }  // namespace impeller
