@@ -13,7 +13,9 @@
                 "--prebuilt-dart-sdk",
                 "--asan",
                 "--lsan",
-                "--dart-debug"
+                "--dart-debug",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_debug_unopt",
             "ninja": {
@@ -89,7 +91,9 @@
             ],
             "gn": [
                 "--android",
-                "--unoptimized"
+                "--unoptimized",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_debug_unopt",
             "ninja": {
