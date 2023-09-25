@@ -500,6 +500,7 @@ void main() {
 
     testUsingContext('Sends an analytics event when Impeller is enabled', () async {
       final BuildCommand command = BuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
@@ -544,6 +545,7 @@ void main() {
 
     testUsingContext('Sends an analytics event when Impeller is disabled', () async {
       final BuildCommand command = BuildCommand(
+        artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
