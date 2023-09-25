@@ -14,7 +14,9 @@
                 "--fuchsia-cpu",
                 "arm64",
                 "--runtime-mode",
-                "profile"
+                "profile",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "fuchsia_profile_arm64",
             "ninja": {
@@ -38,7 +40,9 @@
                 "--fuchsia-cpu",
                 "arm64",
                 "--runtime-mode",
-                "release"
+                "release",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "fuchsia_release_arm64",
             "ninja": {
@@ -63,7 +67,9 @@
                 "arm64",
                 "--runtime-mode",
                 "debug",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "fuchsia_debug_arm64",
             "ninja": {
@@ -87,7 +93,9 @@
                 "--fuchsia-cpu",
                 "x64",
                 "--runtime-mode",
-                "profile"
+                "profile",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "fuchsia_profile_x64",
             "ninja": {
@@ -110,7 +118,9 @@
                 "--fuchsia-cpu",
                 "x64",
                 "--runtime-mode",
-                "release"
+                "release",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "fuchsia_release_x64",
             "ninja": {
@@ -134,7 +144,9 @@
                 "x64",
                 "--runtime-mode",
                 "debug",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "fuchsia_debug_x64",
             "ninja": {
