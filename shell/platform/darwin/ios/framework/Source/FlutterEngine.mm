@@ -49,15 +49,18 @@ static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& confi
   // set thread priority
   switch (config.priority) {
     case fml::Thread::ThreadPriority::BACKGROUND: {
+      pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
       [[NSThread currentThread] setThreadPriority:0];
       break;
     }
     case fml::Thread::ThreadPriority::NORMAL: {
+      pthread_set_qos_class_self_np(QOS_CLASS_DEFAULT, 0);
       [[NSThread currentThread] setThreadPriority:0.5];
       break;
     }
     case fml::Thread::ThreadPriority::RASTER:
     case fml::Thread::ThreadPriority::DISPLAY: {
+      pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
       [[NSThread currentThread] setThreadPriority:1.0];
       sched_param param;
       int policy;
