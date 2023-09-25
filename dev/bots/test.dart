@@ -1175,24 +1175,22 @@ Future<void> _runWebLongRunningTests() async {
         silenceBrowserOutput: true,
       ),
       () => _runFlutterDriverWebTest(
-            testAppDirectory:
-                path.join('packages', 'integration_test', 'example'),
-            target: path.join('integration_test', 'example_test.dart'),
-            driver: path.join('test_driver', 'integration_test.dart'),
-            buildMode: buildMode,
-            renderer: 'canvaskit',
-            expectWriteResponseFile: true,
-            expectResponseFileContent: 'null',
-          ),
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'example_test.dart'),
+        driver: path.join('test_driver', 'integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'canvaskit',
+        expectWriteResponseFile: true,
+        expectResponseFileContent: 'null',
+      ),
       () => _runFlutterDriverWebTest(
-            testAppDirectory:
-                path.join('packages', 'integration_test', 'example'),
-            target: path.join('integration_test', 'extended_test.dart'),
-            driver: path.join('test_driver', 'extended_integration_test.dart'),
-            buildMode: buildMode,
-            renderer: 'canvaskit',
-            expectWriteResponseFile: true,
-            expectResponseFileContent: '''
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'extended_test.dart'),
+        driver: path.join('test_driver', 'extended_integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'canvaskit',
+        expectWriteResponseFile: true,
+        expectResponseFileContent: '''
 {
   "screenshots": [
     {
@@ -1205,7 +1203,7 @@ Future<void> _runWebLongRunningTests() async {
     }
   ]
 }''',
-          ),
+    ),
     ],
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
