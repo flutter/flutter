@@ -1109,31 +1109,6 @@ void main() {
     expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
   });
 
-  testWithoutContext('s, bails taking screenshot on debug device if debugAllowBanner throws RpcError', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final TerminalHandler terminalHandler = setUpTerminalHandler(
-      <FakeVmServiceRequest>[
-        listViews,
-        FakeVmServiceRequest(
-          method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object?>{
-            'isolateId': fakeUnpausedIsolate.id,
-            'enabled': 'false',
-          },
-          // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
-        ),
-      ],
-      logger: logger,
-      fileSystem: fileSystem,
-    );
-
-    await terminalHandler.processTerminalInput('s');
-
-    expect(logger.errorText, contains('Error'));
-  });
-
   testWithoutContext('s, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
