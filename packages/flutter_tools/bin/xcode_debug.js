@@ -648,11 +648,12 @@ function waitForConfigurationBuildDirToUpdate(targetWorkspace, args) {
       const verbose = args.verbose && i % verboseLogInterval === 0;
 
       const configurationBuildDir = configurationBuildDirSettings.value();
-      if (verbose) {
-        console.log(`CONFIGURATION_BUILD_DIR: ${configurationBuildDir}`);
-      }
       if (configurationBuildDir === args.expectedConfigurationBuildDir) {
+        console.log(`CONFIGURATION_BUILD_DIR: ${configurationBuildDir}`);
         return new FunctionResult(null, null);
+      }
+      if (verbose) {
+        console.log(`Current CONFIGURATION_BUILD_DIR: ${configurationBuildDir} while expecting ${args.expectedConfigurationBuildDir}`);
       }
       delay(checkFrequencyInSeconds);
     }

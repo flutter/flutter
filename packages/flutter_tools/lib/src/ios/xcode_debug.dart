@@ -317,7 +317,7 @@ class XcodeDebug {
           _xcode.xcodeAppPath,
           '-g', // Do not bring the application to the foreground.
           '-j', // Launches the app hidden.
-          '-F', // Open "fresh", without resorting windows.
+          '-F', // Open "fresh", without restoring windows.
           xcodeWorkspace.path
         ],
         throwOnError: true,
