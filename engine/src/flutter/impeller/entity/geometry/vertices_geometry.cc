@@ -229,11 +229,13 @@ GeometryResult VerticesGeometry::GetPositionUVBuffer(
   auto vertex_count = vertices_.size();
   auto size = texture_coverage.size;
   auto origin = texture_coverage.origin;
+  auto has_texture_coordinates = HasTextureCoordinates();
   std::vector<VS::PerVertexData> vertex_data(vertex_count);
   {
     for (auto i = 0u; i < vertex_count; i++) {
       auto vertex = vertices_[i];
-      auto texture_coord = texture_coordinates_[i];
+      auto texture_coord =
+          has_texture_coordinates ? texture_coordinates_[i] : vertices_[i];
       auto uv =
           effect_transform * Point((texture_coord.x - origin.x) / size.width,
                                    (texture_coord.y - origin.y) / size.height);
