@@ -5826,7 +5826,17 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
 
   /// Returns tne [Type] of [ParentData] that this element has been configured
   /// for.
-  Type get parentDataType => T;
+  Type get debugParentDataType {
+    Type? type;
+    assert(() {
+      type = T;
+      return true;
+    }());
+    if (type != null) {
+      return type!;
+    }
+    throw UnsupportedError('debugParentDataType is not supported in release builds');
+  }
 
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
@@ -6284,21 +6294,16 @@ abstract class RenderObjectElement extends Element {
   void _debugCheckCompetingAncestors(
     List<ParentDataElement<ParentData>> result,
     Set<Type> debugAncestorTypes,
+    Set<Type> debugParentDataTypes,
     List<Type> debugAncestorCulprits,
   ) {
     assert(() {
-      List<ParentDataElement<ParentData>> getCompetingAncestors() {
-        return result.where((ParentDataElement<ParentData> ancestor) {
-          return debugAncestorCulprits.contains(ancestor.runtimeType);
-        }).toList();
-      }
-
       // Check that no other ParentDataWidgets of the same
       // type want to provide parent data.
-      if (debugAncestorTypes.length != result.length) {
-        // This can only occur if the Set of ancestors was provided a dupe and
-        // did not add it.
-        assert(debugAncestorTypes.length < result.length);
+      if (debugAncestorTypes.length != result.length || debugParentDataTypes.length != result.length) {
+        // This can only occur if the Sets of ancestors and parent data types was
+        // provided a dupe and did not add it.
+        assert(debugAncestorTypes.length < result.length || debugParentDataTypes.length < result.length);
         try {
           // We explicitly throw here (even though we immediately redirect the
           // exception elsewhere) so that debuggers will notice it when they
@@ -6309,71 +6314,15 @@ abstract class RenderObjectElement extends Element {
               'Competing ParentDataWidgets are providing parent data to the '
               'same RenderObject:'
             ),
-            for (final ParentDataElement<ParentData> ancestor in getCompetingAncestors())
+            for (final ParentDataElement<ParentData> ancestor in result.where((ParentDataElement<ParentData> ancestor) {
+              return debugAncestorCulprits.contains(ancestor.runtimeType);
+            }))
               ErrorDescription(
-                '- ${ancestor.widget} (typically placed directly inside a '
+                '- ${ancestor.widget}, which writes ParentData of type '
+                '${ancestor.debugParentDataType}, (typically placed directly '
+                'inside a '
                 '${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} '
                 'widget)'
-              ),
-            ErrorDescription(
-              'A RenderObject can receive parent data from multiple '
-              'ParentDataWidgets, but they must all be of different types.'
-            ),
-            ErrorHint(
-              'Usually, this indicates that one or more of the offending '
-              "ParentDataWidgets listed above isn't placed inside a dedicated "
-              "compatible ancestor widget that it isn't sharing with another "
-              'ParentDataWidget of the same type.'
-            ),
-            ErrorDescription(
-              'The ownership chain for the RenderObject that received the '
-              'parent data was:\n  ${debugGetCreatorChain(10)}'
-            ),
-          ]);
-        } on FlutterError catch (error) {
-          _reportException(
-            ErrorSummary('while looking for parent data.'),
-            error,
-            error.stackTrace,
-          );
-        }
-      }
-      return true;
-    }());
-  }
-
-  void _debugCheckCompetingParentData(
-    List<ParentDataElement<ParentData>> result,
-    Set<Type> debugParentDataTypes,
-    List<Type> debugParentDataCulprits,
-  ) {
-    assert((){
-      List<ParentDataElement<ParentData>> getCompetingParentData() {
-        return result.where((ParentDataElement<ParentData> ancestor) {
-          return debugParentDataCulprits.contains(ancestor.parentDataType);
-        }).toList();
-      }
-
-      // Check that no other ParentData of the same type are possibly
-      // overwriting each other.
-      if (debugParentDataTypes.length != result.length) {
-        // This can only occur if the Set of ParentData types was provided a
-        // dupe and did not add it.
-        assert(debugParentDataTypes.length < result.length);
-        try {
-          // We explicitly throw here (even though we immediately redirect the
-          // exception elsewhere) so that debuggers will notice it when they
-          // have "break on exception" enabled.
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Incorrect use of ParentDataWidget.'),
-            ErrorDescription(
-              'Multiple ParentDataWidgets are providing competing ParentData '
-              'to the same RenderObject:'
-            ),
-            for (final ParentDataElement<ParentData> ancestor in getCompetingParentData())
-              ErrorDescription(
-                '- ${ancestor.widget} which writes ParentData of type '
-                '${ancestor.parentDataType}'
               ),
             ErrorDescription(
               'A RenderObject can receive parent data from multiple '
@@ -6381,8 +6330,14 @@ abstract class RenderObjectElement extends Element {
               'prevent one overwriting another.'
             ),
             ErrorHint(
-              'This can be resolved by using mixins to separate aspects of a '
-              'ParentData class into separate types, mixing them all in on the '
+              'Usually, this indicates that one or more of the offending '
+              "ParentDataWidgets listed above isn't placed inside a dedicated "
+              "compatible ancestor widget that it isn't sharing with another "
+              'ParentDataWidget of the same type.'
+            ),
+            ErrorHint(
+              'Otherwise, separating aspects of ParentData to prevent '
+              'conflicts can be done using mixins, mixing them all in on the '
               'full ParentData Object, such as KeepAlive does with '
               'KeepAliveParentDataMixin.'
             ),
@@ -6409,7 +6364,6 @@ abstract class RenderObjectElement extends Element {
     final Set<Type> debugAncestorTypes = <Type>{};
     final Set<Type> debugParentDataTypes = <Type>{};
     final List<Type> debugAncestorCulprits = <Type>[];
-    final List<Type> debugParentDataCulprits = <Type>[];
 
     // More than one ParentDataWidget can contribute ParentData, but there are
     // some constraints.
@@ -6433,20 +6387,9 @@ abstract class RenderObjectElement extends Element {
     while (ancestor != null && ancestor is! RenderObjectElement) {
       if (ancestor is ParentDataElement<ParentData>) {
         assert(() {
-          if (!debugAncestorTypes.add(ancestor.runtimeType)) {
-            if (!debugAncestorCulprits.contains(ancestor.runtimeType)) {
-              // Add the first one we had put in the Set of Types.
-              debugAncestorCulprits.add(ancestor.runtimeType);
-            }
+          if (!debugAncestorTypes.add(ancestor.runtimeType)
+              || !debugParentDataTypes.add((ancestor! as ParentDataElement<ParentData>).debugParentDataType)) {
             debugAncestorCulprits.add(ancestor.runtimeType);
-          }
-
-          if (!debugParentDataTypes.add((ancestor! as ParentDataElement<ParentData>).parentDataType)) {
-            if (!debugParentDataCulprits.contains((ancestor as ParentDataElement<ParentData>).parentDataType)) {
-              // Add the first one we had put in the Set of Types.
-              debugParentDataCulprits.add(ancestor.parentDataType);
-            }
-            debugParentDataCulprits.add(ancestor.parentDataType);
           }
           return true;
         }());
@@ -6458,17 +6401,12 @@ abstract class RenderObjectElement extends Element {
       if (result.isEmpty || ancestor == null) {
         return true;
       }
-      // Validate point 1 from above.
+      // Validate points 1 and 2 from above.
       _debugCheckCompetingAncestors(
         result,
         debugAncestorTypes,
-        debugAncestorCulprits,
-      );
-      // Validate point 2 from above.
-      _debugCheckCompetingParentData(
-        result,
         debugParentDataTypes,
-        debugParentDataCulprits,
+        debugAncestorCulprits,
       );
       return true;
     }());
