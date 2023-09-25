@@ -15,7 +15,11 @@ import '../runner/flutter_command_runner.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
-    argParser.addFlag('list', help: 'List all settings and their current values.');
+    argParser.addFlag(
+      'list',
+      help: 'List all settings and their current values.',
+      negatable: false,
+    );
     argParser.addFlag('analytics',
       hide: !verboseHelp,
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.\n'
