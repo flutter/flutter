@@ -272,7 +272,7 @@ class KernelCompiler {
         toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     }
 
-    late final List<String> commandToStartFrontendServer;
+    final List<String> commandToStartFrontendServer;
     if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
       final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
       if (!_processManager.canRun(engineDartPath)) {
