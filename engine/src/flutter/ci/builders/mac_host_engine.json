@@ -54,14 +54,14 @@
                 {
                     "language": "python3",
                     "name": "Host Tests for host_debug",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
                         "host_debug",
                         "--type",
-                        "dart,engine",
+                        "dart,dart-host,engine",
                         "--engine-capture-core-dump"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
+                    ]
                 }
             ]
         },
@@ -113,14 +113,14 @@
                 {
                     "language": "python3",
                     "name": "Host Tests for host_profile",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
                         "host_profile",
                         "--type",
-                        "dart,engine",
+                        "dart,dart-host,engine",
                         "--engine-capture-core-dump"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
+                    ]
                 }
             ]
         },
@@ -183,13 +183,13 @@
                 {
                     "language": "python3",
                     "name": "Impeller-golden, dart and engine tests for host_release",
+                    "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
                         "host_release",
                         "--type",
-                        "dart,engine,impeller-golden"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
+                        "dart,dart-host,engine,impeller-golden"
+                    ]
                 }
             ]
         },

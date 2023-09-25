@@ -11,7 +11,7 @@
     "tests": [
         {
             "name": "licenses check",
-	    "max_attempts": 1,
+            "max_attempts": 1,
             "script": "flutter/ci/licenses.sh"
         }
     ]
