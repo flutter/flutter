@@ -11,7 +11,9 @@
                 "--android",
                 "--android-cpu",
                 "arm64",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
             ],
             "ninja": {
                 "config": "android_debug_arm64"
@@ -28,7 +30,9 @@
                 "--runtime-mode",
                 "debug",
                 "--prebuilt-dart-sdk",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
             ],
             "ninja": {
                 "config": "host_debug"
