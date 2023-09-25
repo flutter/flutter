@@ -62,7 +62,10 @@ class CommandArguments {
     this.xcodePath = this.validatedStringArgument('--xcode-path', parsedArguments['--xcode-path']);
     this.projectPath = this.validatedStringArgument('--project-path', parsedArguments['--project-path']);
     this.projectName = this.validatedStringArgument('--project-name', parsedArguments['--project-name']);
-    this.expectedConfigurationBuildDir = this.validatedStringArgument('--expected-configuration-build-dir', parsedArguments['--expected-configuration-build-dir']);
+    this.expectedConfigurationBuildDir = this.validatedStringArgument(
+      '--expected-configuration-build-dir',
+      parsedArguments['--expected-configuration-build-dir'],
+    );
     this.workspacePath = this.validatedStringArgument('--workspace-path', parsedArguments['--workspace-path']);
     this.targetDestinationId = this.validatedStringArgument('--device-id', parsedArguments['--device-id']);
     this.targetSchemeName = this.validatedStringArgument('--scheme', parsedArguments['--scheme']);
