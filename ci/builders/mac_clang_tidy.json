@@ -72,7 +72,7 @@
                         "--shard-id=0",
                         "--shard-variants=host_debug,host_debug,host_debug"
                     ],
-		    "max_attempts": 1,
+                    "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
@@ -201,7 +201,7 @@
                         "--shard-id=0",
                         "--shard-variants=host_debug"
                     ],
-		    "max_attempts": 1,
+                    "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
             ]

@@ -154,7 +154,7 @@
                     "--engine-version",
                     "${REVISION}",
                     "--skip-build",
-		    "--upload"
+                    "--upload"
                 ],
                 "script": "flutter/tools/fuchsia/build_fuchsia_artifacts.py",
                 "language": "python3"
