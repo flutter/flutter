@@ -23,9 +23,7 @@
                 "--runtime-mode",
                 "debug",
                 "--enable-fontconfig",
-                "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--prebuilt-dart-sdk"
             ],
             "name": "host_debug",
             "ninja": {
@@ -59,9 +57,7 @@
                 "profile",
                 "--no-lto",
                 "--enable-fontconfig",
-                "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--prebuilt-dart-sdk"
             ],
             "name": "host_profile",
             "ninja": {
@@ -94,9 +90,7 @@
                 "--runtime-mode",
                 "release",
                 "--enable-fontconfig",
-                "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--prebuilt-dart-sdk"
             ],
             "name": "host_release",
             "ninja": {

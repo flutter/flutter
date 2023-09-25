@@ -24,9 +24,7 @@
                 "profile",
                 "--android",
                 "--android-cpu",
-                "arm",
-                "--rbe",
-                "--no-goma"
+                "arm"
             ],
             "name": "android_profile",
             "ninja": {
@@ -63,9 +61,7 @@
                 "release",
                 "--android",
                 "--android-cpu",
-                "arm",
-                "--rbe",
-                "--no-goma"
+                "arm"
             ],
             "name": "android_release",
             "ninja": {
@@ -103,9 +99,7 @@
                 "release",
                 "--android",
                 "--android-cpu",
-                "arm64",
-                "--rbe",
-                "--no-goma"
+                "arm64"
             ],
             "name": "android_release_arm64",
             "ninja": {
@@ -158,9 +152,7 @@
                 "--runtime-mode",
                 "profile",
                 "--android-cpu",
-                "arm64",
-                "--rbe",
-                "--no-goma"
+                "arm64"
             ],
             "name": "android_profile_arm64",
             "ninja": {
@@ -198,9 +190,7 @@
                 "profile",
                 "--android",
                 "--android-cpu",
-                "x64",
-                "--rbe",
-                "--no-goma"
+                "x64"
             ],
             "name": "android_profile_x64",
             "ninja": {
@@ -238,9 +228,7 @@
                 "release",
                 "--android",
                 "--android-cpu",
-                "x64",
-                "--rbe",
-                "--no-goma"
+                "x64"
             ],
             "name": "android_release_x64",
             "ninja": {
