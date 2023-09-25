@@ -62,8 +62,9 @@ class FakePlistUtils extends Fake implements PlistParser {
   final Map<String, Map<String, Object>> fileContents = <String, Map<String, Object>>{};
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
-    return fileContents[plistFilePath]![key] as String?;
+  T? getValueFromFile<T>(String plistFilePath, String key) {
+    final Map<String, Object>? plistFile = fileContents[plistFilePath];
+    return plistFile == null ? null : plistFile[key] as T?;
   }
 }
 
@@ -674,7 +675,7 @@ void main() {
     );
 
     expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
@@ -954,6 +955,8 @@ void main() {
     plistUtils.fileContents[plistPath] = <String,String>{
       'CFBundleIdentifier': 'io.flutter.someProject',
       'CFBundleDisplayName': 'Awesome Gallery',
+      // Will not use CFBundleName since CFBundleDisplayName is present.
+      'CFBundleName': 'Awesome Gallery 2',
       'MinimumOSVersion': '11.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
@@ -991,6 +994,62 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
+
+  testUsingContext(
+      'Validate basic Xcode settings with CFBundleDisplayName fallback to CFBundleName', () async {
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[plistPath] = <String,String>{
+      'CFBundleIdentifier': 'io.flutter.someProject',
+      // Will use CFBundleName since CFBundleDisplayName is absent.
+      'CFBundleName': 'Awesome Gallery',
+      'MinimumOSVersion': '11.0',
+      'CFBundleVersion': '666',
+      'CFBundleShortVersionString': '12.34.56',
+    };
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+        testLogger.statusText,
+        contains(
+            '[✓] App Settings Validation\n'
+            '    • Version Number: 12.34.56\n'
+            '    • Build Number: 666\n'
+            '    • Display Name: Awesome Gallery\n'
+            '    • Deployment Target: 11.0\n'
+            '    • Bundle Identifier: io.flutter.someProject\n'
+        )
+    );
+    expect(
+        testLogger.statusText,
+        contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
 
   testUsingContext(
       'Validate basic Xcode settings with default bundle identifier prefix', () async {

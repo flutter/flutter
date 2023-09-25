@@ -12,13 +12,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('showing and hiding the custom context menu on SelectionArea', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.SelectableRegionToolbarBuilderExampleApp(),
     );
 
     expect(BrowserContextMenu.enabled, !kIsWeb);
 
     // Allow the selection overlay geometry to be created.
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 

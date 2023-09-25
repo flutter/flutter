@@ -15,34 +15,27 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 export 'events.dart' show PointerEvent;
 
 /// An object that can hit-test pointers.
-abstract class HitTestable {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  HitTestable._();
-
-  /// Check whether the given position hits this object.
-  ///
-  /// If this given position hits this object, consider adding a [HitTestEntry]
-  /// to the given hit test result.
+abstract interface class HitTestable {
+  /// Deprecated. Use [hitTestInView] instead.
+  @Deprecated(
+    'Use hitTestInView and specify the view to hit test. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
   void hitTest(HitTestResult result, Offset position);
+
+  /// Fills the provided [HitTestResult] with [HitTestEntry]s for objects that
+  /// are hit at the given `position` in the view identified by `viewId`.
+  void hitTestInView(HitTestResult result, Offset position, int viewId);
 }
 
 /// An object that can dispatch events.
-abstract class HitTestDispatcher {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  HitTestDispatcher._();
-
+abstract interface class HitTestDispatcher {
   /// Override this method to dispatch events.
   void dispatchEvent(PointerEvent event, HitTestResult result);
 }
 
 /// An object that can handle events.
-abstract class HitTestTarget {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  HitTestTarget._();
-
+abstract interface class HitTestTarget {
   /// Override this method to receive events.
   void handleEvent(PointerEvent event, HitTestEntry<HitTestTarget> entry);
 }

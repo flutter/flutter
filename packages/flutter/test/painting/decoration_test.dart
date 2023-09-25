@@ -9,7 +9,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -35,7 +34,7 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
     );
@@ -53,7 +52,7 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     throw throwable;
   }
 }
@@ -69,7 +68,7 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(TestImageInfo(key, image: image)),
     );
@@ -89,7 +88,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(DelayedImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -112,7 +111,7 @@ class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(MultiFrameImageProvider key, ImageDecoderCallback decode) {
     return completer;
   }
 
@@ -332,6 +331,19 @@ void main() {
     expect(paint.isAntiAlias, true);
     // TODO(craiglabenz): change to true when https://github.com/flutter/flutter/issues/88909 is fixed
     expect(paint.invertColors, !kIsWeb);
+  });
+
+  test('DecorationImage.toString', () async {
+    expect(
+      DecorationImage(
+        image: SynchronousTestImageProvider(
+          await createTestImage(width: 100, height: 100),
+        ),
+        opacity: 0.99,
+        scale: 2.01,
+      ).toString(),
+      'DecorationImage(SynchronousTestImageProvider(), Alignment.center, scale 2.0, opacity 1.0, FilterQuality.low)',
+    );
   });
 
   test('DecorationImage with null textDirection configuration should throw Error', () async {
@@ -679,8 +691,7 @@ void main() {
     final TestCanvas canvas = TestCanvas();
 
     // Paint a square image into an output rect that is twice as wide as it is
-    // tall. One copy of the image should be painted, aligned so that a repeating
-    // tile mode causes it to appear twice.
+    // tall.  Two copies of the image should be painted, one next to the other.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
@@ -693,29 +704,34 @@ void main() {
       repeat: ImageRepeat.repeatX,
     );
 
-    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawRect).toList();
+    const Size imageSize = Size(100.0, 100.0);
 
-    expect(calls, hasLength(1));
-    final Invocation call = calls[0];
-    expect(call.isMethod, isTrue);
-    expect(call.positionalArguments, hasLength(2));
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final Set<Rect> tileRects = <Rect>{};
 
-    // A tiled image is drawn as a rect with a shader.
-    expect(call.positionalArguments[0], isA<Rect>());
-    expect(call.positionalArguments[1], isA<Paint>());
+    expect(calls, hasLength(2));
+    for (final Invocation call in calls) {
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
 
-    final Paint paint = call.positionalArguments[1] as Paint;
+      expect(call.positionalArguments[0], isA<ui.Image>());
 
-    expect(paint.shader, isA<ImageShader>());
-    expect(call.positionalArguments[0], outputRect);
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      tileRects.add(call.positionalArguments[2] as Rect);
+
+      expect(call.positionalArguments[3], isA<Paint>());
+    }
+
+    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(230.0, 30.0, 200.0, 200.0)});
   });
 
   test('paintImage with repeatY and fitWidth', () async {
     final TestCanvas canvas = TestCanvas();
 
     // Paint a square image into an output rect that is twice as tall as it is
-    // wide.  One copy of the image should be painted, aligned so that a repeating
-    // tile mode causes it to appear twice.
+    // wide.  Two copies of the image should be painted, one above the other.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
@@ -727,21 +743,28 @@ void main() {
       fit: BoxFit.fitWidth,
       repeat: ImageRepeat.repeatY,
     );
-    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawRect).toList();
 
-    expect(calls, hasLength(1));
-    final Invocation call = calls[0];
-    expect(call.isMethod, isTrue);
-    expect(call.positionalArguments, hasLength(2));
+    const Size imageSize = Size(100.0, 100.0);
 
-    // A tiled image is drawn as a rect with a shader.
-    expect(call.positionalArguments[0], isA<Rect>());
-    expect(call.positionalArguments[1], isA<Paint>());
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final Set<Rect> tileRects = <Rect>{};
 
-    final Paint paint = call.positionalArguments[1] as Paint;
+    expect(calls, hasLength(2));
+    for (final Invocation call in calls) {
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
 
-    expect(paint.shader, isA<ImageShader>());
-    expect(call.positionalArguments[0], outputRect);
+      expect(call.positionalArguments[0], isA<ui.Image>());
+
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      tileRects.add(call.positionalArguments[2] as Rect);
+
+      expect(call.positionalArguments[3], isA<Paint>());
+    }
+
+    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(30.0, 230.0, 200.0, 200.0)});
   });
 
   test('DecorationImage scale test', () async {
@@ -790,52 +813,4 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
-
-  test('Compute image tiling', () {
-    expect(() => createTilingInfo(ImageRepeat.noRepeat, Rect.zero, Rect.zero, Rect.zero), throwsAssertionError);
-
-    // These tests draw a 16x9 image into a 100x50 container with a destination
-    // size of and make assertions based on observed behavior and the original
-    // rectangles from https://github.com/flutter/flutter/pull/119495/
-
-    final ImageTilingInfo repeatX = createTilingInfo(
-      ImageRepeat.repeatX,
-      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
-      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
-      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-    );
-
-    expect(repeatX.tmx, TileMode.repeated);
-    expect(repeatX.tmy, TileMode.decal);
-    expect(repeatX.transform, matrixMoreOrLessEquals(Matrix4.identity()
-      ..scale(1.0, 1.0)
-      ..setTranslationRaw(-12.0, 0.0, 0.0)
-    ));
-
-    final ImageTilingInfo repeatY = createTilingInfo(
-      ImageRepeat.repeatY,
-      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
-      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
-      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-    );
-    expect(repeatY.tmx, TileMode.decal);
-    expect(repeatY.tmy, TileMode.repeated);
-    expect(repeatY.transform, matrixMoreOrLessEquals(Matrix4.identity()
-      ..scale(1.0, 1.0)
-      ..setTranslationRaw(84.0, 0.0, 0.0)
-    ));
-
-    final ImageTilingInfo repeat = createTilingInfo(
-      ImageRepeat.repeat,
-      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
-      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
-      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-    );
-    expect(repeat.tmx, TileMode.repeated);
-    expect(repeat.tmy, TileMode.repeated);
-    expect(repeat.transform, matrixMoreOrLessEquals(Matrix4.identity()
-      ..scale(1.0, 1.0)
-      ..setTranslationRaw(-12.0, 0.0, 0.0)
-    ));
-  });
 }

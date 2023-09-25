@@ -6,9 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that contains multiple box children that each fills the viewport.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -42,14 +45,14 @@ class SliverFillViewport extends StatelessWidget {
   /// Whether to add padding to both ends of the list.
   ///
   /// If this is set to true and [viewportFraction] < 1.0, padding will be added
-  /// such that the first and last child slivers will be in the center of
-  /// the viewport when scrolled all the way to the start or end, respectively.
-  /// You may want to set this to false if this [SliverFillViewport] is not the only
+  /// such that the first and last child slivers will be in the center of the
+  /// viewport when scrolled all the way to the start or end, respectively. You
+  /// may want to set this to false if this [SliverFillViewport] is not the only
   /// widget along this main axis, such as in a [CustomScrollView] with multiple
   /// children.
   ///
-  /// This option cannot be null. If [viewportFraction] >= 1.0, this option has no
-  /// effect. Defaults to true.
+  /// If [viewportFraction] is greater than one, this option has no effect.
+  /// Defaults to true.
   final bool padEnds;
 
   /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
@@ -144,10 +147,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
     switch (constraints.axis) {
       case Axis.horizontal:
         _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
-        break;
       case Axis.vertical:
         _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
-        break;
     }
 
     return;
@@ -162,6 +163,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 
 /// A sliver that contains a single box child that fills the remaining space in
 /// the viewport.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the
 /// cross axis. The extent of the sliver and its child's size in the main axis
@@ -279,10 +282,9 @@ class SliverFillRemaining extends StatelessWidget {
 
   /// Indicates whether the child should stretch to fill the overscroll area
   /// created by certain scroll physics, such as iOS' default scroll physics.
-  /// This value cannot be null. This flag is only relevant when the
-  /// [hasScrollBody] value is false.
+  /// This flag is only relevant when [hasScrollBody] is false.
   ///
-  /// Defaults to false, meaning the default behavior is for the child to
+  /// Defaults to false, meaning that the default behavior is for the child to
   /// maintain its size and not extend into the overscroll area.
   final bool fillOverscroll;
 

@@ -7,9 +7,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
-const String _expText = 'Éxp'; // renders in Ahem as:
+const String _expText = 'Éxp'; // renders in the test font as:
 
 // ########
 // ########
@@ -19,7 +20,7 @@ const String _expText = 'Éxp'; // renders in Ahem as:
 // ÉÉÉÉxxxxpppp
 
 void main() {
-  testWidgets('Default background', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default background', (WidgetTester tester) async {
     await tester.pumpWidget(const Align(
       alignment: Alignment.topLeft,
       child: Text(_expText, textDirection: TextDirection.ltr, style: TextStyle(color: Color(0xFF345678), fontSize: _crispText))),
@@ -40,7 +41,7 @@ void main() {
     );
   }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
 
-  testWidgets('Default text color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default text color', (WidgetTester tester) async {
     await tester.pumpWidget(const ColoredBox(
       color: Color(0xFFABCDEF),
       child: Align(
@@ -65,8 +66,22 @@ void main() {
     );
   }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
 
-  testWidgets('Default text selection color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default text selection color', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final OverlayEntry overlayEntry = OverlayEntry(
+      builder: (BuildContext context) => SelectableRegion(
+        focusNode: focusNode,
+        selectionControls: emptyTextSelectionControls,
+        child: Align(
+          key: key,
+          alignment: Alignment.topLeft,
+          child: const Text('Éxp', textDirection: TextDirection.ltr, style: TextStyle(fontSize: _crispText, color: Color(0xFF000000))),
+        ),
+      ),
+    );
+    addTearDown(() => overlayEntry..remove()..dispose());
     await tester.pumpWidget(
       ColoredBox(
         color: const Color(0xFFFFFFFF),
@@ -75,28 +90,17 @@ void main() {
           child: MediaQuery(
             data: const MediaQueryData(),
             child: Overlay(
-              initialEntries: <OverlayEntry>[
-                OverlayEntry(
-                  builder: (BuildContext context) => SelectableRegion(
-                    focusNode: FocusNode(),
-                    selectionControls: emptyTextSelectionControls,
-                    child: Align(
-                      key: key,
-                      alignment: Alignment.topLeft,
-                      child: const Text('Éxp', textDirection: TextDirection.ltr, style: TextStyle(fontSize: _crispText)),
-                    ),
-                  ),
-                ),
-              ],
+              initialEntries: <OverlayEntry>[overlayEntry],
             ),
           ),
         ),
       ),
     );
+    await tester.pumpAndSettle();
     await _expectColors(
       tester,
       find.byType(Align),
-      <Color>{ const Color(0xFFFFFFFF) },
+      <Color>{ const Color(0xFFFFFFFF), const Color(0xFF000000) },
     );
     // fake a "select all" event to select the text
     Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
@@ -104,13 +108,13 @@ void main() {
     await _expectColors(
       tester,
       find.byType(Align),
-      <Color>{ const Color(0xFFFFFFFF), const Color(0xFFBFBFBF) }, // 0x80808080 blended with 0xFFFFFFFF
+      <Color>{ const Color(0xFFFFFFFF), const Color(0xFF000000), const Color(0xFFBFBFBF) }, // 0x80808080 blended with 0xFFFFFFFF
       <Offset, Color>{
-        Offset.zero: const Color(0xFFBFBFBF), // the selected text
-        const Offset(10, 10): const Color(0xFFBFBFBF), // the selected text
+        Offset.zero: const Color(0xFF000000), // the selected text
+        const Offset(10, 10): const Color(0xFF000000), // the selected text
         const Offset(50, 95): const Color(0xFFBFBFBF), // the selected background (under the É)
         const Offset(250, 50): const Color(0xFFBFBFBF), // the selected background (above the p)
-        const Offset(250, 95): const Color(0xFFBFBFBF), // the selected text (the p)
+        const Offset(250, 95): const Color(0xFF000000), // the selected text (the p)
         const Offset(400, 400): const Color(0xFFFFFFFF), // the background
         const Offset(799, 599): const Color(0xFFFFFFFF), // the background
       },
@@ -131,6 +135,7 @@ Color _getPixel(ByteData bytes, int x, int y, int width) {
 Future<void> _expectColors(WidgetTester tester, Finder finder, Set<Color> allowedColors, [ Map<Offset, Color>? spotChecks ]) async {
   final TestWidgetsFlutterBinding binding = tester.binding;
   final ui.Image image = (await binding.runAsync<ui.Image>(() => captureImage(finder.evaluate().single)))!;
+  addTearDown(image.dispose);
   final ByteData bytes = (await binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!;
   final Set<int> actualColorValues = <int>{};
   for (int offset = 0; offset < bytes.lengthInBytes; offset += 4) {
@@ -146,7 +151,7 @@ Future<void> _expectColors(WidgetTester tester, Finder finder, Set<Color> allowe
     assert(position.dx.round() < image.width);
     assert(position.dy.round() >= 0);
     assert(position.dy.round() < image.height);
-    final Offset precisePosition = position * binding.window.devicePixelRatio;
+    final Offset precisePosition = position * tester.view.devicePixelRatio;
     final Color actual = _getPixel(bytes, precisePosition.dx.round(), precisePosition.dy.round(), image.width);
     expect(actual, expected, reason: 'Pixel at $position is $actual but expected $expected.');
   });

@@ -35,7 +35,7 @@ class _ScrollNotificationObserverScope extends InheritedWidget {
   bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   _ListenerEntry(this.listener);
   final ScrollNotificationCallback listener;
 }
@@ -71,10 +71,17 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// This widget is similar to [NotificationListener]. It supports a listener
 /// list instead of just a single listener and its listeners run
 /// unconditionally, they do not require a gating boolean return value.
+///
+/// {@tool dartpad}
+/// This sample shows a "Scroll to top" button that uses [ScrollNotificationObserver]
+/// to listen for scroll notifications from [ListView]. The button is only visible
+/// when the user has scrolled down. When pressed, the button animates the scroll
+/// position of the [ListView] back to the top.
+///
+/// ** See code in examples/api/lib/widgets/scroll_notification_observer/scroll_notification_observer.0.dart **
+/// {@end-tool}
 class ScrollNotificationObserver extends StatefulWidget {
   /// Create a [ScrollNotificationObserver].
-  ///
-  /// The [child] parameter must not be null.
   const ScrollNotificationObserver({
     super.key,
     required this.child,
@@ -208,16 +215,12 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   @override
   Widget build(BuildContext context) {
-    // A ScrollMetricsNotification allows listeners to be notified for an
-    // initial state, as well as if the content dimensions change without
-    // scrolling.
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (ScrollMetricsNotification notification) {
-        _notifyListeners(_ConvertedScrollMetricsNotification(
-          metrics: notification.metrics,
-          context: notification.context,
-          depth: notification.depth,
-        ));
+        // A ScrollMetricsNotification allows listeners to be notified for an
+        // initial state, as well as if the content dimensions change without
+        // scrolling.
+        _notifyListeners(notification.asScrollUpdate());
         return false;
       },
       child: NotificationListener<ScrollNotification>(
@@ -239,12 +242,4 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     _listeners = null;
     super.dispose();
   }
-}
-
-class _ConvertedScrollMetricsNotification extends ScrollUpdateNotification {
-  _ConvertedScrollMetricsNotification({
-    required super.metrics,
-    required super.context,
-    required super.depth,
-  });
 }

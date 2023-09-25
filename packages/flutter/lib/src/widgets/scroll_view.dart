@@ -17,11 +17,14 @@ import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'sliver.dart';
 import 'sliver_prototype_extent_list.dart';
+import 'sliver_varied_extent_list.dart';
 import 'viewport.dart';
 
 // Examples can assume:
@@ -38,7 +41,8 @@ enum ScrollViewKeyboardDismissBehavior {
   onDrag,
 }
 
-/// A widget that scrolls.
+/// A widget that combines a [Scrollable] and a [Viewport] to create an
+/// interactive scrolling pane of content in one dimension.
 ///
 /// Scrollable widgets consist of three pieces:
 ///
@@ -53,8 +57,20 @@ enum ScrollViewKeyboardDismissBehavior {
 /// [ScrollView] helps orchestrate these pieces by creating the [Scrollable] and
 /// the viewport and deferring to its subclass to create the slivers.
 ///
+/// To learn more about slivers, see [CustomScrollView.slivers].
+///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
+///
+/// {@template flutter.widgets.ScrollView.PageStorage}
+/// ## Persisting the scroll position during a session
+///
+/// Scroll views attempt to persist their scroll position using [PageStorage].
+/// This can be disabled by setting [ScrollController.keepScrollOffset] to false
+/// on the [controller]. If it is enabled, using a [PageStorageKey] for the
+/// [key] of this widget is recommended to help disambiguate different scroll
+/// views from each other.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -68,6 +84,8 @@ enum ScrollViewKeyboardDismissBehavior {
 ///    effects using slivers.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
+///  * [TwoDimensionalScrollView], which is a similar widget [ScrollView] that
+///    scrolls in two dimensions.
 abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
@@ -79,9 +97,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// If the [shrinkWrap] argument is true, the [center] argument must be null.
   ///
-  /// The [scrollDirection], [reverse], and [shrinkWrap] arguments must not be null.
-  ///
-  /// The [anchor] argument must be non-null and in the range 0.0 to 1.0.
+  /// The [anchor] argument must be in the range zero to one, inclusive.
   const ScrollView({
     super.key,
     this.scrollDirection = Axis.vertical,
@@ -111,7 +127,10 @@ abstract class ScrollView extends StatelessWidget {
        physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null);
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
-  /// The axis along which the scroll view scrolls.
+  /// The [Axis] along which the scroll view's offset increases.
+  ///
+  /// For the direction in which active scrolling may be occurring, see
+  /// [ScrollDirection].
   ///
   /// Defaults to [Axis.vertical].
   /// {@endtemplate}
@@ -273,6 +292,23 @@ abstract class ScrollView extends StatelessWidget {
   /// supports [center]; for that class, the given key must be the key of one of
   /// the slivers in the [CustomScrollView.slivers] list.
   ///
+  /// Most scroll views by default are ordered [GrowthDirection.forward].
+  /// Changing the default values of [ScrollView.anchor],
+  /// [ScrollView.center], or both, can configure a scroll view for
+  /// [GrowthDirection.reverse].
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Radio] buttons in the
+  /// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+  /// configurations. The [CustomScrollView.anchor] and [CustomScrollView.center]
+  /// properties are also set to have the 0 scroll offset positioned in the middle
+  /// of the viewport, with [GrowthDirection.forward] and [GrowthDirection.reverse]
+  /// illustrated on either side. The sliver that shares the
+  /// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
+  ///
+  /// ** See code in examples/api/lib/rendering/growth_direction/growth_direction.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * [anchor], which controls where the [center] as aligned in the viewport.
@@ -287,6 +323,23 @@ abstract class ScrollView extends StatelessWidget {
   /// within the viewport. If the [anchor] is 1.0, and the axis direction is
   /// [AxisDirection.right], then the zero scroll offset is on the left edge of
   /// the viewport.
+  ///
+  /// Most scroll views by default are ordered [GrowthDirection.forward].
+  /// Changing the default values of [ScrollView.anchor],
+  /// [ScrollView.center], or both, can configure a scroll view for
+  /// [GrowthDirection.reverse].
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Radio] buttons in the
+  /// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+  /// configurations. The [CustomScrollView.anchor] and [CustomScrollView.center]
+  /// properties are also set to have the 0 scroll offset positioned in the middle
+  /// of the viewport, with [GrowthDirection.forward] and [GrowthDirection.reverse]
+  /// illustrated on either side. The sliver that shares the
+  /// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
+  ///
+  /// ** See code in examples/api/lib/rendering/growth_direction/growth_direction.0.dart **
+  /// {@end-tool}
   /// {@endtemplate}
   final double anchor;
 
@@ -345,6 +398,8 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Subclasses should override this method to build the slivers for the inside
   /// of the viewport.
+  ///
+  /// To learn more about slivers, see [CustomScrollView.slivers].
   @protected
   List<Widget> buildSlivers(BuildContext context);
 
@@ -461,7 +516,7 @@ abstract class ScrollView extends StatelessWidget {
   }
 }
 
-/// A [ScrollView] that creates custom scroll effects using slivers.
+/// A [ScrollView] that creates custom scroll effects using [slivers].
 ///
 /// A [CustomScrollView] lets you supply [slivers] directly to create various
 /// scrolling effects, such as lists, grids, and expanding headers. For example,
@@ -573,6 +628,8 @@ abstract class ScrollView extends StatelessWidget {
 /// parameter `semanticChildCount`. This should always be the same as the
 /// number of widgets wrapped in [IndexedSemantics].
 ///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
+///
 /// See also:
 ///
 ///  * [SliverList], which is a sliver that displays linear list of children.
@@ -612,6 +669,101 @@ class CustomScrollView extends ScrollView {
   });
 
   /// The slivers to place inside the viewport.
+  ///
+  /// ## What is a sliver?
+  ///
+  /// > _**sliver** (noun): a small, thin piece of something._
+  ///
+  /// A _sliver_ is a widget backed by a [RenderSliver] subclass, i.e. one that
+  /// implements the constraint/geometry protocol that uses [SliverConstraints]
+  /// and [SliverGeometry].
+  ///
+  /// This is as distinct from those widgets that are backed by [RenderBox]
+  /// subclasses, which use [BoxConstraints] and [Size] respectively, and are
+  /// known as box widgets. (Widgets like [Container], [Row], and [SizedBox] are
+  /// box widgets.)
+  ///
+  /// While boxes are much more straightforward (implementing a simple
+  /// two-dimensional Cartesian layout system), slivers are much more powerful,
+  /// and are optimized for one-axis scrolling environments.
+  ///
+  /// Slivers are hosted in viewports, also known as scroll views, most notably
+  /// [CustomScrollView].
+  ///
+  /// ## Examples of slivers
+  ///
+  /// The Flutter framework has many built-in sliver widgets, and custom widgets
+  /// can be created in the same manner. By convention, sliver widgets always
+  /// start with the prefix `Sliver` and are always used in properties called
+  /// `sliver` or `slivers` (as opposed to `child` and `children` which are used
+  /// for box widgets).
+  ///
+  /// Examples of widgets unique to the sliver world include:
+  ///
+  /// * [SliverList], a lazily-loading list of variably-sized box widgets.
+  /// * [SliverFixedExtentList], a lazily-loading list of box widgets that are
+  ///   all forced to the same height.
+  /// * [SliverPrototypeExtentList], a lazily-loading list of box widgets that
+  ///   are all forced to the same height as a given prototype widget.
+  /// * [SliverGrid], a lazily-loading grid of box widgets.
+  /// * [SliverAnimatedList] and [SliverAnimatedGrid], animated variants of
+  ///   [SliverList] and [SliverGrid].
+  /// * [SliverFillRemaining], a widget that fills all remaining space in a
+  ///   scroll view, and lays a box widget out inside that space.
+  /// * [SliverFillViewport], a widget that lays a list of boxes out, each
+  ///   being sized to fit the whole viewport.
+  /// * [SliverPersistentHeader], a sliver that implements pinned and floating
+  ///   headers, e.g. used to implement [SliverAppBar].
+  /// * [SliverToBoxAdapter], a sliver that wraps a box widget.
+  ///
+  /// Examples of sliver variants of common box widgets include:
+  ///
+  /// * [SliverOpacity], [SliverAnimatedOpacity], and [SliverFadeTransition],
+  ///   sliver versions of [Opacity], [AnimatedOpacity], and [FadeTransition].
+  /// * [SliverIgnorePointer], a sliver version of [IgnorePointer].
+  /// * [SliverLayoutBuilder], a sliver version of [LayoutBuilder].
+  /// * [SliverOffstage], a sliver version of [Offstage].
+  /// * [SliverPadding], a sliver version of [Padding].
+  /// * [SliverReorderableList], a sliver version of [ReorderableList]
+  /// * [SliverSafeArea], a sliver version of [SafeArea].
+  /// * [SliverVisibility], a sliver version of [Visibility].
+  ///
+  /// ## Benefits of slivers over boxes
+  ///
+  /// The sliver protocol ([SliverConstraints] and [SliverGeometry]) enables
+  /// _scroll effects_, such as floating app bars, widgets that expand and
+  /// shrink during scroll, section headers that are pinned only while the
+  /// section's children are visible, etc.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=Mz3kHQxBjGg}
+  ///
+  /// ## Mixing slivers and boxes
+  ///
+  /// In general, slivers always wrap box widgets to actually render anything
+  /// (for example, there is no sliver equivalent of [Text] or [Container]);
+  /// the sliver part of the equation is mostly about how these boxes should
+  /// be laid out in a viewport (i.e. when scrolling).
+  ///
+  /// Typically, the simplest way to combine boxes into a sliver environment is
+  /// to use a [SliverList] (maybe using a [ListView, which is a convenient
+  /// combination of a [CustomScrollView] and a [SliverList]). In rare cases,
+  /// e.g. if a single [Divider] widget is needed between two [SliverGrid]s,
+  /// a [SliverToBoxAdapter] can be used to wrap the box widgets.
+  ///
+  /// ## Performance considerations
+  ///
+  /// Because the purpose of scroll views is to, well, scroll, it is common
+  /// for scroll views to contain more contents than are rendered on the screen
+  /// at any particular time.
+  ///
+  /// To improve the performance of scroll views, the content can be rendered in
+  /// _lazy_ widgets, notably [SliverList] and [SliverGrid] (and their variants,
+  /// such as [SliverFixedExtentList] and [SliverAnimatedGrid]). These widgets
+  /// ensure that only the portion of their child lists that are actually
+  /// visible get built, laid out, and painted.
+  ///
+  /// The [ListView] and [GridView] widgets provide a convenient way to combine
+  /// a [CustomScrollView] and a [SliverList] or [SliverGrid] (respectively).
   final List<Widget> slivers;
 
   @override
@@ -1017,12 +1169,14 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// {@tool dartpad}
 /// This example shows a custom implementation of [ListTile] selection in a [ListView] or [GridView].
-/// Long press any ListTile to enable selection mode.
+/// Long press any [ListTile] to enable selection mode.
 ///
-/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
+/// ** See code in examples/api/lib/widgets/scroll_view/list_view.0.dart **
 /// {@end-tool}
 ///
 /// {@macro flutter.widgets.BoxScroll.scrollBehaviour}
+///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
 ///
 /// See also:
 ///
@@ -1075,6 +1229,7 @@ class ListView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1087,8 +1242,10 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
   }) : assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both.',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
        childrenDelegate = SliverChildListDelegate(
          children,
@@ -1148,6 +1305,7 @@ class ListView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
@@ -1164,8 +1322,10 @@ class ListView extends BoxScrollView {
   }) : assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount!),
        assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both.',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
@@ -1253,6 +1413,7 @@ class ListView extends BoxScrollView {
     super.clipBehavior,
   }) : assert(itemCount >= 0),
        itemExtent = null,
+       itemExtentBuilder = null,
        prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
@@ -1373,6 +1534,7 @@ class ListView extends BoxScrollView {
     super.padding,
     this.itemExtent,
     this.prototypeItem,
+    this.itemExtentBuilder,
     required this.childrenDelegate,
     super.cacheExtent,
     super.semanticChildCount,
@@ -1381,8 +1543,10 @@ class ListView extends BoxScrollView {
     super.restorationId,
     super.clipBehavior,
   }) : assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        );
 
   /// {@template flutter.widgets.list_view.itemExtent}
@@ -1401,8 +1565,37 @@ class ListView extends BoxScrollView {
   ///    extent along the main axis.
   ///  * The [prototypeItem] property, which allows forcing the children's
   ///    extent to be the same as the given widget.
+  ///  * The [itemExtentBuilder] property, which allows forcing the children's
+  ///    extent to be the value returned by the callback.
   /// {@endtemplate}
   final double? itemExtent;
+
+  /// {@template flutter.widgets.list_view.itemExtentBuilder}
+  /// If non-null, forces the children to have the corresponding extent returned
+  /// by the builder.
+  ///
+  /// Specifying an [itemExtentBuilder] is more efficient than letting the children
+  /// determine their own extent because the scrolling machinery can make use of
+  /// the foreknowledge of the children's extent to save work, for example when
+  /// the scroll position changes drastically.
+  ///
+  /// This will be called multiple times during the layout phase of a frame to find
+  /// the items that should be loaded by the lazy loading process.
+  ///
+  /// Unlike [itemExtent] or [prototypeItem], this allows children to have
+  /// different extents.
+  ///
+  /// See also:
+  ///
+  ///  * [SliverVariedExtentList], the sliver used internally when this property
+  ///    is provided. It constrains its box children to have a specific given
+  ///    extent along the main axis.
+  ///  * The [itemExtent] property, which allows forcing the children's extent
+  ///    to a given value.
+  ///  * The [prototypeItem] property, which allows forcing the children's
+  ///    extent to be the same as the given widget.
+  /// {@endtemplate}
+  final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@template flutter.widgets.list_view.prototypeItem}
   /// If non-null, forces the children to have the same extent as the given
@@ -1420,6 +1613,8 @@ class ListView extends BoxScrollView {
   ///    extent as a prototype item along the main axis.
   ///  * The [itemExtent] property, which allows forcing the children's extent
   ///    to a given value.
+  ///  * The [itemExtentBuilder] property, which allows forcing the children's
+  ///    extent to be the value returned by the callback.
   /// {@endtemplate}
   final Widget? prototypeItem;
 
@@ -1437,6 +1632,11 @@ class ListView extends BoxScrollView {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent!,
+      );
+    } else if (itemExtentBuilder != null) {
+      return SliverVariedExtentList(
+        delegate: childrenDelegate,
+        itemExtentBuilder: itemExtentBuilder!,
       );
     } else if (prototypeItem != null) {
       return SliverPrototypeExtentList(
@@ -1525,6 +1725,10 @@ class ListView extends BoxScrollView {
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
+///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
+///
+/// ## Examples
 ///
 /// {@tool snippet}
 /// This example demonstrates how to create a [GridView] with two columns. The
@@ -1631,8 +1835,27 @@ class ListView extends BoxScrollView {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows a custom implementation of selection in list and grid views.
+/// Use the button in the top right (possibly hidden under the DEBUG banner) to toggle between
+/// [ListView] and [GridView].
+/// Long press any [ListTile] or [GridTile] to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/list_view.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a custom [SliverGridDelegate].
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/grid_view.0.dart **
+/// {@end-tool}
+///
+/// ## Troubleshooting
+///
+/// ### Padding
+///
 /// By default, [GridView] will automatically pad the limits of the
-/// grids's scrollable to avoid partial obstructions indicated by
+/// grid's scrollable to avoid partial obstructions indicated by
 /// [MediaQuery]'s padding. To avoid this behavior, override with a
 /// zero [padding] property.
 ///
@@ -1662,13 +1885,6 @@ class ListView extends BoxScrollView {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad}
-/// This example shows a custom implementation of [ListTile] selection in a [GridView] or [ListView].
-/// Long press any ListTile to enable selection mode.
-///
-/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -1688,8 +1904,6 @@ class ListView extends BoxScrollView {
 class GridView extends BoxScrollView {
   /// Creates a scrollable, 2D array of widgets with a custom
   /// [SliverGridDelegate].
-  ///
-  /// The [gridDelegate] argument must not be null.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
@@ -1789,8 +2003,6 @@ class GridView extends BoxScrollView {
   ///
   /// To use an [IndexedWidgetBuilder] callback to build children, either use
   /// a [SliverChildBuilderDelegate] or use the [GridView.builder] constructor.
-  ///
-  /// The [gridDelegate] and [childrenDelegate] arguments must not be null.
   const GridView.custom({
     super.key,
     super.scrollDirection,

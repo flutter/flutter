@@ -136,7 +136,10 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
     ));
 
     // FlutterVersion
-    final FlutterVersion version = FlutterVersion(workingDirectory: project.directory.absolute.path);
+    final FlutterVersion version = FlutterVersion(
+      flutterRoot: Cache.flutterRoot!,
+      fs: fileSystem,
+    );
     result.add(ProjectValidatorResult(
       name: 'FlutterVersion.frameworkRevision',
       value: _toJsonValue(version.frameworkRevision),
@@ -224,6 +227,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
       result.add(_materialDesignResult(flutterManifest));
       result.add(_pluginValidatorResult(flutterManifest));
     }
+    result.add(await project.android.validateJavaAndGradleAgpVersions());
     return result;
   }
 

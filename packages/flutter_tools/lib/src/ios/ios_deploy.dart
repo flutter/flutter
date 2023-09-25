@@ -15,8 +15,8 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../device.dart';
 import 'code_signing.dart';
-import 'iproxy.dart';
 
 // Error message patterns from ios-deploy output
 const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
@@ -88,7 +88,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String>launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
@@ -102,7 +102,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -126,9 +126,10 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String> launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
     required bool uninstallFirst,
+    bool skipInstall = false,
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
@@ -148,8 +149,10 @@ class IOSDeploy {
       ],
       if (uninstallFirst)
         '--uninstall',
+      if (skipInstall)
+        '--noinstall',
       '--debug',
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -171,7 +174,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String> launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     required bool uninstallFirst,
     Directory? appDeltaDirectory,
   }) async {
@@ -186,7 +189,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (uninstallFirst)
         '--uninstall',
@@ -288,6 +291,9 @@ class IOSDeployDebugger {
   bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
   _IOSDeployDebuggerState _debuggerState;
 
+  @visibleForTesting
+  String? symbolsDirectoryPath;
+
   // (lldb)    platform select remote-'ios' --sysroot
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L33
   // This regex is to get the configurable lldb prompt. By default this prompt will be "lldb".
@@ -306,8 +312,12 @@ class IOSDeployDebugger {
   // (lldb) Process 6152 resuming
   static final RegExp _lldbProcessResuming = RegExp(r'Process \d+ resuming');
 
+  // Symbol Path: /Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols
+  static final RegExp _symbolsPathPattern = RegExp(r'.*Symbol Path: ');
+
   // Send signal to stop (pause) the app. Used before a backtrace dump.
   static const String _signalStop = 'process signal SIGSTOP';
+  static const String _signalStopError = 'Failed to send signal 17';
 
   static const String _processResume = 'process continue';
   static const String _processInterrupt = 'process interrupt';
@@ -320,6 +330,14 @@ class IOSDeployDebugger {
   /// The future should be completed once the backtraces are logged.
   Completer<void>? _processResumeCompleter;
 
+  // Process 525 exited with status = -1 (0xffffffff) lost connection
+  static final RegExp _lostConnectionPattern = RegExp(r'exited with status = -1 \(0xffffffff\) lost connection');
+
+  /// Whether ios-deploy received a message matching [_lostConnectionPattern],
+  /// indicating that it lost connection to the device.
+  bool get lostConnection => _lostConnection;
+  bool _lostConnection = false;
+
   /// Launch the app on the device, and attach the debugger.
   ///
   /// Returns whether or not the debugger successfully attached.
@@ -331,6 +349,8 @@ class IOSDeployDebugger {
     RegExp lldbRun = RegExp(r'\(lldb\)\s*run');
 
     final Completer<bool> debuggerCompleter = Completer<bool>();
+
+    bool receivedLogs = false;
     try {
       _iosDeployProcess = await _processUtils.start(
         _launchCommand,
@@ -362,6 +382,17 @@ class IOSDeployDebugger {
           return;
         }
 
+        // Symbol Path: /Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols
+        if (_symbolsPathPattern.hasMatch(line)) {
+          _logger.printTrace('Detected path to iOS debug symbols: "$line"');
+          final String prefix = _symbolsPathPattern.stringMatch(line) ?? '';
+          if (prefix.isEmpty) {
+            return;
+          }
+          symbolsDirectoryPath = line.substring(prefix.length);
+          return;
+        }
+
         // (lldb)     run
         // success
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
@@ -381,11 +412,23 @@ class IOSDeployDebugger {
           }
           return;
         }
-        if (line == _signalStop) {
+
+        // (lldb) process signal SIGSTOP
+        // or
+        // process signal SIGSTOP
+        if (line.contains(_signalStop)) {
           // The app is about to be stopped. Only show in verbose mode.
           _logger.printTrace(line);
           return;
         }
+
+        // error: Failed to send signal 17: failed to send signal 17
+        if (line.contains(_signalStopError)) {
+          // The stop signal failed, force exit.
+          exit();
+          return;
+        }
+
         if (line == _backTraceAll) {
           // The app is stopped and the backtrace for all threads will be printed.
           _logger.printTrace(line);
@@ -416,12 +459,16 @@ class IOSDeployDebugger {
           // The app exited or crashed, so exit. Continue passing debugging
           // messages to the log reader until it exits to capture crash dumps.
           _logger.printTrace(line);
+          if (line.contains(_lostConnectionPattern)) {
+            _lostConnection = true;
+          }
           exit();
           return;
         }
         if (_lldbProcessDetached.hasMatch(line)) {
           // The debugger has detached from the app, and there will be no more debugging messages.
           // Kill the ios-deploy process.
+          _logger.printTrace(line);
           exit();
           return;
         }
@@ -444,6 +491,16 @@ class IOSDeployDebugger {
           // This will still cause "legit" logged newlines to be doubled...
         } else if (!_debuggerOutput.isClosed) {
           _debuggerOutput.add(line);
+
+          // Sometimes the `ios-deploy` process does not return logs from the
+          // application after attaching, such as the Dart VM url. In CI,
+          // `idevicesyslog` is used as a fallback to get logs. Print a
+          // message to indicate whether logs were received from `ios-deploy`
+          // to help with debugging.
+          if (!receivedLogs) {
+            _logger.printTrace('Received logs from ios-deploy.');
+            receivedLogs = true;
+          }
         }
         lastLineFromDebugger = line;
       });
@@ -508,6 +565,33 @@ class IOSDeployDebugger {
     // wait for backtrace to be dumped
     await completer.future;
     _iosDeployProcess?.stdin.writeln(_processResume);
+  }
+
+  /// Check what files are found in the device's iOS DeviceSupport directory.
+  ///
+  /// Expected files include Symbols (directory), Info.plist, and .finalized.
+  ///
+  /// If any of the expected files are missing or there are additional files
+  /// (such as .copying_lock or .processing_lock), this may indicate the
+  /// symbols may still be fetching or something went wrong when fetching them.
+  ///
+  /// Used for debugging test flakes: https://github.com/flutter/flutter/issues/121231
+  Future<void> checkForSymbolsFiles(FileSystem fileSystem) async {
+    if (symbolsDirectoryPath == null) {
+      _logger.printTrace('No path provided for Symbols directory.');
+      return;
+    }
+    final Directory symbolsDirectory = fileSystem.directory(symbolsDirectoryPath);
+    if (!symbolsDirectory.existsSync()) {
+      _logger.printTrace('Unable to find Symbols directory at $symbolsDirectoryPath');
+      return;
+    }
+    final Directory currentDeviceSupportDir = symbolsDirectory.parent;
+    final List<FileSystemEntity> symbolStatusFiles = currentDeviceSupportDir.listSync();
+    _logger.printTrace('Symbol files:');
+    for (final FileSystemEntity file in symbolStatusFiles) {
+      _logger.printTrace('  ${file.basename}');
+    }
   }
 
   Future<void> stopAndDumpBacktrace() async {

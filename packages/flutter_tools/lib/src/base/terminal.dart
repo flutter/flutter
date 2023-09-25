@@ -76,7 +76,13 @@ abstract class Terminal {
   factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
+  ///
+  /// Check [isCliAnimationEnabled] as well before using `\r` or ANSI sequences
+  /// to perform animations.
   bool get supportsColor;
+
+  /// Whether to show animations on this terminal.
+  bool get isCliAnimationEnabled;
 
   /// Whether the current terminal can display emoji.
   bool get supportsEmoji;
@@ -152,6 +158,7 @@ class AnsiTerminal implements Terminal {
     required io.Stdio stdio,
     required Platform platform,
     DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
+    this.isCliAnimationEnabled = true,
   })
     : _stdio = stdio,
       _platform = platform,
@@ -175,6 +182,15 @@ class AnsiTerminal implements Terminal {
   static const String yellow = '\u001b[33m';
   static const String grey = '\u001b[90m';
 
+  // Moves cursor up 1 line.
+  static const String cursorUpLineCode = '\u001b[1A';
+
+  // Moves cursor to the beginning of the line.
+  static const String cursorBeginningOfLineCode = '\u001b[1G';
+
+  // Clear the entire line, cursor position does not change.
+  static const String clearEntireLineCode = '\u001b[2K';
+
   static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
     TerminalColor.green: green,
@@ -189,6 +205,9 @@ class AnsiTerminal implements Terminal {
 
   @override
   bool get supportsColor => _platform.stdoutSupportsAnsi;
+
+  @override
+  final bool isCliAnimationEnabled;
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
@@ -266,7 +285,20 @@ class AnsiTerminal implements Terminal {
   }
 
   @override
-  String clearScreen() => supportsColor ? clear : '\n\n';
+  String clearScreen() => supportsColor && isCliAnimationEnabled ? clear : '\n\n';
+
+  /// Returns ANSI codes to clear [numberOfLines] lines starting with the line
+  /// the cursor is on.
+  ///
+  /// If the terminal does not support ANSI codes, returns an empty string.
+  String clearLines(int numberOfLines) {
+    if (!supportsColor || !isCliAnimationEnabled) {
+      return '';
+    }
+    return cursorBeginningOfLineCode +
+        clearEntireLineCode +
+        (cursorUpLineCode + clearEntireLineCode) * (numberOfLines - 1);
+  }
 
   @override
   bool get singleCharMode {
@@ -379,6 +411,9 @@ class _TestTerminal implements Terminal {
 
   @override
   final bool supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => supportsColor;
 
   @override
   final bool supportsEmoji;

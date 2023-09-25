@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MenuAcceleratorLabel].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// Flutter code sample for [MenuAcceleratorLabel].
 
 void main() => runApp(const MenuAcceleratorApp());
 
@@ -103,13 +103,14 @@ class MenuAcceleratorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       home: Shortcuts(
         shortcuts: <ShortcutActivator, Intent>{
           const SingleActivator(LogicalKeyboardKey.keyT, control: true): VoidCallbackIntent(() {
             debugDumpApp();
           }),
         },
-        child: const Scaffold(body: MyMenuBar()),
+        child: const Scaffold(body: SafeArea(child: MyMenuBar())),
       ),
     );
   }

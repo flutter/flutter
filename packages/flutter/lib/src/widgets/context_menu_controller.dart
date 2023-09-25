@@ -10,7 +10,8 @@ import 'overlay.dart';
 /// Builds and manages a context menu at a given location.
 ///
 /// There can only ever be one context menu shown at a given time in the entire
-/// app.
+/// app. Calling [show] on one instance of this class will hide any other
+/// shown instances.
 ///
 /// {@tool dartpad}
 /// This example shows how to use a GestureDetector to show a context menu
@@ -80,6 +81,7 @@ class ContextMenuController {
   ///  * [remove], which removes only the current instance.
   static void removeAny() {
     _menuOverlayEntry?.remove();
+    _menuOverlayEntry?.dispose();
     _menuOverlayEntry = null;
     if (_shownInstance != null) {
       _shownInstance!.onRemove?.call();

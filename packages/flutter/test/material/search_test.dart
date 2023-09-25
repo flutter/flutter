@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
@@ -25,8 +26,9 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing query moves cursor to the end of query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
+    addTearDown(() => delegate.dispose());
 
     await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
@@ -109,7 +111,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <String?>[null]);
@@ -589,8 +591,172 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], TextInputAction.done.toString());
   });
 
+  testWidgets('Custom flexibleSpace value', (WidgetTester tester) async {
+    const Widget flexibleSpace = Text('custom flexibleSpace');
+    final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.byWidget(flexibleSpace), findsOneWidget);
+  });
+
+
+  group('contributes semantics with custom flexibleSpace', () {
+    const Widget flexibleSpace = Text('FlexibleSpace');
+
+    TestSemantics buildExpected({ required String routeName }) {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+      return TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.scopesRoute,
+                      SemanticsFlag.namesRoute,
+                    ],
+                    label: routeName,
+                    textDirection: TextDirection.ltr,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 6,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 8,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isButton,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                ],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                tooltip: 'Back',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 9,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.isTextField,
+                                  SemanticsFlag.isFocused,
+                                  SemanticsFlag.isHeader,
+                                  if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                    debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                                ],
+                                actions: <SemanticsAction>[
+                                  if (isDesktop)
+                                    SemanticsAction.didGainAccessibilityFocus,
+                                  if (isDesktop)
+                                    SemanticsAction.didLoseAccessibilityFocus,
+                                  SemanticsAction.tap,
+                                  SemanticsAction.setSelection,
+                                  SemanticsAction.setText,
+                                  SemanticsAction.paste,
+                                ],
+                                label: 'Search',
+                                textDirection: TextDirection.ltr,
+                                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                              ),
+                              TestSemantics(
+                                id: 10,
+                                label: 'Bottom',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                          TestSemantics(
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 11,
+                                label: 'FlexibleSpace',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      TestSemantics(
+                        id: 5,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Suggestions',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    testWidgets('includes routeName on Android', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: 'Search'),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+
+      semantics.dispose();
+    });
+
+    testWidgets('does not include routeName', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: ''),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+
+      semantics.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
+
+
   group('contributes semantics', () {
     TestSemantics buildExpected({ required String routeName }) {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+                             debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
+                             debugDefaultTargetPlatformOverride == TargetPlatform.linux;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -634,9 +800,10 @@ void main() {
                                 debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
-                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
+                              if (isDesktop)
                                 SemanticsAction.didGainAccessibilityFocus,
+                              if (isDesktop)
+                                SemanticsAction.didLoseAccessibilityFocus,
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,
                               SemanticsAction.setText,
@@ -734,7 +901,7 @@ void main() {
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.light();
+    final ThemeData themeData = ThemeData(useMaterial3: false);
     final _TestSearchDelegate delegate = _TestSearchDelegate(
       defaultAppBarTheme: true,
     );
@@ -749,10 +916,10 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground = tester.widget<Material>(find.descendant(
+    final Material appBarBackground = tester.widgetList<Material>(find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(Material),
-    ));
+    )).first;
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -762,7 +929,7 @@ void main() {
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (dark mode)', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.dark();
+    final ThemeData themeData = ThemeData.dark(useMaterial3: false);
     final _TestSearchDelegate delegate = _TestSearchDelegate(
       defaultAppBarTheme: true,
     );
@@ -777,10 +944,10 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground = tester.widget<Material>(find.descendant(
+    final Material appBarBackground = tester.widgetList<Material>(find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(Material),
-    ));
+    )).first;
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -789,9 +956,9 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/78144
-  testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
+  testWidgets('`Leading`, `Actions` and `FlexibleSpace` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
-    // even with a null return values for [buildLeading] and [buildActions].
+    // even with a null return values for [buildLeading], [buildActions] and [flexibleSpace].
     final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
     final List<String> selectedResults = <String>[];
 
@@ -980,6 +1147,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    this.flexibleSpace ,
     this.defaultAppBarTheme = false,
     super.searchFieldDecorationTheme,
     super.searchFieldStyle,
@@ -993,6 +1161,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   final String suggestions;
   final String result;
   final List<Widget> actions;
+  final Widget? flexibleSpace;
   static const Color hintTextColor = Colors.green;
 
   @override
@@ -1029,7 +1198,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   @override
   Widget buildSuggestions(BuildContext context) {
     queriesForSuggestions.add(query);
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: () {
         showResults(context);
       },
@@ -1046,6 +1215,11 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return actions;
+  }
+
+  @override
+  Widget? buildFlexibleSpace(BuildContext context) {
+    return flexibleSpace;
   }
 
   @override
@@ -1066,7 +1240,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: () {
         showResults(context);
       },

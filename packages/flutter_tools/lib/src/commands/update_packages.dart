@@ -32,15 +32,10 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
-  // Could potentially break color scheme tests on upgrade,
-  // so pin and manually update as needed.
-  'material_color_utilities': '0.2.0',
-  // https://github.com/flutter/flutter/issues/111304
-  'url_launcher_android': '6.0.17',
+  // Keep pinned to latest until 1.0.0.
+  'material_color_utilities': '0.5.0',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
-  // https://github.com/flutter/flutter/issues/116376
-  'path_provider_android': '2.0.21',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -51,6 +46,14 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Attempt to update all the dependencies to their latest versions.\n'
               'This will actually modify the pubspec.yaml files in your checkout.',
         negatable: false,
+      )
+      ..addOption(
+        'cherry-pick-package',
+        help: 'Attempt to update only the specified package. The "-cherry-pick-version" version must be specified also.',
+      )
+      ..addOption(
+        'cherry-pick-version',
+        help: 'Attempt to update the package to the specified version. The "--cherry-pick-package" option must be specified also.',
       )
       ..addFlag(
         'paths',
@@ -177,21 +180,70 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner!.getRepoPackages();
 
-    final bool forceUpgrade = boolArgDeprecated('force-upgrade');
-    final bool isPrintPaths = boolArgDeprecated('paths');
-    final bool isPrintTransitiveClosure = boolArgDeprecated('transitive-closure');
-    final bool isVerifyOnly = boolArgDeprecated('verify-only');
-    final bool isConsumerOnly = boolArgDeprecated('consumer-only');
-    final bool offline = boolArgDeprecated('offline');
-    final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
+    final bool forceUpgrade = boolArg('force-upgrade');
+    final bool isPrintPaths = boolArg('paths');
+    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
+    final bool isVerifyOnly = boolArg('verify-only');
+    final bool isConsumerOnly = boolArg('consumer-only');
+    final bool offline = boolArg('offline');
+    final String? cherryPickPackage = stringArg('cherry-pick-package');
+    final String? cherryPickVersion = stringArg('cherry-pick-version');
 
-    if (boolArgDeprecated('crash')) {
+    if (boolArg('crash')) {
       throw StateError('test crash please ignore.');
     }
 
     if (forceUpgrade && offline) {
       throwToolExit(
           '--force-upgrade cannot be used with the --offline flag'
+      );
+    }
+
+    if (forceUpgrade && cherryPickPackage != null) {
+      throwToolExit(
+          '--force-upgrade cannot be used with the --cherry-pick-package flag'
+      );
+    }
+
+    if (forceUpgrade && isPrintPaths) {
+      throwToolExit(
+          '--force-upgrade cannot be used with the --paths flag'
+      );
+    }
+
+    if (forceUpgrade && isPrintTransitiveClosure) {
+      throwToolExit(
+          '--force-upgrade cannot be used with the --transitive-closure flag'
+      );
+    }
+
+    if (cherryPickPackage != null && offline) {
+      throwToolExit(
+          '--cherry-pick-package cannot be used with the --offline flag'
+      );
+    }
+
+    if (cherryPickPackage != null && cherryPickVersion == null) {
+      throwToolExit(
+          '--cherry-pick-version is required when using --cherry-pick-package flag'
+      );
+    }
+
+    if (isPrintPaths && (stringArg('from') == null || stringArg('to') == null)) {
+      throwToolExit(
+          'The --from and --to flags are required when using the --paths flag'
+      );
+    }
+
+    if (!isPrintPaths && (stringArg('from') != null || stringArg('to') != null)) {
+      throwToolExit(
+          'The --from and --to flags are only allowed when using the --paths flag'
+      );
+    }
+
+    if (isPrintTransitiveClosure && isPrintPaths) {
+      throwToolExit(
+          'The --transitive-closure flag cannot be used with the --paths flag'
       );
     }
 
@@ -217,7 +269,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    if (doUpgrade) {
+    if (forceUpgrade) {
       // This feature attempts to collect all the packages used across all the
       // pubspec.yamls in the repo (including via transitive dependencies), and
       // find the latest version of each that can be used while keeping each
@@ -236,8 +288,37 @@ class UpdatePackagesCommand extends FlutterCommand {
       explicitDependencies: explicitDependencies,
       allDependencies: allDependencies,
       specialDependencies: specialDependencies,
-      doUpgrade: doUpgrade,
+      printPaths: forceUpgrade || isPrintPaths || isPrintTransitiveClosure || cherryPickPackage != null,
     );
+
+    final Iterable<PubspecDependency> baseDependencies;
+    if (cherryPickPackage != null) {
+      if (!allDependencies.containsKey(cherryPickPackage)) {
+        throwToolExit(
+            'Package "$cherryPickPackage" is not currently a dependency, and therefore cannot be upgraded.'
+        );
+      }
+      if (cherryPickVersion != null) {
+        globals.printStatus('Pinning package "$cherryPickPackage" to version "$cherryPickVersion"...');
+      } else {
+        globals.printStatus('Upgrading package "$cherryPickPackage"...');
+      }
+      final List<PubspecDependency> adjustedDependencies = <PubspecDependency>[];
+      for (final String package in allDependencies.keys) {
+        if (package == cherryPickPackage) {
+          assert(cherryPickVersion != null);
+          final PubspecDependency pubspec = allDependencies[cherryPickPackage]!;
+          adjustedDependencies.add(pubspec.copyWith(version: cherryPickVersion));
+        } else {
+          adjustedDependencies.add(allDependencies[package]!);
+        }
+      }
+      baseDependencies = adjustedDependencies;
+    } else if (forceUpgrade) {
+      baseDependencies = explicitDependencies.values;
+    } else {
+      baseDependencies = allDependencies.values;
+    }
 
     // Now that we have all the dependencies we care about, we are going to
     // create a fake package and then run either "pub upgrade", if requested,
@@ -247,12 +328,14 @@ class UpdatePackagesCommand extends FlutterCommand {
     // attempt to download any necessary package versions to the pub cache to
     // warm the cache.
     final PubDependencyTree tree = PubDependencyTree(); // object to collect results
-    await _generateFakePackage(
+    await _pubGetAllDependencies(
       tempDir: _syntheticPackageDir,
-      dependencies: doUpgrade ? explicitDependencies.values : allDependencies.values,
+      dependencies: baseDependencies,
       pubspecs: pubspecs,
       tree: tree,
-      doUpgrade: doUpgrade,
+      doUpgrade: forceUpgrade,
+      isolateEnvironment: forceUpgrade || isPrintPaths || isPrintTransitiveClosure || cherryPickPackage != null,
+      reportDependenciesToTree: forceUpgrade || isPrintPaths || isPrintTransitiveClosure || cherryPickPackage != null,
     );
 
     // Only delete the synthetic package if it was done in a temp directory
@@ -260,18 +343,31 @@ class UpdatePackagesCommand extends FlutterCommand {
       _syntheticPackageDir.deleteSync(recursive: true);
     }
 
-    if (doUpgrade) {
-      final bool done = _upgradePubspecs(
+    if (forceUpgrade || isPrintTransitiveClosure || isPrintPaths || cherryPickPackage != null) {
+      _processPubspecs(
         tree: tree,
         pubspecs: pubspecs,
-        explicitDependencies: explicitDependencies,
         specialDependencies: specialDependencies,
       );
 
-      if (done) {
-        // Complete early if we were just printing data.
+      if (isPrintTransitiveClosure) {
+        tree._dependencyTree.forEach((String from, Set<String> to) {
+          globals.printStatus('$from -> $to');
+        });
         return FlutterCommandResult.success();
       }
+
+      if (isPrintPaths) {
+        showDependencyPaths(from: stringArg('from')!, to: stringArg('to')!, tree: tree);
+        return FlutterCommandResult.success();
+      }
+
+      globals.printStatus('Updating workspace...');
+      _updatePubspecs(
+        tree: tree,
+        pubspecs: pubspecs,
+        specialDependencies: specialDependencies,
+      );
     }
 
     await _runPubGetOnPackages(packages);
@@ -307,8 +403,9 @@ class UpdatePackagesCommand extends FlutterCommand {
         // we need to run update-packages to recapture the transitive deps.
         globals.printWarning(
             'Warning: pubspec in ${directory.path} has updated or new dependencies. '
-            'Please run "flutter update-packages --force-upgrade" to update them correctly '
-            '(checksum ${pubspec.checksum.value} != $checksum).'
+            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
+            // DO NOT PRINT THE CHECKSUM HERE.
+            // It causes people to ignore the requirement to actually run the script.
         );
         needsUpdate = true;
       } else {
@@ -332,11 +429,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     required Set<String> specialDependencies,
     required Map<String, PubspecDependency> explicitDependencies,
     required Map<String, PubspecDependency> allDependencies,
-    required bool doUpgrade,
+    required bool printPaths,
   }) {
     // Visit all the directories with pubspec.yamls we care about.
     for (final Directory directory in packages) {
-      if (doUpgrade) {
+      if (printPaths) {
         globals.printTrace('Reading pubspec.yaml from: ${directory.path}');
       }
       final PubspecYaml pubspec = PubspecYaml(directory); // this parses the pubspec.yaml
@@ -405,12 +502,14 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _generateFakePackage({
+  Future<void> _pubGetAllDependencies({
     required Directory tempDir,
     required Iterable<PubspecDependency> dependencies,
     required List<PubspecYaml> pubspecs,
     required PubDependencyTree tree,
     required bool doUpgrade,
+    required bool isolateEnvironment,
+    required bool reportDependenciesToTree,
   }) async {
     Directory? temporaryFlutterSdk;
     final Directory syntheticPackageDir = tempDir.childDirectory('synthetic_package');
@@ -422,9 +521,10 @@ class UpdatePackagesCommand extends FlutterCommand {
         doUpgrade: doUpgrade,
       ),
     );
-    // Create a synthetic flutter SDK so that transitive flutter SDK
-    // constraints are not affected by this upgrade.
-    if (doUpgrade) {
+
+    if (isolateEnvironment) {
+      // Create a synthetic flutter SDK so that transitive flutter SDK
+      // constraints are not affected by this upgrade.
       temporaryFlutterSdk = createTemporaryFlutterSdk(
         globals.logger,
         globals.fs,
@@ -434,20 +534,22 @@ class UpdatePackagesCommand extends FlutterCommand {
       );
     }
 
-    // Next we run "pub get" on it in order to force the download of any
+    // Run "pub get" on it in order to force the download of any
     // needed packages to the pub cache, upgrading if requested.
+    // TODO(ianh): If this fails, the tool exits silently.
+    // It can fail, e.g., if --cherry-pick-version is invalid.
     await pub.get(
       context: PubContext.updatePackages,
       project: FlutterProject.fromDirectory(syntheticPackageDir),
       upgrade: doUpgrade,
-      offline: boolArgDeprecated('offline'),
+      offline: boolArg('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
       outputMode: PubOutputMode.none,
     );
 
-    if (doUpgrade) {
-      // If upgrading, we run "pub deps --style=compact" on the result. We
-      // pipe all the output to tree.fill(), which parses it so that it can
+    if (reportDependenciesToTree) {
+      // Run "pub deps --style=compact" on the result.
+      // We pipe all the output to tree.fill(), which parses it so that it can
       // create a graph of all the dependencies so that we can figure out the
       // transitive dependencies later. It also remembers which version was
       // selected for each package.
@@ -460,40 +562,29 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  bool _upgradePubspecs({
+  void _processPubspecs({
     required PubDependencyTree tree,
     required List<PubspecYaml> pubspecs,
     required Set<String> specialDependencies,
-    required Map<String, PubspecDependency> explicitDependencies,
   }) {
-    // The transitive dependency tree for the fake package does not contain
-    // dependencies between Flutter SDK packages and pub packages. We add them
-    // here.
     for (final PubspecYaml pubspec in pubspecs) {
       final String package = pubspec.name;
       specialDependencies.add(package);
       tree._versions[package] = pubspec.version;
-      assert(!tree._dependencyTree.containsKey(package));
-      tree._dependencyTree[package] = <String>{};
       for (final PubspecDependency dependency in pubspec.dependencies) {
         if (dependency.kind == DependencyKind.normal) {
+          tree._dependencyTree[package] ??= <String>{};
           tree._dependencyTree[package]!.add(dependency.name);
         }
       }
     }
+  }
 
-    if (boolArgDeprecated('transitive-closure')) {
-      tree._dependencyTree.forEach((String from, Set<String> to) {
-        globals.printStatus('$from -> $to');
-      });
-      return true;
-    }
-
-    if (boolArgDeprecated('paths')) {
-      showDependencyPaths(from: stringArgDeprecated('from')!, to: stringArgDeprecated('to')!, tree: tree);
-      return true;
-    }
-
+  bool _updatePubspecs({
+    required PubDependencyTree tree,
+    required List<PubspecYaml> pubspecs,
+    required Set<String> specialDependencies,
+  }) {
     // Now that we have collected all the data, we can apply our dependency
     // versions to each pubspec.yaml that we collected. This mutates the
     // pubspec.yaml files.
@@ -524,7 +615,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
     try {
       // int.tryParse will not accept null, but will convert empty string to null
-      final int? maxJobs = int.tryParse(stringArgDeprecated('jobs') ?? '');
+      final int? maxJobs = int.tryParse(stringArg('jobs') ?? '');
       final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
@@ -663,7 +754,6 @@ enum DependencyKind {
 /// pubspec.yaml file.
 const String kTransitiveMagicString= '# THIS LINE IS AUTOGENERATED - TO UPDATE USE "flutter update-packages --force-upgrade"';
 
-
 /// This is the string output before a checksum of the packages used.
 const String kDependencyChecksum = '# PUBSPEC CHECKSUM: ';
 
@@ -771,10 +861,8 @@ class PubspecYaml {
           }
         } else {
           // We're in a section we care about. Try to parse out the dependency:
-          final PubspecDependency? dependency = PubspecDependency.parse(line, filename: filename);
+          final PubspecDependency? dependency = PubspecDependency.parse(line, filename: filename, isDevDependency: seenDev);
           if (dependency != null) { // We got one!
-            // Track whether or not this a dev dependency.
-            dependency.isDevDependency = seenDev;
             result.add(dependency);
             if (dependency.kind == DependencyKind.unknown) {
               // If we didn't get a version number, then we need to be ready to
@@ -954,7 +1042,6 @@ class PubspecYaml {
               endOfDirectDependencies = output.length;
             }
             endOfDevDependencies = output.length;
-            break;
           case Section.builders:
           case Section.dependencyOverrides:
           case Section.header:
@@ -964,7 +1051,6 @@ class PubspecYaml {
             if (data.lockLine != null) {
               output.add(data.lockLine!);
             }
-            break;
         }
       } else {
         // Not a header, not a dependency, just pass that through unmodified.
@@ -1198,9 +1284,14 @@ class PubspecDependency extends PubspecLine {
     required DependencyKind kind,
     required this.version,
     required this.sourcePath,
+    required this.isDevDependency,
   }) : _kind = kind;
 
-  static PubspecDependency? parse(String line, { required String filename }) {
+  static PubspecDependency? parse(
+    String line, {
+    required String filename,
+    required bool isDevDependency,
+  }) {
     // We recognize any line that:
     //  * starts with exactly two spaces, no more or less
     //  * has some content, then a colon
@@ -1249,7 +1340,15 @@ class PubspecDependency extends PubspecLine {
     if (colonIndex != -1) {
       version = line.substring(colonIndex + 1, hashIndex != -1 ? hashIndex : line.length).trim();
     }
-    return PubspecDependency(line, package, suffix, isTransitive: isTransitive, version: version, kind: stripped.isEmpty ? DependencyKind.unknown : DependencyKind.normal, sourcePath: filename);
+    return PubspecDependency(
+      line,
+      package,
+      suffix,
+      isTransitive: isTransitive,
+      version: version,
+      kind: stripped.isEmpty ? DependencyKind.unknown : DependencyKind.normal, sourcePath: filename,
+      isDevDependency: isDevDependency,
+    );
   }
 
   final String name; // the package name
@@ -1257,7 +1356,7 @@ class PubspecDependency extends PubspecLine {
   final String version; // the version string if found, or blank.
   final bool isTransitive; // whether the suffix matched kTransitiveMagicString
   final String sourcePath; // the filename of the pubspec.yaml file, for error messages
-  late bool isDevDependency; // Whether this dependency is under the `dev dependencies` section.
+  final bool isDevDependency; // Whether this dependency is under the `dev dependencies` section.
 
   DependencyKind get kind => _kind;
   DependencyKind _kind = DependencyKind.normal;
@@ -1274,12 +1373,33 @@ class PubspecDependency extends PubspecLine {
   /// dependencies/dev_dependencies section, or a dependency_overrides section.
   /// We track this so that we can put ourselves in the right section when
   /// generating the fake pubspec.yaml.
-  bool get lockIsOverride => _lockIsOverride;
-  late bool _lockIsOverride;
+  bool _lockIsOverride = false;
 
   static const String _pathPrefix = '    path: ';
   static const String _sdkPrefix = '    sdk: ';
   static const String _gitPrefix = '    git:';
+
+  PubspecDependency copyWith({
+    String? line,
+    String? name,
+    String? suffix,
+    bool? isTransitive,
+    DependencyKind? kind,
+    String? version,
+    String? sourcePath,
+    bool? isDevDependency,
+  }) {
+    return PubspecDependency(
+      line ?? this.line,
+      name ?? this.name,
+      suffix ?? this.suffix,
+      isTransitive: isTransitive ?? this.isTransitive,
+      kind: kind ?? this.kind,
+      version: version ?? this.version,
+      sourcePath: sourcePath ?? this.sourcePath,
+      isDevDependency: isDevDependency ?? this.isDevDependency,
+    );
+  }
 
   /// Whether the dependency points to a package in the Flutter SDK.
   ///
@@ -1346,16 +1466,16 @@ class PubspecDependency extends PubspecLine {
   /// This generates the entry for this dependency for the pubspec.yaml for the
   /// fake package that we'll use to get the version numbers figured out.
   ///
-  /// When called with [doUpgrade] as [true], the version constrains will be set
-  /// to >= whatever the previous version was. If [doUpgrade] is [false], then
+  /// When called with [allowUpgrade] as [true], the version constrains will be set
+  /// to >= whatever the previous version was. If [allowUpgrade] is [false], then
   /// the previous version is used again as an exact pin.
-  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool doUpgrade = true }) {
+  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool allowUpgrade = true }) {
     final String versionToUse;
     // This should only happen when manually adding new dependencies; otherwise
     // versions should always be pinned exactly
     if (version.isEmpty || version == 'any') {
       versionToUse = 'any';
-    } else if (doUpgrade) {
+    } else if (allowUpgrade) {
       // Must wrap in quotes for Yaml parsing
       versionToUse = "'>= $version'";
     } else {
@@ -1365,14 +1485,12 @@ class PubspecDependency extends PubspecLine {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
         assert(kind != DependencyKind.unknown);
-        break;
       case DependencyKind.normal:
         if (!kManuallyPinnedDependencies.containsKey(name)) {
           dependencies.writeln('  $name: $versionToUse');
         }
-        break;
       case DependencyKind.path:
-        if (lockIsOverride) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln('    path: $_lockTarget');
@@ -1380,9 +1498,8 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    path: $_lockTarget');
         }
-        break;
       case DependencyKind.sdk:
-        if (lockIsOverride) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln('    sdk: $_lockTarget');
@@ -1390,9 +1507,8 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    sdk: $_lockTarget');
         }
-        break;
       case DependencyKind.git:
-        if (lockIsOverride) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln(lockLine);
@@ -1400,7 +1516,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln(lockLine);
         }
-        break;
     }
   }
 
@@ -1428,7 +1543,7 @@ String generateFakePubspec(
   final bool verbose = doUpgrade;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.10.0 <4.0.0'");
+  result.writeln("  sdk: '>=2.12.0 <4.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (kManuallyPinnedDependencies.isNotEmpty) {
@@ -1443,7 +1558,7 @@ String generateFakePubspec(
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
       if (!allTransitive.contains(package)) {
         if (verbose) {
-          globals.printStatus('Skipping $package because it was not transitive');
+          globals.printStatus('  - $package: $version (skipped because it was not a transitive dependency)');
         }
         return;
       }
@@ -1455,7 +1570,7 @@ String generateFakePubspec(
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
-      dependency.describeForFakePubspec(result, overrides, doUpgrade: doUpgrade);
+      dependency.describeForFakePubspec(result, overrides, allowUpgrade: doUpgrade);
     }
   }
   result.write(overrides.toString());
@@ -1636,7 +1751,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: ">=2.7.0 <4.0.0"
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
     output.writeln('dependencies:');
@@ -1668,7 +1783,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=1.11.0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
   return directory;

@@ -17,12 +17,14 @@ class FlutterAttachRequestArguments
     this.customTool,
     this.customToolReplacesArgs,
     this.vmServiceUri,
+    this.vmServiceInfoFile,
     this.program,
     super.restart,
     super.name,
     super.cwd,
     super.env,
     super.additionalProjectPaths,
+    super.allowAnsiColorOutput,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,
@@ -36,6 +38,7 @@ class FlutterAttachRequestArguments
         customTool = obj['customTool'] as String?,
         customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
         vmServiceUri = obj['vmServiceUri'] as String?,
+        vmServiceInfoFile = obj['vmServiceInfoFile'] as String?,
         program = obj['program'] as String?,
         super.fromMap();
 
@@ -64,7 +67,14 @@ class FlutterAttachRequestArguments
   final int? customToolReplacesArgs;
 
   /// The VM Service URI of the running Flutter app to connect to.
+  ///
+  /// Only one of this or [vmServiceInfoFile] (or neither) can be supplied.
   final String? vmServiceUri;
+
+  /// The VM Service info file to extract the VM Service URI from to attach to.
+  ///
+  /// Only one of this or [vmServiceUri] (or neither) can be supplied.
+  final String? vmServiceInfoFile;
 
   /// The program/Flutter app to be run.
   final String? program;
@@ -100,6 +110,7 @@ class FlutterLaunchRequestArguments
     super.cwd,
     super.env,
     super.additionalProjectPaths,
+    super.allowAnsiColorOutput,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,

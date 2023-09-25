@@ -4,22 +4,32 @@
 
 import '../../src/android/android_sdk.dart';
 import '../../src/android/android_studio.dart';
+import '../android/java.dart';
 import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
     argParser.addFlag('analytics',
-      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+      hide: !verboseHelp,
+      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.\n'
+      '(An alias for "--${FlutterGlobalOptions.kEnableAnalyticsFlag}" '
+            'and "--${FlutterGlobalOptions.kDisableAnalyticsFlag}" top level flags.)');
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
-    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addOption('android-studio-dir', help: 'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.');
+    argParser.addOption('jdk-dir', help: 'The Java Development Kit (JDK) installation directory. '
+      'If unset, flutter will search for one in the following order:\n'
+      '    1) the JDK bundled with the latest installation of Android Studio,\n'
+      '    2) the JDK found at the directory found in the JAVA_HOME environment variable, and\n'
+      "    3) the directory containing the java binary found in the user's path.");
     argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
     argParser.addFlag('machine',
@@ -101,7 +111,7 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<String> rest = argResults?.rest ?? <String>[];
+    final List<String> rest = argResults!.rest;
     if (rest.isNotEmpty) {
       throwToolExit(exitCode: 2,
           'error: flutter config: Too many arguments.\n'
@@ -111,12 +121,12 @@ class ConfigCommand extends FlutterCommand {
           '    flutter config --android-studio-dir "/opt/Android Studio"');
     }
 
-    if (boolArgDeprecated('machine')) {
+    if (boolArg('machine')) {
       await handleMachine();
       return FlutterCommandResult.success();
     }
 
-    if (boolArgDeprecated('clear-features')) {
+    if (boolArg('clear-features')) {
       for (final Feature feature in allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
@@ -126,8 +136,8 @@ class ConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    if (argResults?.wasParsed('analytics') ?? false) {
-      final bool value = boolArgDeprecated('analytics');
+    if (argResults!.wasParsed('analytics')) {
+      final bool value = boolArg('analytics');
       // The tool sends the analytics event *before* toggling the flag
       // intentionally to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
@@ -139,22 +149,31 @@ class ConfigCommand extends FlutterCommand {
       }
       globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+
+      // TODO(eliasyishak): Set the telemetry for the unified_analytics
+      //  package as well, the above will be removed once we have
+      //  fully transitioned to using the new package
+      await globals.analytics.setTelemetry(value);
     }
 
-    if (argResults?.wasParsed('android-sdk') ?? false) {
-      _updateConfig('android-sdk', stringArgDeprecated('android-sdk')!);
+    if (argResults!.wasParsed('android-sdk')) {
+      _updateConfig('android-sdk', stringArg('android-sdk')!);
     }
 
-    if (argResults?.wasParsed('android-studio-dir') ?? false) {
-      _updateConfig('android-studio-dir', stringArgDeprecated('android-studio-dir')!);
+    if (argResults!.wasParsed('android-studio-dir')) {
+      _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
     }
 
-    if (argResults?.wasParsed('clear-ios-signing-cert') ?? false) {
+    if (argResults!.wasParsed('jdk-dir')) {
+      _updateConfig('jdk-dir', stringArg('jdk-dir')!);
+    }
+
+    if (argResults!.wasParsed('clear-ios-signing-cert')) {
       _updateConfig('ios-signing-cert', '');
     }
 
-    if (argResults?.wasParsed('build-dir') ?? false) {
-      final String buildDir = stringArgDeprecated('build-dir')!;
+    if (argResults!.wasParsed('build-dir')) {
+      final String buildDir = stringArg('build-dir')!;
       if (globals.fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
@@ -166,8 +185,8 @@ class ConfigCommand extends FlutterCommand {
       if (configSetting == null) {
         continue;
       }
-      if (argResults?.wasParsed(configSetting) ?? false) {
-        final bool keyValue = boolArgDeprecated(configSetting);
+      if (argResults!.wasParsed(configSetting)) {
+        final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
       }
@@ -197,6 +216,10 @@ class ConfigCommand extends FlutterCommand {
     final AndroidSdk? androidSdk = globals.androidSdk;
     if (results['android-sdk'] == null && androidSdk != null) {
       results['android-sdk'] = androidSdk.directory.path;
+    }
+    final Java? java = globals.java;
+    if (results['jdk-dir'] == null && java != null) {
+      results['jdk-dir'] = java.javaHome;
     }
 
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));

@@ -9,11 +9,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'binding.dart';
-import 'deprecated.dart';
 
 /// Ensure the appropriate test binding is initialized.
 TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
@@ -40,9 +38,9 @@ void mockFlutterAssets() {
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
-  SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async { return null; });
 
-  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));
@@ -73,17 +71,21 @@ void mockFlutterAssets() {
 class _MockHttpOverrides extends HttpOverrides {
   bool warningPrinted = false;
   @override
-  HttpClient createHttpClient(SecurityContext? _) {
+  HttpClient createHttpClient(SecurityContext? context) {
     if (!warningPrinted) {
       test_package.printOnFailure(
-        'Warning: At least one test in this suite creates an HttpClient. When\n'
-        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-        'requests will return status code 400, and no network request will\n'
-        'actually be made. Any test expecting a real network connection and\n'
+        'Warning: At least one test in this suite creates an HttpClient. When '
+        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP '
+        'requests will return status code 400, and no network request will '
+        'actually be made. Any test expecting a real network connection and '
         'status code will fail.\n'
-        'To test code that needs an HttpClient, provide your own HttpClient\n'
-        'implementation to the code under test, so that your test can\n'
-        'consistently provide a testable response to the code under test.');
+        'To test code that needs an HttpClient, provide your own HttpClient '
+        'implementation to the code under test, so that your test can '
+        'consistently provide a testable response to the code under test.'
+          .split('\n')
+          .expand<String>((String line) => debugWordWrap(line, FlutterError.wrapWidth))
+          .join('\n'),
+      );
       warningPrinted = true;
     }
     return _MockHttpClient();
@@ -126,7 +128,7 @@ class _MockHttpClient implements HttpClient {
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
 
   @override
-  Function(String line)? keyLog;
+  void Function(String line)? keyLog;
 
   @override
   void close({ bool force = false }) { }
@@ -206,9 +208,18 @@ class _MockHttpClient implements HttpClient {
 }
 
 /// A mocked [HttpClientRequest] which always returns a [_MockHttpClientResponse].
-class _MockHttpRequest extends HttpClientRequest {
+class _MockHttpRequest implements HttpClientRequest {
+  @override
+  bool bufferOutput = true;
+
+  @override
+  int contentLength = -1;
+
   @override
   late Encoding encoding;
+
+  @override
+  bool followRedirects = true;
 
   @override
   final HttpHeaders headers = _MockHttpHeaders();
@@ -247,7 +258,13 @@ class _MockHttpRequest extends HttpClientRequest {
   }
 
   @override
+  int maxRedirects = 5;
+
+  @override
   String get method => '';
+
+  @override
+  bool persistentConnection = true;
 
   @override
   Uri get uri => Uri();
@@ -514,7 +531,7 @@ class _MockHttpResponse implements HttpClientResponse {
 }
 
 /// A mocked [HttpHeaders] that ignores all writes.
-class _MockHttpHeaders extends HttpHeaders {
+class _MockHttpHeaders implements HttpHeaders {
   @override
   List<String>? operator [](String name) => <String>[];
 
@@ -522,13 +539,40 @@ class _MockHttpHeaders extends HttpHeaders {
   void add(String name, Object value, {bool preserveHeaderCase = false}) { }
 
   @override
+  late bool chunkedTransferEncoding;
+
+  @override
   void clear() { }
+
+  @override
+  int contentLength = -1;
+
+  @override
+  ContentType? contentType;
+
+  @override
+  DateTime? date;
+
+  @override
+  DateTime? expires;
 
   @override
   void forEach(void Function(String name, List<String> values) f) { }
 
   @override
+  String? host;
+
+  @override
+  DateTime? ifModifiedSince;
+
+  @override
   void noFolding(String name) { }
+
+  @override
+  late bool persistentConnection;
+
+  @override
+  int? port;
 
   @override
   void remove(String name, Object value) { }

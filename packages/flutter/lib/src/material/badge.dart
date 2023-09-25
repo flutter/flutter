@@ -287,8 +287,6 @@ class _RenderBadge extends RenderAligningShiftedBox {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
-
 class _BadgeDefaultsM3 extends BadgeThemeData {
   _BadgeDefaultsM3(this.context) : super(
     smallSize: 6.0,

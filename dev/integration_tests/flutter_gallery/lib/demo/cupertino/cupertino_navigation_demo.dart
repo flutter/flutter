@@ -48,9 +48,9 @@ class CupertinoNavigationDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
       // Prevent swipe popping of this page. Use explicit exit buttons only.
-      onWillPop: () => Future<bool>.value(true),
+      canPop: false,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: CupertinoTabScaffold(
@@ -603,11 +603,9 @@ class Tab2ConversationBubble extends StatelessWidget {
       case Tab2ConversationBubbleColor.gray:
         backgroundColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context);
         foregroundColor = CupertinoDynamicColor.resolve(CupertinoColors.label, context);
-        break;
       case Tab2ConversationBubbleColor.blue:
         backgroundColor = CupertinoTheme.of(context).primaryColor;
         foregroundColor = CupertinoColors.white;
-        break;
       case null:
         break;
     }

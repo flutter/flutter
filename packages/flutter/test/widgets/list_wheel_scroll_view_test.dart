@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
 void main() {
@@ -170,14 +170,14 @@ void main() {
 
       // The first item is at the center of the viewport.
       expect(
-      tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
-      const Offset(0.0, 250.0),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
 
       // The last item is just before the first item.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '9')),
-        const Offset(0.0, 150.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 150.0), epsilon: 15.0),
       );
 
       controller.jumpTo(1000.0);
@@ -186,7 +186,7 @@ void main() {
       // We have passed the end of the list, the list should have looped back.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
     });
 
@@ -219,7 +219,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '-1000')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
 
       // Can be scrolled infinitely for positive indexes.
@@ -227,7 +227,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '1000')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
     });
 
@@ -603,6 +603,41 @@ void main() {
       // 12 instead of 6 children are laid out + 1 because the middle item is
       // centered.
       expect(viewport.childCount, 13);
+    });
+
+    testWidgets('Active children are laid out with correct offset', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/123497
+      Future<void> buildWidget(double width) async {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListWheelScrollView(
+              itemExtent: 100.0,
+              children: <Widget>[
+                SizedBox(
+                  width: width,
+                  child: const Center(child: Text('blah')),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      double getSizedBoxWidth() => tester.getSize(find.byType(SizedBox)).width;
+      double getSizedBoxCenterX() => tester.getCenter(find.byType(SizedBox)).dx;
+
+      await buildWidget(200.0);
+      expect(getSizedBoxWidth(), 200.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(100.0);
+      expect(getSizedBoxWidth(), 100.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(300.0);
+      expect(getSizedBoxWidth(), 300.0);
+      expect(getSizedBoxCenterX(), 400.0);
     });
   });
 
@@ -1251,7 +1286,7 @@ void main() {
       expect(controller.selectedItem, 10);
     });
 
-    testWidgets('controller hot swappable', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('controller hot swappable', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1268,14 +1303,16 @@ void main() {
       await tester.drag(find.byType(ListWheelScrollView), const Offset(0.0, -500.0));
       await tester.pump();
 
-      final FixedExtentScrollController newController =
+      final FixedExtentScrollController controller1 =
           FixedExtentScrollController(initialItem: 30);
+      addTearDown(controller1.dispose);
 
+      // Attaching first controller.
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
-            controller: newController,
+            controller: controller1,
             itemExtent: 100.0,
             children: List<Widget>.generate(100, (int index) {
               return const Placeholder();
@@ -1286,13 +1323,41 @@ void main() {
 
       // initialItem doesn't do anything since the scroll position was already
       // created.
-      expect(newController.selectedItem, 5);
+      expect(controller1.selectedItem, 5);
 
-      newController.jumpToItem(50);
-      expect(newController.selectedItem, 50);
-      expect(newController.position.pixels, 5000.0);
+      controller1.jumpToItem(50);
+      expect(controller1.selectedItem, 50);
+      expect(controller1.position.pixels, 5000.0);
 
-      // Now remove the controller
+      final FixedExtentScrollController controller2 =
+          FixedExtentScrollController(initialItem: 33);
+      addTearDown(controller2.dispose);
+
+      // Attaching the second controller.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller2,
+            itemExtent: 100.0,
+            children: List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      // First controller is now detached.
+      expect(controller1.hasClients, isFalse);
+      // initialItem doesn't do anything since the scroll position was already
+      // created.
+      expect(controller2.selectedItem, 50);
+
+      controller2.jumpToItem(40);
+      expect(controller2.selectedItem, 40);
+      expect(controller2.position.pixels, 4000.0);
+
+      // Now, use the internal controller.
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1305,9 +1370,59 @@ void main() {
         ),
       );
 
-      // Internally, that same controller is still attached and still at the
-      // same place.
-      expect(newController.selectedItem, 50);
+      // Both controllers are now detached.
+      expect(controller1.hasClients, isFalse);
+      expect(controller2.hasClients, isFalse);
+    });
+
+    testWidgetsWithLeakTracking('controller can be reused', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+          FixedExtentScrollController(initialItem: 3);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            children: List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      // selectedItem is equal to the initialItem.
+      expect(controller.selectedItem, 3);
+      expect(controller.position.pixels, 300.0);
+
+      controller.jumpToItem(10);
+      expect(controller.selectedItem, 10);
+      expect(controller.position.pixels, 1000.0);
+
+      await tester.pumpWidget(const Center());
+
+      // Controller is now detached.
+      expect(controller.hasClients, isFalse);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            children: List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      // Controller is now attached again.
+      expect(controller.hasClients, isTrue);
+      expect(controller.selectedItem, 3);
+      expect(controller.position.pixels, 300.0);
     });
   });
 
@@ -1536,5 +1651,150 @@ void main() {
     expect(controller.offset, greaterThan(700.0));
     await tester.pumpAndSettle();
     expect(controller.offset, 700.0);
+  });
+
+  group('gestures', () {
+    testWidgets('ListWheelScrollView allows taps for on its children', (WidgetTester tester) async {
+      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final List<int> children = List<int>.generate(100, (int index) => index);
+      final List<int> paintedChildren = <int>[];
+      final Set<int> tappedChildren = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100,
+            children: children
+                .map((int index) => GestureDetector(
+                  key: ValueKey<int>(index),
+                  onTap: () {
+                    tappedChildren.add(index);
+                  },
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CustomPaint(
+                      painter: TestCallbackPainter(onPaint: () {
+                        paintedChildren.add(index);
+                      }),
+                    ),
+                  ),
+                ))
+                .toList(),
+          ),
+        ),
+      );
+
+      // Screen is 600px tall. Item 10 is in the center and each item is 100px tall.
+      expect(paintedChildren, <int>[7, 8, 9, 10, 11, 12, 13]);
+
+      for (final int child in paintedChildren) {
+        await tester.tap(find.byKey(ValueKey<int>(child)));
+      }
+      expect(tappedChildren, paintedChildren);
+    });
+
+    testWidgets('ListWheelScrollView allows for horizontal drags on its children', (WidgetTester tester) async {
+      final PageController pageController = PageController();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            itemExtent: 100,
+            children: <Widget>[
+              PageView(
+                controller: pageController,
+                children: List<int>.generate(100, (int index) => index)
+                  .map((int index) => Text(index.toString()))
+                  .toList(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(pageController.page, 0.0);
+
+      await tester.drag(find.byType(PageView), const Offset(-800, 0));
+
+      expect(pageController.page, 1.0);
+    });
+
+    testWidgets('ListWheelScrollView does not crash and does not allow taps on children that were laid out, but not painted', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/126491
+
+      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final List<int> children = List<int>.generate(100, (int index) => index);
+      final List<int> paintedChildren = <int>[];
+      final Set<int> tappedChildren = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 120,
+              child: ListWheelScrollView.useDelegate(
+                controller: controller,
+                physics: const FixedExtentScrollPhysics(),
+                diameterRatio: 0.9,
+                itemExtent: 55,
+                squeeze: 1.45,
+                childDelegate: ListWheelChildListDelegate(
+                  children: children
+                    .map((int index) => GestureDetector(
+                      key: ValueKey<int>(index),
+                      onTap: () {
+                        tappedChildren.add(index);
+                      },
+                      child: SizedBox(
+                        width: 55,
+                        height: 55,
+                        child: CustomPaint(
+                          painter: TestCallbackPainter(onPaint: () {
+                            paintedChildren.add(index);
+                          }),
+                        ),
+                      ),
+                    ))
+                    .toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(paintedChildren, <int>[0, 1]);
+
+      // Expect hitting 0 and 1, which are painted
+      await tester.tap(find.byKey(const ValueKey<int>(0)));
+      expect(tappedChildren, const <int>[0]);
+
+      await tester.tap(find.byKey(const ValueKey<int>(1)));
+      expect(tappedChildren, const <int>[0, 1]);
+
+      // The third child is not painted, so is not hit
+      await tester.tap(find.byKey(const ValueKey<int>(2)), warnIfMissed: false);
+      expect(tappedChildren, const <int>[0, 1]);
+    });
+  });
+
+  testWidgets('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ListWheelScrollView(
+        overAndUnderCenterOpacity: 0.5,
+        itemExtent: 20.0,
+        children: <Widget>[
+          for (int i = 0; i < 20; i++)
+            Container(),
+        ],
+      ),
+    );
+
+    expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
   });
 }

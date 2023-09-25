@@ -24,6 +24,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    bool configOnly = false,
   }) async {}
 
   @override
@@ -33,7 +34,18 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
   }) async {}
+
+  @override
+  Future<List<String>> getBuildVariants({required FlutterProject project}) async => const <String>[];
+
+  @override
+  Future<void> outputsAppLinkSettings(
+    String buildVariant, {
+    required FlutterProject project,
+  }) async {}
+
 }
 
 /// Creates a [FlutterProject] in a directory named [flutter_project]

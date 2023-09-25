@@ -30,6 +30,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace "com.example.channels"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 

@@ -39,7 +39,7 @@ void main() {
     androidEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(BuildMode.profile),
+        kBuildMode: BuildMode.profile.cliName,
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
       inputs: <String, String>{},
@@ -52,7 +52,7 @@ void main() {
     iosEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(BuildMode.profile),
+        kBuildMode: BuildMode.profile.cliName,
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
       },
       inputs: <String, String>{},
@@ -71,10 +71,21 @@ void main() {
       throwsA(isA<MissingDefineException>()));
   });
 
+  const String emptyNativeAssets = '''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''';
+
   testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -94,12 +105,16 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--native-assets',
+        '$build/native_assets.yaml',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], exitCode: 1),
@@ -113,6 +128,9 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -132,12 +150,16 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--native-assets',
+        '$build/native_assets.yaml',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
@@ -152,6 +174,9 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -171,12 +196,16 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--native-assets',
+        '$build/native_assets.yaml',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
@@ -188,10 +217,60 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('KernelSnapshot correctly forwards FrontendServerStarterPath', () async {
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
+    final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    );
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        'path/to/frontend_server_starter.dart',
+        '--sdk-root',
+        '$flutterPatchedSdkPath/',
+        '--target=flutter',
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.profile, <String>[]),
+        '--track-widget-creation',
+        '--aot',
+        '--tfa',
+        '--target-os',
+        'android',
+        '--packages',
+        '/.dart_tool/package_config.json',
+        '--output-dill',
+        '$build/app.dill',
+        '--depfile',
+        '$build/kernel_snapshot.d',
+        '--native-assets',
+        '$build/native_assets.yaml',
+        '--verbosity=error',
+        'file:///lib/main.dart',
+      ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
+    ]);
+
+    await const KernelSnapshot()
+      .build(androidEnvironment..defines[kFrontendServerStarterPath] = 'path/to/frontend_server_starter.dart');
+
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -211,12 +290,16 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
         '$build/app.dill',
         '--depfile',
         '$build/kernel_snapshot.d',
+        '--native-assets',
+        '$build/native_assets.yaml',
         '--verbosity=error',
         'foo',
         'bar',
@@ -234,6 +317,9 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -260,13 +346,15 @@ void main() {
         '--incremental',
         '--initialize-from-dill',
         '$build/app.dill',
+        '--native-assets',
+        '$build/native_assets.yaml',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
     ]);
 
     await const KernelSnapshot().build(androidEnvironment
-      ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
+      ..defines[kBuildMode] = BuildMode.debug.cliName
       ..defines[kTrackWidgetCreation] = 'false');
 
     expect(processManager, hasNoRemainingExpectations);
@@ -276,6 +364,9 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -301,6 +392,8 @@ void main() {
         '--incremental',
         '--initialize-from-dill',
         '$build/app.dill',
+        '--native-assets',
+        '$build/native_assets.yaml',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
@@ -308,7 +401,7 @@ void main() {
 
     await const KernelSnapshot().build(androidEnvironment
       ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
-      ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
+      ..defines[kBuildMode] = BuildMode.debug.cliName
       ..defines[kTrackWidgetCreation] = 'false'
     );
 
@@ -322,7 +415,7 @@ void main() {
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(BuildMode.debug),
+        kBuildMode: BuildMode.debug.cliName,
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
       processManager: processManager,
@@ -330,6 +423,9 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
     );
+    testEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(emptyNativeAssets);
     final String build = testEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -357,6 +453,8 @@ void main() {
         '--incremental',
         '--initialize-from-dill',
         '$build/app.dill',
+        '--native-assets',
+        '$build/native_assets.yaml',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey /build/653e11a8e6908714056a57cd6b4f602a/app.dill 0\n'),
@@ -511,6 +609,7 @@ void main() {
         '-rpath',
         '-Xlinker',
         '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name',
         '@rpath/App.framework/App',
         '-o',
@@ -552,7 +651,7 @@ void main() {
 
   testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
-    androidEnvironment.defines[kBuildMode] = getNameForBuildMode(BuildMode.profile);
+    androidEnvironment.defines[kBuildMode] = BuildMode.profile.cliName;
     final String build = androidEnvironment.buildDir.path;
 
     processManager.addCommands(<FakeCommand>[

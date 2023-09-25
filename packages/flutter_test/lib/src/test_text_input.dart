@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
-import 'deprecated.dart';
 import 'test_async_utils.dart';
 import 'test_text_input_key_handler.dart';
 
@@ -59,7 +58,7 @@ class TestTextInput {
   ///
   /// Called by the binding at the top of a test when
   /// [TestWidgetsFlutterBinding.registerTestTextInput] is true.
-  void register() => SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
+  void register() => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, _handleTextInputCall);
 
   /// Removes this object as a mock handler for [SystemChannels.textInput].
   ///
@@ -68,13 +67,13 @@ class TestTextInput {
   ///
   /// Called by the binding at the end of a (successful) test when
   /// [TestWidgetsFlutterBinding.registerTestTextInput] is true.
-  void unregister() => SystemChannels.textInput.setMockMethodCallHandler(null);
+  void unregister() => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, null);
 
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
   ///
   /// The binding uses the [register] and [unregister] methods to control this
   /// value when [TestWidgetsFlutterBinding.registerTestTextInput] is true.
-  bool get isRegistered => SystemChannels.textInput.checkMockMethodCallHandler(_handleTextInputCall);
+  bool get isRegistered => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(SystemChannels.textInput.name, _handleTextInputCall);
 
   int? _client;
 
@@ -129,29 +128,23 @@ class TestTextInput {
         final List<dynamic> arguments = methodCall.arguments as List<dynamic>;
         _client = arguments[0] as int;
         setClientArgs = arguments[1] as Map<String, dynamic>;
-        break;
       case 'TextInput.updateConfig':
         setClientArgs = methodCall.arguments as Map<String, dynamic>;
-        break;
       case 'TextInput.clearClient':
         _client = null;
         _isVisible = false;
         _keyHandler = null;
         onCleared?.call();
-        break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments as Map<String, dynamic>;
-        break;
       case 'TextInput.show':
         _isVisible = true;
         if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
           _keyHandler ??= MacOSTestTextInputKeyHandler(_client ?? -1);
         }
-        break;
       case 'TextInput.hide':
         _isVisible = false;
         _keyHandler = null;
-        break;
     }
   }
 
@@ -296,6 +289,21 @@ class TestTextInput {
     );
   }
 
+  /// Simulates a scribble interaction finishing.
+  Future<void> finishScribbleInteraction() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.scribbleInteractionFinished',
+           <dynamic>[_client ?? -1,]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
   /// Simulates a Scribble focus.
   Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
@@ -369,5 +377,17 @@ class TestTextInput {
   /// Gives text input chance to respond to unhandled key up event.
   Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
     await _keyHandler?.handleKeyUpEvent(key);
+  }
+
+  /// Simulates iOS responding to an undo or redo gesture or button.
+  Future<void> handleKeyboardUndo(String direction) async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall('TextInputClient.handleUndo', <dynamic>[direction]),
+      ),
+      (ByteData? data) {/* response from framework is discarded */},
+    );
   }
 }

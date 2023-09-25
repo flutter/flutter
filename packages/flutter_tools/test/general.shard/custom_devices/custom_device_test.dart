@@ -166,7 +166,7 @@ void main() {
         directory: dir,
         logger: BufferLogger.test()
       )
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('CustomDevice: no devices listed if custom devices feature flag disabled', () async {
@@ -184,7 +184,7 @@ void main() {
         directory: dir,
         logger: BufferLogger.test()
       )
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('CustomDevices.devices', () async {
@@ -208,7 +208,7 @@ void main() {
           directory: dir,
           logger: BufferLogger.test()
         )
-      ).devices,
+      ).devices(),
       hasLength(1)
     );
   });
@@ -644,6 +644,7 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
+    Uri? nativeAssets,
     @visibleForTesting BuildSystem? buildSystem
   }) async {}
 }

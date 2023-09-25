@@ -139,15 +139,13 @@ class SafeArea extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [SafeArea], for insetting widgets to avoid operating system intrusions.
+///  * [SafeArea], for insetting box widgets to avoid operating system intrusions.
 ///  * [SliverPadding], for insetting slivers in general.
 ///  * [MediaQuery], from which the window padding is obtained.
 ///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
 ///    system.
 class SliverSafeArea extends StatelessWidget {
   /// Creates a sliver that avoids operating system interfaces.
-  ///
-  /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
     super.key,
     this.left = true,

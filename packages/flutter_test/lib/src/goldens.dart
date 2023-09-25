@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:path/path.dart' as path;
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
 
@@ -332,8 +331,6 @@ class ComparisonResult {
   });
 
   /// Indicates whether or not a pixel comparison test has failed.
-  ///
-  /// This value cannot be null.
   final bool passed;
 
   /// Error message used to describe the cause of the pixel comparison failure.

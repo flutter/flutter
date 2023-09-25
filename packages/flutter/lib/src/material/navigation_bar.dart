@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -33,7 +32,7 @@ const double _kIndicatorWidth = 64;
 ///
 /// This widget does not adjust its size with the [ThemeData.visualDensity].
 ///
-/// The [MediaQueryData.textScaleFactor] does not adjust the size of this widget but
+/// The [MediaQueryData.textScaler] does not adjust the size of this widget but
 /// rather the size of the [Tooltip]s displayed on long presses of the
 /// destinations.
 ///
@@ -183,7 +182,7 @@ class NavigationBar extends StatelessWidget {
   /// automatically.
   ///
   /// The height does not adjust with [ThemeData.visualDensity] or
-  /// [MediaQueryData.textScaleFactor] as this component loses usability at
+  /// [MediaQueryData.textScaler] as this component loses usability at
   /// larger and smaller sizes due to the truncating of labels or smaller tap
   /// targets.
   ///
@@ -383,18 +382,14 @@ class NavigationDestination extends StatelessWidget {
           ?? defaults.labelTextStyle!.resolve(selectedState);
         final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
+        final TextStyle? textStyle = _isForwardOrCompleted(animation) ? effectiveSelectedLabelTextStyle : effectiveUnselectedLabelTextStyle;
         return Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: _ClampTextScaleFactor(
+          child: MediaQuery.withClampedTextScaling(
             // Don't scale labels of destinations, instead, tooltip text will
             // upscale.
-            upperLimit: 1,
-            child: Text(
-              label,
-              style: _isForwardOrCompleted(animation)
-                  ? effectiveSelectedLabelTextStyle
-                  : effectiveUnselectedLabelTextStyle,
-            ),
+            maxScaleFactor: 1.0,
+            child: Text(label, style: textStyle),
           ),
         );
       },
@@ -414,7 +409,7 @@ class NavigationDestination extends StatelessWidget {
 /// animation value of 0 is unselected and 1 is selected.
 ///
 /// See [NavigationDestination] for an example.
-class _NavigationDestinationBuilder extends StatelessWidget {
+class _NavigationDestinationBuilder extends StatefulWidget {
   /// Builds a destination (icon + label) to use in a Material 3 [NavigationBar].
   const _NavigationDestinationBuilder({
     required this.buildIcon,
@@ -460,30 +455,33 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   final String? tooltip;
 
   @override
+  State<_NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
+}
+
+class _NavigationDestinationBuilderState extends State<_NavigationDestinationBuilder> {
+  final GlobalKey iconKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
-    final GlobalKey labelKey = GlobalKey();
 
-    final bool selected = info.selectedIndex == info.index;
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
-        message: tooltip ?? label,
+        message: widget.tooltip ?? widget.label,
         child: _IndicatorInkWell(
-          key: UniqueKey(),
-          labelKey: labelKey,
+          iconKey: iconKey,
           labelBehavior: info.labelBehavior,
-          selected: selected,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
           onTap: info.onTap,
           child: Row(
             children: <Widget>[
               Expanded(
                 child: _NavigationBarDestinationLayout(
-                  icon: buildIcon(context),
-                  labelKey: labelKey,
-                  label: buildLabel(context),
+                  icon: widget.buildIcon(context),
+                  iconKey: iconKey,
+                  label: widget.buildLabel(context),
                 ),
               ),
             ],
@@ -496,10 +494,8 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
 class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
-    super.key,
-    required this.labelKey,
+    required this.iconKey,
     required this.labelBehavior,
-    required this.selected,
     super.customBorder,
     super.onTap,
     super.child,
@@ -508,35 +504,15 @@ class _IndicatorInkWell extends InkResponse {
     highlightColor: Colors.transparent,
   );
 
-  final GlobalKey labelKey;
+  final GlobalKey iconKey;
   final NavigationDestinationLabelBehavior labelBehavior;
-  final bool selected;
 
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
-    final RenderBox labelBox = labelKey.currentContext!.findRenderObject()! as RenderBox;
-    final Rect labelRect = labelBox.localToGlobal(Offset.zero) & labelBox.size;
-    final double labelPadding;
-    switch (labelBehavior) {
-      case NavigationDestinationLabelBehavior.alwaysShow:
-        labelPadding = labelRect.height / 2;
-        break;
-      case NavigationDestinationLabelBehavior.onlyShowSelected:
-        labelPadding = selected ? labelRect.height / 2 : 0;
-        break;
-      case NavigationDestinationLabelBehavior.alwaysHide:
-        labelPadding = 0;
-        break;
-    }
-    final double indicatorOffsetX = referenceBox.size.width / 2;
-    final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
-
     return () {
-      return Rect.fromCenter(
-        center: Offset(indicatorOffsetX, indicatorOffsetY),
-        width: _kIndicatorWidth,
-        height: _kIndicatorHeight,
-      );
+      final RenderBox iconBox = iconKey.currentContext!.findRenderObject()! as RenderBox;
+      final Rect iconRect = iconBox.localToGlobal(Offset.zero) & iconBox.size;
+      return referenceBox.globalToLocal(iconRect.topLeft) & iconBox.size;
     };
   }
 }
@@ -777,7 +753,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// 3 [NavigationBar].
   const _NavigationBarDestinationLayout({
     required this.icon,
-    required this.labelKey,
+    required this.iconKey,
     required this.label,
   });
 
@@ -786,10 +762,10 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.icon].
   final Widget icon;
 
-  /// The global key for the label of this destination.
+  /// The global key for the icon of this destination.
   ///
-  /// This is used to determine the position of the label relative to the icon.
-  final GlobalKey labelKey;
+  /// This is used to determine the position of the icon.
+  final GlobalKey iconKey;
 
   /// The label widget that sits below the icon.
   ///
@@ -799,7 +775,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.label].
   final Widget label;
 
-  static final Key _iconKey = UniqueKey();
+  static final Key _labelKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -813,7 +789,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
             LayoutId(
               id: _NavigationDestinationLayoutDelegate.iconId,
               child: RepaintBoundary(
-                key: _iconKey,
+                key: iconKey,
                 child: icon,
               ),
             ),
@@ -823,7 +799,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
                 alwaysIncludeSemantics: true,
                 opacity: animation,
                 child: RepaintBoundary(
-                  key: labelKey,
+                  key: _labelKey,
                   child: label,
                 ),
               ),
@@ -1034,53 +1010,6 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_NavigationDestinationLayoutDelegate oldDelegate) {
     return oldDelegate.animation != animation;
-  }
-}
-
-/// Utility Widgets
-
-// Clamps [MediaQueryData.textScaleFactor] so that if it is greater than
-// [upperLimit] or less than [lowerLimit], [upperLimit] or [lowerLimit] will be
-// used instead for the [child] widget.
-//
-// Example:
-//
-// ```dart
-// _ClampTextScaleFactor(
-//   upperLimit: 2.0,
-//   child: const Text('Foo'), // If textScaleFactor is 3.0, this will only scale 2x.
-// )
-// ```
-class _ClampTextScaleFactor extends StatelessWidget {
-  /// Clamps the text scale factor of descendants by modifying the [MediaQuery]
-  /// surrounding [child].
-  const _ClampTextScaleFactor({
-    this.upperLimit = double.infinity,
-    required this.child,
-  });
-
-  /// The maximum amount that the text scale factor should be for the [child]
-  /// widget.
-  ///
-  /// If this is `1.5`, the textScaleFactor for child widgets will never be
-  /// greater than `1.5`.
-  final double upperLimit;
-
-  /// The [Widget] that should have its (and its descendants) text scale factor
-  /// clamped.
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaleFactor: clampDouble(MediaQuery.textScaleFactorOf(context),
-          0.0,
-          upperLimit,
-        ),
-      ),
-      child: child,
-    );
   }
 }
 
@@ -1367,8 +1296,6 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_158
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)

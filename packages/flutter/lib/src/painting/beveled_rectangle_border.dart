@@ -20,8 +20,6 @@ import 'borders.dart';
 class BeveledRectangleBorder extends OutlinedBorder {
   /// Creates a border like a [RoundedRectangleBorder] except that the corners
   /// are joined by straight lines instead of arcs.
-  ///
-  /// The arguments must not be null.
   const BeveledRectangleBorder({
     super.side,
     this.borderRadius = BorderRadius.zero,
@@ -131,7 +129,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
         final Path path = _getPath(adjustedRect)
           ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
-        break;
     }
   }
 

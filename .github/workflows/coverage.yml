@@ -15,17 +15,15 @@ permissions: read-all
 
 jobs:
   build:
-    permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
     name: coverage
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: ./bin/flutter test --coverage
         run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
       - name: upload coverage
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d
         with:
           files: packages/flutter/coverage/lcov.info
           verbose: true

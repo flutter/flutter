@@ -21,7 +21,7 @@ import 'protocol_discovery.dart';
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(super.identifier, {
+  DesktopDevice(super.id, {
       required PlatformType super.platformType,
       required super.ephemeral,
       required Logger logger,
@@ -149,7 +149,7 @@ abstract class DesktopDevice extends Device {
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
     _deviceLogReader.initializeProcess(process);
-    if (debuggingOptions.buildInfo.isRelease == true) {
+    if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
     final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
@@ -265,6 +265,13 @@ abstract class DesktopDevice extends Device {
     }
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
+    }
+    switch (debuggingOptions.enableImpeller) {
+      case ImpellerStatus.enabled:
+        addFlag('enable-impeller=true');
+      case ImpellerStatus.disabled:
+      case ImpellerStatus.platformDefault:
+        addFlag('enable-impeller=false');
     }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.

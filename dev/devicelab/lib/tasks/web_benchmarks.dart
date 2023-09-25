@@ -20,16 +20,28 @@ import '../framework/utils.dart';
 const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
-Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
+typedef WebBenchmarkOptions = ({
+  String webRenderer,
+  bool useWasm,
+});
+
+Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
   return inDirectory(macrobenchmarksDirectory, () async {
+    await flutter('clean');
     await evalFlutter('build', options: <String>[
       'web',
+      if (benchmarkOptions.useWasm) ...<String>[
+        '--wasm',
+        '--wasm-opt=debug',
+        '--omit-type-checks',
+      ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-      '--web-renderer=${useCanvasKit ? 'canvaskit' : 'html'}',
+      '--web-renderer=${benchmarkOptions.webRenderer}',
       '--profile',
+      '--no-web-resources-cdn',
       '-t',
       'lib/web_benchmarks.dart',
     ]);
@@ -112,8 +124,8 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
         profileData.completeError(error, stackTrace);
         return Response.internalServerError(body: '$error');
       }
-    }).add(createStaticHandler(
-      path.join(macrobenchmarksDirectory, 'build', 'web'),
+    }).add(createBuildDirectoryHandler(
+      path.join(macrobenchmarksDirectory, 'build', benchmarkOptions.useWasm ? 'web_wasm' : 'web'),
     ));
 
     server = await io.HttpServer.bind('localhost', benchmarkServerPort);
@@ -135,6 +147,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
         userDataDirectory: userDataDir,
         headless: isUncalibratedSmokeTest,
         debugPort: chromeDebugPort,
+        enableWasmGC: benchmarkOptions.useWasm,
       );
 
       print('Launching Chrome.');
@@ -147,7 +160,6 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
       );
 
       print('Waiting for the benchmark to report benchmark profile.');
-      final String backend = useCanvasKit ? 'canvaskit' : 'html';
       final Map<String, dynamic> taskResult = <String, dynamic>{};
       final List<String> benchmarkScoreKeys = <String>[];
       final List<Map<String, dynamic>> profiles = await profileData.future;
@@ -159,7 +171,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
           throw 'Benchmark name is empty';
         }
 
-        final String namespace = '$benchmarkName.$backend';
+        final String namespace = '$benchmarkName.${benchmarkOptions.webRenderer}';
         final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
         if (scoreKeys.isEmpty) {
           throw 'No score keys in benchmark "$benchmarkName"';
@@ -185,4 +197,24 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
       chrome?.stop();
     }
   });
+}
+
+Handler createBuildDirectoryHandler(String buildDirectoryPath) {
+  final Handler childHandler = createStaticHandler(buildDirectoryPath);
+  return (Request request) async {
+    final Response response = await childHandler(request);
+    final String? mimeType = response.mimeType;
+
+    // Provide COOP/COEP headers so that the browser loads the page as
+    // crossOriginIsolated. This will make sure that we get high-resolution
+    // timers for our benchmark measurements.
+    if (mimeType == 'text/html' || mimeType == 'text/javascript') {
+      return response.change(headers: <String, String>{
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+      });
+    } else {
+      return response;
+    }
+  };
 }

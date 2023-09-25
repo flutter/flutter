@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -443,6 +444,7 @@ FlutterDriverService setUpDriverService({
       Restart? restart,
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
+      FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
       Device? device,

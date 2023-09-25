@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-group 'com.example.integration_test'
+group 'dev.flutter.plugins.integration_test'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:7.3.1'
     }
 }
 
@@ -26,7 +26,12 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 31
+    // Conditional for compatibility with AGP <4.2.
+    if (project.android.hasProperty("namespace")) {
+        namespace 'dev.flutter.integration_test'
+    }
+
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -34,14 +39,16 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 19
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'lib-proguard-rules.txt'
     }
 
     dependencies {
         // TODO(egarciad): These dependencies should not be added to release builds.
         // https://github.com/flutter/flutter/issues/56591
-        api 'junit:junit:4.12'
+        testImplementation 'junit:junit:4.12'
+        testImplementation 'org.mockito:mockito-inline:5.0.0'
 
         // https://developer.android.com/jetpack/androidx/releases/test/#1.2.0
         api 'androidx.test:runner:1.2.0'

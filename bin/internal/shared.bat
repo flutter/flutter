@@ -22,8 +22,6 @@ SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
 SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
-SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
-
 SET dart=%dart_sdk_path%\bin\dart.exe
 
 REM Ensure that bin/cache exists.
@@ -130,13 +128,13 @@ GOTO :after_subroutine
 
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
+    IF EXIST "%FLUTTER_ROOT%\bin\cache\flutter.version.json" DEL "%FLUTTER_ROOT%\bin\cache\flutter.version.json"
     ECHO: > "%cache_dir%\.dartignore"
     ECHO Building flutter tool... 1>&2
     PUSHD "%flutter_tools_dir%"
 
     REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
     SETLOCAL
-      SET VERBOSITY=--verbosity=error
       IF "%CI%" == "true" GOTO on_bot
       IF "%BOT%" == "true" GOTO on_bot
       IF "%CONTINUOUS_INTEGRATION%" == "true" GOTO on_bot
@@ -144,8 +142,8 @@ GOTO :after_subroutine
       GOTO not_on_bot
       :on_bot
         SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
-        SET VERBOSITY=--verbosity=normal
       :not_on_bot
+      SET PUB_SUMMARY_ONLY=1
       SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
       IF "%PUB_CACHE%" == "" (
         IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
@@ -155,7 +153,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade... 1>&2
-        "%dart%" __deprecated_pub upgrade "%VERBOSITY%" --no-precompile
+        "%dart%" pub upgrade --suppress-analytics
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
         timeout /t 5 /nobreak 2>NUL

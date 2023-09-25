@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverAppBar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SliverAppBar].
 
 void main() => runApp(const AppBarApp());
 
@@ -63,7 +63,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
                   color: index.isOdd ? Colors.white : Colors.black12,
                   height: 100.0,
                   child: Center(
-                    child: Text('$index', textScaleFactor: 5),
+                    child: Text('$index', textScaler: const TextScaler.linear(5)),
                   ),
                 );
               },

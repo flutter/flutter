@@ -37,6 +37,7 @@ void main() {
   group('engine environment declarations', () {
     test('localEngine', () {
       expect(localEngineFromEnv, null);
+      expect(localEngineHostFromEnv, null);
       expect(localEngineSrcPathFromEnv, null);
     });
   });

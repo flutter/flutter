@@ -19,6 +19,7 @@ import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
 import 'text_painter.dart';
+import 'text_scaler.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
@@ -595,14 +596,19 @@ class TextStyle with Diagnosticable {
   // in the [fontFamilyFallback] getter.
   final String? _package;
 
-  /// The size of glyphs (in logical pixels) to use when painting the text.
+  /// The size of fonts (in logical pixels) to use when painting the text.
+  ///
+  /// The value specified matches the dimension of the
+  /// [em square](https://fonts.google.com/knowledge/glossary/em) of the
+  /// underlying font, and more often then not isn't exactly the height or the
+  /// width of glyphs in the font.
   ///
   /// During painting, the [fontSize] is multiplied by the current
   /// `textScaleFactor` to let users make it easier to read text by increasing
   /// its size.
   ///
-  /// [getParagraphStyle] will default to 14 logical pixels if the font size
-  /// isn't specified here.
+  /// The [getParagraphStyle] method defaults to 14 logical pixels if [fontSize]
+  /// is set to null.
   final double? fontSize;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
@@ -922,8 +928,6 @@ class TextStyle with Diagnosticable {
   /// values, so that for instance `style.apply(fontWeightDelta: -2)` when
   /// applied to a `style` whose [fontWeight] is [FontWeight.w500] will return a
   /// [TextStyle] with a [FontWeight.w300].
-  ///
-  /// The numeric arguments must not be null.
   ///
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
@@ -1266,7 +1270,24 @@ class TextStyle with Diagnosticable {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
+  ui.TextStyle getTextStyle({
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
+  }) {
+    assert(
+      identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+      'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+    );
+    final double? fontSize = switch (this.fontSize) {
+      null => null,
+      final double size when textScaler == TextScaler.noScaling => size * textScaleFactor,
+      final double size => textScaler.scale(size),
+    };
     return ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -1279,16 +1300,17 @@ class TextStyle with Diagnosticable {
       leadingDistribution: leadingDistribution,
       fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
-      fontSize: fontSize == null ? null : fontSize! * textScaleFactor,
+      fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height,
       locale: locale,
       foreground: foreground,
-      background: background ?? (backgroundColor != null
-        ? (Paint()..color = backgroundColor!)
-        : null
-      ),
+      background: switch ((background, backgroundColor)) {
+        (final Paint paint, _) => paint,
+        (_, final Color color) => Paint()..color = color,
+        _ => null,
+      },
       shadows: shadows,
       fontFeatures: fontFeatures,
       fontVariations: fontVariations,
@@ -1297,16 +1319,16 @@ class TextStyle with Diagnosticable {
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
   ///
-  /// The `textScaleFactor` argument must not be null. If omitted, it defaults
-  /// to 1.0. The other arguments may be null. The `maxLines` argument, if
-  /// specified and non-null, must be greater than zero.
+  /// If the `textScaleFactor` argument is omitted, it defaults to one. The
+  /// other arguments may be null. The `maxLines` argument, if specified and
+  /// non-null, must be greater than zero.
   ///
   /// If the font size on this style isn't set, it will default to 14 logical
   /// pixels.
   ui.ParagraphStyle getParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
-    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
@@ -1322,6 +1344,7 @@ class TextStyle with Diagnosticable {
     final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
     final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior
       ?? (leadingDistribution == null ? null : ui.TextHeightBehavior(leadingDistribution: leadingDistribution));
+
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
@@ -1330,13 +1353,16 @@ class TextStyle with Diagnosticable {
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
-      fontSize: (fontSize ?? this.fontSize ?? _kDefaultFontSize) * textScaleFactor,
+      fontSize: textScaler.scale(fontSize ?? this.fontSize ?? _kDefaultFontSize),
       height: height ?? this.height,
       textHeightBehavior: effectiveTextHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
-        fontSize: strutStyle.fontSize == null ? null : strutStyle.fontSize! * textScaleFactor,
+        fontSize: switch (strutStyle.fontSize) {
+          null => null,
+          final double unscaled => textScaler.scale(unscaled),
+        },
         height: strutStyle.height,
         leading: strutStyle.leading,
         fontWeight: strutStyle.fontWeight,

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile].
 
 void main() => runApp(const ListTileApp());
 
@@ -20,19 +20,19 @@ class ListTileApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LisTileExample(),
+      home: const ListTileExample(),
     );
   }
 }
 
-class LisTileExample extends StatefulWidget {
-  const LisTileExample({super.key});
+class ListTileExample extends StatefulWidget {
+  const ListTileExample({super.key});
 
   @override
-  State<LisTileExample> createState() => _LisTileExampleState();
+  State<ListTileExample> createState() => _ListTileExampleState();
 }
 
-class _LisTileExampleState extends State<LisTileExample> with TickerProviderStateMixin {
+class _ListTileExampleState extends State<ListTileExample> with TickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final AnimationController _sizeController;
   late final Animation<double> _fadeAnimation;
@@ -86,8 +86,9 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
                 subtitle: const Text('Tap here for Hero transition'),
                 tileColor: Colors.cyan,
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute<Widget>(
-                    builder: (BuildContext context) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
                       return Scaffold(
                         appBar: AppBar(title: const Text('ListTile Hero')),
                         body: Center(

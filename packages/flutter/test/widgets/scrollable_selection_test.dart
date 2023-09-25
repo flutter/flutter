@@ -4,10 +4,12 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
@@ -35,7 +37,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('mouse can select multiple widgets', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -47,6 +49,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -72,7 +75,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('mouse can select multiple widgets - horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('mouse can select multiple widgets - horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -85,6 +88,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -104,8 +108,92 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll forward', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('mouse can select multiple widgets on double-click drag', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pump();
+    await gesture.down(textOffsetToPosition(paragraph1, 2));
+    await tester.pumpAndSettle();
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    await gesture.moveTo(textOffsetToPosition(paragraph1, 4));
+    await tester.pump();
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)));
+    await gesture.moveTo(textOffsetToPosition(paragraph2, 4));
+    // Should select the rest of paragraph 1.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+    expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)));
+    await gesture.moveTo(textOffsetToPosition(paragraph3, 3));
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+    expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+    expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    await gesture.up();
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
+  testWidgetsWithLeakTracking('mouse can select multiple widgets on double-click drag - horizontal', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(textOffsetToPosition(paragraph1, 2));
+    await tester.pumpAndSettle();
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    await gesture.moveTo(textOffsetToPosition(paragraph1, 4));
+    await tester.pump();
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)));
+    await gesture.moveTo(textOffsetToPosition(paragraph2, 5) + const Offset(0, 5));
+    // Should select the rest of paragraph 1.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+    expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+
+    await gesture.up();
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
+  testWidgetsWithLeakTracking('select to scroll forward', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -118,6 +206,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -152,9 +241,11 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll works for small scrollable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('select to scroll works for small scrollable', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
         child: Scaffold(
@@ -171,6 +262,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -196,8 +288,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('select to scroll backward', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('select to scroll backward', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -210,6 +303,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     controller.jumpTo(4000);
     await tester.pumpAndSettle();
@@ -243,8 +337,9 @@ void main() {
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 6, extentOffset: 0));
   });
 
-  testWidgets('select to scroll forward - horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('select to scroll forward - horizontal', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -258,6 +353,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -290,8 +386,9 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll backward - horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('select to scroll backward - horizontal', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -305,6 +402,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     controller.jumpTo(2080);
     await tester.pumpAndSettle();
@@ -338,8 +436,9 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('preserve selection when out of view.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('preserve selection when out of view.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -385,8 +484,9 @@ void main() {
     expect(paragraph50.selections[0], const TextSelection(baseOffset: 2, extentOffset: 4));
   });
 
-  testWidgets('can select all non-Apple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can select all non-Apple', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         focusNode: node,
@@ -411,8 +511,9 @@ void main() {
     expect(find.text('Item 13'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-  testWidgets('can select all - Apple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can select all - Apple', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         focusNode: node,
@@ -437,8 +538,9 @@ void main() {
     expect(find.text('Item 13'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('select to scroll by dragging selection handles forward', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('select to scroll by dragging selection handles forward', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -494,8 +596,9 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll by dragging start selection handle stops scroll when released', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('select to scroll by dragging start selection handle stops scroll when released', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -548,8 +651,9 @@ void main() {
     expect(controller.offset, previousOffset);
   });
 
-  testWidgets('select to scroll by dragging end selection handle stops scroll when released', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('select to scroll by dragging end selection handle stops scroll when released', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
@@ -601,9 +705,11 @@ void main() {
     expect(controller.offset, previousOffset);
   });
 
-  testWidgets('keyboard selection should auto scroll - vertical', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keyboard selection should auto scroll - vertical', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         focusNode: node,
@@ -664,9 +770,11 @@ void main() {
     expect(controller.offset, 72.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('keyboard selection should auto scroll - vertical reversed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keyboard selection should auto scroll - vertical reversed', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         focusNode: node,
@@ -728,9 +836,11 @@ void main() {
     expect(controller.offset, 72.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('keyboard selection should auto scroll - horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keyboard selection should auto scroll - horizontal', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         focusNode: node,
@@ -774,9 +884,11 @@ void main() {
     expect(controller.offset, 352.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('keyboard selection should auto scroll - horizontal reversed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keyboard selection should auto scroll - horizontal reversed', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         focusNode: node,
@@ -830,8 +942,9 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   group('Complex cases', () {
-    testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('selection starts outside of the scrollable', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         home: SelectionArea(
           selectionControls: materialTextSelectionControls,
@@ -874,9 +987,11 @@ void main() {
       expect(controller.offset, 1000.0);
     });
 
-    testWidgets('nested scrollables keep selection alive', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('nested scrollables keep selection alive', (WidgetTester tester) async {
       final ScrollController outerController = ScrollController();
+      addTearDown(outerController.dispose);
       final ScrollController innerController = ScrollController();
+      addTearDown(innerController.dispose);
       await tester.pumpWidget(MaterialApp(
         home: SelectionArea(
           selectionControls: materialTextSelectionControls,
@@ -938,9 +1053,11 @@ void main() {
       expect(innerParagraph24.selections[0], const TextSelection(baseOffset: 0, extentOffset: 2));
     });
 
-    testWidgets('can copy off screen selection - Apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can copy off screen selection - Apple', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
       await tester.pumpWidget(MaterialApp(
         home: SelectionArea(
           focusNode: focusNode,
@@ -979,9 +1096,11 @@ void main() {
       expect(clipboardData['text'], 'em 0It');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    testWidgets('can copy off screen selection - non-Apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can copy off screen selection - non-Apple', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
       await tester.pumpWidget(MaterialApp(
         home: SelectionArea(
           focusNode: focusNode,

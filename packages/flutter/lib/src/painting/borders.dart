@@ -77,8 +77,6 @@ class BorderSide with Diagnosticable {
   /// If one of the sides is zero-width with [BorderStyle.none], then the other
   /// side is return as-is. If both of the sides are zero-width with
   /// [BorderStyle.none], then [BorderSide.none] is returned.
-  ///
-  /// The arguments must not be null.
   static BorderSide merge(BorderSide a, BorderSide b) {
     assert(canMerge(a, b));
     final bool aIsNone = a.style == BorderStyle.none && a.width == 0.0;
@@ -243,8 +241,6 @@ class BorderSide with Diagnosticable {
   ///
   /// Two sides can be merged if one or both are zero-width with
   /// [BorderStyle.none], or if they both have the same color and style.
-  ///
-  /// The arguments must not be null.
   static bool canMerge(BorderSide a, BorderSide b) {
     if ((a.style == BorderStyle.none && a.width == 0.0) ||
         (b.style == BorderStyle.none && b.width == 0.0)) {
@@ -255,8 +251,6 @@ class BorderSide with Diagnosticable {
   }
 
   /// Linearly interpolate between two border sides.
-  ///
-  /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
@@ -285,18 +279,14 @@ class BorderSide with Diagnosticable {
     switch (a.style) {
       case BorderStyle.solid:
         colorA = a.color;
-        break;
       case BorderStyle.none:
         colorA = a.color.withAlpha(0x00);
-        break;
     }
     switch (b.style) {
       case BorderStyle.solid:
         colorB = b.color;
-        break;
       case BorderStyle.none:
         colorB = b.color.withAlpha(0x00);
-        break;
     }
     if (a.strokeAlign != b.strokeAlign) {
       return BorderSide(
@@ -669,8 +659,6 @@ abstract class ShapeBorder {
 abstract class OutlinedBorder extends ShapeBorder {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  ///
-  /// The value of [side] must not be null.
   const OutlinedBorder({ this.side = BorderSide.none });
 
   @override
@@ -844,7 +832,7 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  bool get preferPaintInterior => true;
+  bool get preferPaintInterior => borders.every((ShapeBorder border) => border.preferPaintInterior);
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
@@ -888,8 +876,6 @@ class _CompoundBorder extends ShapeBorder {
 /// borders (where all the borders have the same configuration); to render a
 /// uniform border, consider using [Canvas.drawRect] directly.
 ///
-/// The arguments must not be null.
-///
 /// See also:
 ///
 ///  * [paintImage], which paints an image in a rectangle on a canvas.
@@ -927,7 +913,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -946,7 +931,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -965,7 +949,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -984,7 +967,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }

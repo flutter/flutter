@@ -47,6 +47,7 @@ class UpgradeCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'Override the upgrade working directory. '
               'This is only intended to enable integration testing of the tool itself.'
+              // Also notably, this will override the FakeFlutterVersion if any is set!
       )
       ..addFlag(
         'verify-only',
@@ -71,24 +72,27 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    _commandRunner.workingDirectory = stringArgDeprecated('working-directory') ?? Cache.flutterRoot!;
+    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
     return _commandRunner.runCommand(
-      force: boolArgDeprecated('force'),
-      continueFlow: boolArgDeprecated('continue'),
-      testFlow: stringArgDeprecated('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
-      flutterVersion: stringArgDeprecated('working-directory') == null
+      force: boolArg('force'),
+      continueFlow: boolArg('continue'),
+      testFlow: stringArg('working-directory') != null,
+      gitTagVersion: GitTagVersion.determine(
+        globals.processUtils,
+        globals.platform,
+        workingDirectory: _commandRunner.workingDirectory,
+      ),
+      flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
-      verifyOnly: boolArgDeprecated('verify-only'),
+        : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
+      verifyOnly: boolArg('verify-only'),
     );
   }
 }
 
 @visibleForTesting
 class UpgradeCommandRunner {
-
-  String? workingDirectory;
+  String? workingDirectory; // set in runCommand() above
 
   Future<FlutterCommandResult> runCommand({
     required bool force,
@@ -204,11 +208,27 @@ class UpgradeCommandRunner {
     // Make sure the welcome message re-display is delayed until the end.
     final PersistentToolState persistentToolState = globals.persistentToolState!;
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
-    await precacheArtifacts();
+    await precacheArtifacts(workingDirectory);
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
     persistentToolState.setShouldRedisplayWelcomeMessage(true);
+    if (globals.flutterVersion.channel == 'master' || globals.flutterVersion.channel == 'main') {
+      globals.printStatus(
+        '\n'
+        'This channel is intended for Flutter contributors. '
+        'This channel is not as thoroughly tested as the "beta" and "stable" channels. '
+        'We do not recommend using this channel for normal use as it more likely to contain serious regressions.\n'
+        '\n'
+        'For information on contributing to Flutter, see our contributing guide:\n'
+        '    https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md\n'
+        '\n'
+        'For the most up to date stable version of flutter, consider using the "beta" channel instead. '
+        'The Flutter "beta" channel enjoys all the same automated testing as the "stable" channel, '
+        'but is updated roughly once a month instead of once a quarter.\n'
+        'To change channel, run the "flutter channel beta" command.',
+      );
+    }
   }
 
   Future<bool> hasUncommittedChanges() async {
@@ -281,7 +301,11 @@ class UpgradeCommandRunner {
         'for instructions.'
       );
     }
-    return FlutterVersion(workingDirectory: workingDirectory, frameworkRevision: revision);
+    return FlutterVersion.fromRevision(
+      flutterRoot: workingDirectory!,
+      frameworkRevision: revision,
+      fs: globals.fs,
+    );
   }
 
   /// Attempts a hard reset to the given revision.
@@ -298,27 +322,6 @@ class UpgradeCommandRunner {
       );
     } on ProcessException catch (e) {
       throwToolExit(e.message, exitCode: e.errorCode);
-    }
-  }
-
-  /// Update the engine repository and precache all artifacts.
-  ///
-  /// Check for and download any engine and pkg/ updates. We run the 'flutter'
-  /// shell script reentrantly here so that it will download the updated
-  /// Dart and so forth if necessary.
-  Future<void> precacheArtifacts() async {
-    globals.printStatus('');
-    globals.printStatus('Upgrading engine...');
-    final int code = await globals.processUtils.stream(
-      <String>[
-        globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
-      ],
-      workingDirectory: workingDirectory,
-      allowReentrantFlutter: true,
-      environment: Map<String, String>.of(globals.platform.environment),
-    );
-    if (code != 0) {
-      throwToolExit(null, exitCode: code);
     }
   }
 
@@ -348,5 +351,26 @@ class UpgradeCommandRunner {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
     );
+  }
+}
+
+/// Update the engine repository and precache all artifacts.
+///
+/// Check for and download any engine and pkg/ updates. We run the 'flutter'
+/// shell script reentrantly here so that it will download the updated
+/// Dart and so forth if necessary.
+Future<void> precacheArtifacts([String? workingDirectory]) async {
+  globals.printStatus('');
+  globals.printStatus('Upgrading engine...');
+  final int code = await globals.processUtils.stream(
+    <String>[
+      globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
+    ],
+    allowReentrantFlutter: true,
+    environment: Map<String, String>.of(globals.platform.environment),
+    workingDirectory: workingDirectory,
+  );
+  if (code != 0) {
+    throwToolExit(null, exitCode: code);
   }
 }

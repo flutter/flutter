@@ -55,6 +55,8 @@ class DataTableThemeData with Diagnosticable {
     this.columnSpacing,
     this.dividerThickness,
     this.checkboxHorizontalMargin,
+    this.headingCellCursor,
+    this.dataRowCursor,
   }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
@@ -106,6 +108,12 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.dataTable.checkboxHorizontalMargin}
   final double? checkboxHorizontalMargin;
 
+  /// If specified, overrides the default value of [DataColumn.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? headingCellCursor;
+
+  /// If specified, overrides the default value of [DataRow.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? dataRowCursor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -126,11 +134,17 @@ class DataTableThemeData with Diagnosticable {
     double? columnSpacing,
     double? dividerThickness,
     double? checkboxHorizontalMargin,
+    MaterialStateProperty<MouseCursor?>? headingCellCursor,
+    MaterialStateProperty<MouseCursor?>? dataRowCursor,
   }) {
+    assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+      'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.');
+    dataRowMinHeight = dataRowHeight ?? dataRowMinHeight;
+    dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
+
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
-      dataRowHeight: dataRowHeight ?? this.dataRowHeight,
       dataRowMinHeight: dataRowMinHeight ?? this.dataRowMinHeight,
       dataRowMaxHeight: dataRowMaxHeight ?? this.dataRowMaxHeight,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
@@ -141,12 +155,12 @@ class DataTableThemeData with Diagnosticable {
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
       checkboxHorizontalMargin: checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
+      headingCellCursor: headingCellCursor ?? this.headingCellCursor,
+      dataRowCursor: dataRowCursor ?? this.dataRowCursor,
     );
   }
 
   /// Linearly interpolate between two [DataTableThemeData]s.
-  ///
-  /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
@@ -166,6 +180,8 @@ class DataTableThemeData with Diagnosticable {
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
       dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
       checkboxHorizontalMargin: lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t),
+      headingCellCursor: t < 0.5 ? a.headingCellCursor : b.headingCellCursor,
+      dataRowCursor: t < 0.5 ? a.dataRowCursor : b.dataRowCursor,
     );
   }
 
@@ -183,6 +199,8 @@ class DataTableThemeData with Diagnosticable {
     columnSpacing,
     dividerThickness,
     checkboxHorizontalMargin,
+    headingCellCursor,
+    dataRowCursor,
   );
 
   @override
@@ -205,7 +223,9 @@ class DataTableThemeData with Diagnosticable {
       && other.horizontalMargin == horizontalMargin
       && other.columnSpacing == columnSpacing
       && other.dividerThickness == dividerThickness
-      && other.checkboxHorizontalMargin == checkboxHorizontalMargin;
+      && other.checkboxHorizontalMargin == checkboxHorizontalMargin
+      && other.headingCellCursor == headingCellCursor
+      && other.dataRowCursor == dataRowCursor;
   }
 
   @override
@@ -223,6 +243,8 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('headingCellCursor', headingCellCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('dataRowCursor', dataRowCursor, defaultValue: null));
   }
 }
 
@@ -242,8 +264,6 @@ class DataTableThemeData with Diagnosticable {
 class DataTableTheme extends InheritedWidget {
   /// Constructs a data table theme that configures all descendant
   /// [DataTable] widgets.
-  ///
-  /// The [data] must not be null.
   const DataTableTheme({
     super.key,
     required this.data,

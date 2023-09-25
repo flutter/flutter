@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   void onPressed(TestMenu item) {}
@@ -52,9 +53,10 @@ void main() {
     expect(identical(MenuBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('theme is honored', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('theme is honored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(builder: (BuildContext context) {
             return MenuTheme(
@@ -104,9 +106,10 @@ void main() {
     expect(subMenuMaterial.color, equals(Colors.green));
   });
 
-  testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Constructor parameters override theme parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {

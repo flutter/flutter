@@ -70,7 +70,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
     if (_clipDetailsNotifier == newNotifier) {
       return;
     }
-    if(attached) {
+    if (attached) {
       _clipDetailsNotifier.removeListener(markNeedsSemanticsUpdate);
     }
     _clipDetailsNotifier = newNotifier;
@@ -212,12 +212,10 @@ class ModalBarrier extends StatelessWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         platformSupportsDismissingBarrier = false;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         platformSupportsDismissingBarrier = true;
-        break;
     }
     final bool semanticsDismissible = dismissible && platformSupportsDismissingBarrier;
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
@@ -396,7 +394,9 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapUp({PointerDownEvent? down, PointerUpEvent? up}) {
-    onAnyTapUp?.call();
+    if (onAnyTapUp != null) {
+      invokeCallback('onAnyTapUp', onAnyTapUp!);
+    }
   }
 
   @protected

@@ -215,24 +215,19 @@ class Typography with Diagnosticable {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
         white ??= whiteCupertino;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         black ??= blackMountainView;
         white ??= whiteMountainView;
-        break;
       case TargetPlatform.windows:
         black ??= blackRedmond;
         white ??= whiteRedmond;
-        break;
       case TargetPlatform.macOS:
         black ??= blackRedwoodCity;
         white ??= whiteRedwoodCity;
-        break;
       case TargetPlatform.linux:
         black ??= blackHelsinki;
         white ??= whiteHelsinki;
-        break;
       case null:
         break;
     }
@@ -752,8 +747,6 @@ class Typography with Diagnosticable {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_158
 
 class _M3Typography {
   _M3Typography._();

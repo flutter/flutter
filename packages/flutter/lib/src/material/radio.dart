@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -19,6 +20,8 @@ import 'toggleable.dart';
 // enum SingingCharacter { lafayette }
 // late SingingCharacter? _character;
 // late StateSetter setState;
+
+enum _RadioType { material, adaptive }
 
 const double _kOuterRadius = 8.0;
 const double _kInnerRadius = 4.5;
@@ -93,7 +96,44 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-  });
+  }) : _radioType = _RadioType.material,
+       useCupertinoCheckmarkStyle = false;
+
+  /// Creates an adaptive [Radio] based on whether the target platform is iOS
+  /// or macOS, following Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  ///
+  /// On iOS and macOS, this constructor creates a [CupertinoRadio], which has
+  /// matching functionality and presentation as Material checkboxes, and are the
+  /// graphics expected on iOS. On other platforms, this creates a Material
+  /// design [Radio].
+  ///
+  /// If a [CupertinoRadio] is created, the following parameters are ignored:
+  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
+  /// [materialTapTargetSize], [visualDensity].
+  ///
+  /// [useCupertinoCheckmarkStyle] is used only if a [CupertinoRadio] is created.
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  const Radio.adaptive({
+    super.key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+    this.mouseCursor,
+    this.toggleable = false,
+    this.activeColor,
+    this.fillColor,
+    this.focusColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
+    this.visualDensity,
+    this.focusNode,
+    this.autofocus = false,
+    this.useCupertinoCheckmarkStyle = false
+  }) : _radioType = _RadioType.adaptive;
 
   /// The value represented by this radio button.
   final T value;
@@ -309,6 +349,17 @@ class Radio<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// Controls whether the checkmark style is used in an iOS-style radio.
+  ///
+  /// Only usable under the [Radio.adaptive] constructor. If set to true, on
+  /// Apple platforms the radio button will appear as an iOS styled checkmark.
+  /// Controls the [CupertinoRadio] through [CupertinoRadio.useCheckmarkStyle].
+  ///
+  /// Defaults to false.
+  final bool useCupertinoCheckmarkStyle;
+
+  final _RadioType _radioType;
+
   bool get _selected => value == groupValue;
 
   @override
@@ -366,6 +417,34 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    switch (widget._radioType) {
+      case _RadioType.material:
+        break;
+
+      case _RadioType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return CupertinoRadio<T>(
+              value: widget.value,
+              groupValue: widget.groupValue,
+              onChanged: widget.onChanged,
+              toggleable: widget.toggleable,
+              activeColor: widget.activeColor,
+              focusColor: widget.focusColor,
+              focusNode: widget.focusNode,
+              autofocus: widget.autofocus,
+              useCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
+            );
+        }
+    }
+
     final RadioThemeData radioTheme = RadioTheme.of(context);
     final RadioThemeData defaults = Theme.of(context).useMaterial3 ? _RadioDefaultsM3(context) : _RadioDefaultsM2(context);
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
@@ -378,10 +457,8 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-        break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
@@ -436,10 +513,24 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
         ? effectiveActivePressedOverlayColor
         : effectiveInactivePressedOverlayColor;
     }
+    final bool? accessibilitySelected;
+    // Apple devices also use `selected` to annotate radio button's semantics
+    // state.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        accessibilitySelected = null;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        accessibilitySelected = widget._selected;
+    }
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget._selected,
+      selected: accessibilitySelected,
       child: buildToggleable(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
@@ -514,11 +605,11 @@ class _RadioDefaultsM2 extends RadioThemeData {
       if (states.contains(MaterialState.pressed)) {
         return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
-      if (states.contains(MaterialState.focused)) {
-        return _theme.focusColor;
-      }
       if (states.contains(MaterialState.hovered)) {
         return _theme.hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _theme.focusColor;
       }
       return Colors.transparent;
     });
@@ -537,8 +628,6 @@ class _RadioDefaultsM2 extends RadioThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_158
 
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);

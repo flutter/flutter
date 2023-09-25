@@ -6,8 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Widget boilerplate({required Widget child}) {
   return Directionality(
@@ -64,7 +63,7 @@ void main() {
     expect(theme.data.borderWidth, null);
   });
 
-  testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
@@ -76,7 +75,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData(
       textStyle: TextStyle(fontSize: 10),
@@ -121,7 +120,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Theme text style, except color, is applied', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Theme text style, except color, is applied', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: boilerplate(
@@ -164,7 +163,7 @@ void main() {
     expect(textStyle.color, isNot(Colors.orange));
   });
 
-  testWidgets('Custom BoxConstraints', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom BoxConstraints', (WidgetTester tester) async {
     // Test for minimum constraints
     await tester.pumpWidget(
       Material(
@@ -238,7 +237,7 @@ void main() {
     expect(thirdRect.height, 10.0);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
@@ -342,7 +341,7 @@ void main() {
     },
   );
 
-  testWidgets('Theme button fillColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Theme button fillColor', (WidgetTester tester) async {
     const Color customFillColor = Colors.green;
     await tester.pumpWidget(
       Material(
@@ -371,7 +370,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Custom Theme button fillColor in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom Theme button fillColor in different states', (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(
@@ -438,7 +437,7 @@ void main() {
     expect(buttonColor('Second child').color, disabledFillColor);
   });
 
-  testWidgets('Theme InkWell colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Theme InkWell colors', (WidgetTester tester) async {
     const Color splashColor = Color(0xff4caf50);
     const Color highlightColor = Color(0xffcddc39);
     const Color hoverColor = Color(0xffffeb3b);
@@ -512,9 +511,11 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Theme border width and border colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
       const Color borderColor = Color(0xff4caf50);

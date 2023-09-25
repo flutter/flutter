@@ -109,9 +109,9 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     if (buildInfo == null) {
       filename = 'app.apk';
     } else if (buildInfo.flavor == null) {
-      filename = 'app-${buildInfo.mode.name}.apk';
+      filename = 'app-${buildInfo.mode.cliName}.apk';
     } else {
-      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.name}.apk';
+      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.cliName}.apk';
     }
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
@@ -119,7 +119,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       if (androidProject.parent.isModule) {
         // Module builds output the apk in a subdirectory that corresponds
         // to the buildmode of the apk.
-        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.name);
+        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.cliName);
       }
       apkFile = apkDirectory.childFile(filename);
       if (apkFile.existsSync()) {
@@ -171,7 +171,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
-    final String? packageId = manifests.first.getAttribute('package');
+
+    // Starting from AGP version 7.3, the `package` attribute in Manifest.xml
+    // can be replaced with the `namespace` attribute under the `android` section in `android/app/build.gradle`.
+    final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
     for (final XmlElement activity in document.findAllElements('activity')) {
@@ -324,7 +327,6 @@ class ApkManifestData {
           case 'A':
             currentElement
                 .addChild(_Attribute.fromLine(line, currentElement));
-            break;
           case 'E':
             final _Element element = _Element.fromLine(line, currentElement);
             currentElement.addChild(element);

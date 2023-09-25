@@ -38,6 +38,16 @@ Future<void> main(List<String> rawArgs) async {
   /// Required for A/B test mode.
   final String? localEngine = args['local-engine'] as String?;
 
+  /// The build of the local engine to use as the host platform.
+  ///
+  /// Required if [localEngine] is set.
+  final String? localEngineHost = args['local-engine-host'] as String?;
+
+  /// The build of the local Web SDK to use.
+  ///
+  /// Required for A/B test mode.
+  final String? localWebSdk = args['local-web-sdk'] as String?;
+
   /// The path to the engine "src/" directory.
   final String? localEngineSrcPath = args['local-engine-src-path'] as String?;
 
@@ -85,8 +95,13 @@ Future<void> main(List<String> rawArgs) async {
       stderr.writeln(argParser.usage);
       exit(1);
     }
-    if (localEngine == null) {
-      stderr.writeln('When running in A/B test mode --local-engine is required.\n');
+    if (localEngine == null && localWebSdk == null) {
+      stderr.writeln('When running in A/B test mode --local-engine or --local-web-sdk is required.\n');
+      stderr.writeln(argParser.usage);
+      exit(1);
+    }
+    if (localEngineHost == null) {
+      stderr.writeln('When running in A/B test mode --local-engine-host is required.\n');
       stderr.writeln(argParser.usage);
       exit(1);
     }
@@ -94,6 +109,8 @@ Future<void> main(List<String> rawArgs) async {
       runsPerTest: runsPerTest,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
+      localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
       resultsFile: resultsFile,
@@ -103,6 +120,7 @@ Future<void> main(List<String> rawArgs) async {
     await runTasks(taskNames,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
       exitOnFirstTestFailure: exitOnFirstTestFailure,
@@ -118,7 +136,9 @@ Future<void> main(List<String> rawArgs) async {
 Future<void> _runABTest({
   required int runsPerTest,
   required bool silent,
-  required String localEngine,
+  required String? localEngine,
+  required String localEngineHost,
+  required String? localWebSdk,
   required String? localEngineSrcPath,
   required String? deviceId,
   required String resultsFile,
@@ -126,7 +146,13 @@ Future<void> _runABTest({
 }) async {
   print('$taskName A/B test. Will run $runsPerTest times.');
 
-  final ABTest abTest = ABTest(localEngine, taskName);
+  assert(localEngine != null || localWebSdk != null);
+
+  final ABTest abTest = ABTest(
+    localEngine: (localEngine ?? localWebSdk)!,
+    localEngineHost: localEngineHost,
+    taskName: taskName,
+  );
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
@@ -152,6 +178,8 @@ Future<void> _runABTest({
       taskName,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
+      localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
     );
@@ -166,7 +194,7 @@ Future<void> _runABTest({
 
     abTest.addBResult(localEngineResult);
 
-    if (silent != true && i < runsPerTest) {
+    if (!silent && i < runsPerTest) {
       section('A/B results so far');
       print(abTest.printSummary());
     }
@@ -176,7 +204,7 @@ Future<void> _runABTest({
   final File jsonFile = _uniqueFile(resultsFile);
   jsonFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
-  if (silent != true) {
+  if (!silent) {
     section('Raw results');
     print(abTest.rawResults());
   }
@@ -265,7 +293,6 @@ ArgParser createArgParser(List<String> taskNames) {
     )
     ..addFlag(
       'exit',
-      defaultsTo: true,
       help: 'Exit on the first test failure. Currently flakes are intentionally (though '
             'incorrectly) not considered to be failures.',
     )
@@ -276,6 +303,23 @@ ArgParser createArgParser(List<String> taskNames) {
     )
     ..addOption(
       'local-engine',
+      help: 'Name of a build output within the engine out directory, if you\n'
+            'are building Flutter locally. Use this to select a specific\n'
+            'version of the engine if you have built multiple engine targets.\n'
+            'This path is relative to --local-engine-src-path/out. This option\n'
+            'is required when running an A/B test (see the --ab option).',
+    )
+    ..addOption(
+      'local-engine-host',
+      help: 'Name of a build output within the engine out directory, if you\n'
+            'are building Flutter locally. Use this to select a specific\n'
+            'version of the engine to use as the host platform if you have built '
+            'multiple engine targets.\n'
+            'This path is relative to --local-engine-src-path/out. This option\n'
+            'is required when running an A/B test (see the --ab option).',
+    )
+    ..addOption(
+      'local-web-sdk',
       help: 'Name of a build output within the engine out directory, if you\n'
             'are building Flutter locally. Use this to select a specific\n'
             'version of the engine if you have built multiple engine targets.\n'

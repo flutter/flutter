@@ -155,14 +155,15 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
           'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
           'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
-          'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
-          'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
-          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '19',
+          'FLUTTER_ENGINE_SWITCH_13': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
+          'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
+          'FLUTTER_ENGINE_SWITCH_18': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '20',
         }
       ),
     ]);
@@ -209,7 +210,8 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
           'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
           'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCHES': '4',
+          'FLUTTER_ENGINE_SWITCH_5': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCHES': '5',
         }
       ),
     ]);
@@ -300,6 +302,66 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('Desktop devices pass through the enable-impeller flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
+
+  testWithoutContext('Desktop devices pass through the --no-enable-impeller flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.disabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
@@ -371,7 +433,7 @@ class FakeDesktopDevice extends DesktopDevice {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return getNameForBuildMode(buildInfo.mode);
+    return buildInfo.mode.cliName;
   }
 }
 

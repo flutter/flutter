@@ -157,7 +157,7 @@ class IconThemeData with Diagnosticable {
   /// An opacity to apply to both explicit and default icon colors.
   ///
   /// Falls back to 1.0.
-  double? get opacity => _opacity == null ? null : clampDouble(_opacity!, 0.0, 1.0);
+  double? get opacity => _opacity == null ? null : clampDouble(_opacity, 0.0, 1.0);
   final double? _opacity;
 
   /// The default for [Icon.shadows].
@@ -167,6 +167,9 @@ class IconThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static IconThemeData lerp(IconThemeData? a, IconThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return IconThemeData(
       size: ui.lerpDouble(a?.size, b?.size, t),
       fill: ui.lerpDouble(a?.fill, b?.fill, t),

@@ -25,6 +25,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -67,7 +68,7 @@ class DaemonCommand extends FlutterCommand {
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
       try {
-        port = int.parse(stringArgDeprecated('listen-on-tcp-port')!);
+        port = int.parse(stringArg('listen-on-tcp-port')!);
       } on FormatException catch (error) {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
@@ -334,6 +335,7 @@ class DaemonDomain extends Domain {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
+    registerHandler('setNotifyVerbose', setNotifyVerbose);
 
     sendEvent(
       'daemon.connected',
@@ -345,7 +347,7 @@ class DaemonDomain extends Domain {
 
     _subscription = daemon.notifyingLogger!.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
-        if (message.level == 'status') {
+        if (message.level == 'status' || message.level == 'trace') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
           // ignore: avoid_print
@@ -459,6 +461,11 @@ class DaemonDomain extends Domain {
         ],
       };
     }
+  }
+
+  /// If notifyVerbose is set, the daemon will forward all verbose logs.
+  Future<void> setNotifyVerbose(Map<String, Object?> args) async {
+    daemon.notifyingLogger?.notifyVerbose = _getBoolArg(args, 'verbose') ?? true;
   }
 }
 
@@ -613,6 +620,7 @@ class AppDomain extends Domain {
       'directory': projectDirectory,
       'supportsRestart': isRestartSupported(enableHotReload, device),
       'launchMode': launchMode.toString(),
+      'mode': runner.debuggingOptions.buildInfo.modeName,
     });
 
     Completer<DebugConnectionInfo>? connectionInfoCompleter;
@@ -838,6 +846,9 @@ class DeviceDomain extends Domain {
     registerHandler('startApp', startApp);
     registerHandler('stopApp', stopApp);
     registerHandler('takeScreenshot', takeScreenshot);
+    registerHandler('startDartDevelopmentService', startDartDevelopmentService);
+    registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
+    registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -878,12 +889,12 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  /// Return a list of the current devices, with each device represented as a map
-  /// of properties (id, name, platform, ...).
+  /// Return a list of the currently connected devices, with each device
+  /// represented as a map of properties (id, name, platform, ...).
   Future<List<Map<String, Object?>>> getDevices([ Map<String, Object?>? args ]) async {
     return <Map<String, Object?>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.devices)
+        for (final Device device in await discoverer.devices(filter: DeviceDiscoveryFilter()))
           await _deviceToMap(device),
     ];
   }
@@ -949,7 +960,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
     final String buildMode = _getStringArg(args, 'buildMode', required: true)!;
-    return await device.supportsRuntimeMode(getBuildModeForName(buildMode));
+    return await device.supportsRuntimeMode(BuildMode.fromCliName(buildMode));
   }
 
   /// Creates an application package from a file in the temp directory.
@@ -1058,6 +1069,50 @@ class DeviceDomain extends Domain {
     }
   }
 
+  /// Starts DDS for the device.
+  Future<String?> startDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
+    final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.startDartDevelopmentService(
+      Uri.parse(vmServiceUriStr),
+      logger: globals.logger,
+      disableServiceAuthCodes: disableServiceAuthCodes,
+    );
+    unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
+    return device.dds.uri?.toString();
+  }
+
+  /// Starts DDS for the device.
+  Future<void> shutdownDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.shutdown();
+  }
+
+  Future<void> setExternalDevToolsUriForDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String uri = _getStringArg(args, 'uri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    device.dds.setExternalDevToolsUri(Uri.parse(uri));
+  }
+
   @override
   Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
@@ -1066,10 +1121,12 @@ class DeviceDomain extends Domain {
     return Future<void>.value();
   }
 
-  /// Return the device matching the deviceId field in the args.
+  /// Return the connected device matching the deviceId field in the args.
   Future<Device?> _getDevice(String? deviceId) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices(
+        filter: DeviceDiscoveryFilter(),
+      );
       Device? device;
       for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {
@@ -1159,7 +1216,7 @@ Object? _toJsonable(Object? obj) {
 }
 
 class NotifyingLogger extends DelegatingLogger {
-  NotifyingLogger({ required this.verbose, required Logger parent }) : super(parent) {
+  NotifyingLogger({ required this.verbose, required Logger parent, this.notifyVerbose = false }) : super(parent) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
@@ -1168,6 +1225,8 @@ class NotifyingLogger extends DelegatingLogger {
   final bool verbose;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
+
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1199,6 +1258,7 @@ class NotifyingLogger extends DelegatingLogger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
     _sendMessage(LogMessage('warning', message));
   }
@@ -1225,6 +1285,10 @@ class NotifyingLogger extends DelegatingLogger {
 
   @override
   void printTrace(String message) {
+    if (notifyVerbose) {
+      _sendMessage(LogMessage('trace', message));
+      return;
+    }
     if (!verbose) {
       return;
     }
@@ -1309,6 +1373,7 @@ class EmulatorDomain extends Domain {
   EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
+    java: globals.java,
     androidSdk: globals.androidSdk,
     processManager: globals.processManager,
     androidWorkflow: androidWorkflow!,
@@ -1413,7 +1478,7 @@ class ProxyDomain extends Domain {
     }
 
     _forwardedConnections[id] = socket;
-    socket.listen((List<int> data) {
+    debounceDataStream(socket).listen((List<int> data) {
       sendEvent('proxy.data.$id', null, data);
     }, onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.

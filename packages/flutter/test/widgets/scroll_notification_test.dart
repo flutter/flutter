@@ -5,9 +5,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollMetricsNotification test', (WidgetTester tester) async {
     final List<Notification> events = <Notification>[];
     Widget buildFrame(double height) {
       return NotificationListener<Notification>(
@@ -31,6 +32,7 @@ void main() {
     expect(event.metrics.extentBefore, 0.0);
     expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 400.0);
+    expect(event.metrics.extentTotal, 1000.0);
 
     events.clear();
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
@@ -53,6 +55,7 @@ void main() {
     expect(event.metrics.extentBefore, 10.0);
     expect(event.metrics.extentInside, 590.0);
     expect(event.metrics.extentAfter, 0.0);
+    expect(event.metrics.extentTotal, 600.0);
 
     events.clear();
     // The content dimensions does not change.
@@ -60,7 +63,7 @@ void main() {
     expect(events.length, 0);
   });
 
-  testWidgets('Scroll notification basics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll notification basics', (WidgetTester tester) async {
     late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
@@ -101,7 +104,7 @@ void main() {
     expect(end.dragDetails!.velocity, equals(Velocity.zero));
   });
 
-  testWidgets('Scroll notification depth', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll notification depth', (WidgetTester tester) async {
     final List<Type> depth0Types = <Type>[];
     final List<Type> depth1Types = <Type>[];
     final List<int> depth0Values = <int>[];
@@ -156,7 +159,7 @@ void main() {
     expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
   });
 
-  testWidgets('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
 
     await tester.pumpWidget(
@@ -204,7 +207,7 @@ void main() {
     expect(notificationTypes, equals(types));
   });
 
-  testWidgets('ScrollNotificationObserver', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollNotificationObserver', (WidgetTester tester) async {
     late ScrollNotificationObserverState observer;
     ScrollNotification? notification;
 

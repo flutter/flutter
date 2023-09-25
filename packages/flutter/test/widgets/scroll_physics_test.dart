@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
   const TestScrollPhysics({
@@ -221,6 +222,26 @@ void main() {
       expect(easingApplied.abs(), greaterThan(tensioningApplied.abs()));
     });
 
+    test('no easing resistance for ScrollDecelerationRate.fast', () {
+      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 3.0,
+      );
+
+      final double easingApplied =
+          desktop.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double tensioningApplied =
+          desktop.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+
+      expect(tensioningApplied.abs(), lessThan(easingApplied.abs()));
+      expect(easingApplied, -10);
+    });
+
     test('overscroll a small list and a big list works the same way', () {
       final ScrollMetrics smallListOverscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
@@ -250,6 +271,20 @@ void main() {
 
       expect(smallListOverscrollApplied, greaterThan(1.0));
       expect(smallListOverscrollApplied, lessThan(20.0));
+    });
+
+    test('frictionFactor', () {
+      const BouncingScrollPhysics mobile = BouncingScrollPhysics();
+      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+
+      expect(desktop.frictionFactor(0), 0.26);
+      expect(mobile.frictionFactor(0), 0.52);
+
+      expect(desktop.frictionFactor(0.4), moreOrLessEquals(0.0936));
+      expect(mobile.frictionFactor(0.4), moreOrLessEquals(0.1872));
+
+      expect(desktop.frictionFactor(0.8), moreOrLessEquals(0.0104));
+      expect(mobile.frictionFactor(0.8), moreOrLessEquals(0.0208));
     });
   });
 
@@ -305,7 +340,7 @@ FlutterError
     }
   });
 
-  testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(Material(
       child: Directionality(

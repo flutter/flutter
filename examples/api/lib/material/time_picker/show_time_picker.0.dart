@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [showTimePicker].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [showTimePicker].
 
 void main() {
   runApp(const ShowTimePickerApp());
@@ -129,7 +129,8 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 350,
                 mainAxisSpacing: 4,
-                mainAxisExtent: 200 * MediaQuery.textScaleFactorOf(context),
+                // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
+                mainAxisExtent: 200 * MediaQuery.textScalerOf(context).textScaleFactor,
                 crossAxisSpacing: 4,
               ),
               children: <Widget>[

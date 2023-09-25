@@ -16,14 +16,19 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
+import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
+import 'package:stream_channel/stream_channel.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/logging_logger.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -158,7 +163,7 @@ dev_dependencies:
   });
 
   testUsingContext(
-      'Confirmation that the reporter and timeout args are not set by default',
+      'Confirmation that the reporter, timeout, and concurrency args are not set by default',
       () async {
     final FakePackageTest fakePackageTest = FakePackageTest();
 
@@ -175,6 +180,7 @@ dev_dependencies:
     expect(fakePackageTest.lastArgs, isNot(contains('compact')));
     expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
     expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -246,6 +252,137 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Coverage provides current library name to Coverage Collector by default', () async {
+    const String currentPackageName = '';
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: (VM.parse(<String, Object>{})!
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1',
+              })!,
+            ]
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getSourceReport',
+          args: <String, Object>{
+            'isolateId': '1',
+            'reports': <Object>['Coverage'],
+            'forceCompile': true,
+            'reportLines': true,
+            'libraryFilters': <String>['package:$currentPackageName/'],
+          },
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[],
+          ).toJson(),
+        ),
+      ],
+    );
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--coverage',
+      '--',
+      'test/some_test.dart',
+    ]);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(
+      (testRunner.lastTestWatcher! as CoverageCollector).libraryNames,
+      <String>{currentPackageName},
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Coverage provides library names matching regexps to Coverage Collector', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: (VM.parse(<String, Object>{})!
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1',
+              })!,
+            ]
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getSourceReport',
+          args: <String, Object>{
+            'isolateId': '1',
+            'reports': <Object>['Coverage'],
+            'forceCompile': true,
+            'reportLines': true,
+            'libraryFilters': <String>['package:test_api/'],
+          },
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[],
+          ).toJson(),
+        ),
+      ],
+    );
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--coverage',
+      '--coverage-package=^test',
+      '--',
+      'test/some_test.dart',
+    ]);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(
+      (testRunner.lastTestWatcher! as CoverageCollector).libraryNames,
+      <String>{'test_api'},
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Coverage provides error message if regular expression syntax is invalid', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--coverage',
+      r'--coverage-package="$+"',
+      '--',
+      'test/some_test.dart',
+    ]), throwsToolExit(message: RegExp(r'Regular expression syntax is invalid. FormatException: Nothing to repeat[ \t]*"\$\+"')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('Pipes start-paused to package:test',
@@ -600,6 +737,25 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('Overrides concurrency when running web tests', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--concurrency=100',
+        '--platform=chrome',
+      ]);
+
+      expect(testRunner.lastConcurrency, 1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('when running integration tests', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -723,7 +879,7 @@ dev_dependencies:
       '--no-pub',
     ]);
 
-    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     expect(fileExists, true);
 
   }, overrides: <Type, Generator>{
@@ -744,7 +900,7 @@ dev_dependencies:
       '--no-test-assets',
     ]);
 
-    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     expect(fileExists, false);
 
   }, overrides: <Type, Generator>{
@@ -844,7 +1000,7 @@ dev_dependencies:
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
-  FakeFlutterTestRunner(this.exitCode, [this.leastRunTime]);
+  FakeFlutterTestRunner(this.exitCode, [this.leastRunTime, this.fakeVmServiceHost]);
 
   int exitCode;
   Duration? leastRunTime;
@@ -852,6 +1008,9 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   late DebuggingOptions lastDebuggingOptionsValue;
   String? lastFileReporterValue;
   String? lastReporterOption;
+  int? lastConcurrency;
+  TestWatcher? lastTestWatcher;
+  FakeVmServiceHost? fakeVmServiceHost;
 
   @override
   Future<int> runTests(
@@ -890,12 +1049,37 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     lastDebuggingOptionsValue = debuggingOptions;
     lastFileReporterValue = fileReporter;
     lastReporterOption = reporter;
+    lastConcurrency = concurrency;
+    lastTestWatcher = watcher;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
     }
 
+    if (watcher is CoverageCollector) {
+      await watcher.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: fakeVmServiceHost?.vmService,
+      );
+    }
+
     return exitCode;
+  }
+}
+
+class TestTestDevice extends TestDevice {
+  @override
+  Future<void> get finished => Future<void>.delayed(const Duration(seconds: 1));
+
+  @override
+  Future<void> kill() => Future<void>.value();
+
+  @override
+  Future<Uri?> get vmServiceUri => Future<Uri?>.value(Uri());
+
+  @override
+  Future<StreamChannel<String>> start(String entrypointPath) {
+    throw UnimplementedError();
   }
 }
 
@@ -920,8 +1104,17 @@ class _FakeDeviceManager extends DeviceManager {
   final List<Device> _connectedDevices;
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => _connectedDevices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return <Device>[];
+    }
+    return _connectedDevices;
+  }
 }

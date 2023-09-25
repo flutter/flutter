@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
@@ -82,15 +83,17 @@ enum SnackBarClosedReason {
 ///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
-  ///
-  /// The [label] and [onPressed] arguments must be non-null.
   const SnackBarAction({
     super.key,
     this.textColor,
     this.disabledTextColor,
+    this.backgroundColor,
+    this.disabledBackgroundColor,
     required this.label,
     required this.onPressed,
-  });
+  }) : assert(backgroundColor is! MaterialStateColor || disabledBackgroundColor == null,
+        'disabledBackgroundColor must not be provided when background color is '
+        'a MaterialStateColor');
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
@@ -101,14 +104,28 @@ class SnackBarAction extends StatefulWidget {
   /// hovered and others.
   final Color? textColor;
 
+  /// The button background fill color. If not provided, defaults to
+  /// [SnackBarThemeData.actionBackgroundColor].
+  ///
+  /// If [backgroundColor] is a [MaterialStateColor], then the text color will
+  /// be resolved against the set of [MaterialState]s that the action text is
+  /// in, thus allowing for different colors for the states.
+  final Color? backgroundColor;
+
   /// The button disabled label color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
 
+  /// The button diabled background color. This color is shown after the
+  /// [SnackBarAction] is dismissed.
+  ///
+  /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].
+  final Color? disabledBackgroundColor;
+
   /// The button label.
   final String label;
 
-  /// The callback to be called when the button is pressed. Must not be null.
+  /// The callback to be called when the button is pressed.
   ///
   /// This callback will be called at most once each time this action is
   /// displayed in a [SnackBar].
@@ -166,9 +183,29 @@ class _SnackBarActionState extends State<SnackBarAction> {
       });
     }
 
+    MaterialStateColor? resolveBackgroundColor() {
+      if (widget.backgroundColor is MaterialStateColor) {
+        return widget.backgroundColor! as MaterialStateColor;
+      }
+      if (snackBarTheme.actionBackgroundColor is MaterialStateColor) {
+        return snackBarTheme.actionBackgroundColor! as MaterialStateColor;
+      }
+      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return widget.disabledBackgroundColor ??
+              snackBarTheme.disabledActionBackgroundColor ??
+              Colors.transparent;
+        }
+        return widget.backgroundColor ??
+            snackBarTheme.actionBackgroundColor ??
+            Colors.transparent;
+      });
+    }
+
     return TextButton(
       style: ButtonStyle(
         foregroundColor: resolveForegroundColor(),
+        backgroundColor: resolveBackgroundColor(),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
@@ -211,6 +248,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example demonstrates the various [SnackBar] widget components,
+/// including an optional icon, in either floating or fixed format.
+///
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
@@ -226,8 +270,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 class SnackBar extends StatefulWidget {
   /// Creates a snack bar.
   ///
-  /// The [content] argument must be non-null. The [elevation] must be null or
-  /// non-negative.
+  /// The [elevation] must be null or non-negative.
   const SnackBar({
     super.key,
     required this.content,
@@ -237,6 +280,7 @@ class SnackBar extends StatefulWidget {
     this.padding,
     this.width,
     this.shape,
+    this.hitTestBehavior,
     this.behavior,
     this.action,
     this.actionOverflowThreshold,
@@ -285,6 +329,8 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [SnackBarThemeData.insetPadding] of
   /// [ThemeData.snackBarTheme] is used. If that is also null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
+  ///
+  /// If this property is not null and [hitTestBehavior] is null, then [hitTestBehavior] default is [HitTestBehavior.deferToChild].
   final EdgeInsetsGeometry? margin;
 
   /// The amount of padding to apply to the snack bar's content and optional
@@ -337,6 +383,13 @@ class SnackBar extends StatefulWidget {
   /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder? shape;
+
+  /// Defines how the snack bar area, including margin, will behave during hit testing.
+  ///
+  /// If this property is null and [margin] is not null, then [HitTestBehavior.deferToChild] is used by default.
+  ///
+  /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
+  final HitTestBehavior? hitTestBehavior;
 
   /// This defines the behavior and location of the snack bar.
   ///
@@ -410,12 +463,12 @@ class SnackBar extends StatefulWidget {
 
   /// The direction in which the SnackBar can be dismissed.
   ///
-  /// Cannot be null, defaults to [DismissDirection.down].
+  /// Defaults to [DismissDirection.down].
   final DismissDirection dismissDirection;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   // API for ScaffoldMessengerState.showSnackBar():
@@ -443,6 +496,7 @@ class SnackBar extends StatefulWidget {
       padding: padding,
       width: width,
       shape: shape,
+      hitTestBehavior: hitTestBehavior,
       behavior: behavior,
       action: action,
       actionOverflowThreshold: actionOverflowThreshold,
@@ -522,9 +576,7 @@ class _SnackBarState extends State<SnackBar> {
         : theme.copyWith(
             colorScheme: ColorScheme(
               primary: colorScheme.onPrimary,
-              primaryVariant: colorScheme.onPrimary,
               secondary: buttonColor,
-              secondaryVariant: colorScheme.onSecondary,
               surface: colorScheme.onSurface,
               background: defaults.backgroundColor!,
               error: colorScheme.onError,
@@ -689,6 +741,7 @@ class _SnackBarState extends State<SnackBar> {
       shape: shape,
       elevation: elevation,
       color: backgroundColor,
+      clipBehavior: widget.clipBehavior,
       child: Theme(
         data: effectiveTheme,
         child: accessibleNavigation || theme.useMaterial3
@@ -731,6 +784,7 @@ class _SnackBarState extends State<SnackBar> {
         key: const Key('dismissible'),
         direction: widget.dismissDirection,
         resizeDuration: null,
+        behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
@@ -804,11 +858,12 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   TextStyle? get contentTextStyle => ThemeData(
-          brightness: _theme.brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light)
-      .textTheme
-      .titleMedium;
+    useMaterial3: _theme.useMaterial3,
+    brightness: _theme.brightness == Brightness.light
+      ? Brightness.dark
+      : Brightness.light)
+    .textTheme
+    .titleMedium;
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
@@ -847,14 +902,11 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
-
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
-
   late final ColorScheme _colors = _theme.colorScheme;
 
   @override

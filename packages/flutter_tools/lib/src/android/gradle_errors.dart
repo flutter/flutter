@@ -11,7 +11,6 @@ import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'android_studio.dart';
 import 'gradle_utils.dart';
 import 'multidex.dart';
 
@@ -82,6 +81,9 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   outdatedGradleHandler,
   sslExceptionHandler,
   zipExceptionHandler,
+  incompatibleJavaAndGradleVersionsHandler,
+  remoteTerminatedHandshakeHandler,
+  couldNotOpenCacheDirectoryHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -156,7 +158,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
             prompt: 'Do you want to continue with adding multidex support for Android?',
             defaultChoiceIndex: 0,
           );
-        } on StateError catch(e) {
+        } on StateError catch (e) {
           globals.printError(
             e.message,
             indent: 0,
@@ -270,7 +272,7 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
           defaultChoiceIndex: 0,
         );
         shouldDeleteUserGradle = selection == 'y';
-      } on StateError catch(e) {
+      } on StateError catch (e) {
         globals.printError(
           e.message,
           indent: 0,
@@ -376,10 +378,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: <String, String>{
-        if (javaPath != null)
-          'JAVA_HOME': javaPath!,
-      },
+      environment: globals.java?.environment,
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};
@@ -668,4 +667,71 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'ssl-exception-tag-mismatch',
+);
+
+/// If an incompatible Java and Gradle versions error is caught, we expect an
+/// error specifying that the Java major class file version, one of
+/// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+\d+');
+
+@visibleForTesting
+final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
+  test: (String line) {
+    return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    // TODO(reidbaker): Replace URL with constant defined in
+    // https://github.com/flutter/flutter/pull/123916.
+    globals.printBox(
+      "${globals.logger.terminal.warningMark} Your project's Gradle version "
+      'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
+      'To fix this issue, consult the migration guide at docs.flutter.dev/go/android-java-gradle-error.',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-java-gradle-version',
+);
+
+@visibleForTesting
+final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
+  test: (String line) => line.contains('Remote host terminated the handshake'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
+
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'remote-terminated-handshake',
+);
+
+@visibleForTesting
+final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
+  test: (String line) => line.contains('> Could not open cache directory '),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while resolving dependencies.'
+    );
+
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'could-not-open-cache-directory',
 );

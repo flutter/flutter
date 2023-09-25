@@ -31,5 +31,10 @@
   "selectAllButtonLabel": "Izberi vse",
   "tabSemanticsLabel": "Zavihek $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Opusti",
-  "searchTextFieldPlaceholderLabel": "Iskanje"
+  "searchTextFieldPlaceholderLabel": "Iskanje",
+  "noSpellCheckReplacementsLabel": "Ni zamenjav",
+  "menuDismissLabel": "Opusti meni",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

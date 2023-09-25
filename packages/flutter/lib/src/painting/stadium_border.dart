@@ -25,8 +25,6 @@ import 'rounded_rectangle_border.dart';
 ///  * [BorderSide], which is used to describe the border of the stadium.
 class StadiumBorder extends OutlinedBorder {
   /// Create a stadium border.
-  ///
-  /// The [side] argument must not be null.
   const StadiumBorder({ super.side });
 
   @override

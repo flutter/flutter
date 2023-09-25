@@ -130,6 +130,8 @@ import 'scrollable.dart';
 /// ** See code in examples/api/lib/widgets/single_child_scroll_view/single_child_scroll_view.1.dart **
 /// {@end-tool}
 ///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
+///
 /// See also:
 ///
 ///  * [ListView], which handles multiple children in a scrolling list.
@@ -158,9 +160,7 @@ class SingleChildScrollView extends StatelessWidget {
          'true and pass an explicit controller.',
        );
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
+  /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.
@@ -248,6 +248,7 @@ class SingleChildScrollView extends StatelessWidget {
       controller: scrollController,
       physics: physics,
       restorationId: restorationId,
+      clipBehavior: clipBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return _SingleChildViewport(
           axisDirection: axisDirection,
@@ -361,7 +362,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
@@ -611,22 +612,18 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         mainAxisExtent = size.height;
         leadingScrollOffset = contentSize.height - bounds.bottom;
         targetMainAxisExtent = bounds.height;
-        break;
       case AxisDirection.right:
         mainAxisExtent = size.width;
         leadingScrollOffset = bounds.left;
         targetMainAxisExtent = bounds.width;
-        break;
       case AxisDirection.down:
         mainAxisExtent = size.height;
         leadingScrollOffset = bounds.top;
         targetMainAxisExtent = bounds.height;
-        break;
       case AxisDirection.left:
         mainAxisExtent = size.width;
         leadingScrollOffset = contentSize.width - bounds.right;
         targetMainAxisExtent = bounds.width;
-        break;
     }
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;

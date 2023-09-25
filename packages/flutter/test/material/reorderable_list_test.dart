@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('$ReorderableListView', () {
@@ -71,7 +72,7 @@ void main() {
     });
 
     group('in vertical mode', () {
-      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
         bool onReorderWasCalled = false;
         final List<String> currentListItems = listItems.take(1).toList();
         final ReorderableListView reorderableListView = ReorderableListView(
@@ -97,7 +98,7 @@ void main() {
         expect(currentListItems, orderedEquals(<String>['Item 1']));
       });
 
-      testWidgets('reorders its contents only when a drag finishes', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('reorders its contents only when a drag finishes', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
         final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
@@ -110,7 +111,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 1', 'Item 4']));
       });
 
-      testWidgets('allows reordering from the very top to the very bottom', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('allows reordering from the very top to the very bottom', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
@@ -122,7 +123,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
 
-      testWidgets('allows reordering from the very bottom to the very top', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('allows reordering from the very bottom to the very top', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
@@ -134,7 +135,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
       });
 
-      testWidgets('allows reordering inside the middle of the widget', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('allows reordering inside the middle of the widget', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
@@ -146,7 +147,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 2', 'Item 4']));
       });
 
-      testWidgets('properly reorders with a header', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('properly reorders with a header', (WidgetTester tester) async {
         await tester.pumpWidget(build(header: const Text('Header Text')));
         expect(find.text('Header Text'), findsOneWidget);
         expect(listItems, orderedEquals(originalListItems));
@@ -160,7 +161,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
 
-      testWidgets('properly reorders with a footer', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('properly reorders with a footer', (WidgetTester tester) async {
         await tester.pumpWidget(build(footer: const Text('Footer Text')));
         expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(originalListItems));
@@ -174,7 +175,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
 
-      testWidgets('properly determines the vertical drop area extents', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('properly determines the vertical drop area extents', (WidgetTester tester) async {
         final Widget reorderableListView = ReorderableListView(
           onReorder: (int oldIndex, int newIndex) { },
           children: const <Widget>[
@@ -241,7 +242,7 @@ void main() {
         expect(getListHeight(), kDraggingListHeight);
       });
 
-      testWidgets('Vertical drag in progress golden image', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Vertical drag in progress golden image', (WidgetTester tester) async {
         debugDisableShadows = false;
         final Widget reorderableListView = ReorderableListView(
           children: <Widget>[
@@ -266,6 +267,10 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         await tester.pumpWidget(MaterialApp(
           home: Container(
             color: Colors.white,
@@ -273,7 +278,7 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) {
+                entry = OverlayEntry(builder: (BuildContext context) {
                   // Wrap the list in padding to test that the positioning
                   // is correct when the origin of the overlay is different
                   // from the list.
@@ -305,7 +310,7 @@ void main() {
         debugDisableShadows = true;
       });
 
-      testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
           return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
@@ -345,7 +350,7 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
-      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Preserves children states when rebuilt', (WidgetTester tester) async {
         const Key firstBox = Key('key');
         Widget build() {
           return MaterialApp(
@@ -373,8 +378,9 @@ void main() {
         expect(e0, equals(e1));
       });
 
-      testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
         final ScrollController primary = ScrollController();
+        addTearDown(primary.dispose);
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0, key: Key('C'), child: Text('C')),
@@ -405,6 +411,8 @@ void main() {
 
         // Now try changing the primary scroll controller and checking that the scroll view gets updated.
         final ScrollController primary2 = ScrollController();
+        addTearDown(primary2.dispose);
+
         await tester.pumpWidget(buildWithScrollController(primary2));
         scrollView = tester.widget(
           find.byType(Scrollable),
@@ -412,11 +420,13 @@ void main() {
         expect(scrollView.controller, primary2);
       });
 
-      testWidgets('Test custom ScrollController behavior when set', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Test custom ScrollController behavior when set', (WidgetTester tester) async {
         const Key firstBox = Key('C');
         const Key secondBox = Key('B');
         const Key thirdBox = Key('A');
         final ScrollController customController = ScrollController();
+        addTearDown(customController.dispose);
+
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -474,7 +484,48 @@ void main() {
         expect(customController.offset, 120.0);
       });
 
-      testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('ReorderableList auto scrolling is fast enough', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/121603.
+        final ScrollController controller = ScrollController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ReorderableListView.builder(
+                scrollController: controller,
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
+                  return Text('data', key: ValueKey<int>(index));
+                },
+                onReorder: (int oldIndex, int newIndex) {},
+              ),
+            ),
+          ),
+        );
+
+        // Start gesture on first item.
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        final Offset bottomRight = tester.getBottomRight(find.byType(ReorderableListView));
+        // Drag enough for move to start.
+        await drag.moveTo(Offset(bottomRight.dx / 2, bottomRight.dy));
+        await tester.pump();
+        // Use a fixed value to make sure the default velocity scalar is bigger
+        // than a certain amount.
+        const double kMinimumAllowedAutoScrollDistancePer5ms = 1.7;
+
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 2));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 3));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 4));
+      });
+
+      testWidgetsWithLeakTracking('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0, key: Key('C'), child: Text('C')),
@@ -483,9 +534,13 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         final Widget overlay = Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(builder: (BuildContext context) => reorderableList),
+            entry = OverlayEntry(builder: (BuildContext context) => reorderableList),
           ],
         );
         final Widget boilerplate = Localizations(
@@ -523,7 +578,7 @@ void main() {
         const CustomSemanticsAction moveUp = CustomSemanticsAction(label: 'Move up');
         const CustomSemanticsAction moveDown = CustomSemanticsAction(label: 'Move down');
 
-        testWidgets('Provides the correct accessibility actions in LTR and RTL modes', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Provides the correct accessibility actions in LTR and RTL modes', (WidgetTester tester) async {
           // The a11y actions for a vertical list are the same in LTR and RTL modes.
           final SemanticsHandle handle = tester.ensureSemantics();
           for (final TextDirection direction in TextDirection.values) {
@@ -558,7 +613,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('First item accessibility (a11y) actions work', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('First item accessibility (a11y) actions work', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           expect(listItems, orderedEquals(originalListItems));
 
@@ -579,7 +634,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Middle item accessibility (a11y) actions work', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Middle item accessibility (a11y) actions work', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           expect(listItems, orderedEquals(originalListItems));
 
@@ -614,7 +669,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Last item accessibility (a11y) actions work', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Last item accessibility (a11y) actions work', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           expect(listItems, orderedEquals(originalListItems));
 
@@ -635,7 +690,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
+        testWidgetsWithLeakTracking("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           final Widget reorderableListView = ReorderableListView(
             onReorder: (int oldIndex, int newIndex) { },
@@ -673,15 +728,8 @@ void main() {
           // Get the switch tile's semantics:
           final SemanticsNode semanticsNode = tester.getSemantics(find.byKey(const Key('Switch tile')));
 
-          // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
+          // Check for ReorderableListView custom semantics actions.
           expect(semanticsNode, matchesSemantics(
-            hasToggledState: true,
-            isToggled: true,
-            isEnabled: true,
-            isFocusable: true,
-            hasEnabledState: true,
-            label: 'Switch tile',
-            hasTapAction: true,
             customActions: const <CustomSemanticsAction>[
               CustomSemanticsAction(label: 'Move up'),
               CustomSemanticsAction(label: 'Move down'),
@@ -689,13 +737,29 @@ void main() {
               CustomSemanticsAction(label: 'Move to the start'),
             ],
           ));
+
+          // Check for properties of SwitchTile semantics.
+          late SemanticsNode child;
+          semanticsNode.visitChildren((SemanticsNode node) {
+            child = node;
+            return false;
+          });
+          expect(child, matchesSemantics(
+            hasToggledState: true,
+            isToggled: true,
+            isEnabled: true,
+            isFocusable: true,
+            hasEnabledState: true,
+            label: 'Switch tile',
+            hasTapAction: true,
+          ));
           handle.dispose();
         });
       });
     });
 
     group('in horizontal mode', () {
-      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
         bool onReorderWasCalled = false;
         final List<String> currentListItems = listItems.take(1).toList();
         final ReorderableListView reorderableListView = ReorderableListView(
@@ -722,7 +786,7 @@ void main() {
         expect(currentListItems, orderedEquals(<String>['Item 1']));
       });
 
-      testWidgets('allows reordering from the very top to the very bottom', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('allows reordering from the very top to the very bottom', (WidgetTester tester) async {
         await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
@@ -734,7 +798,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
 
-      testWidgets('allows reordering from the very bottom to the very top', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('allows reordering from the very bottom to the very top', (WidgetTester tester) async {
         await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
@@ -746,7 +810,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
       });
 
-      testWidgets('allows reordering inside the middle of the widget', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('allows reordering inside the middle of the widget', (WidgetTester tester) async {
         await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
@@ -758,7 +822,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 2', 'Item 4']));
       });
 
-      testWidgets('properly reorders with a header', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('properly reorders with a header', (WidgetTester tester) async {
         await tester.pumpWidget(build(header: const Text('Header Text'), scrollDirection: Axis.horizontal));
         expect(find.text('Header Text'), findsOneWidget);
         expect(listItems, orderedEquals(originalListItems));
@@ -781,7 +845,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
       });
 
-      testWidgets('properly reorders with a footer', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('properly reorders with a footer', (WidgetTester tester) async {
         await tester.pumpWidget(build(footer: const Text('Footer Text'), scrollDirection: Axis.horizontal));
         expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(originalListItems));
@@ -804,7 +868,7 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
       });
 
-      testWidgets('properly determines the horizontal drop area extents', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('properly determines the horizontal drop area extents', (WidgetTester tester) async {
         final Widget reorderableListView = ReorderableListView(
           scrollDirection: Axis.horizontal,
           onReorder: (int oldIndex, int newIndex) { },
@@ -872,7 +936,7 @@ void main() {
         expect(getListWidth(), kDraggingListWidth);
       });
 
-      testWidgets('Horizontal drag in progress golden image', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Horizontal drag in progress golden image', (WidgetTester tester) async {
         debugDisableShadows = false;
         final Widget reorderableListView = ReorderableListView(
           scrollDirection: Axis.horizontal,
@@ -898,6 +962,10 @@ void main() {
             ),
           ],
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         await tester.pumpWidget(MaterialApp(
           home: Container(
             color: Colors.white,
@@ -905,7 +973,7 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) {
+                entry = OverlayEntry(builder: (BuildContext context) {
                   // Wrap the list in padding to test that the positioning
                   // is correct when the origin of the overlay is different
                   // from the list.
@@ -937,7 +1005,7 @@ void main() {
         debugDisableShadows = true;
       });
 
-      testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
           return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
@@ -979,7 +1047,7 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
-      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Preserves children states when rebuilt', (WidgetTester tester) async {
         const Key firstBox = Key('key');
         Widget build() {
           return MaterialApp(
@@ -1022,7 +1090,7 @@ void main() {
         const CustomSemanticsAction moveLeft = CustomSemanticsAction(label: 'Move left');
         const CustomSemanticsAction moveRight = CustomSemanticsAction(label: 'Move right');
 
-        testWidgets('Provides the correct accessibility actions in LTR mode', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Provides the correct accessibility actions in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
 
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
@@ -1055,7 +1123,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Provides the correct accessibility actions in Right-To-Left directionality', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Provides the correct accessibility actions in Right-To-Left directionality', (WidgetTester tester) async {
           // In RTL mode, the right is the start and the left is the end.
           // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
           final SemanticsHandle handle = tester.ensureSemantics();
@@ -1090,7 +1158,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('First item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('First item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           expect(listItems, orderedEquals(originalListItems));
 
@@ -1111,7 +1179,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('First item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('First item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
           // In RTL mode, the right is the start and the left is the end.
           // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
           final SemanticsHandle handle = tester.ensureSemantics();
@@ -1134,7 +1202,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Middle item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Middle item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           expect(listItems, orderedEquals(originalListItems));
 
@@ -1169,7 +1237,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Middle item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Middle item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
           // In RTL mode, the right is the start and the left is the end.
           // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
           final SemanticsHandle handle = tester.ensureSemantics();
@@ -1206,7 +1274,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Last item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Last item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           expect(listItems, orderedEquals(originalListItems));
 
@@ -1227,7 +1295,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Last item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('Last item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
           // In RTL mode, the right is the start and the left is the end.
           // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
           final SemanticsHandle handle = tester.ensureSemantics();
@@ -1254,7 +1322,7 @@ void main() {
     });
 
 
-    testWidgets('ReorderableListView.builder asserts on negative childCount', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ReorderableListView.builder asserts on negative childCount', (WidgetTester tester) async {
       expect(() => ReorderableListView.builder(
         itemBuilder: (BuildContext context, int index) {
           return const SizedBox();
@@ -1264,7 +1332,7 @@ void main() {
       ), throwsAssertionError);
     });
 
-    testWidgets('ReorderableListView.builder only creates the children it needs', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ReorderableListView.builder only creates the children it needs', (WidgetTester tester) async {
       final Set<int> itemsCreated = <int>{};
       await tester.pumpWidget(MaterialApp(
         home: ReorderableListView.builder(
@@ -1282,7 +1350,7 @@ void main() {
     });
 
     group('Padding', () {
-      testWidgets('Padding with no header & footer', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Padding with no header & footer', (WidgetTester tester) async {
         const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
 
         // Vertical
@@ -1296,7 +1364,7 @@ void main() {
         expect(tester.getRect(find.byKey(const Key('Item 4'))), const Rect.fromLTRB(154, 20, 202, 560));
       });
 
-      testWidgets('Padding with header or footer', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Padding with header or footer', (WidgetTester tester) async {
         const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
         const Key headerKey = Key('Header');
         const Key footerKey = Key('Footer');
@@ -1355,7 +1423,7 @@ void main() {
       });
     });
 
-    testWidgets('ReorderableListView can be reversed', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ReorderableListView can be reversed', (WidgetTester tester) async {
       final Widget reorderableListView = ReorderableListView(
         reverse: true,
         onReorder: (int oldIndex, int newIndex) { },
@@ -1380,7 +1448,7 @@ void main() {
       expect(tester.getCenter(find.text('A')).dy, greaterThan(tester.getCenter(find.text('B')).dy));
     });
 
-    testWidgets('Animation test when placing an item in place', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Animation test when placing an item in place', (WidgetTester tester) async {
       const Key testItemKey = Key('Test item');
       final Widget reorderableListView = ReorderableListView(
         onReorder: (int oldIndex, int newIndex) { },
@@ -1432,21 +1500,21 @@ void main() {
     });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
 
-    testWidgets('ReorderableListView on desktop platforms should have drag handles', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ReorderableListView on desktop platforms should have drag handles', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       // All four items should have drag handles and not delayed listeners.
       expect(find.byIcon(Icons.drag_handle), findsNWidgets(4));
       expect(find.byType(ReorderableDelayedDragStartListener), findsNothing);
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('ReorderableListView on mobile platforms should not have drag handles', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ReorderableListView on mobile platforms should not have drag handles', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       // All four items should have delayed listeners and not drag handles.
       expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(4));
       expect(find.byIcon(Icons.drag_handle), findsNothing);
     }, variant: TargetPlatformVariant.mobile());
 
-    testWidgets('Vertical list renders drag handle in correct position', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Vertical list renders drag handle in correct position', (WidgetTester tester) async {
       await tester.pumpWidget(build(platform: TargetPlatform.macOS));
       final Finder listView = find.byType(ReorderableListView);
       final Finder item1 = find.byKey(const Key('Item 1'));
@@ -1457,7 +1525,7 @@ void main() {
       expect(tester.getTopRight(dragHandle).dx, tester.getSize(listView).width - 8);
     });
 
-    testWidgets('Horizontal list renders drag handle in correct position', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Horizontal list renders drag handle in correct position', (WidgetTester tester) async {
       await tester.pumpWidget(build(scrollDirection: Axis.horizontal, platform: TargetPlatform.macOS));
       final Finder listView = find.byType(ReorderableListView);
       final Finder item1 = find.byKey(const Key('Item 1'));
@@ -1469,7 +1537,7 @@ void main() {
     });
   });
 
-  testWidgets('ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag', (WidgetTester tester) async {
     // See https://github.com/flutter/flutter/issues/74840 for more details.
     final List<int> items = List<int>.generate(100, (int index) => index);
 
@@ -1537,7 +1605,7 @@ void main() {
     expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
   });
 
-  testWidgets('ReorderableListView calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ReorderableListView calls onReorderStart and onReorderEnd correctly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(8, (int index) => index);
     int? startIndex, endIndex;
     final Finder item0 = find.textContaining('item 0');
@@ -1613,7 +1681,7 @@ void main() {
     expect(endIndex, equals(0));
   });
 
-  testWidgets('ReorderableListView throws an error when key is not passed to its children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ReorderableListView throws an error when key is not passed to its children', (WidgetTester tester) async {
     final Widget reorderableListView = ReorderableListView.builder(
       itemBuilder: (BuildContext context, int index) {
         return SizedBox(child: Text('Item $index'));
@@ -1629,7 +1697,7 @@ void main() {
     expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
   });
 
-  testWidgets('Throws an error if no overlay present', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Throws an error if no overlay present', (WidgetTester tester) async {
     final Widget reorderableList = ReorderableListView(
       children: const <Widget>[
         SizedBox(width: 100.0, height: 100.0, key: Key('C'), child: Text('C')),
@@ -1644,7 +1712,7 @@ void main() {
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child:SizedBox(
+      child: SizedBox(
         width: 100.0,
         height: 100.0,
         child: Directionality(
@@ -1661,7 +1729,7 @@ void main() {
     expect(exception.toString(), contains('ReorderableListView widgets require an Overlay widget ancestor'));
   });
 
-  testWidgets('ReorderableListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ReorderableListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     expect(() => ReorderableListView(
       itemExtent: 30,
       prototypeItem: const SizedBox(),
@@ -1670,7 +1738,7 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('ReorderableListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ReorderableListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
     expect(() => ReorderableListView.builder(
       itemBuilder: (BuildContext context, int index) {
@@ -1690,7 +1758,7 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
 
     await tester.pumpWidget(
@@ -1729,7 +1797,7 @@ void main() {
     expect(item2Height, 30.0);
   });
 
-  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
 
     await tester.pumpWidget(
@@ -1770,6 +1838,89 @@ void main() {
     expect(item1Height, 30.0);
     expect(item2Height, 30.0);
   });
+
+  testWidgetsWithLeakTracking('ReorderableListView auto scrolls speed is configurable', (WidgetTester tester) async {
+    Future<void> pumpFor({
+      required Duration duration,
+      Duration interval = const Duration(milliseconds: 50),
+    }) async {
+      await tester.pump();
+
+      int times = (duration.inMilliseconds / interval.inMilliseconds).ceil();
+      while (times > 0) {
+        await tester.pump(interval + const Duration(milliseconds: 1));
+        await tester.idle();
+        times--;
+      }
+    }
+
+    Future<double> pumpListAndDrag({required double autoScrollerVelocityScalar}) async {
+      final List<int> items = List<int>.generate(10, (int index) => index);
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                key: ValueKey<int>(items[index]),
+                height: 100,
+                color: items[index].isOdd ? Colors.red : Colors.green,
+                child: ReorderableDragStartListener(
+                  index: index,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('item ${items[index]}'),
+                      const Icon(Icons.drag_handle),
+                    ],
+                  ),
+                ),
+              );
+            },
+            itemCount: items.length,
+            onReorder: (int fromIndex, int toIndex) {},
+            scrollController: scrollController,
+            autoScrollerVelocityScalar: autoScrollerVelocityScalar,
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0);
+
+      final Finder item = find.text('item 0');
+      final TestGesture drag = await tester.startGesture(tester.getCenter(item));
+
+      // Drag just enough to touch the edge but not surpass it, so the
+      // auto scroller is not yet triggered
+      await drag.moveBy(const Offset(0, 500));
+      await pumpFor(duration: const Duration(milliseconds: 200));
+
+      expect(scrollController.offset, 0);
+
+      // Now drag a little bit more so the auto scroller triggers
+      await drag.moveBy(const Offset(0, 50));
+      await pumpFor(
+        duration: const Duration(milliseconds: 600),
+        interval: Duration(milliseconds: (1000 / autoScrollerVelocityScalar).round()),
+      );
+
+      return scrollController.offset;
+    }
+
+    const double fastVelocityScalar = 20;
+    final double offsetForFastScroller = await pumpListAndDrag(autoScrollerVelocityScalar: fastVelocityScalar);
+
+    // Reset widget tree
+    await tester.pumpWidget(const SizedBox());
+
+    const double slowVelocityScalar = 5;
+    final double offsetForSlowScroller = await pumpListAndDrag(autoScrollerVelocityScalar: slowVelocityScalar);
+
+    expect(offsetForFastScroller / offsetForSlowScroller, fastVelocityScalar / slowVelocityScalar);
+  });
+
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {

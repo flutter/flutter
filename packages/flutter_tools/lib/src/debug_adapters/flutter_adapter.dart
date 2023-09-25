@@ -11,11 +11,13 @@ import 'package:vm_service/vm_service.dart' as vm;
 import '../base/io.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../globals.dart' as globals show fs;
+import 'error_formatter.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
-class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
+class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFileUtils {
   FlutterDebugAdapter(
     super.channel, {
     required super.fileSystem,
@@ -47,13 +49,6 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   /// Outstanding requests that have been sent to the Flutter run daemon and
   /// their handlers.
   final Map<int, Completer<Object?>> _flutterRequestCompleters = <int, Completer<Object?>>{};
-
-  /// Whether or not this adapter can handle the restartRequest.
-  ///
-  /// For Flutter apps we can handle this with a Hot Restart rather than having
-  /// the whole debug session stopped and restarted.
-  @override
-  bool get supportsRestartRequest => true;
 
   /// A list of reverse-requests from `flutter run --machine` that should be forwarded to the client.
   static const Set<String> _requestsToForwardToClient = <String>{
@@ -127,6 +122,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   Future<void> attachImpl() async {
     final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
+    String? vmServiceUri = args.vmServiceUri;
+    final String? vmServiceInfoFile = args.vmServiceInfoFile;
+
+    if (vmServiceUri != null && vmServiceInfoFile != null) {
+      sendConsoleOutput(
+        'To attach, provide only one (or neither) of vmServiceUri/vmServiceInfoFile',
+      );
+      handleSessionTerminate();
+      return;
+    }
 
     launchProgress = startProgressNotification(
       'launch',
@@ -134,7 +139,11 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
       message: 'Attaching…',
     );
 
-    final String? vmServiceUri = args.vmServiceUri;
+    if (vmServiceUri == null && vmServiceInfoFile != null) {
+      final Uri uriFromFile = await waitForVmServiceInfoFile(logger, globals.fs.file(vmServiceInfoFile));
+      vmServiceUri = uriFromFile.toString();
+    }
+
     final List<String> toolArgs = <String>[
       'attach',
       '--machine',
@@ -177,17 +186,17 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     switch (request.command) {
       case 'hotRestart':
       case 'hotReload':
+      // This convention is for the internal IDE client.
+      case r'$/hotReload':
         final bool isFullRestart = request.command == 'hotRestart';
         await _performRestart(isFullRestart, args?.args['reason'] as String?);
         sendResponse(null);
-        break;
 
       // Handle requests (from the client) that provide responses to reverse-requests
       // that we forwarded from `flutter run --machine`.
       case 'flutter.sendForwardedRequestResponse':
         _handleForwardedResponse(args);
         sendResponse(null);
-        break;
 
       default:
         await super.customRequest(request, args, sendResponse);
@@ -203,28 +212,22 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         switch (event.extensionKind) {
           case 'Flutter.ServiceExtensionStateChanged':
             _sendServiceExtensionStateChanged(event.extensionData);
-            break;
           case 'Flutter.Error':
             _handleFlutterErrorEvent(event.extensionData);
-            break;
         }
-        break;
     }
   }
 
   /// Sends OutputEvents to the client for a Flutter.Error event.
   void _handleFlutterErrorEvent(vm.ExtensionData? data) {
-    final Map<String, dynamic>? errorData = data?.data;
+    final Map<String, Object?>? errorData = data?.data;
     if (errorData == null) {
       return;
     }
 
-    final String errorText = (errorData['renderedErrorText'] as String?)
-        ?? (errorData['description'] as String?)
-        // We should never not error text, but if we do at least send something
-        // so it's not just completely silent.
-        ?? 'Unknown error in Flutter.Error event';
-    sendOutput('stderr', '$errorText\n');
+    FlutterErrorFormatter()
+      ..formatError(errorData)
+      ..sendOutput(sendOutput);
   }
 
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
@@ -399,6 +402,22 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     if (_appId == null) {
       throw DebugAdapterException('Unexpected null `appId` in app.start event');
     }
+
+    // Notify the client whether it can call 'restartRequest' when the user
+    // clicks restart, instead of terminating and re-starting its own debug
+    // session (which is much slower, but required for profile/release mode).
+    final bool supportsRestart = (params['supportsRestart'] as bool?) ?? false;
+    sendEvent(CapabilitiesEventBody(capabilities: Capabilities(supportsRestartRequest: supportsRestart)));
+
+    // Send a custom event so the editor has info about the app starting.
+    //
+    // This message contains things like the `deviceId` and `mode` that the
+    // client might not know about if they were inferred or set by users custom
+    // args.
+    sendEvent(
+      RawEventBody(params),
+      eventType: 'flutter.appStart',
+    );
   }
 
   /// Handles the app.started event from Flutter.
@@ -458,16 +477,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     switch (event) {
       case 'daemon.connected':
         _handleDaemonConnected(params);
-        break;
       case 'app.debugPort':
         _handleDebugPort(params);
-        break;
       case 'app.start':
         _handleAppStart(params);
-        break;
       case 'app.started':
         _handleAppStarted();
-        break;
     }
 
     if (_eventsToForwardToClient.contains(event)) {
@@ -663,6 +678,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     bool fullRestart, [
     String? reason,
   ]) async {
+    // Don't do anything if the app hasn't started yet, as restarts and reloads
+    // can only operate on a running app.
+    if (_appId == null) {
+      return;
+    }
+
     final String progressId = fullRestart ? 'hotRestart' : 'hotReload';
     final String progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
     final DapProgressReporter progress = startProgressNotification(

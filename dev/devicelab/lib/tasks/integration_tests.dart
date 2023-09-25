@@ -4,6 +4,7 @@
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
+import '../framework/talkback.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -74,9 +75,10 @@ TaskFunction createHybridAndroidViewsIntegrationTest() {
 }
 
 TaskFunction createAndroidSemanticsIntegrationTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
-    'lib/main.dart',
+    'integration_test/main_test.dart',
+    withTalkBack: true,
   ).call;
 }
 
@@ -104,10 +106,11 @@ TaskFunction createEndToEndFrameNumberTest() {
   ).call;
 }
 
-TaskFunction createEndToEndDriverTest() {
+TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/driver.dart',
+    environment: environment,
   ).call;
 }
 
@@ -171,6 +174,7 @@ class DriverTest {
     this.testTarget, {
       this.extraOptions = const <String>[],
       this.deviceIdOverride,
+      this.environment,
     }
   );
 
@@ -178,6 +182,7 @@ class DriverTest {
   final String testTarget;
   final List<String> extraOptions;
   final String? deviceIdOverride;
+  final Map<String, String>? environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -200,7 +205,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options);
+      await flutter('drive', options: options, environment: environment);
 
       return TaskResult.success(null);
     });
@@ -213,6 +218,7 @@ class IntegrationTest {
     this.testTarget, {
       this.extraOptions = const <String>[],
       this.createPlatforms = const <String>[],
+      this.withTalkBack = false,
     }
   );
 
@@ -220,6 +226,7 @@ class IntegrationTest {
   final String testTarget;
   final List<String> extraOptions;
   final List<String> createPlatforms;
+  final bool withTalkBack;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -237,6 +244,13 @@ class IntegrationTest {
         ]);
       }
 
+      if (withTalkBack) {
+        if (device is! AndroidDevice) {
+          return TaskResult.failure('A test that enables TalkBack can only be run on Android devices');
+        }
+        await enableTalkBack();
+      }
+
       final List<String> options = <String>[
         '-v',
         '-d',
@@ -245,6 +259,10 @@ class IntegrationTest {
         ...extraOptions,
       ];
       await flutter('test', options: options);
+
+      if (withTalkBack) {
+        await disableTalkBack();
+      }
 
       return TaskResult.success(null);
     });

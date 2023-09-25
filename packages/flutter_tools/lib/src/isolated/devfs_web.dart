@@ -179,7 +179,7 @@ class WebAssetServer implements AssetReader {
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
     String hostname,
-    int? port,
+    int port,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -203,7 +203,7 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        httpServer = await HttpServer.bind(address, port);
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -295,7 +295,9 @@ class WebAssetServer implements AssetReader {
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        server.basePath,
+        packageConfig.toPackageUri(
+          globals.fs.file(entrypoint).absolute.uri,
+        ),
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
@@ -344,6 +346,7 @@ class WebAssetServer implements AssetReader {
   ///
   /// It should have no leading or trailing slashes.
   @visibleForTesting
+  @override
   String basePath;
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
@@ -416,6 +419,19 @@ class WebAssetServer implements AssetReader {
 
     File file = _resolveDartFile(requestPath);
 
+    if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
+      final Directory canvasKitDirectory = globals.fs.directory(
+        globals.fs.path.join(
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+          'canvaskit',
+        )
+      );
+      final Uri potential = canvasKitDirectory
+          .uri
+          .resolve(requestPath.replaceFirst('canvaskit/', ''));
+      file = globals.fs.file(potential);
+    }
+
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
@@ -437,7 +453,8 @@ class WebAssetServer implements AssetReader {
     if (!file.existsSync()) {
       // Paths starting with these prefixes should've been resolved above.
       if (requestPath.startsWith('assets/') ||
-          requestPath.startsWith('packages/')) {
+          requestPath.startsWith('packages/') ||
+          requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
       return _serveIndex();
@@ -476,7 +493,7 @@ class WebAssetServer implements AssetReader {
 
   /// Write a single file into the in-memory cache.
   void writeFile(String filePath, String contents) {
-    writeBytes(filePath, utf8.encode(contents) as Uint8List);
+    writeBytes(filePath, const Utf8Encoder().convert(contents));
   }
 
   void writeBytes(String filePath, Uint8List contents) {
@@ -625,7 +642,7 @@ class WebDevFS implements DevFS {
   /// server.
   WebDevFS({
     required this.hostname,
-    required int? port,
+    required int port,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -658,7 +675,7 @@ class WebDevFS implements DevFS {
   final ChromiumLauncher? chromiumLauncher;
   final bool nullAssertions;
   final bool nativeNullAssertions;
-  final int? _port;
+  final int _port;
   final NullSafetyMode nullSafetyMode;
 
   late WebAssetServer webAssetServer;
@@ -761,7 +778,7 @@ class WebDevFS implements DevFS {
 
     final int selectedPort = webAssetServer.selectedPort;
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
-      webAssetServer.webRenderer = WebRendererMode.autoDetect;
+      webAssetServer.webRenderer = WebRendererMode.auto;
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }

@@ -25,7 +25,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    if (project.android.hasProperty("namespace")) {
+        namespace '{{androidIdentifier}}'
+    }
+
+    compileSdkVersion {{compileSdkVersion}}
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

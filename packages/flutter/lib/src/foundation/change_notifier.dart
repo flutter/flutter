@@ -104,12 +104,34 @@ const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
-/// {@macro flutter.flutter.ListenableBuilder.ChangeNotifier.rebuild}
+/// ## Using ChangeNotifier subclasses for data models
+///
+/// A data structure can extend or mix in [ChangeNotifier] to implement the
+/// [Listenable] interface and thus become usable with widgets that listen for
+/// changes to [Listenable]s, such as [ListenableBuilder].
+///
+/// {@tool dartpad}
+/// The following example implements a simple counter that utilizes a
+/// [ListenableBuilder] to limit rebuilds to only the [Text] widget containing
+/// the count. The current count is stored in a [ChangeNotifier] subclass, which
+/// rebuilds the [ListenableBuilder]'s contents when its value is changed.
+///
+/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// In this case, the [ChangeNotifier] subclass encapsulates a list, and notifies
+/// the clients any time an item is added to the list. This example only supports
+/// adding items; as an exercise, consider adding buttons to remove items from
+/// the list as well.
+///
+/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.3.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
-class ChangeNotifier implements Listenable {
+mixin class ChangeNotifier implements Listenable {
   int _count = 0;
   // The _listeners is intentionally set to a fixed-length _GrowableList instead
   // of const [].
@@ -185,6 +207,39 @@ class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners => _count > 0;
 
+  /// Dispatches event of the [object] creation to [MemoryAllocations.instance].
+  ///
+  /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
+  /// is false, the method is noop.
+  ///
+  /// Tools like leak_tracker use the event of object creation to help
+  /// developers identify the owner of the object, for troubleshooting purposes,
+  /// by taking stack trace at the moment of the event.
+  ///
+  /// But, as [ChangeNotifier] is mixin, it does not have its own constructor. So, it
+  /// communicates object creation in first `addListener`, that results
+  /// in the stack trace pointing to `addListener`, not to constructor.
+  ///
+  /// To make debugging easier, invoke [ChangeNotifier.maybeDispatchObjectCreation]
+  /// in constructor of the class. It will help
+  /// to identify the owner.
+  ///
+  /// Make sure to invoke it with condition `if (kFlutterMemoryAllocationsEnabled) ...`
+  /// so that the method is tree-shaken away when the flag is false.
+  @protected
+  static void maybeDispatchObjectCreation(ChangeNotifier object) {
+    // Tree shaker does not include this method and the class MemoryAllocations
+    // if kFlutterMemoryAllocationsEnabled is false.
+    if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ChangeNotifier',
+        object: object,
+      );
+      object._creationDispatched = true;
+    }
+  }
+
   /// Register a closure to be called when the object changes.
   ///
   /// If the given closure is already registered, an additional instance is
@@ -214,14 +269,11 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ChangeNotifier',
-        object: this,
-      );
-      _creationDispatched = true;
+
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation(this);
     }
+
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -421,7 +473,7 @@ class ChangeNotifier implements Listenable {
           if (_listeners[i] == null) {
             // We swap this item with the next not null item.
             int swapIndex = i + 1;
-            while(_listeners[swapIndex] == null) {
+            while (_listeners[swapIndex] == null) {
               swapIndex += 1;
             }
             _listeners[i] = _listeners[swapIndex];
@@ -466,17 +518,25 @@ class _MergingListenable extends Listenable {
 /// When [value] is replaced with something that is not equal to the old
 /// value as evaluated by the equality operator ==, this class notifies its
 /// listeners.
+///
+/// ## Limitations
+///
+/// Because this class only notifies listeners when the [value]'s _identity_
+/// changes, listeners will not be notified when mutable state within the
+/// value itself changes.
+///
+/// For example, a `ValueNotifier<List<int>>` will not notify its listeners
+/// when the _contents_ of the list are changed.
+///
+/// As a result, this class is best used with only immutable data types.
+///
+/// For mutable data types, consider extending [ChangeNotifier] directly.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ValueNotifier',
-        object: this,
-      );
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    _creationDispatched = true;
   }
 
   /// The current value stored in this notifier.

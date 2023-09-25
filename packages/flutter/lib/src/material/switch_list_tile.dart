@@ -261,8 +261,6 @@ class SwitchListTile extends StatelessWidget {
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Whether this switch is checked.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the user toggles the switch on or off.
@@ -537,7 +535,6 @@ class SwitchListTile extends StatelessWidget {
           splashRadius: splashRadius,
           overlayColor: overlayColor,
         );
-        break;
 
       case _SwitchListTileType.material:
         control = Switch(
@@ -570,12 +567,10 @@ class SwitchListTile extends StatelessWidget {
       case ListTileControlAffinity.leading:
         leading = control;
         trailing = secondary;
-        break;
       case ListTileControlAffinity.trailing:
       case ListTileControlAffinity.platform:
         leading = secondary;
         trailing = control;
-        break;
     }
 
     final ThemeData theme = Theme.of(context);

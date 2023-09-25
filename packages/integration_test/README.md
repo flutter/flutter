@@ -140,7 +140,7 @@ import 'package:integration_test/integration_test_driver_extended.dart';
 
 Future<void> main() async {
   await integrationDriver(
-    onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
+    onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
       final File image = File('$screenshotName.png');
       image.writeAsBytesSync(screenshotBytes);
       // Return false if the screenshot is invalid.
@@ -219,6 +219,13 @@ physical):
 
 ```sh
 ./gradlew app:connectedAndroidTest -Ptarget=`pwd`/../integration_test/foo_test.dart
+```
+
+Note:
+To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
+and pass them to gradle in a comma separated list:
+```bash
+./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
 ```
 
 ## Firebase Test Lab

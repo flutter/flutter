@@ -7,47 +7,81 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'features.dart';
 import 'project.dart';
+import 'template.dart';
 import 'version.dart';
 
-enum FlutterProjectType {
+enum FlutterProjectType implements CliEnum {
   /// This is the default project with the user-managed host code.
   /// It is different than the "module" template in that it exposes and doesn't
   /// manage the platform code.
   app,
+
   /// A List/Detail app template that follows community best practices.
   skeleton,
+
   /// The is a project that has managed platform host code. It is an application with
   /// ephemeral .ios and .android directories that can be updated automatically.
   module,
+
   /// This is a Flutter Dart package project. It doesn't have any native
   /// components, only Dart.
   package,
+
+  /// This is a Dart package project with external builds for native components.
+  packageFfi,
+
   /// This is a native plugin project.
   plugin,
+
   /// This is an FFI native plugin project.
-  ffiPlugin,
-}
+  pluginFfi;
 
-String flutterProjectTypeToString(FlutterProjectType? type) {
-  if (type == null) {
-    return '';
-  }
-  if (type == FlutterProjectType.ffiPlugin) {
-    return 'plugin_ffi';
-  }
-  return getEnumName(type);
-}
+  @override
+  String get cliName => snakeCase(name);
 
-FlutterProjectType? stringToProjectType(String value) {
-  FlutterProjectType? result;
-  for (final FlutterProjectType type in FlutterProjectType.values) {
-    if (value == flutterProjectTypeToString(type)) {
-      result = type;
-      break;
+  @override
+  String get helpText => switch (this) {
+        FlutterProjectType.app => '(default) Generate a Flutter application.',
+        FlutterProjectType.skeleton =>
+          'Generate a List View / Detail View Flutter application that follows community best practices.',
+        FlutterProjectType.package =>
+          'Generate a shareable Flutter project containing modular Dart code.',
+        FlutterProjectType.plugin =>
+          'Generate a shareable Flutter project containing an API '
+          'in Dart code with a platform-specific implementation through method channels for Android, iOS, '
+          'Linux, macOS, Windows, web, or any combination of these.',
+        FlutterProjectType.pluginFfi =>
+          'Generate a shareable Flutter project containing an API '
+          'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
+          'Linux, macOS, Windows, or any combination of these.',
+        FlutterProjectType.packageFfi =>
+          'Generate a shareable Dart/Flutter project containing an API '
+          'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
+          'Linux, macOS, and Windows.',
+        FlutterProjectType.module =>
+          'Generate a project to add a Flutter module to an existing Android or iOS application.',
+      };
+
+  static FlutterProjectType? fromCliName(String value) {
+    for (final FlutterProjectType type in FlutterProjectType.values) {
+      if (value == type.cliName) {
+        return type;
+      }
     }
+    return null;
   }
-  return result;
+
+  static List<FlutterProjectType> get enabledValues {
+    return <FlutterProjectType>[
+      for (final FlutterProjectType value in values)
+        if (value == FlutterProjectType.packageFfi) ...<FlutterProjectType>[
+          if (featureFlags.isNativeAssetsEnabled) value
+        ] else
+          value,
+    ];
+  }
 }
 
   /// Verifies the expected yaml keys are present in the file.
@@ -100,7 +134,7 @@ class FlutterProjectMetadata {
       }
     }
     if (_validateMetadataMap(yamlRoot, <String, Type>{'project_type': String}, _logger)) {
-      _projectType = stringToProjectType(yamlRoot['project_type'] as String);
+      _projectType = FlutterProjectType.fromCliName(yamlRoot['project_type'] as String);
     }
     final Object? migrationYaml = yamlRoot['migration'];
     if (migrationYaml is YamlMap) {
@@ -157,13 +191,13 @@ class FlutterProjectMetadata {
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
 #
-# This file should be version controlled.
+# This file should be version controlled and should not be manually edited.
 
 version:
-  revision: $_versionRevision
-  channel: $_versionChannel
+  revision: ${escapeYamlString(_versionRevision ?? '')}
+  channel: ${escapeYamlString(_versionChannel ?? kUserBranch)}
 
-project_type: ${flutterProjectTypeToString(projectType)}
+project_type: ${projectType == null ? '' : projectType!.cliName}
 ${migrateConfig.getOutputFileString()}''';
   }
 

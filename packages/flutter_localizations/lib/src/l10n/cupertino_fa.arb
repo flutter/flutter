@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "انتخاب همه",
   "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
   "modalBarrierDismissLabel": "نپذیرفتن",
-  "searchTextFieldPlaceholderLabel": "جستجو"
+  "searchTextFieldPlaceholderLabel": "جستجو",
+  "noSpellCheckReplacementsLabel": "جایگزینی پیدا نشد",
+  "menuDismissLabel": "بستن منو",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

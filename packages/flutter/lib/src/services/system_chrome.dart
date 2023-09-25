@@ -182,7 +182,9 @@ enum SystemUiMode {
 
 /// Specifies a preference for the style of the system overlays.
 ///
-/// Used by [SystemChrome.setSystemUIOverlayStyle].
+/// Used by [AppBar.systemOverlayStyle] for declaratively setting the style of
+/// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
+/// imperatively setting the style of the systeme overlays.
 @immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].
@@ -356,11 +358,7 @@ List<String> _stringify(List<dynamic> list) => <String>[
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
-class SystemChrome {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChrome._();
-
+abstract final class SystemChrome {
   /// Specifies the set of orientations the application interface can
   /// be displayed in.
   ///
@@ -369,6 +367,74 @@ class SystemChrome {
   /// default.
   ///
   /// ## Limitations
+  ///
+  /// ### Android
+  ///
+  /// Android screens may choose to [letterbox](https://developer.android.com/guide/practices/enhanced-letterboxing)
+  /// applications that lock orientation, particularly on larger screens. When
+  /// letterboxing occurs on Android, the [MediaQueryData.size] reports the
+  /// letterboxed size, not the full screen size. Applications that make
+  /// decisions about whether to lock orientation based on the screen size
+  /// must use the `display` property of the current [FlutterView].
+  ///
+  /// ```dart
+  /// // A widget that locks the screen to portrait if it is less than 600
+  /// // logical pixels wide.
+  /// class MyApp extends StatefulWidget {
+  ///   const MyApp({ super.key });
+  ///
+  ///   @override
+  ///   State<MyApp> createState() => _MyAppState();
+  /// }
+  ///
+  /// class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  ///   ui.FlutterView? _view;
+  ///   static const double kOrientationLockBreakpoint = 600;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeDependencies() {
+  ///     super.didChangeDependencies();
+  ///     _view = View.maybeOf(context);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     _view = null;
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeMetrics() {
+  ///     final ui.Display? display = _view?.display;
+  ///     if (display == null) {
+  ///       return;
+  ///     }
+  ///     if (display.size.width / display.devicePixelRatio < kOrientationLockBreakpoint) {
+  ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+  ///         DeviceOrientation.portraitUp,
+  ///       ]);
+  ///     } else {
+  ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
+  ///     }
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return const MaterialApp(
+  ///       home: Placeholder(),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ### iOS
   ///
   /// This setting will only be respected on iPad if multitasking is disabled.
   ///
@@ -492,8 +558,8 @@ class SystemChrome {
     );
   }
 
-  /// Specifies the style to use for the system overlays that are visible (if
-  /// any).
+  /// Specifies the style to use for the system overlays (e.g. the status bar on
+  /// Android or iOS, the system navigation bar on Android) that are visible (if any).
   ///
   /// This method will schedule the embedder update to be run in a microtask.
   /// Any subsequent calls to this method during the current event loop will
@@ -512,14 +578,11 @@ class SystemChrome {
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   ///
-  /// {@tool snippet}
-  /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-  ///   return const Placeholder();
-  /// }
-  /// ```
+  /// {@tool sample}
+  /// The following example uses an `AppBar` to set the system status bar color and
+  /// the system navigation bar color.
+  ///
+  /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.0.dart **
   /// {@end-tool}
   ///
   /// For more complex control of the system overlay styles, consider using
@@ -537,15 +600,18 @@ class SystemChrome {
   /// overlay style navigation bar properties.
   ///
   /// {@tool sample}
-  /// The following example creates a widget that changes the status bar color
-  /// to a random value on Android.
+  /// The following example uses an `AnnotatedRegion<SystemUiOverlayStyle>` to set
+  /// the system status bar color and the system navigation bar color.
   ///
   /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.1.dart **
   /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///  * [AppBar.systemOverlayStyle], a convenient property for declaratively setting
+  ///    the style of the system overlays.
+  ///  * [AnnotatedRegion], the widget used to place a `SystemUiOverlayStyle` into
+  ///    the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     if (_pendingStyle != null) {
       // The microtask has already been queued; just update the pending value.

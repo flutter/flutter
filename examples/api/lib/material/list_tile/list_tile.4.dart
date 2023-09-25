@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile].
 
 void main() => runApp(const ListTileApp());
 
@@ -41,10 +41,11 @@ class _ListTileExampleState extends State<ListTileExample> {
             titleAlignment: titleAlignment,
             leading: Checkbox(
               value: true,
-              onChanged:(bool? value) { },
+              onChanged: (bool? value) {},
             ),
             title: const Text('Headline Text'),
-            subtitle: const Text('Tapping on the trailing widget will show a menu that allows you to change the title alignment. The title alignment is set to threeLine by default if `ThemeData.useMaterial3` is true. Otherwise, defaults to titleHeight.'),
+            subtitle: const Text(
+                'Tapping on the trailing widget will show a menu that allows you to change the title alignment. The title alignment is set to threeLine by default if `ThemeData.useMaterial3` is true. Otherwise, defaults to titleHeight.'),
             trailing: PopupMenuButton<ListTileTitleAlignment>(
               onSelected: (ListTileTitleAlignment? value) {
                 setState(() {

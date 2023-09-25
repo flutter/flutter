@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class OnTapPage extends StatelessWidget {
   const OnTapPage({super.key, required this.id, required this.onTap});
@@ -32,7 +33,7 @@ class OnTapPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -63,7 +64,7 @@ void main() {
       isMethodCall('selectSingleEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/',
+          'uri': '/',
           'state': null,
           'replace': false,
         },
@@ -81,7 +82,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/A',
+          'uri': '/A',
           'state': null,
           'replace': false,
         },
@@ -99,7 +100,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/',
+          'uri': '/',
           'state': null,
           'replace': false,
         },
@@ -107,7 +108,7 @@ void main() {
     );
   });
 
-  testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator does not report route name by default', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -141,7 +142,7 @@ void main() {
     expect(log, hasLength(0));
   });
 
-  testWidgets('Replace should send platform messages', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Replace should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -173,7 +174,7 @@ void main() {
       isMethodCall('selectSingleEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/',
+          'uri': '/',
           'state': null,
           'replace': false,
         },
@@ -191,7 +192,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/A',
+          'uri': '/A',
           'state': null,
           'replace': false,
         },
@@ -209,7 +210,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/B',
+          'uri': '/B',
           'state': null,
           'replace': false,
         },
@@ -217,7 +218,7 @@ void main() {
     );
   });
 
-  testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Nameless routes should send platform messages', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -246,7 +247,7 @@ void main() {
       isMethodCall('selectSingleEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/home',
+          'uri': '/home',
           'state': null,
           'replace': false,
         },
@@ -261,7 +262,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -269,16 +270,18 @@ void main() {
     });
 
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
     );
+    addTearDown(delegate.dispose);
 
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
@@ -289,7 +292,7 @@ void main() {
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
-        'location': 'initial',
+        'uri': 'initial',
         'state': null,
         'replace': false,
       }),
@@ -298,8 +301,8 @@ void main() {
 
     // Triggers a router rebuild and verify the route information is reported
     // to the web engine.
-    delegate.routeInformation = const RouteInformation(
-      location: 'update',
+    delegate.routeInformation = RouteInformation(
+      uri: Uri.parse('update'),
       state: 'state',
     );
     await tester.pump();
@@ -308,12 +311,17 @@ void main() {
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
-        'location': 'update',
+        'uri': 'update',
         'state': 'state',
         'replace': false,
       }),
     ]);
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134205
+    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
+  ));
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
@@ -338,7 +346,11 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     required this.builder,
     this.onPopRoute,
     this.reportConfiguration = false,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   RouteInformation get routeInformation => _routeInformation;
   late RouteInformation _routeInformation;

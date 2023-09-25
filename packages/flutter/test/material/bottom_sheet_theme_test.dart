@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('BottomSheetThemeData copyWith, ==, hashCode basics', () {
@@ -27,13 +28,16 @@ void main() {
   test('BottomSheetThemeData null fields by default', () {
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData();
     expect(bottomSheetTheme.backgroundColor, null);
+    expect(bottomSheetTheme.shadowColor, null);
     expect(bottomSheetTheme.elevation, null);
     expect(bottomSheetTheme.shape, null);
     expect(bottomSheetTheme.clipBehavior, null);
     expect(bottomSheetTheme.constraints, null);
+    expect(bottomSheetTheme.dragHandleColor, null);
+    expect(bottomSheetTheme.dragHandleSize, null);
   });
 
-  testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData().debugFillProperties(builder);
 
@@ -45,14 +49,17 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData(
       backgroundColor: Color(0xFFFFFFFF),
       elevation: 2.0,
+      shadowColor: Color(0xFF00FFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       clipBehavior: Clip.antiAlias,
       constraints: BoxConstraints(minWidth: 200, maxWidth: 640),
+      dragHandleColor: Color(0xFFFFFFFF),
+      dragHandleSize: Size(20, 20)
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -63,14 +70,18 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xffffffff)',
       'elevation: 2.0',
+      'shadowColor: Color(0xff00ffff)',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
+      'dragHandleColor: Color(0xffffffff)',
+      'dragHandleSize: Size(20.0, 20.0)',
       'clipBehavior: Clip.antiAlias',
       'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
     ]);
   });
 
-  testWidgets('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: BottomSheet(
           onClosing: () {},
@@ -93,7 +104,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
   });
 
-  testWidgets('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
     final BottomSheetThemeData bottomSheetTheme = _bottomSheetTheme();
 
     await tester.pumpWidget(MaterialApp(
@@ -120,8 +131,9 @@ void main() {
     expect(material.clipBehavior, bottomSheetTheme.clipBehavior);
   });
 
-  testWidgets('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
+    const Color shadowColor = Colors.blue;
     const double elevation = 7.0;
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
@@ -133,6 +145,7 @@ void main() {
       home: Scaffold(
         body: BottomSheet(
           backgroundColor: backgroundColor,
+          shadowColor: shadowColor,
           elevation: elevation,
           shape: shape,
           clipBehavior: Clip.hardEdge,
@@ -151,12 +164,13 @@ void main() {
       ),
     );
     expect(material.color, backgroundColor);
+    expect(material.shadowColor, shadowColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
     expect(material.clipBehavior, clipBehavior);
   });
 
-  testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -187,7 +201,7 @@ void main() {
     expect(modalBarrier.color, modalBarrierColor);
   });
 
-  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -213,7 +227,7 @@ void main() {
     expect(material.color, persistentBackgroundColor);
   });
 
-  testWidgets("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -235,23 +249,27 @@ void main() {
     expect(material.color, null);
   });
 
-  testWidgets('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
     const double lightElevation = 5.0;
     const double darkElevation = 3.0;
     const Color lightBackgroundColor = Colors.green;
     const Color darkBackgroundColor = Colors.grey;
+    const Color lightShadowColor = Colors.blue;
+    const Color darkShadowColor = Colors.purple;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light().copyWith(
+      theme: ThemeData.light(useMaterial3: false).copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: lightElevation,
           backgroundColor: lightBackgroundColor,
+          shadowColor: lightShadowColor,
         ),
       ),
-      darkTheme: ThemeData.dark().copyWith(
+      darkTheme: ThemeData.dark(useMaterial3: false).copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: darkElevation,
           backgroundColor: darkBackgroundColor,
+          shadowColor: darkShadowColor,
         ),
       ),
       home: Scaffold(
@@ -287,6 +305,7 @@ void main() {
     );
     expect(lightMaterial.elevation, lightElevation);
     expect(lightMaterial.color, lightBackgroundColor);
+    expect(lightMaterial.shadowColor, lightShadowColor);
 
     // Simulate the user changing to dark theme
     tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
@@ -300,12 +319,13 @@ void main() {
     );
     expect(darkMaterial.elevation, darkElevation);
     expect(darkMaterial.color, darkBackgroundColor);
+    expect(darkMaterial.shadowColor, darkShadowColor);
   });
 }
 
 Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
   return MaterialApp(
-    theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
+    theme: ThemeData(bottomSheetTheme: bottomSheetTheme, useMaterial3: false),
     home: Scaffold(
       body: Builder(
         builder: (BuildContext context) {

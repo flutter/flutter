@@ -70,16 +70,15 @@ typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent ev
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///
-  /// [dragStartBehavior] must not be null.
-  ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
+    this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
-    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
-  });
+    AllowedButtonsFilter? allowedButtonsFilter,
+  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
 
@@ -147,6 +146,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [DragUpdateDetails] object.
   ///
+  /// If this gesture recognizer recognizes movement on a single axis (a
+  /// [VerticalDragGestureRecognizer] or [HorizontalDragGestureRecognizer]),
+  /// then `details` will reflect movement only on that axis and its
+  /// [DragUpdateDetails.primaryDelta] will be non-null.
+  /// If this gesture recognizer recognizes movement in all directions
+  /// (a [PanGestureRecognizer]), then `details` will reflect movement on
+  /// both axes and its [DragUpdateDetails.primaryDelta] will be null.
+  ///
   /// See also:
   ///
   ///  * [allowedButtonsFilter], which decides which button will be allowed.
@@ -161,6 +168,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The velocity is provided in the callback's `details` argument, which is a
   /// [DragEndDetails] object.
+  ///
+  /// If this gesture recognizer recognizes movement on a single axis (a
+  /// [VerticalDragGestureRecognizer] or [HorizontalDragGestureRecognizer]),
+  /// then `details` will reflect movement only on that axis and its
+  /// [DragEndDetails.primaryVelocity] will be non-null.
+  /// If this gesture recognizer recognizes movement in all directions
+  /// (a [PanGestureRecognizer]), then `details` will reflect movement on
+  /// both axes and its [DragEndDetails.primaryVelocity] will be null.
   ///
   /// See also:
   ///
@@ -193,6 +208,25 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// If null then [kMaxFlingVelocity] is used.
   double? maxFlingVelocity;
+
+  /// Whether the drag threshold should be met before dispatching any drag callbacks.
+  ///
+  /// The drag threshold is met when the global distance traveled by a pointer has
+  /// exceeded the defined threshold on the relevant axis, i.e. y-axis for the
+  /// [VerticalDragGestureRecognizer], x-axis for the [HorizontalDragGestureRecognizer],
+  /// and the entire plane for [PanGestureRecognizer]. The threshold for both
+  /// [VerticalDragGestureRecognizer] and [HorizontalDragGestureRecognizer] are
+  /// calculated by [computeHitSlop], while [computePanSlop] is used for
+  /// [PanGestureRecognizer].
+  ///
+  /// If true, the drag callbacks will only be dispatched when this recognizer has
+  /// won the arena and the drag threshold has been met.
+  ///
+  /// If false, the drag callbacks will be dispatched immediately when this recognizer
+  /// has won the arena.
+  ///
+  /// This value defaults to false.
+  bool onlyAcceptDragOnThreshold;
 
   /// Determines the type of velocity estimation method to use for a potential
   /// drag gesture, when a new pointer is added.
@@ -258,9 +292,17 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// inertia, for example.
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind);
 
+  /// Determines if a gesture is a fling or not, and if so its effective velocity.
+  ///
+  /// A fling calls its gesture end callback with a velocity, allowing the
+  /// provider of the callback to respond by carrying the gesture forward with
+  /// inertia, for example.
+  DragEndDetails? _considerFling(VelocityEstimate estimate, PointerDeviceKind kind);
+
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
+  bool _hasDragThresholdBeenMet = false;
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
@@ -363,7 +405,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedEndPosition: localPosition
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
         if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
-          resolve(GestureDisposition.accepted);
+          _hasDragThresholdBeenMet = true;
+          if (_acceptedActivePointers.contains(event.pointer)) {
+            _checkDrag(event.pointer);
+          } else {
+            resolve(GestureDisposition.accepted);
+          }
         }
       }
     }
@@ -378,47 +425,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
-    if (_state != _DragState.accepted) {
-      _state = _DragState.accepted;
-      final OffsetPair delta = _pendingDragOffset;
-      final Duration? timestamp = _lastPendingEventTimestamp;
-      final Matrix4? transform = _lastTransform;
-      final Offset localUpdateDelta;
-      switch (dragStartBehavior) {
-        case DragStartBehavior.start:
-          _initialPosition = _initialPosition + delta;
-          localUpdateDelta = Offset.zero;
-          break;
-        case DragStartBehavior.down:
-          localUpdateDelta = _getDeltaForDetails(delta.local);
-          break;
-      }
-      _pendingDragOffset = OffsetPair.zero;
-      _lastPendingEventTimestamp = null;
-      _lastTransform = null;
-      _checkStart(timestamp, pointer);
-      if (localUpdateDelta != Offset.zero && onUpdate != null) {
-        final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
-        final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
-        final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
-          untransformedEndPosition: correctedLocalPosition,
-          untransformedDelta: localUpdateDelta,
-          transform: localToGlobal,
-        );
-        final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
-        final OffsetPair correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
-        _checkUpdate(
-          sourceTimeStamp: timestamp,
-          delta: localUpdateDelta,
-          primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
-          globalPosition: correctedPosition.global,
-          localPosition: correctedPosition.local,
-        );
-      }
-      // This acceptGesture might have been called only for one pointer, instead
-      // of all pointers. Resolve all pointers to `accepted`. This won't cause
-      // infinite recursion because an accepted pointer won't be accepted again.
-      resolve(GestureDisposition.accepted);
+    if (!onlyAcceptDragOnThreshold || _hasDragThresholdBeenMet) {
+      _checkDrag(pointer);
     }
   }
 
@@ -430,19 +438,18 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void didStopTrackingLastPointer(int pointer) {
     assert(_state != _DragState.ready);
-    switch(_state) {
+    switch (_state) {
       case _DragState.ready:
         break;
 
       case _DragState.possible:
         resolve(GestureDisposition.rejected);
         _checkCancel();
-        break;
 
       case _DragState.accepted:
         _checkEnd(pointer);
-        break;
     }
+    _hasDragThresholdBeenMet = false;
     _velocityTrackers.clear();
     _initialButtons = null;
     _state = _DragState.ready;
@@ -465,6 +472,50 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       );
       invokeCallback<void>('onDown', () => onDown!(details));
     }
+  }
+
+  void _checkDrag(int pointer) {
+    if (_state == _DragState.accepted) {
+      return;
+    }
+    _state = _DragState.accepted;
+    final OffsetPair delta = _pendingDragOffset;
+    final Duration? timestamp = _lastPendingEventTimestamp;
+    final Matrix4? transform = _lastTransform;
+    final Offset localUpdateDelta;
+    switch (dragStartBehavior) {
+      case DragStartBehavior.start:
+        _initialPosition = _initialPosition + delta;
+        localUpdateDelta = Offset.zero;
+      case DragStartBehavior.down:
+        localUpdateDelta = _getDeltaForDetails(delta.local);
+    }
+    _pendingDragOffset = OffsetPair.zero;
+    _lastPendingEventTimestamp = null;
+    _lastTransform = null;
+    _checkStart(timestamp, pointer);
+    if (localUpdateDelta != Offset.zero && onUpdate != null) {
+      final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
+      final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
+      final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
+        untransformedEndPosition: correctedLocalPosition,
+        untransformedDelta: localUpdateDelta,
+        transform: localToGlobal,
+      );
+      final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
+      final OffsetPair correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
+      _checkUpdate(
+        sourceTimeStamp: timestamp,
+        delta: localUpdateDelta,
+        primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
+        globalPosition: correctedPosition.global,
+        localPosition: correctedPosition.local,
+      );
+    }
+    // This acceptGesture might have been called only for one pointer, instead
+    // of all pointers. Resolve all pointers to `accepted`. This won't cause
+    // infinite recursion because an accepted pointer won't be accepted again.
+    resolve(GestureDisposition.accepted);
   }
 
   void _checkStart(Duration? timestamp, int pointer) {
@@ -504,33 +555,21 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
-
-    final DragEndDetails details;
-    final String Function() debugReport;
-
     final VelocityEstimate? estimate = tracker.getVelocityEstimate();
-    if (estimate != null && isFlingGesture(estimate, tracker.kind)) {
-      final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
-        .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-      details = DragEndDetails(
-        velocity: velocity,
-        primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
-      );
-      debugReport = () {
-        return '$estimate; fling at $velocity.';
-      };
+
+    DragEndDetails? details;
+    final String Function() debugReport;
+    if (estimate == null) {
+      debugReport = () => 'Could not estimate velocity.';
     } else {
-      details = DragEndDetails(
-        primaryVelocity: 0.0,
-      );
-      debugReport = () {
-        if (estimate == null) {
-          return 'Could not estimate velocity.';
-        }
-        return '$estimate; judged to not be a fling.';
-      };
+      details = _considerFling(estimate, tracker.kind);
+      debugReport = (details != null)
+        ? () => '$estimate; fling at ${details!.velocity}.'
+        : () => '$estimate; judged to not be a fling.';
     }
-    invokeCallback<void>('onEnd', () => onEnd!(details), debugReport: debugReport);
+    details ??= DragEndDetails(primaryVelocity: 0.0);
+
+    invokeCallback<void>('onEnd', () => onEnd!(details!), debugReport: debugReport);
   }
 
   void _checkCancel() {
@@ -579,6 +618,19 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
+  DragEndDetails? _considerFling(VelocityEstimate estimate, PointerDeviceKind kind) {
+    if (!isFlingGesture(estimate, kind)) {
+      return null;
+    }
+    final double maxVelocity = maxFlingVelocity ?? kMaxFlingVelocity;
+    final double dy = clampDouble(estimate.pixelsPerSecond.dy, -maxVelocity, maxVelocity);
+    return DragEndDetails(
+      velocity: Velocity(pixelsPerSecond: Offset(0, dy)),
+      primaryVelocity: dy,
+    );
+  }
+
+  @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
     return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
@@ -621,6 +673,19 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }
 
   @override
+  DragEndDetails? _considerFling(VelocityEstimate estimate, PointerDeviceKind kind) {
+    if (!isFlingGesture(estimate, kind)) {
+      return null;
+    }
+    final double maxVelocity = maxFlingVelocity ?? kMaxFlingVelocity;
+    final double dx = clampDouble(estimate.pixelsPerSecond.dx, -maxVelocity, maxVelocity);
+    return DragEndDetails(
+      velocity: Velocity(pixelsPerSecond: Offset(dx, 0)),
+      primaryVelocity: dx,
+    );
+  }
+
+  @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
     return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
@@ -658,6 +723,16 @@ class PanGestureRecognizer extends DragGestureRecognizer {
     final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
     return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity
         && estimate.offset.distanceSquared > minDistance * minDistance;
+  }
+
+  @override
+  DragEndDetails? _considerFling(VelocityEstimate estimate, PointerDeviceKind kind) {
+    if (!isFlingGesture(estimate, kind)) {
+      return null;
+    }
+    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
+        .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
+    return DragEndDetails(velocity: velocity);
   }
 
   @override

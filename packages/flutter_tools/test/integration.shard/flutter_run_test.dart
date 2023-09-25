@@ -68,4 +68,10 @@ void main() {
       matches: isNotEmpty,
     );
   });
+
+  testWithoutContext('reports deviceId and mode in app.start event', () async {
+    await flutter.run();
+    expect(flutter.currentRunningDeviceId, 'flutter-tester');
+    expect(flutter.currentRunningMode, 'debug');
+  });
 }

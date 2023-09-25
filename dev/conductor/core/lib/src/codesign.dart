@@ -99,7 +99,7 @@ class CodesignCommand extends Command<void> {
       );
     }
 
-    if (argResults!['verify'] as bool != true) {
+    if (!(argResults!['verify'] as bool)) {
       throw ConductorException(
         'Sorry, but codesigning is not implemented yet. Please pass the '
         '--$kVerify flag to verify signatures.',
@@ -125,7 +125,15 @@ class CodesignCommand extends Command<void> {
     await framework.checkout(revision);
 
     // Ensure artifacts present
-    await framework.runFlutter(<String>['precache', '--android', '--ios', '--macos']);
+    final io.ProcessResult result = await framework.runFlutter(
+      <String>['precache', '--android', '--ios', '--macos'],
+    );
+    if (result.exitCode != 0) {
+      stdio.printError(
+        'flutter precache: exitCode: ${result.exitCode}\n'
+        'stdout:\n${result.stdout}\nstderr:\n${result.stderr}',
+      );
+    }
 
     await verifyExist();
     if (argResults![kSignatures] as bool) {
@@ -170,6 +178,7 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/dart',
       'dart-sdk/bin/dartaotruntime',
       'dart-sdk/bin/utils/gen_snapshot',
+      'dart-sdk/bin/utils/wasm-opt',
     ]
         .map((String relativePath) =>
             fileSystem.path.join(frameworkCacheDirectory, relativePath))
@@ -192,10 +201,16 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64/libtessellator.dylib',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+      'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+      'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
     ]
         .map((String relativePath) =>

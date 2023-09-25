@@ -18,13 +18,9 @@ import 'object.dart';
 /// container, this class has no width and height members. To determine the
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
-///
-/// The fields [left], [right], [bottom], and [top] must not be null.
 @immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
-  ///
-  /// The arguments must not be null.
   const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
@@ -76,11 +72,9 @@ class RelativeRect {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
 
     return RelativeRect.fromLTRB(left, top, right, bottom);
@@ -437,7 +431,16 @@ class RenderStack extends RenderBox
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Stacks only clip children whose geometry overflow the stack. A child that
+  /// paints outside its bounds (e.g. a box with a shadow) will not be clipped,
+  /// regardless of the value of this property. Similarly, a child that itself
+  /// has a descendant that overflows the stack will not be clipped, as only the
+  /// geometry of the stack's direct children are considered.
+  ///
+  /// To clip children whose geometry does not overflow the stack, consider
+  /// using a [RenderClipRect] render object.
+  ///
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -562,18 +565,11 @@ class RenderStack extends RenderBox
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
-    final BoxConstraints nonPositionedConstraints;
-    switch (fit) {
-      case StackFit.loose:
-        nonPositionedConstraints = constraints.loosen();
-        break;
-      case StackFit.expand:
-        nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-        break;
-      case StackFit.passthrough:
-        nonPositionedConstraints = constraints;
-        break;
-    }
+    final BoxConstraints nonPositionedConstraints = switch (fit) {
+      StackFit.loose => constraints.loosen(),
+      StackFit.expand => BoxConstraints.tight(constraints.biggest),
+      StackFit.passthrough => constraints,
+    };
 
     RenderBox? child = firstChild;
     while (child != null) {

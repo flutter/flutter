@@ -5,7 +5,10 @@
 import 'template.dart';
 
 class InputChipTemplate extends TokenTemplate {
-  const InputChipTemplate(super.blockName, super.fileName, super.tokens);
+  const InputChipTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   static const String tokenGroup = 'md.comp.input-chip';
   static const String variant = '';
@@ -13,7 +16,7 @@ class InputChipTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
-  const _${blockName}DefaultsM3(this.context, this.isEnabled, this.isSelected)
+  _${blockName}DefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: ${elevation("$tokenGroup$variant.container")},
         shape: ${shape("$tokenGroup.container")},
@@ -23,12 +26,26 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   final BuildContext context;
   final bool isEnabled;
   final bool isSelected;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
 
   @override
-  Color? get backgroundColor => ${componentColor("$tokenGroup$variant.container")};
+  MaterialStateProperty<Color?>? get color =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return ${componentColor("$tokenGroup$variant.disabled.selected.container")};
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return ${componentColor("$tokenGroup$variant.disabled.container")};
+      }
+      if (states.contains(MaterialState.selected)) {
+        return ${componentColor("$tokenGroup$variant.selected.container")};
+      }
+      return ${componentColor("$tokenGroup$variant.container")};
+    });
 
   @override
   Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
@@ -37,15 +54,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get selectedColor => isEnabled
-    ? ${componentColor("$tokenGroup$variant.selected.container")}
-    : ${componentColor("$tokenGroup$variant.disabled.selected.container")};
-
-  @override
   Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
-
-  @override
-  Color? get disabledColor => ${componentColor("$tokenGroup$variant.disabled.container")};
 
   @override
   Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
@@ -62,7 +71,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
     color: isEnabled
       ? ${color("$tokenGroup.with-leading-icon.leading-icon.color")}
       : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
-    size: ${tokens["$tokenGroup.with-leading-icon.leading-icon.size"]},
+    size: ${getToken("$tokenGroup.with-leading-icon.leading-icon.size")},
   );
 
   @override
@@ -76,7 +85,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
   )!;
 }
 ''';

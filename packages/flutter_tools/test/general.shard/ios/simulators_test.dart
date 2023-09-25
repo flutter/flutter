@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -771,14 +772,16 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     late FakeProcessManager fakeProcessManager;
     Xcode xcode;
     late SimControl simControl;
+    late BufferLogger logger;
     const String deviceId = 'smart-phone';
     const String appId = 'flutterApp';
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
+      logger = BufferLogger.test();
       simControl = SimControl(
-        logger: BufferLogger.test(),
+        logger: logger,
         processManager: fakeProcessManager,
         xcode: xcode,
       );
@@ -931,6 +934,159 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       expect(await iosSimulator.stopApp(null), isFalse);
     });
+
+    testWithoutContext('listAvailableIOSRuntimes succeeds', () async {
+      const String validRuntimesOutput = '''
+{
+  "runtimes" : [
+    {
+      "bundlePath" : "/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 15.4.simruntime",
+      "buildversion" : "19E240",
+      "platform" : "iOS",
+      "runtimeRoot" : "/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 15.4.simruntime/Contents/Resources/RuntimeRoot",
+      "identifier" : "com.apple.CoreSimulator.SimRuntime.iOS-15-4",
+      "version" : "15.4",
+      "isInternal" : false,
+      "isAvailable" : true,
+      "name" : "iOS 15.4",
+      "supportedDeviceTypes" : [
+        {
+          "bundlePath" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone 6s.simdevicetype",
+          "name" : "iPhone 6s",
+          "identifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-6s",
+          "productFamily" : "iPhone"
+        },
+        {
+          "bundlePath" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone 6s Plus.simdevicetype",
+          "name" : "iPhone 6s Plus",
+          "identifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-6s-Plus",
+          "productFamily" : "iPhone"
+        }
+      ]
+    },
+    {
+      "bundlePath" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime",
+      "buildversion" : "20E247",
+      "platform" : "iOS",
+      "runtimeRoot" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot",
+      "identifier" : "com.apple.CoreSimulator.SimRuntime.iOS-16-4",
+      "version" : "16.4",
+      "isInternal" : false,
+      "isAvailable" : true,
+      "name" : "iOS 16.4",
+      "supportedDeviceTypes" : [
+        {
+          "bundlePath" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone 8.simdevicetype",
+          "name" : "iPhone 8",
+          "identifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-8",
+          "productFamily" : "iPhone"
+        },
+        {
+          "bundlePath" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone 8 Plus.simdevicetype",
+          "name" : "iPhone 8 Plus",
+          "identifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-8-Plus",
+          "productFamily" : "iPhone"
+        }
+      ]
+    },
+    {
+      "bundlePath" : "/Library/Developer/CoreSimulator/Volumes/iOS_21A5268h/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 17.0.simruntime",
+      "buildversion" : "21A5268h",
+      "platform" : "iOS",
+      "runtimeRoot" : "/Library/Developer/CoreSimulator/Volumes/iOS_21A5268h/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 17.0.simruntime/Contents/Resources/RuntimeRoot",
+      "identifier" : "com.apple.CoreSimulator.SimRuntime.iOS-17-0",
+      "version" : "17.0",
+      "isInternal" : false,
+      "isAvailable" : true,
+      "name" : "iOS 17.0",
+      "supportedDeviceTypes" : [
+        {
+          "bundlePath" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone 8.simdevicetype",
+          "name" : "iPhone 8",
+          "identifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-8",
+          "productFamily" : "iPhone"
+        },
+        {
+          "bundlePath" : "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone 8 Plus.simdevicetype",
+          "name" : "iPhone 8 Plus",
+          "identifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-8-Plus",
+          "productFamily" : "iPhone"
+        }
+      ]
+    }
+  ]
+}
+
+''';
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'list',
+          'runtimes',
+          'available',
+          'iOS',
+          '--json',
+        ],
+        stdout: validRuntimesOutput,
+      ));
+
+      final List<IOSSimulatorRuntime> runtimes = await simControl.listAvailableIOSRuntimes();
+
+      final IOSSimulatorRuntime runtime1 = runtimes[0];
+      expect(runtime1.bundlePath, '/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 15.4.simruntime');
+      expect(runtime1.buildVersion, '19E240');
+      expect(runtime1.platform, 'iOS');
+      expect(runtime1.runtimeRoot, '/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 15.4.simruntime/Contents/Resources/RuntimeRoot');
+      expect(runtime1.identifier, 'com.apple.CoreSimulator.SimRuntime.iOS-15-4');
+      expect(runtime1.version, Version(15, 4, null));
+      expect(runtime1.isInternal, false);
+      expect(runtime1.isAvailable, true);
+      expect(runtime1.name, 'iOS 15.4');
+
+      final IOSSimulatorRuntime runtime2 = runtimes[1];
+      expect(runtime2.bundlePath, '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime');
+      expect(runtime2.buildVersion, '20E247');
+      expect(runtime2.platform, 'iOS');
+      expect(runtime2.runtimeRoot, '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot');
+      expect(runtime2.identifier, 'com.apple.CoreSimulator.SimRuntime.iOS-16-4');
+      expect(runtime2.version, Version(16, 4, null));
+      expect(runtime2.isInternal, false);
+      expect(runtime2.isAvailable, true);
+      expect(runtime2.name, 'iOS 16.4');
+
+      final IOSSimulatorRuntime runtime3 = runtimes[2];
+      expect(runtime3.bundlePath, '/Library/Developer/CoreSimulator/Volumes/iOS_21A5268h/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 17.0.simruntime');
+      expect(runtime3.buildVersion, '21A5268h');
+      expect(runtime3.platform, 'iOS');
+      expect(runtime3.runtimeRoot, '/Library/Developer/CoreSimulator/Volumes/iOS_21A5268h/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 17.0.simruntime/Contents/Resources/RuntimeRoot');
+      expect(runtime3.identifier, 'com.apple.CoreSimulator.SimRuntime.iOS-17-0');
+      expect(runtime3.version, Version(17, 0, null));
+      expect(runtime3.isInternal, false);
+      expect(runtime3.isAvailable, true);
+      expect(runtime3.name, 'iOS 17.0');
+    });
+
+    testWithoutContext('listAvailableIOSRuntimes handles bad simctl output', () async {
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'simctl',
+          'list',
+          'runtimes',
+          'available',
+          'iOS',
+          '--json',
+        ],
+        stdout: 'Install Started',
+      ));
+
+      final List<IOSSimulatorRuntime> runtimes = await simControl.listAvailableIOSRuntimes();
+
+      expect(runtimes, isEmpty);
+      expect(logger.errorText, contains('simctl returned non-JSON response:'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
   });
 
   group('startApp', () {
@@ -1041,8 +1197,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         cacheSkSL: true,
         purgePersistentCache: true,
         dartFlags: '--baz',
+        enableImpeller: ImpellerStatus.disabled,
         nullAssertions: true,
-        enableImpeller: true,
         hostVmServicePort: 0,
       );
 
@@ -1065,8 +1221,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         '--verbose-logging',
         '--cache-sksl',
         '--purge-persistent-cache',
+        '--enable-impeller=false',
         '--dart-flags=--baz,--null_assertions',
-        '--enable-impeller',
         '--vm-service-port=0',
       ]));
     }, overrides: <Type, Generator>{
@@ -1204,7 +1360,7 @@ class FakeSimControl extends Fake implements SimControl {
 
   @override
   Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String>? launchArgs ]) async {
-    requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
+    requests.add(LaunchRequest(appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
 
@@ -1215,9 +1371,8 @@ class FakeSimControl extends Fake implements SimControl {
 }
 
 class LaunchRequest {
-  const LaunchRequest(this.deviceId, this.appIdentifier, this.launchArgs);
+  const LaunchRequest(this.appIdentifier, this.launchArgs);
 
-  final String deviceId;
   final String appIdentifier;
   final List<String>? launchArgs;
 }

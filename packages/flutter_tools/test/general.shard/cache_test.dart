@@ -334,6 +334,37 @@ void main() {
       expect(logger.warningText, contains('Flutter assets will be downloaded from $baseUrl'));
       expect(logger.statusText, isEmpty);
     });
+
+    testWithoutContext('a non-empty realm is included in the storage url', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Directory internalDir = fileSystem.currentDirectory
+        .childDirectory('cache')
+        .childDirectory('bin')
+        .childDirectory('internal');
+      final File engineVersionFile = internalDir.childFile('engine.version');
+      engineVersionFile.createSync(recursive: true);
+      engineVersionFile.writeAsStringSync('abcdef');
+
+      final File engineRealmFile = internalDir.childFile('engine.realm');
+      engineRealmFile.createSync(recursive: true);
+      engineRealmFile.writeAsStringSync('flutter_archives_v2');
+
+      final Cache cache = Cache.test(
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+      );
+
+      expect(cache.storageBaseUrl, contains('flutter_archives_v2'));
+    });
+
+    test('bin/internal/engine.realm is empty', () async {
+      final FileSystem fileSystem = globals.fs;
+      final String realmFilePath = fileSystem.path.join(
+        getFlutterRoot(), 'bin', 'internal', 'engine.realm');
+      final String realm = fileSystem.file(realmFilePath).readAsStringSync().trim();
+      expect(realm, isEmpty,
+        reason: 'The checked-in engine.realm file must be empty.');
+    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {
@@ -880,6 +911,31 @@ void main() {
     ));
   });
 
+  testWithoutContext('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final File canvasKitWasm = fileSystem.file(fileSystem.path.join(
+      cache.getRoot().path,
+      'canvaskit',
+      'canvaskit.wasm',
+    ));
+    canvasKitWasm.createSync(recursive: true);
+    canvasKitWasm.writeAsStringSync('hello world');
+
+    final LegacyCanvasKitRemover remover = LegacyCanvasKitRemover(cache);
+    expect(await remover.isUpToDate(fileSystem), false);
+    await remover.update(
+      FakeArtifactUpdater(),
+      BufferLogger.test(),
+      fileSystem,
+      FakeOperatingSystemUtils(),
+    );
+    expect(await remover.isUpToDate(fileSystem), true);
+
+    expect(canvasKitWasm.existsSync(), isFalse);
+  });
+
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
@@ -978,6 +1034,13 @@ void main() {
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
     expect(pub.calledGet, 1);
+    expect(
+      pub.invocations.first,
+      predicate<FakePubInvocation>(
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        'Pub invoked with PubOutputMode.none',
+      ),
+    );
   });
 
   testUsingContext('Check current DevTools version', () async {
@@ -1010,7 +1073,11 @@ void main() {
     });
 
     testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(
+        cache!,
+        java: FakeJava(),
+        platform: FakePlatform(),
+      );
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
@@ -1018,7 +1085,11 @@ void main() {
       final String? oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
       try {
-        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(
+          cache!,
+          java: FakeJava(),
+          platform: FakePlatform(),
+        );
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
 
         final Directory gradleWrapperDir = cache!.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
@@ -1050,7 +1121,11 @@ void main() {
     });
 
     testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(
+        cache!,
+        java: FakeJava(),
+        platform: FakePlatform(),
+      );
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
 
       await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem!, FakeOperatingSystemUtils());
@@ -1172,8 +1247,17 @@ class FakeVersionedPackageResolver extends Fake implements VersionedPackageResol
   }
 }
 
+class FakePubInvocation {
+  FakePubInvocation({
+    required this.outputMode,
+  });
+
+  final PubOutputMode outputMode;
+}
+
 class FakePub extends Fake implements Pub {
-  int calledGet = 0;
+  final List<FakePubInvocation> invocations = <FakePubInvocation>[];
+  int get calledGet => invocations.length;
 
   @override
   Future<void> get({
@@ -1188,7 +1272,7 @@ class FakePub extends Fake implements Pub {
     bool printProgress = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    calledGet += 1;
+    invocations.add(FakePubInvocation(outputMode: outputMode));
   }
 }
 

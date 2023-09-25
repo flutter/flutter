@@ -2,20 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
+// We use .bin as the extension since it is well-known to represent
+// data in some arbitrary binary format.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
 
+// We use the same bin file for the web, but re-encoded as JSON(base64(bytes))
+// so it can be downloaded by even the dumbest of browsers.
+// See https://github.com/flutter/flutter/issues/128456
+const String _kAssetManifestWebFilename = 'AssetManifest.bin.json';
+
 /// Contains details about available assets and their variants.
-/// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
+/// See [Resolution-aware image assets](https://docs.flutter.dev/ui/assets-and-images#resolution-aware)
 /// to learn about asset variants and how to declare them.
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
   static Future<AssetManifest> loadFromAssetBundle(AssetBundle bundle) {
+    // The AssetManifest file contains binary data.
+    //
+    // On the web, the build process wraps this binary data in json+base64 so
+    // it can be transmitted over the network without special configuration
+    // (see #131382).
+    if (kIsWeb) {
+      // On the web, the AssetManifest is downloaded as a String, then
+      // json+base64-decoded to get to the binary data.
+      return bundle.loadStructuredData(_kAssetManifestWebFilename, (String jsonData) async {
+        // Decode the manifest JSON file to the underlying BIN, and convert to ByteData.
+        final ByteData message = ByteData.sublistView(base64.decode(json.decode(jsonData) as String));
+        // Now we can keep operating as usual.
+        return _AssetManifestBin.fromStandardMessageCodecMessage(message);
+      });
+    }
+    // On every other platform, the binary file contents are used directly.
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
 
@@ -26,18 +51,16 @@ abstract class AssetManifest {
   /// file at build time.
   ///
   /// See [Specifying assets](https://docs.flutter.dev/development/ui/assets-and-images#specifying-assets)
-  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets) for more
-  /// information.
+  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets)
+  /// for more information.
   List<String> listAssets();
 
-  /// Retrieves metadata about an asset and its variants.
+  /// Retrieves metadata about an asset and its variants. Returns null if the
+  /// key was not found in the asset manifest.
   ///
-  /// This method considers a main asset to be a variant of itself and
-  /// includes it in the returned list.
-  ///
-  /// Throws an [ArgumentError] if [key] cannot be found within the manifest. To
-  /// avoid this, use a key obtained from the [listAssets] method.
-  List<AssetMetadata> getAssetVariants(String key);
+  /// This method considers a main asset to be a variant of itself. The returned
+  /// list will include it if it exists.
+  List<AssetMetadata>? getAssetVariants(String key);
 }
 
 // Lazily parses the binary asset manifest into a data structure that's easier to work
@@ -64,33 +87,32 @@ class _AssetManifestBin implements AssetManifest {
   final Map<String, List<AssetMetadata>> _typeCastedData = <String, List<AssetMetadata>>{};
 
   @override
-  List<AssetMetadata> getAssetVariants(String key) {
+  List<AssetMetadata>? getAssetVariants(String key) {
     // We lazily delay typecasting to prevent a performance hiccup when parsing
     // large asset manifests. This is important to keep an app's first asset
     // load fast.
     if (!_typeCastedData.containsKey(key)) {
       final Object? variantData = _data[key];
       if (variantData == null) {
-        throw ArgumentError('Asset key $key was not found within the asset manifest.');
+        return null;
       }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> data) => AssetMetadata(
+        .map((Map<Object?, Object?> data) {
+          final String asset = data['asset']! as String;
+          final Object? dpr = data['dpr'];
+          return AssetMetadata(
             key: data['asset']! as String,
-            targetDevicePixelRatio: data['dpr']! as double,
-            main: false,
-        ))
+            targetDevicePixelRatio: dpr as double?,
+            main: key == asset,
+          );
+        })
         .toList();
 
       _data.remove(key);
     }
 
-    final AssetMetadata mainAsset = AssetMetadata(key: key,
-      targetDevicePixelRatio: null,
-      main: true
-    );
-
-    return <AssetMetadata>[mainAsset, ..._typeCastedData[key]!];
+    return _typeCastedData[key]!;
   }
 
   @override
@@ -117,7 +139,7 @@ class AssetMetadata {
   /// This will be null if the parent folder name is not a ratio value followed
   /// by an "x".
   ///
-  /// See [Declaring resolution-aware image assets](https://docs.flutter.dev/development/ui/assets-and-images#resolution-aware)
+  /// See [Resolution-aware image assets](https://docs.flutter.dev/development/ui/assets-and-images#resolution-aware)
   /// for more information.
   final double? targetDevicePixelRatio;
 
@@ -127,8 +149,5 @@ class AssetMetadata {
 
   /// Whether or not this is a main asset. In other words, this is true if
   /// this asset is not a variant of another asset.
-  ///
-  /// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
-  /// for more about asset variants.
   final bool main;
 }

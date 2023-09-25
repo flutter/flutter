@@ -12,8 +12,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -23,7 +23,7 @@ void main() {
     navigatorObserver = MockNavigatorObserver();
   });
 
-  testWidgets('Middle auto-populates with title', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Middle auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -53,7 +53,7 @@ void main() {
     expect(tester.getCenter(find.text('An iPod')).dx, 400.0);
   });
 
-  testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Large title auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -118,7 +118,7 @@ void main() {
     expect(tester.getCenter(find.byWidget(titles[0].widget)).dx, 400.0);
   });
 
-  testWidgets('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -138,7 +138,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
       CupertinoPageRoute<void>(
@@ -153,18 +153,19 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.widgetWithText(CupertinoNavigationBar, 'A Phone'), findsOneWidget);
     expect(tester.getCenter(find.text('A Phone')).dx, 400.0);
 
     // Also shows the previous page's title next to the back button.
     expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
-    // 3 paddings + 1 ahem character at font size 34.0.
-    expect(tester.getTopLeft(find.text('An iPod')).dx, 8.0 + 4.0 + 34.0 + 6.0);
+    // 3 paddings + 1 test font character at font size 34.0.
+    // The epsilon is needed since the text theme has a negative letter spacing thus.
+    expect(tester.getTopLeft(find.text('An iPod')).dx, moreOrLessEquals(8.0 + 4.0 + 34.0 + 6.0, epsilon: 0.5));
   });
 
-  testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Previous title is correct on first transition frame', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -207,7 +208,7 @@ void main() {
     expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
   });
 
-  testWidgets('Previous title stays up to date with changing routes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Previous title stays up to date with changing routes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -267,10 +268,11 @@ void main() {
     // from An iPod to Back (since An Internet communicator is too long to
     // fit in the back button).
     expect(find.widgetWithText(CupertinoButton, 'Back'), findsOneWidget);
-    expect(tester.getTopLeft(find.text('Back')).dx, 8.0 + 4.0 + 34.0 + 6.0);
+    // The epsilon is needed since the text theme has a negative letter spacing thus.
+    expect(tester.getTopLeft(find.text('Back')).dx, moreOrLessEquals(8.0 + 4.0 + 34.0 + 6.0, epsilon: 0.5));
   });
 
-  testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -376,7 +378,7 @@ void main() {
     );
   });
 
-  testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -415,65 +417,66 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(443.7, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(475.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(291.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(350.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(168.2, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(237.4, epsilon: 0.1));
+
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(149.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(89.5, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(48.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(54.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(26.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(33.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(14.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(20.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.41, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(12.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(3.0, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.4, epsilon: 0.1));
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(0.0, epsilon: 0.1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(156.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(411.03, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(308.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(484.35, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(431.7, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(530.67, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(510.4, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(557.61, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(551.8, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.88, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.8, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(583.86, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(585.6, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(590.26, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(592.6, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(594.58, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(596.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(597.66, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(600.0, epsilon: 0.1));
@@ -520,51 +523,51 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-70.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-55.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-137.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-111.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-192.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-161.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-227.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-200.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-246.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-226.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-255.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-242.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-260.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-251.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-264.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-257.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-266.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-261.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-263.0, epsilon: 1.0));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-198.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-83.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 360));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
   }
 
-  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: true);
   });
 
@@ -649,15 +652,15 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
   }
 
-  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: true);
   });
 
-  testWidgets('Animated push/pop is not linear', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Animated push/pop is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -673,43 +676,43 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
-    // The whole transition is 400ms based on CupertinoPageRoute.transitionDuration.
+    // The whole transition is 500ms based on CupertinoPageRoute.transitionDuration.
     // Break it up into small chunks.
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-87, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(537, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-69, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(609, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(301, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-136, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(362, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-220, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(141, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-191, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(192, epsilon: 1));
 
     // Finish the rest of the animation
-    await tester.pump(const Duration(milliseconds: 250));
+    await tester.pump(const Duration(milliseconds: 350));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-179, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(262, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-197, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(190, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(499, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-129, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(437, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-47, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(659, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-74, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(607, epsilon: 1));
   });
 
-  testWidgets('Dragged pop gesture is linear', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dragged pop gesture is linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -755,7 +758,7 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300));
   });
 
-  testWidgets('Pop gesture snapping is not linear', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Pop gesture snapping is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -802,7 +805,7 @@ void main() {
     );
   });
 
-  testWidgets('Snapped drags forwards and backwards should signal didStart/StopUserGesture', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Snapped drags forwards and backwards should signal didStart/StopUserGesture', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -856,7 +859,7 @@ void main() {
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/29596.
-  testWidgets('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         navigatorObservers: <NavigatorObserver>[navigatorObserver],
@@ -893,7 +896,7 @@ void main() {
     expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
   });
 
-  testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         navigatorObservers: <NavigatorObserver>[navigatorObserver],
@@ -950,7 +953,7 @@ void main() {
       );
     }
 
-    testWidgets('when route is not fullscreenDialog, it has a barrierColor', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when route is not fullscreenDialog, it has a barrierColor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: SizedBox.expand(),
@@ -965,7 +968,7 @@ void main() {
       expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, const Color(0x18000000));
     });
 
-    testWidgets('when route is a fullscreenDialog, it has no barrierColor', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when route is a fullscreenDialog, it has no barrierColor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: SizedBox.expand(),
@@ -980,7 +983,7 @@ void main() {
       expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, isNull);
     });
 
-    testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsShadowRect({required double dx, required Color color}) {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
           if (methodName != #drawRect) {
@@ -1060,7 +1063,7 @@ void main() {
       expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
       expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
 
-      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // At the end of the animation, the shadow approaches full transparency
       expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));
@@ -1070,7 +1073,7 @@ void main() {
       expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
     });
 
-    testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsNoShadows() {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
           if (methodName != #drawRect) {
@@ -1112,7 +1115,7 @@ void main() {
     });
   });
 
-  testWidgets('ModalPopup overlay dark mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ModalPopup overlay dark mode', (WidgetTester tester) async {
     late StateSetter stateSetter;
     Brightness brightness = Brightness.light;
 
@@ -1185,7 +1188,7 @@ void main() {
     );
   });
 
-  testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('During back swipe the route ignores input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
 
     final GlobalKey homeScaffoldKey = GlobalKey();
@@ -1248,7 +1251,7 @@ void main() {
     expect(pageTapCount, 1);
   });
 
-  testWidgets('showCupertinoModalPopup uses root navigator by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup uses root navigator by default', (WidgetTester tester) async {
     final PopupObserver rootObserver = PopupObserver();
     final PopupObserver nestedObserver = PopupObserver();
 
@@ -1281,7 +1284,7 @@ void main() {
     expect(nestedObserver.popupCount, 0);
   });
 
-  testWidgets('back swipe to screen edges does not dismiss the hero animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('back swipe to screen edges does not dismiss the hero animation', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     final UniqueKey container = UniqueKey();
     await tester.pumpWidget(CupertinoApp(
@@ -1351,7 +1354,7 @@ void main() {
     expect(firstPosition, greaterThan(thirdPosition));
   });
 
-  testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final PopupObserver rootObserver = PopupObserver();
     final PopupObserver nestedObserver = PopupObserver();
 
@@ -1385,7 +1388,7 @@ void main() {
     expect(nestedObserver.popupCount, 1);
   });
 
-  testWidgets('showCupertinoDialog uses root navigator by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoDialog uses root navigator by default', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     final DialogObserver nestedObserver = DialogObserver();
 
@@ -1418,7 +1421,7 @@ void main() {
     expect(nestedObserver.dialogCount, 0);
   });
 
-  testWidgets('showCupertinoDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     final DialogObserver nestedObserver = DialogObserver();
 
@@ -1452,7 +1455,7 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
-  testWidgets('showCupertinoModalPopup does not allow for semantics dismiss by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup does not allow for semantics dismiss by default', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(CupertinoApp(
@@ -1487,7 +1490,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(CupertinoApp(
@@ -1523,7 +1526,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
     final RouteSettingsObserver routeSettingsObserver = RouteSettingsObserver();
 
     await tester.pumpWidget(CupertinoApp(
@@ -1554,7 +1557,7 @@ void main() {
     expect(routeSettingsObserver.routeName, '/modal');
   });
 
-  testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
     const Color kTransparentColor = Color(0x00000000);
 
     await tester.pumpWidget(CupertinoApp(
@@ -1580,7 +1583,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, null);
   });
 
-  testWidgets('showCupertinoModalPopup null barrier color must be default gray barrier color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup null barrier color must be default gray barrier color', (WidgetTester tester) async {
     // Barrier color for a Cupertino modal barrier.
     // Extracted from https://developer.apple.com/design/resources/.
     const Color kModalBarrierColor = CupertinoDynamicColor.withBrightness(
@@ -1610,7 +1613,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, kModalBarrierColor);
   });
 
-  testWidgets('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
     const Color customColor = Color(0x11223344);
 
     await tester.pumpWidget(CupertinoApp(
@@ -1636,7 +1639,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, customColor);
   });
 
-  testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1661,7 +1664,7 @@ void main() {
     expect(find.text('Visible'), findsNothing);
   });
 
-  testWidgets('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1687,7 +1690,7 @@ void main() {
     expect(find.text('Visible'), findsOneWidget);
   });
 
-  testWidgets('CupertinoPage works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
@@ -1702,6 +1705,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1728,6 +1732,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1746,7 +1751,7 @@ void main() {
     expect(find.widgetWithText(CupertinoNavigationBar, 'title two'), findsOneWidget);
   });
 
-  testWidgets('CupertinoPage can toggle MaintainState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoPage can toggle MaintainState', (WidgetTester tester) async {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
@@ -1756,6 +1761,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1777,6 +1783,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1793,7 +1800,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
   });
 
-  testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popping routes should cancel down events', (WidgetTester tester) async {
     await tester.pumpWidget(const _TestPostRouteCancel());
 
     final TestGesture gesture = await tester.createGesture();
@@ -1812,7 +1819,7 @@ void main() {
     expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
 
-  testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popping routes during back swipe should not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
 
     final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(builder: (BuildContext context) {
@@ -1862,7 +1869,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'app',
@@ -1893,7 +1900,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
   group('showCupertinoDialog avoids overlapping display features', () {
-    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning with anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -1931,7 +1938,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgets('positioning with Directionality', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning with Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -1971,7 +1978,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgets('positioning by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2010,7 +2017,7 @@ void main() {
   });
 
   group('showCupertinoModalPopup avoids overlapping display features', () {
-    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2048,7 +2055,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
     });
 
-    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2088,7 +2095,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
     });
 
-    testWidgets('default positioning', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default positioning', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2213,12 +2220,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 
 Widget buildNavigator({
   required List<Page<dynamic>> pages,
+  required FlutterView view,
   PopPageCallback? onPopPage,
   GlobalKey<NavigatorState>? key,
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromView(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromView(view),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

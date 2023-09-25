@@ -1,0 +1,32 @@
+name: Share a Flutter design document
+description: As a contributor, I would like to share a design document.
+labels: ['design doc']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your interest in contributing to Flutter!
+
+        Please ensure that you are following
+        https://github.com/flutter/flutter/wiki/Design-Documents
+        when sharing a design document.
+
+        Please fill out the sections below to the best of your ability.
+  - type: input
+    id: document_link
+    attributes:
+      label: Document Link
+      description: |
+        Insert the "https://flutter.dev/go" link for your document here.
+        For details on creating a link, see the instructions in
+        https://flutter.dev/go/template
+    validations:
+      required: true
+  - type: textarea
+    id: proposal_description
+    attributes:
+      label: What problem are you solving?
+      description: |
+        Please provide a brief description of the problem you are solving.
+    validations:
+      required: true

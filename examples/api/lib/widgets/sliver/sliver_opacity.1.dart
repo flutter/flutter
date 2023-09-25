@@ -2,34 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverOpacity].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SliverOpacity].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SliverOpacityExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SliverOpacityExampleApp extends StatelessWidget {
+  const SliverOpacityExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: SliverOpacityExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SliverOpacityExample extends StatefulWidget {
+  const SliverOpacityExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SliverOpacityExample> createState() => _SliverOpacityExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _SliverOpacityExampleState extends State<SliverOpacityExample> {
   static const List<Widget> _listItems = <Widget>[
     ListTile(title: Text('Now you see me,')),
     ListTile(title: Text("Now you don't!")),

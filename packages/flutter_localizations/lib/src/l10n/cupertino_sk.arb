@@ -31,5 +31,10 @@
   "selectAllButtonLabel": "Vybrať všetko",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Odmietnuť",
-  "searchTextFieldPlaceholderLabel": "Hľadať"
+  "searchTextFieldPlaceholderLabel": "Hľadať",
+  "noSpellCheckReplacementsLabel": "Nenašli sa žiadne náhrady",
+  "menuDismissLabel": "Zavrieť ponuku",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

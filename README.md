@@ -13,6 +13,7 @@
 [![codecov](https://codecov.io/gh/flutter/flutter/branch/master/graph/badge.svg?token=11yDrJU2M2)](https://codecov.io/gh/flutter/flutter)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5631/badge)](https://bestpractices.coreinfrastructure.org/projects/5631)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/flutter/badge)](https://deps.dev/project/github/flutter%2Fflutter)
+[![SLSA 1](https://slsa.dev/images/gh-badge-level1.svg)](https://slsa.dev)
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
@@ -99,7 +100,7 @@ Information on how to get started can be found in our
 [Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master
 [Discord instructions]: https://github.com/flutter/flutter/wiki/Chat
-[Discord badge]: https://img.shields.io/discord/608014603317936148
+[Discord badge]: https://img.shields.io/discord/608014603317936148?logo=discord
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://docs.flutter.dev/resources/inside-flutter

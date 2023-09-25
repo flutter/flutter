@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
@@ -112,7 +113,7 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
 }
 
 void main() {
-  testWidgets('ExpansionPanelList test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelList test', (WidgetTester tester) async {
     late int capturedIndex;
     late bool capturedIsExpanded;
 
@@ -144,7 +145,7 @@ void main() {
     expect(find.byType(ExpandIcon), findsOneWidget);
     await tester.tap(find.byType(ExpandIcon));
     expect(capturedIndex, 0);
-    expect(capturedIsExpanded, isFalse);
+    expect(capturedIsExpanded, isTrue);
     box = tester.renderObject(find.byType(ExpansionPanelList));
     expect(box.size.height, equals(oldHeight));
 
@@ -178,11 +179,12 @@ void main() {
     expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
   });
 
-  testWidgets('ExpansionPanelList does not merge header when canTapOnHeader is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelList does not merge header when canTapOnHeader is false', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final Key headerKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: ExpansionPanelListSemanticsTest(headerKey: headerKey),
       ),
     );
@@ -225,7 +227,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Multiple Panel List test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Multiple Panel List test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
@@ -264,7 +266,7 @@ void main() {
     expect(find.text('D'), findsOneWidget);
   });
 
-  testWidgets('Open/close animations', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Open/close animations', (WidgetTester tester) async {
     const Duration kSizeAnimationDuration = Duration(milliseconds: 1000);
     // The MaterialGaps animate in using kThemeAnimationDuration (hardcoded),
     // which should be less than our test size animation length. So we can assume that they
@@ -358,7 +360,7 @@ void main() {
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
 
-  testWidgets('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -497,7 +499,7 @@ void main() {
     expect(find.text('F'), findsNothing);
   });
 
-  testWidgets('Radio mode calls expansionCallback once if other panels closed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio mode calls expansionCallback once if other panels closed', (WidgetTester tester) async {
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -556,7 +558,7 @@ void main() {
     // Callback is invoked once with appropriate arguments
     expect(callbackHistory.length, equals(1));
     expect(callbackHistory.last['index'], equals(1));
-    expect(callbackHistory.last['isExpanded'], equals(false));
+    expect(callbackHistory.last['isExpanded'], equals(true));
 
     // Close the same panel
     await tester.tap(find.byType(ExpandIcon).at(1));
@@ -565,10 +567,10 @@ void main() {
     // Callback is invoked once with appropriate arguments
     expect(callbackHistory.length, equals(2));
     expect(callbackHistory.last['index'], equals(1));
-    expect(callbackHistory.last['isExpanded'], equals(true));
+    expect(callbackHistory.last['isExpanded'], equals(false));
   });
 
-  testWidgets('Radio mode calls expansionCallback twice if other panel open prior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio mode calls expansionCallback twice if other panel open prior', (WidgetTester tester) async {
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -630,7 +632,7 @@ void main() {
     expect(callbackHistory.length, equals(1));
     callbackResults = callbackHistory[callbackHistory.length - 1];
     expect(callbackResults['index'], equals(1));
-    expect(callbackResults['isExpanded'], equals(false));
+    expect(callbackResults['isExpanded'], equals(true));
 
     // Close a different panel
     await tester.tap(find.byType(ExpandIcon).at(2));
@@ -639,16 +641,111 @@ void main() {
     // Callback is invoked the first time with correct arguments
     expect(callbackHistory.length, equals(3));
     callbackResults = callbackHistory[callbackHistory.length - 2];
-    expect(callbackResults['index'], equals(2));
+    expect(callbackResults['index'], equals(1));
     expect(callbackResults['isExpanded'], equals(false));
 
     // Callback is invoked the second time with correct arguments
     callbackResults = callbackHistory[callbackHistory.length - 1];
-    expect(callbackResults['index'], equals(1));
-    expect(callbackResults['isExpanded'], equals(false));
+    expect(callbackResults['index'], equals(2));
+    expect(callbackResults['isExpanded'], equals(true));
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking('ExpansionPanelList.radio callback displays true or false based on the visibility of a list item',  (WidgetTester tester) async {
+    late int lastExpanded;
+    bool topElementExpanded = false;
+    bool bottomElementExpanded = false;
+
+    final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
+      // topElement
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'B' : 'A');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 0,
+      ),
+      // bottomElement
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'D' : 'C');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 1,
+      ),
+    ];
+
+    final ExpansionPanelList expansionListRadio = ExpansionPanelList.radio(
+      children: demoItemsRadio,
+      expansionCallback: (int index, bool isExpanded)
+      {
+        lastExpanded = index;
+        if (index == 0)
+        {
+          topElementExpanded = isExpanded;
+          bottomElementExpanded = false;
+        }
+        else
+        {
+          topElementExpanded = false;
+          bottomElementExpanded = isExpanded;
+        }
+      }
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: expansionListRadio,
+        ),
+      ),
+    );
+
+    // Initializes with all panels closed.
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    await tester.tap(find.byType(ExpandIcon).at(0));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+
+    // Now the first panel is open.
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    expect(lastExpanded,0);
+    expect(topElementExpanded,true);
+
+    await tester.tap(find.byType(ExpandIcon).at(1));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+
+    // Open the other panel and ensure the first is now closed.
+    expect(lastExpanded,1);
+    expect(bottomElementExpanded,true);
+    expect(topElementExpanded,false);
+    expect(find.text('D'), findsOneWidget);
+    expect(find.text('A'), findsOneWidget);
+
+    await tester.tap(find.byType(ExpandIcon).at(1));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+
+    // Close the item that was expanded should now be false.
+    expect(lastExpanded,1);
+    expect(bottomElementExpanded,false);
+
+    // All panels should be closed.
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking(
     'didUpdateWidget accounts for toggling between ExpansionPanelList '
     'and ExpansionPaneList.radio',
     (WidgetTester tester) async {
@@ -778,7 +875,7 @@ void main() {
     },
   );
 
-  testWidgets('No duplicate global keys at layout/build time', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('No duplicate global keys at layout/build time', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13780
     await tester.pumpWidget(
       StatefulBuilder(
@@ -902,7 +999,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Panel header has semantics, canTapOnHeader = false ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Panel header has semantics, canTapOnHeader = false ', (WidgetTester tester) async {
     const Key expandedKey = Key('expanded');
     const Key collapsedKey = Key('collapsed');
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
@@ -929,6 +1026,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: SingleChildScrollView(
           child: expansionList,
         ),
@@ -986,7 +1084,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Panel header has semantics, canTapOnHeader = true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Panel header has semantics, canTapOnHeader = true', (WidgetTester tester) async {
     const Key expandedKey = Key('expanded');
     const Key collapsedKey = Key('collapsed');
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -1039,7 +1137,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Ensure canTapOnHeader is false by default',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Ensure canTapOnHeader is false by default',  (WidgetTester tester) async {
     final ExpansionPanel expansionPanel = ExpansionPanel(
       headerBuilder: (BuildContext context, bool isExpanded) => const Text('Demo'),
       body: const SizedBox(height: 100.0),
@@ -1048,7 +1146,7 @@ void main() {
     expect(expansionPanel.canTapOnHeader, isFalse);
   });
 
-  testWidgets('Toggle ExpansionPanelRadio when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Toggle ExpansionPanelRadio when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1108,7 +1206,7 @@ void main() {
     expect(find.text('D'), findsOneWidget);
   });
 
-  testWidgets('Toggle ExpansionPanel when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Toggle ExpansionPanel when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1167,7 +1265,7 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('Do not toggle ExpansionPanel when tapping header and canTapOnHeader is false',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not toggle ExpansionPanel when tapping header and canTapOnHeader is false',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1207,7 +1305,7 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('Do not toggle ExpansionPanelRadio when tapping header and canTapOnHeader is false',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not toggle ExpansionPanelRadio when tapping header and canTapOnHeader is false',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1265,7 +1363,7 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('Correct default header padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Correct default header padding', (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
     await tester.pumpWidget(
@@ -1303,7 +1401,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/5848.
-  testWidgets('The AnimatedContainer and IconButton have the same height of 48px', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The AnimatedContainer and IconButton have the same height of 48px', (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
     await tester.pumpWidget(
@@ -1328,7 +1426,7 @@ void main() {
     expect(boxOfContainer.size.height, equals(48.0)); // Header should have 48px height according to Material 2 Design spec.
   });
 
-  testWidgets("The AnimatedContainer's height is at least kMinInteractiveDimension", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("The AnimatedContainer's height is at least kMinInteractiveDimension", (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
     await tester.pumpWidget(
@@ -1351,7 +1449,7 @@ void main() {
     expect(box.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
   });
 
-  testWidgets('Correct custom header padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Correct custom header padding', (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
     await tester.pumpWidget(
@@ -1389,7 +1487,7 @@ void main() {
     expect(box.size.width, equals(744.0));
   });
 
-  testWidgets('ExpansionPanelList respects dividerColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelList respects dividerColor', (WidgetTester tester) async {
     const Color dividerColor = Colors.red;
     await tester.pumpWidget(const MaterialApp(
       home: SingleChildScrollView(
@@ -1406,7 +1504,7 @@ void main() {
     expect(decoration.border!.top.color, dividerColor);
   });
 
-  testWidgets('ExpansionPanelList.radio respects DividerColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelList.radio respects DividerColor', (WidgetTester tester) async {
     const Color dividerColor = Colors.red;
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
@@ -1439,7 +1537,7 @@ void main() {
     expect(boxDecoration.border!.top.color, dividerColor);
   });
 
-  testWidgets('ExpansionPanelList respects expandIconColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelList respects expandIconColor', (WidgetTester tester) async {
     const Color expandIconColor = Colors.blue;
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
@@ -1463,7 +1561,7 @@ void main() {
     expect(expandIcon.color, expandIconColor);
   });
 
-  testWidgets('ExpansionPanelList.radio respects expandIconColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelList.radio respects expandIconColor', (WidgetTester tester) async {
     const Color expandIconColor = Colors.blue;
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
@@ -1488,7 +1586,7 @@ void main() {
     expect(expandIcon.color, expandIconColor);
   });
 
-  testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
     const double elevation = 8;
 
     // Test for ExpansionPanelList.
@@ -1530,7 +1628,7 @@ void main() {
     expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, elevation);
   });
 
-  testWidgets('Using a value non defined value throws assertion error', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Using a value non defined value throws assertion error', (WidgetTester tester) async {
 
     // It should throw an AssertionError since, 19 is not defined in kElevationToShadow.
     await tester.pumpWidget(const MaterialApp(
@@ -1549,7 +1647,7 @@ void main() {
     ));
   });
 
-  testWidgets('ExpansionPanel.panelColor test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanel.panelColor test', (WidgetTester tester) async {
     const Color firstPanelColor = Colors.red;
     const Color secondPanelColor = Colors.brown;
 
@@ -1585,7 +1683,7 @@ void main() {
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
 
-  testWidgets('ExpansionPanelRadio.backgroundColor test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelRadio.backgroundColor test', (WidgetTester tester) async {
     const Color firstPanelColor = Colors.red;
     const Color secondPanelColor = Colors.brown;
 
@@ -1618,5 +1716,91 @@ void main() {
 
     expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
+  });
+
+  testWidgetsWithLeakTracking('ExpansionPanelList.materialGapSize defaults to 16.0', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              },
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionPanelList expansionPanelList = tester.widget(find.byType(ExpansionPanelList));
+    expect(expansionPanelList.materialGapSize, 16);
+  });
+
+  testWidgetsWithLeakTracking('ExpansionPanelList respects materialGapSize', (WidgetTester tester) async {
+    Widget buildWidgetForTest({double materialGapSize = 16}) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            materialGapSize: materialGapSize,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                isExpanded: true,
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+              ExpansionPanel(
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidgetForTest(materialGapSize: 0));
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial.children.length, 3);
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
+    for (final MergeableMaterialItem e in mergeableMaterial.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 0);
+      }
+    }
+
+    await tester.pumpWidget(buildWidgetForTest(materialGapSize: 20));
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial2 = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial2.children.length, 3);
+    expect(mergeableMaterial2.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial2.children.whereType<MaterialSlice>().length, 2);
+    for (final MergeableMaterialItem e in mergeableMaterial2.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 20);
+      }
+    }
+
+    await tester.pumpWidget(buildWidgetForTest());
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial3 = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial3.children.length, 3);
+    expect(mergeableMaterial3.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial3.children.whereType<MaterialSlice>().length, 2);
+    for (final MergeableMaterialItem e in mergeableMaterial3.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 16);
+      }
+    }
   });
 }

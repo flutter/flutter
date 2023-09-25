@@ -112,9 +112,6 @@ class _TableElementRow {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Table extends RenderObjectWidget {
   /// Creates a table.
-  ///
-  /// The [children], [defaultColumnWidth], and [defaultVerticalAlignment]
-  /// arguments must not be null.
   Table({
     super.key,
     this.children = const <TableRow>[],
@@ -144,6 +141,12 @@ class Table extends RenderObjectWidget {
                'Otherwise, the table will contain holes.',
              );
            }
+           if (children.any((TableRow row) => row.children.isEmpty)) {
+             throw FlutterError(
+               'One or more TableRow have no children.\n'
+               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
+             );
+           }
          }
          return true;
        }()),
@@ -163,8 +166,7 @@ class Table extends RenderObjectWidget {
 
   /// The rows of the table.
   ///
-  /// Every row in a table must have the same number of children, and all the
-  /// children must be non-null.
+  /// Every row in a table must have the same number of children.
   final List<TableRow> children;
 
   /// How the horizontal extents of the columns of this table should be determined.
@@ -411,7 +413,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
     final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }

@@ -11,18 +11,17 @@ import 'dart:io';
 import 'common.dart';
 
 const List<String> expectedMainErrors = <String>[
+  'dev/bots/test/analyze-snippet-code-test-input/custom_imports_broken.dart:19:11: (statement) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:30:5: (expression) (unnecessary_new)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:103:5: (statement) (always_specify_types)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:111:5: (top-level declaration) (prefer_const_declarations)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:111:19: (top-level declaration) (unnecessary_nullable_for_final_variable_declarations)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:5: (top-level declaration) (prefer_const_declarations)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:21: (top-level declaration) (invalid_assignment)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:134:14: (top-level declaration) (argument_type_not_assignable)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:134:14: (top-level declaration) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:136:21: (top-level declaration) (read_potentially_unassigned_final)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:147:12: (self-contained program) (unused_import)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:11: (self-contained program) (undefined_class)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:22: (self-contained program) (avoid_dynamic_calls)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:22: (self-contained program) (undefined_function)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (annotate_overrides)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (must_call_super)',
@@ -34,6 +33,7 @@ const List<String> expectedMainErrors = <String>[
 
 const List<String> expectedUiErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (prefer_typing_uninitialized_variables)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (inference_failure_on_uninitialized_variable)',
   'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (missing_const_final_var_or_type)',
   'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (prefer_final_fields)',
   'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (unused_field)',
@@ -72,7 +72,7 @@ void main() {
     final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
-      'Found 19 snippet code errors.',
+      'Found 18 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);

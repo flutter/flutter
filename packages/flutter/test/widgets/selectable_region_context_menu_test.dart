@@ -2,52 +2,67 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: undefined_class, undefined_getter, undefined_setter
-
 @TestOn('browser') // This file contains web-only library.
 library;
-
-import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:web/web.dart' as web;
+
+extension on web.HTMLCollection {
+  Iterable<web.Element> get iterable => _genIterable(this);
+}
+extension on web.CSSRuleList {
+  Iterable<web.CSSRule> get iterable => _genIterable(this);
+}
+
+Iterable<T> _genIterable<T>(dynamic jsCollection) {
+  // ignore: avoid_dynamic_calls
+  return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
+}
 
 void main() {
-  html.Element? element;
-  final RegisterViewFactory originalFactory = PlatformSelectableRegionContextMenu.registerViewFactory;
-  PlatformSelectableRegionContextMenu.registerViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
-    element = fn(0) as html.Element;
+  web.HTMLElement? element;
+  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
+    element = fn(0) as web.HTMLElement;
     // The element needs to be attached to the document body to receive mouse
     // events.
-    html.document.body!.append(element!);
+    web.document.body!.append(element);
   };
   // This force register the dom element.
   PlatformSelectableRegionContextMenu(child: const Placeholder());
-  PlatformSelectableRegionContextMenu.registerViewFactory = originalFactory;
+  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = null;
 
   test('DOM element is set up correctly', () async {
     expect(element, isNotNull);
     expect(element!.style.width, '100%');
     expect(element!.style.height, '100%');
-    expect(element!.classes.length, 1);
-    final String className = element!.classes.first;
+    expect(element!.classList.length, 1);
+    final String className = element!.className;
 
-    expect(html.document.head!.children, isNotEmpty);
+    expect(web.document.head!.children.iterable, isNotEmpty);
     bool foundStyle = false;
-    for (final html.Element element in html.document.head!.children) {
-      if (element is! html.StyleElement) {
+    for (final web.Element element in web.document.head!.children.iterable) {
+      if (element.tagName != 'STYLE') {
         continue;
       }
-      final html.CssStyleSheet sheet = element.sheet! as html.CssStyleSheet;
-      foundStyle = sheet.rules!.any((html.CssRule rule) => rule.cssText!.contains(className));
+      final web.CSSRuleList? rules = (element as web.HTMLStyleElement).sheet?.rules;
+      if (rules != null) {
+        foundStyle = rules.iterable.any((web.CSSRule rule) => rule.cssText.contains(className));
+      }
+      if (foundStyle) {
+        break;
+      }
     }
     expect(foundStyle, isTrue);
   });
 
-  testWidgets('right click can trigger select word', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('right click can trigger select word', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
         MaterialApp(
@@ -65,11 +80,13 @@ void main() {
 
     // Dispatch right click.
     element!.dispatchEvent(
-      html.MouseEvent(
+      web.MouseEvent(
         'mousedown',
-        button: 2,
-        clientX: 200,
-        clientY: 300,
+        web.MouseEventInit(
+          button: 2,
+          clientX: 200,
+          clientY: 300,
+        ),
       ),
     );
     final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
@@ -143,30 +160,20 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  SelectionGeometry get value => _value;
-  SelectionGeometry _value = SelectionGeometry(
+  final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
-    if (other == _value) {
-      return;
-    }
-    _value = other;
-    for (final VoidCallback callback in listeners) {
-      callback();
-    }
-  }
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }

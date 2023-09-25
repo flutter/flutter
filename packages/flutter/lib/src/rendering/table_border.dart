@@ -227,7 +227,6 @@ class TableBorder {
               path.lineTo(rect.left + x, rect.bottom);
             }
             canvas.drawPath(path, paint);
-            break;
           case BorderStyle.none:
             break;
         }
@@ -246,13 +245,12 @@ class TableBorder {
               path.lineTo(rect.right, rect.top + y);
             }
             canvas.drawPath(path, paint);
-            break;
           case BorderStyle.none:
             break;
         }
       }
     }
-    if(!isUniform || borderRadius == BorderRadius.zero) {
+    if (!isUniform || borderRadius == BorderRadius.zero) {
       paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
     } else {
       final RRect outer = borderRadius.toRRect(rect);

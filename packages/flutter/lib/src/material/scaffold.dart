@@ -279,6 +279,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// the SnackBar to be visible.
   ///
   /// {@tool dartpad}
+  /// Here is an example showing how to display a [SnackBar] with [showSnackBar]
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
   /// Here is an example showing that a floating [SnackBar] appears above [Scaffold.floatingActionButton].
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
@@ -360,14 +366,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBars.isNotEmpty) {
           _snackBarController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         setState(() {
           assert(_snackBarTimer == null);
           // build will create a new timer if necessary to dismiss the snackBar.
         });
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -497,10 +501,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_materialBanners.isNotEmpty) {
           _materialBannerController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -1140,7 +1142,29 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       final double snackBarYOffsetBase;
-      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
+      final bool showAboveFab = switch (currentFloatingActionButtonLocation) {
+        FloatingActionButtonLocation.startTop
+        || FloatingActionButtonLocation.centerTop
+        || FloatingActionButtonLocation.endTop
+        || FloatingActionButtonLocation.miniStartTop
+        || FloatingActionButtonLocation.miniCenterTop
+        || FloatingActionButtonLocation.miniEndTop => false,
+        FloatingActionButtonLocation.startDocked
+        || FloatingActionButtonLocation.startFloat
+        || FloatingActionButtonLocation.centerDocked
+        || FloatingActionButtonLocation.centerFloat
+        || FloatingActionButtonLocation.endContained
+        || FloatingActionButtonLocation.endDocked
+        || FloatingActionButtonLocation.endFloat
+        || FloatingActionButtonLocation.miniStartDocked
+        || FloatingActionButtonLocation.miniStartFloat
+        || FloatingActionButtonLocation.miniCenterDocked
+        || FloatingActionButtonLocation.miniCenterFloat
+        || FloatingActionButtonLocation.miniEndDocked
+        || FloatingActionButtonLocation.miniEndFloat => true,
+        FloatingActionButtonLocation() => true,
+      };
+      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
         // SnackBarBehavior.fixed applies a SafeArea automatically.
@@ -1362,11 +1386,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
-      if (status == AnimationStatus.dismissed) {
+      if (widget.child != null && status == AnimationStatus.dismissed) {
         assert(widget.currentController.status == AnimationStatus.dismissed);
-        if (widget.child != null) {
-          widget.currentController.forward();
-        }
+        widget.currentController.forward();
       }
     });
   }
@@ -1440,8 +1462,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
 /// callback that increments a counter.
 ///
-/// ![The Scaffold has a white background with a blue AppBar at the top. A blue FloatingActionButton is positioned at the bottom right corner of the Scaffold.](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
-///
 /// ** See code in examples/api/lib/material/scaffold/scaffold.0.dart **
 /// {@end-tool}
 ///
@@ -1488,6 +1508,19 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// cause the body to avoid the padding. The [SafeArea]
 /// widget can be used within the scaffold's body to avoid areas
 /// like display notches.
+///
+/// ## Floating action button with a draggable scrollable bottom sheet
+///
+/// If [Scaffold.bottomSheet] is a [DraggableScrollableSheet],
+/// [Scaffold.floatingActionButton] is set, and the bottom sheet is dragged to
+/// cover greater than 70% of the Scaffold's height, two things happen in parallel:
+///
+///   * Scaffold starts to show scrim (see [ScaffoldState.showBodyScrim]), and
+///   * [Scaffold.floatingActionButton] is scaled down through an animation with a [Curves.easeIn], and
+///     disappears when the bottom sheet covers the entire Scaffold.
+///
+/// And as soon as the bottom sheet is dragged down to cover less than 70% of the [Scaffold], the scrim
+/// disappears and [Scaffold.floatingActionButton] animates back to its normal size.
 ///
 /// ## Troubleshooting
 ///
@@ -1609,7 +1642,7 @@ class Scaffold extends StatefulWidget {
   /// This is useful if the app bar's [AppBar.backgroundColor] is not
   /// completely opaque.
   ///
-  /// This property is false by default. It must not be null.
+  /// This property is false by default.
   ///
   /// See also:
   ///
@@ -2305,6 +2338,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
       bottomSheetKey.currentState!.close();
       setState(() {
+        _showBodyScrim = false;
+        _bodyScrimColor = Colors.black.withOpacity(0.0);
         _currentBottomSheet = null;
       });
 
@@ -2425,7 +2460,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
-  ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
+  ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
+  ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
   PersistentBottomSheetController<T> showBottomSheet<T>(
     WidgetBuilder builder, {
     Color? backgroundColor,
@@ -2480,7 +2516,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   double get _floatingActionButtonVisibilityValue => _floatingActionButtonVisibilityController.value;
 
   /// Sets the current value of the visibility animation for the
-  /// [Scaffold.floatingActionButton]. This value must not be null.
+  /// [Scaffold.floatingActionButton].
   set _floatingActionButtonVisibilityValue(double newValue) {
     _floatingActionButtonVisibilityController.value = clampDouble(newValue,
       _floatingActionButtonVisibilityController.lowerBound,
@@ -2716,8 +2752,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   Color _bodyScrimColor = Colors.black;
 
   /// Whether to show a [ModalBarrier] over the body of the scaffold.
-  ///
-  /// The `value` parameter must not be null.
   void showBodyScrim(bool value, double opacity) {
     if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
       return;
@@ -2926,7 +2960,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           removeRightPadding: false,
           removeBottomPadding: true,
         );
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -3045,8 +3078,6 @@ class ScaffoldFeatureController<T extends Widget, U> {
 /// curve specified with the [curve] argument, after the finger is released. In
 /// such a case, the value of [startingPoint] would be the progress of the
 /// animation at the time when the finger was released.
-///
-/// The [startingPoint] and [curve] arguments must not be null.
 class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   /// Creates a suspended curve.
   const _BottomSheetSuspendedCurve(
@@ -3183,7 +3214,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       scaffold.showBodyScrim(false, 0.0);
     }
     // If the Scaffold.bottomSheet != null, we're a persistent bottom sheet.
-    if (notification.extent == notification.minExtent && scaffold.widget.bottomSheet == null) {
+    if (notification.extent == notification.minExtent &&
+        scaffold.widget.bottomSheet == null &&
+        notification.shouldCloseOnMinExtent) {
       close();
     }
     return false;

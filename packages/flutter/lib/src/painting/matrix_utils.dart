@@ -8,11 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
-class MatrixUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  MatrixUtils._();
-
+abstract final class MatrixUtils {
   /// Returns the given [transform] matrix as an [Offset], if the matrix is
   /// nothing but a 2D translation.
   ///
@@ -545,8 +541,6 @@ List<String> debugDescribeTransform(Matrix4? transform) {
 /// Property which handles [Matrix4] that represent transforms.
 class TransformProperty extends DiagnosticsProperty<Matrix4> {
   /// Create a diagnostics property for [Matrix4] objects.
-  ///
-  /// The [showName] and [level] arguments must not be null.
   TransformProperty(
     String super.name,
     super.value, {

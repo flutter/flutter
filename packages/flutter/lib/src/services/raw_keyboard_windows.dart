@@ -27,9 +27,6 @@ const int _vkProcessKey = 0xe5;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataWindows extends RawKeyEventData {
   /// Creates a key event data structure specific for Windows.
-  ///
-  /// The [keyCode], [scanCode], [characterCodePoint], and [modifiers], arguments
-  /// must not be null.
   const RawKeyEventDataWindows({
     this.keyCode = 0,
     this.scanCode = 0,
@@ -122,32 +119,24 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
-        break;
       case ModifierKey.shiftModifier:
         result = _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
-        break;
       case ModifierKey.altModifier:
         result = _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
-        break;
       case ModifierKey.metaModifier:
         // Windows does not provide an "any" key for win key press.
         result = _isLeftRightModifierPressed(side, modifierLeftMeta | modifierRightMeta , modifierLeftMeta, modifierRightMeta);
-        break;
       case ModifierKey.capsLockModifier:
         result = modifiers & modifierCaps != 0;
-        break;
       case ModifierKey.scrollLockModifier:
         result = modifiers & modifierScrollLock != 0;
-        break;
       case ModifierKey.numLockModifier:
         result = modifiers & modifierNumLock != 0;
-        break;
       // The OS does not expose the Fn key to the drivers, it doesn't generate a key message.
       case ModifierKey.functionModifier:
       case ModifierKey.symbolModifier:
         // These modifier masks are not used in Windows keyboards.
         result = false;
-        break;
     }
     assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;

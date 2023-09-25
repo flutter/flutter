@@ -54,11 +54,6 @@ enum OverflowBarAlignment {
 /// {@end-tool}
 class OverflowBar extends MultiChildRenderObjectWidget {
   /// Constructs an OverflowBar.
-  ///
-  /// The [spacing], [overflowSpacing], [overflowAlignment],
-  /// [overflowDirection], and [clipBehavior] parameters must not be
-  /// null. The [children] argument must not be null and must not contain
-  /// any null objects.
   const OverflowBar({
     super.key,
     this.spacing = 0.0,
@@ -199,7 +194,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
@@ -497,13 +492,10 @@ class _RenderOverflowBar extends RenderBox
         switch (overflowAlignment) {
           case OverflowBarAlignment.start:
             x = rtl ? constraints.maxWidth - child.size.width : 0;
-            break;
           case OverflowBarAlignment.center:
             x = (constraints.maxWidth - child.size.width) / 2;
-            break;
           case OverflowBarAlignment.end:
             x = rtl ? 0 : constraints.maxWidth - child.size.width;
-            break;
         }
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;
@@ -522,29 +514,22 @@ class _RenderOverflowBar extends RenderBox
       switch (alignment) {
         case null:
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.start:
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.center:
           final double halfRemainingWidth = (size.width - actualWidth) / 2;
           x = rtl ? size.width - halfRemainingWidth - firstChildWidth : halfRemainingWidth;
-          break;
         case MainAxisAlignment.end:
           x = rtl ? actualWidth - firstChildWidth : size.width - actualWidth;
-          break;
         case MainAxisAlignment.spaceBetween:
           layoutSpacing = (size.width - childrenWidth) / (childCount - 1);
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.spaceAround:
           layoutSpacing = childCount > 0 ? (size.width - childrenWidth) / childCount : 0;
           x = rtl ? size.width - layoutSpacing / 2 - firstChildWidth : layoutSpacing / 2;
-          break;
         case MainAxisAlignment.spaceEvenly:
           layoutSpacing = (size.width - childrenWidth) / (childCount + 1);
           x = rtl ? size.width - layoutSpacing - firstChildWidth : layoutSpacing;
-          break;
       }
 
       while (child != null) {

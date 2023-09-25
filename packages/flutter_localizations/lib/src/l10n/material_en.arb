@@ -73,7 +73,7 @@
 
   "scrimLabel": "Scrim",
   "@scrimLabel": {
-    "description": "The label for the scrim rendered underneath the content of a modal route."
+    "description": "The label for the scrim rendered underneath the content of a bottom sheet (used as the 'modalRouteContentName' of the 'scrimOnTapHint' message)."
   },
 
   "bottomSheetLabel": "Bottom Sheet",
@@ -83,7 +83,7 @@
 
   "scrimOnTapHint": "Close $modalRouteContentName",
   "@scrimOnTapHint": {
-    "description": "The onTapHint for the scrim rendered underneath the content of a modal route which users can tap to dismiss the content",
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route (especially a bottom sheet) which users can tap to dismiss the content.",
     "parameters": "modalRouteContentName"
   },
 
@@ -192,6 +192,26 @@
     "description": "The label for cut buttons and menu items."
   },
 
+  "scanTextButtonLabel": "Scan text",
+  "@scanTextButtonLabel": {
+    "description": "The label for scan text buttons and menu items for starting the insertion of text via OCR."
+  },
+
+  "lookUpButtonLabel": "Look Up",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items on iOS."
+  },
+
+  "searchWebButtonLabel": "Search Web",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items on iOS."
+  },
+
+  "shareButtonLabel": "Share...",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items on iOS."
+  },
+
   "okButtonLabel": "OK",
   "@okButtonLabel": {
     "description": "The label for OK buttons and menu items."
@@ -235,6 +255,11 @@
   "modalBarrierDismissLabel": "Dismiss",
   "@modalBarrierDismissLabel": {
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+  },
+
+  "menuDismissLabel": "Dismiss menu",
+  "@menuDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
   },
 
   "dateSeparator": "/",
@@ -452,6 +477,36 @@
   "collapsedIconTapHint": "Expand",
   "@collapsedIconTapHint": {
     "description": "The verb which describes what happens when a collapsed ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileExpandedHint": "double tap to collapse",
+  "@expansionTileExpandedHint": {
+    "description": "The verb which describes the tap action on an expanded ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the collapsedHint string which describes the action to be performed on an expanded ExpansionTile. In the case of US english, this would be 'Expanded\n double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileCollapsedHint": "double tap to expand",
+  "@expansionTileCollapsedHint": {
+    "description": "The verb which describes the tap action on a collapsed ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed ExpansionTile. In the case of US english, this would be 'Collapsed\n double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileExpandedTapHint": "Collapse",
+  "@expansionTileExpandedTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "@expansionTileCollapsedTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand for more details.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expandedHint": "Collapsed",
+  "@expandedHint": {
+    "description": "The verb which describes the ExpansionTile state when an expanded ExpansionTile is pressed."
+  },
+
+  "collapsedHint": "Expanded",
+  "@collapsedHint": {
+    "description": "The verb which describes the ExpansionTile state when a collapsed ExpansionTile is pressed."
   },
 
   "remainingTextFieldCharacterCountZero": "No characters remaining",

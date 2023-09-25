@@ -37,11 +37,7 @@ import 'theme.dart';
 /// ### Background Colors
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_background_colors.png)
 ///
-class CupertinoColors {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  CupertinoColors._();
-
+abstract final class CupertinoColors {
   /// iOS 13's default blue color. Used to indicate active elements such as
   /// buttons, selected tabs and your own chat bubbles.
   ///
@@ -742,8 +738,6 @@ class CupertinoColors {
 class CupertinoDynamicColor extends Color with Diagnosticable {
   /// Creates an adaptive [Color] that changes its effective color based on the
   /// [BuildContext] given. The default effective color is [color].
-  ///
-  /// All the colors must not be null.
   const CupertinoDynamicColor({
     String? debugLabel,
     required Color color,
@@ -772,8 +766,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// given [BuildContext]'s brightness (from [MediaQueryData.platformBrightness]
   /// or [CupertinoThemeData.brightness]) and accessibility contrast setting
   /// ([MediaQueryData.highContrast]). The default effective color is [color].
-  ///
-  /// All the colors must not be null.
   const CupertinoDynamicColor.withBrightnessAndContrast({
     String? debugLabel,
     required Color color,
@@ -795,8 +787,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// Creates an adaptive [Color] that changes its effective color based on the given
   /// [BuildContext]'s brightness (from [MediaQueryData.platformBrightness] or
   /// [CupertinoThemeData.brightness]). The default effective color is [color].
-  ///
-  /// All the colors must not be null.
   const CupertinoDynamicColor.withBrightness({
     String? debugLabel,
     required Color color,
@@ -832,8 +822,8 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
 
   /// The current effective color.
   ///
-  /// Must not be null. Defaults to [color] if this [CupertinoDynamicColor] has
-  /// never been resolved.
+  /// Defaults to [color] if this [CupertinoDynamicColor] has never been
+  /// resolved.
   final Color _effectiveColor;
 
   @override
@@ -1041,20 +1031,15 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? highContrastColor : color;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
-            break;
         }
-        break;
       case Brightness.dark:
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? darkHighContrastColor : darkColor;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? darkHighContrastElevatedColor : darkElevatedColor;
-            break;
         }
     }
 
@@ -1135,7 +1120,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     if (_debugLabel != null) {
-      properties.add(MessageProperty('debugLabel', _debugLabel!));
+      properties.add(MessageProperty('debugLabel', _debugLabel));
     }
     properties.add(createCupertinoColorProperty('color', color));
     if (_isPlatformBrightnessDependent) {
@@ -1167,8 +1152,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
 }
 
 /// Creates a diagnostics property for [CupertinoDynamicColor].
-///
-/// The [showName], [style], and [level] arguments must not be null.
 DiagnosticsProperty<Color> createCupertinoColorProperty(
   String name,
   Color? value, {

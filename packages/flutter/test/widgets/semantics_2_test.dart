@@ -5,11 +5,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics 2', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // this test is the same as the test in Semantics 1, but
@@ -33,8 +34,8 @@ void main() {
             ),
             SizedBox(
               height: 10.0,
-              child: IgnorePointer(
-                ignoring: false,
+              child: ExcludeSemantics(
+                excluding: false,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
@@ -87,7 +88,7 @@ void main() {
             ),
             SizedBox(
               height: 10.0,
-              child: IgnorePointer(
+              child: ExcludeSemantics(
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
@@ -128,8 +129,8 @@ void main() {
             ),
             SizedBox(
               height: 10.0,
-              child: IgnorePointer(
-                ignoring: false,
+              child: ExcludeSemantics(
+                excluding: false,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,

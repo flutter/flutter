@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show clampDouble;
 
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'math.dart' show clampDouble;
 import 'object.dart';
 
 // Examples can assume:
@@ -42,6 +42,7 @@ import 'object.dart';
 // late Map<Listenable, VoidCallback>? handles;
 // late DiagnosticsTreeStyle style;
 // late IconData icon;
+// late double devicePixelRatio;
 
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
@@ -225,8 +226,6 @@ enum DiagnosticsTreeStyle {
 ///    to render text art for arbitrary trees of [DiagnosticsNode] objects.
 class TextTreeConfiguration {
   /// Create a configuration object describing how to render a tree as text.
-  ///
-  /// All of the arguments must not be null.
   TextTreeConfiguration({
     required this.prefixLineOne,
     required this.prefixOtherLines,
@@ -906,13 +905,11 @@ class _PrefixedStringBuilder {
           }
           lastWordStart = index;
           mode = _WordWrapParseMode.inWord;
-          break;
         case _WordWrapParseMode.inWord: // looking for a good break point. Treat all text
           while ((index < message.length) && (message[index] != ' ' || noWrap(index))) {
             index += 1;
           }
           mode = _WordWrapParseMode.atBreak;
-          break;
         case _WordWrapParseMode.atBreak: // at start of break point
           if ((index - startForLengthCalculations > width) || (index == message.length)) {
             // we are over the width line, so break
@@ -952,7 +949,6 @@ class _PrefixedStringBuilder {
             // skip to the end of this break point
             mode = _WordWrapParseMode.inSpace;
           }
-          break;
       }
     }
   }
@@ -1453,8 +1449,6 @@ abstract class DiagnosticsNode {
   /// Diagnostics containing just a string `message` and not a concrete name or
   /// value.
   ///
-  /// The [style] and [level] arguments must not be null.
-  ///
   /// See also:
   ///
   ///  * [MessageProperty], which is better suited to messages that are to be
@@ -1618,7 +1612,7 @@ abstract class DiagnosticsNode {
           'showSeparator': showSeparator,
         if (level != DiagnosticLevel.info)
           'level': level.name,
-        if (showName == false)
+        if (!showName)
           'showName': showName,
         if (emptyBodyDescription != null)
           'emptyBodyDescription': emptyBodyDescription,
@@ -1831,8 +1825,6 @@ class MessageProperty extends DiagnosticsProperty<void> {
   ///
   /// Messages have no concrete [value] (so [value] will return null). The
   /// message is stored as the description.
-  ///
-  /// The [name], `message`, and [level] arguments must not be null.
   MessageProperty(
     String name,
     String message, {
@@ -1849,8 +1841,6 @@ class MessageProperty extends DiagnosticsProperty<void> {
 ///    instead of describing a property with a string value.
 class StringProperty extends DiagnosticsProperty<String> {
   /// Create a diagnostics property for strings.
-  ///
-  /// The [showName], [quoted], [style], and [level] arguments must not be null.
   StringProperty(
     String super.name,
     super.value, {
@@ -1958,8 +1948,6 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
 /// Numeric formatting is optimized for debug message readability.
 class DoubleProperty extends _NumProperty<double> {
   /// If specified, [unit] describes the unit for the [value] (e.g. px).
-  ///
-  /// The [showName], [style], and [level] arguments must not be null.
   DoubleProperty(
     super.name,
     super.value, {
@@ -1976,8 +1964,6 @@ class DoubleProperty extends _NumProperty<double> {
   ///
   /// Use if computing the property [value] may throw an exception or is
   /// expensive.
-  ///
-  /// The [showName] and [level] arguments must not be null.
   DoubleProperty.lazy(
     super.name,
     super.computeValue, {
@@ -1998,8 +1984,6 @@ class DoubleProperty extends _NumProperty<double> {
 /// Examples of units include 'px' and 'ms'.
 class IntProperty extends _NumProperty<int> {
   /// Create a diagnostics property for integers.
-  ///
-  /// The [showName], [style], and [level] arguments must not be null.
   IntProperty(
     super.name,
     super.value, {
@@ -2024,8 +2008,6 @@ class PercentProperty extends DoubleProperty {
   /// Setting [showName] to false is often reasonable for [PercentProperty]
   /// objects, as the fact that the property is shown as a percentage tends to
   /// be sufficient to disambiguate its meaning.
-  ///
-  /// The [showName] and [level] arguments must not be null.
   PercentProperty(
     super.name,
     super.fraction, {
@@ -2098,8 +2080,6 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   ///
   /// [showName] defaults to false as typically [ifTrue] and [ifFalse] should
   /// be descriptions that make the property name redundant.
-  ///
-  /// The [showName] and [level] arguments must not be null.
   FlagProperty(
     String name, {
     required bool? value,
@@ -2161,7 +2141,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
     if (value == null || ((value ?? false) && ifTrue == null) || (!(value ?? true) && ifFalse == null)) {
       // We are missing a description for the flag value so we need to show the
       // flag name. The property will have DiagnosticLevel.hidden for this case
-      // so users will not see this the property in this case unless they are
+      // so users will not see this property in this case unless they are
       // displaying hidden properties.
       return true;
     }
@@ -2198,8 +2178,6 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// empty iterable [value] is not interesting to display similar to how
   /// [defaultValue] is used to indicate that a specific concrete value is not
   /// interesting to display.
-  ///
-  /// The [style], [showName], [showSeparator], and [level] arguments must not be null.
   IterableProperty(
     String super.name,
     super.value, {
@@ -2264,14 +2242,12 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   }
 }
 
-/// An property than displays enum values tersely.
+/// [DiagnosticsProperty] that has an [Enum] as value.
 ///
-/// The enum value is displayed with the class name stripped. For example:
+/// The enum value is displayed with the enum name stripped. For example:
 /// [HitTestBehavior.deferToChild] is shown as `deferToChild`.
 ///
-/// This class can be used with classes that appear like enums but are not
-/// "real" enums, so long as their `toString` implementation, in debug mode,
-/// returns a string consisting of the class name followed by the value name. It
+/// This class can be used with enums and returns the enum's name getter. It
 /// can also be used with nullable properties; the null value is represented as
 /// `null`.
 ///
@@ -2279,7 +2255,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 ///
 ///  * [DiagnosticsProperty] which documents named parameters common to all
 ///    [DiagnosticsProperty].
-class EnumProperty<T> extends DiagnosticsProperty<T> {
+class EnumProperty<T extends Enum?> extends DiagnosticsProperty<T> {
   /// Create a diagnostics property that displays an enum.
   ///
   /// The [level] argument must also not be null.
@@ -2295,7 +2271,7 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
     if (value == null) {
       return value.toString();
     }
-    return describeEnum(value!);
+    return value!.name;
   }
 }
 
@@ -2326,8 +2302,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   /// absent (null), but for which the exact value's [Object.toString]
   /// representation is not very transparent (e.g. a callback).
   ///
-  /// The [showName] and [level] arguments must not be null. Additionally, at
-  /// least one of [ifPresent] and [ifNull] must not be null.
+  /// At least one of [ifPresent] or [ifNull] must be non-null.
   ObjectFlagProperty(
     String super.name,
     super.value, {
@@ -2341,8 +2316,6 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   ///
   /// Only use if prefixing the property name with the word 'has' is a good
   /// flag name.
-  ///
-  /// The [name] and [level] arguments must not be null.
   ObjectFlagProperty.has(
     String super.name,
     super.value, {
@@ -2378,7 +2351,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
     if ((value != null && ifPresent == null) || (value == null && ifNull == null)) {
       // We are missing a description for the flag value so we need to show the
       // flag name. The property will have DiagnosticLevel.hidden for this case
-      // so users will not see this the property in this case unless they are
+      // so users will not see this property in this case unless they are
       // displaying hidden properties.
       return true;
     }
@@ -2519,9 +2492,6 @@ typedef ComputePropertyValueCallback<T> = T? Function();
 class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// Create a diagnostics property.
   ///
-  /// The [showName], [showSeparator], [style], [missingIfNull], and [level]
-  /// arguments must not be null.
-  ///
   /// The [level] argument is just a suggestion and can be overridden if
   /// something else about the property causes it to have a lower or higher
   /// level. For example, if the property value is null and [missingIfNull] is
@@ -2557,9 +2527,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   ///
   /// Use if computing the property [value] may throw an exception or is
   /// expensive.
-  ///
-  /// The [showName], [showSeparator], [style], [missingIfNull], and [level]
-  /// arguments must not be null.
   ///
   /// The [level] argument is just a suggestion and can be overridden
   /// if something else about the property causes it to have a lower or higher
@@ -2677,7 +2644,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   String toDescription({ TextTreeConfiguration? parentConfiguration }) {
     if (_description != null) {
-      return _addTooltip(_description!);
+      return _addTooltip(_description);
     }
 
     if (exception != null) {
@@ -2698,8 +2665,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// If a [tooltip] is specified, add the tooltip it to the end of `text`
   /// enclosing it parenthesis to disambiguate the tooltip from the rest of
   /// the text.
-  ///
-  /// `text` must not be null.
   String _addTooltip(String text) {
     return tooltip == null ? text : '$text ($tooltip)';
   }
@@ -2867,8 +2832,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 /// to implement [getChildren] and [getProperties].
 class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   /// Create a diagnostics describing a [Diagnosticable] value.
-  ///
-  /// The [value] argument must not be null.
   DiagnosticableNode({
     super.name,
     required this.value,
@@ -2977,11 +2940,16 @@ String describeIdentity(Object? object) => '${objectRuntimeType(object, '<optimi
 ///
 /// void validateDescribeEnum() {
 ///   assert(Day.monday.toString() == 'Day.monday');
+///   // ignore: deprecated_member_use
 ///   assert(describeEnum(Day.monday) == 'monday');
 ///   assert(Day.monday.name == 'monday'); // preferred for real enums
 /// }
 /// ```
 /// {@end-tool}
+@Deprecated(
+  'Use the `name` getter on enums instead. '
+  'This feature was deprecated after v3.10.0-1.1.pre.'
+)
 String describeEnum(Object enumEntry) {
   if (enumEntry is Enum) {
     return enumEntry.name;
@@ -3218,7 +3186,7 @@ mixin Diagnosticable {
   ///     // without a space.
   ///     properties.add(DoubleProperty(
   ///       'device pixel ratio',
-  ///       ui.window.devicePixelRatio,
+  ///       devicePixelRatio,
   ///       tooltip: 'physical pixels per logical pixel',
   ///     ));
   ///
@@ -3294,6 +3262,8 @@ mixin Diagnosticable {
   /// {@end-tool}
   ///
   /// Used by [toDiagnosticsNode] and [toString].
+  ///
+  /// Do not add values, that have lifetime shorter than the object.
   @protected
   @mustCallSuper
   void debugFillProperties(DiagnosticPropertiesBuilder properties) { }

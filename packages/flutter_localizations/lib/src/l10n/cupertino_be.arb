@@ -31,5 +31,10 @@
   "selectAllButtonLabel": "Выбраць усе",
   "tabSemanticsLabel": "Укладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Адхіліць",
-  "searchTextFieldPlaceholderLabel": "Пошук"
+  "searchTextFieldPlaceholderLabel": "Пошук",
+  "noSpellCheckReplacementsLabel": "Замен не знойдзена",
+  "menuDismissLabel": "Закрыць меню",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

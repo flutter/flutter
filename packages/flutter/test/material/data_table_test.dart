@@ -9,14 +9,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
 
 void main() {
-  testWidgets('DataTable control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     Widget buildTable({ int? sortColumnIndex, bool sortAscending = true }) {
@@ -159,7 +160,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('DataTable control test - tristate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable control test - tristate', (WidgetTester tester) async {
     final List<String> log = <String>[];
     const int numItems = 3;
     Widget buildTable(List<bool> selected, {int? disabledIndex}) {
@@ -229,7 +230,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable control test - no checkboxes', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     Widget buildTable({ bool checkboxes = false }) {
@@ -295,7 +296,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable overflow test - header', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -328,7 +329,7 @@ void main() {
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
   });
 
-  testWidgets('DataTable overflow test - header with spaces', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable overflow test - header with spaces', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -356,7 +357,7 @@ void main() {
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
-  testWidgets('DataTable overflow test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable overflow test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -384,7 +385,7 @@ void main() {
     expect(tester.takeException(), isNull); // cell overflows table, but text doesn't overflow cell
   });
 
-  testWidgets('DataTable overflow test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable overflow test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -412,7 +413,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable column onSort test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable column onSort test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -440,7 +441,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable sort indicator orientation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable sort indicator orientation', (WidgetTester tester) async {
     Widget buildTable({ bool sortAscending = true }) {
       return DataTable(
         sortColumnIndex: 0,
@@ -468,11 +469,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-    // The `tester.widget` ensures that there is exactly one upward arrow.
     final Finder iconFinder = find.descendant(
       of: find.byType(DataTable),
       matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
     );
+    // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -492,7 +493,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable sort indicator orientation does not change on state update', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable sort indicator orientation does not change on state update', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43724
     Widget buildTable({String title = 'Name1'}) {
       return DataTable(
@@ -520,11 +521,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-    // The `tester.widget` ensures that there is exactly one upward arrow.
     final Finder iconFinder = find.descendant(
       of: find.byType(DataTable),
       matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
     );
+    // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -544,7 +545,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable sort indicator orientation does not change on state update - reverse', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable sort indicator orientation does not change on state update - reverse', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43724
     Widget buildTable({String title = 'Name1'}) {
       return DataTable(
@@ -573,11 +574,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-    // The `tester.widget` ensures that there is exactly one upward arrow.
     final Finder iconFinder = find.descendant(
       of: find.byType(DataTable),
       matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
     );
+    // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -597,7 +598,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable row onSelectChanged test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -625,7 +626,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable custom row height', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable custom row height', (WidgetTester tester) async {
     Widget buildCustomTable({
       int? sortColumnIndex,
       bool sortAscending = true,
@@ -738,7 +739,7 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, greaterThan(0.0));
   });
 
-  testWidgets('DataTable custom row height one row taller than others', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable custom row height one row taller than others', (WidgetTester tester) async {
     const String multilineText = 'Line one.\nLine two.\nLine three.\nLine four.';
 
     Widget buildCustomTable({
@@ -779,7 +780,7 @@ void main() {
     expect(multilineRowHeight, greaterThan(singleLineRowHeight));
   });
 
-  testWidgets('DataTable custom row height - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable custom row height - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
     Widget buildCustomTable({
       double dataRowHeight = 48.0,
     }) {
@@ -829,7 +830,7 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 30.0);
   });
 
-  testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -1052,7 +1053,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -1246,7 +1247,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable set border width test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable set border width test', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1298,7 +1299,7 @@ void main() {
     expect(boxDecoration.border!.top.width, thickness);
   });
 
-  testWidgets('DataTable set show bottom border', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable set show bottom border', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1347,7 +1348,7 @@ void main() {
     expect(boxDecoration.border!.bottom.width, 0.0);
   });
 
-  testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
     Widget buildTable({ int? sortColumnIndex, bool sortEnabled = true }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -1411,7 +1412,7 @@ void main() {
     }
   });
 
-  testWidgets('DataTable correctly renders with a mouse', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable correctly renders with a mouse', (WidgetTester tester) async {
     // Regression test for a bug described in
     // https://github.com/flutter/flutter/pull/43735#issuecomment-589459947
     // Filed at https://github.com/flutter/flutter/issues/51152
@@ -1459,7 +1460,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
-  testWidgets('DataRow renders default selected row colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataRow renders default selected row colors', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.light();
     Widget buildTable({bool selected = false}) {
       return MaterialApp(
@@ -1501,7 +1502,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow renders checkbox with colors from CheckboxTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataRow renders checkbox with colors from CheckboxTheme', (WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
     const Color checkColor = Color(0xFF0000FF);
 
@@ -1546,7 +1547,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataRow renders custom colors when selected', (WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
 
@@ -1595,7 +1596,7 @@ void main() {
     expect(lastTableRowBoxDecoration().color, selectedColor);
   });
 
-  testWidgets('DataRow renders custom colors when disabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataRow renders custom colors when disabled', (WidgetTester tester) async {
     const Color disabledColor = Colors.grey;
     const Color defaultColor = Colors.red;
 
@@ -1650,7 +1651,7 @@ void main() {
     expect(lastTableRowBoxDecoration().color, disabledColor);
   });
 
-  testWidgets('DataRow renders custom colors when pressed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataRow renders custom colors when pressed', (WidgetTester tester) async {
     const Color pressedColor = Color(0xff4caf50);
     Widget buildTable() {
       return DataTable(
@@ -1679,6 +1680,7 @@ void main() {
     }
 
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(child: buildTable()),
     ));
 
@@ -1689,7 +1691,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('DataTable can render inside an AlertDialog', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable can render inside an AlertDialog', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1711,7 +1713,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable renders with border and background decoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable renders with border and background decoration', (WidgetTester tester) async {
     const double width = 800;
     const double height = 600;
     const double borderHorizontal = 5.0;
@@ -1748,11 +1750,7 @@ void main() {
     );
     expect(
       find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
-      paints
-        ..path(color: borderColor)
-        ..path(color: borderColor)
-        ..path(color: borderColor)
-        ..path(color: borderColor),
+      paints..path(color: borderColor),
     );
     expect(
       tester.getTopLeft(find.byType(Table)),
@@ -1764,7 +1762,7 @@ void main() {
     );
   });
 
-  testWidgets('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
     const double customCheckboxHorizontalMargin = 15.0;
     const double customHorizontalMargin = 10.0;
     Finder cellContent;
@@ -1853,7 +1851,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow is disabled when onSelectChanged is not set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataRow is disabled when onSelectChanged is not set', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1888,7 +1886,7 @@ void main() {
     expect(find.widgetWithText(TableRowInkWell, 'GitHub'), findsNothing);
   });
 
-  testWidgets('DataTable set interior border test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable set interior border test', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1954,7 +1952,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100952
-  testWidgets('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1991,7 +1989,7 @@ void main() {
 
   });
 
-  testWidgets('DataTable clip behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable clip behavior', (WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(30));
@@ -2040,7 +2038,7 @@ void main() {
     expect(material.borderRadius, borderRadius);
   });
 
-  testWidgets('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (WidgetTester tester) async {
     DataTable createDataTable() =>
       DataTable(
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
@@ -2053,7 +2051,7 @@ void main() {
       e.toString().contains('dataRowMaxHeight >= dataRowMinHeight'))));
   });
 
-  testWidgets('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (WidgetTester tester) async {
     DataTable createDataTable({double? dataRowHeight, double? dataRowMinHeight, double? dataRowMaxHeight}) =>
       DataTable(
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
@@ -2072,4 +2070,255 @@ void main() {
     expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0), throwsA(predicate((AssertionError e) =>
       e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
   });
+
+  group('TableRowInkWell', () {
+    testWidgetsWithLeakTracking('can handle secondary taps', (WidgetTester tester) async {
+      bool secondaryTapped = false;
+      bool secondaryTappedDown = false;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Table(
+            children: <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableRowInkWell(
+                    onSecondaryTap: () {
+                      secondaryTapped = true;
+                    },
+                    onSecondaryTapDown: (TapDownDetails details) {
+                      secondaryTappedDown = true;
+                    },
+                    child: const SizedBox(
+                      width: 100.0,
+                      height: 100.0,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      expect(secondaryTapped, isFalse);
+      expect(secondaryTappedDown, isFalse);
+
+      expect(find.byType(TableRowInkWell), findsOneWidget);
+      await tester.tap(
+        find.byType(TableRowInkWell),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      expect(secondaryTapped, isTrue);
+      expect(secondaryTappedDown, isTrue);
+    });
+  });
+
+  testWidgetsWithLeakTracking('Heading cell cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            sortColumnIndex: 0,
+            columns: <DataColumn>[
+              // This column can be sorted.
+              DataColumn(
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return SystemMouseCursors.forbidden;
+                  }
+                  return SystemMouseCursors.copy;
+                }),
+
+                onSort: (int columnIndex, bool ascending) {},
+                label: const Text('A'),
+              ),
+              // This column cannot be sorted.
+              DataColumn(
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return SystemMouseCursors.forbidden;
+                  }
+                  return SystemMouseCursors.copy;
+                }),
+                label: const Text('B'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(Text('Data 1')),
+                  DataCell(Text('Data 2')),
+                ],
+              ),
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(Text('Data 3')),
+                  DataCell(Text('Data 4')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('A')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
+
+    await gesture.moveTo(tester.getCenter(find.text('B')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+  });
+
+  testWidgetsWithLeakTracking('DataRow cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            sortColumnIndex: 0,
+            columns: <DataColumn>[
+              DataColumn(
+                label: const Text('A'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+              const DataColumn(label: Text('B')),
+            ],
+            rows: <DataRow>[
+              // This row can be selected.
+              DataRow(
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return SystemMouseCursors.copy;
+                  }
+                  return SystemMouseCursors.forbidden;
+                }),
+                onSelectChanged: (bool? selected) {},
+                cells: const <DataCell>[
+                  DataCell(Text('Data 1')),
+                  DataCell(Text('Data 2')),
+                ],
+              ),
+              // This row is selected.
+              DataRow(
+                selected: true,
+                onSelectChanged: (bool? selected) {},
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return SystemMouseCursors.copy;
+                  }
+                  return SystemMouseCursors.forbidden;
+                }),
+                cells: const <DataCell>[
+                  DataCell(Text('Data 3')),
+                  DataCell(Text('Data 4')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('Data 1')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+    await gesture.moveTo(tester.getCenter(find.text('Data 3')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
+  });
+
+  testWidgetsWithLeakTracking("DataRow cursor doesn't update checkbox cursor", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            sortColumnIndex: 0,
+            columns: <DataColumn>[
+              DataColumn(
+                label: const Text('A'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+              const DataColumn(label: Text('B')),
+            ],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? selected) {},
+                mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy),
+                cells: const <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox).last));
+    await tester.pump();
+
+    // Test that the checkbox cursor is not changed.
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    await gesture.moveTo(tester.getCenter(find.text('Data')));
+    await tester.pump();
+
+    // Test that cursor is updated for the row.
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/114470.
+  testWidgetsWithLeakTracking('DataTable text styles are merged with default text style', (WidgetTester tester) async {
+    late DefaultTextStyle defaultTextStyle;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              defaultTextStyle = DefaultTextStyle.of(context);
+              return DataTable(
+                headingTextStyle: const TextStyle(),
+                dataTextStyle: const TextStyle(),
+                columns: const <DataColumn>[
+                  DataColumn(label: Text('Header 1')),
+                  DataColumn(label: Text('Header 2')),
+                ],
+                rows: const <DataRow>[
+                  DataRow(
+                    cells: <DataCell>[
+                      DataCell(Text('Data 1')),
+                      DataCell(Text('Data 2')),
+                    ],
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle? headingTextStyle = _getTextRenderObject(tester, 'Header 1').text.style;
+    expect(headingTextStyle, defaultTextStyle.style);
+
+    final TextStyle? dataTextStyle = _getTextRenderObject(tester, 'Data 1').text.style;
+    expect(dataTextStyle, defaultTextStyle.style);
+  });
+}
+
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.renderObject(find.text(text));
 }

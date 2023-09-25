@@ -47,10 +47,10 @@ void main() {
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-          listener: () {
-            ++semanticsUpdateCount;
-          },
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.rootPipelineOwner.ensureSemantics(
+        listener: () {
+          ++semanticsUpdateCount;
+        },
       );
       layout(tree, phase: EnginePhase.flushSemantics);
       // Initial semantics update
@@ -305,12 +305,13 @@ ui.PointerData _pointerData(
   PointerDeviceKind kind = PointerDeviceKind.mouse,
   int pointer = 0,
 }) {
+  final double devicePixelRatio = RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
   return ui.PointerData(
     pointerIdentifier: pointer,
     embedderId: pointer,
     change: change,
-    physicalX: logicalPosition.dx * RendererBinding.instance.window.devicePixelRatio,
-    physicalY: logicalPosition.dy * RendererBinding.instance.window.devicePixelRatio,
+    physicalX: logicalPosition.dx * devicePixelRatio,
+    physicalY: logicalPosition.dy * devicePixelRatio,
     kind: kind,
     device: device,
   );

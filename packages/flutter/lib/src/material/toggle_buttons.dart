@@ -30,7 +30,34 @@ import 'toggle_buttons_theme.dart';
 /// correlated by their index in the list. The length of [isSelected] has to
 /// match the length of the [children] list.
 ///
+/// There is a Material 3 version of this component, [SegmentedButton],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]).
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
+///
+/// ## Updating to [SegmentedButton]
+///
+/// There is a Material 3 version of this component, [SegmentedButton],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]). The [SegmentedButton] widget's visuals
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/segmented-buttons/overview> for
+/// more details. The [SegmentedButton] widget's API is also slightly different.
+/// While the [ToggleButtons] widget can have list of widgets, the
+/// [SegmentedButton] widget has a list of [ButtonSegment]s with
+/// a type value. While the [ToggleButtons] uses a list of boolean values
+/// to determine the selection state of each button, the [SegmentedButton]
+/// uses a set of type values to determine the selection state of each segment.
+/// The [SegmentedButton.style] is a [ButtonStyle] style field, which can be
+/// used to customize the entire segmented button and the individual segments.
+///
+/// {@tool dartpad}
+/// This sample shows how to migrate [ToggleButtons] that allows multiple
+/// or no selection to [SegmentedButton] that allows multiple or no selection.
+///
+/// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.1.dart **
+/// {@end-tool}
 ///
 /// {@tool dartpad}
 /// This example showcase [ToggleButtons] in various configurations.
@@ -178,9 +205,8 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// Both [children] and [isSelected] properties arguments are required.
   ///
-  /// [isSelected] values must be non-null. [focusNodes] must be null or a
-  /// list of non-null nodes. [renderBorder] and [direction] must not be null.
-  /// If [direction] is [Axis.vertical], [verticalDirection] must not be null.
+  /// The [focusNodes] argument must be null or a list of nodes. If [direction]
+  /// is [Axis.vertical], [verticalDirection] must not be null.
   const ToggleButtons({
     super.key,
     required this.children,
@@ -718,10 +744,8 @@ class ToggleButtons extends StatelessWidget {
           }
           assert(minPaddingSize.width >= 0.0);
           assert(minPaddingSize.height >= 0.0);
-          break;
         case MaterialTapTargetSize.shrinkWrap:
           minPaddingSize = Size.zero;
-          break;
       }
 
       Widget button = _SelectToggleButton(
@@ -894,20 +918,24 @@ class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   @override
   Color? resolve(Set<MaterialState> states) {
     if (selected) {
-      if (states.contains(MaterialState.hovered)) {
-        return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
-      } else if (states.contains(MaterialState.focused)) {
-        return focusColor ?? colorScheme?.primary.withOpacity(0.12);
-      } else if (states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.pressed)) {
         return splashColor ?? colorScheme?.primary.withOpacity(0.16);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusColor ?? colorScheme?.primary.withOpacity(0.12);
+      }
     } else if (unselected) {
+      if (states.contains(MaterialState.pressed)) {
+        return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
+      }
       if (states.contains(MaterialState.hovered)) {
         return hoverColor ?? colorScheme?.onSurface.withOpacity(0.04);
-      } else if (states.contains(MaterialState.focused)) {
+      }
+      if (states.contains(MaterialState.focused)) {
         return focusColor ?? colorScheme?.onSurface.withOpacity(0.12);
-      } else if (states.contains(MaterialState.pressed)) {
-        return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
       }
     }
     return null;
@@ -1188,19 +1216,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       switch (textDirection) {
         case TextDirection.ltr:
           childParentData.offset = Offset(leadingBorderSide.width, borderSide.width);
-          break;
         case TextDirection.rtl:
           childParentData.offset = Offset(trailingBorderSide.width, borderSide.width);
-          break;
       }
     } else {
       switch (verticalDirection) {
         case VerticalDirection.down:
           childParentData.offset = Offset(borderSide.width, leadingBorderSide.width);
-          break;
         case VerticalDirection.up:
           childParentData.offset = Offset(borderSide.width, trailingBorderSide.width);
-          break;
       }
     }
   }
@@ -1354,7 +1378,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.right - rrect.trRadiusX, rrect.bottom);
             context.canvas.drawPath(horizontalPaths, horizontalPaint);
           }
-          break;
         case TextDirection.rtl:
           if (isLastButton) {
             final Path leadingPath = Path();
@@ -1394,7 +1417,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.left - rrect.tlRadiusX, rrect.bottom);
             context.canvas.drawPath(horizontalPaths, horizontalPaint);
           }
-          break;
       }
     } else {
       switch (verticalDirection) {
@@ -1437,7 +1459,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.bottom);
             context.canvas.drawPath(paths, paint);
           }
-          break;
         case VerticalDirection.up:
           if (isLastButton) {
             final Path bottomPath = Path();
@@ -1477,7 +1498,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.bottom - leadingBorderSide.width);
             context.canvas.drawPath(paths, paint);
           }
-          break;
       }
     }
   }

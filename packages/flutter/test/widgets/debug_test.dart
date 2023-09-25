@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('debugChildrenHaveDuplicateKeys control test', () {
@@ -64,7 +65,7 @@ void main() {
     }
   });
 
-  testWidgets('debugCheckHasTable control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasTable control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -95,7 +96,7 @@ void main() {
     );
   });
 
-  testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
@@ -116,10 +117,9 @@ void main() {
               error.diagnostics.last.toStringDeep(),
               equalsIgnoringHashCodes(
                 'No MediaQuery ancestor could be found starting from the context\n'
-                'that was passed to MediaQuery.of(). This can happen because you\n'
-                'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '(those widgets introduce a MediaQuery), or it can happen if the\n'
-                'context you use comes from a widget above those widgets.\n',
+                'that was passed to MediaQuery.of(). This can happen because the\n'
+                'context used is not a descendant of a View widget, which\n'
+                'introduces a MediaQuery.\n'
               ),
             );
             expect(
@@ -139,14 +139,16 @@ void main() {
               endsWith(
                 '[root]"\n' // End of ownership chain.
                 '   No MediaQuery ancestor could be found starting from the context\n'
-                '   that was passed to MediaQuery.of(). This can happen because you\n'
-                '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '   (those widgets introduce a MediaQuery), or it can happen if the\n'
-                '   context you use comes from a widget above those widgets.\n',
+                '   that was passed to MediaQuery.of(). This can happen because the\n'
+                '   context used is not a descendant of a View widget, which\n'
+                '   introduces a MediaQuery.\n'
               ),
             );
           }
-          return Container();
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );
@@ -230,7 +232,7 @@ void main() {
     }
   });
 
-  testWidgets('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -279,7 +281,7 @@ void main() {
     debugHighlightDeprecatedWidgets = false;
   });
 
-  testWidgets('debugCreator of layers should not be null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCreator of layers should not be null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(

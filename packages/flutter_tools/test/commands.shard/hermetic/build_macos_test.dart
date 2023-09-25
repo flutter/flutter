@@ -159,6 +159,29 @@ STDERR STUFF
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('macOS build successfully with renamed .xcodeproj/.xcworkspace files', () async {
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+
+    fileSystem.directory(fileSystem.path.join('macos', 'RenamedProj.xcodeproj')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('macos', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
+    createCoreMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    Platform: () => macosPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
   testUsingContext('macOS build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
@@ -520,7 +543,7 @@ STDERR STUFF
     );
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'macos'),
     ));

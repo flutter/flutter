@@ -335,7 +335,7 @@ void main() {
         expect(uri.toString(), 'http://127.0.0.1:123/');
       });
 
-      testWithoutContext('Get network device IP (iPv4)', () async {
+      testWithoutContext('Get wireless device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -367,12 +367,12 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
       });
 
-      testWithoutContext('Get network device IP (iPv6)', () async {
+      testWithoutContext('Get wireless device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -404,7 +404,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
       });
@@ -478,6 +478,18 @@ void main() {
     });
 
     group('for launch', () {
+      testWithoutContext('Ensure either port or device name are provided', () async {
+        final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+        );
+
+        expect(() async => portDiscovery.queryForLaunch(applicationId: 'app-id'), throwsAssertionError);
+      });
+
       testWithoutContext('No ports available', () async {
         final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
@@ -557,7 +569,7 @@ void main() {
         expect(uri.toString(), 'http://127.0.0.1:123/');
       });
 
-      testWithoutContext('Get network device IP (iPv4)', () async {
+      testWithoutContext('Get wireless device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -588,13 +600,13 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
       });
 
-      testWithoutContext('Get network device IP (iPv6)', () async {
+      testWithoutContext('Get wireless device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -625,7 +637,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
@@ -665,6 +677,93 @@ void main() {
           throwsToolExit(
               message:'Did not find a Dart VM Service advertised for srv-bar on port 321.'),
         );
+      });
+
+      testWithoutContext('Matches on application id and device name', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[
+            PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+            PtrResourceRecord('baz', future, domainName: 'srv-boo'),
+          ],
+          <String, List<SrvResourceRecord>>{
+            'srv-bar': <SrvResourceRecord>[
+              SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'My-Phone.local'),
+            ],
+          },
+        );
+        final FakeIOSDevice device = FakeIOSDevice(
+          name: 'My Phone',
+        );
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+        );
+
+        final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
+          'srv-bar',
+          device,
+        );
+        expect(uri.toString(), 'http://127.0.0.1:123/');
+      });
+
+      testWithoutContext('Throw error if unable to find VM Service with app id and device name', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[
+            PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+            PtrResourceRecord('baz', future, domainName: 'srv-boo'),
+          ],
+          <String, List<SrvResourceRecord>>{
+            'srv-foo': <SrvResourceRecord>[
+              SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+            ],
+          },
+        );
+        final FakeIOSDevice device = FakeIOSDevice(
+          name: 'My Phone',
+        );
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+        );
+        expect(
+          portDiscovery.getVMServiceUriForLaunch(
+            'srv-bar',
+            device,
+          ),
+          throwsToolExit(
+              message:'Did not find a Dart VM Service advertised for srv-bar'),
+        );
+      });
+    });
+
+    group('deviceNameMatchesTargetName', () {
+      testWithoutContext('compares case insensitive and without spaces, hypthens, .local', () {
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[],
+            <String, List<SrvResourceRecord>>{},
+          ),
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+        );
+
+        expect(portDiscovery.deviceNameMatchesTargetName('My phone', 'My-Phone.local'), isTrue);
+      });
+
+      testWithoutContext('includes numbers in comparison', () {
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[],
+            <String, List<SrvResourceRecord>>{},
+          ),
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+        );
+        expect(portDiscovery.deviceNameMatchesTargetName('My phone', 'My-Phone-2.local'), isFalse);
       });
     });
 
@@ -755,7 +854,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -792,7 +891,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -829,7 +928,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -895,6 +994,11 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
+  FakeIOSDevice({this.name = 'iPhone'});
+
+  @override
+  final String name;
+
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 

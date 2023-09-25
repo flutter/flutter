@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -48,6 +49,9 @@ void main() {
           outdatedGradleHandler,
           sslExceptionHandler,
           zipExceptionHandler,
+          incompatibleJavaAndGradleVersionsHandler,
+          remoteTerminatedHandshakeHandler,
+          couldNotOpenCacheDirectoryHandler,
         ])
       );
     });
@@ -85,6 +89,51 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+    });
+
+    testUsingContext('retries if remote host terminated ssl handshake', () async {
+      const String errorMessage = r'''
+Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host terminated the handshake
+	at java.base/sun.security.ssl.SSLSocketImpl.handleEOF(SSLSocketImpl.java:1696)
+	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1514)
+	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1416)
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:456)
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:427)
+	at java.base/sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:572)
+	at java.base/sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:197)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.followRedirect0(HttpURLConnection.java:2783)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.followRedirect(HttpURLConnection.java:2695)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1854)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1520)
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:250)
+	at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+	at org.gradle.wrapper.Download.download(Download.java:44)
+	at org.gradle.wrapper.Install$1.call(Install.java:61)
+	at org.gradle.wrapper.Install$1.call(Install.java:48)
+	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+	at org.gradle.wrapper.Install.createDist(Install.java:48)
+	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
+Caused by: java.io.EOFException: SSL peer shut down incorrectly
+	at java.base/sun.security.ssl.SSLSocketInputRecord.read(SSLSocketInputRecord.java:483)
+	at java.base/sun.security.ssl.SSLSocketInputRecord.readHeader(SSLSocketInputRecord.java:472)
+	at java.base/sun.security.ssl.SSLSocketInputRecord.decode(SSLSocketInputRecord.java:160)
+	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:111)
+	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506)''';
+
+      expect(formatTestErrorMessage(errorMessage, remoteTerminatedHandshakeHandler), isTrue);
+      expect(await remoteTerminatedHandshakeHandler.handler(
+        line: '',
+        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
+
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     });
 
     testUsingContext('retries if gradle fails downloading with proxy error', () async {
@@ -580,9 +629,7 @@ Command: /home/android/gradlew assembleRelease
         )
       );
     });
-  });
 
-  group('permission errors', () {
     testUsingContext('pattern', () async {
       const String errorMessage = '''
 Permission denied
@@ -728,6 +775,7 @@ assembleFooTest
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
       FileSystem: () => fileSystem,
@@ -770,6 +818,7 @@ assembleProfile
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
       FileSystem: () => fileSystem,
@@ -1302,6 +1351,66 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       AnsiTerminal: () => _TestPromptTerminal('n'),
       BotDetector: () => const FakeBotDetector(false),
     });
+  });
+
+  group('incompatible java and gradle versions error', () {
+    const String errorMessage = '''
+Could not compile build file '…/example/android/build.gradle'.
+> startup failed:
+  General error during conversion: Unsupported class file major version 61
+  java.lang.IllegalArgumentException: Unsupported class file major version 61
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleJavaAndGradleVersionsHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await incompatibleJavaAndGradleVersionsHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
+      );
+
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
+      expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
+      expect(testLogger.statusText, contains('docs.flutter.dev/go/android-java-gradle-error'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+  });
+
+  testUsingContext('couldNotOpenCacheDirectoryHandler', () async {
+    final GradleBuildStatus status = await couldNotOpenCacheDirectoryHandler.handler(
+      line: '''
+FAILURE: Build failed with an exception.
+
+* Where:
+Script '/Volumes/Work/s/w/ir/x/w/flutter/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy' line: 276
+
+* What went wrong:
+A problem occurred evaluating script.
+> Failed to apply plugin class 'FlutterPlugin'.
+   > Could not open cache directory 41rl0ui7kgmsyfwn97o2jypl6 (/Volumes/Work/s/w/ir/cache/gradle/caches/6.7/gradle-kotlin-dsl/41rl0ui7kgmsyfwn97o2jypl6).
+      > Failed to create Jar file /Volumes/Work/s/w/ir/cache/gradle/caches/6.7/generated-gradle-jars/gradle-api-6.7.jar.''',
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      multidexEnabled: true,
+    );
+    expect(testLogger.errorText, contains('Gradle threw an error while resolving dependencies'));
+    expect(status, GradleBuildStatus.retry);
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('android'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 }
 

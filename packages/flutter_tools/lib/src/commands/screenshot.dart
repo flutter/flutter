@@ -52,6 +52,7 @@ class ScreenshotCommand extends FlutterCommand {
       defaultsTo: _kDeviceType,
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   final FileSystem fs;
@@ -64,6 +65,9 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   @override
   final List<String> aliases = <String>['pic'];
@@ -83,7 +87,6 @@ class ScreenshotCommand extends FlutterCommand {
         if (!device!.supportsScreenshot) {
           throwToolExit('Screenshot not supported for ${device!.name}.');
         }
-        break;
       default:
         if (vmServiceUrl == null) {
           throwToolExit('VM Service URI must be specified for screenshot type $screenshotType');
@@ -96,7 +99,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    await _validateOptions(stringArgDeprecated(_kType), stringArgDeprecated(_kVmServiceUrl));
+    await _validateOptions(stringArg(_kType), stringArg(_kVmServiceUrl));
     return super.verifyThenRunCommand(commandPath);
   }
 
@@ -104,20 +107,17 @@ class ScreenshotCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     File? outputFile;
     if (argResults?.wasParsed(_kOut) ?? false) {
-      outputFile = fs.file(stringArgDeprecated(_kOut));
+      outputFile = fs.file(stringArg(_kOut));
     }
 
     bool success = true;
-    switch (stringArgDeprecated(_kType)) {
+    switch (stringArg(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);
-        break;
       case _kSkiaType:
         success = await runSkia(outputFile);
-        break;
       case _kRasterizerType:
         success = await runRasterizer(outputFile);
-        break;
     }
 
     return success ? FlutterCommandResult.success()
@@ -150,7 +150,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<bool> runSkia(File? outputFile) async {
-    final Uri vmServiceUrl = Uri.parse(stringArgDeprecated(_kVmServiceUrl)!);
+    final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
     final FlutterVmService vmService = await connectToVmService(vmServiceUrl, logger: globals.logger);
     final vm_service.Response? skp = await vmService.screenshotSkp();
     if (skp == null) {
@@ -174,7 +174,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<bool> runRasterizer(File? outputFile) async {
-    final Uri vmServiceUrl = Uri.parse(stringArgDeprecated(_kVmServiceUrl)!);
+    final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
     final FlutterVmService vmService = await connectToVmService(vmServiceUrl, logger: globals.logger);
     final vm_service.Response? response = await vmService.screenshot();
     if (response == null) {

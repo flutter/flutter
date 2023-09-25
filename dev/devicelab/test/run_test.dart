@@ -96,7 +96,7 @@ void main() {
 
       final ProcessResult result = await runScript(
         <String>['smoke_test_success'],
-        <String>['--ab=2', '--local-engine=host_debug_unopt', '--ab-result-file', abResultsFile.path],
+        <String>['--ab=2', '--local-engine=host_debug_unopt', '--local-engine-host=host_debug_unopt', '--ab-result-file', abResultsFile.path],
       );
       expect(result.exitCode, 0);
 

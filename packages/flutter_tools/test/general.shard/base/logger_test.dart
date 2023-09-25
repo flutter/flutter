@@ -480,7 +480,7 @@ void main() {
           expect(done, isTrue);
         });
 
-        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout', () async {
+        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout without color support', () async {
           mockStopwatch = FakeStopwatch();
           const String warningMessage = 'a warning message.';
           final bool done = FakeAsync().run<bool>((FakeAsync time) {
@@ -489,6 +489,7 @@ void main() {
               stopwatch: mockStopwatch,
               terminal: terminal,
               slowWarningCallback: () => warningMessage,
+              warningColor: TerminalColor.red,
               timeout: const Duration(milliseconds: 100),
             )..start();
             // must be greater than the spinner timer duration
@@ -497,7 +498,37 @@ void main() {
             time.elapse(timeLapse);
 
             List<String> lines = outputStdout();
+            expect(lines.join().contains(RegExp(red)), isFalse);
             expect(lines.join(), '⣽\ba warning message.⣻');
+
+            spinner.stop();
+            lines = outputStdout();
+            return true;
+          });
+          expect(done, isTrue);
+        });
+
+        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout with color support', () async {
+          mockStopwatch = FakeStopwatch();
+          const String warningMessage = 'a warning message.';
+          final bool done = FakeAsync().run<bool>((FakeAsync time) {
+            final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
+              stdio: mockStdio,
+              stopwatch: mockStopwatch,
+              terminal: coloredTerminal,
+              slowWarningCallback: () => warningMessage,
+              warningColor: TerminalColor.red,
+              timeout: const Duration(milliseconds: 100),
+            )..start();
+            // must be greater than the spinner timer duration
+            const Duration timeLapse = Duration(milliseconds: 101);
+            mockStopwatch.elapsed += timeLapse;
+            time.elapse(timeLapse);
+
+            List<String> lines = outputStdout();
+            expect(lines.join().contains(RegExp(red)), isTrue);
+            expect(lines.join(), '⣽\b${AnsiTerminal.red}a warning message.${AnsiTerminal.resetColor}⣻');
+            expect(lines.join(), matches('$red$warningMessage$resetColor'));
 
             spinner.stop();
             lines = outputStdout();
@@ -1254,6 +1285,47 @@ void main() {
       expect(mockLogger.statusText, 'Hey Hey Hey Hey\n');
       expect(mockLogger.traceText, 'Oooh, I do I do I do\n');
       expect(mockLogger.errorText, 'Helpless!\n$stackTrace\n');
+    });
+
+    testWithoutContext('Animations are disabled when, uh, disabled.', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: _kNoAnsiPlatform,
+          isCliAnimationEnabled: false,
+        ),
+        stdio: fakeStdio,
+        stopwatchFactory: FakeStopwatchFactory(stopwatch: FakeStopwatch()),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+      );
+      logger.startProgress('po').stop();
+      expect(outputStderr(), <String>['']);
+      expect(outputStdout(), <String>[
+          'po                                                                   0ms',
+          '',
+      ]);
+      logger.startProgress('ta')
+        ..pause()
+        ..resume()
+        ..stop();
+      expect(outputStderr(), <String>['']);
+      expect(outputStdout(), <String>[
+          'po                                                                   0ms',
+          'ta                                                              ',
+          'ta                                                                   0ms',
+          '',
+      ]);
+      logger.startSpinner()
+        ..pause()
+        ..resume()
+        ..stop();
+      expect(outputStderr(), <String>['']);
+      expect(outputStdout(), <String>[
+          'po                                                                   0ms',
+          'ta                                                              ',
+          'ta                                                                   0ms',
+          '',
+      ]);
     });
   });
 }

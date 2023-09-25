@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
@@ -1051,7 +1052,7 @@ void main() {
 
     await webDevFS.create();
 
-    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.autoDetect);
+    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.auto);
 
     await webDevFS.destroy();
   }));
@@ -1189,6 +1190,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
+    Uri? nativeAssetsYaml,
   }) async {
     return output;
   }
@@ -1198,7 +1200,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
@@ -1207,10 +1212,8 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 }
 
 class FakeDwds extends Fake implements Dwds {
-  FakeDwds(this.connectedAppsIterable) :
+  FakeDwds(Iterable<AppConnection> connectedAppsIterable) :
     connectedApps = Stream<AppConnection>.fromIterable(connectedAppsIterable);
-
-  final Iterable<AppConnection> connectedAppsIterable;
 
   @override
   final Stream<AppConnection> connectedApps;

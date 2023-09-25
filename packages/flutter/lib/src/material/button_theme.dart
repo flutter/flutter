@@ -66,9 +66,6 @@ enum ButtonBarLayoutBehavior {
 ///    depend on any inherited themes.
 class ButtonTheme extends InheritedTheme {
   /// Creates a button theme.
-  ///
-  /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
-  /// must not be null.
   ButtonTheme({
     super.key,
     ButtonTextTheme textTheme = ButtonTextTheme.normal,
@@ -108,8 +105,6 @@ class ButtonTheme extends InheritedTheme {
        );
 
   /// Creates a button theme from [data].
-  ///
-  /// The [data] argument must not be null.
   const ButtonTheme.fromButtonThemeData({
     super.key,
     required this.data,
@@ -168,9 +163,7 @@ class ButtonThemeData with Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
-  /// The [textTheme], [minWidth], [height], [alignedDropdown], and
-  /// [layoutBehavior] parameters must not be null. The [minWidth] and
-  /// [height] parameters must greater than or equal to zero.
+  /// The [minWidth] and [height] parameters must greater than or equal to zero.
   ///
   /// The ButtonTheme's methods that have a [MaterialButton] parameter and
   /// have a name with a `get` prefix are used to configure a
@@ -249,7 +242,7 @@ class ButtonThemeData with Diagnosticable {
   ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
     if (_padding != null) {
-      return _padding!;
+      return _padding;
     }
     switch (textTheme) {
       case ButtonTextTheme.normal:
@@ -277,7 +270,7 @@ class ButtonThemeData with Diagnosticable {
   ///    [Material].
   ShapeBorder get shape {
     if (_shape != null) {
-      return _shape!;
+      return _shape;
     }
     switch (textTheme) {
       case ButtonTextTheme.normal:
@@ -537,7 +530,7 @@ class ButtonThemeData with Diagnosticable {
       switch (getTextTheme(button)) {
         case ButtonTextTheme.normal:
         case ButtonTextTheme.accent:
-          return _splashColor!;
+          return _splashColor;
         case ButtonTextTheme.primary:
           break;
       }
@@ -641,12 +634,8 @@ class ButtonThemeData with Diagnosticable {
       return button.padding!;
     }
 
-    if (button is MaterialButtonWithIconMixin) {
-      return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
-    }
-
     if (_padding != null) {
-      return _padding!;
+      return _padding;
     }
 
     switch (getTextTheme(button)) {

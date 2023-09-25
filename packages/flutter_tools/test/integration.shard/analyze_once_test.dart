@@ -27,10 +27,7 @@ void main() {
       '--no-color',
       ...arguments,
     ], workingDirectory: projectPath);
-    printOnFailure('Output of flutter ${arguments.join(" ")}');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-    expect(result.exitCode, exitCode, reason: 'Expected to exit with non-zero exit code.');
+    expect(result, ProcessResultMatcher(exitCode: exitCode));
     assertContains(result.stdout.toString(), statusTextContains);
     assertContains(result.stdout.toString(), errorTextContains);
     expect(result.stderr, contains(exitMessageContains));
@@ -484,7 +481,7 @@ class _MyHomePageState extends State<MyHomePage> {
 const String pubspecYamlSrc = r'''
 name: flutter_project
 environment:
-  sdk: ">=2.1.0 <4.0.0"
+  sdk: '>=3.2.0-0 <4.0.0'
 
 dependencies:
   flutter:

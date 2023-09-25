@@ -19,11 +19,12 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
+import 'notification_listener.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
 import 'restoration.dart';
 import 'router.dart';
-import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
@@ -263,8 +264,6 @@ class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
   ///
-  /// The boolean arguments, [color], and [navigatorObservers] must not be null.
-  ///
   /// Most callers will want to use the [home] or [routes] parameters, or both.
   /// The [home] parameter is a convenience for the following [routes] map:
   ///
@@ -313,6 +312,7 @@ class WidgetsApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
+    this.onNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
     this.pageRouteBuilder,
@@ -420,6 +420,7 @@ class WidgetsApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.onNavigationNotification,
     this.textStyle,
     required this.color,
     this.locale,
@@ -701,6 +702,13 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final RouteFactory? onUnknownRoute;
 
+  /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
+  /// The callback to use when receiving a [NavigationNotification].
+  ///
+  /// By default this updates the engine with the navigation status.
+  /// {@endtemplate}
+  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
+
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
@@ -724,6 +732,10 @@ class WidgetsApp extends StatefulWidget {
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [initialRoute] must be null and [builder] must not be null.
+  ///
+  /// Changing the [initialRoute] will have no effect, as it only controls the
+  /// _initial_ route. To change the route while the application is running, use
+  /// the [Navigator] or [Router] APIs.
   ///
   /// See also:
   ///
@@ -1324,12 +1336,41 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
     : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
+  AppLifecycleState? _appLifecycleState;
+
+  /// The default value for [onNavigationNotification].
+  ///
+  /// Does nothing and stops bubbling if the app is detached. Otherwise, updates
+  /// the platform with [NavigationNotification.canHandlePop] and stops
+  /// bubbling.
+  bool _defaultOnNavigationNotification(NavigationNotification notification) {
+    switch (_appLifecycleState) {
+      case null:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.inactive:
+        // Avoid updating the engine when the app isn't ready.
+        return true;
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+        return true;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appLifecycleState = state;
+    super.didChangeAppLifecycleState(state);
+  }
+
   @override
   void initState() {
     super.initState();
     _updateRouting();
     _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
+    _appLifecycleState = WidgetsBinding.instance.lifecycleState;
   }
 
   @override
@@ -1362,7 +1403,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
         _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
-            location: _initialRouteName,
+            uri: Uri.parse(_initialRouteName),
           ),
         );
       } else {
@@ -1484,7 +1525,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> didPushRoute(String route) async {
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
@@ -1496,7 +1537,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (navigator == null) {
       return false;
     }
-    navigator.pushNamed(route);
+    final Uri uri = routeInformation.uri;
+    navigator.pushNamed(
+      Uri.decodeComponent(
+        Uri(
+          path: uri.path.isEmpty ? '/' : uri.path,
+          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          fragment: uri.fragment.isEmpty ? null : uri.fragment,
+        ).toString(),
+      ),
+    );
     return true;
   }
 
@@ -1738,25 +1788,28 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: SharedAppData(
-        child: Shortcuts(
-          debugLabel: '<Default WidgetsApp Shortcuts>',
-          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-          // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
-          // fall through to the defaultShortcuts.
-          child: DefaultTextEditingShortcuts(
-            child: Actions(
-              actions: widget.actions ?? <Type, Action<Intent>>{
-                ...WidgetsApp.defaultActions,
-                ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
-              },
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: TapRegionSurface(
-                  child: ShortcutRegistrar(
-                    child: Localizations(
-                      locale: appLocale,
-                      delegates: _localizationsDelegates.toList(),
-                      child: title,
+        child: NotificationListener<NavigationNotification>(
+          onNotification: widget.onNavigationNotification ?? _defaultOnNavigationNotification,
+          child: Shortcuts(
+            debugLabel: '<Default WidgetsApp Shortcuts>',
+            shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+            // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+            // fall through to the defaultShortcuts.
+            child: DefaultTextEditingShortcuts(
+              child: Actions(
+                actions: widget.actions ?? <Type, Action<Intent>>{
+                  ...WidgetsApp.defaultActions,
+                  ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
+                },
+                child: FocusTraversalGroup(
+                  policy: ReadingOrderTraversalPolicy(),
+                  child: TapRegionSurface(
+                    child: ShortcutRegistrar(
+                      child: Localizations(
+                        locale: appLocale,
+                        delegates: _localizationsDelegates.toList(),
+                        child: title,
+                      ),
                     ),
                   ),
                 ),

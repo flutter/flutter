@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "Selecionar Tudo",
   "tabSemanticsLabel": "Guia $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Dispensar",
-  "searchTextFieldPlaceholderLabel": "Pesquisar"
+  "searchTextFieldPlaceholderLabel": "Pesquisar",
+  "noSpellCheckReplacementsLabel": "Nenhuma alternativa encontrada",
+  "menuDismissLabel": "Dispensar menu",
+  "lookUpButtonLabel": "Pesquisar",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

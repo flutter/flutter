@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CheckboxMenuButton].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// Flutter code sample for [CheckboxMenuButton].
 
 void main() => runApp(const MenuApp());
 
@@ -101,8 +101,9 @@ class MenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: MyCheckboxMenu(message: kMessage)),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const Scaffold(body: SafeArea(child: MyCheckboxMenu(message: kMessage))),
     );
   }
 }

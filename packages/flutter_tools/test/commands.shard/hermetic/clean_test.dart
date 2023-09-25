@@ -224,7 +224,7 @@ void main() {
 FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcodeWorkspace) {
   // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
   final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
-  if (setupXcodeWorkspace == true) {
+  if (setupXcodeWorkspace) {
     projectUnderTest.ios.hostAppRoot.childDirectory('Runner.xcworkspace').createSync(recursive: true);
     projectUnderTest.macos.hostAppRoot.childDirectory('Runner.xcworkspace').createSync(recursive: true);
   }

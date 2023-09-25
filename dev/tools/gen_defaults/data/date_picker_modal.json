@@ -1,5 +1,5 @@
 {
-  "version": "v0_158",
+  "version": "v0_162",
 
   "md.comp.date-picker.modal.container.color": "surface",
   "md.comp.date-picker.modal.container.elevation": "md.sys.elevation.level3",
@@ -38,7 +38,7 @@
   "md.comp.date-picker.modal.header.headline.text-style": "headlineLarge",
   "md.comp.date-picker.modal.header.supporting-text.color": "onSurfaceVariant",
   "md.comp.date-picker.modal.header.supporting-text.text-style": "labelLarge",
-  "md.comp.date-picker.modal.range-selection.active-indicator.container.color": "primaryContainer",
+  "md.comp.date-picker.modal.range-selection.active-indicator.container.color": "secondaryContainer",
   "md.comp.date-picker.modal.range-selection.active-indicator.container.height": 40.0,
   "md.comp.date-picker.modal.range-selection.active-indicator.container.shape": "md.sys.shape.corner.full",
   "md.comp.date-picker.modal.range-selection.container.elevation": "md.sys.elevation.level0",
@@ -47,7 +47,7 @@
   "md.comp.date-picker.modal.range-selection.date.in-range.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.date-picker.modal.range-selection.date.in-range.hover.state-layer.color": "onPrimaryContainer",
   "md.comp.date-picker.modal.range-selection.date.in-range.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
-  "md.comp.date-picker.modal.range-selection.date.in-range.label-text.color": "onPrimaryContainer",
+  "md.comp.date-picker.modal.range-selection.date.in-range.label-text.color": "onSecondaryContainer",
   "md.comp.date-picker.modal.range-selection.date.in-range.pressed.state-layer.color": "onPrimaryContainer",
   "md.comp.date-picker.modal.range-selection.date.in-range.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
   "md.comp.date-picker.modal.range-selection.header.container.height": 128.0,

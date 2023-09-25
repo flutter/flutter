@@ -69,7 +69,7 @@ class GenSnapshot {
     // one for the target architecture in question.
     if (snapshotType.platform == TargetPlatform.ios ||
         snapshotType.platform == TargetPlatform.darwin) {
-      snapshotterPath += '_${getDartNameForDarwinArch(darwinArch!)}';
+      snapshotterPath += '_${darwinArch!.dartName}';
     }
 
     return _processUtils.stream(
@@ -259,7 +259,7 @@ class AOTSnapshotter {
     required bool stripAfterBuild,
     required bool extractAppleDebugSymbols
   }) async {
-    final String targetArch = getNameForDarwinArch(appleArch);
+    final String targetArch = appleArch.name;
     if (!quiet) {
       _logger.printStatus('Building App.framework for $targetArch...');
     }
@@ -300,6 +300,7 @@ class AOTSnapshotter {
       '-dynamiclib',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-fapplication-extension',
       '-install_name', '@rpath/App.framework/App',
       '-o', appLib,
       assemblyO,
@@ -327,7 +328,7 @@ class AOTSnapshotter {
         }
       }
     } else {
-      assert(stripAfterBuild == false);
+      assert(!stripAfterBuild);
     }
 
     return 0;

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AnimatedSlide].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [AnimatedSlide].
 
 void main() => runApp(const AnimatedSlideApp());
 
@@ -13,8 +13,9 @@ class AnimatedSlideApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: AnimatedSlideExample(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const AnimatedSlideExample(),
     );
   }
 }

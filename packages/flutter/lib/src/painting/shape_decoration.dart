@@ -68,8 +68,6 @@ class ShapeDecoration extends Decoration {
   ///
   /// The [color] and [gradient] properties are mutually exclusive, one (or
   /// both) of them must be null.
-  ///
-  /// The [shape] must not be null.
   const ShapeDecoration({
     this.color,
     this.image,
@@ -98,7 +96,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = const CircleBorder();
         }
-        break;
       case BoxShape.rectangle:
         if (source.borderRadius != null) {
           assert(source.border == null || source.border!.isUniform);
@@ -109,7 +106,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = source.border ?? const Border();
         }
-        break;
     }
     return ShapeDecoration(
       color: source.color,
@@ -159,8 +155,7 @@ class ShapeDecoration extends Decoration {
   /// Shapes can be stacked (using the `+` operator). The color, gradient, and
   /// image are drawn into the inner-most shape specified.
   ///
-  /// The [shape] property specifies the outline (border) of the decoration. The
-  /// shape must not be null.
+  /// The [shape] property specifies the outline (border) of the decoration.
   ///
   /// ## Directionality-dependent shapes
   ///
@@ -239,7 +234,7 @@ class ShapeDecoration extends Decoration {
     return ShapeDecoration(
       color: Color.lerp(a?.color, b?.color, t),
       gradient: Gradient.lerp(a?.gradient, b?.gradient, t),
-      image: t < 0.5 ? a!.image : b!.image, // TODO(ianh): cross-fade the image
+      image: DecorationImage.lerp(a?.image, b?.image, t),
       shadows: BoxShadow.lerpList(a?.shadows, b?.shadows, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t)!,
     );

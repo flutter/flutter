@@ -90,12 +90,12 @@ enum DismissDirection {
 class Dismissible extends StatefulWidget {
   /// Creates a widget that can be dismissed.
   ///
-  /// The [key] argument must not be null because [Dismissible]s are commonly
-  /// used in lists and removed from the list when dismissed. Without keys, the
-  /// default behavior is to sync widgets based on their index in the list,
-  /// which means the item after the dismissed item would be synced with the
-  /// state of the dismissed item. Using keys causes the widgets to sync
-  /// according to their keys and avoids this pitfall.
+  /// The [key] argument is required because [Dismissible]s are commonly used in
+  /// lists and removed from the list when dismissed. Without keys, the default
+  /// behavior is to sync widgets based on their index in the list, which means
+  /// the item after the dismissed item would be synced with the state of the
+  /// dismissed item. Using keys causes the widgets to sync according to their
+  /// keys and avoids this pitfall.
   const Dismissible({
     required Key key,
     required this.child,
@@ -390,19 +390,16 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       case DismissDirection.horizontal:
       case DismissDirection.vertical:
         _dragExtent += delta;
-        break;
 
       case DismissDirection.up:
         if (_dragExtent + delta < 0) {
           _dragExtent += delta;
         }
-        break;
 
       case DismissDirection.down:
         if (_dragExtent + delta > 0) {
           _dragExtent += delta;
         }
-        break;
 
       case DismissDirection.endToStart:
         switch (Directionality.of(context)) {
@@ -410,14 +407,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             if (_dragExtent + delta > 0) {
               _dragExtent += delta;
             }
-            break;
           case TextDirection.ltr:
             if (_dragExtent + delta < 0) {
               _dragExtent += delta;
             }
-            break;
         }
-        break;
 
       case DismissDirection.startToEnd:
         switch (Directionality.of(context)) {
@@ -425,18 +419,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             if (_dragExtent + delta < 0) {
               _dragExtent += delta;
             }
-            break;
           case TextDirection.ltr:
             if (_dragExtent + delta > 0) {
               _dragExtent += delta;
             }
-            break;
         }
-        break;
 
       case DismissDirection.none:
         _dragExtent = 0;
-        break;
     }
     if (oldDragExtent.sign != _dragExtent.sign) {
       setState(() {
@@ -449,7 +439,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDismissUpdateValueChanged() {
-    if(widget.onUpdate != null) {
+    if (widget.onUpdate != null) {
       final bool oldDismissThresholdReached = _dismissThresholdReached;
       _dismissThresholdReached = _moveController!.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold);
       final DismissUpdateDetails details = DismissUpdateDetails(
@@ -526,13 +516,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         }
         _dragExtent = flingVelocity.sign;
         _moveController!.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-        break;
       case _FlingGestureKind.reverse:
         assert(_dragExtent != 0.0);
         assert(!_moveController!.isDismissed);
         _dragExtent = flingVelocity.sign;
         _moveController!.fling(velocity: -flingVelocity.abs() * _kFlingVelocityScale);
-        break;
       case _FlingGestureKind.none:
         if (!_moveController!.isDismissed) { // we already know it's not completed, we check that above
           if (_moveController!.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold)) {
@@ -541,7 +529,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             _moveController!.reverse();
           }
         }
-        break;
     }
   }
 

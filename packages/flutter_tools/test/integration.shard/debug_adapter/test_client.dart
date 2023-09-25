@@ -4,9 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dds/src/dap/logging.dart';
-import 'package:dds/src/dap/protocol_generated.dart';
-import 'package:dds/src/dap/protocol_stream.dart';
+import 'package:dds/dap.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 
 import 'test_server.dart';
@@ -113,6 +111,11 @@ class DapTestClient {
     return custom('hotReload');
   }
 
+  /// Sends a custom request with custom syntax convention to the debug adapter to trigger a Hot Reload.
+  Future<Response> customSyntaxHotReload() {
+    return custom(r'$/hotReload');
+  }
+
   /// Sends a custom request to the debug adapter to trigger a Hot Restart.
   Future<Response> hotRestart() {
     return custom('hotRestart');
@@ -152,6 +155,7 @@ class DapTestClient {
     String? cwd,
     bool? noDebug,
     List<String>? additionalProjectPaths,
+    bool? allowAnsiColorOutput,
     bool? debugSdkLibraries,
     bool? debugExternalPackageLibraries,
     bool? evaluateGettersInDebugViews,
@@ -166,6 +170,7 @@ class DapTestClient {
         args: args,
         toolArgs: toolArgs,
         additionalProjectPaths: additionalProjectPaths,
+        allowAnsiColorOutput: allowAnsiColorOutput,
         debugSdkLibraries: debugSdkLibraries,
         debugExternalPackageLibraries: debugExternalPackageLibraries,
         evaluateGettersInDebugViews: evaluateGettersInDebugViews,

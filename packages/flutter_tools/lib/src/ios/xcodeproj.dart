@@ -185,6 +185,7 @@ class XcodeProjectInterpreter {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
     final String? configuration = buildContext.configuration;
+    final String? target = buildContext.target;
     final String? deviceId = buildContext.deviceId;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
@@ -195,12 +196,14 @@ class XcodeProjectInterpreter {
         ...<String>['-scheme', scheme],
       if (configuration != null)
         ...<String>['-configuration', configuration],
+      if (target != null)
+        ...<String>['-target', target],
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
-      if (buildContext.isWatch == true && buildContext.environmentType == EnvironmentType.physical)
+      if (buildContext.isWatch && buildContext.environmentType == EnvironmentType.physical)
         'generic/platform=watchOS'
-      else if (buildContext.isWatch == true)
+      else if (buildContext.isWatch)
         'generic/platform=watchOS Simulator'
       else if (deviceId != null)
         'id=$deviceId'
@@ -380,6 +383,7 @@ class XcodeProjectBuildContext {
     this.configuration,
     this.environmentType = EnvironmentType.physical,
     this.deviceId,
+    this.target,
     this.isWatch = false,
   });
 
@@ -387,10 +391,11 @@ class XcodeProjectBuildContext {
   final String? configuration;
   final EnvironmentType environmentType;
   final String? deviceId;
+  final String? target;
   final bool isWatch;
 
   @override
-  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
+  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId, target);
 
   @override
   bool operator ==(Object other) {
@@ -402,7 +407,8 @@ class XcodeProjectBuildContext {
         other.configuration == configuration &&
         other.deviceId == deviceId &&
         other.environmentType == environmentType &&
-        other.isWatch == isWatch;
+        other.isWatch == isWatch &&
+        other.target == target;
   }
 }
 
@@ -477,6 +483,7 @@ class XcodeProjectInfo {
     }
     return false;
   }
+
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String? schemeFor(BuildInfo? buildInfo) {

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [PhysicalKeyboardKey].
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// Flutter code sample for [PhysicalKeyboardKey].
 
 void main() => runApp(const KeyExampleApp());
 
@@ -74,8 +74,8 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
         child: Focus(
           focusNode: _focusNode,
           onKey: _handleKeyEvent,
-          child: AnimatedBuilder(
-            animation: _focusNode,
+          child: ListenableBuilder(
+            listenable: _focusNode,
             builder: (BuildContext context, Widget? child) {
               if (!_focusNode.hasFocus) {
                 return GestureDetector(

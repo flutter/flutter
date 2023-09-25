@@ -73,9 +73,7 @@ import 'theme_data.dart';
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class TextButton extends ButtonStyleButton {
-  /// Create a TextButton.
-  ///
-  /// The [autofocus] and [clipBehavior] arguments must not be null.
+  /// Create a [TextButton].
   const TextButton({
     super.key,
     required super.onPressed,
@@ -87,6 +85,7 @@ class TextButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.isSemanticButton,
     required Widget super.child,
   });
 
@@ -95,8 +94,6 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row and padded by 8 logical pixels
   /// at the ends, with an 8 pixel gap in between.
-  ///
-  /// The [icon] and [label] arguments must not be null.
   factory TextButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -200,9 +197,7 @@ class TextButton extends ButtonStyleButton {
       : disabledIconColor == null
         ? ButtonStyleButton.allOrNull<Color?>(iconColor)
         : _TextButtonDefaultIconColor(iconColor, disabledIconColor);
-    final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
-      : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
+    final MaterialStateProperty<MouseCursor?> mouseCursor = _TextButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
@@ -249,7 +244,7 @@ class TextButton extends ButtonStyleButton {
   /// each state and "others" means all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.textScaleFactorOf(context)` and the names of the
+  /// `MediaQuery.textScalerOf(context).textScaleFactor` and the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
@@ -316,7 +311,7 @@ class TextButton extends ButtonStyleButton {
   ///   * hovered - Theme.colorScheme.primary(0.08)
   ///   * focused or pressed - Theme.colorScheme.primary(0.12)
   ///   * others - null
-  /// * `shadowColor` - null
+  /// * `shadowColor` - Colors.transparent,
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
@@ -386,7 +381,7 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     useMaterial3 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) :  const EdgeInsets.all(8),
     const EdgeInsets.symmetric(horizontal: 8),
     const EdgeInsets.symmetric(horizontal: 4),
-    MediaQuery.textScaleFactorOf(context),
+    MediaQuery.textScalerOf(context).textScaleFactor,
   );
 }
 
@@ -419,10 +414,13 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 
   @override
   Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.pressed)) {
+      return primary.withOpacity(0.12);
+    }
     if (states.contains(MaterialState.hovered)) {
       return primary.withOpacity(0.04);
     }
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+    if (states.contains(MaterialState.focused)) {
       return primary.withOpacity(0.12);
     }
     return null;
@@ -456,14 +454,14 @@ class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
 }
 
 @immutable
-class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
+class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
   _TextButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
-  final MouseCursor enabledCursor;
-  final MouseCursor disabledCursor;
+  final MouseCursor? enabledCursor;
+  final MouseCursor? disabledCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
@@ -498,7 +496,7 @@ class _TextButtonWithIcon extends TextButton {
       useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.textScaleFactorOf(context),
+      MediaQuery.textScalerOf(context).textScaleFactor,
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
@@ -517,7 +515,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScaleFactorOf(context);
+    final double scale = MediaQuery.textScalerOf(context).textScaleFactor;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -532,8 +530,6 @@ class _TextButtonWithIconChild extends StatelessWidget {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_158
 
 class _TextButtonDefaultsM3 extends ButtonStyle {
   _TextButtonDefaultsM3(this.context)
@@ -566,13 +562,13 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
+      }
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.primary.withOpacity(0.12);
       }
       return null;

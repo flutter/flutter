@@ -7,11 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'material_localizations.dart';
 
 /// Utility functions for working with dates.
-class DateUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  DateUtils._();
-
+abstract final class DateUtils {
   /// Returns a [DateTime] with the date of the original, but time set to
   /// midnight.
   static DateTime dateOnly(DateTime date) {
@@ -71,7 +67,7 @@ class DateUtils {
   ///
   /// `date` would be January 15, 2019.
   /// `futureDate` would be April 1, 2019 since it adds 3 months.
-  static  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+  static DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
     return DateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 

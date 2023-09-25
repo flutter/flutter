@@ -25,9 +25,9 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
-        return style.apply(color: ${componentColor('md.comp.menu.list-item.disabled.label-text')});
+        return style.apply(color: ${componentColor('md.comp.list.list-item.disabled.label-text')});
       }
-      return style.apply(color: ${componentColor('md.comp.menu.list-item.label-text')});
+      return style.apply(color: ${componentColor('md.comp.list.list-item.label-text')});
     });
   }
 
@@ -42,5 +42,9 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
 
   @override
   ShapeBorder? get shape => ${shape("md.comp.menu.container")};
+
+  // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
+  // Update this when the token is available.
+  static EdgeInsets menuHorizontalPadding  = const EdgeInsets.symmetric(horizontal: 12.0);
 }''';
 }

@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "Barchasini tanlash",
   "tabSemanticsLabel": "$tabCount varaqdan $tabIndex",
   "modalBarrierDismissLabel": "Yopish",
-  "searchTextFieldPlaceholderLabel": "Qidiruv"
+  "searchTextFieldPlaceholderLabel": "Qidiruv",
+  "noSpellCheckReplacementsLabel": "Almashtirish uchun soʻz topilmadi",
+  "menuDismissLabel": "Menyuni yopish",
+  "lookUpButtonLabel": "Tepaga qarang",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

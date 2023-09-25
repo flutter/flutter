@@ -296,8 +296,6 @@ enum ListTileTitleAlignment {
 /// Here is an example of a custom list item that resembles a YouTube-related
 /// video list item created with [Expanded] and [Container] widgets.
 ///
-/// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
-///
 /// ** See code in examples/api/lib/material/list_tile/custom_list_item.0.dart **
 /// {@end-tool}
 ///
@@ -305,8 +303,6 @@ enum ListTileTitleAlignment {
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
-///
-/// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
 ///
 /// ** See code in examples/api/lib/material/list_tile/custom_list_item.1.dart **
 /// {@end-tool}
@@ -513,22 +509,25 @@ class ListTile extends StatelessWidget {
   ///
   /// If this property is null, then [ListTileThemeData.titleTextStyle] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyLarge]
-  /// will be used. Otherwise, If ListTile style is [ListTileStyle.list],
-  /// [TextTheme.titleMedium] will be used and if ListTile style is [ListTileStyle.drawer],
-  /// [TextTheme.bodyLarge] will be used.
+  /// with [ColorScheme.onSurface] will be used. Otherwise, If ListTile style is
+  /// [ListTileStyle.list], [TextTheme.titleMedium] will be used and if ListTile style
+  /// is [ListTileStyle.drawer], [TextTheme.bodyLarge] will be used.
   final TextStyle? titleTextStyle;
 
   /// The text style for ListTile's [subtitle].
   ///
   /// If this property is null, then [ListTileThemeData.subtitleTextStyle] is used.
-  /// If that is also null, [TextTheme.bodyMedium] will be used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyMedium]
+  /// with [ColorScheme.onSurfaceVariant] will be used, otherwise [TextTheme.bodyMedium]
+  /// with [TextTheme.bodySmall] color will be used.
   final TextStyle? subtitleTextStyle;
 
   /// The text style for ListTile's [leading] and [trailing].
   ///
   /// If this property is null, then [ListTileThemeData.leadingAndTrailingTextStyle] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.labelSmall]
-  /// will be used, otherwise [TextTheme.bodyMedium] will be used.
+  /// with [ColorScheme.onSurfaceVariant] will be used, otherwise [TextTheme.bodyMedium]
+  /// will be used.
   final TextStyle? leadingAndTrailingTextStyle;
 
   /// Defines the font used for the [title].
@@ -802,7 +801,7 @@ class ListTile extends StatelessWidget {
       subtitleStyle = subtitleTextStyle
         ?? tileTheme.subtitleTextStyle
         ?? defaults.subtitleTextStyle!;
-      final Color? subtitleColor = effectiveColor ?? theme.textTheme.bodySmall!.color;
+      final Color? subtitleColor = effectiveColor;
       subtitleStyle = subtitleStyle.copyWith(
         color: subtitleColor,
         fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
@@ -967,7 +966,7 @@ enum _ListTileSlot {
   trailing,
 }
 
-class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ListTileSlot> {
+class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, RenderBox> {
   const _ListTile({
     this.leading,
     required this.title,
@@ -1049,7 +1048,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   }
 }
 
-class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_ListTileSlot> {
+class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_ListTileSlot, RenderBox> {
   _RenderListTile({
     required bool isDense,
     required VisualDensity visualDensity,
@@ -1533,7 +1532,8 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
   }
 
   @override
-  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!
+    .copyWith(color: _textTheme.bodySmall!.color);
 
   @override
   TextStyle? get leadingAndTrailingTextStyle => _textTheme.bodyMedium;
@@ -1561,8 +1561,6 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
-
 class _LisTileDefaultsM3 extends ListTileThemeData {
   _LisTileDefaultsM3(this.context)
     : super(
@@ -1581,13 +1579,13 @@ class _LisTileDefaultsM3 extends ListTileThemeData {
   Color? get tileColor =>  Colors.transparent;
 
   @override
-  TextStyle? get titleTextStyle => _textTheme.bodyLarge;
+  TextStyle? get titleTextStyle => _textTheme.bodyLarge!.copyWith(color: _colors.onSurface);
 
   @override
-  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!.copyWith(color: _colors.onSurfaceVariant);
 
   @override
-  TextStyle? get leadingAndTrailingTextStyle => _textTheme.labelSmall;
+  TextStyle? get leadingAndTrailingTextStyle => _textTheme.labelSmall!.copyWith(color: _colors.onSurfaceVariant);
 
   @override
   Color? get selectedColor => _colors.primary;

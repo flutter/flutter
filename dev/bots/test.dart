@@ -83,6 +83,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
 final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
 
 String get platformFolderName {
@@ -212,13 +213,16 @@ String get shuffleSeed {
 ///
 /// Examples:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
+/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt
 Future<void> main(List<String> args) async {
   try {
     printProgress('STARTING ANALYSIS');
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+        flutterTestArgs.add(arg);
+      } else if (arg.startsWith('--local-engine-host=')) {
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_HOST'] = arg.substring('--local-engine-host='.length);
         flutterTestArgs.add(arg);
       } else if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
@@ -277,7 +281,8 @@ Future<void> main(List<String> args) async {
 }
 
 final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-final bool _runningInDartHHHBot = _luciBotId.startsWith('luci-dart-');
+final bool _runningInDartHHHBot =
+    _luciBotId.startsWith('luci-dart-') || _luciBotId.startsWith('dart-tests-');
 
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
@@ -543,7 +548,10 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
   // The tests are randomly distributed into subshards so as to get a uniform
@@ -573,9 +581,7 @@ Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mai
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
   final String examplePath = path.relative(exampleDirectory.path, from: Directory.current.path);
-  final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = <String>[
-    if (hasNullSafety) '--no-sound-null-safety',
     if (mainFile != null) path.relative(mainFile.path, from: exampleDirectory.absolute.path),
   ];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
@@ -771,8 +777,6 @@ Future<void> _runAddToAppLifeCycleTests() async {
 }
 
 Future<void> _runFrameworkTests() async {
-  final List<String> soundNullSafetyOptions     = <String>['--null-assertions', '--sound-null-safety'];
-  final List<String> mixedModeNullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -780,7 +784,7 @@ Future<void> _runFrameworkTests() async {
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
+        options: <String>[trackWidgetCreationOption],
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
       );
     }
@@ -795,13 +799,13 @@ Future<void> _runFrameworkTests() async {
     // Run release mode tests (see packages/flutter/test_release/README.md)
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
+      options: <String>['--dart-define=dart.vm.product=true'],
       tests: <String>['test_release${path.separator}'],
     );
     // Run profile mode tests (see packages/flutter/test_profile/README.md)
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true', ...soundNullSafetyOptions],
+      options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true'],
       tests: <String>['test_profile${path.separator}'],
     );
   }
@@ -810,14 +814,14 @@ Future<void> _runFrameworkTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false)
       .whereType<Directory>()
-      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .where((Directory dir) => !dir.path.endsWith('widgets'))
       .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
     printProgress('${green}Running packages/flutter tests$reset for $cyan${tests.join(", ")}$reset');
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
+        options: <String>[trackWidgetCreationOption],
         tests: tests,
       );
     }
@@ -837,9 +841,9 @@ Future<void> _runFrameworkTests() async {
         workingDirectory: path.join(flutterRoot, 'examples', 'api'),
       );
     }
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   }
 
   Future<void> runTracingTests() async {
@@ -931,7 +935,7 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
-  Future<void> runFixTests() async {
+  Future<void> runFixTests(String package) async {
     final List<String> args = <String>[
       'fix',
       '--compare-to-golden',
@@ -939,13 +943,12 @@ Future<void> _runFrameworkTests() async {
     await runCommand(
       dart,
       args,
-      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_fixes'),
+      workingDirectory: path.join(flutterRoot, 'packages', package, 'test_fixes'),
     );
   }
 
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
-      '--sound-null-safety',
       'run',
       'bin/test_private.dart',
     ];
@@ -970,7 +973,9 @@ Future<void> _runFrameworkTests() async {
   Future<void> runSlow() async {
     printProgress('${green}Running slow package tests$reset for directories other than packages/flutter');
     await runTracingTests();
-    await runFixTests();
+    await runFixTests('flutter');
+    await runFixTests('flutter_test');
+    await runFixTests('integration_test');
     await runPrivateTests();
   }
 
@@ -978,6 +983,10 @@ Future<void> _runFrameworkTests() async {
     printProgress('${green}Running package tests$reset for directories other than packages/flutter');
     await _runTestHarnessTests();
     await runExampleTests();
+    await _runFlutterTest(
+      path.join(flutterRoot, 'dev', 'a11y_assessments'),
+      tests: <String>[ 'test' ],
+    );
     await _runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await _runDartTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
@@ -989,26 +998,40 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>[
       '--enable-vmservice',
       // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
       '--exclude-tags=web',
     ]);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
+    // Run java unit tests for integration_test
+    //
+    // Generate Gradle wrapper if it doesn't exist.
+    Process.runSync(
+      flutter,
+      <String>['build', 'apk', '--config-only'],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
+    await runCommand(
+      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
+      <String>[
+        ':integration_test:testDebugUnitTest',
+        '--tests',
+        'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
+      ],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
     const String httpClientWarning =
-      'Warning: At least one test in this suite creates an HttpClient. When\n'
-      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-      'requests will return status code 400, and no network request will\n'
-      'actually be made. Any test expecting a real network connection and\n'
-      'status code will fail.\n'
-      'To test code that needs an HttpClient, provide your own HttpClient\n'
-      'implementation to the code under test, so that your test can\n'
-      'consistently provide a testable response to the code under test.';
+      'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
+      'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
+      'will actually be made. Any test expecting a real network connection and status code will fail.\n'
+      'To test code that needs an HttpClient, provide your own HttpClient implementation to the code under\n'
+      'test, so that your test can consistently provide a testable response to the code under test.';
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter_test'),
       script: path.join('test', 'bindings_test_failure.dart'),
@@ -1135,8 +1158,13 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
+  final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
+  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
+  if (engineRealm.isNotEmpty) {
+    return;
+  }
   final List<ShardRunner> tests = <ShardRunner>[
-    for (String buildMode in _kAllBuildModes) ...<ShardRunner>[
+    for (final String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
         target: path.join('test_driver', 'failure.dart'),
@@ -1161,11 +1189,6 @@ Future<void> _runWebLongRunningTests() async {
         renderer: 'canvaskit',
       ),
     ],
-
-    // This test specifically tests how images are loaded in HTML mode, so we don't run it in CanvasKit mode.
-    () => _runWebE2eTest('image_loading_integration', buildMode: 'debug', renderer: 'html'),
-    () => _runWebE2eTest('image_loading_integration', buildMode: 'profile', renderer: 'html'),
-    () => _runWebE2eTest('image_loading_integration', buildMode: 'release', renderer: 'html'),
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('platform_messages_integration', buildMode: 'debug', renderer: 'canvaskit'),
@@ -1226,6 +1249,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
     () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
     () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
+    () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -1233,8 +1257,12 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/stack_trace.dart'),
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
+    () => _runWebDebugTest('lib/web_resources_cdn_test.dart',
+      additionalArguments: <String>[
+        '--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion',
+      ]),
     () => _runWebDebugTest('test/test.dart'),
-    () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
+    () => _runWebDebugTest('lib/null_safe_main.dart'),
     () => _runWebDebugTest('lib/web_define_loading.dart',
       additionalArguments: <String>[
         '--dart-define=test.valueA=Example,A',
@@ -1247,12 +1275,8 @@ Future<void> _runWebLongRunningTests() async {
         '--dart-define=test.valueB=Value',
       ]
     ),
-    () => _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-      '--sound-null-safety',
-    ]),
-    () => _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-      '--sound-null-safety',
-    ]),
+    () => _runWebDebugTest('lib/sound_mode.dart'),
+    () => _runWebReleaseTest('lib/sound_mode.dart'),
     () => _runFlutterWebTest(
       'html',
       path.join(flutterRoot, 'packages', 'integration_test'),
@@ -1311,7 +1335,6 @@ Future<void> _runFlutterDriverWebTest({
       if (driver != null) '--driver=$driver',
       '--target=$target',
       '--browser-name=chrome',
-      '--no-sound-null-safety',
       '-d',
       'web-server',
       '--$buildMode',
@@ -1353,7 +1376,6 @@ Future<void> _runWebTreeshakeTest() async {
       'build',
       'web',
       '--target=$target',
-      '--no-sound-null-safety',
       '--profile',
     ],
     workingDirectory: testAppDirectory,
@@ -1366,7 +1388,7 @@ Future<void> _runWebTreeshakeTest() async {
   final String javaScript = mainDartJs.readAsStringSync();
 
   // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
-  expect(javaScript.contains('RenderObjectToWidgetElement'), true);
+  expect(javaScript.contains('RootElement'), true);
 
   const String word = 'debugFillProperties';
   int count = 0;
@@ -1380,6 +1402,14 @@ Future<void> _runWebTreeshakeTest() async {
     }
     pos = javaScript.indexOf(word, pos);
   }
+
+  // The following are classes from `timeline.dart` that should be treeshaken
+  // off unless the app (typically a benchmark) uses methods that need them.
+  expect(javaScript.contains('AggregatedTimedBlock'), false);
+  expect(javaScript.contains('AggregatedTimings'), false);
+  expect(javaScript.contains('_BlockBuffer'), false);
+  expect(javaScript.contains('_StringListChain'), false);
+  expect(javaScript.contains('_Float64ListChain'), false);
 
   const int kMaxExpectedDebugFillProperties = 11;
   if (count > kMaxExpectedDebugFillProperties) {
@@ -1457,6 +1487,13 @@ Future<void> _runFlutterPackagesTests() async {
         'run',
         toolScript,
         'analyze',
+        // Fetch the oldest possible dependencies, rather than the newest, to
+        // insulate flutter/flutter from out-of-band failures when new versions
+        // of dependencies are published. This compensates for the fact that
+        // flutter/packages doesn't use pinned dependencies, and for the
+        // purposes of this test using old dependencies is fine. See
+        // https://github.com/flutter/flutter/issues/129633
+        '--downgrade',
         '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
@@ -1579,7 +1616,6 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
       '--driver=test_driver/transitions_perf_e2e_test.dart',
       '--target=test_driver/transitions_perf_e2e.dart',
       '--browser-name=chrome',
-      '--no-sound-null-safety',
       '-d',
       'web-server',
       '--$buildMode',
@@ -1686,7 +1722,6 @@ Future<void> _runWebReleaseTest(String target, {
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
 Future<void> _runWebDebugTest(String target, {
-  bool enableNullSafety = false,
   List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
@@ -1700,11 +1735,6 @@ Future<void> _runWebDebugTest(String target, {
     <String>[
       'run',
       '--debug',
-      if (enableNullSafety)
-        ...<String>[
-          '--no-sound-null-safety',
-          '--null-assertions',
-        ],
       '-d',
       'chrome',
       '--web-run-headless',
@@ -1747,7 +1777,6 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
       '--platform=chrome',
       '--web-renderer=$webRenderer',
       '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
-      '--sound-null-safety',
       ...flutterTestArgs,
       ...tests,
     ],

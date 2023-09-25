@@ -81,6 +81,8 @@ abstract class FlutterTestDriver {
       // intended only for use in local debugging.
       // ignore: avoid_print
       print('$time$_logPrefix$line');
+    } else {
+      printOnFailure('$time$_logPrefix$line');
     }
   }
 
@@ -88,7 +90,6 @@ abstract class FlutterTestDriver {
     List<String> arguments, {
     String? script,
     bool withDebugger = false,
-    bool singleWidgetReloads = false,
   }) async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
@@ -112,8 +113,6 @@ abstract class FlutterTestDriver {
       environment: <String, String>{
         'FLUTTER_TEST': 'true',
         'FLUTTER_WEB': 'true',
-        if (singleWidgetReloads)
-          'FLUTTER_SINGLE_WIDGET_RELOAD': 'true',
       },
     );
 
@@ -496,6 +495,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   });
 
   String? _currentRunningAppId;
+  String? _currentRunningDeviceId;
+  String? _currentRunningMode;
+
+  String? get currentRunningDeviceId => _currentRunningDeviceId;
+  String? get currentRunningMode => _currentRunningMode;
 
   Future<void> run({
     bool withDebugger = false,
@@ -504,8 +508,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool chrome = false,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
-    bool singleWidgetReloads = false,
-    bool serveObservatory = true,
+    bool serveObservatory = false,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -535,7 +538,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       script: script,
-      singleWidgetReloads: singleWidgetReloads,
     );
   }
 
@@ -544,8 +546,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool singleWidgetReloads = false,
-    bool serveObservatory = true,
+    bool serveObservatory = false,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -566,7 +567,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       withDebugger: withDebugger,
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
-      singleWidgetReloads: singleWidgetReloads,
       attachPort: port,
     );
   }
@@ -578,7 +578,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool singleWidgetReloads = false,
     int? attachPort,
   }) async {
     assert(!startPaused || withDebugger);
@@ -586,7 +585,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       args,
       script: script,
       withDebugger: withDebugger,
-      singleWidgetReloads: singleWidgetReloads,
     );
 
     final Completer<void> prematureExitGuard = Completer<void>();
@@ -611,6 +609,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
         // Set this up now, but we don't wait it yet. We want to make sure we don't
         // miss it while waiting for debugPort below.
+        final Future<Map<String, Object?>> start = _waitFor(event: 'app.start', timeout: appStartTimeout);
         final Future<Map<String, Object?>> started = _waitFor(event: 'app.started', timeout: appStartTimeout);
 
         if (withDebugger) {
@@ -630,9 +629,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           _attachPort = attachPort;
         }
 
-        // Now await the started event; if it had already happened the future will
+        // Now await the start/started events; if it had already happened the future will
         // have already completed.
-        _currentRunningAppId = ((await started)['params'] as Map<String, Object?>?)?['appId'] as String?;
+        final Map<String, Object?>? startParams = (await start)['params'] as Map<String, Object?>?;
+        final Map<String, Object?>? startedParams = (await started)['params'] as Map<String, Object?>?;
+        _currentRunningAppId = startedParams?['appId'] as String?;
+        _currentRunningDeviceId = startParams?['deviceId'] as String?;
+        _currentRunningMode = startParams?['mode'] as String?;
         prematureExitGuard.complete();
       } on Exception catch (error, stackTrace) {
         prematureExitGuard.completeError(Exception(error.toString()), stackTrace);
@@ -745,7 +748,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // to throw if it sees an app.stop event before the response to this request.
     final Future<Map<String, Object?>> responseFuture = _waitFor(
       id: requestId,
-      ignoreAppStopEvent: method == 'app.stop',
+      ignoreAppStopEvent: method == 'app.stop' || method == 'app.detach',
     );
     _process?.stdin.writeln(jsonEncoded);
     final Map<String, Object?> response = await responseFuture;
@@ -794,13 +797,11 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool pauseOnExceptions = false,
     Future<void> Function()? beforeStart,
-    bool singleWidgetReloads = false,
   }) async {
     await super._setupProcess(
       args,
       script: script,
       withDebugger: withDebugger,
-      singleWidgetReloads: singleWidgetReloads,
     );
 
     // Stash the PID so that we can terminate the VM more reliably than using

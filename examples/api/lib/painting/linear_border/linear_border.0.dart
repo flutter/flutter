@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Examples of LinearBorder and LinearBorderEdge.
-
-
 import 'package:flutter/material.dart';
+
+/// Examples for [LinearBorder] and [LinearBorderEdge].
 
 void main() {
   runApp(const ExampleApp());
 }
 
 class ExampleApp extends StatelessWidget {
-  const ExampleApp({ super.key });
+  const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(useMaterial3: true),
       home: const Directionality(
-        textDirection: TextDirection.ltr, // Or try rtl.
+        // TRY THIS: Switch to TextDirection.rtl to see how the borders change.
+        textDirection: TextDirection.ltr,
         child: Home(),
       ),
     );
@@ -27,7 +27,7 @@ class ExampleApp extends StatelessWidget {
 }
 
 class SampleCard extends StatelessWidget {
-  const SampleCard({ super.key, required this.title, required this.subtitle, required this.children });
+  const SampleCard({super.key, required this.title, required this.subtitle, required this.children});
 
   final String title;
   final String subtitle;
@@ -51,7 +51,7 @@ class SampleCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: List<Widget>.generate(children.length * 2 - 1, (int index) {
-                return index.isEven ? children[index ~/2] : const SizedBox(width: 16);
+                return index.isEven ? children[index ~/ 2] : const SizedBox(width: 16);
               }),
             ),
           ],
@@ -62,7 +62,7 @@ class SampleCard extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
-  const Home({ super.key });
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -104,7 +104,7 @@ class _HomeState extends State<Home> {
                       side: primarySide3,
                       shape: LinearBorder.bottom(),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Text'),
                   ),
                   OutlinedButton(
@@ -112,7 +112,7 @@ class _HomeState extends State<Home> {
                       side: primarySide3,
                       shape: LinearBorder.bottom(),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Outlined'),
                   ),
                   ElevatedButton(
@@ -120,7 +120,7 @@ class _HomeState extends State<Home> {
                       side: primarySide3,
                       shape: LinearBorder.bottom(),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Elevated'),
                   ),
                 ],
@@ -140,7 +140,7 @@ class _HomeState extends State<Home> {
                       side: primarySide0,
                       shape: LinearBorder.start(),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Start()'),
                   ),
                   TextButton(
@@ -148,7 +148,7 @@ class _HomeState extends State<Home> {
                       side: primarySide0,
                       shape: LinearBorder.end(),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('End()'),
                   ),
                   TextButton(
@@ -156,7 +156,7 @@ class _HomeState extends State<Home> {
                       side: primarySide0,
                       shape: LinearBorder.top(),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Top()'),
                   ),
                   TextButton(
@@ -164,7 +164,7 @@ class _HomeState extends State<Home> {
                       side: primarySide0,
                       shape: LinearBorder.bottom(),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Bottom()'),
                   ),
                 ],
@@ -186,7 +186,7 @@ class _HomeState extends State<Home> {
                         size: 0.5,
                       ),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Center'),
                   ),
                   TextButton(
@@ -197,7 +197,7 @@ class _HomeState extends State<Home> {
                         alignment: -1,
                       ),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Start'),
                   ),
                   TextButton(
@@ -208,7 +208,7 @@ class _HomeState extends State<Home> {
                         alignment: 1,
                       ),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('End'),
                   ),
                 ],
@@ -229,7 +229,7 @@ class _HomeState extends State<Home> {
                         bottom: LinearBorderEdge(),
                       ),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Horizontal'),
                   ),
                   TextButton(
@@ -240,7 +240,7 @@ class _HomeState extends State<Home> {
                         end: LinearBorderEdge(),
                       ),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Vertical'),
                   ),
                   TextButton(
@@ -251,7 +251,7 @@ class _HomeState extends State<Home> {
                         bottom: LinearBorderEdge(),
                       ),
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Corner'),
                   ),
                 ],
@@ -276,20 +276,19 @@ class _HomeState extends State<Home> {
                       side: primarySide3,
                       shape: shape,
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Press Play'),
                   ),
                   TextButton(
                     style: ButtonStyle(
-                      side: MaterialStateProperty.resolveWith<BorderSide?>((Set <MaterialState> states) {
+                      side: MaterialStateProperty.resolveWith<BorderSide?>((Set<MaterialState> states) {
                         return states.contains(MaterialState.hovered) ? primarySide3 : null;
                       }),
-                      shape: MaterialStateProperty.resolveWith<OutlinedBorder>((Set <MaterialState> states) {
+                      shape: MaterialStateProperty.resolveWith<OutlinedBorder>((Set<MaterialState> states) {
                         return states.contains(MaterialState.hovered) ? shape0 : shape1;
                       }),
-
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Hover'),
                   ),
                 ],

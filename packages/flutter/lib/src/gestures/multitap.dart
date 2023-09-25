@@ -119,8 +119,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   DoubleTapGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
-    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
-  });
+    AllowedButtonsFilter? allowedButtonsFilter,
+  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
 
   // The default value for [allowedButtonsFilter].
   // Accept the input if, and only if, [kPrimaryButton] is pressed.
@@ -208,7 +208,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
     // If second tap is not allowed, reset the state.
     final bool isPointerAllowed = super.isPointerAllowed(event);
-    if (isPointerAllowed == false) {
+    if (!isPointerAllowed) {
       _reset();
     }
     return isPointerAllowed;

@@ -6,10 +6,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestResult {
   bool dragStarted = false;
   bool dragUpdate = false;
+  bool dragEnd = false;
 }
 
 class NestedScrollableCase extends StatelessWidget {
@@ -76,7 +78,9 @@ class NestedDraggableCase extends StatelessWidget {
                     onDragUpdate: (DragUpdateDetails details){
                       testResult.dragUpdate = true;
                     },
-                    onDragEnd: (_) {},
+                    onDragEnd: (_) {
+                      testResult.dragEnd = true;
+                    },
                   ),
                 );
               },
@@ -89,10 +93,10 @@ class NestedDraggableCase extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
-      gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
-    );
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
+    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+    addTearDown(tester.view.reset);
+
     final TestResult result = TestResult();
 
     await tester.pumpWidget(MaterialApp(
@@ -112,10 +116,10 @@ void main() {
    expect(result.dragUpdate, true);
   });
 
-  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
-      gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
-    );
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
+    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+    addTearDown(tester.view.reset);
+
     final TestResult result = TestResult();
 
     await tester.pumpWidget(MaterialApp(
@@ -133,5 +137,6 @@ void main() {
 
    expect(result.dragStarted, true);
    expect(result.dragUpdate, true);
+   expect(result.dragEnd, true);
   });
 }

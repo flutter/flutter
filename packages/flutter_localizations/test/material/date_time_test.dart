@@ -110,6 +110,7 @@ void main() {
       testWidgets('formats ${TimeOfDayFormat.HH_dot_mm}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 20, minute: 32)), '20.32');
         expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 9, minute: 32)), '09.32');
+        expect(await formatTimeOfDay(tester, const Locale('da'), const TimeOfDay(hour: 9, minute: 32)), '09.32');
       });
 
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {
@@ -118,7 +119,7 @@ void main() {
 
       testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('zh'), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
-        expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), 'முற்பகல் 9:32');
+        expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
       });
     });
 
@@ -192,6 +193,22 @@ void main() {
     ));
 
     expect(dateFormat.locale, 'en_US');
+  });
+
+  testWidgets('cy is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
+    late DateFormat dateFormat;
+
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('cy'),
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      home: Builder(builder: (BuildContext context) {
+        dateFormat = DateFormat.yMMMd('cy');
+        return Container();
+      }),
+    ));
+
+    expect(dateFormat.locale, 'cy');
+    expect(dateFormat.format(DateTime(2023, 4, 10, 2, 32)), equals('10 Ebr 2023'));
   });
 }
 

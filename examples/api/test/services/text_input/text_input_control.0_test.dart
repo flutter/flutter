@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Enter text using the VKB', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.TextInputControlExampleApp());
     await tester.pumpAndSettle();
 
     await tester.tap(find.descendant(

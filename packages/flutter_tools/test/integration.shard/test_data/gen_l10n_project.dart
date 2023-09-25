@@ -34,7 +34,7 @@ class GenL10nProject extends Project {
   final String pubspec = '''
 name: test_l10n_project
 environment:
-  sdk: ">=2.12.0-0 <4.0.0"
+  sdk: '>=3.2.0-0 <4.0.0'
 
 dependencies:
   flutter:
@@ -232,6 +232,8 @@ class Home extends StatelessWidget {
               "${localizations.selectInPlural('male', 1)}",
               "${localizations.selectInPlural('male', 2)}",
               "${localizations.selectInPlural('female', 1)}",
+              '${localizations.datetime1(DateTime(2023, 6, 26))}',
+              '${localizations.datetime2(DateTime(2023, 6, 26, 5, 23))}',
             ]);
           },
         ),
@@ -682,7 +684,9 @@ void main() {
         "type": "num"
       }
     }
-  }
+  },
+  "datetime1": "{today, date, ::yMd}",
+  "datetime2": "{current, time, ::jms}"
 }
 ''';
 

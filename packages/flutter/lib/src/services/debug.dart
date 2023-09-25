@@ -15,17 +15,13 @@ export 'hardware_keyboard.dart' show KeyDataTransitMode;
 /// of their extent of support for keyboard API.
 KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
 
-/// Profile and print statistics on Platform Channel usage.
+/// Setting to true will cause extensive logging to occur when key events are
+/// received.
 ///
-/// When this is true statistics about the usage of Platform Channels will be
-/// printed out periodically to the console and Timeline events will show the
-/// time between sending and receiving a message (encoding and decoding time
-/// excluded).
-///
-/// The statistics include the total bytes transmitted and the average number of
-/// bytes per invocation in the last quantum. "Up" means in the direction of
-/// Flutter to the host platform, "down" is the host platform to flutter.
-bool debugProfilePlatformChannels = false;
+/// Can be used to debug keyboard issues: each time a key event is received on
+/// the framework side, the event details and the current pressed state will
+/// be printed.
+bool debugPrintKeyboardEvents = false;
 
 /// Returns true if none of the widget library debug variables have been changed.
 ///
@@ -38,7 +34,7 @@ bool debugAssertAllServicesVarsUnset(String reason) {
     if (debugKeyEventSimulatorTransitModeOverride != null) {
       throw FlutterError(reason);
     }
-    if (debugProfilePlatformChannels) {
+    if (debugPrintKeyboardEvents) {
       throw FlutterError(reason);
     }
     return true;

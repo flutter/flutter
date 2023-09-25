@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile.selected].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile.selected].
 
 void main() => runApp(const ListTileApp());
 
@@ -15,18 +15,19 @@ class ListTileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: const LisTileExample(),
+      home: const ListTileExample(),
     );
   }
 }
-class LisTileExample extends StatefulWidget {
-  const LisTileExample({super.key});
+
+class ListTileExample extends StatefulWidget {
+  const ListTileExample({super.key});
 
   @override
-  State<LisTileExample> createState() => _LisTileExampleState();
+  State<ListTileExample> createState() => _ListTileExampleState();
 }
 
-class _LisTileExampleState extends State<LisTileExample> {
+class _ListTileExampleState extends State<ListTileExample> {
   int _selectedIndex = 0;
 
   @override

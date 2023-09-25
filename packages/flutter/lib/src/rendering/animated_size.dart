@@ -99,8 +99,42 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     );
   }
 
+  /// When asserts are enabled, returns the animation controller that is used
+  /// to drive the resizing.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  AnimationController? get debugController {
+    AnimationController? controller;
+    assert(() {
+      controller = _controller;
+      return true;
+    }());
+    return controller;
+  }
+
+  /// When asserts are enabled, returns the animation that drives the resizing.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  CurvedAnimation? get debugAnimation {
+    CurvedAnimation? animation;
+    assert(() {
+      animation = _animation;
+      return true;
+    }());
+    return animation;
+  }
+
   late final AnimationController _controller;
   late final CurvedAnimation _animation;
+
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
   double? _lastValue;
@@ -141,7 +175,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -181,7 +215,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         // Call markNeedsLayout in case the RenderObject isn't marked dirty
         // already, to resume interrupted resizing animation.
         markNeedsLayout();
-        break;
     }
   }
 
@@ -213,16 +246,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     switch (_state) {
       case RenderAnimatedSizeState.start:
         _layoutStart();
-        break;
       case RenderAnimatedSizeState.stable:
         _layoutStable();
-        break;
       case RenderAnimatedSizeState.changed:
         _layoutChanged();
-        break;
       case RenderAnimatedSizeState.unstable:
         _layoutUnstable();
-        break;
     }
 
     size = constraints.constrain(_animatedSize!);
@@ -253,13 +282,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         } else if (_controller.value == _controller.upperBound) {
           return constraints.constrain(childSize);
         }
-        break;
       case RenderAnimatedSizeState.unstable:
       case RenderAnimatedSizeState.changed:
         if (_sizeTween.end != childSize) {
           return constraints.constrain(childSize);
         }
-        break;
     }
 
     return constraints.constrain(_animatedSize!);
@@ -358,6 +385,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   @override
   void dispose() {
     _clipRectLayer.layer = null;
+    _controller.dispose();
+    _animation.dispose();
     super.dispose();
   }
 }

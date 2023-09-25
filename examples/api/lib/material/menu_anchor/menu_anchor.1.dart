@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MenuAnchor].
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// Flutter code sample for [MenuAnchor].
 
 void main() => runApp(const ContextMenuApp());
 
@@ -41,6 +42,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   final MenuController _menuController = MenuController();
   ShortcutRegistryEntry? _shortcutsEntry;
+  bool _menuWasEnabled = false;
 
   Color get backgroundColor => _backgroundColor;
   Color _backgroundColor = Colors.red;
@@ -60,6 +62,12 @@ class _MyContextMenuState extends State<MyContextMenu> {
         _showingMessage = value;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _disableContextMenu();
   }
 
   @override
@@ -84,7 +92,29 @@ class _MyContextMenuState extends State<MyContextMenu> {
   void dispose() {
     _shortcutsEntry?.dispose();
     _buttonFocusNode.dispose();
+    _reenableContextMenu();
     super.dispose();
+  }
+
+  Future<void> _disableContextMenu() async {
+    if (!kIsWeb) {
+      // Does nothing on non-web platforms.
+      return;
+    }
+    _menuWasEnabled = BrowserContextMenu.enabled;
+    if (_menuWasEnabled) {
+      await BrowserContextMenu.disableContextMenu();
+    }
+  }
+
+  void _reenableContextMenu() {
+    if (!kIsWeb) {
+      // Does nothing on non-web platforms.
+      return;
+    }
+    if (_menuWasEnabled && !BrowserContextMenu.enabled) {
+      BrowserContextMenu.enableContextMenu();
+    }
   }
 
   @override
@@ -93,6 +123,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
       padding: const EdgeInsets.all(50),
       child: GestureDetector(
         onTapDown: _handleTapDown,
+        onSecondaryTapDown: _handleSecondaryTapDown,
         child: MenuAnchor(
           controller: _menuController,
           anchorTapClosesMenu: true,
@@ -101,16 +132,18 @@ class _MyContextMenuState extends State<MyContextMenu> {
               child: Text(MenuEntry.about.label),
               onPressed: () => _activate(MenuEntry.about),
             ),
-            if (_showingMessage) MenuItemButton(
-              onPressed: () => _activate(MenuEntry.hideMessage),
-              shortcut: MenuEntry.hideMessage.shortcut,
-              child: Text(MenuEntry.hideMessage.label),
-            ),
-            if (!_showingMessage) MenuItemButton(
-              onPressed: () => _activate(MenuEntry.showMessage),
-              shortcut: MenuEntry.showMessage.shortcut,
-              child: Text(MenuEntry.showMessage.label),
-            ),
+            if (_showingMessage)
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.hideMessage),
+                shortcut: MenuEntry.hideMessage.shortcut,
+                child: Text(MenuEntry.hideMessage.label),
+              ),
+            if (!_showingMessage)
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.showMessage),
+                shortcut: MenuEntry.showMessage.shortcut,
+                child: Text(MenuEntry.showMessage.label),
+              ),
             SubmenuButton(
               menuChildren: <Widget>[
                 MenuItemButton(
@@ -140,7 +173,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
               children: <Widget>[
                 const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text('Ctrl-click anywhere on the background to show the menu.'),
+                  child: Text('Right-click anywhere on the background to show the menu.'),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -169,31 +202,42 @@ class _MyContextMenuState extends State<MyContextMenu> {
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
-        break;
       case MenuEntry.showMessage:
       case MenuEntry.hideMessage:
         showingMessage = !showingMessage;
-        break;
       case MenuEntry.colorMenu:
         break;
       case MenuEntry.colorRed:
         backgroundColor = Colors.red;
-        break;
       case MenuEntry.colorGreen:
         backgroundColor = Colors.green;
-        break;
       case MenuEntry.colorBlue:
         backgroundColor = Colors.blue;
-        break;
     }
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    if (!HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) &&
-        !HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
-      return;
-    }
+  void _handleSecondaryTapDown(TapDownDetails details) {
     _menuController.open(position: details.localPosition);
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Don't open the menu on these platforms with a Ctrl-tap (or a
+        // tap).
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // Only open the menu on these platforms if the control button is down
+        // when the tap occurs.
+        if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
+            HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
+          _menuController.open(position: details.localPosition);
+        }
+    }
   }
 }
 
@@ -204,8 +248,9 @@ class ContextMenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: MyContextMenu(message: kMessage)),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const Scaffold(body: MyContextMenu(message: kMessage)),
     );
   }
 }

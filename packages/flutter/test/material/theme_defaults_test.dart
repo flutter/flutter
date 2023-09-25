@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Duration defaultButtonDuration = Duration(milliseconds: 200);
 
@@ -11,12 +12,14 @@ void main() {
   group('FloatingActionButton', () {
     const BoxConstraints defaultFABConstraints = BoxConstraints.tightFor(width: 56.0, height: 56.0);
     const ShapeBorder defaultFABShape = CircleBorder();
+    const ShapeBorder defaultFABShapeM3 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const EdgeInsets defaultFABPadding = EdgeInsets.zero;
 
-    testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData.light(useMaterial3: false);
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light(),
+          theme: theme,
           home: Center(
               child: FloatingActionButton(
                 onPressed: () { }, // button.enabled == true
@@ -40,10 +43,39 @@ void main() {
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
-    testWidgets('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material3 - theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData.light(useMaterial3: true);
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light(),
+          theme: theme,
+          home: Center(
+            child: FloatingActionButton(
+              onPressed: () { }, // button.enabled == true
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      );
+
+      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.enabled, true);
+      expect(raw.textStyle!.color, theme.colorScheme.onPrimaryContainer);
+      expect(raw.fillColor, theme.colorScheme.primaryContainer);
+      expect(raw.elevation, 6.0);
+      expect(raw.highlightElevation, 6.0);
+      expect(raw.disabledElevation, 6.0);
+      expect(raw.constraints, defaultFABConstraints);
+      expect(raw.padding, defaultFABPadding);
+      expect(raw.shape, defaultFABShapeM3);
+      expect(raw.animationDuration, defaultButtonDuration);
+      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+    });
+
+    testWidgetsWithLeakTracking('Material2 - theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData.light(useMaterial3: false);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
           home: const Center(
               child: FloatingActionButton(
                 onPressed: null, // button.enabled == false
@@ -65,6 +97,36 @@ void main() {
       expect(raw.constraints, defaultFABConstraints);
       expect(raw.padding, defaultFABPadding);
       expect(raw.shape, defaultFABShape);
+      expect(raw.animationDuration, defaultButtonDuration);
+      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+    });
+
+    testWidgetsWithLeakTracking('Material3 - theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData.light(useMaterial3: true);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: const Center(
+            child: FloatingActionButton(
+              onPressed: null, // button.enabled == false
+              child: Icon(Icons.add),
+            ),
+          ),
+        ),
+      );
+
+      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      expect(raw.enabled, false);
+      expect(raw.textStyle!.color, theme.colorScheme.onPrimaryContainer);
+      expect(raw.fillColor, theme.colorScheme.primaryContainer);
+      // highlightColor, disabled button can't be pressed
+      // splashColor, disabled button doesn't splash
+      expect(raw.elevation, 6.0);
+      expect(raw.highlightElevation, 6.0);
+      expect(raw.disabledElevation, 6.0);
+      expect(raw.constraints, defaultFABConstraints);
+      expect(raw.padding, defaultFABPadding);
+      expect(raw.shape, defaultFABShapeM3);
       expect(raw.animationDuration, defaultButtonDuration);
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });

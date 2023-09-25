@@ -345,7 +345,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: ExpansionPanelList(
               expansionCallback: (int index, bool isExpanded) {
                 setState(() {
-                  _demoItems[index].isExpanded = !isExpanded;
+                  _demoItems[index].isExpanded = isExpanded;
                 });
               },
               children: _demoItems.map<ExpansionPanel>((DemoItem<dynamic> item) {

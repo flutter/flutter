@@ -27,6 +27,7 @@ import 'menu_style.dart';
 import 'menu_theme.dart';
 import 'radio.dart';
 import 'text_button.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -127,7 +128,7 @@ class MenuAnchor extends StatefulWidget {
     this.childFocusNode,
     this.style,
     this.alignmentOffset = Offset.zero,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     this.anchorTapClosesMenu = false,
     this.onOpen,
     this.onClose,
@@ -183,7 +184,7 @@ class MenuAnchor extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Whether the menus will be closed if the anchor area is tapped.
@@ -303,6 +304,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _anchorChildren.clear();
     _menuController._detach(this);
     _internalMenuController = null;
+    _menuScopeNode.dispose();
     super.dispose();
   }
 
@@ -342,7 +344,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // Needs to update the overlay entry on the next frame, since it's in the
       // overlay.
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        _overlayEntry!.markNeedsBuild();
+        _overlayEntry?.markNeedsBuild();
       });
     }
   }
@@ -463,10 +465,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _handleScroll() {
-    // If an ancestor scrolls, and we're a top level or root anchor, then close
-    // the menus. Don't just close it on *any* scroll, since we want to be able
-    // to scroll menus themselves if they're too big for the view.
-    if (_isTopLevel || _isRoot) {
+    // If an ancestor scrolls, and we're a root anchor, then close the menus.
+    // Don't just close it on *any* scroll, since we want to be able to scroll
+    // menus themselves if they're too big for the view.
+    if (_isRoot) {
       _root._close();
     }
   }
@@ -551,13 +553,15 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
     _closeChildren(inDispose: inDispose);
     _overlayEntry?.remove();
+    _overlayEntry?.dispose();
     _overlayEntry = null;
     if (!inDispose) {
       // Notify that _childIsOpen changed state, but only if not
       // currently disposing.
       _parent?._childChangedOpenState();
+      widget.onClose?.call();
+      setState(() {});
     }
-    widget.onClose?.call();
   }
 
   void _closeChildren({bool inDispose = false}) {
@@ -810,6 +814,7 @@ class MenuItemButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.leadingIcon,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -870,6 +875,14 @@ class MenuItemButton extends StatefulWidget {
 
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
+
+  /// {@template flutter.material.menu_anchor.closeOnActivate}
+  /// Determines if the menu will be closed when a [MenuItemButton]
+  /// is pressed.
+  ///
+  /// Defaults to true.
+  /// {@endtemplate}
+  final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1052,6 +1065,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       style: mergedStyle,
       statesController: widget.statesController,
       clipBehavior: widget.clipBehavior,
+      isSemanticButton: null,
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
@@ -1061,14 +1075,14 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       ),
     );
 
-    if (_platformSupportsAccelerators() && widget.enabled) {
+    if (_platformSupportsAccelerators && widget.enabled) {
       child = MenuAcceleratorCallbackBinding(
         onInvoke: _handleSelect,
         child: child,
       );
     }
 
-    return child;
+    return MergeSemantics(child: child);
   }
 
   void _handleFocusChange() {
@@ -1088,8 +1102,16 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
-    widget.onPressed?.call();
-    _MenuAnchorState._maybeOf(context)?._root._close();
+    if (widget.closeOnActivate) {
+      _MenuAnchorState._maybeOf(context)?._root._close();
+    }
+    // Delay the call to onPressed until post-frame so that the focus is
+    // restored to what it was before the menu was opened before the action is
+    // executed.
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      FocusManager.instance.applyFocusChangesIfNeeded();
+      widget.onPressed?.call();
+    });
   }
 
   void _createInternalFocusNodeIfNeeded() {
@@ -1140,6 +1162,7 @@ class CheckboxMenuButton extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1166,7 +1189,7 @@ class CheckboxMenuButton extends StatelessWidget {
   /// The checkbox will have different default container color and check color when
   /// this is true. This is only used when [ThemeData.useMaterial3] is set to true.
   ///
-  /// Must not be null. Defaults to false.
+  /// Defaults to false.
   final bool isError;
 
   /// Called when the value of the checkbox should change.
@@ -1242,6 +1265,9 @@ class CheckboxMenuButton extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
+  final bool closeOnActivate;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1262,13 +1288,10 @@ class CheckboxMenuButton extends StatelessWidget {
         switch (value) {
           case false:
             onChanged!.call(true);
-            break;
           case true:
             onChanged!.call(tristate ? null : false);
-            break;
           case null:
             onChanged!.call(false);
-            break;
         }
       },
       onHover: onHover,
@@ -1295,6 +1318,7 @@ class CheckboxMenuButton extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
@@ -1335,6 +1359,7 @@ class RadioMenuButton<T> extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1439,6 +1464,9 @@ class RadioMenuButton<T> extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
+  final bool closeOnActivate;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1486,6 +1514,7 @@ class RadioMenuButton<T> extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
@@ -1530,10 +1559,11 @@ class SubmenuButton extends StatefulWidget {
     this.onFocusChange,
     this.onOpen,
     this.onClose,
+    this.controller,
     this.style,
     this.menuStyle,
     this.alignmentOffset,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     this.focusNode,
     this.statesController,
     this.leadingIcon,
@@ -1559,6 +1589,9 @@ class SubmenuButton extends StatefulWidget {
 
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
+
+  /// An optional [MenuController] for this submenu.
+  final MenuController? controller;
 
   /// Customizes this button's appearance.
   ///
@@ -1587,7 +1620,7 @@ class SubmenuButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -1742,7 +1775,8 @@ class SubmenuButton extends StatefulWidget {
 class _SubmenuButtonState extends State<SubmenuButton> {
   FocusNode? _internalFocusNode;
   bool _waitingToFocusMenu = false;
-  final MenuController _menuController = MenuController();
+  MenuController? _internalMenuController;
+  MenuController get _menuController => widget.controller ?? _internalMenuController!;
   _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
   FocusNode get _buttonFocusNode => widget.focusNode ?? _internalFocusNode!;
   bool get _enabled => widget.menuChildren.isNotEmpty;
@@ -1759,12 +1793,15 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         return true;
       }());
     }
+    if (widget.controller == null) {
+      _internalMenuController = MenuController();
+    }
     _buttonFocusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
-    _internalFocusNode?.removeListener(_handleFocusChange);
+    _buttonFocusNode.removeListener(_handleFocusChange);
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -1792,6 +1829,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       }
       _buttonFocusNode.addListener(_handleFocusChange);
     }
+    if (widget.controller != oldWidget.controller) {
+      _internalMenuController = (oldWidget.controller == null) ? null : MenuController();
+    }
   }
 
   @override
@@ -1805,15 +1845,11 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
             menuPaddingOffset += Offset(menuPadding.right, 0);
-            break;
           case TextDirection.ltr:
             menuPaddingOffset += Offset(-menuPadding.left, 0);
-            break;
         }
-        break;
       case Axis.vertical:
         menuPaddingOffset += Offset(0, -menuPadding.top);
-        break;
     }
 
     return MenuAnchor(
@@ -1822,7 +1858,16 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       alignmentOffset: menuPaddingOffset,
       clipBehavior: widget.clipBehavior,
       onClose: widget.onClose,
-      onOpen: widget.onOpen,
+      onOpen: () {
+        if (!_waitingToFocusMenu) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            _menuController._anchor?._focusButton();
+            _waitingToFocusMenu = false;
+          });
+          _waitingToFocusMenu = true;
+        }
+        widget.onOpen?.call();
+      },
       style: widget.menuStyle,
       builder: (BuildContext context, MenuController controller, Widget? child) {
         // Since we don't want to use the theme style or default style from the
@@ -1843,16 +1888,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller.close();
           } else {
             controller.open();
-            if (!_waitingToFocusMenu) {
-              // Only schedule this if it's not already scheduled.
-              SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-                // This has to happen in the next frame because the menu bar is
-                // not focusable until the first menu is open.
-                controller._anchor?._focusButton();
-                _waitingToFocusMenu = false;
-              });
-              _waitingToFocusMenu = true;
-            }
           }
         }
 
@@ -1872,22 +1907,27 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
-
-        child = TextButton(
-          style: mergedStyle,
-          focusNode: _buttonFocusNode,
-          onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
-          onPressed: _enabled ? () => toggleShowMenu(context) : null,
-          child: _MenuItemLabel(
-            leadingIcon: widget.leadingIcon,
-            trailingIcon: widget.trailingIcon,
-            hasSubmenu: true,
-            showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-            child: child ?? const SizedBox(),
+        child = MergeSemantics(
+          child: Semantics(
+            expanded: controller.isOpen,
+            child: TextButton(
+              style: mergedStyle,
+              focusNode: _buttonFocusNode,
+              onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
+              onPressed: _enabled ? () => toggleShowMenu(context) : null,
+              isSemanticButton: null,
+              child: _MenuItemLabel(
+                leadingIcon: widget.leadingIcon,
+                trailingIcon: widget.trailingIcon,
+                hasSubmenu: true,
+                showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                child: child ?? const SizedBox(),
+              ),
+            ),
           ),
         );
 
-        if (_enabled && _platformSupportsAccelerators()) {
+        if (_enabled && _platformSupportsAccelerators) {
           return MenuAcceleratorCallbackBinding(
             onInvoke: () => toggleShowMenu(context),
             hasSubmenu: true,
@@ -2016,35 +2056,44 @@ class _LocalizedShortcutLabeler {
   String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
     final ShortcutSerialization serialized = shortcut.serializeForMenu();
     final String keySeparator;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
+    if (_usesSymbolicModifiers) {
         // Use "⌃ ⇧ A" style on macOS and iOS.
         keySeparator = ' ';
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+    } else {
         // Use "Ctrl+Shift+A" style.
         keySeparator = '+';
-        break;
     }
     if (serialized.trigger != null) {
       final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
-      // These should be in this order, to match the LogicalKeySet version.
-      if (serialized.alt!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-      }
-      if (serialized.control!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-      }
-      if (serialized.meta!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-      }
-      if (serialized.shift!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+      if (_usesSymbolicModifiers) {
+        // macOS/iOS platform convention uses this ordering, with ⌘ always last.
+        if (serialized.control!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
+        }
+        if (serialized.alt!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
+        }
+        if (serialized.shift!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+        }
+        if (serialized.meta!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
+        }
+      } else {
+        // These should be in this order, to match the LogicalKeySet version.
+        if (serialized.alt!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
+        }
+        if (serialized.control!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
+        }
+        if (serialized.meta!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
+        }
+        if (serialized.shift!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+        }
       }
       String? shortcutTrigger;
       final int logicalKeyId = trigger.keyId;
@@ -2316,7 +2365,6 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
             if (_moveToParent(anchor)) {
               return;
             }
-            break;
           case Axis.vertical:
             if (firstItemIsFocused) {
               if (_moveToParent(anchor)) {
@@ -2326,23 +2374,18 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
             if (_moveToPrevious(anchor)) {
               return;
             }
-            break;
         }
-        break;
       case TraversalDirection.down:
         switch (orientation) {
           case Axis.horizontal:
             if (_moveToSubmenu(anchor)) {
               return;
             }
-            break;
           case Axis.vertical:
             if (_moveToNext(anchor)) {
               return;
             }
-            break;
         }
-        break;
       case TraversalDirection.left:
         switch (orientation) {
           case Axis.horizontal:
@@ -2351,14 +2394,11 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                 if (_moveToNext(anchor)) {
                   return;
                 }
-                break;
               case TextDirection.ltr:
                 if (_moveToPrevious(anchor)) {
                   return;
                 }
-                break;
             }
-            break;
           case Axis.vertical:
             switch (Directionality.of(context)) {
               case TextDirection.rtl:
@@ -2371,14 +2411,12 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     return;
                   }
                 }
-                break;
               case TextDirection.ltr:
                 switch (anchor._parent!._orientation) {
                   case Axis.horizontal:
                     if (_moveToPreviousTopLevel(anchor)) {
                       return;
                     }
-                    break;
                   case Axis.vertical:
                     if (buttonIsFocused) {
                       if (_moveToPreviousTopLevel(anchor)) {
@@ -2389,13 +2427,9 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                         return;
                       }
                     }
-                    break;
                 }
-                break;
             }
-            break;
         }
-        break;
       case TraversalDirection.right:
         switch (orientation) {
           case Axis.horizontal:
@@ -2404,14 +2438,11 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                 if (_moveToPrevious(anchor)) {
                   return;
                 }
-                break;
               case TextDirection.ltr:
                 if (_moveToNext(anchor)) {
                   return;
                 }
-                break;
             }
-            break;
           case Axis.vertical:
             switch (Directionality.of(context)) {
               case TextDirection.rtl:
@@ -2420,14 +2451,11 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     if (_moveToPreviousTopLevel(anchor)) {
                       return;
                     }
-                    break;
                   case Axis.vertical:
                     if (_moveToParent(anchor)) {
                       return;
                     }
-                    break;
                 }
-                break;
               case TextDirection.ltr:
                 if (buttonIsFocused) {
                   if (_moveToSubmenu(anchor)) {
@@ -2438,11 +2466,8 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     return;
                   }
                 }
-                break;
             }
-            break;
         }
-        break;
     }
     super.invoke(intent);
   }
@@ -2841,7 +2866,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   @override
   void initState() {
     super.initState();
-    if (_platformSupportsAccelerators()) {
+    if (_platformSupportsAccelerators) {
       _showAccelerators = _altIsPressed();
       HardwareKeyboard.instance.addHandler(_handleKeyEvent);
     }
@@ -2850,9 +2875,9 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
 
   @override
   void dispose() {
-    assert(_platformSupportsAccelerators() || _shortcutRegistryEntry == null);
+    assert(_platformSupportsAccelerators || _shortcutRegistryEntry == null);
     _displayLabel = '';
-    if (_platformSupportsAccelerators()) {
+    if (_platformSupportsAccelerators) {
       _shortcutRegistryEntry?.dispose();
       _shortcutRegistryEntry = null;
       _shortcutRegistry = null;
@@ -2865,7 +2890,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_platformSupportsAccelerators()) {
+    if (!_platformSupportsAccelerators) {
       return;
     }
     _binding = MenuAcceleratorCallbackBinding.maybeOf(context);
@@ -2893,7 +2918,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   }
 
   bool _handleKeyEvent(KeyEvent event) {
-    assert(_platformSupportsAccelerators());
+    assert(_platformSupportsAccelerators);
     final bool altIsPressed = _altIsPressed();
     if (altIsPressed != _showAccelerators) {
       setState(() {
@@ -2906,7 +2931,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   }
 
   void _updateAcceleratorShortcut() {
-    assert(_platformSupportsAccelerators());
+    assert(_platformSupportsAccelerators);
     _shortcutRegistryEntry?.dispose();
     _shortcutRegistryEntry = null;
     // Before registering an accelerator as a shortcut it should meet these
@@ -3113,10 +3138,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         switch (textDirection) {
           case TextDirection.rtl:
             directionalOffset = Offset(-alignmentOffset.dx, alignmentOffset.dy);
-            break;
           case TextDirection.ltr:
             directionalOffset = alignmentOffset;
-            break;
         }
       } else {
         directionalOffset = alignmentOffset;
@@ -3127,7 +3150,6 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           x -= childSize.width;
-          break;
         case TextDirection.ltr:
           break;
       }
@@ -3158,7 +3180,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.left;
         } else {
-          final double newX = anchorRect.right;
+          final double newX = anchorRect.right + alignmentOffset.dx;
           if (!offRightSide(newX)) {
             x = newX;
           } else {
@@ -3169,7 +3191,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.right - childSize.width;
         } else {
-          final double newX = anchorRect.left - childSize.width;
+          final double newX = anchorRect.left - childSize.width - alignmentOffset.dx;
           if (!offLeftSide(newX)) {
             x = newX;
           } else {
@@ -3192,7 +3214,12 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       } else if (offBottom(y)) {
         final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
-          y = newY;
+          // Only move the menu up if its parent is horizontal (MenuAnchor/MenuBar).
+          if (parentOrientation == Axis.horizontal) {
+            y = newY - alignmentOffset.dy;
+          } else {
+            y = newY;
+          }
         } else {
           y = allowedRect.bottom - childSize.height;
         }
@@ -3274,11 +3301,9 @@ class _MenuPanelState extends State<_MenuPanel> {
       case Axis.horizontal:
         themeStyle = MenuBarTheme.of(context).style;
         defaultStyle = _MenuBarDefaultsM3(context);
-        break;
       case Axis.vertical:
         themeStyle = MenuTheme.of(context).style;
         defaultStyle = _MenuDefaultsM3(context);
-        break;
     }
     final MenuStyle? widgetStyle = widget.menuStyle;
 
@@ -3350,7 +3375,7 @@ class _MenuPanelState extends State<_MenuPanel> {
         shadowColor: shadowColor,
         surfaceTintColor: surfaceTintColor,
         type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: widget.clipBehavior,
         child: Padding(
           padding: resolvedPadding,
           child: SingleChildScrollView(
@@ -3422,11 +3447,9 @@ class _Submenu extends StatelessWidget {
       case Axis.horizontal:
         themeStyle = MenuBarTheme.of(context).style;
         defaultStyle = _MenuBarDefaultsM3(context);
-        break;
       case Axis.vertical:
         themeStyle = MenuTheme.of(context).style;
         defaultStyle = _MenuDefaultsM3(context);
-        break;
     }
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
@@ -3561,21 +3584,36 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
   return true;
 }
 
-bool _platformSupportsAccelerators() {
+/// Whether [defaultTargetPlatform] is an Apple platform (Mac or iOS).
+bool get _isApple {
   switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return true;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.windows:
-      return true;
-    case TargetPlatform.iOS:
-    case TargetPlatform.macOS:
-      // On iOS and macOS, pressing the Option key (a.k.a. the Alt key) causes a
-      // different set of characters to be generated, and the native menus don't
-      // support accelerators anyhow, so we just disable accelerators on these
-      // platforms.
       return false;
   }
+}
+
+/// Whether [defaultTargetPlatform] is one that uses symbolic shortcuts.
+///
+/// Mac and iOS use special symbols for modifier keys instead of their names,
+/// render them in a particular order defined by Apple's human interface
+/// guidelines, and format them so that the modifier keys always align.
+bool get _usesSymbolicModifiers {
+  return _isApple;
+}
+
+
+bool get _platformSupportsAccelerators {
+  // On iOS and macOS, pressing the Option key (a.k.a. the Alt key) causes a
+  // different set of characters to be generated, and the native menus don't
+  // support accelerators anyhow, so we just disable accelerators on these
+  // platforms.
+  return !_isApple;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Menu
@@ -3584,8 +3622,6 @@ bool _platformSupportsAccelerators() {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_158
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
@@ -3619,15 +3655,15 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(
-        horizontal: math.max(
-          _kTopLevelMenuHorizontalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dx,
-        ),
+        horizontal: _kTopLevelMenuHorizontalMinPadding
       ),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
@@ -3641,6 +3677,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor {
@@ -3756,7 +3793,9 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
-    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+    // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
+    // Update this when the token is available.
+    return MaterialStatePropertyAll<TextStyle?>(_textTheme.labelLarge);
   }
 
   @override
@@ -3764,10 +3803,25 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   // The horizontal padding number comes from the spec.
   EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+    VisualDensity visualDensity = Theme.of(context).visualDensity;
+    // When horizontal VisualDensity is greater than zero, set it to zero
+    // because the [ButtonStyleButton] has already handle the padding based on the density.
+    // However, the [ButtonStyleButton] doesn't allow the [VisualDensity] adjustment
+    // to reduce the width of the left/right padding, so we need to handle it here if
+    // the density is less than zero, such as on desktop platforms.
+    if (visualDensity.horizontal > 0) {
+      visualDensity = VisualDensity(vertical: visualDensity.vertical);
+    }
     return ButtonStyleButton.scaledPadding(
-      const EdgeInsets.symmetric(horizontal: 12),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsets.symmetric(horizontal: 4),
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        _kLabelItemDefaultSpacing + visualDensity.baseSizeAdjustment.dx,
+      )),
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        8 + visualDensity.baseSizeAdjustment.dx,
+      )),
+      const EdgeInsets.symmetric(horizontal: _kMenuViewPadding),
       MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
@@ -3805,15 +3859,13 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsetsDirectional.symmetric(
-        vertical: math.max(
-          _kMenuVerticalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dy,
-        ),
-      ),
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
+      EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 
 // END GENERATED TOKEN PROPERTIES - Menu

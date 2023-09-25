@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
+import 'color_scheme.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -57,8 +58,7 @@ import 'theme.dart';
 class Card extends StatelessWidget {
   /// Creates a Material Design card.
   ///
-  /// The [elevation] must be null or non-negative. The [borderOnForeground]
-  /// must not be null.
+  /// The [elevation] must be null or non-negative.
   const Card({
     super.key,
     this.color,
@@ -76,6 +76,12 @@ class Card extends StatelessWidget {
   /// The card's background color.
   ///
   /// Defines the card's [Material.color].
+  ///
+  /// In Material 3, [surfaceTintColor] is drawn on top of this color
+  /// when the card is elevated. This might make the appearance of
+  /// the card slightly different than in Material 2. To disable this
+  /// feature, set [surfaceTintColor] to [Colors.transparent].
+  /// See [Material.surfaceTintColor] for more details.
   ///
   /// If this property is null then the ambient [CardTheme.color] is used. If that is null,
   /// and [ThemeData.useMaterial3] is true, then [ColorScheme.surface] of
@@ -214,10 +220,8 @@ class _CardDefaultsM2 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
-
 class _CardDefaultsM3 extends CardTheme {
-  const _CardDefaultsM3(this.context)
+  _CardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
@@ -226,15 +230,16 @@ class _CardDefaultsM3 extends CardTheme {
       );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => Theme.of(context).colorScheme.surface;
+  Color? get color => _colors.surface;
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+  Color? get shadowColor => _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 }
 
 // END GENERATED TOKEN PROPERTIES - Card

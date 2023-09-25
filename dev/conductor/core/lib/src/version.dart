@@ -54,20 +54,16 @@ class Version {
         assert(m == null);
         assert(n == null);
         assert(commits == null);
-        break;
       case VersionType.development:
         assert(m != null);
         assert(n != null);
         assert(commits == null);
-        break;
       case VersionType.latest:
         assert(m != null);
         assert(n != null);
         assert(commits != null);
-        break;
       case VersionType.gitDescribe:
         assert(commits != null);
-        break;
     }
   }
 
@@ -182,19 +178,15 @@ class Version {
           nextM = 0;
           nextN = 0;
         }
-        break;
       case 'z':
         // Hotfix to stable release.
         assert(previousVersion.type == VersionType.stable);
         nextZ += 1;
-        break;
       case 'm':
         assert(false, "Do not increment 'm' via Version.increment, use instead Version.fromCandidateBranch()");
-        break;
       case 'n':
         // Hotfix to internal roll.
         nextN = nextN! + 1;
-        break;
       default:
         throw Exception('Unknown increment level $increment.');
     }

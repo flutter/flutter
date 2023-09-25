@@ -12,12 +12,9 @@ library;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
 
 void main() {
   final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
@@ -31,7 +28,7 @@ void main() {
 
   group(AutomatedTestWidgetsFlutterBinding, () {
     test('allows setting defaultTestTimeout to 5 minutes', () {
-      binding.defaultTestTimeout = const test_package.Timeout(Duration(minutes: 5));
+      binding.defaultTestTimeout = const Timeout(Duration(minutes: 5));
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
     });
   });
@@ -58,6 +55,18 @@ void main() {
     assert(order == 2);
     expect(binding.testTextInput.isRegistered, isFalse);
     order += 1;
+  });
+
+  testWidgets('timeStamp should be accurate to microsecond precision', (WidgetTester tester) async {
+    final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+    await tester.pumpWidget(const CircularProgressIndicator());
+
+    final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
+    await tester.pump(const Duration(microseconds: 12345));
+    final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
+
+    expect(timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
   });
 
   group('elapseBlocking', () {

@@ -4,8 +4,11 @@
 
 import 'dart:io';
 
+import 'token_logger.dart';
+
+/// Base class for code generation templates.
 abstract class TokenTemplate {
-  const TokenTemplate(this.blockName, this.fileName, this.tokens, {
+  const TokenTemplate(this.blockName, this.fileName, this._tokens, {
     this.colorSchemePrefix = 'Theme.of(context).colorScheme.',
     this.textThemePrefix = 'Theme.of(context).textTheme.'
   });
@@ -19,7 +22,7 @@ abstract class TokenTemplate {
   final String fileName;
 
   /// Map of token data extracted from the Material Design token database.
-  final Map<String, dynamic> tokens;
+  final Map<String, dynamic> _tokens;
 
   /// Optional prefix prepended to color definitions.
   ///
@@ -30,6 +33,15 @@ abstract class TokenTemplate {
   ///
   /// Defaults to 'Theme.of(context).textTheme.'
   final String textThemePrefix;
+
+  /// Check if a token is available.
+  bool tokenAvailable(String tokenName) => _tokens.containsKey(tokenName);
+
+  /// Resolve a token while logging its usage.
+  dynamic getToken(String tokenName) {
+    tokenLogger.log(tokenName);
+    return _tokens[tokenName];
+  }
 
   static const String beginGeneratedComment = '''
 
@@ -78,7 +90,6 @@ abstract class TokenTemplate {
     final StringBuffer buffer = StringBuffer(contentBeforeBlock);
     buffer.write(beginComment);
     buffer.write(headerComment);
-    buffer.write('// Token database version: ${tokens['version']}\n\n');
     buffer.write(generate());
     buffer.write(endComment);
     buffer.write(contentAfterBlock);
@@ -102,8 +113,8 @@ abstract class TokenTemplate {
   /// See also:
   ///   * [componentColor], that provides support for an optional opacity.
   String color(String colorToken, [String defaultValue = 'null']) {
-    return tokens.containsKey(colorToken)
-      ? '$colorSchemePrefix${tokens[colorToken]}'
+    return tokenAvailable(colorToken)
+      ? '$colorSchemePrefix${getToken(colorToken)}'
       : defaultValue;
   }
 
@@ -133,19 +144,22 @@ abstract class TokenTemplate {
   ///   * [color], that provides support for looking up a raw color token.
   String componentColor(String componentToken) {
     final String colorToken = '$componentToken.color';
-    if (!tokens.containsKey(colorToken)) {
+    if (!tokenAvailable(colorToken)) {
       return 'null';
     }
     String value = color(colorToken);
     final String opacityToken = '$componentToken.opacity';
-    if (tokens.containsKey(opacityToken)) {
+    if (tokenAvailable(opacityToken)) {
       value += '.withOpacity(${opacity(opacityToken)})';
     }
     return value;
   }
 
   /// Generate the opacity value for the given token.
-  String? opacity(String token) => _numToString(tokens[token]);
+  String? opacity(String token) {
+    tokenLogger.log(token);
+    return _numToString(getToken(token));
+  }
 
   String? _numToString(Object? value, [int? digits]) {
     if (value == null) {
@@ -157,12 +171,12 @@ abstract class TokenTemplate {
       }
       return digits == null ? value.toString() : value.toStringAsFixed(digits);
     }
-    return tokens[value].toString();
+    return getToken(value as String).toString();
   }
 
   /// Generate an elevation value for the given component token.
   String elevation(String componentToken) {
-    return tokens[tokens['$componentToken.elevation']!]!.toString();
+    return getToken(getToken('$componentToken.elevation')! as String)!.toString();
   }
 
   /// Generate a size value for the given component token.
@@ -170,17 +184,17 @@ abstract class TokenTemplate {
   /// Non-square sizes are specified as width and height.
   String size(String componentToken) {
     final String sizeToken = '$componentToken.size';
-    if (!tokens.containsKey(sizeToken)) {
+    if (!tokenAvailable(sizeToken)) {
       final String widthToken = '$componentToken.width';
       final String heightToken = '$componentToken.height';
-      if (!tokens.containsKey(widthToken) && !tokens.containsKey(heightToken)) {
+      if (!tokenAvailable(widthToken) && !tokenAvailable(heightToken)) {
         throw Exception('Unable to find width, height, or size tokens for $componentToken');
       }
-      final String? width = _numToString(tokens.containsKey(widthToken) ? tokens[widthToken]! as num : double.infinity, 0);
-      final String? height = _numToString(tokens.containsKey(heightToken) ? tokens[heightToken]! as num : double.infinity, 0);
+      final String? width = _numToString(tokenAvailable(widthToken) ? getToken(widthToken)! as num : double.infinity, 0);
+      final String? height = _numToString(tokenAvailable(heightToken) ? getToken(heightToken)! as num : double.infinity, 0);
       return 'const Size($width, $height)';
     }
-    return 'const Size.square(${_numToString(tokens[sizeToken])})';
+    return 'const Size.square(${_numToString(getToken(sizeToken))})';
   }
 
   /// Generate a shape constant for the given component token.
@@ -189,7 +203,8 @@ abstract class TokenTemplate {
   ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
   ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
   String shape(String componentToken, [String prefix = 'const ']) {
-    final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
+
+    final Map<String, dynamic> shape = getToken(getToken('$componentToken.shape') as String) as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
         final double topLeft = shape['topLeft'] as double;
@@ -224,16 +239,30 @@ abstract class TokenTemplate {
 
   /// Generate a [BorderSide] for the given component.
   String border(String componentToken) {
-    if (!tokens.containsKey('$componentToken.color')) {
+
+    if (!tokenAvailable('$componentToken.color')) {
       return 'null';
     }
     final String borderColor = componentColor(componentToken);
-    final double width = (tokens['$componentToken.width'] ?? tokens['$componentToken.height'] ?? 1.0) as double;
+    final double width = (getToken('$componentToken.width') ?? getToken('$componentToken.height') ?? 1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
   /// Generate a [TextTheme] text style name for the given component token.
   String textStyle(String componentToken) {
-    return '$textThemePrefix${tokens["$componentToken.text-style"]}';
+
+    return '$textThemePrefix${getToken("$componentToken.text-style")}';
+  }
+
+  String textStyleWithColor(String componentToken) {
+
+    if (!tokenAvailable('$componentToken.text-style')) {
+      return 'null';
+    }
+    String style = textStyle(componentToken);
+    if (tokenAvailable('$componentToken.color')) {
+      style = '$style?.copyWith(color: ${componentColor(componentToken)})';
+    }
+    return style;
   }
 }

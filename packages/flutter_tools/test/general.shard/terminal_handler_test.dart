@@ -400,6 +400,52 @@ void main() {
       await terminalHandler.processTerminalInput('L');
     });
 
+    testWithoutContext('f - debugDumpFocusTree', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ]);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpLayerTree with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpFocusTree with service protocol and profile mode is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], buildMode: BuildMode.profile);
+      await terminalHandler.processTerminalInput('f');
+    });
+
+    testWithoutContext('f - debugDumpFocusTree without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('f');
+    });
+
     testWithoutContext('o,O - debugTogglePlatform', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         // Request 1.
@@ -418,10 +464,10 @@ void main() {
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
             'isolateId': '1',
-            'value': 'fuchsia',
+            'value': 'windows',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia',
+            'value': 'windows',
           },
         ),
         // Request 2.
@@ -450,7 +496,7 @@ void main() {
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
 
-      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to windows'));
       expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
     });
 
@@ -472,10 +518,10 @@ void main() {
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
             'isolateId': '1',
-            'value': 'fuchsia',
+            'value': 'windows',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia',
+            'value': 'windows',
           },
         ),
         // Request 2.
@@ -504,7 +550,7 @@ void main() {
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
 
-      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to windows'));
       expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
     });
 
@@ -1423,19 +1469,18 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
         ..isRunningDebug = true
         ..isRunningProfile = false
         ..isRunningRelease = false;
-      break;
     case BuildMode.profile:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = true
         ..isRunningRelease = false;
-      break;
     case BuildMode.release:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = false
         ..isRunningRelease = true;
-      break;
+    case _:
+      // NOOP
   }
   return TerminalHandler(
     residentRunner,
@@ -1451,7 +1496,6 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;
-  String? receivedCommand;
 
   @override
   Future<void> cleanupAfterSignal() async { }
@@ -1518,7 +1562,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

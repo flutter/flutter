@@ -6,11 +6,15 @@ import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -295,8 +299,18 @@ class FakePlistParser implements PlistParser {
   }
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
-    return _underlyingValues[key] as String?;
+  T? getValueFromFile<T>(String plistFilePath, String key) {
+    return _underlyingValues[key] as T?;
+  }
+
+  @override
+  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+    if (value == null) {
+      _underlyingValues.remove(key);
+      return true;
+    }
+    setProperty(key, value);
+    return true;
   }
 }
 
@@ -312,7 +326,7 @@ class FakeBotDetector implements BotDetector {
 
 class FakeFlutterVersion implements FlutterVersion {
   FakeFlutterVersion({
-    this.channel = 'unknown',
+    this.branch = 'master',
     this.dartSdkVersion = '12',
     this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
@@ -324,16 +338,39 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkAge = '0 hours ago',
     this.frameworkCommitDate = '12/01/01',
     this.gitTagVersion = const GitTagVersion.unknown(),
+    this.flutterRoot = '/path/to/flutter',
+    this.nextFlutterVersion,
   });
+
+  final String branch;
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   bool _didFetchTagsAndUpdate = false;
+
+  /// Will be returned by [fetchTagsAndGetVersion] if not null.
+  final FlutterVersion? nextFlutterVersion;
+
+  @override
+    FlutterVersion fetchTagsAndGetVersion({
+      SystemClock clock = const SystemClock(),
+    }) {
+    _didFetchTagsAndUpdate = true;
+    return nextFlutterVersion ?? this;
+  }
 
   bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
   bool _didCheckFlutterVersionFreshness = false;
 
   @override
-  final String channel;
+  String get channel {
+    if (kOfficialChannels.contains(branch) || kObsoleteBranches.containsKey(branch)) {
+      return branch;
+    }
+    return kUserBranch;
+  }
+
+  @override
+  final String flutterRoot;
 
   @override
   final String devToolsVersion;
@@ -366,15 +403,10 @@ class FakeFlutterVersion implements FlutterVersion {
   final String frameworkCommitDate;
 
   @override
-  String get frameworkDate => frameworkCommitDate;
-
-  @override
   final GitTagVersion gitTagVersion;
 
   @override
-  void fetchTagsAndUpdate() {
-    _didFetchTagsAndUpdate = true;
-  }
+  FileSystem get fs => throw UnimplementedError('FakeFlutterVersion.fs is not implemented');
 
   @override
   Future<void> checkFlutterVersionFreshness() async {
@@ -386,7 +418,10 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
-    return 'master';
+    if (!redactUnknownBranches || kOfficialChannels.contains(branch) || kObsoleteBranches.containsKey(branch)) {
+      return branch;
+    }
+    return kUserBranch;
   }
 
   @override
@@ -408,11 +443,13 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isSingleWidgetReloadEnabled = false,
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
+    this.isFlutterWebWasmEnabled = false,
+    this.isCliAnimationEnabled = true,
+    this.isNativeAssetsEnabled = false,
   });
 
   @override
@@ -428,9 +465,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isSingleWidgetReloadEnabled;
-
-  @override
   final bool isAndroidEnabled;
 
   @override
@@ -443,6 +477,15 @@ class TestFeatureFlags implements FeatureFlags {
   final bool areCustomDevicesEnabled;
 
   @override
+  final bool isFlutterWebWasmEnabled;
+
+  @override
+  final bool isCliAnimationEnabled;
+
+  @override
+  final bool isNativeAssetsEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -453,8 +496,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
-      case singleWidgetReload:
-        return isSingleWidgetReloadEnabled;
       case flutterAndroidFeature:
         return isAndroidEnabled;
       case flutterIOSFeature:
@@ -463,6 +504,10 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
+      case cliAnimation:
+        return isCliAnimationEnabled;
+      case nativeAssets:
+        return isNativeAssetsEnabled;
     }
     return false;
   }
@@ -573,6 +618,7 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
+
   @override
   late bool platformToolsAvailable;
 
@@ -581,4 +627,44 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   AndroidSdkVersion? latestVersion;
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
+}
+
+class FakeJava extends Fake implements Java {
+  FakeJava({
+    this.javaHome = '/android-studio/jbr',
+    String binary = '/android-studio/jbr/bin/java',
+    Version? version,
+    bool canRun = true,
+  }): binaryPath = binary,
+      version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
+      _environment = <String, String>{
+        if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
+        'PATH': '/android-studio/jbr/bin',
+      },
+      _canRun = canRun;
+
+  @override
+  String? javaHome;
+
+  @override
+  String binaryPath;
+
+  final Map<String, String> _environment;
+  final bool _canRun;
+
+  @override
+  Map<String, String> get environment => _environment;
+
+  @override
+  Version? version;
+
+  @override
+  bool canRun() {
+    return _canRun;
+  }
 }

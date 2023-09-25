@@ -28,7 +28,6 @@ import 'src/commands/doctor.dart';
 import 'src/commands/downgrade.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
-import 'src/commands/format.dart';
 import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
@@ -125,6 +124,14 @@ Future<void> main(List<String> args) async {
           windows: globals.platform.isWindows,
         );
       },
+      Terminal: () {
+        return AnsiTerminal(
+          stdio: globals.stdio,
+          platform: globals.platform,
+          now: DateTime.now(),
+          isCliAnimationEnabled: featureFlags.isCliAnimationEnabled,
+        );
+      },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
     shutdownHooks: globals.shutdownHooks,
@@ -152,11 +159,11 @@ List<FlutterCommand> generateCommands({
         platform: globals.platform,
       ),
     ],
+    suppressAnalytics: globals.flutterUsage.suppressAnalytics,
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(
     verboseHelp: verboseHelp,
-    artifacts: globals.artifacts,
     stdio: globals.stdio,
     logger: globals.logger,
     terminal: globals.terminal,
@@ -199,7 +206,6 @@ List<FlutterCommand> generateCommands({
     signals: globals.signals,
   ),
   EmulatorsCommand(),
-  FormatCommand(verboseHelp: verboseHelp),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,

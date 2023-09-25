@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [NavigationRail].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [NavigationRail].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const NavigationRailExampleApp());
+
+class NavigationRailExampleApp extends StatelessWidget {
+  const NavigationRailExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      theme: ThemeData(useMaterial3: true),
       home: const NavRailExample(),
     );
   }
@@ -49,19 +49,23 @@ class _NavRailExampleState extends State<NavRailExample> {
                 });
               },
               labelType: labelType,
-              leading: showLeading ? FloatingActionButton(
-                elevation: 0,
-                onPressed: () {
-                  // Add your onPressed code here!
-                },
-                child: const Icon(Icons.add),
-              ) : const SizedBox(),
-              trailing: showTrailing ? IconButton(
-                onPressed: () {
-                  // Add your onPressed code here!
-                },
-                icon: const Icon(Icons.more_horiz_rounded),
-              ) : const SizedBox(),
+              leading: showLeading
+                  ? FloatingActionButton(
+                      elevation: 0,
+                      onPressed: () {
+                        // Add your onPressed code here!
+                      },
+                      child: const Icon(Icons.add),
+                    )
+                  : const SizedBox(),
+              trailing: showTrailing
+                  ? IconButton(
+                      onPressed: () {
+                        // Add your onPressed code here!
+                      },
+                      icon: const Icon(Icons.more_horiz_rounded),
+                    )
+                  : const SizedBox(),
               destinations: const <NavigationRailDestination>[
                 NavigationRailDestination(
                   icon: Icon(Icons.favorite_border),
@@ -69,13 +73,19 @@ class _NavRailExampleState extends State<NavRailExample> {
                   label: Text('First'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.bookmark_border),
-                  selectedIcon: Icon(Icons.book),
+                  icon: Badge(child: Icon(Icons.bookmark_border)),
+                  selectedIcon: Badge(child: Icon(Icons.book)),
                   label: Text('Second'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.star_border),
-                  selectedIcon: Icon(Icons.star),
+                  icon: Badge(
+                    label: Text('4'),
+                    child: Icon(Icons.star_border),
+                  ),
+                  selectedIcon: Badge(
+                    label: Text('4'),
+                    child: Icon(Icons.star),
+                  ),
                   label: Text('Third'),
                 ),
               ],

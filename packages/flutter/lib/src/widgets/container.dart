@@ -52,11 +52,11 @@ import 'image.dart';
 ///  * [Decoration], which you can extend to provide other effects with
 ///    [DecoratedBox].
 ///  * [CustomPaint], another way to draw custom effects from the widget layer.
+///  * [DecoratedSliver], which applies a [Decoration] to a sliver.
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
-  /// The [decoration] and [position] arguments must not be null. By default the
-  /// decoration paints behind the child.
+  /// By default the decoration paints behind the child.
   const DecoratedBox({
     super.key,
     required this.decoration,
@@ -96,10 +96,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     switch (position) {
       case DecorationPosition.background:
         label = 'bg';
-        break;
       case DecorationPosition.foreground:
         label = 'fg';
-        break;
     }
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));

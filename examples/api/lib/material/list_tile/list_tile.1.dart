@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile].
 
 void main() => runApp(const ListTileApp());
 
@@ -15,13 +15,13 @@ class ListTileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: const LisTileExample(),
+      home: const ListTileExample(),
     );
   }
 }
 
-class LisTileExample extends StatelessWidget {
-  const LisTileExample({super.key});
+class ListTileExample extends StatelessWidget {
+  const ListTileExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +67,7 @@ class LisTileExample extends StatelessWidget {
             child: ListTile(
               leading: FlutterLogo(size: 72.0),
               title: Text('Three-line ListTile'),
-              subtitle: Text(
-                'A sufficiently long subtitle warrants three lines.'
-              ),
+              subtitle: Text('A sufficiently long subtitle warrants three lines.'),
               trailing: Icon(Icons.more_vert),
               isThreeLine: true,
             ),

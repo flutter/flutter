@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -304,7 +303,7 @@ class BoxConstraints extends Constraints {
   ///  * The size must satisfy these constraints.
   ///  * The aspect ratio of the returned size matches the aspect ratio of the
   ///    given size.
-  ///  * The returned size as big as possible while still being equal to or
+  ///  * The returned size is as big as possible while still being equal to or
   ///    smaller than the given size.
   Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
     if (isTight) {
@@ -900,8 +899,6 @@ class BoxHitTestResult extends HitTestResult {
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
-  ///
-  /// The [localPosition] argument must not be null.
   BoxHitTestEntry(super.target, this.localPosition);
 
   /// The position of the hit test in the local coordinates of [target].
@@ -912,6 +909,15 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
+///
+/// {@tool dartpad}
+/// Parent data is used to communicate to a render object about its
+/// children. In this example, there are two render objects that perform
+/// text layout. They use parent data to identify the kind of child they
+/// are laying out, and space the children accordingly.
+///
+/// ** See code in examples/api/lib/rendering/box/parent_data.0.dart **
+/// {@end-tool}
 class BoxParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system.
   Offset offset = Offset.zero;
@@ -1390,13 +1396,13 @@ abstract class RenderBox extends RenderObject {
         } else {
           debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments!['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments!['intrinsics dimension'] = dimension.name;
         debugTimelineArguments!['intrinsics argument'] = '$argument';
         return true;
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType intrinsics',
             arguments: debugTimelineArguments,
           );
@@ -1411,7 +1417,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;
@@ -1486,10 +1492,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// ### Text
   ///
-  /// Text is the canonical example of a width-in-height-out algorithm. The
-  /// `height` argument is therefore ignored.
+  /// English text is the canonical example of a width-in-height-out algorithm.
+  /// The `height` argument is therefore ignored.
   ///
-  /// Consider the string "Hello World" The _maximum_ intrinsic width (as
+  /// Consider the string "Hello World". The _maximum_ intrinsic width (as
   /// returned from [computeMaxIntrinsicWidth]) would be the width of the string
   /// with no line breaks.
   ///
@@ -1498,12 +1504,12 @@ abstract class RenderBox extends RenderObject {
   /// might still not overflow. For example, maybe the rendering would put a
   /// line-break half-way through the words, as in "Hel⁞lo⁞Wor⁞ld". However,
   /// this wouldn't be a _correct_ rendering, and [computeMinIntrinsicWidth] is
-  /// supposed to render the minimum width that the box could be without failing
-  /// to _correctly_ paint the contents within itself.
+  /// defined as returning the minimum width that the box could be without
+  /// failing to _correctly_ paint the contents within itself.
   ///
-  /// The minimum intrinsic _height_ for a given width smaller than the minimum
-  /// intrinsic width could therefore be greater than the minimum intrinsic
-  /// height for the minimum intrinsic width.
+  /// The minimum intrinsic _height_ for a given width _smaller_ than the
+  /// minimum intrinsic width could therefore be greater than the minimum
+  /// intrinsic height for the minimum intrinsic width.
   ///
   /// ### Viewports (e.g. scrolling lists)
   ///
@@ -1832,7 +1838,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType.getDryLayout',
             arguments: debugTimelineArguments,
           );
@@ -1844,7 +1850,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;
@@ -1906,7 +1912,7 @@ abstract class RenderBox extends RenderObject {
         ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         ),
       ]),
     ));
@@ -1985,7 +1991,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    return _size!;
+    return _size ?? (throw StateError('RenderBox was not laid out: $runtimeType#${shortHash(this)}'));
   }
   Size? _size;
   /// Setting the size, in debug mode, triggers some analysis of the render box,
@@ -2106,7 +2112,7 @@ abstract class RenderBox extends RenderObject {
   @override
   void debugResetSize() {
     // updates the value of size._canBeUsedByParent if necessary
-    size = size;
+    size = size; // ignore: no_self_assignments
   }
 
   Map<TextBaseline, double?>? _cachedBaselines;
@@ -2136,7 +2142,6 @@ abstract class RenderBox extends RenderObject {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
     assert(() {
-      final RenderObject? parent = this.parent as RenderObject?;
       if (owner!.debugDoingLayout) {
         return (RenderObject.debugActiveLayout == parent) && parent!.debugDoingThisLayout;
       }
@@ -2144,7 +2149,6 @@ abstract class RenderBox extends RenderObject {
         return ((RenderObject.debugActivePaint == parent) && parent!.debugDoingThisPaint) ||
                ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
       }
-      assert(parent == this.parent);
       return false;
     }());
     assert(_debugSetDoingBaseline(true));
@@ -2170,8 +2174,7 @@ abstract class RenderBox extends RenderObject {
   double? getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     _cachedBaselines ??= <TextBaseline, double?>{};
-    _cachedBaselines!.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
-    return _cachedBaselines![baseline];
+    return _cachedBaselines!.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
   }
 
   /// Returns the distance from the y-coordinate of the position of the box to
@@ -2266,7 +2269,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
           ),
         ]);
       }
@@ -2315,7 +2318,7 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
             ),
           ]);
         }
@@ -2341,7 +2344,7 @@ abstract class RenderBox extends RenderObject {
             ),
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
             ),
           ]);
         }

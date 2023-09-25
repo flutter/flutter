@@ -103,9 +103,6 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 ///  * [FadeTransition], which [AnimatedSwitcher] uses to perform the transition.
 class AnimatedSwitcher extends StatefulWidget {
   /// Creates an [AnimatedSwitcher].
-  ///
-  /// The [duration], [transitionBuilder], [layoutBuilder], [switchInCurve], and
-  /// [switchOutCurve] parameters must not be null.
   const AnimatedSwitcher({
     super.key,
     this.child,
@@ -216,6 +213,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return FadeTransition(
+      key: ValueKey<Key?>(child.key),
       opacity: animation,
       child: child,
     );
@@ -337,10 +335,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }) {
     final _ChildEntry entry = _ChildEntry(
       widgetChild: child,
-      transition: KeyedSubtree(
-        key: ValueKey<int>(_childNumber),
-        child: builder(child, animation),
-      ),
+      transition: KeyedSubtree.wrap(builder(child, animation), _childNumber),
       animation: animation,
       controller: controller,
     );
@@ -391,6 +386,6 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   @override
   Widget build(BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!);
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
   }
 }

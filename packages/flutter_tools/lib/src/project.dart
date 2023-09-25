@@ -7,12 +7,14 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/convert.dart';
+import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'features.dart';
@@ -20,6 +22,7 @@ import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
+import 'project_validator_result.dart';
 import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
@@ -117,6 +120,9 @@ class FlutterProject {
 
   /// The location of this project.
   final Directory directory;
+
+  /// The location of the build folder.
+  Directory get buildDirectory => directory.childDirectory('build');
 
   /// The manifest of this project.
   final FlutterManifest manifest;
@@ -418,14 +424,30 @@ abstract class FlutterProjectPlatform {
 class AndroidProject extends FlutterProjectPlatform {
   AndroidProject._(this.parent);
 
+  // User facing string when java/gradle/agp versions are compatible.
+  @visibleForTesting
+  static const String validJavaGradleAgpString = 'compatible java/gradle/agp';
+
+  // User facing link that describes compatibility between gradle and
+  // android gradle plugin.
+  static const String gradleAgpCompatUrl =
+    'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle';
+
+  // User facing link that describes compatibility between java and the first
+  // version of gradle to support it.
+  static const String javaGradleCompatUrl =
+    'https://docs.gradle.org/current/userguide/compatibility.html#java';
+
   /// The parent of this project.
   final FlutterProject parent;
 
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
+  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
-  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -458,6 +480,25 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Returns true if the current version of the Gradle plugin is supported.
   late final bool isSupportedVersion = _computeSupportedVersion();
 
+  /// Gets all build variants of this project.
+  Future<List<String>> getBuildVariants() async {
+    if (!existsSync() || androidBuilder == null) {
+      return const <String>[];
+    }
+    return androidBuilder!.getBuildVariants(project: parent);
+  }
+
+  /// Outputs app link related settings into a json file.
+  ///
+  /// The file is stored in
+  /// `<project>/build/app/app-link-settings-<variant>.json`.
+  Future<void> outputsAppLinkSettings({required String variant}) async {
+    if (!existsSync() || androidBuilder == null) {
+      return;
+    }
+    await androidBuilder!.outputsAppLinkSettings(variant, project: parent);
+  }
+
   bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
     final File plugin = hostAppGradleRoot.childFile(
@@ -465,30 +506,55 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    final File appGradle = hostAppGradleRoot.childFile(
-        fileSystem.path.join('app', 'build.gradle'));
-    if (!appGradle.existsSync()) {
-      return false;
-    }
-    for (final String line in appGradle.readAsLinesSync()) {
-      if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
-          line.contains("def flutterPluginVersion = 'managed'")) {
-        return true;
+    try {
+      for (final String line in appGradleFile.readAsLinesSync()) {
+        // This syntax corresponds to applying the Flutter Gradle Plugin with a
+        // script.
+        // See https://docs.gradle.org/current/userguide/plugins.html#sec:script_plugins.
+        final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
+
+        // This syntax corresponds to applying the Flutter Gradle Plugin using
+        // the declarative "plugins {}" block after including it in the
+        // pluginManagement block of the settings.gradle file.
+        // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
+        // as well as the settings.gradle and build.gradle templates.
+        final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+
+        // This case allows for flutter run/build to work for modules. It does
+        // not guarantee the Flutter Gradle Plugin is applied.
+        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        if (fileBasedApply || declarativeApply || managed) {
+          return true;
+        }
       }
+    } on FileSystemException {
+      return false;
     }
     return false;
   }
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _kotlinPluginPattern) != null;
+    final bool imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
+    final bool declarativeMatch = firstMatchInFile(appGradleFile, _declarativeKotlinPluginPattern) != null;
+    return imperativeMatch || declarativeMatch;
   }
 
+  /// Gets the module-level build.gradle file.
+  /// See https://developer.android.com/build#module-level.
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
+      .childFile('build.gradle');
+
   File get appManifestFile {
-    return isUsingGradle
-        ? globals.fs.file(globals.fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
-        : hostAppGradleRoot.childFile('AndroidManifest.xml');
+    if (isUsingGradle) {
+      return hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml');
+    }
+
+    return hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
@@ -503,13 +569,88 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
 
+  /// Check if the versions of Java, Gradle and AGP are compatible.
+  ///
+  /// This is expected to be called from
+  /// flutter_tools/lib/src/project_validator.dart.
+  Future<ProjectValidatorResult> validateJavaAndGradleAgpVersions() async {
+    // Constructing ProjectValidatorResult happens here and not in
+    // flutter_tools/lib/src/project_validator.dart because of the additional
+    // Complexity of variable status values and error string formatting.
+    const String visibleName = 'Java/Gradle/Android Gradle Plugin';
+    final CompatibilityResult validJavaGradleAgpVersions =
+        await hasValidJavaGradleAgpVersions();
+
+
+    return ProjectValidatorResult(
+      name: visibleName,
+      value: validJavaGradleAgpVersions.description,
+      status: validJavaGradleAgpVersions.success
+          ? StatusProjectValidator.success
+          : StatusProjectValidator.error,
+    );
+  }
+
+  /// Ensures Java SDK is compatible with the project's Gradle version and
+  /// the project's Gradle version is compatible with the AGP version used
+  /// in build.gradle.
+  Future<CompatibilityResult> hasValidJavaGradleAgpVersions() async {
+    final String? gradleVersion = await gradle.getGradleVersion(
+        hostAppGradleRoot, globals.logger, globals.processManager);
+    final String? agpVersion =
+        gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
+    final String? javaVersion = versionToParsableString(globals.java?.version);
+
+    // Assume valid configuration.
+    String description = validJavaGradleAgpString;
+
+    final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
+        gradleV: gradleVersion, agpV: agpVersion);
+
+    final bool compatibleJavaGradle = gradle.validateJavaAndGradle(globals.logger,
+        javaV: javaVersion, gradleV: gradleVersion);
+
+    // Begin description formatting.
+    if (!compatibleGradleAgp) {
+      description = '''
+Incompatible Gradle/AGP versions. \n
+Gradle Version: $gradleVersion, AGP Version: $agpVersion
+Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
+See the link below for more information:
+$gradleAgpCompatUrl
+''';
+    }
+    if (!compatibleJavaGradle) {
+      // Should contain the agp error (if present) but not the valid String.
+      description = '''
+${compatibleGradleAgp ? '' : description}
+Incompatible Java/Gradle versions.
+Java Version: $javaVersion, Gradle Version: $gradleVersion\n
+See the link below for more information:
+$javaGradleCompatUrl
+''';
+    }
+    return CompatibilityResult(
+        compatibleJavaGradle && compatibleGradleAgp, description);
+  }
+
   bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
 
   String? get applicationId {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _applicationIdPattern)?.group(1);
+    return firstMatchInFile(appGradleFile, _applicationIdPattern)?.group(1);
+  }
+
+  /// Get the namespace for newer Android projects,
+  /// which replaces the `package` attribute in the Manifest.xml.
+  String? get namespace {
+    try {
+      // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
+      return _androidNamespacePattern.firstMatch(appGradleFile.readAsStringSync())?.group(1);
+    } on FileSystemException {
+      return null;
+    }
   }
 
   String? get group {
@@ -519,7 +660,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// The build directory where the Android artifacts are placed.
   Directory get buildDirectory {
-    return parent.directory.childDirectory('build');
+    return parent.buildDirectory;
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
@@ -550,12 +691,17 @@ class AndroidProject extends FlutterProjectPlatform {
 
   Future<void> _regenerateLibrary() async {
     ErrorHandlingFileSystem.deleteIfExists(ephemeralDirectory, recursive: true);
+    await _overwriteFromTemplate(
+        globals.fs.path.join(
+          'module',
+          'android',
+          'library_new_embedding',
+        ),
+        ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
-      'library_new_embedding',
-    ), ephemeralDirectory);
-    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
+      'gradle'), ephemeralDirectory);
     globals.gradleUtils?.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
@@ -576,9 +722,9 @@ class AndroidProject extends FlutterProjectPlatform {
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
         'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
         'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
         'gradleVersion': gradle.templateDefaultGradleVersion,
-        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
         'compileSdkVersion': gradle.compileSdkVersion,
         'minSdkVersion': gradle.minSdkVersion,
         'ndkVersion': gradle.ndkVersion,
@@ -765,4 +911,22 @@ class FuchsiaProject {
   Directory? _meta;
   Directory get meta =>
       _meta ??= editableHostAppDirectory.childDirectory('meta');
+}
+
+// Combines success and a description into one object that can be returned
+// together.
+@visibleForTesting
+class CompatibilityResult {
+  CompatibilityResult(this.success, this.description);
+  final bool success;
+  final String description;
+}
+
+/// Converts a [Version] to a string that can be parsed by [Version.parse].
+String? versionToParsableString(Version? version) {
+  if (version == null) {
+    return null;
+  }
+
+  return '${version.major}.${version.minor}.${version.patch}';
 }

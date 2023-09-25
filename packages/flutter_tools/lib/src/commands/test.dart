@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
@@ -68,6 +67,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     requiresPubspecYaml();
     usesPubOption();
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
@@ -133,6 +133,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         defaultsTo: 'coverage/lcov.info',
         help: 'Where to store coverage information (if coverage is enabled).',
       )
+      ..addMultiOption('coverage-package',
+        help: 'A regular expression matching packages names '
+              'to include in the coverage report (if coverage is enabled). '
+              'If unset, matches the current package name.',
+        valueHelp: 'package-name-regexp',
+        splitCommas: false,
+      )
       ..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -146,7 +153,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       )
       ..addOption('concurrency',
         abbr: 'j',
-        defaultsTo: math.max<int>(1, globals.platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run. This will be ignored '
               'when running integration tests.',
         valueHelp: 'jobs',
@@ -238,13 +244,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   final Set<Uri> _testFileUris = <Uri>{};
 
+  bool get isWeb => stringArg('platform') == 'chrome';
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     final Set<DevelopmentArtifact> results = _isIntegrationTest
         // Use [DeviceBasedDevelopmentArtifacts].
         ? await super.requiredArtifacts
         : <DevelopmentArtifact>{};
-    if (stringArgDeprecated('platform') == 'chrome') {
+    if (isWeb) {
       results.add(DevelopmentArtifact.web);
     }
     return results;
@@ -313,11 +321,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'directory (or one of its subdirectories).');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final bool buildTestAssets = boolArgDeprecated('test-assets');
+    final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
-    final String? tags = stringArgDeprecated('tags');
-    final String? excludeTags = stringArgDeprecated('exclude-tags');
+    final String? tags = stringArg('tags');
+    final String? excludeTags = stringArg('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     TestTimeRecorder? testTimeRecorder;
@@ -343,7 +351,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
 
-    final bool startPaused = boolArgDeprecated('start-paused');
+    final bool startPaused = boolArg('start-paused');
     if (startPaused && _testFileUris.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
@@ -351,17 +359,19 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    int? jobs = int.tryParse(stringArgDeprecated('concurrency')!);
-    if (jobs == null || jobs <= 0 || !jobs.isFinite) {
+    final String? concurrencyString = stringArg('concurrency');
+    int? jobs = concurrencyString == null ? null : int.tryParse(concurrencyString);
+    if (jobs != null && (jobs <= 0 || !jobs.isFinite)) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
     }
-    if (_isIntegrationTest) {
+
+    if (_isIntegrationTest || isWeb) {
       if (argResults!.wasParsed('concurrency')) {
         globals.printStatus(
           '-j/--concurrency was parsed but will be ignored, this option is not '
-          'supported when running Integration Tests.',
+          'supported when running Integration Tests or web tests.',
         );
       }
       // Running with concurrency will result in deploying multiple test apps
@@ -369,13 +379,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       jobs = 1;
     }
 
-    final int? shardIndex = int.tryParse(stringArgDeprecated('shard-index') ?? '');
+    final int? shardIndex = int.tryParse(stringArg('shard-index') ?? '');
     if (shardIndex != null && (shardIndex < 0 || !shardIndex.isFinite)) {
       throwToolExit(
           'Could not parse --shard-index=$shardIndex argument. It must be an integer greater than -1.');
     }
 
-    final int? totalShards = int.tryParse(stringArgDeprecated('total-shards') ?? '');
+    final int? totalShards = int.tryParse(stringArg('total-shards') ?? '');
     if (totalShards != null && (totalShards <= 0 || !totalShards.isFinite)) {
       throwToolExit(
           'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
@@ -390,18 +400,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'If you set --shard-index you need to also set --total-shards.');
     }
 
-    final bool machine = boolArgDeprecated('machine');
+    final bool machine = boolArg('machine');
     CoverageCollector? collector;
-    if (boolArgDeprecated('coverage') || boolArgDeprecated('merge-coverage') ||
-        boolArgDeprecated('branch-coverage')) {
-      final String projectName = flutterProject.manifest.appName;
+    if (boolArg('coverage') || boolArg('merge-coverage') ||
+        boolArg('branch-coverage')) {
+      final Set<String> packagesToInclude = _getCoveragePackages(
+        stringsArg('coverage-package'),
+        flutterProject,
+        buildInfo.packageConfig,
+      );
       collector = CoverageCollector(
         verbose: !machine,
-        libraryNames: <String>{projectName},
+        libraryNames: packagesToInclude,
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
-        branchCoverage: boolArgDeprecated('branch-coverage'),
+        branchCoverage: boolArg('branch-coverage'),
       );
     }
 
@@ -415,12 +429,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
-      disableServiceAuthCodes: boolArgDeprecated('disable-service-auth-codes'),
-      serveObservatory: boolArgDeprecated('serve-observatory'),
+      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      serveObservatory: boolArg('serve-observatory'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
-      nullAssertions: boolArgDeprecated(FlutterOptions.kNullAssertions),
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      usingCISystem: usingCISystem,
     );
 
     Device? integrationTestDevice;
@@ -464,23 +479,23 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       tags: tags,
       excludeTags: excludeTags,
       watcher: watcher,
-      enableVmService: collector != null || startPaused || boolArgDeprecated('enable-vmservice'),
-      ipv6: boolArgDeprecated('ipv6'),
+      enableVmService: collector != null || startPaused || boolArg('enable-vmservice'),
+      ipv6: boolArg('ipv6'),
       machine: machine,
-      updateGoldens: boolArgDeprecated('update-goldens'),
+      updateGoldens: boolArg('update-goldens'),
       concurrency: jobs,
       testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
-      web: stringArgDeprecated('platform') == 'chrome',
-      randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),
-      reporter: stringArgDeprecated('reporter'),
+      web: isWeb,
+      randomSeed: stringArg('test-randomize-ordering-seed'),
+      reporter: stringArg('reporter'),
       fileReporter: stringArg('file-reporter'),
-      timeout: stringArgDeprecated('timeout'),
-      runSkipped: boolArgDeprecated('run-skipped'),
+      timeout: stringArg('timeout'),
+      runSkipped: boolArg('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
       integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArgDeprecated(FlutterOptions.kDeviceUser),
+      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
       testTimeRecorder: testTimeRecorder,
     );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
@@ -488,8 +503,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (collector != null) {
       final Stopwatch? collectTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageDataCollect);
       final bool collectionResult = await collector.collectCoverageData(
-        stringArgDeprecated('coverage-path'),
-        mergeCoverageData: boolArgDeprecated('merge-coverage'),
+        stringArg('coverage-path'),
+        mergeCoverageData: boolArg('merge-coverage'),
       );
       testTimeRecorder?.stop(TestTimePhases.CoverageDataCollect, collectTimeRecorderStopwatch!);
       if (!collectionResult) {
@@ -504,6 +519,30 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit(null);
     }
     return FlutterCommandResult.success();
+  }
+
+  Set<String> _getCoveragePackages(
+    List<String> packagesRegExps,
+    FlutterProject flutterProject,
+    PackageConfig packageConfig,
+  ) {
+    final String projectName = flutterProject.manifest.appName;
+    final Set<String> packagesToInclude = <String>{
+      if (packagesRegExps.isEmpty) projectName,
+    };
+    try {
+      for (final String regExpStr in packagesRegExps) {
+        final RegExp regExp = RegExp(regExpStr);
+        packagesToInclude.addAll(
+          packageConfig.packages
+              .map((Package e) => e.name)
+              .where((String e) => regExp.hasMatch(e)),
+        );
+      }
+    } on FormatException catch (e) {
+      throwToolExit('Regular expression syntax is invalid. $e');
+    }
+    return packagesToInclude;
   }
 
   /// Parses a test file/directory target passed as an argument and returns it
@@ -539,7 +578,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 
   bool _needRebuild(Map<String, DevFSContent> entries) {
-    final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    // TODO(andrewkolos): This logic might fail in the future if we change the
+    // schema of the contents of the asset manifest file and the user does not
+    // perform a `flutter clean` after upgrading.
+    // See https://github.com/flutter/flutter/issues/128563.
+    final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
     }

@@ -2,37 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RangeSlider].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RangeSlider].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RangeSliderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class RangeSliderExampleApp extends StatelessWidget {
+  const RangeSliderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('RangeSlider Sample')),
+        body: const RangeSliderExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class RangeSliderExample extends StatefulWidget {
+  const RangeSliderExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RangeSliderExample> createState() => _RangeSliderExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RangeSliderExampleState extends State<RangeSliderExample> {
   RangeValues _currentRangeValues = const RangeValues(40, 80);
 
   @override

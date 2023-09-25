@@ -38,12 +38,9 @@ import 'ticker_provider.dart';
 ///  * [AnimatedSwitcher], which can fade from one child to the next as the
 ///    subtree changes.
 ///  * [AnimatedCrossFade], which can fade between two specific children.
+///  * [SliverVisibility], the sliver equivalent of this widget.
 class Visibility extends StatelessWidget {
   /// Control whether the given [child] is [visible].
-  ///
-  /// The [child] and [replacement] arguments must not be null.
-  ///
-  /// The boolean arguments must not be null.
   ///
   /// The [maintainSemantics] and [maintainInteractivity] arguments can only be
   /// set if [maintainSize] is set.
@@ -63,25 +60,23 @@ class Visibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
   }) : assert(
-         maintainState == true || maintainAnimation == false,
+         maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
        ),
        assert(
-         maintainAnimation == true || maintainSize == false,
+         maintainAnimation || !maintainSize,
          'Cannot maintain size if animations are not maintained.',
        ),
        assert(
-         maintainSize == true || maintainSemantics == false,
+         maintainSize || !maintainSemantics,
          'Cannot maintain semantics if size is not maintained.',
        ),
        assert(
-         maintainSize == true || maintainInteractivity == false,
+         maintainSize || !maintainInteractivity,
          'Cannot maintain interactivity if size is not maintained.',
        );
 
   /// Control whether the given [child] is [visible].
-  ///
-  /// The [child] and [replacement] arguments must not be null.
   ///
   /// This is equivalent to the default [Visibility] constructor with all
   /// "maintain" fields set to true. This constructor should be used in place of
@@ -90,13 +85,13 @@ class Visibility extends StatelessWidget {
   const Visibility.maintain({
     super.key,
     required this.child,
-    this.replacement = const SizedBox.shrink(),
     this.visible = true,
   }) :  maintainState = true,
         maintainAnimation = true,
         maintainSize = true,
         maintainSemantics = true,
-        maintainInteractivity = true;
+        maintainInteractivity = true,
+        replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
   ///
@@ -205,10 +200,6 @@ class Visibility extends StatelessWidget {
   /// visible to accessibility tools when it is hidden from the user. If this
   /// flag is set to true, then accessibility tools will report the widget as if
   /// it was present.
-  ///
-  /// Dynamically changing this value may cause the current state of the
-  /// subtree to be lost (and a new instance of the subtree, with new [State]
-  /// objects, to be immediately created if [visible] is true).
   final bool maintainSemantics;
 
   /// Whether to allow the widget to be interactive when hidden.
@@ -218,45 +209,66 @@ class Visibility extends StatelessWidget {
   /// By default, with [maintainInteractivity] set to false, touch events cannot
   /// reach the [child] when it is hidden from the user. If this flag is set to
   /// true, then touch events will nonetheless be passed through.
-  ///
-  /// Dynamically changing this value may cause the current state of the
-  /// subtree to be lost (and a new instance of the subtree, with new [State]
-  /// objects, to be immediately created if [visible] is true).
   final bool maintainInteractivity;
+
+  /// Tells the visibility state of an element in the tree based off its
+  /// ancestor [Visibility] elements.
+  ///
+  /// If there's one or more [Visibility] widgets in the ancestor tree, this
+  /// will return true if and only if all of those widgets have [visible] set
+  /// to true. If there is no [Visibility] widget in the ancestor tree of the
+  /// specified build context, this will return true.
+  ///
+  /// This will register a dependency from the specified context on any
+  /// [Visibility] elements in the ancestor tree, such that if any of their
+  /// visibilities changes, the specified context will be rebuilt.
+  static bool of(BuildContext context) {
+    bool isVisible = true;
+    BuildContext ancestorContext = context;
+    InheritedElement? ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    while (isVisible && ancestor != null) {
+      final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
+      isVisible = scope.isVisible;
+      ancestor.visitAncestorElements((Element parent) {
+        ancestorContext = parent;
+        return false;
+      });
+      ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    }
+    return isVisible;
+  }
 
   @override
   Widget build(BuildContext context) {
+    Widget result = child;
     if (maintainSize) {
-      Widget result = child;
-      if (!maintainInteractivity) {
-        result = IgnorePointer(
-          ignoring: !visible,
-          ignoringSemantics: !visible && !maintainSemantics,
-          child: child,
-        );
-      }
-      return _Visibility(
+      result = _Visibility(
         visible: visible,
         maintainSemantics: maintainSemantics,
-        child: result,
+        child: IgnorePointer(
+          ignoring: !visible && !maintainInteractivity,
+          child: result,
+        ),
       );
-    }
-    assert(!maintainInteractivity);
-    assert(!maintainSemantics);
-    assert(!maintainSize);
-    if (maintainState) {
-      Widget result = child;
-      if (!maintainAnimation) {
-        result = TickerMode(enabled: visible, child: child);
+    } else {
+      assert(!maintainInteractivity);
+      assert(!maintainSemantics);
+      assert(!maintainSize);
+      if (maintainState) {
+        if (!maintainAnimation) {
+          result = TickerMode(enabled: visible, child: result);
+        }
+        result = Offstage(
+          offstage: !visible,
+          child: result,
+        );
+      } else {
+        assert(!maintainAnimation);
+        assert(!maintainState);
+        result = visible ? child : replacement;
       }
-      return Offstage(
-        offstage: !visible,
-        child: result,
-      );
     }
-    assert(!maintainAnimation);
-    assert(!maintainState);
-    return visible ? child : replacement;
+    return _VisibilityScope(isVisible: visible, child: result);
   }
 
   @override
@@ -268,6 +280,18 @@ class Visibility extends StatelessWidget {
     properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
     properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
     properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+  }
+}
+
+/// Inherited widget that allows descendants to find their visibility status.
+class _VisibilityScope extends InheritedWidget {
+  const _VisibilityScope({required this.isVisible, required super.child});
+
+  final bool isVisible;
+
+  @override
+  bool updateShouldNotify(_VisibilityScope old) {
+    return isVisible != old.isVisible;
   }
 }
 
@@ -293,15 +317,16 @@ class Visibility extends StatelessWidget {
 ///    sliver child.
 ///
 /// Using this widget is not necessary to hide children. The simplest way to
-/// hide a child is just to not include it, or, if a child _must_ be given (e.g.
-/// because the parent is a [StatelessWidget]) then to use a childless
-/// [SliverToBoxAdapter] instead of the child that would otherwise be included.
+/// hide a child is just to not include it. If a child _must_ be given (e.g.
+/// because the parent is a [StatelessWidget]), then including a childless
+/// [SliverToBoxAdapter] instead of the child that would otherwise be included
+/// is typically more efficient than using [SliverVisibility].
+///
+/// See also:
+///
+///  * [Visibility], the equivalent widget for boxes.
 class SliverVisibility extends StatelessWidget {
   /// Control whether the given [sliver] is [visible].
-  ///
-  /// The [sliver] and [replacementSliver] arguments must not be null.
-  ///
-  /// The boolean arguments must not be null.
   ///
   /// The [maintainSemantics] and [maintainInteractivity] arguments can only be
   /// set if [maintainSize] is set.
@@ -321,25 +346,23 @@ class SliverVisibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
   }) : assert(
-         maintainState == true || maintainAnimation == false,
+         maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
        ),
        assert(
-         maintainAnimation == true || maintainSize == false,
+         maintainAnimation || !maintainSize,
          'Cannot maintain size if animations are not maintained.',
        ),
        assert(
-         maintainSize == true || maintainSemantics == false,
+         maintainSize || !maintainSemantics,
          'Cannot maintain semantics if size is not maintained.',
        ),
        assert(
-         maintainSize == true || maintainInteractivity == false,
+         maintainSize || !maintainInteractivity,
          'Cannot maintain interactivity if size is not maintained.',
        );
 
   /// Control whether the given [sliver] is [visible].
-  ///
-  /// The [sliver] and [replacementSliver] arguments must not be null.
   ///
   /// This is equivalent to the default [SliverVisibility] constructor with all
   /// "maintain" fields set to true. This constructor should be used in place of
@@ -453,10 +476,6 @@ class SliverVisibility extends StatelessWidget {
   /// visible to accessibility tools when it is hidden from the user. If this
   /// flag is set to true, then accessibility tools will report the widget as if
   /// it was present.
-  ///
-  /// Dynamically changing this value may cause the current state of the
-  /// subtree to be lost (and a new instance of the subtree, with new [State]
-  /// objects, to be immediately created if [visible] is true).
   final bool maintainSemantics;
 
   /// Whether to allow the sliver to be interactive when hidden.
@@ -466,23 +485,16 @@ class SliverVisibility extends StatelessWidget {
   /// By default, with [maintainInteractivity] set to false, touch events cannot
   /// reach the [sliver] when it is hidden from the user. If this flag is set to
   /// true, then touch events will nonetheless be passed through.
-  ///
-  /// Dynamically changing this value may cause the current state of the
-  /// subtree to be lost (and a new instance of the subtree, with new [State]
-  /// objects, to be immediately created if [visible] is true).
   final bool maintainInteractivity;
 
   @override
   Widget build(BuildContext context) {
     if (maintainSize) {
       Widget result = sliver;
-      if (!maintainInteractivity) {
-        result = SliverIgnorePointer(
-          sliver: sliver,
-          ignoring: !visible,
-          ignoringSemantics: !visible && !maintainSemantics,
-        );
-      }
+      result = SliverIgnorePointer(
+        ignoring: !visible && !maintainInteractivity,
+        sliver: result,
+      );
       return _SliverVisibility(
         visible: visible,
         maintainSemantics: maintainSemantics,
@@ -526,19 +538,19 @@ class SliverVisibility extends StatelessWidget {
 // different layers. This can be significantly more expensive, so the issue is avoided by a
 // specialized render object that does not ever force compositing.
 class _Visibility extends SingleChildRenderObjectWidget {
-  const _Visibility({ required this.visible, required this.maintainSemantics,  super.child });
+  const _Visibility({ required this.visible, required this.maintainSemantics, super.child });
 
   final bool visible;
   final bool maintainSemantics;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  _RenderVisibility createRenderObject(BuildContext context) {
     return _RenderVisibility(visible, maintainSemantics);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
-    (renderObject as _RenderVisibility)
+  void updateRenderObject(BuildContext context, _RenderVisibility renderObject) {
+    renderObject
       ..visible = visible
       ..maintainSemantics = maintainSemantics;
   }
@@ -602,8 +614,8 @@ class _SliverVisibility extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
-    (renderObject as _RenderSliverVisibility)
+  void updateRenderObject(BuildContext context, _RenderSliverVisibility renderObject) {
+    renderObject
       ..visible = visible
       ..maintainSemantics = maintainSemantics;
   }

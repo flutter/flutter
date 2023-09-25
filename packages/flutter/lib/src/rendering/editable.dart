@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'custom_paint.dart';
 import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 import 'paragraph.dart';
 import 'viewport_offset.dart';
@@ -24,15 +25,10 @@ const double _kCaretHeightOffset = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
-const EdgeInsets _kFloatingCaretSizeIncrease = EdgeInsets.symmetric(horizontal: 0.5, vertical: 1.0);
+const EdgeInsets _kFloatingCursorSizeIncrease = EdgeInsets.symmetric(horizontal: 0.5, vertical: 1.0);
 
 // The corner radius of the floating cursor in pixels.
-const Radius _kFloatingCaretRadius = Radius.circular(1.0);
-
-/// Signature for the callback that reports when the caret location changes.
-///
-/// Used by [RenderEditable.onCaretChanged].
-typedef CaretChangedHandler = void Function(Rect caretRect);
+const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
@@ -40,8 +36,6 @@ typedef CaretChangedHandler = void Function(Rect caretRect);
 @immutable
 class TextSelectionPoint {
   /// Creates a description of a point in a text selection.
-  ///
-  /// The [point] argument must not be null.
   const TextSelectionPoint(this.point, this.direction);
 
   /// Coordinates of the lower left or lower right corner of the selection,
@@ -131,7 +125,7 @@ class TextSelectionPoint {
 /// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
 /// be checked before calling [movePrevious], [moveNext] and [moveByOffset],
 /// or accessing [current].
-class VerticalCaretMovementRun extends Iterator<TextPosition> {
+class VerticalCaretMovementRun implements Iterator<TextPosition> {
   VerticalCaretMovementRun._(
     this._editable,
     this._lineMetrics,
@@ -259,18 +253,13 @@ class VerticalCaretMovementRun extends Iterator<TextPosition> {
 /// position. The cursor is shown while [showCursor] is true. It is painted in
 /// the [cursorColor].
 ///
-/// If, when the render object paints, the caret is found to have changed
-/// location, [onCaretChanged] is called.
-///
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> implements TextLayoutMetrics {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderInlineChildrenContainerDefaults implements TextLayoutMetrics {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
-  /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
-  ///
-  /// The [textDirection] argument must not be null.
+  /// The [textAlign] argument defaults to [TextAlign.start].
   ///
   /// If [showCursor] is not specified, then it defaults to hiding the cursor.
   ///
@@ -278,8 +267,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// the number of lines. By default, it is 1, meaning this is a single-line
   /// text field. If it is not null, it must be greater than zero.
   ///
-  /// The [offset] is required and must not be null. You can use [
-  /// ViewportOffset.zero] if you have no need for scrolling.
+  /// Use [ViewportOffset.zero] for the [offset] if there is no need for
+  /// scrolling.
   RenderEditable({
     InlineSpan? text,
     required TextDirection textDirection,
@@ -295,10 +284,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     bool expands = false,
     StrutStyle? strutStyle,
     Color? selectionColor,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     TextSelection? selection,
     required ViewportOffset offset,
-    this.onCaretChanged,
     this.ignorePointer = false,
     bool readOnly = false,
     bool forceLine = true,
@@ -334,6 +328,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(
+         identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+       ),
        assert(obscuringCharacter.characters.length == 1),
        assert(cursorWidth >= 0.0),
        assert(cursorHeight == null || cursorHeight >= 0.0),
@@ -341,7 +339,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
-         textScaleFactor: textScaleFactor,
+         textScaler: textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
          locale: locale,
          maxLines: maxLines == 1 ? 1 : null,
          strutStyle: strutStyle,
@@ -385,14 +383,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _updateForegroundPainter(foregroundPainter);
     _updatePainter(painter);
     addAll(children);
-    _extractPlaceholderSpans(text);
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! TextParentData) {
-      child.parentData = TextParentData();
-    }
   }
 
   /// Child render objects
@@ -433,17 +423,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _foregroundRenderObject?.painter = effectivePainter;
     }
     _foregroundPainter = newPainter;
-  }
-
-  late List<PlaceholderSpan> _placeholderSpans;
-  void _extractPlaceholderSpans(InlineSpan? span) {
-    _placeholderSpans = <PlaceholderSpan>[];
-    span?.visitChildren((InlineSpan span) {
-      if (span is PlaceholderSpan) {
-        _placeholderSpans.add(span);
-      }
-      return true;
-    });
   }
 
   /// The [RenderEditablePainter] to use for painting above this
@@ -492,8 +471,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   // Caret Painters:
-  // The floating painter. This painter paints the regular caret as well.
-  late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter(_onCaretChanged);
+  // A single painter for both the regular caret and the floating cursor.
+  late final _CaretPainter _caretPainter = _CaretPainter();
 
   // Text Highlight painters:
   final _TextHighlightPainter _selectionPainter = _TextHighlightPainter();
@@ -531,19 +510,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
-  }
-
-  Rect? _lastCaretRect;
-  // TODO(LongCatIsLooong): currently EditableText uses this callback to keep
-  // the text field visible. But we don't always paint the caret, for example
-  // when the selection is not collapsed.
-  /// Called during the paint phase when the caret location changes.
-  CaretChangedHandler? onCaretChanged;
-  void _onCaretChanged(Rect caretRect) {
-    if (_lastCaretRect != caretRect) {
-      onCaretChanged?.call(caretRect);
-    }
-    _lastCaretRect = onCaretChanged == null ? null : caretRect;
   }
 
   /// Whether the [handleEvent] will propagate pointer events to selection
@@ -594,7 +560,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Character used for obscuring text if [obscureText] is true.
   ///
-  /// Cannot be null, and must have a length of exactly one.
+  /// Must have a length of exactly one.
   String get obscuringCharacter => _obscuringCharacter;
   String _obscuringCharacter;
   set obscuringCharacter(String value) {
@@ -637,8 +603,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The object that controls the text selection, used by this render object
   /// for implementing cut, copy, and paste keyboard shortcuts.
   ///
-  /// It must not be null. It will make cut, copy and paste functionality work
-  /// with the most recently set [TextSelectionDelegate].
+  /// It will make cut, copy and paste functionality work with the most recently
+  /// set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
 
   /// Track whether position of the start of the selected text is within the viewport.
@@ -720,6 +686,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
     assert(selection != null);
+    if (!selection!.isValid) {
+      _selectionStartInViewport.value = false;
+      _selectionEndInViewport.value = false;
+      return;
+    }
     final Rect visibleRegion = Offset.zero & size;
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
@@ -821,14 +792,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
-    _extractPlaceholderSpans(value);
+    _canComputeIntrinsicsCached = null;
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
 
   /// How the text should be aligned horizontally.
-  ///
-  /// This must not be null.
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
     if (_textPainter.textAlign == value) {
@@ -849,8 +818,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
-  ///
-  /// This must not be null.
   // TextPainter.textDirection is nullable, but it is set to a
   // non-null value in the RenderEditable constructor and we refuse to
   // set it to null here, so _textPainter.textDirection cannot be null.
@@ -903,7 +870,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The color to use when painting the cursor aligned to the text while
   /// rendering the floating cursor.
   ///
-  /// The default is light grey.
+  /// Typically this would be set to [CupertinoColors.inactiveGray].
+  ///
+  /// If this is null, the background cursor is not painted.
   Color? get backgroundCursorColor => _caretPainter.backgroundCursorColor;
   set backgroundCursorColor(Color? value) {
     _caretPainter.backgroundCursorColor = value;
@@ -1020,16 +989,35 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionPainter.highlightColor = value;
   }
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   double get textScaleFactor => _textPainter.textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   set textScaleFactor(double value) {
-    if (_textPainter.textScaleFactor == value) {
+    textScaler = TextScaler.linear(value);
+  }
+
+  /// {@macro flutter.painting.textPainter.textScaler}
+  TextScaler get textScaler => _textPainter.textScaler;
+  set textScaler(TextScaler value) {
+    if (_textPainter.textScaler == value) {
       return;
     }
-    _textPainter.textScaleFactor = value;
+    _textPainter.textScaler = value;
     markNeedsTextLayout();
   }
 
@@ -1261,7 +1249,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -1282,7 +1270,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // [assembleSemanticsNode] invocations.
   LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
 
-  /// Returns a list of rects that bound the given selection.
+  /// Returns a list of rects that bound the given selection, and the text
+  /// direction. The text direction is used by the engine to calculate
+  /// the closest position to a given point.
   ///
   /// See [TextPainter.getBoxesForSelection] for more details.
   List<TextBox> getBoxesForSelection(TextSelection selection) {
@@ -1407,13 +1397,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
-          assert(parentData.scale != null);
-          childNode.rect = Rect.fromLTWH(
-            childNode.rect.left,
-            childNode.rect.top,
-            childNode.rect.width * parentData.scale!,
-            childNode.rect.height * parentData.scale!,
-          );
+          assert(parentData.offset != null);
           newChildren.add(childNode);
           childIndex += 1;
         }
@@ -1790,11 +1774,44 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///    [TextPainter] object.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
     _computeTextMetricsIfNeeded();
-    final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
-    // This rect is the same as _caretPrototype but without the vertical padding.
-    final Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset + cursorOffset);
-    // Add additional cursor offset (generally only if on iOS).
-    return rect.shift(_snapToPhysicalPixel(rect.topLeft));
+    final Rect caretPrototype = _caretPrototype;
+    final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, caretPrototype);
+    Rect caretRect = caretPrototype.shift(caretOffset + cursorOffset);
+    final double scrollableWidth = math.max(_textPainter.width + _caretMargin, size.width);
+
+    final double caretX = clampDouble(caretRect.left, 0, math.max(scrollableWidth - _caretMargin, 0));
+    caretRect = Offset(caretX, caretRect.top) & caretRect.size;
+
+    final double caretHeight = cursorHeight;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        final double fullHeight = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype) ?? _textPainter.preferredLineHeight;
+        final double heightDiff = fullHeight - caretRect.height;
+        // Center the caret vertically along the text.
+        caretRect = Rect.fromLTWH(
+          caretRect.left,
+          caretRect.top + heightDiff / 2,
+          caretRect.width,
+          caretRect.height,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Override the height to take the full height of the glyph at the TextPosition
+        // when not on iOS. iOS has special handling that creates a taller caret.
+        // TODO(garyq): See the TODO for _computeCaretPrototype().
+        caretRect = Rect.fromLTWH(
+          caretRect.left,
+          caretRect.top - _kCaretHeightOffset,
+          caretRect.width,
+          caretHeight,
+        );
+    }
+
+    caretRect = caretRect.shift(_paintOffset);
+    return caretRect.shift(_snapToPhysicalPixel(caretRect.topLeft));
   }
 
   @override
@@ -1893,52 +1910,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    // Hit test text spans.
-    bool hitText = false;
-
+    final Offset effectivePosition = position - _paintOffset;
     final InlineSpan? textSpan = _textPainter.text;
-    if (textSpan != null) {
-      final Offset effectivePosition = position - _paintOffset;
-      final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
-      final Object? span = textSpan.getSpanForPosition(textPosition);
-      if (span is HitTestTarget) {
+    switch (textSpan?.getSpanForPosition(_textPainter.getPositionForOffset(effectivePosition))) {
+      case final HitTestTarget span:
         result.add(HitTestEntry(span));
-        hitText = true;
-      }
-    }
-    // Hit test render object children
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData! as TextParentData;
-      final Matrix4 transform = Matrix4.translationValues(
-        textParentData.offset.dx,
-        textParentData.offset.dy,
-        0.0,
-      )..scale(
-        textParentData.scale,
-        textParentData.scale,
-        textParentData.scale,
-      );
-      final bool isHit = result.addWithPaintTransform(
-        transform: transform,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(() {
-            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
-              && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
-          }());
-          return child!.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit) {
         return true;
-      }
-      child = childAfter(child);
-      childIndex += 1;
+      case _:
+        return hitTestInlineChildren(result, effectivePosition);
     }
-    return hitText;
   }
 
   late TapGestureRecognizer _tap;
@@ -2086,9 +2066,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextSelection fromWord = _getWordAtOffset(fromPosition);
+    final TextSelection fromWord = getWordAtOffset(fromPosition);
     final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
-    final TextSelection toWord = toPosition == fromPosition ? fromWord : _getWordAtOffset(toPosition);
+    final TextSelection toWord = toPosition == fromPosition ? fromWord : getWordAtOffset(toPosition);
     final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
 
     _setSelection(
@@ -2118,7 +2098,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
-  TextSelection _getWordAtOffset(TextPosition position) {
+  /// Returns a [TextSelection] that encompasses the word at the given
+  /// [TextPosition].
+  @visibleForTesting
+  TextSelection getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= plainText.length) {
@@ -2136,11 +2119,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TextAffinity.upstream:
         // upstream affinity is effectively -1 in text position.
         effectiveOffset = position.offset - 1;
-        break;
       case TextAffinity.downstream:
         effectiveOffset = position.offset;
-        break;
     }
+    assert(effectiveOffset >= 0);
 
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
@@ -2149,8 +2131,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    if (TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))
-        && effectiveOffset > 0) {
+    if (effectiveOffset > 0
+        && TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))) {
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -2181,7 +2163,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
               extentOffset: position.offset,
             );
           }
-          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
@@ -2199,79 +2180,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // will be overwritten during intrinsic width/height calculations and must be
   // restored to the original values before final layout and painting.
   List<PlaceholderDimensions>? _placeholderDimensions;
-
-  // Layout the child inline widgets. We then pass the dimensions of the
-  // children to _textPainter so that appropriate placeholders can be inserted
-  // into the LibTxt layout. This does not do anything if no inline widgets were
-  // specified.
-  List<PlaceholderDimensions> _layoutChildren(BoxConstraints constraints, {bool dry = false}) {
-    if (childCount == 0) {
-      _textPainter.setPlaceholderDimensions(<PlaceholderDimensions>[]);
-      return <PlaceholderDimensions>[];
-    }
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
-    int childIndex = 0;
-    // Only constrain the width to the maximum width of the paragraph.
-    // Leave height unconstrained, which will overflow if expanded past.
-    BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-    // The content will be enlarged by textScaleFactor during painting phase.
-    // We reduce constraints by textScaleFactor, so that the content will fit
-    // into the box once it is enlarged.
-    boxConstraints = boxConstraints / textScaleFactor;
-    while (child != null) {
-      double? baselineOffset;
-      final Size childSize;
-      if (!dry) {
-        child.layout(
-          boxConstraints,
-          parentUsesSize: true,
-        );
-        childSize = child.size;
-        switch (_placeholderSpans[childIndex].alignment) {
-          case ui.PlaceholderAlignment.baseline:
-            baselineOffset = child.getDistanceToBaseline(
-              _placeholderSpans[childIndex].baseline!,
-            );
-            break;
-          case ui.PlaceholderAlignment.aboveBaseline:
-          case ui.PlaceholderAlignment.belowBaseline:
-          case ui.PlaceholderAlignment.bottom:
-          case ui.PlaceholderAlignment.middle:
-          case ui.PlaceholderAlignment.top:
-            baselineOffset = null;
-            break;
-        }
-      } else {
-        assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
-        childSize = child.getDryLayout(boxConstraints);
-      }
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: childSize,
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-        baselineOffset: baselineOffset,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    return placeholderDimensions;
-  }
-
-  void _setParentData() {
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData! as TextParentData;
-      textParentData.offset = Offset(
-        _textPainter.inlinePlaceholderBoxes![childIndex].left,
-        _textPainter.inlinePlaceholderBoxes![childIndex].top,
-      );
-      textParentData.scale = _textPainter.inlinePlaceholderScales![childIndex];
-      child = childAfter(child);
-      childIndex += 1;
-    }
-  }
 
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
@@ -2311,13 +2219,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   late Rect _caretPrototype;
 
-  // TODO(garyq): This is no longer producing the highest-fidelity caret
-  // heights for Android, especially when non-alphabetic languages
-  // are involved. The current implementation overrides the height set
-  // here with the full measured height of the text on Android which looks
-  // superior (subjectively and in terms of fidelity) in _paintCaret. We
-  // should rework this properly to once again match the platform. The constant
-  // _kCaretHeightOffset scales poorly for small font sizes.
+  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/120836
   //
   /// On iOS, the cursor is taller than the cursor on Android. The height
   /// of the cursor for iOS is approximate and obtained through an eyeball
@@ -2327,13 +2229,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         _caretPrototype = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight + 2);
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
-        break;
     }
   }
 
@@ -2352,34 +2252,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       );
   }
 
-  bool _canComputeDryLayout() {
-    // Dry layout cannot be calculated without a full layout for
-    // alignments that require the baseline (baseline, aboveBaseline,
-    // belowBaseline).
-    for (final PlaceholderSpan span in _placeholderSpans) {
-      switch (span.alignment) {
-        case ui.PlaceholderAlignment.baseline:
-        case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline:
-          return false;
-        case ui.PlaceholderAlignment.top:
-        case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom:
-          continue;
-      }
-    }
-    return true;
+  bool _canComputeDryLayoutForInlineWidgets() {
+    return text?.visitChildren((InlineSpan span) {
+      return (span is! PlaceholderSpan) || switch (span.alignment) {
+        ui.PlaceholderAlignment.baseline ||
+        ui.PlaceholderAlignment.aboveBaseline ||
+        ui.PlaceholderAlignment.belowBaseline => false,
+        ui.PlaceholderAlignment.top ||
+        ui.PlaceholderAlignment.middle ||
+        ui.PlaceholderAlignment.bottom => true,
+      };
+    }) ?? true;
   }
+
+  bool? _canComputeIntrinsicsCached;
+  bool get _canComputeIntrinsics => _canComputeIntrinsicsCached ??= _canComputeDryLayoutForInlineWidgets();
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (!_canComputeDryLayout()) {
+    if (!_canComputeIntrinsics) {
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
       ));
       return Size.zero;
     }
-    _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final double width = forceLine ? constraints.maxWidth : constraints
         .constrainWidth(_textPainter.size.width + _caretMargin);
@@ -2389,10 +2286,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = _layoutChildren(constraints);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild);
     _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     _computeTextMetricsIfNeeded();
-    _setParentData();
+    positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
     _computeCaretPrototype();
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
@@ -2498,8 +2395,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _floatingCursorTextPosition = lastTextPosition;
       final double? animationValue = _resetFloatingCursorAnimationValue;
       final EdgeInsets sizeAdjustment = animationValue != null
-        ? EdgeInsets.lerp(_kFloatingCaretSizeIncrease, EdgeInsets.zero, animationValue)!
-        : _kFloatingCaretSizeIncrease;
+        ? EdgeInsets.lerp(_kFloatingCursorSizeIncrease, EdgeInsets.zero, animationValue)!
+        : _kFloatingCursorSizeIncrease;
       _caretPainter.floatingCursorRect = sizeAdjustment.inflateRect(_caretPrototype).shift(boundedOffset);
     } else {
       _caretPainter.floatingCursorRect = null;
@@ -2567,31 +2464,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
 
     _textPainter.paint(context.canvas, effectiveOffset);
-
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    // childIndex might be out of index of placeholder boxes. This can happen
-    // if engine truncates children due to ellipsis. Sadly, we would not know
-    // it until we finish layout, and RenderObject is in immutable state at
-    // this point.
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData! as TextParentData;
-
-      final double scale = textParentData.scale!;
-      context.pushTransform(
-        needsCompositing,
-        effectiveOffset + textParentData.offset,
-        Matrix4.diagonal3Values(scale, scale, scale),
-        (PaintingContext context, Offset offset) {
-          context.paintChild(
-            child!,
-            offset,
-          );
-        },
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
+    paintInlineChildren(context, effectiveOffset);
 
     if (foregroundChild != null) {
       context.paintChild(foregroundChild, offset);
@@ -2621,6 +2494,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         Offset.zero,
       );
     }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    if (child == _foregroundRenderObject || child == _backgroundRenderObject) {
+      return;
+    }
+    defaultApplyPaintTransform(child, transform);
   }
 
   @override
@@ -2668,7 +2549,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     properties.add(IntProperty('minLines', minLines));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(ColorProperty('selectionColor', selectionColor));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
+    properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
     properties.add(DiagnosticsProperty<ViewportOffset>('offset', offset));
@@ -2758,8 +2639,8 @@ class _RenderEditableCustomPaint extends RenderBox {
 /// when only auxiliary content changes (e.g. a blinking cursor) are present. It
 /// will be scheduled to repaint when:
 ///
-///  * It's assigned to a new [RenderEditable] and the [shouldRepaint] method
-///    returns true.
+///  * It's assigned to a new [RenderEditable] (replacing a prior
+///    [RenderEditablePainter]) and the [shouldRepaint] method returns true.
 ///  * Any of the [RenderEditable]s it is attached to repaints.
 ///  * The [notifyListeners] method is called, which typically happens when the
 ///    painter's attributes change.
@@ -2770,9 +2651,8 @@ class _RenderEditableCustomPaint extends RenderBox {
 ///    and sets it as the foreground painter of the [RenderEditable].
 ///  * [RenderEditable.painter], which takes a [RenderEditablePainter]
 ///    and sets it as the background painter of the [RenderEditable].
-///  * [CustomPainter] a similar class which paints within a [RenderCustomPaint].
+///  * [CustomPainter], a similar class which paints within a [RenderCustomPaint].
 abstract class RenderEditablePainter extends ChangeNotifier {
-
   /// Determines whether repaint is needed when a new [RenderEditablePainter]
   /// is provided to a [RenderEditable].
   ///
@@ -2895,8 +2775,8 @@ class _TextHighlightPainter extends RenderEditablePainter {
   }
 }
 
-class _FloatingCursorPainter extends RenderEditablePainter {
-  _FloatingCursorPainter(this.caretPaintCallback);
+class _CaretPainter extends RenderEditablePainter {
+  _CaretPainter();
 
   bool get shouldPaint => _shouldPaint;
   bool _shouldPaint = true;
@@ -2908,8 +2788,11 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     notifyListeners();
   }
 
-  CaretChangedHandler caretPaintCallback;
-
+  // This is directly manipulated by the RenderEditable during
+  // setFloatingCursor.
+  //
+  // When changing this value, the caller is responsible for ensuring that
+  // listeners are notified.
   bool showRegularCaret = false;
 
   final Paint caretPaint = Paint();
@@ -2970,44 +2853,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
   }
 
   void paintRegularCursor(Canvas canvas, RenderEditable renderEditable, Color caretColor, TextPosition textPosition) {
-    final Rect caretPrototype = renderEditable._caretPrototype;
-    final Offset caretOffset = renderEditable._textPainter.getOffsetForCaret(textPosition, caretPrototype);
-    Rect caretRect = caretPrototype.shift(caretOffset + cursorOffset);
-
-    final double? caretHeight = renderEditable._textPainter.getFullHeightForCaret(textPosition, caretPrototype);
-    if (caretHeight != null) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          final double heightDiff = caretHeight - caretRect.height;
-          // Center the caret vertically along the text.
-          caretRect = Rect.fromLTWH(
-            caretRect.left,
-            caretRect.top + heightDiff / 2,
-            caretRect.width,
-            caretRect.height,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          // Override the height to take the full height of the glyph at the TextPosition
-          // when not on iOS. iOS has special handling that creates a taller caret.
-          // TODO(garyq): See the TODO for _computeCaretPrototype().
-          caretRect = Rect.fromLTWH(
-            caretRect.left,
-            caretRect.top - _kCaretHeightOffset,
-            caretRect.width,
-            caretHeight,
-          );
-          break;
-      }
-    }
-
-    caretRect = caretRect.shift(renderEditable._paintOffset);
-    final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
-
+    final Rect integralRect = renderEditable.getLocalRectForCaret(textPosition);
     if (shouldPaint) {
       final Radius? radius = cursorRadius;
       caretPaint.color = caretColor;
@@ -3018,7 +2864,6 @@ class _FloatingCursorPainter extends RenderEditablePainter {
         canvas.drawRRect(caretRRect, caretPaint);
       }
     }
-    caretPaintCallback(integralRect);
   }
 
   @override
@@ -3027,8 +2872,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
     final TextSelection? selection = renderEditable.selection;
 
-    // TODO(LongCatIsLooong): skip painting the caret when the selection is
-    // (-1, -1).
+    // TODO(LongCatIsLooong): skip painting caret when selection is (-1, -1): https://github.com/flutter/flutter/issues/79495
     if (selection == null || !selection.isCollapsed) {
       return;
     }
@@ -3053,7 +2897,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     }
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCaretRadius),
+      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCursorRadius),
       floatingCursorPaint..color = floatingCursorColor,
     );
   }
@@ -3067,7 +2911,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     if (oldDelegate == null) {
       return shouldPaint;
     }
-    return oldDelegate is! _FloatingCursorPainter
+    return oldDelegate is! _CaretPainter
         || oldDelegate.shouldPaint != shouldPaint
         || oldDelegate.showRegularCaret != showRegularCaret
         || oldDelegate.caretColor != caretColor

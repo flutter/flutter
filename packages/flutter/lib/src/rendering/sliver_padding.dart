@@ -194,16 +194,12 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
         childParentData.paintOffset = Offset(resolvedPadding!.left, calculatePaintOffset(constraints, from: resolvedPadding!.bottom + childLayoutGeometry.scrollExtent, to: resolvedPadding!.bottom + childLayoutGeometry.scrollExtent + resolvedPadding!.top));
-        break;
       case AxisDirection.right:
         childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: 0.0, to: resolvedPadding!.left), resolvedPadding!.top);
-        break;
       case AxisDirection.down:
         childParentData.paintOffset = Offset(resolvedPadding!.left, calculatePaintOffset(constraints, from: 0.0, to: resolvedPadding!.top));
-        break;
       case AxisDirection.left:
         childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: resolvedPadding!.right + childLayoutGeometry.scrollExtent, to: resolvedPadding!.right + childLayoutGeometry.scrollExtent + resolvedPadding!.left), resolvedPadding!.top);
-        break;
     }
     assert(beforePadding == this.beforePadding);
     assert(afterPadding == this.afterPadding);
@@ -302,7 +298,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
 class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   /// Creates a render object that insets its child in a viewport.
   ///
-  /// The [padding] argument must not be null and must have non-negative insets.
+  /// The [padding] argument must have non-negative insets.
   RenderSliverPadding({
     required EdgeInsetsGeometry padding,
     TextDirection? textDirection,

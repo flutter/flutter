@@ -15,9 +15,9 @@ import 'system_channels.dart';
 /// to "Hello, wrold!" may be:
 /// ```dart
 /// SuggestionSpan suggestionSpan =
-///   SuggestionSpan(
-///     const TextRange(start: 7, end: 12),
-///     List<String>.of(<String>['word', 'world', 'old']),
+///   const SuggestionSpan(
+///     TextRange(start: 7, end: 12),
+///     <String>['word', 'world', 'old'],
 /// );
 /// ```
 @immutable

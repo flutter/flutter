@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AnimatedIcon].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [AnimatedIcon].
 
 void main() {
   runApp(const AnimatedIconApp());
@@ -44,8 +44,9 @@ class _AnimatedIconExampleState extends State<AnimatedIconExample> with SingleTi
     controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..forward()
-     ..repeat(reverse: true);
+    )
+      ..forward()
+      ..repeat(reverse: true);
     animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
   }
 

@@ -8,29 +8,41 @@
 @TestOn('!chrome')
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 
-final TextEditingController controller = TextEditingController();
-final FocusNode focusNode = FocusNode();
-final FocusScopeNode focusScopeNode = FocusScopeNode();
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
 void main() {
+  late TextEditingController controller;
+  late FocusNode focusNode;
+  late FocusScopeNode focusScopeNode;
+
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+    controller = TextEditingController();
+    focusNode = FocusNode();
+    focusScopeNode = FocusScopeNode();
   });
 
-  testWidgets('cursor has expected width, height, and radius', (WidgetTester tester) async {
+  tearDown(() {
+    controller.dispose();
+    focusNode.dispose();
+    focusScopeNode.dispose();
+  });
+
+  testWidgetsWithLeakTracking('cursor has expected width, height, and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -56,7 +68,7 @@ void main() {
     expect(editableText.cursorRadius!.x, 2.0);
   });
 
-  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
@@ -67,8 +79,8 @@ void main() {
         child: EditableText(
           backgroundCursorColor: Colors.grey,
           key: editableTextKey,
-          controller: TextEditingController(),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
@@ -112,7 +124,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
     late String changedValue;
@@ -122,8 +134,8 @@ void main() {
         child: EditableText(
           backgroundCursorColor: Colors.grey,
           key: editableTextKey,
-          controller: TextEditingController(),
-          focusNode: FocusNode(),
+          controller: controller,
+          focusNode: focusNode,
           style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
@@ -167,7 +179,7 @@ void main() {
     );
   });
 
-  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor animates on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -218,7 +230,7 @@ void main() {
     await verifyKeyFrame(opacity: 1.0,  at: 1000000);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('Cursor does not animate on non-iOS platforms', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not animate on non-iOS platforms', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(child: TextField(maxLines: 3)),
@@ -237,7 +249,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not animate on Android', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     const Widget widget = MaterialApp(
       home: Material(
@@ -275,9 +287,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(renderEditable.cursorColor!.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 5},
+  ));
 
-  testWidgets('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     const Widget widget = MaterialApp(
@@ -313,9 +330,15 @@ void main() {
     expect(renderEditable, paints..rrect(color: defaultCursorColor));
 
     EditableText.debugDeterministicCursor = false;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 6},
+  ));
 
-  testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     EditableText.debugDeterministicCursor = true;
     const Widget widget = MaterialApp(
@@ -352,17 +375,23 @@ void main() {
     expect(renderEditable, paints..rect(color: defaultCursorColor));
 
     EditableText.debugDeterministicCursor = false;
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 4},
+  ));
 
-  testWidgets('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
 
     const String testText = 'Some text long enough to move the cursor around';
-    final TextEditingController controller = TextEditingController(text: testText);
+    controller.text = testText;
+
     final Widget widget = MaterialApp(
       home: EditableText(
         controller: controller,
-        focusNode: FocusNode(),
+        focusNode: focusNode,
         style: const TextStyle(fontSize: 20.0),
         cursorColor: Colors.blue,
         backgroundCursorColor: Colors.grey,
@@ -429,9 +458,15 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
 
     debugDefaultTargetPlatformOverride = null;
-  }, variant: KeySimulatorTransitModeVariant.all());
+  },
+  variant: KeySimulatorTransitModeVariant.all(),
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 18},
+  ));
 
-  testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -457,11 +492,15 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 3},
+  ));
 
-  testWidgets('Cursor does not show when not focused', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not show when not focused', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106512 .
-    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -488,9 +527,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 2},
+  ));
 
-  testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor radius is 2.0', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -506,10 +550,9 @@ void main() {
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
-    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MediaQuery(
@@ -601,10 +644,9 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
-    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MediaQuery(
@@ -658,10 +700,9 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgets('Updating the floating cursor can end without update', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Updating the floating cursor can end without update', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
-    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MediaQuery(
@@ -702,10 +743,9 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
-    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MediaQuery(
@@ -769,11 +809,58 @@ void main() {
     await checkCursorBlinking();
   });
 
+  testWidgetsWithLeakTracking('Turning showCursor off stops the cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/108187.
+    final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
+    // This doesn't really matter.
+    EditableText.debugDeterministicCursor = false;
+    addTearDown(() { EditableText.debugDeterministicCursor = debugDeterministicCursor; });
+    const Key key = Key('EditableText');
+
+    Widget buildEditableText({ required bool showCursor }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            key: key,
+            backgroundCursorColor: Colors.grey,
+            // Use animation controller to animate cursor blink for testing.
+            cursorOpacityAnimates: true,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            showCursor: showCursor,
+          ),
+        ),
+      );
+    }
+    late final EditableTextState editableTextState = tester.state(find.byKey(key));
+    await tester.pumpWidget(buildEditableText(showCursor: false));
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    // No cursor even when focused.
+    expect(editableTextState.cursorCurrentlyVisible, false);
+
+    // The EditableText still has focus, so the cursor should starts blinking.
+    await tester.pumpWidget(buildEditableText(showCursor: true));
+    expect(editableTextState.cursorCurrentlyVisible, true);
+    await tester.pump();
+    expect(editableTextState.cursorCurrentlyVisible, true);
+
+    // readOnly disables blinking cursor.
+    await tester.pumpWidget(buildEditableText(showCursor: false));
+    expect(editableTextState.cursorCurrentlyVisible, false);
+    await tester.pump();
+    expect(editableTextState.cursorCurrentlyVisible, false);
+  });
+
   // Regression test for https://github.com/flutter/flutter/pull/30475.
-  testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
-    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MediaQuery(
@@ -836,12 +923,10 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autofocus sets cursor to the end of text', (WidgetTester tester) async {
     const String text = 'hello world';
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    final FocusNode focusNode = FocusNode();
-
     controller.text = text;
+
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -868,15 +953,14 @@ void main() {
     expect(controller.selection.baseOffset, text.length);
   });
 
-  testWidgets('Floating cursor is painted', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+  testWidgetsWithLeakTracking('Floating cursor is painted', (WidgetTester tester) async {
     const TextStyle textStyle = TextStyle();
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
-    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Padding(
           padding: const EdgeInsets.only(top: 0.25),
           child: Material(
@@ -945,9 +1029,15 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
     debugDefaultTargetPlatformOverride = null;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 4},
+  ));
 
-  testWidgets('cursor layout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor layout', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
@@ -961,8 +1051,8 @@ void main() {
             EditableText(
               backgroundCursorColor: Colors.grey,
               key: editableTextKey,
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
+              controller: controller,
+              focusNode: focusNode,
               style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
@@ -1008,7 +1098,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('cursor layout has correct height', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor layout has correct height', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
@@ -1022,8 +1112,8 @@ void main() {
             EditableText(
               backgroundCursorColor: Colors.grey,
               key: editableTextKey,
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
+              controller: controller,
+              focusNode: focusNode,
               style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
@@ -1070,7 +1160,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('password briefly does not show last character when disabled by system', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('password briefly does not show last character when disabled by system', (WidgetTester tester) async {
     final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
     EditableText.debugDeterministicCursor = false;
     addTearDown(() {
@@ -1105,4 +1195,151 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
   });
+
+  testWidgetsWithLeakTracking('getLocalRectForCaret with empty text', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() { EditableText.debugDeterministicCursor = false; });
+    const String text = '12';
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
+    );
+    addTearDown(controller.dispose);
+
+    final Widget widget = EditableText(
+      autofocus: true,
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      focusNode: focusNode,
+      style: const TextStyle(fontSize: 20),
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.text,
+      cursorColor: cursorColor,
+      maxLines: null,
+    );
+    await tester.pumpWidget(MaterialApp(home: widget));
+
+    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    final Rect initialLocalCaretRect = renderEditable.getLocalRectForCaret(const TextPosition(offset: text.length));
+
+    for (int i = 0; i < 3; i++) {
+      Actions.invoke(primaryFocus!.context!, const DeleteCharacterIntent(forward: false));
+      await tester.pump();
+      expect(controller.text.length, math.max(0, text.length - 1 - i));
+      final Rect localRect = renderEditable.getLocalRectForCaret(
+        TextPosition(offset: controller.text.length),
+      );
+
+      expect(localRect.size, initialLocalCaretRect.size);
+      expect(localRect.top, initialLocalCaretRect.top);
+      expect(localRect.left, lessThan(initialLocalCaretRect.left));
+    }
+
+    expect(controller.text, isEmpty);
+  });
+
+  testWidgetsWithLeakTracking('Caret center space test', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() { EditableText.debugDeterministicCursor = false; });
+    final String text = 'test${' ' * 1000}';
+    final TextEditingController controller = TextEditingController.fromValue(
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length, affinity: TextAffinity.upstream),
+      ),
+    );
+    addTearDown(controller.dispose);
+
+    final Widget widget = EditableText(
+      autofocus: true,
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      focusNode: focusNode,
+      style: const TextStyle(),
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.text,
+      cursorColor: cursorColor,
+      cursorWidth: 13.0,
+      cursorHeight: 17.0,
+      maxLines: null,
+    );
+    await tester.pumpWidget(MaterialApp(home: widget));
+
+    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final Rect editableTextRect = tester.getRect(find.byWidget(widget));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    // The trailing whitespaces are not line break opportunities.
+    expect(renderEditable.getLineAtOffset(TextPosition(offset: text.length)).start, 0);
+
+    // The caretRect shouldn't be outside of the RenderEditable.
+    final Rect caretRect = Rect.fromLTWH(
+      editableTextRect.right - 13.0 - 1.0,
+      editableTextRect.top,
+      13.0,
+      17.0,
+    );
+    expect(
+      renderEditable,
+      paints..rect(color: cursorColor, rect: caretRect),
+    );
+  },
+  skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 1},
+  ));
+
+  testWidgetsWithLeakTracking('getLocalRectForCaret reports the real caret Rect', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() { EditableText.debugDeterministicCursor = false; });
+    final String text = 'test${' ' * 50}\n'
+                        '2nd line\n'
+                        '\n';
+    final TextEditingController controller = TextEditingController.fromValue(TextEditingValue(
+      text: text,
+      selection: const TextSelection.collapsed(offset: 0),
+    ));
+    addTearDown(controller.dispose);
+
+    final Widget widget = EditableText(
+      autofocus: true,
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      focusNode: focusNode,
+      style: const TextStyle(fontSize: 20),
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.text,
+      cursorColor: cursorColor,
+      maxLines: null,
+    );
+    await tester.pumpWidget(MaterialApp(home: widget));
+
+    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final Rect editableTextRect = tester.getRect(find.byWidget(widget));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    final Iterable<TextPosition> positions = List<int>
+      .generate(text.length + 1, (int index) => index)
+      .expand((int i) => <TextPosition>[TextPosition(offset: i, affinity: TextAffinity.upstream), TextPosition(offset: i)]);
+    for (final TextPosition position in positions) {
+      controller.selection = TextSelection.fromPosition(position);
+      await tester.pump();
+
+      final Rect localRect = renderEditable.getLocalRectForCaret(position);
+      expect(
+        renderEditable,
+        paints..rect(color: cursorColor, rect: localRect.shift(editableTextRect.topLeft)),
+      );
+    }
+  },
+  variant: TargetPlatformVariant.all(),
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134386
+    notDisposedAllowList: <String, int?> {'LeaderLayer': 792},
+  ));
 }

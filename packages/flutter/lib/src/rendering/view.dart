@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
@@ -33,6 +32,10 @@ class ViewConfiguration {
   final double devicePixelRatio;
 
   /// Creates a transformation matrix that applies the [devicePixelRatio].
+  ///
+  /// The matrix translates points from the local coordinate system of the
+  /// app (in logical pixels) to the global coordinate system of the
+  /// [FlutterView] (in physical pixels).
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
@@ -64,13 +67,17 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Typically created by the binding (e.g., [RendererBinding]).
   ///
-  /// The [configuration] must not be null.
+  /// Providing a [configuration] is optional, but a configuration must be set
+  /// before calling [prepareInitialFrame]. This decouples creating the
+  /// [RenderView] object from configuring it. Typically, the object is created
+  /// by the [View] widget and configured by the [RendererBinding] when the
+  /// [RenderView] is registered with it by the [View] widget.
   RenderView({
     RenderBox? child,
-    required ViewConfiguration configuration,
-    required ui.FlutterView window,
+    ViewConfiguration? configuration,
+    required ui.FlutterView view,
   }) : _configuration = configuration,
-       _window = window {
+       _view = view {
     this.child = child;
   }
 
@@ -79,27 +86,42 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   Size _size = Size.zero;
 
   /// The constraints used for the root layout.
-  ViewConfiguration get configuration => _configuration;
-  ViewConfiguration _configuration;
-
-  /// The configuration is initially set by the [configuration] argument
-  /// passed to the constructor.
   ///
-  /// Always call [prepareInitialFrame] before changing the configuration.
+  /// Typically, this configuration is set by the [RendererBinding], when the
+  /// [RenderView] is registered with it. It will also update the configuration
+  /// if necessary. Therefore, if used in conjunction with the [RendererBinding]
+  /// this property must not be set manually as the [RendererBinding] will just
+  /// override it.
+  ///
+  /// For tests that want to change the size of the view, set
+  /// [TestFlutterView.physicalSize] on the appropriate [TestFlutterView]
+  /// (typically [WidgetTester.view]) instead of setting a configuration
+  /// directly on the [RenderView].
+  ViewConfiguration get configuration => _configuration!;
+  ViewConfiguration? _configuration;
   set configuration(ViewConfiguration value) {
-    if (configuration == value) {
+    if (_configuration == value) {
       return;
     }
-    final ViewConfiguration oldConfiguration = _configuration;
+    final ViewConfiguration? oldConfiguration = _configuration;
     _configuration = value;
-    if (oldConfiguration.toMatrix() != _configuration.toMatrix()) {
+    if (_rootTransform == null) {
+      // [prepareInitialFrame] has not been called yet, nothing to do for now.
+      return;
+    }
+    if (oldConfiguration?.toMatrix() != configuration.toMatrix()) {
       replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
     }
     assert(_rootTransform != null);
     markNeedsLayout();
   }
 
-  final ui.FlutterView _window;
+  /// Whether a [configuration] has been set.
+  bool get hasConfiguration => _configuration != null;
+
+  /// The [FlutterView] into which this [RenderView] will render.
+  ui.FlutterView get flutterView => _view;
+  final ui.FlutterView _view;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -192,18 +214,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
-  /// Determines the set of mouse tracker annotations at the given position.
-  ///
-  /// See also:
-  ///
-  ///  * [Layer.findAllAnnotations], which is used by this method to find all
-  ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
-  HitTestResult hitTestMouseTrackers(Offset position) {
-    final BoxHitTestResult result = BoxHitTestResult();
-    hitTest(result, position: position);
-    return result;
-  }
-
   @override
   bool get isRepaintBoundary => true;
 
@@ -212,6 +222,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (child != null) {
       context.paintChild(child!, offset);
     }
+    assert(() {
+      final List<DebugPaintCallback> localCallbacks = _debugPaintCallbacks.toList();
+      for (final DebugPaintCallback paintCallback in localCallbacks) {
+        if (_debugPaintCallbacks.contains(paintCallback)) {
+          paintCallback(context, offset, this);
+        }
+      }
+      return true;
+    }());
   }
 
   @override
@@ -226,7 +245,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
     if (!kReleaseMode) {
-      Timeline.startSync('COMPOSITING');
+      FlutterTimeline.startSync('COMPOSITING');
     }
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
@@ -234,7 +253,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      _window.render(scene);
+      _view.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
@@ -244,7 +263,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       }());
     } finally {
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -255,7 +274,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
-    _window.updateSemantics(update);
+    _view.updateSemantics(update);
   }
 
   void _updateSystemChrome() {
@@ -287,7 +306,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       bounds.center.dx,
       // The vertical center of the system status bar. The system status bar
       // height is kept as top window padding.
-      _window.padding.top / 2.0,
+      _view.padding.top / 2.0,
     );
     // Center of the navigation bar
     final Offset bottom = Offset(
@@ -298,7 +317,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       // from the bottom because available pixels are in (0..bottom) range.
       // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
       // bottom drawn pixel is at 1919 position.
-      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+      bounds.bottom - 1.0 - _view.padding.bottom / 2.0,
     );
     final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
@@ -306,7 +325,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         lowerOverlayStyle = layer!.find<SystemUiOverlayStyle>(bottom);
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -375,11 +393,54 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
       return true;
     }());
-    properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(DiagnosticsProperty<Size>('view size', _view.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(DoubleProperty('device pixel ratio', _view.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.platformDispatcher.semanticsEnabled) {
+    if (_view.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
     }
   }
+
+  static final List<DebugPaintCallback> _debugPaintCallbacks = <DebugPaintCallback>[];
+
+  /// Registers a [DebugPaintCallback] that is called every time a [RenderView]
+  /// repaints in debug mode.
+  ///
+  /// The callback may paint a debug overlay on top of the content of the
+  /// [RenderView] provided to the callback. Callbacks are invoked in the
+  /// order they were registered in.
+  ///
+  /// Neither registering a callback nor the continued presence of a callback
+  /// changes how often [RenderView]s are repainted. It is up to the owner of
+  /// the callback to call [markNeedsPaint] on any [RenderView] for which it
+  /// wants to update the painted overlay.
+  ///
+  /// Does nothing in release mode.
+  static void debugAddPaintCallback(DebugPaintCallback callback) {
+    assert(() {
+      _debugPaintCallbacks.add(callback);
+      return true;
+    }());
+  }
+
+  /// Removes a callback registered with [debugAddPaintCallback].
+  ///
+  /// It does not schedule a frame to repaint the [RenderView]s without the
+  /// overlay painted by the removed callback. It is up to the owner of the
+  /// callback to call [markNeedsPaint] on the relevant [RenderView]s to
+  /// repaint them without the overlay.
+  ///
+  /// Does nothing in release mode.
+  static void debugRemovePaintCallback(DebugPaintCallback callback) {
+    assert(() {
+      _debugPaintCallbacks.remove(callback);
+      return true;
+    }());
+  }
 }
+
+/// A callback for painting a debug overlay on top of the provided [RenderView].
+///
+/// Used by [RenderView.debugAddPaintCallback] and
+/// [RenderView.debugRemovePaintCallback].
+typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset, RenderView renderView);

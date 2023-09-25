@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "Επιλογή όλων",
   "tabSemanticsLabel": "Καρτέλα $tabIndex από $tabCount",
   "modalBarrierDismissLabel": "Παράβλεψη",
-  "searchTextFieldPlaceholderLabel": "Αναζήτηση"
+  "searchTextFieldPlaceholderLabel": "Αναζήτηση",
+  "noSpellCheckReplacementsLabel": "Δεν βρέθηκαν αντικαταστάσεις",
+  "menuDismissLabel": "Παράβλεψη μενού",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

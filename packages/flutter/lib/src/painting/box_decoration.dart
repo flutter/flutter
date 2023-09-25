@@ -68,6 +68,8 @@ import 'image_provider.dart';
 ///
 ///  * [DecoratedBox] and [Container], widgets that can be configured with
 ///    [BoxDecoration] objects.
+///  * [DecoratedSliver], a widget that can be configured with a [BoxDecoration]
+///   that is converted to render with slivers.
 ///  * [CustomPaint], a widget that lets you draw arbitrary graphics.
 ///  * [Decoration], the base class which lets you define other decorations.
 class BoxDecoration extends Decoration {
@@ -82,8 +84,6 @@ class BoxDecoration extends Decoration {
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
   /// * If [backgroundBlendMode] is null, this decoration paints with [BlendMode.srcOver]
-  ///
-  /// The [shape] argument must not be null.
   const BoxDecoration({
     this.color,
     this.image,
@@ -230,7 +230,7 @@ class BoxDecoration extends Decoration {
   BoxDecoration scale(double factor) {
     return BoxDecoration(
       color: Color.lerp(null, color, factor),
-      image: image, // TODO(ianh): fade the image from transparent
+      image: DecorationImage.lerp(null, image, factor),
       border: BoxBorder.lerp(null, border, factor),
       borderRadius: BorderRadiusGeometry.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
@@ -305,7 +305,7 @@ class BoxDecoration extends Decoration {
     }
     return BoxDecoration(
       color: Color.lerp(a.color, b.color, t),
-      image: t < 0.5 ? a.image : b.image, // TODO(ianh): cross-fade the image
+      image: DecorationImage.lerp(a.image, b.image, t),
       border: BoxBorder.lerp(a.border, b.border, t),
       borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
@@ -423,14 +423,12 @@ class _BoxDecorationPainter extends BoxPainter {
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
-        break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius == null || _decoration.borderRadius == BorderRadius.zero) {
           canvas.drawRect(rect, paint);
         } else {
           canvas.drawRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect), paint);
         }
-        break;
     }
   }
 
@@ -465,12 +463,10 @@ class _BoxDecorationPainter extends BoxPainter {
         final double radius = rect.shortestSide / 2.0;
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         clipPath = Path()..addOval(square);
-        break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null) {
           clipPath = Path()..addRRect(_decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect));
         }
-        break;
     }
     _imagePainter!.paint(canvas, rect, clipPath, configuration);
   }

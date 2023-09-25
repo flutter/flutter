@@ -20,6 +20,7 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -49,10 +50,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
 
   @override
-  EnvironmentType get environmentType => boolArgDeprecated('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  EnvironmentType get environmentType => boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
-  bool get configOnly => boolArgDeprecated('config-only');
+  bool get configOnly => boolArg('config-only');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
@@ -131,7 +132,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   final bool configOnly = false;
 
-  String? get exportOptionsPlist => stringArgDeprecated('export-options-plist');
+  String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
@@ -376,11 +377,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
 
-    xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
-    xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
-    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
-    xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
-    xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+    xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleShortVersionStringKey);
+    xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleVersionKey);
+    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleDisplayNameKey)
+      ?? globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleNameKey);
+    xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kMinimumOSVersionKey);
+    xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleIdentifierKey);
 
     final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
       final String title = entry.key;
@@ -455,7 +457,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String relativeOutputPath = app.ipaOutputPath;
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
-    final String exportMethod = stringArgDeprecated('export-method')!;
+    final String exportMethod = stringArg('export-method')!;
     final bool isAppStoreUpload = exportMethod  == 'app-store';
     File? generatedExportPlist;
     try {
@@ -540,7 +542,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>${stringArgDeprecated('export-method')}</string>
+        <string>${stringArg('export-method')}</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -596,7 +598,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   EnvironmentType get environmentType;
   bool get configOnly;
 
-  bool get shouldCodesign => boolArgDeprecated('codesign');
+  bool get shouldCodesign => boolArg('codesign');
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
@@ -673,7 +675,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.
-      final String arch = getNameForDarwinArch(DarwinArch.arm64);
+      final String arch = DarwinArch.arm64.name;
       final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$arch.json');
       final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -716,13 +718,27 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
       globals.printStatus(
         '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-        'flutter pub global activate devtools; flutter pub global run devtools '
-        '--appSizeBase=$relativeAppSizePath'
+        'dart devtools --appSizeBase=$relativeAppSizePath'
       );
     }
 
     if (result.output != null) {
       globals.printStatus('Built ${result.output}.');
+
+      // When an app is successfully built, record to analytics whether Impeller
+      // is enabled or disabled.
+      final BuildableIOSApp app = await buildableIOSApp;
+      final String plistPath = app.project.infoPlist.path;
+      final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+        plistPath, PlistParser.kFLTEnableImpellerKey,
+      );
+      BuildEvent(
+        impellerEnabled == false
+          ? 'plist-impeller-disabled'
+          : 'plist-impeller-enabled',
+        type: 'ios',
+        flutterUsage: globals.flutterUsage,
+      ).send();
 
       return FlutterCommandResult.success();
     }

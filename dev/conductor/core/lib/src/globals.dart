@@ -160,12 +160,10 @@ String getNewPrLink({
       candidateBranch = state.framework.candidateBranch;
       workingBranch = state.framework.workingBranch;
       repoLabel = 'Framework';
-      break;
     case 'engine':
       candidateBranch = state.engine.candidateBranch;
       workingBranch = state.engine.workingBranch;
       repoLabel = 'Engine';
-      break;
     default:
       throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.');
   }
