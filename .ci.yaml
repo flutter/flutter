@@ -3912,7 +3912,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3922,7 +3921,6 @@ targets:
         {
           "sdk_version": "14c18"
         }
-    bringup: true
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3993,7 +3991,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_driver_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4003,7 +4000,6 @@ targets:
         {
           "sdk_version": "14c18"
         }
-    bringup: true
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
@@ -4133,7 +4129,6 @@ targets:
   # TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
   - name: Mac_ios microbenchmarks_ios_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4143,7 +4138,6 @@ targets:
         {
           "sdk_version": "14c18"
         }
-    bringup: true
 
   - name: Mac_ios native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
