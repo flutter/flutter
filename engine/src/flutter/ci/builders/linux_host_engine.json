@@ -13,7 +13,9 @@
                 "--runtime-mode",
                 "debug",
                 "--unoptimized",
-                "--prebuilt-dart-sdk"
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_debug_unopt",
             "ninja": {
@@ -39,7 +41,9 @@
                 "--unoptimized",
                 "--prebuilt-dart-sdk",
                 "--target-dir",
-                "host_debug_impeller_vulkan"
+                "host_debug_impeller_vulkan",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_debug_impeller_vulkan",
             "ninja": {
@@ -91,7 +95,9 @@
                 "--runtime-mode",
                 "debug",
                 "--prebuilt-dart-sdk",
-                "--build-embedder-examples"
+                "--build-embedder-examples",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_debug",
             "ninja": {
@@ -142,7 +148,9 @@
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--build-embedder-examples"
+                "--build-embedder-examples",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_profile",
             "ninja": {
@@ -192,7 +200,9 @@
                 "--runtime-mode",
                 "release",
                 "--prebuilt-dart-sdk",
-                "--build-embedder-examples"
+                "--build-embedder-examples",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_release",
             "ninja": {
