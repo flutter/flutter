@@ -2105,7 +2105,7 @@ void main() {
     final ThemeData globalTheme = ThemeData(colorSchemeSeed: Colors.red);
     final ThemeData localTheme = ThemeData(
       colorSchemeSeed: Colors.green,
-        iconButtonTheme: IconButtonThemeData(
+      iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           backgroundColor: const Color(0xffffff00)
         ),
@@ -2152,7 +2152,7 @@ void main() {
     expect(searchViewMaterial.color, localTheme.colorScheme.surface);
 
     // Test the search view icons background color.
-     final Material iconButtonMaterial = tester.widget<Material>(find.descendant(
+    final Material iconButtonMaterial = tester.widget<Material>(find.descendant(
       of: find.byType(IconButton),
       matching: find.byType(Material),
     ).first);
