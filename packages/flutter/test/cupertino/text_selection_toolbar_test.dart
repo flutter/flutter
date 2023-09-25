@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -492,5 +497,52 @@ void main() {
         color: const Color(0x33000000),
       ),
     );
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgetsWithLeakTracking('Basic golden tests', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    Widget buildToolbar(Brightness brightness, Offset offset) {
+      final Widget toolbar = CupertinoTextSelectionToolbar(
+        anchorAbove: offset,
+        anchorBelow: offset,
+        children: <Widget>[
+          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum'),
+          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'dolor sit amet'),
+          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum \ndolor sit amet'),
+          CupertinoTextSelectionToolbarButton.buttonItem(buttonItem: ContextMenuButtonItem(onPressed: () {}, type: ContextMenuButtonType.copy)),
+        ],
+      );
+      return CupertinoApp(
+        theme: CupertinoThemeData(brightness: brightness),
+        home: Center(
+          child: SizedBox(
+            height: 200,
+            child: RepaintBoundary(key: key, child: toolbar),
+          ),
+        ),
+      );
+    }
+
+    // The String describes the location of the toolbar in relation to the
+    // content the arrow points to.
+    const List<(String, Offset)> toolbarLocation = <(String, Offset)>[
+      ('BottomRight', Offset.zero),
+      ('BottomLeft', Offset(100000, 0)),
+      ('TopRight', Offset(0, 100)),
+      ('TopLeft', Offset(100000, 100)),
+    ];
+
+    debugDisableShadows = false;
+    addTearDown(() => debugDisableShadows = true);
+    for (final Brightness brightness in Brightness.values) {
+      for (final (String location, Offset offset) in toolbarLocation) {
+        await tester.pumpWidget(buildToolbar(brightness, offset));
+        await expectLater(
+          find.byKey(key),
+          matchesGoldenFile('cupertino_selection_toolbar.$location.$brightness.png'),
+        );
+      }
+    }
+    debugDisableShadows = true;
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }

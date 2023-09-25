@@ -2493,7 +2493,6 @@ targets:
 
   - name: Linux_pixel_7pro picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2805,7 +2804,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2851,7 +2849,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2861,7 +2858,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2871,7 +2867,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2881,7 +2876,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -4315,7 +4309,6 @@ targets:
 
   - name: Mac_ios very_long_picture_scrolling_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 120
     properties:
@@ -4355,7 +4348,6 @@ targets:
   - name: Mac_ios draw_points_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4718,7 +4710,6 @@ targets:
       - .ci.yaml
 
   - name: Windows module_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/133639
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5182,7 +5173,6 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/134636
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
