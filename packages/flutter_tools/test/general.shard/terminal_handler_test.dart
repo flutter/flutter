@@ -1018,35 +1018,11 @@ void main() {
   testWithoutContext('s, can take screenshot on debug device that does not support screenshot', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-      listViews,
-      FakeVmServiceRequest(
-        method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object?>{
-          'isolateId': fakeUnpausedIsolate.id,
-          'enabled': 'false',
-        },
-      ),
-      FakeVmServiceRequest(
-        method: '_flutter.screenshot',
-        args: <String, Object>{},
-        jsonResponse: <String, Object>{
-          'screenshot': base64.encode(<int>[1, 2, 3, 4]),
-        },
-      ),
-      FakeVmServiceRequest(
-        method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object?>{
-          'isolateId': fakeUnpausedIsolate.id,
-          'enabled': 'true',
-        },
-      ),
-    ], logger: logger, fileSystem: fileSystem);
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], logger: logger, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');
 
-    expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
-    expect(fileSystem.currentDirectory.childFile('flutter_01.png').readAsBytesSync(), <int>[1, 2, 3, 4]);
+    expect(logger.statusText, isNot(contains('Screenshot written to')));
   });
 
   testWithoutContext('s, can take screenshot on debug web device that does not support screenshot', () async {
@@ -1147,41 +1123,6 @@ void main() {
           },
           // Failed response,
           errorCode: RPCErrorCodes.kInternalError,
-        ),
-      ],
-      logger: logger,
-      fileSystem: fileSystem,
-    );
-
-    await terminalHandler.processTerminalInput('s');
-
-    expect(logger.errorText, contains('Error'));
-  });
-
-  testWithoutContext('s, bails taking screenshot on debug device if flutter.screenshot throws RpcError, restoring banner', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final TerminalHandler terminalHandler = setUpTerminalHandler(
-      <FakeVmServiceRequest>[
-        listViews,
-        FakeVmServiceRequest(
-          method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object?>{
-            'isolateId': fakeUnpausedIsolate.id,
-            'enabled': 'false',
-          },
-        ),
-        const FakeVmServiceRequest(
-          method: '_flutter.screenshot',
-          // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
-        ),
-        FakeVmServiceRequest(
-          method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object?>{
-            'isolateId': fakeUnpausedIsolate.id,
-            'enabled': 'true',
-          },
         ),
       ],
       logger: logger,
