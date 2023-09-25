@@ -2988,7 +2988,7 @@ TEST_P(AiksTest, CanRenderForegroundAdvancedBlendWithMaskBlur) {
   canvas.ClipRect(Rect::MakeXYWH(100, 150, 400, 400));
   canvas.DrawCircle({400, 400}, 200,
                     {
-                        .color = Color::White(),
+                        .color = Color::Grey(),
                         .color_filter = ColorFilter::MakeBlend(
                             BlendMode::kColor, Color::Green()),
                         .mask_blur_descriptor =
