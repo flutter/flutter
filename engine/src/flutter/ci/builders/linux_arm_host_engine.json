@@ -25,9 +25,7 @@
                 "--no-lto",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--prebuilt-dart-sdk"
             ],
             "name": "linux_profile_arm64",
             "ninja": {
@@ -64,9 +62,7 @@
                 "debug",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--prebuilt-dart-sdk"
             ],
             "name": "linux_debug_arm64",
             "ninja": {
@@ -103,9 +99,7 @@
                 "release",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--prebuilt-dart-sdk"
             ],
             "name": "linux_release_arm64",
             "ninja": {

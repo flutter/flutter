@@ -20,9 +20,7 @@
             "gn": [
                 "--android",
                 "--android-cpu=x86",
-                "--runtime-mode=jit_release",
-                "--rbe",
-                "--no-goma"
+                "--runtime-mode=jit_release"
             ],
             "name": "android_jit_release_x86",
             "ninja": {
@@ -74,9 +72,7 @@
             "gn": [
                 "--android",
                 "--android-cpu=arm",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-lto"
             ],
             "name": "android_debug",
             "ninja": {
@@ -127,9 +123,7 @@
             "gn": [
                 "--android",
                 "--android-cpu=arm64",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-lto"
             ],
             "name": "android_debug_arm64",
             "ninja": {
@@ -150,9 +144,7 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--enable-vulkan-validation-layers",
-                "--rbe",
-                "--no-goma"
+                "--enable-vulkan-validation-layers"
             ],
             "name": "android_debug_arm64_validation_layers",
             "ninja": {
@@ -184,9 +176,7 @@
             "gn": [
                 "--android",
                 "--android-cpu=x86",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-lto"
             ],
             "name": "android_debug_x86",
             "ninja": {
@@ -218,9 +208,7 @@
             "gn": [
                 "--android",
                 "--android-cpu=x64",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-lto"
             ],
             "name": "android_debug_x64",
             "ninja": {
