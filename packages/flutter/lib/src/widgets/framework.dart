@@ -5824,8 +5824,11 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> super.widget);
 
-  /// Returns tne [Type] of [ParentData] that this element has been configured
+  /// Returns the [Type] of [ParentData] that this element has been configured
   /// for.
+  ///
+  /// This is only available in debug mode. It will throw in profile and
+  /// release modes.
   Type get debugParentDataType {
     Type? type;
     assert(() {
@@ -5835,7 +5838,7 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
     if (type != null) {
       return type!;
     }
-    throw UnsupportedError('debugParentDataType is not supported in release builds');
+    throw UnsupportedError('debugParentDataType is only supported in debug builds');
   }
 
   void _applyParentData(ParentDataWidget<T> widget) {
