@@ -162,7 +162,8 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
 
 ContentContext::ContentContext(
     std::shared_ptr<Context> context,
-    std::shared_ptr<TypographerContext> typographer_context)
+    std::shared_ptr<TypographerContext> typographer_context,
+    std::shared_ptr<RenderTargetAllocator> render_target_allocator)
     : context_(std::move(context)),
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
@@ -170,8 +171,10 @@ ContentContext::ContentContext(
 #if IMPELLER_ENABLE_3D
       scene_context_(std::make_shared<scene::SceneContext>(context_)),
 #endif  // IMPELLER_ENABLE_3D
-      render_target_cache_(std::make_shared<RenderTargetCache>(
-          context_->GetResourceAllocator())) {
+      render_target_cache_(render_target_allocator == nullptr
+                               ? std::make_shared<RenderTargetCache>(
+                                     context_->GetResourceAllocator())
+                               : std::move(render_target_allocator)) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
