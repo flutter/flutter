@@ -524,6 +524,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void _validate() {
     if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
+    } else {
+      _errorText.value = null;
     }
   }
 
