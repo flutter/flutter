@@ -334,38 +334,38 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   /// Collect the device state for specified deviceId.
   /// static final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)\s+(.*)');
-  Future<String?> getDeviceState({required String deviceId}) async {
-    final RegExp deviceRegex = RegExp(r'^(\S+)\s+(\S+)\s+(.*)');
-    final List<String> output = (await eval(adbPath, <String>['devices', '-l']))
-        .trim().split('\n');
-    String? deviceState;
+  // Future<String?> getDeviceState({required String deviceId}) async {
+  //   final RegExp deviceRegex = RegExp(r'^(\S+)\s+(\S+)\s+(.*)');
+  //   final List<String> output = (await eval(adbPath, <String>['devices', '-l']))
+  //       .trim().split('\n');
+  //   String? deviceState;
 
-    for (final String line in output) {
-      // Skip lines like: * daemon started successfully *
-      if (line.startsWith('* daemon ')) {
-        continue;
-      }
+  //   for (final String line in output) {
+  //     // Skip lines like: * daemon started successfully *
+  //     if (line.startsWith('* daemon ')) {
+  //       continue;
+  //     }
 
-      if (line.startsWith('List of devices')) {
-        continue;
-      }
+  //     if (line.startsWith('List of devices')) {
+  //       continue;
+  //     }
 
-      if (_kDeviceRegex.hasMatch(line)) {
-        final Match match = deviceRegex.firstMatch(line)!;
+  //     if (_kDeviceRegex.hasMatch(line)) {
+  //       final Match match = deviceRegex.firstMatch(line)!;
 
-        final String deviceID = match[1]!;
-        if (deviceID == deviceId) {
-          print('Found device.');
-          deviceState = match[2];
-          break;
-        }
-      } else {
-        throw FormatException('Failed to parse device from adb output: "$line"');
-      }
-    }
+  //       final String deviceID = match[1]!;
+  //       if (deviceID == deviceId) {
+  //         print('Found device.');
+  //         deviceState = match[2];
+  //         break;
+  //       }
+  //     } else {
+  //       throw FormatException('Failed to parse device from adb output: "$line"');
+  //     }
+  //   }
 
-    return deviceState;
-  }
+  //   return deviceState;
+  // }
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
