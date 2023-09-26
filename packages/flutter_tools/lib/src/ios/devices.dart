@@ -723,6 +723,18 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
+
+      if ((isCoreDevice || forceXcodeDebugWorkflow) && debuggingOptions.debuggingEnabled && package is BuildableIOSApp) {
+        // When debugging via Xcode, after the app launches, reset the Generated
+        // settings to not include the custom configuration build directory.
+        // This is to prevent confusion if the project is later ran via Xcode
+        // rather than the Flutter CLI.
+        await updateGeneratedXcodeProperties(
+          project: FlutterProject.current(),
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+        );
+      }
     }
   }
 
@@ -868,6 +880,8 @@ class IOSDevice extends Device {
           scheme: scheme,
           xcodeProject: project.xcodeProject,
           xcodeWorkspace: project.xcodeWorkspace!,
+          hostAppProjectName: project.hostAppProjectName,
+          expectedConfigurationBuildDir: bundle.parent.absolute.path,
           verboseLogging: _logger.isVerbose,
         );
       } else {
@@ -887,18 +901,6 @@ class IOSDevice extends Device {
       // Kill Xcode on shutdown when running from CI
       if (debuggingOptions.usingCISystem) {
         shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
-      }
-
-      if (package is BuildableIOSApp) {
-        // After automating Xcode, reset the Generated settings to not include
-        // the custom configuration build directory. This is to prevent
-        // confusion if the project is later ran via Xcode rather than the
-        // Flutter CLI.
-        await updateGeneratedXcodeProperties(
-          project: flutterProject,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-        );
       }
 
       return debugSuccess;
