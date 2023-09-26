@@ -308,13 +308,14 @@ struct ContentContextOptions {
   PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
   bool has_stencil_attachment = true;
   bool wireframe = false;
+  bool is_for_rrect_blur_clear = false;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
-      return fml::HashCombine(o.sample_count, o.blend_mode, o.stencil_compare,
-                              o.stencil_operation, o.primitive_type,
-                              o.color_attachment_pixel_format,
-                              o.has_stencil_attachment, o.wireframe);
+      return fml::HashCombine(
+          o.sample_count, o.blend_mode, o.stencil_compare, o.stencil_operation,
+          o.primitive_type, o.color_attachment_pixel_format,
+          o.has_stencil_attachment, o.wireframe, o.is_for_rrect_blur_clear);
     }
   };
 
@@ -329,7 +330,8 @@ struct ContentContextOptions {
              lhs.color_attachment_pixel_format ==
                  rhs.color_attachment_pixel_format &&
              lhs.has_stencil_attachment == rhs.has_stencil_attachment &&
-             lhs.wireframe == rhs.wireframe;
+             lhs.wireframe == rhs.wireframe &&
+             lhs.is_for_rrect_blur_clear == rhs.is_for_rrect_blur_clear;
     }
   };
 

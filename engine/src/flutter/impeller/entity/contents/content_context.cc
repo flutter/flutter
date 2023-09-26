@@ -38,10 +38,19 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
 
   switch (pipeline_blend) {
     case BlendMode::kClear:
-      color0.dst_alpha_blend_factor = BlendFactor::kZero;
-      color0.dst_color_blend_factor = BlendFactor::kZero;
-      color0.src_alpha_blend_factor = BlendFactor::kZero;
-      color0.src_color_blend_factor = BlendFactor::kZero;
+      if (is_for_rrect_blur_clear) {
+        color0.alpha_blend_op = BlendOperation::kReverseSubtract;
+        color0.color_blend_op = BlendOperation::kReverseSubtract;
+        color0.dst_alpha_blend_factor = BlendFactor::kOne;
+        color0.dst_color_blend_factor = BlendFactor::kOne;
+        color0.src_alpha_blend_factor = BlendFactor::kDestinationColor;
+        color0.src_color_blend_factor = BlendFactor::kDestinationColor;
+      } else {
+        color0.dst_alpha_blend_factor = BlendFactor::kZero;
+        color0.dst_color_blend_factor = BlendFactor::kZero;
+        color0.src_alpha_blend_factor = BlendFactor::kZero;
+        color0.src_color_blend_factor = BlendFactor::kZero;
+      }
       break;
     case BlendMode::kSource:
       color0.blending_enabled = false;
