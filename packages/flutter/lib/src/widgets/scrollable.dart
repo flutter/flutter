@@ -443,19 +443,19 @@ class Scrollable extends StatefulWidget {
   /// given context visible.
   ///
   /// If the [Scrollable] of the provided [BuildContext] is a
-  /// [TwoDimensionalScrollable] and [axisDirection] is not provided to specify
-  /// one [Axis], both vertical and horizontal axes will ensure
-  /// the target is made visible using the same [alignment] value. Providing
-  /// an [axisDirection] allows different [alignment]s to be specified, but
-  /// will require then that ensureVisible is called for each [Axis] of the
-  /// [TwoDimensionalScrollable].
+  /// [TwoDimensionalScrollable] and a specific [Axis] is not provided,
+  /// both vertical and horizontal axes will ensure the target is made visible
+  /// using the same [alignment] value. Providing
+  /// an [Axis] allows different [alignment]s to be specified, but
+  /// will require that ensureVisible is called separately for each [Axis] of
+  /// the [TwoDimensionalScrollable].
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
@@ -468,7 +468,7 @@ class Scrollable extends StatefulWidget {
     RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
-      final List<Future<void>> newFutures = <Future<void>>[];
+      late final List<Future<void>> newFutures;
       (newFutures, scrollable) = scrollable._performEnsureVisible(
         context.findRenderObject()!,
         alignment: alignment,
@@ -476,7 +476,7 @@ class Scrollable extends StatefulWidget {
         curve: curve,
         alignmentPolicy: alignmentPolicy,
         targetRenderObject: targetRenderObject,
-        axisDirection: axisDirection
+        axis: axis,
       );
       futures.addAll(newFutures);
 
@@ -1033,16 +1033,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
-    axisDirection ??= this.axisDirection;
-    assert(
-      axisDirection == this.axisDirection,
-      'Scrollable.ensureVisible was called with an AxisDirection for a one '
-      'dimensional Scrollable that does not match. The provided AxisDirection '
-      'was $axisDirection, and this Scrollable has an AxisDirection of '
-      '${this.axisDirection}.',
-    );
     final Future<void> ensureVisibleFuture = position.ensureVisible(
       object,
       alignment: alignment,
@@ -2092,7 +2084,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
     assert(
       false,
@@ -2193,7 +2185,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
     final List<Future<void>> newFutures = <Future<void>>[];
 
@@ -2217,18 +2209,15 @@ class _HorizontalInnerDimensionState extends ScrollableState {
       ));
     }
 
-    switch (axisDirection) {
-      case AxisDirection.left:
-      case AxisDirection.right:
+    switch (axis) {
+      case Axis.vertical:
         ensureHorizontal();
-      case AxisDirection.up:
-      case AxisDirection.down:
+      case Axis.horizontal:
         ensureVertical();
       case null:
         ensureHorizontal();
         ensureVertical();
     }
-
     return (newFutures, verticalScrollable);
   }
 

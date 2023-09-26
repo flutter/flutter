@@ -596,10 +596,10 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     RenderObject target,
     double alignment, {
     Rect? rect,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
-    assert(axisDirection == null || axisDirection == this.axisDirection);
-    axisDirection ??= this.axisDirection;
+    // One dimensional viewport has only one axis, override if set.
+    axis = this.axis;
     rect ??= target.paintBounds;
     if (target is! RenderBox) {
       return RevealedOffset(offset: offset.pixels, rect: rect);

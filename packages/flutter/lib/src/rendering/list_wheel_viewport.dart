@@ -1125,14 +1125,11 @@ class RenderListWheelViewport
     RenderObject target,
     double alignment, {
     Rect? rect,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
-    // ListWheelViewport only supports Axis.vertical.
-    assert(axisDirection == null || axisDirectionToAxis(axisDirection) == Axis.vertical);
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.
-
     rect ??= target.paintBounds;
 
     // `child` will be the last RenderObject before the viewport when walking up from `target`.

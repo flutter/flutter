@@ -108,11 +108,11 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// when the offset of the viewport is changed by x then `target` also moves
   /// by x within the viewport.
   ///
-  /// The optional [axisDirection] is used by [RenderTwoDimensionalViewport] to
+  /// The optional [Axis] is used by
+  /// [RenderTwoDimensionalViewport.getOffstToReveal] to
   /// determine which [Axis] of the two should reveal. One dimensional
   /// subclasses like [RenderViewportBase] and [RenderListWheelViewport] will
-  /// assert that if an [axisDirection] is provided, that it matches the
-  /// [axisDirection] the viewport has been configured for.
+  /// ignore the `axis` value is provided, as there is only one in those cases.
   ///
   /// See also:
   ///
@@ -121,7 +121,7 @@ abstract interface class RenderAbstractViewport extends RenderObject {
     RenderObject target,
     double alignment, {
     Rect? rect,
-    AxisDirection? axisDirection,
+    Axis? axis,
   });
 
   /// Determines which provided leading or trailing edge of the viewport, as
@@ -821,10 +821,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     RenderObject target,
     double alignment, {
     Rect? rect,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
-    assert(axisDirection == null || axisDirection == this.axisDirection);
-    axisDirection ??= this.axisDirection;
+    // One dimensional viewport has only one axis, override if set.
+    axis = this.axis;
     // Steps to convert `rect` (from a RenderBox coordinate system) to its
     // scroll offset within this viewport (not in the exact order):
     //

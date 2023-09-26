@@ -921,11 +921,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     RenderObject target,
     double alignment, {
     Rect? rect,
-    AxisDirection? axisDirection,
+    Axis? axis,
   }) {
     // We must know which axis we are revealing for, since Offset refers to only
     // one of two scroll positions.
-    assert(axisDirection != null);
+    assert(axis != null);
 
     // Starting at `target` and walking towards the root:
     //  - `child` will be the last object before we reach this viewport, and
@@ -941,9 +941,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       child = parent;
     }
 
-    final double offset = switch (axisDirectionToAxis(axisDirection!)) {
-      Axis.vertical => verticalOffset.pixels,
-      Axis.horizontal => horizontalOffset.pixels,
+    late final double offset;
+    late final AxisDirection axisDirection;
+    (offset, axisDirection) = switch (axis!) {
+      Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
+      Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection)
     };
 
     // `rect` in the new intermediate coordinate system.
@@ -955,7 +957,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       assert(pivot.parent != this);
       assert(pivot != this);
       assert(pivot.parent is RenderBox);
-      pivotExtent = switch (axisDirectionToAxis(axisDirection)) {
+      pivotExtent = switch (axis) {
         Axis.horizontal => pivot.size.width,
         Axis.vertical => pivot.size.height,
       };
@@ -1125,7 +1127,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
         descendant: descendant,
         viewport: viewport,
-        axisDirection: viewport.verticalAxisDirection,
+        axis: Axis.vertical,
         rect: rect,
         duration: duration,
         curve: curve,
@@ -1136,7 +1138,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
         descendant: descendant,
         viewport: viewport,
-        axisDirection: viewport.horizontalAxisDirection,
+        axis: Axis.horizontal,
         rect: rect,
         duration: duration,
         curve: curve,
@@ -1173,11 +1175,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     required RenderObject descendant,
     Rect? rect,
     required RenderTwoDimensionalViewport viewport,
-    required AxisDirection axisDirection,
+    required Axis axis,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    final ViewportOffset offset = switch (axisDirectionToAxis(axisDirection)) {
+    final ViewportOffset offset = switch (axis) {
       Axis.vertical => viewport.verticalOffset,
       Axis.horizontal => viewport.horizontalOffset,
     };
@@ -1186,13 +1188,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       descendant,
       0.0,
       rect: rect,
-      axisDirection: axisDirection,
+      axis: axis,
     );
     final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(
       descendant,
       1.0,
       rect: rect,
-      axisDirection: axisDirection,
+      axis: axis,
     );
     final double currentOffset = offset.pixels;
 
