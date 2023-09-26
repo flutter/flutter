@@ -4670,6 +4670,20 @@ targets:
         ["devicelab", "hostonly", "windows"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
 
+  - name: Windows_arm64 hot_mode_dev_cycle_win_target__benchmark
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: hot_mode_dev_cycle_win_target__benchmark
+
   - name: Windows module_custom_host_app_name_test
     bringup: true # Flaky https://github.com/flutter/flutter/issues/134644
     recipe: devicelab/devicelab_drone
@@ -5071,6 +5085,21 @@ targets:
         ]
       task_name: windows_home_scroll_perf__timeline_summary
 
+  - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_home_scroll_perf__timeline_summary
+
+
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5249,6 +5278,16 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      task_name: flutter_tool_startup
+
+  - name: Windows_arm64 flutter_tool_startup__windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       task_name: flutter_tool_startup
 
   - name: Linux flutter_tool_startup__linux
