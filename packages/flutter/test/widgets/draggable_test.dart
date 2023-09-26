@@ -318,7 +318,7 @@ void main() {
     expect(targetMoveCount['Target 2'], equals(1));
   });
 
-  testWidgetsWithLeakTracking('Drag and drop - onMove ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -393,6 +393,47 @@ void main() {
 
     expect(targetMoveCount['Target 1'], equals(2));
     expect(targetMoveCount['Target 2'], equals(1));
+  });
+
+  testWidgetsWithLeakTracking('Drag and drop - onMove is not called if moved with null data', (WidgetTester tester) async {
+    bool onMoveCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            feedback: Text('Dragging'),
+            child: Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target'));
+            },
+            onMove: (DragTargetDetails<dynamic> details) {
+              onMoveCalled = true;
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(onMoveCalled, isFalse);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(onMoveCalled, isFalse);
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(onMoveCalled, isFalse);
+    await gesture.up();
+    await tester.pump();
+
+    expect(onMoveCalled, isFalse);
   });
 
   testWidgetsWithLeakTracking('Drag and drop - dragging over button', (WidgetTester tester) async {
