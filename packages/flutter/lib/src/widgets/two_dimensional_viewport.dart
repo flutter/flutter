@@ -1198,7 +1198,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     );
     final double currentOffset = offset.pixels;
 
-    final RevealedOffset? targetOffset = RenderAbstractViewport.applyTargetOffset(
+    final RevealedOffset? targetOffset = RevealedOffset.clampOffset(
       leadingEdgeOffset: leadingEdgeOffset,
       trailingEdgeOffset: trailingEdgeOffset,
       currentOffset: currentOffset,

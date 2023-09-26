@@ -124,59 +124,6 @@ abstract interface class RenderAbstractViewport extends RenderObject {
     Axis? axis,
   });
 
-  /// Determines which provided leading or trailing edge of the viewport, as
-  /// [RevealedOffset]s, will be used for [RenderViewportBase.showInViewport]
-  /// accounting for the size and already visible portion of the [RenderObject]
-  /// that is being revealed.
-  ///
-  /// Also used by [RenderTwoDimensionalViewport.showInViewport] for each
-  /// horizontal and vertical [Axis].
-  ///
-  /// If the target [RenderObject] is already fully visible, this will return
-  /// null.
-  static RevealedOffset? applyTargetOffset({
-    required RevealedOffset leadingEdgeOffset,
-    required RevealedOffset trailingEdgeOffset,
-    required double currentOffset,
-  }) {
-    //           scrollOffset
-    //                       0 +---------+
-    //                         |         |
-    //                       _ |         |
-    //    viewport position |  |         |
-    // with `descendant` at |  |         | _
-    //        trailing edge |_ | xxxxxxx |  | viewport position
-    //                         |         |  | with `descendant` at
-    //                         |         | _| leading edge
-    //                         |         |
-    //                     800 +---------+
-    //
-    // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
-    //                       viewport on the left in image above.
-    // `leadingEdgeOffset`: Distance from scrollOffset 0 to the start of the
-    //                      viewport on the right in image above.
-    //
-    // The viewport position on the left is achieved by setting `offset.pixels`
-    // to `trailingEdgeOffset`, the one on the right by setting it to
-    // `leadingEdgeOffset`.
-    if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
-      // `descendant` is too big to be visible on screen in its entirety. Let's
-      // align it with the edge that requires the least amount of scrolling.
-      final double leadingEdgeDiff = (currentOffset - leadingEdgeOffset.offset).abs();
-      final double trailingEdgeDiff = (currentOffset - trailingEdgeOffset.offset).abs();
-      return leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
-    } else if (currentOffset > leadingEdgeOffset.offset) {
-      // `descendant` currently starts above the leading edge and can be shown
-      // fully on screen by scrolling down (which means: moving viewport up).
-      return leadingEdgeOffset;
-    } else if (currentOffset < trailingEdgeOffset.offset) {
-      // `descendant currently ends below the trailing edge and can be shown
-      // fully on screen by scrolling up (which means: moving viewport down)
-      return trailingEdgeOffset;
-    }
-    return null;
-  }
-
   /// The default value for the cache extent of the viewport.
   ///
   /// This default assumes [CacheExtentStyle.pixel].
@@ -232,6 +179,59 @@ class RevealedOffset {
   ///  * [RenderAbstractViewport.getOffsetToReveal], which calculates this
   ///    value for a specific element.
   final Rect rect;
+
+  /// Determines which provided leading or trailing edge of the viewport, as
+  /// [RevealedOffset]s, will be used for [RenderViewportBase.showInViewport]
+  /// accounting for the size and already visible portion of the [RenderObject]
+  /// that is being revealed.
+  ///
+  /// Also used by [RenderTwoDimensionalViewport.showInViewport] for each
+  /// horizontal and vertical [Axis].
+  ///
+  /// If the target [RenderObject] is already fully visible, this will return
+  /// null.
+  static RevealedOffset? clampOffset({
+    required RevealedOffset leadingEdgeOffset,
+    required RevealedOffset trailingEdgeOffset,
+    required double currentOffset,
+  }) {
+    //           scrollOffset
+    //                       0 +---------+
+    //                         |         |
+    //                       _ |         |
+    //    viewport position |  |         |
+    // with `descendant` at |  |         | _
+    //        trailing edge |_ | xxxxxxx |  | viewport position
+    //                         |         |  | with `descendant` at
+    //                         |         | _| leading edge
+    //                         |         |
+    //                     800 +---------+
+    //
+    // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+    //                       viewport on the left in image above.
+    // `leadingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+    //                      viewport on the right in image above.
+    //
+    // The viewport position on the left is achieved by setting `offset.pixels`
+    // to `trailingEdgeOffset`, the one on the right by setting it to
+    // `leadingEdgeOffset`.
+    if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
+      // `descendant` is too big to be visible on screen in its entirety. Let's
+      // align it with the edge that requires the least amount of scrolling.
+      final double leadingEdgeDiff = (currentOffset - leadingEdgeOffset.offset).abs();
+      final double trailingEdgeDiff = (currentOffset - trailingEdgeOffset.offset).abs();
+      return leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
+    } else if (currentOffset > leadingEdgeOffset.offset) {
+      // `descendant` currently starts above the leading edge and can be shown
+      // fully on screen by scrolling down (which means: moving viewport up).
+      return leadingEdgeOffset;
+    } else if (currentOffset < trailingEdgeOffset.offset) {
+      // `descendant currently ends below the trailing edge and can be shown
+      // fully on screen by scrolling up (which means: moving viewport down)
+      return trailingEdgeOffset;
+    }
+    return null;
+  }
 
   @override
   String toString() {
@@ -1235,7 +1235,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(descendant, 0.0, rect: rect);
     final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(descendant, 1.0, rect: rect);
     final double currentOffset = offset.pixels;
-    final RevealedOffset? targetOffset = RenderAbstractViewport.applyTargetOffset(
+    final RevealedOffset? targetOffset = RevealedOffset.clampOffset(
       leadingEdgeOffset: leadingEdgeOffset,
       trailingEdgeOffset: trailingEdgeOffset,
       currentOffset: currentOffset,
