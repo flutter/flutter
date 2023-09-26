@@ -215,22 +215,19 @@ class RevealedOffset {
     // The viewport position on the left is achieved by setting `offset.pixels`
     // to `trailingEdgeOffset`, the one on the right by setting it to
     // `leadingEdgeOffset`.
-    if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
-      // `descendant` is too big to be visible on screen in its entirety. Let's
-      // align it with the edge that requires the least amount of scrolling.
-      final double leadingEdgeDiff = (currentOffset - leadingEdgeOffset.offset).abs();
-      final double trailingEdgeDiff = (currentOffset - trailingEdgeOffset.offset).abs();
-      return leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
-    } else if (currentOffset > leadingEdgeOffset.offset) {
-      // `descendant` currently starts above the leading edge and can be shown
-      // fully on screen by scrolling down (which means: moving viewport up).
-      return leadingEdgeOffset;
-    } else if (currentOffset < trailingEdgeOffset.offset) {
-      // `descendant currently ends below the trailing edge and can be shown
-      // fully on screen by scrolling up (which means: moving viewport down)
-      return trailingEdgeOffset;
+    final bool inverted = leadingEdgeOffset.offset < trailingEdgeOffset.offset;
+    final RevealedOffset smaller;
+    final RevealedOffset larger;
+    (smaller, larger) = inverted
+      ? (leadingEdgeOffset, trailingEdgeOffset)
+      : (trailingEdgeOffset, leadingEdgeOffset);
+    if (currentOffset > larger.offset) {
+      return larger;
+    } else if (currentOffset < smaller.offset) {
+      return smaller;
+    } else {
+      return null;
     }
-    return null;
   }
 
   @override

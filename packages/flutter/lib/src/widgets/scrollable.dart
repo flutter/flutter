@@ -44,6 +44,13 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 /// which the scrollable content is displayed.
 typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition);
 
+// The return type of _performEnsureVisible.
+//
+// The list of futures represents each pending ScrollPosition call to
+// ensureVisible. The returned ScrollableState's context is used to find the
+// next potential ancestor Scrollable.
+typedef _EnsureVisibleResults = (List<Future<void>>, ScrollableState);
+
 /// A widget that manages scrolling in one dimension and informs the [Viewport]
 /// through which the content is viewed.
 ///
@@ -463,7 +470,7 @@ class Scrollable extends StatefulWidget {
     RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
-      late final List<Future<void>> newFutures;
+      final List<Future<void>> newFutures;
       (newFutures, scrollable) = scrollable._performEnsureVisible(
         context.findRenderObject()!,
         alignment: alignment,
@@ -1020,7 +1027,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // Returns the Future from calling ensureVisible for the ScrollPosition, as
   // as well as this ScrollableState instance so its context can be used to
   // check for other ancestor Scrollables in executing ensureVisible.
-  (List<Future<void>>, ScrollableState) _performEnsureVisible(
+  _EnsureVisibleResults _performEnsureVisible(
     RenderObject object, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
@@ -2070,7 +2077,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
 
   // Implemented in the _HorizontalInnerDimension instead.
   @override
-  (List<Future<void>>, ScrollableState) _performEnsureVisible(
+  _EnsureVisibleResults _performEnsureVisible(
     RenderObject object, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
@@ -2170,7 +2177,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
   // as well as the vertical ScrollableState instance so its context can be
   // used to check for other ancestor Scrollables in executing ensureVisible.
   @override
-  (List<Future<void>>, ScrollableState) _performEnsureVisible(
+  _EnsureVisibleResults _performEnsureVisible(
     RenderObject object, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
