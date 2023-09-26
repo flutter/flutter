@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -83,6 +84,24 @@ void main() {
     expect(
       (globals.logger as BufferLogger).traceText,
       contains('No package config found. Skipping native assets compilation.'),
+    );
+  });
+
+  testUsingContext('does not throw if clang not present but no native assets present', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.create(recursive: true);
+    await buildNativeAssetsLinux(
+      projectUri: projectUri,
+      buildMode: BuildMode.debug,
+      fileSystem: fileSystem,
+      buildRunner: _BuildRunnerWithoutClang(),
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      isNot(contains('Building native assets for ')),
     );
   });
 
@@ -371,4 +390,9 @@ void main() {
     final CCompilerConfig result = await runner.cCompilerConfig;
     expect(result.cc, Uri.file('/some/path/to/clang'));
   });
+}
+
+class _BuildRunnerWithoutClang extends FakeNativeAssetsBuildRunner {
+  @override
+  Future<CCompilerConfig> get cCompilerConfig async => throwToolExit('Failed to find clang++ on the PATH.');
 }

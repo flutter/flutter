@@ -23,7 +23,7 @@ Future<Uri?> dryRunNativeAssetsLinux({
   bool flutterTester = false,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
@@ -90,7 +90,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsLinux({
     // CMake requires the folder to exist to do copying.
     await buildDir.create(recursive: true);
   }
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory ?? buildUri_, fileSystem);
     return (nativeAssetsYaml, <Uri>[]);
   }
