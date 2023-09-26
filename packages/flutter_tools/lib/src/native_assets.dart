@@ -184,7 +184,6 @@ Future<Uri> writeNativeAssetsYaml(
   Uri yamlParentDirectory,
   FileSystem fileSystem,
 ) async {
-  print(StackTrace.current);
   globals.logger.printTrace('Writing native_assets.yaml.');
   final String nativeAssetsDartContents = assets.toNativeAssetsFile();
   final Directory parentDirectory = fileSystem.directory(yamlParentDirectory);
