@@ -109,7 +109,7 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// by x within the viewport.
   ///
   /// The optional [Axis] is used by
-  /// [RenderTwoDimensionalViewport.getOffstToReveal] to
+  /// [RenderTwoDimensionalViewport.getOffsetToReveal] to
   /// determine which [Axis] to compute an offset for. One dimensional
   /// subclasses like [RenderViewportBase] and [RenderListWheelViewport] will
   /// ignore the `axis` value if provided, as there is only one in those cases.
