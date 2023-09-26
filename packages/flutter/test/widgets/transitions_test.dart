@@ -280,6 +280,7 @@ void main() {
       child: SizeTransition(
         axis: Axis.horizontal,
         sizeFactor: animation,
+        crossAxisSizeFactor: 1.0,
         child: const Text('Ready'),
       ),
     );
@@ -288,18 +289,139 @@ void main() {
 
     final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.widthFactor, 0.0);
+    expect(actualPositionedBox.heightFactor, 1.0);
 
     controller.value = 0.0;
     await tester.pump();
     expect(actualPositionedBox.widthFactor, 0.0);
+    expect(actualPositionedBox.heightFactor, 1.0);
 
     controller.value = 0.75;
     await tester.pump();
     expect(actualPositionedBox.widthFactor, 0.5);
+    expect(actualPositionedBox.heightFactor, 1.0);
 
     controller.value = 1.0;
     await tester.pump();
     expect(actualPositionedBox.widthFactor, 1.0);
+    expect(actualPositionedBox.heightFactor, 1.0);
+  });
+
+  testWidgetsWithLeakTracking('SizeTransition with crossAxisSizeFactor should size its cross axi from its children - vertical axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
+
+    const Key key = Key('key');
+
+    final Widget widget =  Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: SizedBox(
+          key: key,
+          child: SizeTransition(
+            sizeFactor: animation,
+            crossAxisSizeFactor: 1.0,
+            child: const SizedBox.square(dimension: 100),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100,  0));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.5);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+
+    controller.value = 1.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size.square(100));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.5);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100,  0));
+  });
+
+  testWidgetsWithLeakTracking('SizeTransition with crossAxisSizeFactor should size its cross axi from its children - horizontal axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+
+    const Key key = Key('key');
+
+    final Widget widget =  Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: SizedBox(
+          key: key,
+          child: SizeTransition(
+            axis: Axis.horizontal,
+            sizeFactor: animation,
+            crossAxisSizeFactor: 1.0,
+            child: const SizedBox.square(dimension: 100),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.0);
+    expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.0);
+    expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.5);
+    expect(tester.getSize(find.byKey(key)), const Size(50, 100));
+
+    controller.value = 1.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size.square(100));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.5);
+    expect(tester.getSize(find.byKey(key)), const Size(50, 100));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.0);
+    expect(tester.getSize(find.byKey(key)), const Size(0,  100));
   });
 
   testWidgetsWithLeakTracking('MatrixTransition animates', (WidgetTester tester) async {
