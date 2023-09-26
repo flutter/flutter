@@ -916,6 +916,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
   }
 
+  @protected
   @override
   RevealedOffset getOffsetToReveal(
     RenderObject target,
@@ -927,56 +928,31 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // one of two scroll positions.
     assert(axis != null);
 
-    // Starting at `target` and walking towards the root:
-    //  - `child` will be the last object before we reach this viewport, and
-    //  - `pivot` will be the last RenderBox before we reach this viewport.
-    RenderObject child = target;
-    RenderBox? pivot;
-    // Find the direct child of the viewport that contains our target
-    while (child.parent != this) {
-      final RenderObject parent = child.parent!;
-      if (child is RenderBox) {
-        pivot = child;
-      }
-      child = parent;
-    }
-
     late final double offset;
     late final AxisDirection axisDirection;
     (offset, axisDirection) = switch (axis!) {
       Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
-      Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection)
+      Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection),
     };
 
-    // `rect` in the new intermediate coordinate system.
-    final Rect rectLocal;
-    // Our new reference frame render object's main axis extent.
-    final double pivotExtent;
-    if (pivot != null) {
-      assert(pivot.parent != null);
-      assert(pivot.parent != this);
-      assert(pivot != this);
-      assert(pivot.parent is RenderBox);
-      pivotExtent = switch (axis) {
-        Axis.horizontal => pivot.size.width,
-        Axis.vertical => pivot.size.height,
-      };
-      rect ??= target.paintBounds;
-      rectLocal = MatrixUtils.transformRect(target.getTransformTo(pivot), rect);
-    } else {
-      assert(rect != null);
-      return RevealedOffset(offset: offset, rect: rect!);
+    rect ??= target.paintBounds;
+    // `child` will be the last RenderObject before the viewport when walking
+    // up from `target`.
+    RenderObject child = target;
+    while (child.parent != this) {
+      child = child.parent!;
     }
 
     assert(child.parent == this);
     final RenderBox box = child as RenderBox;
+    final Rect rectLocal = MatrixUtils.transformRect(target.getTransformTo(child), rect);
 
     final double targetMainAxisExtent;
     double leadingScrollOffset = offset;
     // The scroll offset of `rect` within `child`.
     switch (axisDirection) {
       case AxisDirection.up:
-        leadingScrollOffset += pivotExtent - rectLocal.bottom;
+        leadingScrollOffset += child.size.height - rectLocal.bottom;
         targetMainAxisExtent = rectLocal.height;
       case AxisDirection.right:
         leadingScrollOffset += rectLocal.left;
@@ -985,7 +961,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         leadingScrollOffset += rectLocal.top;
         targetMainAxisExtent = rectLocal.height;
       case AxisDirection.left:
-        leadingScrollOffset += pivotExtent - rectLocal.right;
+        leadingScrollOffset += child.size.width - rectLocal.right;
         targetMainAxisExtent = rectLocal.width;
     }
 
