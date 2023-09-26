@@ -924,8 +924,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     Rect? rect,
     Axis? axis,
   }) {
-    // We must know which axis we are revealing for, since Offset refers to only
-    // one of two scroll positions.
+    // We must know which axis we are revealing for, since RevealedOffset
+    // refers to only one of two scroll positions.
     assert(axis != null);
 
     late final double offset;
