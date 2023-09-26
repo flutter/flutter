@@ -84,8 +84,6 @@ class BoxDecoration extends Decoration {
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
   /// * If [backgroundBlendMode] is null, this decoration paints with [BlendMode.srcOver]
-  ///
-  /// The [shape] argument must not be null.
   const BoxDecoration({
     this.color,
     this.image,

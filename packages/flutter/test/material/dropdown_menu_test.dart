@@ -1680,6 +1680,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.text, ''); // nothing selected
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/131350.
+  testWidgets('DropdownMenuEntry.leadingIcon default layout', (WidgetTester tester) async {
+    // The DropdownMenu should not get extra padding in DropdownMenuEntry items
+    // when both text field and DropdownMenuEntry have leading icons.
+    await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            leadingIcon: Icon(Icons.search),
+            hintText: 'Hint',
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'Item 0',
+                leadingIcon: Icon(Icons.alarm)
+              ),
+              DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+            ],
+          ),
+        )
+    ));
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pumpAndSettle();
+
+    // Check text location in text field.
+    expect(tester.getTopLeft(find.text('Hint')).dx, 48.0);
+
+    // By default, the text of item 0 should be aligned with the text of the text field.
+    expect(tester.getTopLeft(find.text('Item 0').last).dx, 48.0);
+
+    // By default, the text of item 1 should be aligned with the text of the text field,
+    // so there are some extra padding before "Item 1".
+    expect(tester.getTopLeft(find.text('Item 1').last).dx, 48.0);
+  });
 }
 
 enum TestMenu {

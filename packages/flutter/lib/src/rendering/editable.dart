@@ -36,8 +36,6 @@ const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 @immutable
 class TextSelectionPoint {
   /// Creates a description of a point in a text selection.
-  ///
-  /// The [point] argument must not be null.
   const TextSelectionPoint(this.point, this.direction);
 
   /// Coordinates of the lower left or lower right corner of the selection,
@@ -261,9 +259,7 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
 class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderInlineChildrenContainerDefaults implements TextLayoutMetrics {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
-  /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
-  ///
-  /// The [textDirection] argument must not be null.
+  /// The [textAlign] argument defaults to [TextAlign.start].
   ///
   /// If [showCursor] is not specified, then it defaults to hiding the cursor.
   ///
@@ -271,8 +267,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// the number of lines. By default, it is 1, meaning this is a single-line
   /// text field. If it is not null, it must be greater than zero.
   ///
-  /// The [offset] is required and must not be null. You can use [
-  /// ViewportOffset.zero] if you have no need for scrolling.
+  /// Use [ViewportOffset.zero] for the [offset] if there is no need for
+  /// scrolling.
   RenderEditable({
     InlineSpan? text,
     required TextDirection textDirection,
@@ -564,7 +560,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Character used for obscuring text if [obscureText] is true.
   ///
-  /// Cannot be null, and must have a length of exactly one.
+  /// Must have a length of exactly one.
   String get obscuringCharacter => _obscuringCharacter;
   String _obscuringCharacter;
   set obscuringCharacter(String value) {
@@ -607,8 +603,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The object that controls the text selection, used by this render object
   /// for implementing cut, copy, and paste keyboard shortcuts.
   ///
-  /// It must not be null. It will make cut, copy and paste functionality work
-  /// with the most recently set [TextSelectionDelegate].
+  /// It will make cut, copy and paste functionality work with the most recently
+  /// set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
 
   /// Track whether position of the start of the selected text is within the viewport.
@@ -802,8 +798,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// How the text should be aligned horizontally.
-  ///
-  /// This must not be null.
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
     if (_textPainter.textAlign == value) {
@@ -824,8 +818,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
-  ///
-  /// This must not be null.
   // TextPainter.textDirection is nullable, but it is set to a
   // non-null value in the RenderEditable constructor and we refuse to
   // set it to null here, so _textPainter.textDirection cannot be null.
@@ -1257,7 +1249,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
