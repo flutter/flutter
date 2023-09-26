@@ -964,6 +964,9 @@ class StartupTest {
           device.deviceId,
         ]);
 
+        print('Waiting 10 seocnds...');
+        sleep(const Duration(seconds: 10));
+        print('Done waiting.');
         // TODO add wait for device here.
         await device.awaitDevice();
       }
