@@ -917,7 +917,11 @@ class AndroidDevice extends Device {
       // change this to a for loop that will not run forever after testing.
       <String>['-s', deviceId, 'wait-for-device', 'shell', '\'while [[ -z \$(getprop sys.boot_completed) ]]; do echo "waiting..."; sleep 1; done; echo "done";\''],
     );
-    print('exit code ${await process.exitCode}');
+    process.stdout.transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            print(line);
+          },);
     print('Done waiting for device.');
   }
 }
