@@ -164,6 +164,7 @@
                 "parameters": [
                     "--engine-version",
                     "${REVISION}",
+		    "--upload",
                     "--target-arch",
                     "arm64",
                     "--out-dir",
@@ -181,6 +182,7 @@
                 "parameters": [
                     "--engine-version",
                     "${REVISION}",
+		    "--upload",
                     "--target-arch",
                     "x64",
                     "--out-dir",
