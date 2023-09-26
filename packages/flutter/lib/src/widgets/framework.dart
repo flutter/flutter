@@ -6389,13 +6389,12 @@ abstract class RenderObjectElement extends Element {
 
     while (ancestor != null && ancestor is! RenderObjectElement) {
       if (ancestor is ParentDataElement<ParentData>) {
-        assert(() {
-          if (!debugAncestorTypes.add(ancestor.runtimeType)
-              || !debugParentDataTypes.add((ancestor! as ParentDataElement<ParentData>).debugParentDataType)) {
+        assert((ParentDataElement<ParentData> ancestor) {
+          if (!debugAncestorTypes.add(ancestor.runtimeType) || !debugParentDataTypes.add(ancestor.debugParentDataType)) {
             debugAncestorCulprits.add(ancestor.runtimeType);
           }
           return true;
-        }());
+        }(ancestor));
         result.add(ancestor);
       }
       ancestor = ancestor._parent;
