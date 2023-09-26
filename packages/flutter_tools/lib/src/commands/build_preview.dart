@@ -78,7 +78,9 @@ class BuildPreviewCommand extends BuildSubCommand {
     if (!previewDevice.existsSync()) {
       throw StateError('Preview device not found at ${previewDevice.absolute.path}');
     }
-    previewDevice.copySync(artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
+    final String newPath = artifacts.getArtifactPath(Artifact.flutterPreviewDevice);
+    fs.file(newPath).parent.createSync(recursive: true);
+    previewDevice.copySync(newPath);
     return FlutterCommandResult.success();
   }
 
