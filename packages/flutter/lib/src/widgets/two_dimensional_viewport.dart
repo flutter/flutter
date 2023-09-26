@@ -1042,7 +1042,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // so handling is split between the options for allowed implicit scrolling.
     final bool allowHorizontal = horizontalOffset.allowImplicitScrolling;
     final bool allowVertical = verticalOffset.allowImplicitScrolling;
-    Rect? newRect;
     AxisDirection? axisDirection;
     switch ((allowHorizontal, allowVertical)) {
       case (true, true):
@@ -1064,7 +1063,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         );
     }
 
-    newRect = RenderTwoDimensionalViewport.showInViewport(
+    final Rect? newRect = RenderTwoDimensionalViewport.showInViewport(
       descendant: descendant,
       viewport: this,
       axisDirection: axisDirection,
@@ -1122,7 +1121,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return rect;
     }
 
-    Rect? showVertical() {
+    Rect? showVertical(Rect? rect) {
       return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
         descendant: descendant,
         viewport: viewport,
@@ -1133,7 +1132,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       );
     }
 
-    Rect? showHorizontal() {
+    Rect? showHorizontal(Rect? rect) {
       return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
         descendant: descendant,
         viewport: viewport,
@@ -1147,15 +1146,15 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     switch (axisDirection) {
       case AxisDirection.left:
       case AxisDirection.right:
-        return showHorizontal();
+        return showHorizontal(rect);
       case AxisDirection.up:
       case AxisDirection.down:
-        return showVertical();
+        return showVertical(rect);
       case null:
         // Update rect after revealing in one axis before revealing in the next.
-        rect = showHorizontal() ?? rect;
+        rect = showHorizontal(rect) ?? rect;
         // We only return the final rect after both have been revealed.
-        rect = showVertical();
+        rect = showVertical(rect);
         if (rect == null) {
           // `descendant` is between leading and trailing edge and hence already
           //  fully shown on screen.

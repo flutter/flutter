@@ -468,7 +468,7 @@ class Scrollable extends StatefulWidget {
     RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
-      late final List<Future<void>> newFutures;
+      final List<Future<void>> newFutures = <Future<void>>[];
       (newFutures, scrollable) = scrollable._performEnsureVisible(
         context.findRenderObject()!,
         alignment: alignment,
