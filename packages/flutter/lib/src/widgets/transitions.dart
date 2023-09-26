@@ -443,7 +443,8 @@ class SizeTransition extends AnimatedWidget {
     this.axisAlignment = 0.0,
     this.crossAxisSizeFactor,
     this.child,
-  }) : super(listenable: sizeFactor);
+  }) : assert(crossAxisSizeFactor == null || crossAxisSizeFactor >= 0.0),
+    super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].
@@ -476,6 +477,9 @@ class SizeTransition extends AnimatedWidget {
   ///
   /// If the value of [crossAxisSizeFactor] is less than one, the child will be
   /// clipped in the appropriate axis.
+  ///
+  /// If `null` (the default), the cross axis size is as large as the
+  /// parent.
   final double? crossAxisSizeFactor;
 
   /// The widget below this widget in the tree.
