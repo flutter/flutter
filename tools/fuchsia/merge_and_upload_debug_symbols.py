@@ -214,7 +214,17 @@ def main():
 
   arch = args.target_arch
   cipd_def = WriteCIPDDefinition(arch, out_dir, internal_symbol_dirs)
-  ProcessCIPDPackage(args.upload, cipd_def, args.engine_version, out_dir, arch)
+
+  # Set revision to HEAD if empty and remove upload. This is to support
+  # presubmit workflows. An empty engine_version means this script is running
+  # on presubmit.
+  should_upload = args.upload
+  engine_version = args.engine_version
+  if not engine_version:
+    engine_version = 'HEAD'
+    should_upload = False
+
+  ProcessCIPDPackage(should_upload, cipd_def, engine_version, out_dir, arch)
   return 0
 
 
