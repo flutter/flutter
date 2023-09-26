@@ -1189,43 +1189,67 @@ void main() {
       return tester.pumpWidget(Theme(data: theme, child: indicator));
     }
 
-    // With elevation provided.
-    const double testElevation = 1.0;
-    await pumpIndicator(
-      const RefreshProgressIndicator(elevation: testElevation),
-    );
-    final Material material = tester.widget(
+    // With default values.
+    await pumpIndicator(const RefreshProgressIndicator());
+    Material material = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
         matching: find.byType(Material),
       ),
     );
-    expect(material.elevation, testElevation);
-
-    // With indicatorMargin provided.
-    const EdgeInsetsGeometry testIndicatorMargin = EdgeInsets.all(6.0);
-    await pumpIndicator(
-      const RefreshProgressIndicator(indicatorMargin: testIndicatorMargin),
-    );
-    final Container container = tester.widget(
+    Container container = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
         matching: find.byType(Container),
       ),
     );
-    expect(container.margin, testIndicatorMargin);
-
-    // With indicatorPadding provided.
-    const EdgeInsetsGeometry testIndicatorPadding = EdgeInsets.all(10.0);
-    await pumpIndicator(
-      const RefreshProgressIndicator(indicatorPadding: testIndicatorPadding),
-    );
-    final Padding padding = tester.widget(
+    Padding padding = tester.widget(
       find.descendant(
-        of: find.byType(Material), // Find the Padding under the Material.
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
         matching: find.byType(Padding),
       ),
     );
+    expect(material.elevation, 2.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(padding.padding, const EdgeInsets.all(12.0));
+
+    // With values provided.
+    const double testElevation = 1.0;
+    const EdgeInsetsGeometry testIndicatorMargin = EdgeInsets.all(6.0);
+    const EdgeInsetsGeometry testIndicatorPadding = EdgeInsets.all(10.0);
+    await pumpIndicator(
+      const RefreshProgressIndicator(
+        elevation: testElevation,
+        indicatorMargin: testIndicatorMargin,
+        indicatorPadding: testIndicatorPadding,
+      ),
+    );
+    material = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material),
+      ),
+    );
+    container = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Container),
+      ),
+    );
+    padding = tester.widget(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(material.elevation, testElevation);
+    expect(container.margin, testIndicatorMargin);
     expect(padding.padding, testIndicatorPadding);
   });
 }
