@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:package_config/package_config.dart' show Package;
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -104,6 +105,7 @@ void main() {
       await createPackageConfig(iosEnvironment);
 
       final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
         buildResult: FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
           native_assets_cli.Asset(
             id: 'package:foo/foo.dart',

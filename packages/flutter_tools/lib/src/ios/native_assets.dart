@@ -23,7 +23,7 @@ Future<Uri?> dryRunNativeAssetsIOS({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
@@ -72,7 +72,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   required Uri yamlParentDirectory,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory, fileSystem);
     return <Uri>[];
   }

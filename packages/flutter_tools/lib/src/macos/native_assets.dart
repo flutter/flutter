@@ -23,7 +23,7 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   bool flutterTester = false,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
@@ -77,7 +77,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
 }) async {
   const OS targetOs = OS.macOS;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOs);
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory ?? buildUri_, fileSystem);
     return (nativeAssetsYaml, <Uri>[]);
   }
