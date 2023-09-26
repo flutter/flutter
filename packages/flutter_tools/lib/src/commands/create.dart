@@ -911,7 +911,7 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
 
     // Gradle template version incompatible with Java version.
     final gradle.JavaGradleCompat? validCompatibleGradleVersionRange = gradle.getValidGradleVersionRangeForJavaVersion(globals.logger, javaV: javaVersion);
-    final String compatibleGradleVersionMessage = validCompatibleGradleVersionRange == null ? '' : ' (compatible Gradle version range: ${validCompatibleGradleVersionRange.gradleMin} - ${validCompatibleGradleVersionRange.gradleMax})';
+    final String compatibleGradleVersionMessage = validCompatibleGradleVersionRange == null ? '' : ' (minimum required Gradle version: ${validCompatibleGradleVersionRange.minRequiredGradle})';
 
     globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
