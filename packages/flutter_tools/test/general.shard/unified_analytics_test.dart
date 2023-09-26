@@ -10,7 +10,6 @@ import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -65,7 +64,7 @@ void main() {
   });
 
   group('Unit testing getAnalytics', () {
-    testUsingContext('Successfully creates the instance for standard branch',
+    testWithoutContext('Successfully creates the instance for standard branch',
         () {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
@@ -77,7 +76,7 @@ void main() {
       expect(analytics.clientId, hardCodedClientId);
     });
 
-    testUsingContext('NoOp instance for user branch', () {
+    testWithoutContext('NoOp instance for user branch', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
         flutterVersion: FakeFlutterVersion(
@@ -92,7 +91,7 @@ void main() {
           reason: 'The client ID should match the NoOp client id');
     });
 
-    testUsingContext('NoOp instance for unknown branch', () {
+    testWithoutContext('NoOp instance for unknown branch', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
         flutterVersion: FakeFlutterVersion(
@@ -106,7 +105,7 @@ void main() {
           reason: 'The client ID should match the NoOp client id');
     });
 
-    testUsingContext('NoOp instance when running on bots', () {
+    testWithoutContext('NoOp instance when running on bots', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: true,
         flutterVersion: FakeFlutterVersion(),
@@ -118,7 +117,7 @@ void main() {
           reason: 'The client ID should match the NoOp client id');
     });
 
-    testUsingContext('NoOp instance when suppressing via env variable', () {
+    testWithoutContext('NoOp instance when suppressing via env variable', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: true,
         flutterVersion: FakeFlutterVersion(),
