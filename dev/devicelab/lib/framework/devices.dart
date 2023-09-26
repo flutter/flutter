@@ -915,7 +915,7 @@ class AndroidDevice extends Device {
     process = await startProcess(
       adbPath,
       // change this to a for loop that will not run forever after testing.
-      <String>['-s', deviceId, 'wait-for-device', 'shell', '\'while [[ -z \$(getprop sys.boot_completed) ]]; do echo "waiting for device"; sleep 1; done; echo "done"\''],
+      <String>['-s', deviceId, 'wait-for-device', 'shell', '\'while [[ -z \$(getprop sys.boot_completed) ]]; do echo "waiting..."; sleep 1; done; echo "done";\''],
     );
     print('exit code ${await process.exitCode}');
     print('Done waiting for device.');
