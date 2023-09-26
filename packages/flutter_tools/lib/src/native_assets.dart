@@ -245,7 +245,6 @@ Future<bool> nativeBuildRequired(NativeAssetsBuildRunner buildRunner) async {
 /// are supported on that operating system.
 ///
 /// Exits the tool if the above condition is not satisfied.
-// TODO(fujino): this does not appear to do what it says it does.
 Future<void> ensureNoNativeAssetsOrOsIsSupported(
   Uri workingDirectory,
   String os,
