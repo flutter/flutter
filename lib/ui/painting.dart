@@ -3482,8 +3482,9 @@ class ColorFilter implements ImageFilter {
         _matrix = null,
         _type = _kTypeMode;
 
-  /// Construct a color filter that transforms a color by a 5x5 matrix, where
-  /// the fifth row is implicitly added in an identity configuration.
+  /// Construct a color filter from a 4x5 row-major matrix. The matrix is
+  /// interpreted as a 5x5 matrix, where the fifth row is the identity
+  /// configuration.
   ///
   /// Every pixel's color value, represented as an `[R, G, B, A]`, is matrix
   /// multiplied to create a new color:
