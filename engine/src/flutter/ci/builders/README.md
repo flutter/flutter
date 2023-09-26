@@ -122,7 +122,8 @@ The current list of supported magic variables is:
   folder where logs are being placed.
 * `${LUCI_WORKDIR}` - translated to the LUCI chroot working directory.
 * `${LUCI_CLEANUP}` - translated to the LUCI chroot temp directory.
-* `${REVISION}` - translated to the engine commit under test.
+* `${REVISION}` - translated to the engine commit in postsubmit. In presubmit
+  it is translated to an empty string.
 
 ### Build
 

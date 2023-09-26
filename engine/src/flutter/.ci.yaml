@@ -161,6 +161,7 @@ targets:
   - name: Linux Fuchsia
     recipe: engine/engine
     properties:
+      add_recipes_cq: "true"
       build_fuchsia: "true"
       fuchsia_ctl_version: version:0.0.27
       # ensure files from pre-production Fuchsia SDK tests are purged from cache
