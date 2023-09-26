@@ -73,10 +73,10 @@ class SkiaShadowFlags {
 // material spec.
 const double ckShadowAmbientAlpha = 0.039;
 const double ckShadowSpotAlpha = 0.25;
-const double ckShadowLightRadius = 1.1;
-const double ckShadowLightHeight = 600.0;
 const double ckShadowLightXOffset = 0;
 const double ckShadowLightYOffset = -450;
+const double ckShadowLightHeight = 600;
+const double ckShadowLightRadius = 800;
 const double ckShadowLightXTangent = ckShadowLightXOffset / ckShadowLightHeight;
 const double ckShadowLightYTangent = ckShadowLightYOffset / ckShadowLightHeight;
 
@@ -161,13 +161,15 @@ void drawSkShadow(
   bool transparentOccluder,
   double devicePixelRatio,
 ) {
-  final int flags = transparentOccluder
+  int flags = transparentOccluder
       ? SkiaShadowFlags.kTransparentOccluderShadowFlags
       : SkiaShadowFlags.kDefaultShadowFlags;
+  flags |= SkiaShadowFlags.kDirectionalLight_ShadowFlag;
 
   final ui.Color inAmbient =
       color.withAlpha((color.alpha * ckShadowAmbientAlpha).round());
-  final ui.Color inSpot = color.withAlpha((color.alpha * ckShadowSpotAlpha).round());
+  final ui.Color inSpot =
+      color.withAlpha((color.alpha * ckShadowSpotAlpha).round());
 
   final SkTonalColors inTonalColors = SkTonalColors(
     ambient: makeFreshSkColor(inAmbient),
@@ -180,10 +182,10 @@ void drawSkShadow(
     path.skiaObject,
     Float32List(3)..[2] = devicePixelRatio * elevation,
     Float32List(3)
-      ..[0] = ckShadowLightXOffset
-      ..[1] = ckShadowLightYOffset
-      ..[2] = devicePixelRatio * ckShadowLightHeight,
-    devicePixelRatio * ckShadowLightRadius,
+      ..[0] = 0
+      ..[1] = -1
+      ..[2] = 1,
+    ckShadowLightRadius / ckShadowLightHeight,
     tonalColors.ambient,
     tonalColors.spot,
     flags.toDouble(),
