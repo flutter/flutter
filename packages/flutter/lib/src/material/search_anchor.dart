@@ -142,8 +142,6 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/material/search_anchor/search_anchor.0.dart **
   /// {@end-tool}
-  ///
-  /// The [suggestionsBuilder] argument must not be null.
   factory SearchAnchor.bar({
     Widget? barLeading,
     Iterable<Widget>? barTrailing,
@@ -295,8 +293,6 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// The widget returned by this builder is faded out when it is tapped.
   /// At the same time a search view route is faded in.
-  ///
-  /// This must not be null.
   final SearchAnchorChildBuilder builder;
 
   /// Called to get the suggestion list for the search view.

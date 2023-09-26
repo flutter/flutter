@@ -5,10 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('SliverAppBar - Stretch', () {
-    testWidgets('fills overscroll', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -43,7 +44,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets('fills overscroll after reverse direction input - scrolling header', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('fills overscroll after reverse direction input - scrolling header', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -92,7 +93,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('fills overscroll after reverse direction input - floating header', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('fills overscroll after reverse direction input - floating header', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -142,7 +143,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('does not stretch without overscroll physics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not stretch without overscroll physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -177,7 +178,7 @@ void main() {
       expect(header.child!.size.height, equals(100.0));
     });
 
-    testWidgets('default trigger offset', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default trigger offset', (WidgetTester tester) async {
       bool didTrigger = false;
       const Key anchor = Key('drag');
       await tester.pumpWidget(
@@ -215,7 +216,7 @@ void main() {
       expect(didTrigger, isTrue);
     });
 
-    testWidgets('custom trigger offset', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('custom trigger offset', (WidgetTester tester) async {
       bool didTrigger = false;
       const Key anchor = Key('drag');
       await tester.pumpWidget(
@@ -254,7 +255,7 @@ void main() {
       expect(didTrigger, isTrue);
     });
 
-    testWidgets('stretch callback not triggered without overscroll physics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('stretch callback not triggered without overscroll physics', (WidgetTester tester) async {
       bool didTrigger = false;
       const Key anchor = Key('drag');
       await tester.pumpWidget(
@@ -293,7 +294,7 @@ void main() {
       expect(didTrigger, isFalse);
     });
 
-    testWidgets('asserts reasonable trigger offset', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('asserts reasonable trigger offset', (WidgetTester tester) async {
       expect(
         () {
           return MaterialApp(
@@ -325,7 +326,7 @@ void main() {
   });
 
   group('SliverAppBar - Stretch, Pinned', () {
-    testWidgets('fills overscroll', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -360,7 +361,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets('does not stretch without overscroll physics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not stretch without overscroll physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -397,7 +398,7 @@ void main() {
   });
 
   group('SliverAppBar - Stretch, Floating', () {
-    testWidgets('fills overscroll', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -432,7 +433,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets('does not fill overscroll without proper physics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not fill overscroll without proper physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -469,7 +470,7 @@ void main() {
   });
 
   group('SliverAppBar - Stretch, Floating, Pinned', () {
-    testWidgets('fills overscroll', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('fills overscroll', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(
@@ -505,7 +506,7 @@ void main() {
       expect(header.child!.size.height, equals(200.0));
     });
 
-    testWidgets('does not fill overscroll without proper physics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not fill overscroll without proper physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
         MaterialApp(

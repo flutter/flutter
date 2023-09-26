@@ -2,35 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is included from `<app>/android/settings.gradle`,
-// so it can be versioned with the Flutter SDK.
+// This file exists solely for the compatibility with projects that have
+// not migrated to the declarative apply of the Flutter App Plugin Loader Gradle Plugin.
 
-import groovy.json.JsonSlurper
-
-def flutterProjectRoot = rootProject.projectDir.parentFile
-
-// If this logic is changed, also change the logic in module_plugin_loader.gradle.
-def pluginsFile = new File(flutterProjectRoot, '.flutter-plugins-dependencies')
-if (!pluginsFile.exists()) {
-  return
-}
-
-def object = new JsonSlurper().parseText(pluginsFile.text)
-assert object instanceof Map
-assert object.plugins instanceof Map
-assert object.plugins.android instanceof List
-// Includes the Flutter plugins that support the Android platform.
-object.plugins.android.each { androidPlugin ->
-  assert androidPlugin.name instanceof String
-  assert androidPlugin.path instanceof String
-  // Skip plugins that have no native build (such as a Dart-only implementation
-  // of a federated plugin).
-  def needsBuild = androidPlugin.containsKey('native_build') ? androidPlugin['native_build'] : true
-  if (!needsBuild) {
-    return
-  }
-  def pluginDirectory = new File(androidPlugin.path, 'android')
-  assert pluginDirectory.exists()
-  include ":${androidPlugin.name}"
-  project(":${androidPlugin.name}").projectDir = pluginDirectory
-}
+def pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: "$pathToThisDirectory/src/main/groovy/app_plugin_loader.groovy"

@@ -1584,14 +1584,16 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     });
   });
 
-  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () {
-    void createAndDispose() {
+  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () async {
+    Future<void> createAndDispose() async {
       PlatformRouteInformationProvider(
         initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
       ).dispose();
     }
-
-    expect(createAndDispose, dispatchesMemoryEvents(PlatformRouteInformationProvider));
+    await expectLater(
+      await memoryEvents(createAndDispose, PlatformRouteInformationProvider),
+      areCreateAndDispose,
+    );
   });
 }
 
@@ -1646,7 +1648,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.reportConfiguration = false,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1734,7 +1736,7 @@ class SimpleRouteInformationProvider extends RouteInformationProvider with Chang
     this.onRouterReport,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1794,7 +1796,7 @@ class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with Ch
     required this.builder,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 

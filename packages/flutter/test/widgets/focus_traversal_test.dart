@@ -441,96 +441,6 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Nested navigator does not trap focus', (WidgetTester tester) async {
-    final FocusNode node1 = FocusNode();
-    addTearDown(node1.dispose);
-    final FocusNode node2 = FocusNode();
-    addTearDown(node2.dispose);
-    final FocusNode node3 = FocusNode();
-    addTearDown(node3.dispose);
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FocusTraversalGroup(
-          policy: ReadingOrderTraversalPolicy(),
-          child: FocusScope(
-            child: Column(
-              children: <Widget>[
-                Focus(
-                  focusNode: node1,
-                  child: const SizedBox(width: 100, height: 100),
-                ),
-                SizedBox(
-                  width: 100,
-                  height: 100,
-                  child: Navigator(
-                    pages: <Page<void>>[
-                      MaterialPage<void>(
-                        child: Focus(
-                          focusNode: node2,
-                          child: const SizedBox(width: 100, height: 100),
-                        ),
-                      ),
-                    ],
-                    onPopPage: (_, __) => false,
-                  ),
-                ),
-                Focus(
-                  focusNode: node3,
-                  child: const SizedBox(width: 100, height: 100),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    node1.requestFocus();
-    await tester.pump();
-
-    expect(node1.hasFocus, isTrue);
-    expect(node2.hasFocus, isFalse);
-    expect(node3.hasFocus, isFalse);
-
-    node1.nextFocus();
-    await tester.pump();
-    expect(node1.hasFocus, isFalse);
-    expect(node2.hasFocus, isTrue);
-    expect(node3.hasFocus, isFalse);
-
-    node2.nextFocus();
-    await tester.pump();
-    expect(node1.hasFocus, isFalse);
-    expect(node2.hasFocus, isFalse);
-    expect(node3.hasFocus, isTrue);
-
-    node3.nextFocus();
-    await tester.pump();
-    expect(node1.hasFocus, isTrue);
-    expect(node2.hasFocus, isFalse);
-    expect(node3.hasFocus, isFalse);
-
-    node1.previousFocus();
-    await tester.pump();
-    expect(node1.hasFocus, isFalse);
-    expect(node2.hasFocus, isFalse);
-    expect(node3.hasFocus, isTrue);
-
-    node3.previousFocus();
-    await tester.pump();
-    expect(node1.hasFocus, isFalse);
-    expect(node2.hasFocus, isTrue);
-    expect(node3.hasFocus, isFalse);
-
-    node2.previousFocus();
-    await tester.pump();
-    expect(node1.hasFocus, isTrue);
-    expect(node2.hasFocus, isFalse);
-    expect(node3.hasFocus, isFalse);
-  });
-
   group(ReadingOrderTraversalPolicy, () {
     testWidgetsWithLeakTracking('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -684,6 +594,41 @@ void main() {
       expect(firstFocusNode.hasFocus, isFalse);
       expect(secondFocusNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);
+    });
+
+    testWidgetsWithLeakTracking('Requesting nextFocus on node focuses its descendant', (WidgetTester tester) async {
+      for (final bool canRequestFocus in <bool>{true, false}) {
+        final FocusNode node1 = FocusNode();
+        final FocusNode node2 = FocusNode();
+        addTearDown(() {
+          node1.dispose();
+          node2.dispose();
+        });
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusTraversalGroup(
+              policy: ReadingOrderTraversalPolicy(),
+              child: FocusScope(
+                child: Focus(
+                  focusNode: node1,
+                  canRequestFocus: canRequestFocus,
+                  child: Focus(
+                    focusNode: node2,
+                    child: Container(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final bool didFindNode = node1.nextFocus();
+        await tester.pump();
+        expect(didFindNode, isTrue);
+        expect(node1.hasPrimaryFocus, isFalse);
+        expect(node2.hasPrimaryFocus, isTrue);
+      }
     });
 
     testWidgetsWithLeakTracking('Move reading focus to previous node.', (WidgetTester tester) async {
