@@ -193,6 +193,18 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
   RenderBox? testGetChildFor(ChildVicinity vicinity) => getChildFor(vicinity);
 
   @override
+  TestExtendedParentData parentDataOf(RenderBox child) {
+    return child.parentData! as TestExtendedParentData;
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! TestExtendedParentData) {
+      child.parentData = TestExtendedParentData();
+    }
+  }
+
+  @override
   void layoutChildSequence() {
     // Really simple table implementation for testing.
     // Every child is 200x200 square
@@ -467,4 +479,33 @@ class KeepAliveCheckBoxState extends State<KeepAliveCheckBox> with AutomaticKeep
       },
     );
   }
+}
+
+// TwoDimensionalViewportParentData already mixes in KeepAliveParentDataMixin,
+// and so should be compatible with both the KeepAlive and
+// TestParentDataWidget ParentDataWidgets.
+// This ParentData is set up above as part of the
+// RenderSimpleBuilderTableViewport for testing.
+class TestExtendedParentData extends TwoDimensionalViewportParentData {
+  int? testValue;
+}
+
+class TestParentDataWidget extends ParentDataWidget<TestExtendedParentData> {
+  const TestParentDataWidget({
+    super.key,
+    required super.child,
+    this.testValue,
+  });
+
+  final int? testValue;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is TestExtendedParentData);
+    final TestExtendedParentData parentData = renderObject.parentData! as TestExtendedParentData;
+    parentData.testValue = testValue;
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => SimpleBuilderTableViewport;
 }
