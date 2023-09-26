@@ -443,19 +443,14 @@ class Scrollable extends StatefulWidget {
   /// given context visible.
   ///
   /// If the [Scrollable] of the provided [BuildContext] is a
-  /// [TwoDimensionalScrollable] and a specific [Axis] is not provided,
-  /// both vertical and horizontal axes will ensure the target is made visible
-  /// using the same [alignment] value. Providing
-  /// an [Axis] allows different [alignment]s to be specified, but
-  /// will require that ensureVisible is called separately for each [Axis] of
-  /// the [TwoDimensionalScrollable].
+  /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
+  /// the target is made visible.
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
-    Axis? axis,
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
@@ -476,7 +471,6 @@ class Scrollable extends StatefulWidget {
         curve: curve,
         alignmentPolicy: alignmentPolicy,
         targetRenderObject: targetRenderObject,
-        axis: axis,
       );
       futures.addAll(newFutures);
 
@@ -1033,7 +1027,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
-    Axis? axis,
   }) {
     final Future<void> ensureVisibleFuture = position.ensureVisible(
       object,
@@ -2084,7 +2077,6 @@ class _VerticalOuterDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
-    Axis? axis,
   }) {
     assert(
       false,
@@ -2185,39 +2177,25 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
-    Axis? axis,
   }) {
     final List<Future<void>> newFutures = <Future<void>>[];
 
-    void ensureHorizontal() {
-      newFutures.add(position.ensureVisible(
-        object,
-        alignment: alignment,
-        duration: duration,
-        curve: curve,
-        alignmentPolicy: alignmentPolicy,
-      ));
-    }
+    newFutures.add(position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+    ));
 
-    void ensureVertical() {
-      newFutures.add(verticalScrollable.position.ensureVisible(
-        object,
-        alignment: alignment,
-        duration: duration,
-        curve: curve,
-        alignmentPolicy: alignmentPolicy,
-      ));
-    }
+    newFutures.add(verticalScrollable.position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+    ));
 
-    switch (axis) {
-      case Axis.vertical:
-        ensureHorizontal();
-      case Axis.horizontal:
-        ensureVertical();
-      case null:
-        ensureHorizontal();
-        ensureVertical();
-    }
     return (newFutures, verticalScrollable);
   }
 
