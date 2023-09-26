@@ -272,7 +272,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       textType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
     } else {
       if (autocorrect) textType |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
-      if (!enableSuggestions) textType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+      if (!enableSuggestions) {
+        // Note: both required. Some devices ignore TYPE_TEXT_FLAG_NO_SUGGESTIONS.
+        textType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        textType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+      }
     }
 
     if (textCapitalization == TextInputChannel.TextCapitalization.CHARACTERS) {
