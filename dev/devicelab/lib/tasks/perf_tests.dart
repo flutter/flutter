@@ -963,6 +963,9 @@ class StartupTest {
           '-d',
           device.deviceId,
         ]);
+
+        // TODO add wait for device here.
+        await device.awaitDevice();
       }
 
       final Map<String, dynamic> averageResults = _average(results, iterations);

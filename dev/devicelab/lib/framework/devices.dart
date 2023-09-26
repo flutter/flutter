@@ -8,7 +8,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
-import 'package:retry/retry.dart';
 
 import 'utils.dart';
 
@@ -118,9 +117,6 @@ abstract class DeviceDiscovery {
 
   /// Prepares the system to run tasks.
   Future<void> performPreflightTasks();
-
-  /// Waits for the device to come to a ready state.
-  Future<void> deviceReady(String deviceId);
 }
 
 /// A proxy for one specific device.
@@ -196,6 +192,8 @@ abstract class Device {
 
   /// Stop a process.
   Future<void> stop(String packageName);
+
+  Future<void> awaitDevice();
 
   @override
   String toString() {
@@ -396,28 +394,28 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // a better method, but so far that's the best one I've found.
     await exec(adbPath, <String>['kill-server']);
   }
-  
-  @override
-  Future<void> deviceReady(String deviceId, {RetryOptions retryOptions = const RetryOptions(
-    maxAttempts: 5,
-    delayFactor: Duration(seconds: 15),
-    maxDelay: Duration(seconds: 15),
-  ), }) async {
-    int count = 0;
-    // Wait for the device through adb
-    await retryOptions.retry(
-      () async {
-        print('Attempt ${count++}');
-        final String? state = await getDeviceState(deviceId: deviceId);
-        print('Found state: $state');
-        if (state != 'device') {
-          throw DeviceException('Device not ready, current state = $state');
-        } else {
-          print('Found device $deviceId ready.');
-        }
-      },
-      retryIf: (Exception e) => e is TimeoutException || e is FormatException || e is DeviceException);
-  }
+
+  // @override
+  // Future<void> deviceReady(String deviceId, {RetryOptions retryOptions = const RetryOptions(
+  //   maxAttempts: 5,
+  //   delayFactor: Duration(seconds: 15),
+  //   maxDelay: Duration(seconds: 15),
+  // ), }) async {
+  //   int count = 0;
+  //   // Wait for the device through adb
+  //   await retryOptions.retry(
+  //     () async {
+  //       print('Attempt ${count++}');
+  //       final String? state = await getDeviceState(deviceId: deviceId);
+  //       print('Found state: $state');
+  //       if (state != 'device') {
+  //         throw DeviceException('Device not ready, current state = $state');
+  //       } else {
+  //         print('Found device $deviceId ready.');
+  //       }
+  //     },
+  //     retryIf: (Exception e) => e is TimeoutException || e is FormatException || e is DeviceException);
+  // }
 }
 
 class LinuxDeviceDiscovery implements DeviceDiscovery {
@@ -452,9 +450,6 @@ class LinuxDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
-  
-  @override
-  Future<void> deviceReady(String deviceId) async { }
 }
 
 class MacosDeviceDiscovery implements DeviceDiscovery {
@@ -489,9 +484,6 @@ class MacosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
-
-  @override
-  Future<void> deviceReady(String deviceId) async { }
 }
 
 class WindowsDeviceDiscovery implements DeviceDiscovery {
@@ -526,9 +518,6 @@ class WindowsDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
-
-  @override
-  Future<void> deviceReady(String deviceId) async { }
 }
 
 class FuchsiaDeviceDiscovery implements DeviceDiscovery {
@@ -635,9 +624,6 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> performPreflightTasks() async {}
-
-  @override
-  Future<void> deviceReady(String deviceId) async { }
 }
 
 class AndroidDevice extends Device {
@@ -921,6 +907,19 @@ class AndroidDevice extends Device {
   Future<void> reboot() {
     return adb(<String>['reboot']);
   }
+
+  @override
+  Future<void> awaitDevice() async {
+    Process? process;
+    print('Waiting for device.');
+    process = await startProcess(
+      adbPath,
+      // change this to a for loop that will not run forever after testing.
+      <String>['-s', deviceId, 'wait-for-device', 'shell', '\'while [[ -z \$(getprop sys.boot_completed) ]]; do echo "waiting for device"; sleep 1; done; echo "done"\''],
+    );
+    print('exit code ${await process.exitCode}');
+    print('Done waiting for device.');
+  }
 }
 
 class IosDeviceDiscovery implements DeviceDiscovery {
@@ -1039,8 +1038,8 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     // Currently we do not have preflight tasks for iOS.
   }
 
-  @override
-  Future<void> deviceReady(String deviceId) async { }
+  // @override
+  // Future<void> deviceReady(String deviceId) async {}
 }
 
 /// iOS device.
@@ -1157,6 +1156,9 @@ class IosDevice extends Device {
   Future<void> reboot() {
     return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class LinuxDevice extends Device {
@@ -1209,6 +1211,9 @@ class LinuxDevice extends Device {
 
   @override
   Future<void> wakeUp() async { }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class MacosDevice extends Device {
@@ -1261,6 +1266,9 @@ class MacosDevice extends Device {
 
   @override
   Future<void> wakeUp() async { }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class WindowsDevice extends Device {
@@ -1313,6 +1321,9 @@ class WindowsDevice extends Device {
 
   @override
   Future<void> wakeUp() async { }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 /// Fuchsia device.
@@ -1367,6 +1378,9 @@ class FuchsiaDevice extends Device {
   Future<void> reboot() async {
     // Unsupported.
   }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 /// Path to the `adb` executable.
@@ -1442,6 +1456,9 @@ class FakeDevice extends Device {
   Future<void> reboot() async {
     // Unsupported.
   }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class FakeDeviceDiscovery implements DeviceDiscovery {
@@ -1505,7 +1522,4 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> performPreflightTasks() async { }
-
-  @override
-  Future<void> deviceReady(String deviceId) async { }
 }
