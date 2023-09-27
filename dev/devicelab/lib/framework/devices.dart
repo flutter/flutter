@@ -911,7 +911,11 @@ class AndroidDevice extends Device {
   @override
   Future<void> awaitDevice() async {
     print('Waiting for device.');
-    final String adbOut = await adb(<String>['wait-for-device', 'shell', '\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\'']);
+    // Maybe need to run two different commands.
+    // shellExec(command, arguments)
+    final String waitOut = await adb(<String>['wait-for-device']);
+    print(waitOut);
+    final String adbOut = await shellEval('\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\'', <String>[]);
     print(adbOut);
     print('Done waiting for device.');
   }
