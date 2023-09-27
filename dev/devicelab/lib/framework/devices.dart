@@ -913,7 +913,7 @@ class AndroidDevice extends Device {
 
     print('Waiting for device.');
 
-    final String adbOut = await adb(<String>['wait-for-device', 'shell', '\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\'']);
+    final int adbOut = await exec(adbPath, <String>['wait-for-device', 'shell', '\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\'']);
     print(adbOut);
     // process = await startProcess(
     //   adbPath,
