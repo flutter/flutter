@@ -1287,6 +1287,13 @@ TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
   std::unique_ptr<MockAngleSurfaceManager> surface_manager =
       std::make_unique<MockAngleSurfaceManager>();
 
+  EXPECT_CALL(*engine.get(), PostRasterThreadTask)
+      .Times(2)
+      .WillRepeatedly([](fml::closure callback) {
+        callback();
+        return true;
+      });
+
   EXPECT_CALL(*window_binding_handler.get(), NeedsVSync)
       .WillOnce(Return(true))
       .WillOnce(Return(false));
