@@ -441,9 +441,9 @@ class SizeTransition extends AnimatedWidget {
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
-    this.crossAxisSizeFactor,
+    this.fixedCrossAxisSizeFactor,
     this.child,
-  }) : assert(crossAxisSizeFactor == null || crossAxisSizeFactor >= 0.0),
+  }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
     super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
@@ -475,12 +475,12 @@ class SizeTransition extends AnimatedWidget {
 
   /// The factor to multiply the cross axis size of the child by.
   ///
-  /// If the value of [crossAxisSizeFactor] is less than one, the child will be
+  /// If the value of [fixedCrossAxisSizeFactor] is less than one, the child will be
   /// clipped in the appropriate axis.
   ///
   /// If `null` (the default), the cross axis size is as large as the
   /// parent.
-  final double? crossAxisSizeFactor;
+  final double? fixedCrossAxisSizeFactor;
 
   /// The widget below this widget in the tree.
   ///
@@ -498,8 +498,8 @@ class SizeTransition extends AnimatedWidget {
     return ClipRect(
       child: Align(
         alignment: alignment,
-        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : crossAxisSizeFactor,
-        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : crossAxisSizeFactor,
+        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
+        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
         child: child,
       ),
     );

@@ -244,7 +244,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         sizeFactor: animation,
-        crossAxisSizeFactor: 2.0,
+        fixedCrossAxisSizeFactor: 2.0,
         child: const Text('Ready'),
       ),
     );
@@ -280,7 +280,7 @@ void main() {
       child: SizeTransition(
         axis: Axis.horizontal,
         sizeFactor: animation,
-        crossAxisSizeFactor: 1.0,
+        fixedCrossAxisSizeFactor: 1.0,
         child: const Text('Ready'),
       ),
     );
@@ -320,7 +320,7 @@ void main() {
           key: key,
           child: SizeTransition(
             sizeFactor: animation,
-            crossAxisSizeFactor: 1.0,
+            fixedCrossAxisSizeFactor: 1.0,
             child: const SizedBox.square(dimension: 100),
           ),
         ),
@@ -379,7 +379,7 @@ void main() {
           child: SizeTransition(
             axis: Axis.horizontal,
             sizeFactor: animation,
-            crossAxisSizeFactor: 1.0,
+            fixedCrossAxisSizeFactor: 1.0,
             child: const SizedBox.square(dimension: 100),
           ),
         ),
