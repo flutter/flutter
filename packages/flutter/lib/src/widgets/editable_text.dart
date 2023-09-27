@@ -811,7 +811,7 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
-    this.canTapOutsideFocus = true,
+    this.onTapOutsideRequiresFocus = false,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -1402,8 +1402,9 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.editableText.onTapOutside}
   /// Called for each tap that occurs outside of the [TextFieldTapRegion] group
-  /// when [canTapOutsideFocus] is set to true.
-  /// When [canTapOutsideFocus] is set to false, this method will be called only
+  /// when [onTapOutsideRequiresFocus] is set to false.
+  ///
+  /// When [onTapOutsideRequiresFocus] is set to true, this method will be called only
   /// when the text field is focused.
   ///
   /// If this is null, [FocusNode.unfocus] will be called on the [focusNode] for
@@ -1848,12 +1849,12 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
-  /// {@template flutter.widgets.editableText.canTapOutsideFocus}
+  /// {@template flutter.widgets.editableText.onTapOutsideRequiresFocus}
   /// Determine whether [onTapOutside] is called when this widget is not focused.
   ///
-  /// Defaults to true.
+  /// Defaults to false.
   /// {@endtemplate}
-  final bool canTapOutsideFocus;
+  final bool onTapOutsideRequiresFocus;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -4781,7 +4782,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
-        onTapOutside: _hasFocus || widget.canTapOutsideFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
+        onTapOutside: _hasFocus || !widget.onTapOutsideRequiresFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(
           cursor: widget.mouseCursor ?? SystemMouseCursors.text,

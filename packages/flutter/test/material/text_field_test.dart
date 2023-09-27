@@ -16893,7 +16893,7 @@ void main() {
                 TextField(
                   autofocus: true,
                   focusNode: focusNodeA,
-                  canTapOutsideFocus: false,
+                  onTapOutsideRequiresFocus: true,
                   onTapOutside: (PointerDownEvent event) {
                     timesTriggered += 1;
                   },
@@ -16922,7 +16922,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(timesTriggered, 0);
-    }, variant: TargetPlatformVariant.all());
+
+      focusNodeA..requestFocus();
+      await tester.pump();
+
+      await click(find.text('Outside'));
+      await tester.pumpAndSettle();
+          
+      expect(timesTriggered, 1);
+      }, variant: TargetPlatformVariant.all());
     }}
   });
 

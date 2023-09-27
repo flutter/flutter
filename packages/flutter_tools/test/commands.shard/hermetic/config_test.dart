@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -48,6 +49,23 @@ void main() {
   }
 
   group('config', () {
+    testUsingContext('prints all settings with --list', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      await commandRunner.run(<String>['config', '--list']);
+      expect(
+        testLogger.statusText,
+        'All Settings:\n'
+        '${allFeatures
+            .where((Feature e) => e.configSetting != null)
+            .map((Feature e) => '  ${e.configSetting}: (Not set)')
+            .join('\n')}'
+        '\n\n',
+      );
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
     testUsingContext('throws error on excess arguments', () {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
@@ -196,6 +214,7 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--list'
       ]);
 
       expect(
@@ -270,19 +289,20 @@ void main() {
       Usage: () => testUsage,
     });
 
-    testUsingContext('analytics reported disabled when suppressed', () async {
+    testUsingContext('analytics reported with help usages', () async {
       final ConfigCommand configCommand = ConfigCommand();
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      createTestCommandRunner(configCommand);
 
       testUsage.suppressAnalytics = true;
-
-      await commandRunner.run(<String>[
-        'config',
-      ]);
-
       expect(
-        testLogger.statusText,
+        configCommand.usage,
         containsIgnoringWhitespace('Analytics reporting is currently disabled'),
+      );
+
+      testUsage.suppressAnalytics = false;
+      expect(
+        configCommand.usage,
+        containsIgnoringWhitespace('Analytics reporting is currently enabled'),
       );
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,

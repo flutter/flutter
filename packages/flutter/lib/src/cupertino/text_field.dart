@@ -285,7 +285,7 @@ class CupertinoTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-    this.canTapOutsideFocus = true,
+    this.onTapOutsideRequiresFocus = false,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -412,7 +412,7 @@ class CupertinoTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-    this.canTapOutsideFocus = true,
+    this.onTapOutsideRequiresFocus = false,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -815,8 +815,8 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
-  /// {@macro flutter.widgets.editableText.canTapOutsideFocus}
-  final bool canTapOutsideFocus;
+  /// {@macro flutter.widgets.editableText.onTapOutsideRequiresFocus}
+  final bool onTapOutsideRequiresFocus;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
