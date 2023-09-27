@@ -44,10 +44,18 @@ class Tessellator {
 
   ~Tessellator();
 
+  /// @brief An arbitrary value to determine when a multi-contour non-zero fill
+  /// path should be split into multiple tessellations.
+  static constexpr size_t kMultiContourThreshold = 30u;
+
+  /// @brief A callback that returns the results of the tessellation.
+  ///
+  ///        The index buffer may not be populated, in which case [indices] will
+  ///        be nullptr and indices_count will be 0.
   using BuilderCallback = std::function<bool(const float* vertices,
-                                             size_t vertices_size,
+                                             size_t vertices_count,
                                              const uint16_t* indices,
-                                             size_t indices_size)>;
+                                             size_t indices_count)>;
 
   //----------------------------------------------------------------------------
   /// @brief      Generates filled triangles from the polyline. A callback is

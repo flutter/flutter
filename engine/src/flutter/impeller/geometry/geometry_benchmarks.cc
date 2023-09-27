@@ -35,8 +35,8 @@ static void BM_Polyline(benchmark::State& state, Args&&... args) {
     if (tessellate) {
       tess.Tessellate(
           FillType::kNonZero, polyline,
-          [](const float* vertices, size_t vertices_size,
-             const uint16_t* indices, size_t indices_size) { return true; });
+          [](const float* vertices, size_t vertices_count,
+             const uint16_t* indices, size_t indices_count) { return true; });
     }
   }
   state.counters["SinglePointCount"] = single_point_count;
