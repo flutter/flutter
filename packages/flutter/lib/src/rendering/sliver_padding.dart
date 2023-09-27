@@ -18,7 +18,7 @@ import 'sliver.dart';
 ///
 /// {@template flutter.rendering.RenderSliverEdgeInsetsPadding}
 /// Applying padding in the main extent of the viewport to slivers that have scroll effects is likely to have
-/// undesired effects. For example, For example, wrapping a [SliverPersistentHeader] with
+/// undesired effects. For example, wrapping a [SliverPersistentHeader] with
 /// `pinned:true` will cause only the appbar to stay pinned while the padding will scroll away.
 /// {@endtemplate}
 abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
