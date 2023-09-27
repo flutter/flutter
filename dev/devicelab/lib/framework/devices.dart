@@ -910,27 +910,9 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> awaitDevice() async {
-
     print('Waiting for device.');
-
-    final int adbOut = await exec(adbPath, <String>['wait-for-device', 'shell', '\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\'']);
+    final String adbOut = await adb(<String>['wait-for-device', 'shell', '\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\'']);
     print(adbOut);
-    // process = await startProcess(
-    //   adbPath,
-    //   // change this to a for loop that will not run forever after testing.
-    //   <String>['-s', deviceId, 'wait-for-device', 'shell', '\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\''],
-    // );
-    // print('Process exit code: ${await process.exitCode}');
-    // process.stderr.transform<String>(utf8.decoder)
-    //       .transform<String>(const LineSplitter())
-    //       .listen((String line) {
-    //         print('Device wait stderr: $line');
-    //       },);
-    // process.stdout.transform<String>(utf8.decoder)
-    //       .transform<String>(const LineSplitter())
-    //       .listen((String line) {
-    //         print('Device wait stdout: $line');
-    //       },);
     print('Done waiting for device.');
   }
 }
