@@ -307,7 +307,7 @@ void main() {
     expect(actualPositionedBox.heightFactor, 1.0);
   });
 
-  testWidgetsWithLeakTracking('SizeTransition with crossAxisSizeFactor should size its cross axis from its children - vertical axis', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
 
@@ -338,7 +338,7 @@ void main() {
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 0.0);
     expect(actualPositionedBox.widthFactor, 1.0);
-    expect(tester.getSize(find.byKey(key)), const Size(100,  0));
+    expect(tester.getSize(find.byKey(key)), const Size(100, 0));
 
     controller.value = 0.5;
     await tester.pump();
@@ -362,10 +362,10 @@ void main() {
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 0.0);
     expect(actualPositionedBox.widthFactor, 1.0);
-    expect(tester.getSize(find.byKey(key)), const Size(100,  0));
+    expect(tester.getSize(find.byKey(key)), const Size(100, 0));
   });
 
-  testWidgetsWithLeakTracking('SizeTransition with crossAxisSizeFactor should size its cross axis from its children - horizontal axis', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
 
@@ -421,7 +421,7 @@ void main() {
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 1.0);
     expect(actualPositionedBox.widthFactor, 0.0);
-    expect(tester.getSize(find.byKey(key)), const Size(0,  100));
+    expect(tester.getSize(find.byKey(key)), const Size(0, 100));
   });
 
   testWidgetsWithLeakTracking('MatrixTransition animates', (WidgetTester tester) async {
