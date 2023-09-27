@@ -1675,6 +1675,7 @@ targets:
       task_name: android_view_scroll_perf__timeline_summary
 
   - name: Linux_android animated_image_gc_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135560
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
