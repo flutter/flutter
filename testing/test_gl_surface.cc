@@ -20,6 +20,7 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "third_party/skia/include/gpu/gl/GrGLAssembleInterface.h"
 #include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
@@ -336,7 +337,7 @@ sk_sp<GrDirectContext> TestGLSurface::CreateGrContext() {
     return nullptr;
   }
 
-  context_ = GrDirectContext::MakeGL(interface);
+  context_ = GrDirectContexts::MakeGL(interface);
   return context_;
 }
 
