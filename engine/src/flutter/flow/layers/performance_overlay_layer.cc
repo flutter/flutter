@@ -57,10 +57,10 @@ void VisualizeStopWatch(DlCanvas* canvas,
     if (impeller_enabled) {
       canvas->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(text),
                             x + label_x, y + height + label_y, paint);
+      return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
     canvas->DrawTextBlob(text, x + label_x, y + height + label_y, paint);
-    return;
   }
 }
 
