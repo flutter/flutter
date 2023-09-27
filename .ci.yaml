@@ -2150,6 +2150,7 @@ targets:
       task_name: flutter_test_performance
 
   - name: Linux_android flutter_view__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135575
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
