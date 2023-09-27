@@ -58,8 +58,8 @@ const String packageName = 'package_with_native_assets';
 const String exampleAppName = '${packageName}_example';
 
 void main() {
-  if (!platform.isMacOS && !platform.isLinux) {
-    // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
+  if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
+    // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
   }
 
@@ -146,9 +146,10 @@ void main() {
 
           if (device == 'macos') {
             expectDylibIsBundledMacOS(exampleDirectory, buildMode);
-          }
-          if (device == 'linux') {
+          } else if (device == 'linux') {
             expectDylibIsBundledLinux(exampleDirectory, buildMode);
+          } else if (device == 'windows') {
+            expectDylibIsBundledWindows(exampleDirectory, buildMode);
           }
           if (device == hostOs) {
             expectCCompilerIsConfigured(exampleDirectory);
@@ -205,6 +206,8 @@ void main() {
             expectDylibIsBundledIos(exampleDirectory, buildMode);
           } else if (buildSubcommand == 'linux') {
             expectDylibIsBundledLinux(exampleDirectory, buildMode);
+          } else if (buildSubcommand == 'windows') {
+            expectDylibIsBundledWindows(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
@@ -239,11 +242,15 @@ void main() {
             'build',
             buildSubcommand,
             if (buildSubcommand == 'ios') '--no-codesign',
+            if (buildSubcommand == 'windows') '-v' // Requires verbose mode for error.
           ],
           workingDirectory: exampleDirectory.path,
         );
         expect(result.exitCode, isNot(0));
-        expect(result.stderr, contains('link mode set to static, but this is not yet supported'));
+        expect(
+          (result.stdout as String) + (result.stderr as String),
+          contains('link mode set to static, but this is not yet supported'),
+        );
       });
     });
   }
@@ -301,11 +308,33 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
   // Linux does not support cross compilation, so always only check current architecture.
   final String architecture = Architecture.current.dartPlatform;
-  final Directory appBundle = appDirectory.childDirectory('build/$hostOs/$architecture/$buildMode/bundle/');
+  final Directory appBundle = appDirectory
+      .childDirectory('build')
+      .childDirectory(hostOs)
+      .childDirectory(architecture)
+      .childDirectory(buildMode)
+      .childDirectory('bundle');
   expect(appBundle, exists);
-  final Directory dylibsFolder = appBundle.childDirectory('lib/');
+  final Directory dylibsFolder = appBundle.childDirectory('lib');
   expect(dylibsFolder, exists);
   final File dylib = dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
+  expect(dylib, exists);
+}
+
+/// Checks that dylibs are bundled.
+///
+/// Sample path: build\windows\x64\runner\Debug\my_package_example.exe
+void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
+  // Linux does not support cross compilation, so always only check current architecture.
+  final String architecture = Architecture.current.dartPlatform;
+  final Directory appBundle = appDirectory
+      .childDirectory('build')
+      .childDirectory(hostOs)
+      .childDirectory(architecture)
+      .childDirectory('runner')
+      .childDirectory(buildMode.upperCaseFirst());
+  expect(appBundle, exists);
+  final File dylib = appBundle.childFile(OS.windows.dylibFileName(packageName));
   expect(dylib, exists);
 }
 

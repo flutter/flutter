@@ -20,6 +20,7 @@ import '../linux/native_assets.dart';
 import '../macos/native_assets.dart';
 import '../native_assets.dart';
 import '../project.dart';
+import '../windows/native_assets.dart';
 import 'test_time_recorder.dart';
 
 /// A request to the [TestCompiler] for recompilation.
@@ -189,6 +190,14 @@ class TestCompiler {
           );
         } else if (globals.platform.isLinux) {
           (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+            buildMode: buildInfo.mode,
+            projectUri: projectUri,
+            flutterTester: true,
+            fileSystem: globals.fs,
+            buildRunner: buildRunner,
+          );
+        } else if (globals.platform.isWindows) {
+          (nativeAssetsYaml, _) = await buildNativeAssetsWindows(
             buildMode: buildInfo.mode,
             projectUri: projectUri,
             flutterTester: true,

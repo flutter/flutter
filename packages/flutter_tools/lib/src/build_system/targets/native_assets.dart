@@ -16,6 +16,7 @@ import '../../linux/native_assets.dart';
 import '../../macos/native_assets.dart';
 import '../../macos/xcode.dart';
 import '../../native_assets.dart';
+import '../../windows/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -134,6 +135,20 @@ class NativeAssets extends Target {
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
+      case TargetPlatform.windows_x64:
+        final String? environmentBuildMode = environment.defines[kBuildMode];
+        if (environmentBuildMode == null) {
+          throw MissingDefineException(kBuildMode, name);
+        }
+        final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        (_, dependencies) = await buildNativeAssetsWindows(
+          targetPlatform: targetPlatform,
+          buildMode: buildMode,
+          projectUri: projectUri,
+          yamlParentDirectory: environment.buildDir.uri,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
       case TargetPlatform.tester:
         if (const LocalPlatform().isMacOS) {
           (_, dependencies) = await buildNativeAssetsMacOS(
@@ -147,6 +162,15 @@ class NativeAssets extends Target {
           );
         } else if (const LocalPlatform().isLinux) {
           (_, dependencies) = await buildNativeAssetsLinux(
+            buildMode: BuildMode.debug,
+            projectUri: projectUri,
+            yamlParentDirectory: environment.buildDir.uri,
+            fileSystem: fileSystem,
+            buildRunner: buildRunner,
+            flutterTester: true,
+          );
+        } else if (const LocalPlatform().isWindows) {
+          (_, dependencies) = await buildNativeAssetsWindows(
             buildMode: BuildMode.debug,
             projectUri: projectUri,
             yamlParentDirectory: environment.buildDir.uri,
@@ -168,7 +192,6 @@ class NativeAssets extends Target {
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
         // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
         // Write the file we claim to have in the [outputs].
         await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);

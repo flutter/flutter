@@ -11,12 +11,16 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 
 const String programFilesPath = r'C:\Program Files (x86)';
 const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
 const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 const String vswherePath = programFilesPath + r'\Microsoft Visual Studio\Installer\vswhere.exe';
+const String clPath = visualStudioPath + r'\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64\cl.exe';
+const String libPath = visualStudioPath + r'\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64\lib.exe';
+const String linkPath = visualStudioPath + r'\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64\link.exe';
+const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -140,6 +144,7 @@ void setMockVswhereResponse(
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
+  fileSystem.file(clPath).createSync(recursive: true);
   final String finalResponse = responseOverride
     ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '[]');
   final List<String> requirementArguments = requiredComponents == null
@@ -300,11 +305,11 @@ void setMockSdkRegResponse(
   const String registryKey = r'InstallationFolder';
   const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
   final String stdout = registryPresent
-    ? '''
+      ? '''
 $registryPath
     $registryKey    REG_SZ    $installationPath
 '''
-    : '''
+      : '''
 
 ERROR: The system was unable to find the specified registry key or value.
 ''';
@@ -776,6 +781,10 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
     });
 
     testWithoutContext('Everything returns good values when Build Tools is present with all components', () {
@@ -814,6 +823,10 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 17 2022'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
     });
 
     testWithoutContext('Metadata is for compatible version when latest is missing components', () {
@@ -905,8 +918,7 @@ void main() {
     });
 
     testWithoutContext('Ignores unicode replacement char in unused properties', () {
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['unused'] = 'Bad UTF8 \u{FFFD}';
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['unused'] = 'Bad UTF8 \u{FFFD}';
 
       setMockCompatibleVisualStudioInstallation(
         response,
@@ -919,6 +931,10 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
     });
 
     testWithoutContext('Throws ToolExit on bad UTF-8 in installationPath', () {
@@ -953,13 +969,16 @@ void main() {
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
       expect(visualStudio.displayName, equals('\u{FFFD}'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
     });
 
     testWithoutContext("Ignores bad UTF-8 in catalog's productDisplayVersion", () {
       final Map<String, dynamic> catalog = Map<String, dynamic>.of(_defaultResponse['catalog'] as Map<String, dynamic>)
         ..['productDisplayVersion'] = '\u{FFFD}';
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
-        ..['catalog'] = catalog;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['catalog'] = catalog;
 
       setMockCompatibleVisualStudioInstallation(response, fixture.fileSystem, fixture.processManager);
 
@@ -969,6 +988,10 @@ void main() {
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
       expect(visualStudio.displayVersion, equals('\u{FFFD}'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
     });
 
     testWithoutContext('Ignores malformed JSON in description property', () {
@@ -987,101 +1010,109 @@ void main() {
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
       expect(visualStudio.displayVersion, equals('16.2.5'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
 
       expect(fixture.logger.warningText, isEmpty);
     });
   });
 
   group(VswhereDetails, () {
-      test('Accepts empty JSON', () {
-        const bool meetsRequirements = true;
-        final Map<String, dynamic> json = <String, dynamic>{};
+    test('Accepts empty JSON', () {
+      const bool meetsRequirements = true;
+      final Map<String, dynamic> json = <String, dynamic>{};
+      const String msvcVersion = '';
 
-        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
-        expect(result.installationPath, null);
-        expect(result.displayName, null);
-        expect(result.fullVersion, null);
-        expect(result.isComplete, null);
-        expect(result.isLaunchable, null);
-        expect(result.isRebootRequired, null);
-        expect(result.isPrerelease, null);
-        expect(result.catalogDisplayVersion, null);
-        expect(result.isUsable, isTrue);
-      });
+      expect(result.installationPath, null);
+      expect(result.displayName, null);
+      expect(result.fullVersion, null);
+      expect(result.isComplete, null);
+      expect(result.isLaunchable, null);
+      expect(result.isRebootRequired, null);
+      expect(result.isPrerelease, null);
+      expect(result.catalogDisplayVersion, null);
+      expect(result.isUsable, isTrue);
+    });
 
-      test('Ignores unknown JSON properties', () {
-        const bool meetsRequirements = true;
-        final Map<String, dynamic> json = <String, dynamic>{
-          'hello': 'world',
-        };
+    test('Ignores unknown JSON properties', () {
+      const bool meetsRequirements = true;
+      final Map<String, dynamic> json = <String, dynamic>{
+        'hello': 'world',
+      };
+      const String msvcVersion = '';
 
-        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
-        expect(result.installationPath, null);
-        expect(result.displayName, null);
-        expect(result.fullVersion, null);
-        expect(result.isComplete, null);
-        expect(result.isLaunchable, null);
-        expect(result.isRebootRequired, null);
-        expect(result.isPrerelease, null);
-        expect(result.catalogDisplayVersion, null);
-        expect(result.isUsable, isTrue);
-      });
+      expect(result.installationPath, null);
+      expect(result.displayName, null);
+      expect(result.fullVersion, null);
+      expect(result.isComplete, null);
+      expect(result.isLaunchable, null);
+      expect(result.isRebootRequired, null);
+      expect(result.isPrerelease, null);
+      expect(result.catalogDisplayVersion, null);
+      expect(result.isUsable, isTrue);
+    });
 
-      test('Accepts JSON', () {
-        const bool meetsRequirements = true;
+    test('Accepts JSON', () {
+      const bool meetsRequirements = true;
+      const String msvcVersion = '';
 
-        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
+      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse, msvcVersion);
 
-        expect(result.installationPath, visualStudioPath);
-        expect(result.displayName, 'Visual Studio Community 2019');
-        expect(result.fullVersion, '16.2.29306.81');
-        expect(result.isComplete, true);
-        expect(result.isLaunchable, true);
-        expect(result.isRebootRequired, false);
-        expect(result.isPrerelease, false);
-        expect(result.catalogDisplayVersion, '16.2.5');
-        expect(result.isUsable, isTrue);
-      });
+      expect(result.installationPath, visualStudioPath);
+      expect(result.displayName, 'Visual Studio Community 2019');
+      expect(result.fullVersion, '16.2.29306.81');
+      expect(result.isComplete, true);
+      expect(result.isLaunchable, true);
+      expect(result.isRebootRequired, false);
+      expect(result.isPrerelease, false);
+      expect(result.catalogDisplayVersion, '16.2.5');
+      expect(result.isUsable, isTrue);
+    });
 
-      test('Installation that does not satisfy requirements is not usable', () {
-        const bool meetsRequirements = false;
+    test('Installation that does not satisfy requirements is not usable', () {
+      const bool meetsRequirements = false;
+      const String msvcVersion = '';
 
-        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse);
+      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, _defaultResponse, msvcVersion);
 
-        expect(result.isUsable, isFalse);
-      });
+      expect(result.isUsable, isFalse);
+    });
 
-      test('Incomplete installation is not usable', () {
-        const bool meetsRequirements = true;
-        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
-          ..['isComplete'] = false;
+    test('Incomplete installation is not usable', () {
+      const bool meetsRequirements = true;
+      final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)..['isComplete'] = false;
+      const String msvcVersion = '';
 
-        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
-        expect(result.isUsable, isFalse);
-      });
+      expect(result.isUsable, isFalse);
+    });
 
-      test('Unlaunchable installation is not usable', () {
-        const bool meetsRequirements = true;
-        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
-          ..['isLaunchable'] = false;
+    test('Unlaunchable installation is not usable', () {
+      const bool meetsRequirements = true;
+      final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)..['isLaunchable'] = false;
+      const String msvcVersion = '';
 
-        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
-        expect(result.isUsable, isFalse);
-      });
+      expect(result.isUsable, isFalse);
+    });
 
-      test('Installation that requires reboot is not usable', () {
-        const bool meetsRequirements = true;
-        final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)
-          ..['isRebootRequired'] = true;
+    test('Installation that requires reboot is not usable', () {
+      const bool meetsRequirements = true;
+      final Map<String, dynamic> json = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
+      const String msvcVersion = '';
 
-        final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json);
+      final VswhereDetails result = VswhereDetails.fromJson(meetsRequirements, json, msvcVersion);
 
-        expect(result.isUsable, isFalse);
-      });
+      expect(result.isUsable, isFalse);
+    });
   });
 }
 

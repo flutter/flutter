@@ -4,18 +4,17 @@
 
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 
-import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';
+import 'visual_studio.dart';
 
 /// Dry run the native builds.
 ///
 /// This does not build native assets, it only simulates what the final paths
 /// of all assets will be so that this can be embedded in the kernel file.
-Future<Uri?> dryRunNativeAssetsLinux({
+Future<Uri?> dryRunNativeAssetsWindows({
   required NativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   bool flutterTester = false,
@@ -26,11 +25,11 @@ Future<Uri?> dryRunNativeAssetsLinux({
     projectUri: projectUri,
     flutterTester: flutterTester,
     fileSystem: fileSystem,
-    os: OS.linux,
+    os: OS.windows,
   );
 }
 
-Future<Iterable<Asset>> dryRunNativeAssetsLinuxInternal(
+Future<Iterable<Asset>> dryRunNativeAssetsWindowsInternal(
   FileSystem fileSystem,
   Uri projectUri,
   bool flutterTester,
@@ -41,11 +40,12 @@ Future<Iterable<Asset>> dryRunNativeAssetsLinuxInternal(
     projectUri,
     flutterTester,
     buildRunner,
-    OS.linux,
+    OS.windows,
   );
 }
 
-Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsLinux({
+Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
+    buildNativeAssetsWindows({
   required NativeAssetsBuildRunner buildRunner,
   TargetPlatform? targetPlatform,
   required Uri projectUri,
@@ -65,34 +65,27 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsLinux({
   );
 }
 
-/// Flutter expects `clang++` to be on the path on Linux hosts.
-///
-/// Search for the accompanying `clang`, `ar`, and `ld`.
-Future<CCompilerConfig> cCompilerConfigLinux() async {
-  const String kClangPlusPlusBinary = 'clang++';
-  const String kClangBinary = 'clang';
-  const String kArBinary = 'llvm-ar';
-  const String kLdBinary = 'ld.lld';
 
-  final ProcessResult whichResult = await globals.processManager.run(<String>['which', kClangPlusPlusBinary]);
-  if (whichResult.exitCode != 0) {
-    throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
-  }
-  File clangPpFile = globals.fs.file((whichResult.stdout as String).trim());
-  clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
-
-  final Directory clangDir = clangPpFile.parent;
-  final Map<String, Uri> binaryPaths = <String, Uri>{};
-  for (final String binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
-    final File binaryFile = clangDir.childFile(binary);
-    if (!await binaryFile.exists()) {
-      throwToolExit("Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");
-    }
-    binaryPaths[binary] = binaryFile.uri;
-  }
-  return CCompilerConfig(
-    ar: binaryPaths[kArBinary],
-    cc: binaryPaths[kClangBinary],
-    ld: binaryPaths[kLdBinary],
+Future<CCompilerConfig> cCompilerConfigWindows() async {
+  final VisualStudio visualStudio = VisualStudio(
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    logger: globals.logger,
+    processManager: globals.processManager,
   );
+
+  return CCompilerConfig(
+    cc: _toOptionalFileUri(visualStudio.clPath),
+    ld: _toOptionalFileUri(visualStudio.linkPath),
+    ar: _toOptionalFileUri(visualStudio.libPath),
+    envScript: _toOptionalFileUri(visualStudio.vcvarsPath),
+    envScriptArgs: <String>[],
+  );
+}
+
+Uri? _toOptionalFileUri(String? string) {
+  if (string == null) {
+    return null;
+  }
+  return Uri.file(string);
 }

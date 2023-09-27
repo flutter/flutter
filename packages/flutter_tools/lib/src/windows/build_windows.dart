@@ -18,6 +18,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import '../migrations/cmake_native_assets_migration.dart';
 import 'migrations/build_architecture_migration.dart';
 import 'migrations/show_window_migration.dart';
 import 'migrations/version_migration.dart';
@@ -61,6 +62,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
+    CmakeNativeAssetsMigration(windowsProject, 'windows', globals.logger),
     VersionMigration(windowsProject, globals.logger),
     ShowWindowMigration(windowsProject, globals.logger),
     BuildArchitectureMigration(windowsProject, buildDirectory, globals.logger),
