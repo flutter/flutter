@@ -305,9 +305,8 @@ class FormState extends State<Form> {
   /// returns a [Map] which keys' are [Key]s of the descendant [FormField]s
   /// and values' are their corresponding validation results.
   ///
-  /// Note that any [FormField] that has not been asigned a key will be ignored in
-  /// the result. To get the absolute validation value of the Form, Consider using
-  /// [validate]
+  /// Any [FormField] that has not been asigned a key will be ignored in the result.
+  /// To get the absolute validation value of the Form, Consider using [validate]
   ///
   /// Common usage of this method is when you need draw the user's attention
   /// to the invalid field(s) using their widget key(s).
@@ -639,9 +638,9 @@ enum AutovalidateMode {
   onUserInteraction,
 }
 
-// Used to encapsultae `Form`'s validation state
-// Note that having all vlaues of `fieldsValidationStatus` as true
-// is not a guarantee of a valid form. Fields with no keys are skipped in this
+// Used to encapsultae `Form`'s validation state.
+// Having all vlaues of `fieldsValidationStatus` as true is not a guarantee
+// of a valid form. Fields with no keys are skipped in this
 // Map.
 // a Form with no validation erros is only represented by setting `isValid` to true.
 class _FormValidationStatus {
