@@ -245,9 +245,12 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
-    bringup: true
+    presubmit: false
     recipe: flutter/coverage
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
