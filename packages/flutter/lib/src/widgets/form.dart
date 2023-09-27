@@ -293,19 +293,46 @@ class FormState extends State<Form> {
   /// returns true if there are no errors.
   ///
   /// The form will rebuild to report the results.
+  /// See also: [validateGranually]
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate();
+    return _validate().isValid;
   }
 
-  bool _validate() {
+
+  /// Validates every [FormField]s that is a descendant of this [Form], and
+  /// returns a [Map] which keys' are [Key]s of the descendant [FormField]s
+  /// and values' are their corresponding validation results.
+  ///
+  /// Note that any [FormField] that has not been asigned a key will be ignored in
+  /// the result. To get the absolute validation value of the Form, Consider using
+  /// [validate]
+  ///
+  /// Common usage of this method is when you need draw the user's attention
+  /// to the invalid field(s) using their widget key(s).
+  ///
+  /// The form will rebuild to report the results.
+  Map<Key, bool> validateGranually() {
+    _hasInteractedByUser = true;
+    _forceRebuild();
+    return _validate().fieldsValidationStatus;
+  }
+
+  _FormValidationStatus _validate() {
+    final Map<Key, bool> fieldsValidationStatus = <Key, bool>{};
     bool hasError = false;
     String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
       errorMessage += field.errorText ?? '';
+      final Key? key = field.widget.key;
+      if (key != null) {
+        fieldsValidationStatus[key] = field.validate();
+      }
     }
+    final _FormValidationStatus formValidationStatus = _FormValidationStatus(
+        fieldsValidationStatus: fieldsValidationStatus, isValid: !hasError);
 
     if (errorMessage.isNotEmpty) {
       final TextDirection directionality = Directionality.of(context);
@@ -318,7 +345,7 @@ class FormState extends State<Form> {
         SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
       }
     }
-    return !hasError;
+    return formValidationStatus;
   }
 }
 
@@ -610,4 +637,20 @@ enum AutovalidateMode {
   /// Used to auto-validate [Form] and [FormField] only after each user
   /// interaction.
   onUserInteraction,
+}
+
+// Used to encapsultae `Form`'s validation state
+// Note that having all vlaues of `fieldsValidationStatus` as true
+// is not a guarantee of a valid form. Fields with no keys are skipped in this
+// Map.
+// a Form with no validation erros is only represented by setting `isValid` to true.
+class _FormValidationStatus {
+
+  _FormValidationStatus({
+    required this.fieldsValidationStatus,
+    required this.isValid,
+  });
+
+  final Map<Key, bool> fieldsValidationStatus;
+  final bool isValid;
 }
