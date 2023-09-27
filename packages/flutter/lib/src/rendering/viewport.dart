@@ -110,9 +110,10 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   ///
   /// The optional [Axis] is used by
   /// [RenderTwoDimensionalViewport.getOffsetToReveal] to
-  /// determine which [Axis] to compute an offset for. One dimensional
+  /// determine which of the two axes to compute an offset for. One dimensional
   /// subclasses like [RenderViewportBase] and [RenderListWheelViewport] will
-  /// ignore the `axis` value if provided, as there is only one in those cases.
+  /// assert in debug builds if the `axis` value is provided and does not match
+  /// the single [Axis] that viewport is configured for.
   ///
   /// See also:
   ///
@@ -820,8 +821,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Rect? rect,
     Axis? axis,
   }) {
-    // One dimensional viewport has only one axis, override if set.
-    axis = this.axis;
+    // One dimensional viewport has only one axis, it should match if it has
+    // been provided.
+    axis ??= this.axis;
+    assert(axis == this.axis);
+
     // Steps to convert `rect` (from a RenderBox coordinate system) to its
     // scroll offset within this viewport (not in the exact order):
     //

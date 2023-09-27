@@ -1127,6 +1127,9 @@ class RenderListWheelViewport
     Rect? rect,
     Axis? axis,
   }) {
+    // One dimensional viewport has only one axis, it should match if it has
+    // been provided.
+    assert(axis == null || axis == Axis.vertical);
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.

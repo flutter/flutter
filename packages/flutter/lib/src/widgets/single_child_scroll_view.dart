@@ -598,8 +598,11 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     Rect? rect,
     Axis? axis,
   }) {
-    // One dimensional viewport has only one axis, override if set.
-    axis = this.axis;
+    // One dimensional viewport has only one axis, it should match if it has
+    // been provided.
+    axis ??= this.axis;
+    assert(axis == this.axis);
+
     rect ??= target.paintBounds;
     if (target is! RenderBox) {
       return RevealedOffset(offset: offset.pixels, rect: rect);

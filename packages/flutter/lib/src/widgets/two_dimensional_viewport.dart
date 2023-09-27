@@ -928,9 +928,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // refers to only one of two scroll positions.
     assert(axis != null);
 
-    late final double offset;
-    late final AxisDirection axisDirection;
-    (offset, axisDirection) = switch (axis!) {
+    final (double offset, AxisDirection axisDirection) = switch (axis!) {
       Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
       Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection),
     };
