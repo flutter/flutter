@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -27,7 +28,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
-import '../../commands.shard/hermetic/run_test.dart' show TestDeviceManager, TestRunCommandThatOnlyValidates;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -705,13 +705,13 @@ void main() {
     });
 
     group('--flavor', () {
-      late TestDeviceManager testDeviceManager;
+      late _TestDeviceManager testDeviceManager;
       late Logger logger;
       late FileSystem fileSystem;
 
       setUp(() {
         logger = BufferLogger.test();
-        testDeviceManager = TestDeviceManager(logger: logger);
+        testDeviceManager = _TestDeviceManager(logger: logger);
         fileSystem = MemoryFileSystem.test();
       });
 
@@ -722,7 +722,7 @@ void main() {
 
         final FakeDevice device = FakeDevice('name', 'id');
         testDeviceManager.devices = <Device>[device];
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+        final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);
 
         expect(runner.run(<String>['run', '--no-pub', '--no-hot', '--flavor=strawberry']),
@@ -748,7 +748,7 @@ void main() {
 
         final FakeDevice device = FakeDevice('name', 'id');
         testDeviceManager.devices = <Device>[device];
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+        final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);
 
         expect(runner.run(<String>['run', '--dart-define=FLUTTER_APP_FLAVOR=strawberry', '--no-pub', '--no-hot', '--flavor=strawberry']),
@@ -916,4 +916,23 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
+}
+
+class _TestDeviceManager extends DeviceManager {
+  _TestDeviceManager({required super.logger});
+  List<Device> devices = <Device>[];
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
+  }
+}
+
+class _TestRunCommandThatOnlyValidates extends RunCommand {
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
 }
