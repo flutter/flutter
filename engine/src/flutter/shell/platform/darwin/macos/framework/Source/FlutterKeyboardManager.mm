@@ -337,10 +337,9 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
 
 - (void)syncModifiersIfNeeded:(NSEventModifierFlags)modifierFlags
                     timestamp:(NSTimeInterval)timestamp {
-  // The embedder responder is the first element in _primaryResponders.
-  FlutterEmbedderKeyResponder* embedderResponder =
-      (FlutterEmbedderKeyResponder*)_primaryResponders[0];
-  [embedderResponder syncModifiersIfNeeded:modifierFlags timestamp:timestamp];
+  for (id<FlutterKeyPrimaryResponder> responder in _primaryResponders) {
+    [responder syncModifiersIfNeeded:modifierFlags timestamp:timestamp];
+  }
 }
 
 /**

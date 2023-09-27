@@ -957,13 +957,17 @@ static void SwizzledNoop(id self, SEL _cmd) {}
 
 - (bool)testModifierKeysAreSynthesizedOnMouseMove {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
   // Need to return a real renderer to allow view controller to load.
   FlutterRenderer* renderer_ = [[FlutterRenderer alloc] initWithFlutterEngine:engineMock];
   OCMStub([engineMock renderer]).andReturn(renderer_);
 
   // Capture calls to sendKeyEvent
-  __block NSMutableArray<KeyEventWrapper*>* events =
-      [[NSMutableArray<KeyEventWrapper*> alloc] init];
+  __block NSMutableArray<KeyEventWrapper*>* events = [NSMutableArray array];
   OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
                                                   callback:nil
                                                   userData:nil])
@@ -971,6 +975,17 @@ static void SwizzledNoop(id self, SEL _cmd) {}
         FlutterKeyEvent* event;
         [invocation getArgument:&event atIndex:2];
         [events addObject:[[KeyEventWrapper alloc] initWithEvent:event]];
+      }));
+
+  __block NSMutableArray<NSDictionary*>* channelEvents = [NSMutableArray array];
+  OCMStub([binaryMessengerMock sendOnChannel:@"flutter/keyevent"
+                                     message:[OCMArg any]
+                                 binaryReply:[OCMArg any]])
+      .andDo((^(NSInvocation* invocation) {
+        NSData* data;
+        [invocation getArgument:&data atIndex:3];
+        id event = [[FlutterJSONMessageCodec sharedInstance] decode:data];
+        [channelEvents addObject:event];
       }));
 
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
@@ -987,12 +1002,27 @@ static void SwizzledNoop(id self, SEL _cmd) {}
   // For each modifier key, check that key events are synthesized.
   for (NSNumber* keyCode in flutter::keyCodeToModifierFlag) {
     FlutterKeyEvent* event;
+    NSDictionary* channelEvent;
     NSNumber* logicalKey;
     NSNumber* physicalKey;
-    NSNumber* flag = flutter::keyCodeToModifierFlag[keyCode];
+    NSEventModifierFlags flag = [flutter::keyCodeToModifierFlag[keyCode] unsignedLongValue];
+
+    // Cocoa event always contain combined flags.
+    if (flag & (flutter::kModifierFlagShiftLeft | flutter::kModifierFlagShiftRight)) {
+      flag |= NSEventModifierFlagShift;
+    }
+    if (flag & (flutter::kModifierFlagControlLeft | flutter::kModifierFlagControlRight)) {
+      flag |= NSEventModifierFlagControl;
+    }
+    if (flag & (flutter::kModifierFlagAltLeft | flutter::kModifierFlagAltRight)) {
+      flag |= NSEventModifierFlagOption;
+    }
+    if (flag & (flutter::kModifierFlagMetaLeft | flutter::kModifierFlagMetaRight)) {
+      flag |= NSEventModifierFlagCommand;
+    }
 
     // Should synthesize down event.
-    NSEvent* mouseEvent = flutter::testing::CreateMouseEvent([flag unsignedLongValue]);
+    NSEvent* mouseEvent = flutter::testing::CreateMouseEvent(flag);
     [viewController mouseMoved:mouseEvent];
     EXPECT_EQ([events count], 1u);
     event = events[0].data;
@@ -1002,6 +1032,11 @@ static void SwizzledNoop(id self, SEL _cmd) {}
     EXPECT_EQ(event->logical, logicalKey.unsignedLongLongValue);
     EXPECT_EQ(event->physical, physicalKey.unsignedLongLongValue);
     EXPECT_EQ(event->synthesized, true);
+
+    channelEvent = channelEvents[0];
+    EXPECT_TRUE([channelEvent[@"type"] isEqual:@"keydown"]);
+    EXPECT_TRUE([channelEvent[@"keyCode"] isEqual:keyCode]);
+    EXPECT_TRUE([channelEvent[@"modifiers"] isEqual:@(flag)]);
 
     // Should synthesize up event.
     mouseEvent = flutter::testing::CreateMouseEvent(0x00);
@@ -1015,7 +1050,13 @@ static void SwizzledNoop(id self, SEL _cmd) {}
     EXPECT_EQ(event->physical, physicalKey.unsignedLongLongValue);
     EXPECT_EQ(event->synthesized, true);
 
+    channelEvent = channelEvents[1];
+    EXPECT_TRUE([channelEvent[@"type"] isEqual:@"keyup"]);
+    EXPECT_TRUE([channelEvent[@"keyCode"] isEqual:keyCode]);
+    EXPECT_TRUE([channelEvent[@"modifiers"] isEqual:@(0)]);
+
     [events removeAllObjects];
+    [channelEvents removeAllObjects];
   };
 
   return true;
