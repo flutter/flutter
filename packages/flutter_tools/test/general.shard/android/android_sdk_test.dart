@@ -342,6 +342,44 @@ void main() {
       Config: () => config,
     });
   });
+
+  for (final String operatingSystem in <String>['windows', 'linux', 'macos']) {
+    final FileSystem fileSystem;
+    final String extension;
+    if (operatingSystem == 'windows') {
+      fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      extension = '.exe';
+    } else {
+      fileSystem = MemoryFileSystem.test();
+      extension = '';
+    }
+    testUsingContext('ndk executables', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final Directory binDir = sdk.directory
+          .childDirectory('ndk')
+          .childDirectory('24.0.8215888')
+          .childDirectory('toolchains')
+          .childDirectory('llvm')
+          .childDirectory('prebuilt')
+          .childDirectory('darwin-x86_64')
+          .childDirectory('bin')
+        ..createSync(recursive: true);
+      final File clang = binDir.childFile('clang$extension')..createSync();
+      final File ar = binDir.childFile('llvm-ar$extension')..createSync();
+      final File ld = binDir.childFile('ld.lld$extension')..createSync();
+      expect(sdk.getNdkClangPath(), clang.path);
+      expect(sdk.getNdkArPath(), ar.path);
+      expect(sdk.getNdkLdPath(), ld.path);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: operatingSystem),
+      Config: () => config,
+    });
+  }
 }
 
 /// A broken SDK installation.

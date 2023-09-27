@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
 import 'package:package_config/package_config_types.dart';
 
+import '../../android/native_assets.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
@@ -189,6 +190,20 @@ class NativeAssets extends Target {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
       case TargetPlatform.android:
+        final String? androidArchsEnvironment =
+            environment.defines[kAndroidArchs];
+        final List<AndroidArch> androidArchs = _androidArchs(
+          targetPlatform,
+          androidArchsEnvironment,
+        );
+        (_, dependencies) = await buildNativeAssetsAndroid(
+          buildMode: BuildMode.debug,
+          projectUri: projectUri,
+          yamlParentDirectory: environment.buildDir.uri,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+          androidArchs: androidArchs,
+        );
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
@@ -217,6 +232,40 @@ class NativeAssets extends Target {
     }
     if (!await outputDepfile.exists()) {
       throwToolExit("${outputDepfile.path} doesn't exist.");
+    }
+  }
+
+  List<AndroidArch> _androidArchs(
+    TargetPlatform targetPlatform,
+    String? androidArchsEnvironment,
+  ) {
+    switch (targetPlatform) {
+      case TargetPlatform.android_arm:
+        return <AndroidArch>[AndroidArch.armeabi_v7a];
+      case TargetPlatform.android_arm64:
+        return <AndroidArch>[AndroidArch.arm64_v8a];
+      case TargetPlatform.android_x64:
+        return <AndroidArch>[AndroidArch.x86_64];
+      case TargetPlatform.android_x86:
+        return <AndroidArch>[AndroidArch.x86];
+      case TargetPlatform.android:
+        if (androidArchsEnvironment == null) {
+          throw MissingDefineException(kAndroidArchs, name);
+        }
+        return androidArchsEnvironment
+            .split(' ')
+            .map(getAndroidArchForName)
+            .toList();
+      case TargetPlatform.darwin:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_x64:
+        throwToolExit('Unsupported Android target platform: $targetPlatform.');
     }
   }
 

@@ -620,7 +620,7 @@ void main() {
     });
 
     testUsingContext('native assets run unsupported', () async {
-      final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.android_arm64);
+      final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.fuchsia_arm64);
       final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
       final List<FlutterDevice> devices = <FlutterDevice>[
         fakeFlutterDevice,
@@ -664,7 +664,7 @@ void main() {
         () => hotRunner.run(),
         throwsToolExit( message:
           'Package(s) bar require the native assets feature. '
-          'This feature has not yet been implemented for `TargetPlatform.android_arm64`. '
+          'This feature has not yet been implemented for `TargetPlatform.fuchsia_arm64`. '
           'For more info see https://github.com/flutter/flutter/issues/129757.',
         )
       );

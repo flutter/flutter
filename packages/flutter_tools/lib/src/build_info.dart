@@ -961,6 +961,11 @@ const String kIosArchs = 'IosArchs';
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';
 
+/// The define to control what Android architectures are built for.
+///
+/// This is expected to be a space-delimited list of architectures.
+const String kAndroidArchs = 'AndroidArchs';
+
 /// Path to the SDK root to be used as the isysroot.
 const String kSdkRoot = 'SdkRoot';
 

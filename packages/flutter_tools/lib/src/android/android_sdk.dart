@@ -320,6 +320,43 @@ class AndroidSdk {
 
   String? getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
+  String? getNdkCompilerPath(String binaryName) {
+    final Directory ndk = directory.childDirectory('ndk');
+    if (!ndk.existsSync()) {
+      return null;
+    }
+    final List<Directory> ndkVersions =
+        ndk.listSync().whereType<Directory>().toList()..reversed;
+    for (final Directory ndkVersion in ndkVersions) {
+      final Directory prebuilt = ndkVersion
+          .childDirectory('toolchains')
+          .childDirectory('llvm')
+          .childDirectory('prebuilt');
+      if (!prebuilt.existsSync()) {
+        continue;
+      }
+      final List<Directory> hostArchitectures =
+          prebuilt.listSync().whereType<Directory>().toList();
+      for (final Directory hostArchitecture in hostArchitectures) {
+        final File executable =
+            hostArchitecture.childDirectory('bin').childFile(binaryName);
+        if (executable.existsSync()) {
+          return executable.path;
+        }
+      }
+    }
+    return null;
+  }
+
+  String? getNdkClangPath() =>
+      getNdkCompilerPath(globals.platform.isWindows ? 'clang.exe' : 'clang');
+
+  String? getNdkArPath() => getNdkCompilerPath(
+      globals.platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar');
+
+  String? getNdkLdPath() =>
+      getNdkCompilerPath(globals.platform.isWindows ? 'ld.lld.exe' : 'ld.lld');
+
   /// Sets up various paths used internally.
   ///
   /// This method should be called in a case where the tooling may have updated

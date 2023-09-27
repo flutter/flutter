@@ -17,6 +17,8 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 
 import '../src/common.dart';
@@ -33,6 +35,7 @@ final List<String> devices = <String>[
 final List<String> buildSubcommands = <String>[
   hostOs,
   if (hostOs == 'macos') 'ios',
+  'apk',
 ];
 
 final List<String> add2appBuildSubcommands = <String>[
@@ -208,6 +211,8 @@ void main() {
             expectDylibIsBundledLinux(exampleDirectory, buildMode);
           } else if (buildSubcommand == 'windows') {
             expectDylibIsBundledWindows(exampleDirectory, buildMode);
+          } else if (buildSubcommand == 'apk') {
+            expectDylibIsBundledAndroid(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
@@ -246,11 +251,11 @@ void main() {
           ],
           workingDirectory: exampleDirectory.path,
         );
-        expect(result.exitCode, isNot(0));
         expect(
           (result.stdout as String) + (result.stderr as String),
           contains('link mode set to static, but this is not yet supported'),
         );
+        expect(result.exitCode, isNot(0));
       });
     });
   }
@@ -336,6 +341,37 @@ void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final File dylib = appBundle.childFile(OS.windows.dylibFileName(packageName));
   expect(dylib, exists);
+}
+
+void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
+  final File apk = appDirectory
+      .childDirectory('build')
+      .childDirectory('app')
+      .childDirectory('outputs')
+      .childDirectory('flutter-apk')
+      .childFile('app-$buildMode.apk');
+  expect(apk, exists);
+  final OperatingSystemUtils osUtils = OperatingSystemUtils(
+    fileSystem: fileSystem,
+    logger: BufferLogger.test(),
+    platform: platform,
+    processManager: processManager,
+  );
+  final Directory apkUnzipped = appDirectory.childDirectory('apk-unzipped');
+  apkUnzipped.createSync();
+  osUtils.unzip(apk, apkUnzipped);
+  final Directory lib = apkUnzipped.childDirectory('lib');
+  for (final String arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
+    final Directory archDir = lib.childDirectory(arch);
+    expect(archDir, exists);
+    // The dylibs should be next to the flutter and app so.
+    expect(archDir.childFile('libflutter.so'), exists);
+    if (buildMode != 'debug') {
+      expect(archDir.childFile('libapp.so'), exists);
+    }
+    final File dylib = archDir.childFile(OS.android.dylibFileName(packageName));
+    expect(dylib, exists);
+  }
 }
 
 /// For `flutter build` we can't easily test whether running the app works.
