@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'animated_color_square.dart';
 import 'bogus_font_text.dart';
-import 'darwin_app_extension_scenario.dart';
 import 'get_bitmap_scenario.dart';
 import 'initial_route_reply.dart';
 import 'locale_initialization.dart';
@@ -67,7 +66,6 @@ Map<String, _ScenarioFactory> _scenarios = <String, _ScenarioFactory>{
   'pointer_events': (FlutterView view) => TouchesScenario(view),
   'display_texture': (FlutterView view) => DisplayTexture(view),
   'get_bitmap': (FlutterView view) => GetBitmapScenario(view),
-  'app_extension': (FlutterView view) => DarwinAppExtensionScenario(view),
 };
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};

@@ -93,7 +93,7 @@ FLUTTER_ASSERT_ARC
     id mockBundle = OCMClassMock([NSBundle class]);
     OCMStub([mockBundle objectForInfoDictionaryKey:@"FLTAssetsPath"]).andReturn(@"foo/assets");
     NSString* resultAssetsPath = @"path/to/foo/assets";
-    OCMStub([mockBundle pathForResource:@"foo/assets" ofType:nil]).andReturn(resultAssetsPath);
+    OCMStub([mockBundle pathForResource:@"foo/assets" ofType:@""]).andReturn(resultAssetsPath);
     NSString* path = FLTAssetsPathFromBundle(mockBundle);
     XCTAssertEqualObjects(path, @"path/to/foo/assets");
   }
@@ -102,9 +102,9 @@ FLUTTER_ASSERT_ARC
     id mockBundle = OCMClassMock([NSBundle class]);
     id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
     NSString* resultAssetsPath = @"path/to/foo/assets";
-    OCMStub([mockBundle pathForResource:@"Frameworks/App.framework/flutter_assets" ofType:nil])
+    OCMStub([mockBundle pathForResource:@"Frameworks/App.framework/flutter_assets" ofType:@""])
         .andReturn(nil);
-    OCMStub([mockMainBundle pathForResource:@"Frameworks/App.framework/flutter_assets" ofType:nil])
+    OCMStub([mockMainBundle pathForResource:@"Frameworks/App.framework/flutter_assets" ofType:@""])
         .andReturn(resultAssetsPath);
     NSString* path = FLTAssetsPathFromBundle(mockBundle);
     XCTAssertEqualObjects(path, @"path/to/foo/assets");
