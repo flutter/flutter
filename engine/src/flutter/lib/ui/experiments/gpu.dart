@@ -147,7 +147,7 @@ class RasterPipeline {}
 /// A handle to a graphics context. Used to create and manage GPU resources.
 ///
 /// To obtain the default graphics context, use [getGpuContext].
-class GpuContext extends NativeFieldWrapperClass1 {
+base class GpuContext extends NativeFieldWrapperClass1 {
   /// Creates a new graphics context that corresponds to the default Impeller
   /// context.
   GpuContext._createDefault() {
