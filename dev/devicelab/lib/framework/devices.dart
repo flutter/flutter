@@ -920,7 +920,7 @@ class AndroidDevice extends Device {
     process.stdout.transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            print('line - $line');
+            print(line);
           },);
     print('Done waiting for device.');
   }
