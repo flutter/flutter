@@ -20,6 +20,7 @@
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 // These are common defines present on all OpenGL headers. However, we don't
@@ -51,7 +52,7 @@ sk_sp<GrDirectContext> GPUSurfaceGLSkia::MakeGLContext(
   const auto options =
       MakeDefaultContextOptions(ContextType::kRender, GrBackendApi::kOpenGL);
 
-  auto context = GrDirectContext::MakeGL(delegate->GetGLInterface(), options);
+  auto context = GrDirectContexts::MakeGL(delegate->GetGLInterface(), options);
 
   if (!context) {
     FML_LOG(ERROR) << "Failed to set up Skia Gr context.";
