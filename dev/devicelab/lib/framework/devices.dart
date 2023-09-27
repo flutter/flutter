@@ -915,12 +915,12 @@ class AndroidDevice extends Device {
     process = await startProcess(
       adbPath,
       // change this to a for loop that will not run forever after testing.
-      <String>['-s', deviceId, 'wait-for-device', 'shell', '\'while [[ -z \$(getprop sys.boot_completed) ]]; do echo "waiting..."; sleep 1; done; echo "done";\''],
+      <String>['-s', deviceId, 'wait-for-device', 'shell', '\'i=0; while [ \$((\$i)) -le 60 ] && [ -z \$(getprop sys.boot_completed) ]; do i=\$((\$i + 1)); echo \$i; sleep 1; done;\''],
     );
     process.stdout.transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            print(line);
+            print('Device wait: $line');
           },);
     print('Done waiting for device.');
   }
