@@ -216,7 +216,7 @@ BuildMode nativeAssetsBuildMode(build_info.BuildMode buildMode) {
 ///
 /// Native asset builds cannot be run without a package config. If there is
 /// no package config, leave a logging trace about that.
-Future<bool> hasNoPackageConfig(NativeAssetsBuildRunner buildRunner) async {
+Future<bool> _hasNoPackageConfig(NativeAssetsBuildRunner buildRunner) async {
   final bool packageConfigExists = await buildRunner.hasPackageConfig();
   if (!packageConfigExists) {
     globals.logger.printTrace('No package config found. Skipping native assets compilation.');
@@ -224,24 +224,23 @@ Future<bool> hasNoPackageConfig(NativeAssetsBuildRunner buildRunner) async {
   return !packageConfigExists;
 }
 
-/// Checks that if native assets is disabled, none of the dependencies declare
-/// native assets.
-///
-/// If any of the dependencies have native assets, but native assets are
-/// disabled, exits the tool.
-Future<bool> isDisabledAndNoNativeAssets(NativeAssetsBuildRunner buildRunner) async {
-  if (featureFlags.isNativeAssetsEnabled) {
+Future<bool> nativeBuildRequired(NativeAssetsBuildRunner buildRunner) async {
+  if (await _hasNoPackageConfig(buildRunner)) {
     return false;
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
-    return true;
+    return false;
   }
-  final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
-  throwToolExit(
-    'Package(s) $packageNames require the native assets feature to be enabled. '
-    'Enable using `flutter config --enable-native-assets`.',
-  );
+
+  if (!featureFlags.isNativeAssetsEnabled) {
+    final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
+    throwToolExit(
+      'Package(s) $packageNames require the native assets feature to be enabled. '
+      'Enable using `flutter config --enable-native-assets`.',
+    );
+  }
+  return true;
 }
 
 /// Ensures that either this project has no native assets, or that native assets
@@ -254,7 +253,7 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   FileSystem fileSystem,
   NativeAssetsBuildRunner buildRunner,
 ) async {
-  if (await hasNoPackageConfig(buildRunner)) {
+  if (await _hasNoPackageConfig(buildRunner)) {
     return;
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
@@ -354,12 +353,7 @@ Future<Uri?> dryRunNativeAssets({
           buildRunner: buildRunner,
         );
       } else {
-        await ensureNoNativeAssetsOrOsIsSupported(
-          projectUri,
-          const LocalPlatform().operatingSystem,
-          fileSystem,
-          buildRunner,
-        );
+        await nativeBuildRequired(buildRunner);
         nativeAssetsYaml = null;
       }
     case build_info.TargetPlatform.linux_arm64:
@@ -403,7 +397,7 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
   required FileSystem fileSystem,
   required Iterable<build_info.TargetPlatform> targetPlatforms,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
@@ -463,7 +457,7 @@ Future<Uri?> dryRunNativeAssetsSingleArchitecture({
   required FileSystem fileSystem,
   required OS os,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
@@ -535,7 +529,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
     // CMake requires the folder to exist to do copying.
     await buildDir.create(recursive: true);
   }
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
       <Asset>[],
       yamlParentDirectory ?? buildUri,
