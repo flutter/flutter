@@ -1987,6 +1987,7 @@ targets:
       task_name: cull_opacity_perf__timeline_summary
 
   - name: Linux_android devtools_profile_start_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135582
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
