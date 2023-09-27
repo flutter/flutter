@@ -143,8 +143,7 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-        fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin',
-          'snapshots', 'frontend_server_aot.dart.snapshot')
+        fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'frontend_server.dart.snapshot')
       );
     });
 
@@ -326,7 +325,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
-          'snapshots', 'frontend_server_aot.dart.snapshot')
+          'snapshots', 'frontend_server.dart.snapshot')
       );
 
 
@@ -398,7 +397,7 @@ void main() {
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: TargetPlatform.web_javascript),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin',
-          'snapshots', 'frontend_server_aot.dart.snapshot'),
+          'snapshots', 'frontend_server.dart.snapshot'),
       );
       expect(
         artifacts.getArtifactPath(

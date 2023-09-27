@@ -132,7 +132,6 @@ class KernelSnapshot extends Target {
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.engineDartAotRuntime),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ];
 
