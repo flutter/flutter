@@ -2055,6 +2055,117 @@ void main() {
       expect(inputText.style.color, theme.colorScheme.onSurface);
     });
   });
+
+  testWidgets('SearchAnchor view respects theme brightness', (WidgetTester tester) async {
+    Widget buildSearchAnchor(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.ac_unit),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    ThemeData theme = ThemeData(brightness: Brightness.light);
+    await tester.pumpWidget(buildSearchAnchor(theme));
+
+    // Open the search view.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+
+    // Test the search view background color.
+    Material material = getSearchViewMaterial(tester);
+    expect(material.color, theme.colorScheme.surface);
+
+    // Change the theme brightness.
+    theme = ThemeData(brightness: Brightness.dark);
+    await tester.pumpWidget(buildSearchAnchor(theme));
+    await tester.pumpAndSettle();
+
+    // Test the search view background color.
+    material = getSearchViewMaterial(tester);
+    expect(material.color, theme.colorScheme.surface);
+  });
+
+  testWidgets('Search view widgets can inherit local themes', (WidgetTester tester) async {
+    final ThemeData globalTheme = ThemeData(colorSchemeSeed: Colors.red);
+    final ThemeData localTheme = ThemeData(
+      colorSchemeSeed: Colors.green,
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          backgroundColor: const Color(0xffffff00)
+        ),
+      ),
+      cardTheme: const CardTheme(color: Color(0xff00ffff)),
+    );
+    Widget buildSearchAnchor() {
+      return MaterialApp(
+        theme: globalTheme,
+        home: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Theme(
+                data: localTheme,
+                child: Material(
+                  child: SearchAnchor.bar(
+                    suggestionsBuilder: (BuildContext context, SearchController controller) {
+                      return <Widget>[
+                        Card(
+                          child: ListTile(
+                            onTap: () {},
+                            title: const Text('Item 1'),
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
+                ),
+              );
+            }
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSearchAnchor());
+
+    // Open the search view.
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
+
+    // Test the search view background color.
+    final Material searchViewMaterial = getSearchViewMaterial(tester);
+    expect(searchViewMaterial.color, localTheme.colorScheme.surface);
+
+    // Test the search view icons background color.
+    final Material iconButtonMaterial = tester.widget<Material>(find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    ).first);
+    expect(find.byWidget(iconButtonMaterial), findsOneWidget);
+    expect(iconButtonMaterial.color, localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<MaterialState>{}));
+
+    // Test the suggestion card color.
+    final Material suggestionMaterial = tester.widget<Material>(find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Material),
+    ).first);
+    expect(suggestionMaterial.color, localTheme.cardTheme.color);
+  });
 }
 
 Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {

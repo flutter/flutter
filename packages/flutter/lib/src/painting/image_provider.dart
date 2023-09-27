@@ -406,8 +406,7 @@ abstract class ImageProvider<T extends Object> {
   /// The location may be [ImageCacheStatus.untracked], indicating that this
   /// image provider's key is not available in the [ImageCache].
   ///
-  /// The `cache` and `configuration` parameters must not be null. If the
-  /// `handleError` parameter is null, errors will be reported to
+  /// If the `handleError` parameter is null, errors will be reported to
   /// [FlutterError.onError], and the method will return null.
   ///
   /// A completed return value of null indicates that an error has occurred.
@@ -655,8 +654,6 @@ class _AbstractImageStreamCompleter extends ImageStreamCompleter {}
 @immutable
 class AssetBundleImageKey {
   /// Creates the key for an [AssetImage] or [AssetBundleImageProvider].
-  ///
-  /// The arguments must not be null.
   const AssetBundleImageKey({
     required this.bundle,
     required this.name,
@@ -1402,8 +1399,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 // our cache if the headers describe the image as having expired at that point.
 abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
-  ///
-  /// The arguments [url] and [scale] must not be null.
   const factory NetworkImage(String url, { double scale, Map<String, String>? headers }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
@@ -1436,8 +1431,6 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 @immutable
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
-  ///
-  /// The arguments must not be null.
   const FileImage(this.file, { this.scale = 1.0 });
 
   /// The file to decode into an image.
@@ -1528,8 +1521,6 @@ class FileImage extends ImageProvider<FileImage> {
 @immutable
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
-  ///
-  /// The arguments must not be null.
   const MemoryImage(this.bytes, { this.scale = 1.0 });
 
   /// The bytes to decode into an image.
@@ -1674,10 +1665,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 class ExactAssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches the given image from an asset bundle.
   ///
-  /// The [assetName] and [scale] arguments must not be null. The [scale] arguments
-  /// defaults to 1.0. The [bundle] argument may be null, in which case the
-  /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
-  /// will be used instead.
+  /// The [scale] argument defaults to 1. The [bundle] argument may be null, in
+  /// which case the bundle provided in the [ImageConfiguration] passed to the
+  /// [resolve] call will be used instead.
   ///
   /// The [package] argument must be non-null when fetching an asset that is
   /// included in a package. See the documentation for the [ExactAssetImage] class

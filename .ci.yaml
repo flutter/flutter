@@ -245,9 +245,12 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
-    bringup: true
+    presubmit: false
     recipe: flutter/coverage
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -256,7 +259,6 @@ targets:
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
     timeout: 30
-    bringup: true # https://github.com/flutter/flutter/issues/131968
     enabled_branches:
       # Don't run this on release branches
       - master
@@ -569,7 +571,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"}
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: framework_tests
       subshard: slow
@@ -1148,6 +1151,8 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1168,6 +1173,8 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1188,6 +1195,8 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1208,6 +1217,8 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1228,6 +1239,8 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1248,6 +1261,8 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1268,6 +1283,8 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1288,6 +1305,8 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1308,6 +1327,8 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1328,6 +1349,8 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1348,6 +1371,8 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1368,6 +1393,8 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1388,6 +1415,8 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1408,6 +1437,8 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1428,6 +1459,8 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1448,6 +1481,8 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1468,6 +1503,8 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1488,6 +1525,8 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1508,6 +1547,8 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1528,6 +1569,8 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1548,6 +1591,8 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1569,6 +1614,8 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1678,17 +1725,16 @@ targets:
   - name: Linux_pixel_7pro backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: backdrop_filter_perf__timeline_summary
 
-
   - name: Linux_pixel_7pro draw_atlas_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+     # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1700,6 +1746,7 @@ targets:
   - name: Linux_pixel_7pro draw_atlas_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1711,6 +1758,7 @@ targets:
   - name: Linux_pixel_7pro dynamic_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1722,6 +1770,7 @@ targets:
   - name: Linux_pixel_7pro static_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -1733,7 +1782,7 @@ targets:
   - name: Linux_pixel_7pro hello_world_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
+    # Uses Impeller.
     timeout: 60
     properties:
       tags: >
@@ -1915,7 +1964,6 @@ targets:
   - name: Linux_pixel_7pro cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1934,7 +1982,6 @@ targets:
   - name: Linux_pixel_7pro cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2059,6 +2106,7 @@ targets:
       task_name: flutter_gallery__start_up
 
   - name: Linux_android flutter_gallery__start_up_delayed
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/134631
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2206,7 +2254,6 @@ targets:
   - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2448,7 +2495,6 @@ targets:
 
   - name: Linux_pixel_7pro picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2475,6 +2521,7 @@ targets:
       task_name: slider_perf_android
 
   - name: Linux_android platform_channels_benchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2512,7 +2559,6 @@ targets:
 
   - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2581,7 +2627,6 @@ targets:
   - name: Linux_pixel_7pro textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2656,6 +2701,7 @@ targets:
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
 
   - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135118
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2723,6 +2769,7 @@ targets:
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2734,6 +2781,7 @@ targets:
   - name: Linux_pixel_7pro animated_advanced_blend_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2745,6 +2793,7 @@ targets:
   - name: Linux_pixel_7pro animated_advanced_blend_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2757,7 +2806,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2766,6 +2814,7 @@ targets:
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2777,6 +2826,7 @@ targets:
   - name: Linux_pixel_7pro draw_vertices_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller
     bringup: true
     timeout: 60
     properties:
@@ -2788,6 +2838,7 @@ targets:
   - name: Linux_pixel_7pro draw_vertices_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    # Uses Impeller.
     bringup: true
     timeout: 60
     properties:
@@ -2800,7 +2851,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2810,7 +2860,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2820,7 +2869,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -2830,7 +2878,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -4264,7 +4311,6 @@ targets:
 
   - name: Mac_ios very_long_picture_scrolling_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 120
     properties:
@@ -4304,7 +4350,6 @@ targets:
   - name: Mac_ios draw_points_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4667,7 +4712,6 @@ targets:
       - .ci.yaml
 
   - name: Windows module_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/133639
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4772,6 +4816,25 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows_arm64 run_debug_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: run_debug_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Windows run_release_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4783,6 +4846,25 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
+      task_name: run_release_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows_arm64 run_release_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       task_name: run_release_test_windows
     runIf:
       - dev/**
@@ -5069,6 +5151,20 @@ targets:
         ]
       task_name: flutter_gallery_win_desktop__compile
 
+  - name: Windows_arm64 flutter_gallery_win_desktop__compile
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__compile
+
   - name: Windows flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5076,6 +5172,20 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__start_up
+
+  - name: Windows_arm64 flutter_gallery_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5095,6 +5205,20 @@ targets:
         ]
       task_name: complex_layout_win_desktop__start_up
 
+  - name: Windows_arm64 complex_layout_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: complex_layout_win_desktop__start_up
+
   - name: Windows flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5102,6 +5226,20 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_view_win_desktop__start_up
+
+  - name: Windows_arm64 flutter_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5121,6 +5259,20 @@ targets:
         ]
       task_name: platform_view_win_desktop__start_up
 
+  - name: Windows_arm64 platform_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: platform_view_win_desktop__start_up
+
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5131,7 +5283,6 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/134636
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5201,6 +5352,20 @@ targets:
         ["devicelab", "hostonly", "windows"]
       task_name: windows_startup_test
 
+  - name: Windows_arm64 windows_startup_test
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: windows_startup_test
+
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5208,6 +5373,16 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      task_name: flutter_tool_startup
+
+  - name: Windows_arm64 flutter_tool_startup__windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       task_name: flutter_tool_startup
 
   - name: Linux flutter_tool_startup__linux
