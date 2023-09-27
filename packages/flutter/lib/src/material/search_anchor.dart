@@ -342,7 +342,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
   }
 
   void _openView() {
-    Navigator.of(context).push(_SearchViewRoute(
+    final NavigatorState navigator = Navigator.of(context);
+    navigator.push(_SearchViewRoute(
       viewLeading: widget.viewLeading,
       viewTrailing: widget.viewTrailing,
       viewHintText: widget.viewHintText,
@@ -363,6 +364,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
       textCapitalization: widget.textCapitalization,
+      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     ));
   }
 
@@ -433,6 +435,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     required this.anchorKey,
     required this.searchController,
     required this.suggestionsBuilder,
+    required this.capturedThemes,
   });
 
   final ValueGetter<bool>? toggleVisibility;
@@ -455,6 +458,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final GlobalKey anchorKey;
   final SearchController searchController;
   final SuggestionsBuilder suggestionsBuilder;
+  final CapturedThemes capturedThemes;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -467,7 +471,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
   late final SearchViewThemeData viewDefaults;
   late final SearchViewThemeData viewTheme;
-  late final DividerThemeData dividerTheme;
   final RectTween _rectTween = RectTween();
 
   Rect? getRect() {
@@ -502,7 +505,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   void updateViewConfig(BuildContext context) {
     viewDefaults = _SearchViewDefaultsM3(context, isFullScreen: showFullScreenView);
     viewTheme = SearchViewTheme.of(context);
-    dividerTheme = DividerTheme.of(context);
   }
 
   void updateTweens(BuildContext context) {
@@ -576,30 +578,29 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               curve: _kViewFadeOnInterval,
               reverseCurve: _kViewFadeOnInterval.flipped,
             ),
-            child: _ViewContent(
-              viewLeading: viewLeading,
-              viewTrailing: viewTrailing,
-              viewHintText: viewHintText,
-              viewBackgroundColor: viewBackgroundColor,
-              viewElevation: viewElevation,
-              viewSurfaceTintColor: viewSurfaceTintColor,
-              viewSide: viewSide,
-              viewShape: viewShape,
-              viewHeaderTextStyle: viewHeaderTextStyle,
-              viewHeaderHintStyle: viewHeaderHintStyle,
-              dividerColor: dividerColor,
-              showFullScreenView: showFullScreenView,
-              animation: curvedAnimation,
-              topPadding: topPadding,
-              viewMaxWidth: _rectTween.end!.width,
-              viewRect: viewRect,
-              viewDefaults: viewDefaults,
-              viewTheme: viewTheme,
-              dividerTheme: dividerTheme,
-              viewBuilder: viewBuilder,
-              searchController: searchController,
-              suggestionsBuilder: suggestionsBuilder,
-              textCapitalization: textCapitalization,
+            child: capturedThemes.wrap(
+              _ViewContent(
+                viewLeading: viewLeading,
+                viewTrailing: viewTrailing,
+                viewHintText: viewHintText,
+                viewBackgroundColor: viewBackgroundColor,
+                viewElevation: viewElevation,
+                viewSurfaceTintColor: viewSurfaceTintColor,
+                viewSide: viewSide,
+                viewShape: viewShape,
+                viewHeaderTextStyle: viewHeaderTextStyle,
+                viewHeaderHintStyle: viewHeaderHintStyle,
+                dividerColor: dividerColor,
+                showFullScreenView: showFullScreenView,
+                animation: curvedAnimation,
+                topPadding: topPadding,
+                viewMaxWidth: _rectTween.end!.width,
+                viewRect: viewRect,
+                viewBuilder: viewBuilder,
+                searchController: searchController,
+                suggestionsBuilder: suggestionsBuilder,
+                textCapitalization: textCapitalization,
+              ),
             ),
           );
         }
@@ -631,9 +632,6 @@ class _ViewContent extends StatefulWidget {
     required this.animation,
     required this.viewMaxWidth,
     required this.viewRect,
-    required this.viewDefaults,
-    required this.viewTheme,
-    required this.dividerTheme,
     required this.searchController,
     required this.suggestionsBuilder,
   });
@@ -656,9 +654,6 @@ class _ViewContent extends StatefulWidget {
   final Animation<double> animation;
   final double viewMaxWidth;
   final Rect viewRect;
-  final SearchViewThemeData viewDefaults;
-  final SearchViewThemeData viewTheme;
-  final DividerThemeData dividerTheme;
   final SearchController searchController;
   final SuggestionsBuilder suggestionsBuilder;
 
@@ -747,39 +742,43 @@ class _ViewContentState extends State<_ViewContent> {
       ),
     ];
 
+    final SearchViewThemeData viewDefaults = _SearchViewDefaultsM3(context, isFullScreen: widget.showFullScreenView);
+    final SearchViewThemeData viewTheme = SearchViewTheme.of(context);
+    final DividerThemeData dividerTheme = DividerTheme.of(context);
+
     final Color effectiveBackgroundColor = widget.viewBackgroundColor
-      ?? widget.viewTheme.backgroundColor
-      ?? widget.viewDefaults.backgroundColor!;
+      ?? viewTheme.backgroundColor
+      ?? viewDefaults.backgroundColor!;
     final Color effectiveSurfaceTint = widget.viewSurfaceTintColor
-      ?? widget.viewTheme.surfaceTintColor
-      ?? widget.viewDefaults.surfaceTintColor!;
+      ?? viewTheme.surfaceTintColor
+      ?? viewDefaults.surfaceTintColor!;
     final double effectiveElevation = widget.viewElevation
-      ?? widget.viewTheme.elevation
-      ?? widget.viewDefaults.elevation!;
+      ?? viewTheme.elevation
+      ?? viewDefaults.elevation!;
     final BorderSide? effectiveSide = widget.viewSide
-      ?? widget.viewTheme.side
-      ?? widget.viewDefaults.side;
+      ?? viewTheme.side
+      ?? viewDefaults.side;
     OutlinedBorder effectiveShape = widget.viewShape
-      ?? widget.viewTheme.shape
-      ?? widget.viewDefaults.shape!;
+      ?? viewTheme.shape
+      ?? viewDefaults.shape!;
     if (effectiveSide != null) {
       effectiveShape = effectiveShape.copyWith(side: effectiveSide);
     }
     final Color effectiveDividerColor = widget.dividerColor
-      ?? widget.viewTheme.dividerColor
-      ?? widget.dividerTheme.color
-      ?? widget.viewDefaults.dividerColor!;
+      ?? viewTheme.dividerColor
+      ?? dividerTheme.color
+      ?? viewDefaults.dividerColor!;
     final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle
-      ?? widget.viewTheme.headerTextStyle
-      ?? widget.viewDefaults.headerTextStyle;
+      ?? viewTheme.headerTextStyle
+      ?? viewDefaults.headerTextStyle;
     final TextStyle? effectiveHintStyle = widget.viewHeaderHintStyle
-      ?? widget.viewTheme.headerHintStyle
+      ?? viewTheme.headerHintStyle
       ?? widget.viewHeaderTextStyle
-      ?? widget.viewTheme.headerTextStyle
-      ?? widget.viewDefaults.headerHintStyle;
+      ?? viewTheme.headerTextStyle
+      ?? viewDefaults.headerHintStyle;
 
     final Widget viewDivider = DividerTheme(
-      data: widget.dividerTheme.copyWith(color: effectiveDividerColor),
+      data: dividerTheme.copyWith(color: effectiveDividerColor),
       child: const Divider(height: 1),
     );
 
