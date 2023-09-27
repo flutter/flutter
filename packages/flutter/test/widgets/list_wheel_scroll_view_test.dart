@@ -1599,9 +1599,6 @@ void main() {
   });
 
   testWidgets('will not assert on getOffsetToReveal Axis', (WidgetTester tester) async {
-    List<Widget> outerChildren;
-    final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1612,9 +1609,9 @@ void main() {
             child: ListWheelScrollView(
               controller: ScrollController(initialScrollOffset: 300.0),
               itemExtent: 100.0,
-              children: outerChildren = List<Widget>.generate(10, (int i) {
+              children: List<Widget>.generate(10, (int i) {
                 return Center(
-                  child: innerChildren[i] = SizedBox(
+                  child: SizedBox(
                     height: 50.0,
                     width: 50.0,
                     child: Text('Item $i'),
@@ -1628,9 +1625,7 @@ void main() {
     );
 
     final RenderListWheelViewport viewport = tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
-
-    // direct child of viewport
-    final RenderObject target = tester.renderObject(find.byWidget(outerChildren[5]));
+    final RenderObject target = tester.renderObject(find.text('Item 5'));
     viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
   });
 
