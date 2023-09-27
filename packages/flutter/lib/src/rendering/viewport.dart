@@ -821,10 +821,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Rect? rect,
     Axis? axis,
   }) {
-    // One dimensional viewport has only one axis, it should match if it has
-    // been provided.
-    axis ??= this.axis;
-    assert(axis == this.axis);
+    // One dimensional viewport has only one axis, override if it was
+    // provided/may be mismatched.
+    axis = this.axis;
 
     // Steps to convert `rect` (from a RenderBox coordinate system) to its
     // scroll offset within this viewport (not in the exact order):
