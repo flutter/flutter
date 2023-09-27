@@ -53,7 +53,6 @@ const double kDefaultRmseThreshold = 0.5;
         @"--two-platform-view-clip-rect" : @"two_platform_view_clip_rect",
         @"--two-platform-view-clip-rrect" : @"two_platform_view_clip_rrect",
         @"--two-platform-view-clip-path" : @"two_platform_view_clip_path",
-        @"--app-extension" : @"app_extension",
       };
     });
     _identifier = launchArgsMap[launchArg];

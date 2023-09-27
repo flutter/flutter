@@ -109,9 +109,7 @@ if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -skip-testing ScenariosUITests/TwoPlatformViewClipRRectTests/testPlatformView \
   -skip-testing ScenariosUITests/TwoPlatformViewsWithOtherBackDropFilterTests/testPlatformView \
   -skip-testing ScenariosUITests/UnobstructedPlatformViewTests/testMultiplePlatformViewsWithOverlays \
-  # Plist with FLTEnableImpeller=YES, all projects in the workspace requires this file.
-  # For example, FlutterAppExtensionTestHost has a dummy file under the below directory.
-  INFOPLIST_FILE="Scenarios/Info_Impeller.plist"; then
+  INFOPLIST_FILE="Scenarios/Info_Impeller.plist"; then # Plist with FLTEnableImpeller=YES
   echo "test success."
 else
   echo "test failed."
