@@ -151,6 +151,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
@@ -189,6 +191,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
@@ -262,6 +266,7 @@ void main() {
     await gesture.up();
     final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
     expect(boxes.length, 1);
+    await tester.pumpAndSettle();
     // There is a selection now.
     // We check the presence of the copy button to make sure the selection toolbar
     // is showing.
