@@ -539,8 +539,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     HapticFeedback.selectionClick();
     widget.focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
-    _showToolbar();
-    _showHandles();
+    // Platforms besides Android will show the text selection handles when
+    // the long press is initiated. Android shows the text selection handles when
+    // the long press has ended, usually after a pointer up event is received.
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      _showHandles();
+    }
     _updateSelectedContentIfNeeded();
   }
 
@@ -552,6 +556,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
+    _showToolbar();
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      _showHandles();
+    }
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {

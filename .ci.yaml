@@ -245,9 +245,12 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
-    bringup: true
+    presubmit: false
     recipe: flutter/coverage
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -1780,7 +1783,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     # Uses Impeller.
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4852,6 +4854,25 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows_arm64 run_debug_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: run_debug_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Windows run_release_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4863,6 +4884,25 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
+      task_name: run_release_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows_arm64 run_release_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       task_name: run_release_test_windows
     runIf:
       - dev/**
@@ -5149,6 +5189,20 @@ targets:
         ]
       task_name: flutter_gallery_win_desktop__compile
 
+  - name: Windows_arm64 flutter_gallery_win_desktop__compile
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__compile
+
   - name: Windows flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5156,6 +5210,20 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__start_up
+
+  - name: Windows_arm64 flutter_gallery_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5175,6 +5243,20 @@ targets:
         ]
       task_name: complex_layout_win_desktop__start_up
 
+  - name: Windows_arm64 complex_layout_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: complex_layout_win_desktop__start_up
+
   - name: Windows flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5188,6 +5270,20 @@ targets:
         ]
       task_name: flutter_view_win_desktop__start_up
 
+  - name: Windows_arm64 flutter_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_view_win_desktop__start_up
+
   - name: Windows platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5195,6 +5291,20 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: platform_view_win_desktop__start_up
+
+  - name: Windows_arm64 platform_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5280,6 +5390,20 @@ targets:
         ["devicelab", "hostonly", "windows"]
       task_name: windows_startup_test
 
+  - name: Windows_arm64 windows_startup_test
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: windows_startup_test
+
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5287,6 +5411,16 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      task_name: flutter_tool_startup
+
+  - name: Windows_arm64 flutter_tool_startup__windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       task_name: flutter_tool_startup
 
   - name: Linux flutter_tool_startup__linux
