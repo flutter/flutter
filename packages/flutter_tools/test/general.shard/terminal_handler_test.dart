@@ -1015,7 +1015,7 @@ void main() {
     expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
   });
 
-  testWithoutContext('s, can take screenshot on debug device that does not support screenshot', () async {
+  testWithoutContext('s, will not take screenshot on non-web device without screenshot tooling support', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], logger: logger, fileSystem: fileSystem);
