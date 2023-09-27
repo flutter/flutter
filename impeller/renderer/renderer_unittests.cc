@@ -404,14 +404,14 @@ TEST_P(RendererTest, CanRenderInstanced) {
                     .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
                     .TakePath()
                     .CreatePolyline(1.0f),
-                [&builder](const float* vertices, size_t vertices_size,
-                           const uint16_t* indices, size_t indices_size) {
-                  for (auto i = 0u; i < vertices_size; i += 2) {
+                [&builder](const float* vertices, size_t vertices_count,
+                           const uint16_t* indices, size_t indices_count) {
+                  for (auto i = 0u; i < vertices_count * 2; i += 2) {
                     VS::PerVertexData data;
                     data.vtx = {vertices[i], vertices[i + 1]};
                     builder.AppendVertex(data);
                   }
-                  for (auto i = 0u; i < indices_size; i++) {
+                  for (auto i = 0u; i < indices_count; i++) {
                     builder.AppendIndex(indices[i]);
                   }
                   return true;
