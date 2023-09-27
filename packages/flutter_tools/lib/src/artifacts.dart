@@ -580,8 +580,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterToolsFileGenerators:
       case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
-      case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
@@ -622,8 +620,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterToolsFileGenerators:
       case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
-      case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
@@ -676,8 +672,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterToolsFileGenerators:
       case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
-      case Artifact.flutterPreviewDevice:
-        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
