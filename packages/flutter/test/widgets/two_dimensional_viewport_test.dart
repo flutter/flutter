@@ -2365,6 +2365,275 @@ void main() {
         ),
       );
     }, variant: TargetPlatformVariant.all());
+
+    group('TwoDimensionalViewport showOnScreen & showInViewport', () {
+      Finder findKey(ChildVicinity vicinity) {
+        return find.byKey(ValueKey<ChildVicinity>(vicinity));
+      }
+
+      testWidgets('Axis.vertical', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+        // Child visible at origin
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 0))).dy,
+          equals(0.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 0))).dy,
+          equals(0.0),
+        );
+        // (0, 3) is in the cache extent, and will be brought into view next
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 3))).dy,
+          equals(600.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 3)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        // Now in view
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 3))).dy,
+          equals(400.0),
+        );
+
+        // If already visible, no change
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 3)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 3))).dy,
+          equals(400.0),
+        );
+      });
+
+      testWidgets('Axis.horizontal', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 1, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 1, yIndex: 0))).dx,
+          equals(200.0), // No change since already fully visible
+        );
+        // (5, 0) is now in the cache extent, and will be brought into view next
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 5, yIndex: 0))).dx,
+          equals(1000.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        // Now in view
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 5, yIndex: 0))).dx,
+          equals(600.0),
+        );
+
+        // If already in position, no change
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 5, yIndex: 0))).dx,
+          equals(600.0),
+        );
+      });
+
+      testWidgets('both axes', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 1, yIndex: 1)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 1, yIndex: 1))),
+          const Rect.fromLTRB(200.0, 200.0, 400.0, 400.0),
+        );
+        // (5, 4) is in the cache extent, and will be brought into view next
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 5, yIndex: 4))),
+          const Rect.fromLTRB(1000.0, 800.0, 1200.0, 1000.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 4)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        // Now in view
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 5, yIndex: 4))),
+          const Rect.fromLTRB(600.0, 200.0, 800.0, 400.0),
+        );
+
+        // If already visible, no change
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 4)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 5, yIndex: 4))),
+          const Rect.fromLTRB(600.0, 200.0, 800.0, 400.0),
+        );
+      });
+
+      testWidgets('Axis.vertical reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(
+          verticalDetails: const ScrollableDetails.vertical(reverse: true),
+          useCacheExtent: true,
+        ));
+
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 0))).dy,
+          equals(400.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        // Already visible so no change.
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 0))).dy,
+          equals(400.0),
+        );
+        // (0, 3) is in the cache extent, and will be brought into view next
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 3))).dy,
+          equals(-200.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 3)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        // Now in view
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 3))).dy,
+          equals(0.0),
+        );
+
+        // If already visible, no change
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 3)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 3))).dy,
+          equals(0.0),
+        );
+      });
+
+      testWidgets('Axis.horizontal reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(
+          horizontalDetails: const ScrollableDetails.horizontal(reverse: true),
+          useCacheExtent: true,
+        ));
+
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 0))).dx,
+          equals(600.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        // Already visible so no change.
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 0, yIndex: 0))).dx,
+          equals(600.0),
+        );
+        // (4, 0) is in the cache extent, and will be brought into view next
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 4, yIndex: 0))).dx,
+          equals(-200.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 4, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 4, yIndex: 0))).dx,
+          equals(0.0),
+        );
+
+        // If already visible, no change
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 4, yIndex: 0)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getTopLeft(findKey(const ChildVicinity(xIndex: 4, yIndex: 0))).dx,
+          equals(0.0),
+        );
+      });
+
+      testWidgets('both axes reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(
+          verticalDetails: const ScrollableDetails.vertical(reverse: true),
+          horizontalDetails: const ScrollableDetails.horizontal(reverse: true),
+          useCacheExtent: true,
+        ));
+
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 1, yIndex: 1)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 1, yIndex: 1))),
+          const Rect.fromLTRB(400.0, 200.0, 600.0, 400.0),
+        );
+        // (5, 4) is in the cache extent, and will be brought into view next
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 5, yIndex: 4))),
+          const Rect.fromLTRB(-400.0, -400.0, -200.0, -200.0),
+        );
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 4)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        // Now in view
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 5, yIndex: 4))),
+          const Rect.fromLTRB(0.0, 200.0, 200.0, 400.0),
+        );
+
+        // If already visible, no change
+        tester.renderObject(find.byKey(
+          const ValueKey<ChildVicinity>(ChildVicinity(xIndex: 5, yIndex: 4)),
+          skipOffstage: false,
+        )).showOnScreen();
+        await tester.pump();
+        expect(
+          tester.getRect(findKey(const ChildVicinity(xIndex: 5, yIndex: 4))),
+          const Rect.fromLTRB(0.0, 200.0, 200.0, 400.0),
+        );
+      });
+    });
   });
 }
 
