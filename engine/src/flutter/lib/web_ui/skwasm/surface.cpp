@@ -8,6 +8,7 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
 
 using namespace Skwasm;
 
@@ -91,7 +92,7 @@ void Surface::_init() {
   makeCurrent(_glContext);
   emscripten_webgl_enable_extension(_glContext, "WEBGL_debug_renderer_info");
 
-  _grContext = GrDirectContext::MakeGL(GrGLMakeNativeInterface());
+  _grContext = GrDirectContexts::MakeGL(GrGLMakeNativeInterface());
 
   // WebGL should already be clearing the color and stencil buffers, but do it
   // again here to ensure Skia receives them in the expected state.
