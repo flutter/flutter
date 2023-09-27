@@ -423,7 +423,13 @@ class TextField extends StatefulWidget {
   ///
   /// This text style is also used as the base style for the [decoration].
   ///
-  /// If null, defaults to the `titleMedium` text style from the current [Theme].
+  /// If null and [ThemeData.useMaterial3] is true, [TextTheme.bodyLarge] will
+  /// be used. When the text field is disabled, [TextTheme.bodyLarge] with an
+  /// opacity of 0.38 will be used instead.
+  ///
+  /// If null and [ThemeData.useMaterial3] is false, [TextTheme.titleMedium] will
+  /// be used. When the text field is disabled, [TextTheme.titleMedium] with
+  /// [ThemeData.disabledColor] will be used instead.
   final TextStyle? style;
 
   /// {@macro flutter.widgets.editableText.strutStyle}
