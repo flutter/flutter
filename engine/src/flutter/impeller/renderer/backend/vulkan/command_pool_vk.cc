@@ -59,6 +59,10 @@ class BackgroundCommandPoolVK final {
 static bool kResetOnBackgroundThread = false;
 
 CommandPoolVK::~CommandPoolVK() {
+  if (!pool_) {
+    return;
+  }
+
   auto const context = context_.lock();
   if (!context) {
     return;
@@ -84,6 +88,11 @@ vk::UniqueCommandBuffer CommandPoolVK::CreateCommandBuffer() {
     return {};
   }
 
+  Lock lock(pool_mutex_);
+  if (!pool_) {
+    return {};
+  }
+
   auto const device = context->GetDevice();
   vk::CommandBufferAllocateInfo info;
   info.setCommandPool(pool_.get());
@@ -97,17 +106,39 @@ vk::UniqueCommandBuffer CommandPoolVK::CreateCommandBuffer() {
 }
 
 void CommandPoolVK::CollectCommandBuffer(vk::UniqueCommandBuffer&& buffer) {
+  Lock lock(pool_mutex_);
   if (!pool_) {
-    // If the command pool has already been destroyed, just free the buffer.
+    // If the command pool has already been destroyed, then its buffers have
+    // already been freed.
+    buffer.release();
     return;
   }
   collected_buffers_.push_back(std::move(buffer));
 }
 
+void CommandPoolVK::Destroy() {
+  Lock lock(pool_mutex_);
+  pool_.reset();
+
+  // When the command pool is destroyed, all of its command buffers are freed.
+  // Handles allocated from that pool are now invalid and must be discarded.
+  for (auto& buffer : collected_buffers_) {
+    buffer.release();
+  }
+  collected_buffers_.clear();
+}
+
 // Associates a resource with a thread and context.
 using CommandPoolMap =
     std::unordered_map<uint64_t, std::shared_ptr<CommandPoolVK>>;
-FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<CommandPoolMap> resources_;
+FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<CommandPoolMap> tls_command_pool_map;
+
+// Map each context to a list of all thread-local command pools associated
+// with that context.
+static Mutex g_all_pools_map_mutex;
+static std::unordered_map<const ContextVK*,
+                          std::vector<std::weak_ptr<CommandPoolVK>>>
+    g_all_pools_map IPLR_GUARDED_BY(g_all_pools_map_mutex);
 
 // TODO(matanlurey): Return a status_or<> instead of nullptr when we have one.
 std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
@@ -117,14 +148,13 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
   }
 
   // If there is a resource in used for this thread and context, return it.
-  auto resources = resources_.get();
-  if (!resources) {
-    resources = new CommandPoolMap();
-    resources_.reset(resources);
+  if (!tls_command_pool_map.get()) {
+    tls_command_pool_map.reset(new CommandPoolMap());
   }
+  CommandPoolMap& pool_map = *tls_command_pool_map.get();
   auto const hash = strong_context->GetHash();
-  auto const it = resources->find(hash);
-  if (it != resources->end()) {
+  auto const it = pool_map.find(hash);
+  if (it != pool_map.end()) {
     return it->second;
   }
 
@@ -136,7 +166,13 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
 
   auto const resource =
       std::make_shared<CommandPoolVK>(std::move(*pool), context_);
-  resources->emplace(hash, resource);
+  pool_map.emplace(hash, resource);
+
+  {
+    Lock all_pools_lock(g_all_pools_map_mutex);
+    g_all_pools_map[strong_context.get()].push_back(resource);
+  }
+
   return resource;
 }
 
@@ -199,11 +235,34 @@ CommandPoolRecyclerVK::~CommandPoolRecyclerVK() {
 }
 
 void CommandPoolRecyclerVK::Dispose() {
-  auto const resources = resources_.get();
-  if (!resources) {
-    return;
+  CommandPoolMap* pool_map = tls_command_pool_map.get();
+  if (pool_map) {
+    pool_map->clear();
   }
-  resources->clear();
+}
+
+void CommandPoolRecyclerVK::DestroyThreadLocalPools(const ContextVK* context) {
+  // Delete the context's entry in this thread's command pool map.
+  if (tls_command_pool_map.get()) {
+    tls_command_pool_map.get()->erase(context->GetHash());
+  }
+
+  // Destroy all other thread-local CommandPoolVK instances associated with
+  // this context.
+  Lock all_pools_lock(g_all_pools_map_mutex);
+  auto found = g_all_pools_map.find(context);
+  if (found != g_all_pools_map.end()) {
+    for (auto& weak_pool : found->second) {
+      auto pool = weak_pool.lock();
+      if (!pool) {
+        continue;
+      }
+      // Delete all objects held by this pool.  The destroyed pool will still
+      // remain in its thread's TLS map until that thread exits.
+      pool->Destroy();
+    }
+    g_all_pools_map.erase(found);
+  }
 }
 
 }  // namespace impeller
