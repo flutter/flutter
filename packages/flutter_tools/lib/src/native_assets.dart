@@ -5,7 +5,8 @@
 // Logic for native assets shared between all host OSes.
 
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder;
+import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
+import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder show NativeAssetsBuildRunner;
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -18,6 +19,7 @@ import 'cache.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'ios/native_assets.dart';
+import 'linux/native_assets.dart';
 import 'macos/native_assets.dart';
 import 'macos/native_assets_host.dart';
 import 'resident_runner.dart';
@@ -37,7 +39,7 @@ abstract class NativeAssetsBuildRunner {
   Future<List<Package>> packagesWithNativeAssets();
 
   /// Runs all [packagesWithNativeAssets] `build.dart` in dry run.
-  Future<native_assets_builder.DryRunResult> dryRun({
+  Future<DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
     required OS targetOs,
@@ -45,7 +47,7 @@ abstract class NativeAssetsBuildRunner {
   });
 
   /// Runs all [packagesWithNativeAssets] `build.dart`.
-  Future<native_assets_builder.BuildResult> build({
+  Future<BuildResult> build({
     required bool includeParentEnvironment,
     required BuildMode buildMode,
     required LinkModePreference linkModePreference,
@@ -62,9 +64,15 @@ abstract class NativeAssetsBuildRunner {
 
 /// Uses `package:native_assets_builder` for its implementation.
 class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
-  NativeAssetsBuildRunnerImpl(this.projectUri, this.fileSystem, this.logger);
+  NativeAssetsBuildRunnerImpl(
+    this.projectUri,
+    this.packageConfig,
+    this.fileSystem,
+    this.logger,
+  );
 
   final Uri projectUri;
+  final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
 
@@ -90,8 +98,6 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     dartExecutable: _dartExecutable,
   );
 
-  native_assets_builder.PackageLayout? _packageLayout;
-
   @override
   Future<bool> hasPackageConfig() {
     final File packageConfigJson = fileSystem
@@ -103,27 +109,35 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
 
   @override
   Future<List<Package>> packagesWithNativeAssets() async {
-    _packageLayout ??= await native_assets_builder.PackageLayout.fromRootPackageRoot(projectUri);
-    return _packageLayout!.packagesWithNativeAssets;
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      packageConfig,
+      projectUri.resolve('.dart_tool/package_config.json'),
+    );
+    return packageLayout.packagesWithNativeAssets;
   }
 
   @override
-  Future<native_assets_builder.DryRunResult> dryRun({
+  Future<DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
     required OS targetOs,
     required Uri workingDirectory,
   }) {
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      packageConfig,
+      projectUri.resolve('.dart_tool/package_config.json'),
+    );
     return _buildRunner.dryRun(
       includeParentEnvironment: includeParentEnvironment,
       linkModePreference: linkModePreference,
       targetOs: targetOs,
       workingDirectory: workingDirectory,
+      packageLayout: packageLayout,
     );
   }
 
   @override
-  Future<native_assets_builder.BuildResult> build({
+  Future<BuildResult> build({
     required bool includeParentEnvironment,
     required BuildMode buildMode,
     required LinkModePreference linkModePreference,
@@ -133,6 +147,10 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     int? targetAndroidNdkApi,
     IOSSdk? targetIOSSdk,
   }) {
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      packageConfig,
+      projectUri.resolve('.dart_tool/package_config.json'),
+    );
     return _buildRunner.build(
       buildMode: buildMode,
       cCompilerConfig: cCompilerConfig,
@@ -142,6 +160,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       targetAndroidNdkApi: targetAndroidNdkApi,
       targetIOSSdk: targetIOSSdk,
       workingDirectory: workingDirectory,
+      packageLayout: packageLayout,
     );
   }
 
@@ -149,6 +168,9 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   late final Future<CCompilerConfig> cCompilerConfig = () {
     if (globals.platform.isMacOS || globals.platform.isIOS) {
       return cCompilerConfigMacOS();
+    }
+    if (globals.platform.isLinux) {
+      return cCompilerConfigLinux();
     }
     throwToolExit(
       'Native assets feature not yet implemented for Linux, Windows and Android.',
@@ -192,7 +214,7 @@ BuildMode nativeAssetsBuildMode(build_info.BuildMode buildMode) {
 ///
 /// Native asset builds cannot be run without a package config. If there is
 /// no package config, leave a logging trace about that.
-Future<bool> hasNoPackageConfig(NativeAssetsBuildRunner buildRunner) async {
+Future<bool> _hasNoPackageConfig(NativeAssetsBuildRunner buildRunner) async {
   final bool packageConfigExists = await buildRunner.hasPackageConfig();
   if (!packageConfigExists) {
     globals.logger.printTrace('No package config found. Skipping native assets compilation.');
@@ -200,24 +222,23 @@ Future<bool> hasNoPackageConfig(NativeAssetsBuildRunner buildRunner) async {
   return !packageConfigExists;
 }
 
-/// Checks that if native assets is disabled, none of the dependencies declare
-/// native assets.
-///
-/// If any of the dependencies have native assets, but native assets are
-/// disabled, exits the tool.
-Future<bool> isDisabledAndNoNativeAssets(NativeAssetsBuildRunner buildRunner) async {
-  if (featureFlags.isNativeAssetsEnabled) {
+Future<bool> nativeBuildRequired(NativeAssetsBuildRunner buildRunner) async {
+  if (await _hasNoPackageConfig(buildRunner)) {
     return false;
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
-    return true;
+    return false;
   }
-  final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
-  throwToolExit(
-    'Package(s) $packageNames require the native assets feature to be enabled. '
-    'Enable using `flutter config --enable-native-assets`.',
-  );
+
+  if (!featureFlags.isNativeAssetsEnabled) {
+    final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
+    throwToolExit(
+      'Package(s) $packageNames require the native assets feature to be enabled. '
+      'Enable using `flutter config --enable-native-assets`.',
+    );
+  }
+  return true;
 }
 
 /// Ensures that either this project has no native assets, or that native assets
@@ -230,7 +251,7 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   FileSystem fileSystem,
   NativeAssetsBuildRunner buildRunner,
 ) async {
-  if (await hasNoPackageConfig(buildRunner)) {
+  if (await _hasNoPackageConfig(buildRunner)) {
     return;
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
@@ -315,15 +336,24 @@ Future<Uri?> dryRunNativeAssets({
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
-      } else {
-        await ensureNoNativeAssetsOrOsIsSupported(
-          projectUri,
-          const LocalPlatform().operatingSystem,
-          fileSystem,
-          buildRunner,
+      } else if (const LocalPlatform().isLinux) {
+        nativeAssetsYaml = await dryRunNativeAssetsLinux(
+          projectUri: projectUri,
+          flutterTester: true,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
         );
+      } else {
+        await nativeBuildRequired(buildRunner);
         nativeAssetsYaml = null;
       }
+    case build_info.TargetPlatform.linux_arm64:
+    case build_info.TargetPlatform.linux_x64:
+      nativeAssetsYaml = await dryRunNativeAssetsLinux(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: buildRunner,
+      );
     case build_info.TargetPlatform.android_arm:
     case build_info.TargetPlatform.android_arm64:
     case build_info.TargetPlatform.android_x64:
@@ -331,8 +361,6 @@ Future<Uri?> dryRunNativeAssets({
     case build_info.TargetPlatform.android:
     case build_info.TargetPlatform.fuchsia_arm64:
     case build_info.TargetPlatform.fuchsia_x64:
-    case build_info.TargetPlatform.linux_arm64:
-    case build_info.TargetPlatform.linux_x64:
     case build_info.TargetPlatform.web_javascript:
     case build_info.TargetPlatform.windows_x64:
       await ensureNoNativeAssetsOrOsIsSupported(
@@ -355,7 +383,7 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
   required FileSystem fileSystem,
   required Iterable<build_info.TargetPlatform> targetPlatforms,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
@@ -364,7 +392,12 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
     if (targetPlatforms.contains(build_info.TargetPlatform.darwin) ||
         (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.macOS))
       ...await dryRunNativeAssetsMacOSInternal(fileSystem, projectUri, false, buildRunner),
-    if (targetPlatforms.contains(build_info.TargetPlatform.ios)) ...await dryRunNativeAssetsIOSInternal(fileSystem, projectUri, buildRunner)
+    if (targetPlatforms.contains(build_info.TargetPlatform.linux_arm64) ||
+        targetPlatforms.contains(build_info.TargetPlatform.linux_x64) ||
+        (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.linux))
+      ...await dryRunNativeAssetsLinuxInternal(fileSystem, projectUri, false, buildRunner),
+    if (targetPlatforms.contains(build_info.TargetPlatform.ios))
+      ...await dryRunNativeAssetsIOSInternal(fileSystem, projectUri, buildRunner)
   ];
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
   return nativeAssetsUri;

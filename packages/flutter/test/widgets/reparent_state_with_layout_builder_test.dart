@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
 
@@ -65,7 +66,7 @@ class StatefulCreationCounterState extends State<StatefulCreationCounter> {
 }
 
 void main() {
-  testWidgets('reparent state with layout builder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('reparent state with layout builder', (WidgetTester tester) async {
     expect(StatefulCreationCounterState.creationCount, 0);
     await tester.pumpWidget(const Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
@@ -75,7 +76,7 @@ void main() {
     expect(StatefulCreationCounterState.creationCount, 1);
   });
 
-  testWidgets('Clean then reparent with dependencies', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Clean then reparent with dependencies', (WidgetTester tester) async {
     int layoutBuilderBuildCount = 0;
 
     late StateSetter keyedSetState;

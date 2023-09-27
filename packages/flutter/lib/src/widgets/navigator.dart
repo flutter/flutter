@@ -613,8 +613,6 @@ class RouteSettings {
 ///    history.
 abstract class Page<T> extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
-  ///
-  /// The [arguments] argument must not be null.
   const Page({
     this.key,
     super.name,
@@ -1451,9 +1449,6 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
-  /// The [onGenerateRoute], [pages], [onGenerateInitialRoutes],
-  /// [transitionDelegate], [observers] arguments must not be null.
-  ///
   /// If the [pages] is not empty, the [onPopPage] must not be null.
   const Navigator({
     super.key,
@@ -1520,7 +1515,7 @@ class Navigator extends StatefulWidget {
   /// The delegate used for deciding how routes transition in or off the screen
   /// during the [pages] updates.
   ///
-  /// Defaults to [DefaultTransitionDelegate] if not specified, cannot be null.
+  /// Defaults to [DefaultTransitionDelegate].
   final TransitionDelegate<dynamic> transitionDelegate;
 
   /// The name of the first route to show.
@@ -1652,7 +1647,7 @@ class Navigator extends StatefulWidget {
   /// In cases where clipping is not desired, consider setting this property to
   /// [Clip.none].
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Whether or not the navigator and it's new topmost route should request focus
@@ -2927,6 +2922,10 @@ class _RouteEntry extends RouteTransitionRecord {
   final _RestorationInformation? restorationInformation;
   final bool pageBased;
 
+  /// The limit this route entry will attempt to pop in the case of route being
+  /// remove as a result of a page update.
+  static const int kDebugPopAttemptLimit = 100;
+
   static final Route<dynamic> notAnnounced = _NotAnnounced();
 
   _RouteLifecycle currentState;
@@ -3268,6 +3267,20 @@ class _RouteEntry extends RouteTransitionRecord {
       'This route cannot be marked for pop. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition out.',
     );
+    // Remove state that prevents a pop, e.g. LocalHistoryEntry[s].
+    int attempt = 0;
+    while (route.willHandlePopInternally) {
+      assert(
+        () {
+          attempt += 1;
+          return attempt < kDebugPopAttemptLimit;
+        }(),
+        'Attempted to pop $route $kDebugPopAttemptLimit times, but still failed',
+      );
+      final bool popResult = route.didPop(result);
+      assert(!popResult);
+
+    }
     pop<dynamic>(result);
     _isWaitingForExitingDecision = false;
   }
@@ -3372,7 +3385,7 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
   /// Creates an instance of [_History].
   _History() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -5457,7 +5470,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   /// Gets first route entry satisfying the predicate, or null if not found.
-  _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+  _RouteEntry? _firstRouteEntryWhereOrNull(_RouteEntryPredicate test) {
     for (final _RouteEntry element in _history) {
       if (test(element)) {
         return element;
@@ -5467,7 +5480,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   /// Gets last route entry satisfying the predicate, or null if not found.
-  _RouteEntry? _lastRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+  _RouteEntry? _lastRouteEntryWhereOrNull(_RouteEntryPredicate test) {
     _RouteEntry? result;
     for (final _RouteEntry element in _history) {
       if (test(element)) {
@@ -5891,8 +5904,6 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// {@end-tool}
 class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   /// Creates a [RestorableRouteFuture].
-  ///
-  /// The [onPresent] and [navigatorFinder] arguments must not be null.
   RestorableRouteFuture({
     this.navigatorFinder = _defaultNavigatorFinder,
     required this.onPresent,
