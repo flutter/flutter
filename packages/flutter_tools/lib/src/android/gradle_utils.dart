@@ -362,27 +362,27 @@ bool validateGradleAndAgp(Logger logger,
 
   // First check if versions are too old.
   if (isWithinVersionRange(agpV,
-      min: '0.0', max: oldestSupportedAgpVersion, inclusiveMax: false)) {
+      versionRange: const VersionRange('0.0', oldestSupportedAgpVersion), inclusiveMax: false)) {
     logger.printTrace('AGP Version: $agpV is too old.');
     return false;
   }
   if (isWithinVersionRange(gradleV,
-      min: '0.0', max: oldestSupportedGradleVersion, inclusiveMax: false)) {
+      versionRange: const VersionRange('0.0', oldestSupportedGradleVersion), inclusiveMax: false)) {
     logger.printTrace('Gradle Version: $gradleV is too old.');
     return false;
   }
 
   // Check highest supported version before checking unknown versions.
-  if (isWithinVersionRange(agpV, min: '8.0', max: maxKnownAndSupportedAgpVersion)) {
+  if (isWithinVersionRange(agpV, versionRange: const VersionRange('8.0', maxKnownAndSupportedAgpVersion))) {
     return isWithinVersionRange(gradleV,
-        min: '8.0', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('8.0', maxKnownAndSupportedGradleVersion));
   }
   // Check if versions are newer than the max known versions.
   if (isWithinVersionRange(agpV,
-      min: maxKnownAndSupportedAgpVersion, max: '100.100')) {
+      versionRange: const VersionRange(maxKnownAndSupportedAgpVersion, '100.100'))) {
     // Assume versions we do not know about are valid but log.
     final bool validGradle =
-        isWithinVersionRange(gradleV, min: '8.0', max: '100.00');
+        isWithinVersionRange(gradleV, versionRange: const VersionRange('8.0', '100.00'));
     logger.printTrace('Newer than known AGP version ($agpV), gradle ($gradleV).'
         '\n Treating as valid configuration.');
     return validGradle;
@@ -390,84 +390,80 @@ bool validateGradleAndAgp(Logger logger,
 
   // Begin Known Gradle <-> AGP validation.
   // Max agp here is a made up version to contain all 7.4 changes.
-  if (isWithinVersionRange(agpV, min: '7.4', max: '7.5')) {
+  if (isWithinVersionRange(agpV, versionRange: const VersionRange('7.4', '7.5'))) {
     return isWithinVersionRange(gradleV,
-        min: '7.5', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('7.5', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(agpV,
-      min: '7.3', max: '7.4', inclusiveMax: false)) {
+      versionRange: const VersionRange('7.3', '7.4'), inclusiveMax: false)) {
     return isWithinVersionRange(gradleV,
-        min: '7.4', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('7.4', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(agpV,
-      min: '7.2', max: '7.3', inclusiveMax: false)) {
+      versionRange: const VersionRange('7.2', '7.3'), inclusiveMax: false)) {
     return isWithinVersionRange(gradleV,
-        min: '7.3.3', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('7.3.3', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(agpV,
-      min: '7.1', max: '7.2', inclusiveMax: false)) {
+      versionRange: const VersionRange('7.1', '7.2'), inclusiveMax: false)) {
     return isWithinVersionRange(gradleV,
-        min: '7.2', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('7.2', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(agpV,
-      min: '7.0', max: '7.1', inclusiveMax: false)) {
+      versionRange: const VersionRange('7.0', '7.1'), inclusiveMax: false)) {
     return isWithinVersionRange(gradleV,
-        min: '7.0', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('7.0', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(agpV,
-      min: '4.2.0', max: '7.0', inclusiveMax: false)) {
+      versionRange: const VersionRange('4.2.0', '7.0'), inclusiveMax: false)) {
     return isWithinVersionRange(gradleV,
-        min: '6.7.1', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('6.7.1', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(agpV,
-      min: '4.1.0', max: '4.2.0', inclusiveMax: false)) {
+      versionRange: const VersionRange('4.1.0', '4.2.0'), inclusiveMax: false)) {
     return isWithinVersionRange(gradleV,
-        min: '6.5', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('6.5', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(agpV,
-      min: '4.0.0', max: '4.1.0', inclusiveMax: false)) {
+      versionRange: const VersionRange('4.0.0', '4.1.0'), inclusiveMax: false)) {
     return isWithinVersionRange(gradleV,
-        min: '6.1.1', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('6.1.1', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(
     agpV,
-    min: '3.6.0',
-    max: '3.6.4',
+    versionRange: const VersionRange('3.6.0', '3.6.4'),
   )) {
     return isWithinVersionRange(gradleV,
-        min: '5.6.4', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('5.6.4', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(
     agpV,
-    min: '3.5.0',
-    max: '3.5.4',
+    versionRange: const VersionRange('3.5.0', '3.5.4'),
   )) {
     return isWithinVersionRange(gradleV,
-        min: '5.4.1', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('5.4.1', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(
     agpV,
-    min: '3.4.0',
-    max: '3.4.3',
+    versionRange: const VersionRange('3.4.0', '3.4.3'),
   )) {
     return isWithinVersionRange(gradleV,
-        min: '5.1.1', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('5.1.1', maxKnownAndSupportedGradleVersion));
   }
   if (isWithinVersionRange(
     agpV,
-    min: '3.3.0',
-    max: '3.3.3',
+    versionRange: const VersionRange('3.3.0', '3.3.3'),
   )) {
     return isWithinVersionRange(gradleV,
-        min: '4.10.1', max: maxKnownAndSupportedGradleVersion);
+        versionRange: const VersionRange('4.10.1', maxKnownAndSupportedGradleVersion));
   }
 
   logger.printTrace('Unknown Gradle-Agp compatibility, $gradleV, $agpV');
   return false;
 }
 
-/// Validate that the [javaVersion] and Gradle version are compatible with
-/// each other.
+/// Validate that the Java versiion [javaV] and Gradle version [gradleV] are
+/// compatible with each other.
 ///
 /// Source of truth:
 /// https://docs.gradle.org/current/userguide/compatibility.html#java
@@ -487,12 +483,12 @@ bool validateJavaAndGradle(Logger logger,
 
   // First check if versions are too old.
   if (isWithinVersionRange(javaV,
-      min: '1.1', max: oldestSupportedJavaVersion, inclusiveMax: false)) {
+      versionRange: const VersionRange('1.1', oldestSupportedJavaVersion), inclusiveMax: false)) {
     logger.printTrace('Java Version: $javaV is too old.');
     return false;
   }
   if (isWithinVersionRange(gradleV,
-      min: '0.0', max: oldestDocumentedJavaGradleCompatibility, inclusiveMax: false)) {
+      versionRange: const VersionRange('0.0', oldestDocumentedJavaGradleCompatibility), inclusiveMax: false)) {
     logger.printTrace('Gradle Version: $gradleV is too old.');
     return false;
   }
@@ -500,13 +496,12 @@ bool validateJavaAndGradle(Logger logger,
   // Check if versions are newer than the max supported versions.
   if (isWithinVersionRange(
     javaV,
-    min: oneMajorVersionHigherJavaVersion,
-    max: '100.100',
+    versionRange: const VersionRange(oneMajorVersionHigherJavaVersion, '100.100'),
   )) {
     // Assume versions Java versions newer than [maxSupportedJavaVersion]
     // required a higher gradle version.
     final bool validGradle = isWithinVersionRange(gradleV,
-        min: maxKnownAndSupportedGradleVersion, max: '100.00');
+        versionRange: const VersionRange(maxKnownAndSupportedGradleVersion, '100.00'));
     logger.printWarning(
         'Newer than known valid Java version ($javaV), gradle ($gradleV).'
         '\n Treating as valid configuration.');
@@ -515,8 +510,8 @@ bool validateJavaAndGradle(Logger logger,
 
   // Begin known Java <-> Gradle evaluation.
   for (final JavaGradleCompat data in _javaGradleCompatList) {
-    if (javaV == data.java) {
-      return isWithinVersionRange(gradleV, min: data.minRequiredGradle, max: maxKnownAndSupportedGradleVersion);
+    if (isWithinVersionRange(javaV, versionRange: VersionRange(data.javaMin, data.javaMax), inclusiveMax: false)) {
+      return isWithinVersionRange(gradleV, versionRange: VersionRange(data.minRequiredGradle, maxKnownAndSupportedGradleVersion));
     }
   }
 
@@ -536,7 +531,7 @@ JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(
   required String javaV,
 }) {
   for (final JavaGradleCompat data in _javaGradleCompatList) {
-    if (javaV == data.java) {
+    if (isWithinVersionRange(javaV, versionRange: VersionRange(data.javaMin, data.javaMax), inclusiveMax: false)) {
       return data;
     }
   }
@@ -564,21 +559,21 @@ bool validateJavaAndAgp(Logger logger,
 
   // Check if AGP version is too old to perform validation.
   if (isWithinVersionRange(agpV,
-      min: '1.0', max: oldestDocumentedJavaAgpCompatibilityVersion, inclusiveMax: false)) {
+      versionRange: const VersionRange('1.0', oldestDocumentedJavaAgpCompatibilityVersion), inclusiveMax: false)) {
     logger.printTrace('AGP Version: $agpV is too old to determine Java compatibility.');
     return false;
   }
 
   if (isWithinVersionRange(agpV,
-        min: maxKnownAndSupportedAgpVersion, max: '100.100', inclusiveMin: false)) {
+        versionRange: const VersionRange(maxKnownAndSupportedAgpVersion, '100.100'), inclusiveMin: false)) {
     logger.printTrace('AGP Version: $agpV is too new to determine Java compatibility.');
     return false;
   }
 
   // Begin known Java <-> AGP evaluation.
   for (final JavaAgpCompat data in _javaAgpCompatList) {
-    if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
-      return isWithinVersionRange(javaV, min: data.javaMin, max: '100.100');
+    if (isWithinVersionRange(agpV, versionRange: VersionRange(data.agpMin, data.agpMax))) {
+      return isWithinVersionRange(javaV, versionRange: VersionRange(data.javaMin, '100.100'));
     }
   }
 
@@ -591,7 +586,7 @@ bool validateJavaAndAgp(Logger logger,
   JavaAgpCompat? getMinimumAgpVersionForJavaVersion(Logger logger,
     {required String javaV}) {
   for (final JavaAgpCompat data in _javaAgpCompatList) {
-    if (isWithinVersionRange(javaV, min: data.javaMin, max: '100.100')) {
+    if (isWithinVersionRange(javaV, versionRange: VersionRange(data.javaMin, '100.100'))) {
       return data;
     }
   }
@@ -600,14 +595,16 @@ bool validateJavaAndAgp(Logger logger,
   return null;
 }
 
-/// Returns valid Java range for specified Gradle and AGP verisons.
+/// Returns valid Java range for specified Gradle and AGP verisons, where the
+/// minimum Java version is inclusive, but the maximum Java version is exclusive
+/// (a valid maximum Java version is < the maxJavaVersion returned).
 ///
 /// Assumes that [gradleV] and [agpV] are compatible versions.
 VersionRange getJavaVersionFor({required String gradleV, required String agpV}) {
   // Find minimum Java version based on AGP compatibility.
   String? minJavaVersion;
   for (final JavaAgpCompat data in _javaAgpCompatList) {
-    if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
+    if (isWithinVersionRange(agpV, versionRange: VersionRange(data.agpMin, data.agpMax))) {
       minJavaVersion = data.javaMin;
     }
   }
@@ -615,8 +612,8 @@ VersionRange getJavaVersionFor({required String gradleV, required String agpV}) 
   // Find maximum Java version based on Gradle compatibility.
   String? maxJavaVersion;
   for (final JavaGradleCompat data in _javaGradleCompatList.reversed) {
-    if (isWithinVersionRange(gradleV, min: data.minRequiredGradle, max: maxKnownAndSupportedGradleVersion)) {
-      maxJavaVersion = data.java;
+    if (isWithinVersionRange(gradleV, versionRange: VersionRange(data.minRequiredGradle, maxKnownAndSupportedGradleVersion))) {
+      maxJavaVersion = data.javaMax;
     }
   }
 
@@ -650,11 +647,11 @@ String getGradleVersionFor(String androidPluginVersion) {
 
   ];
   for (final GradleForAgp data in compatList) {
-    if (isWithinVersionRange(androidPluginVersion, min: data.agpMin, max: data.agpMax)) {
+    if (isWithinVersionRange(androidPluginVersion, versionRange: VersionRange(data.agpMin, data.agpMax))) {
       return data.minRequiredGradle;
     }
   }
-  if (isWithinVersionRange(androidPluginVersion, min: maxKnownAgpVersion, max: '100.100')) {
+  if (isWithinVersionRange(androidPluginVersion, versionRange: const VersionRange(maxKnownAgpVersion, '100.100'))) {
     return maxKnownAndSupportedGradleVersion;
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
@@ -747,26 +744,30 @@ void exitWithNoSdkMessage() {
 
 /// Data class to hold defined Java <-> Gradle compatability criteria.
 //
-/// [minRequiredGradle] represents the first Gradle version the Java version
-/// [java].
+/// [minRequiredGradle] represents the first Gradle version that can support the
+/// range of Java versions [[javaMin] - [javaMax]) where [javaMin] is inclusive
+/// and [javaMax] is exclusive.
 @immutable
 class JavaGradleCompat {
   const JavaGradleCompat({
-    required this.java,
+    required this.javaMin,
+    required this.javaMax,
     required this.minRequiredGradle,
   });
 
-  final String java;
+  final String javaMin;
+  final String javaMax;
   final String minRequiredGradle;
 
   @override
   bool operator ==(Object other) =>
       other is JavaGradleCompat &&
-      other.java == java &&
+      other.javaMin == javaMin &&
+      other.javaMax == javaMax &&
       other.minRequiredGradle == minRequiredGradle;
 
   @override
-  int get hashCode => Object.hash(java, minRequiredGradle);
+  int get hashCode => Object.hash(javaMin, javaMax, minRequiredGradle);
 }
 
 /// Data class to hold defined Java <-> AGP compatibility criteria.
@@ -833,52 +834,64 @@ String getGradlewFileName(Platform platform) {
 /// [oneMajorVersionHigher] - 1.
 List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
     JavaGradleCompat(
-      java: '19',
+      javaMin: '19',
+      javaMax: '20',
       minRequiredGradle: '7.6',
     ),
     JavaGradleCompat(
-      java: '18',
+      javaMin: '18',
+      javaMax: '19',
       minRequiredGradle: '7.5',
     ),
     JavaGradleCompat(
-      java: '17',
+      javaMin: '17',
+      javaMax: '18',
       minRequiredGradle: '7.3',
     ),
     JavaGradleCompat(
-      java: '16',
+      javaMin: '16',
+      javaMax: '17',
       minRequiredGradle: '7.0',
     ),
     JavaGradleCompat(
-      java: '15',
+      javaMin: '15',
+      javaMax: '16',
       minRequiredGradle: '6.7',
     ),
     JavaGradleCompat(
-      java: '14',
+      javaMin: '14',
+      javaMax: '15',
       minRequiredGradle: '6.3',
     ),
     JavaGradleCompat(
-      java: '13',
+      javaMin: '13',
+      javaMax: '14',
       minRequiredGradle: '6.0',
     ),
     JavaGradleCompat(
-      java: '12',
+      javaMin: '12',
+      javaMax: '13',
       minRequiredGradle: '5.4',
     ),
     JavaGradleCompat(
-      java: '11',
+      javaMin: '11',
+      javaMax: '12',
       minRequiredGradle: '5.0',
     ),
     // 1.11 is a made up java version to cover everything in 1.10.*
     JavaGradleCompat(
-      java: '1.10',
+      javaMin: '1.10',
+      javaMax: '1.11',
       minRequiredGradle: '4.7',
     ),
     JavaGradleCompat(
-      java: '1.9',
+      javaMin: '1.9',
+      javaMax: '1.10',
       minRequiredGradle: '4.3',
     ),
     JavaGradleCompat(
-      java: '1.8',
+      javaMin: '1.8',
+      javaMax: '1.9',
       minRequiredGradle: '2.0',
     ),
   ];

@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'version_range.dart';
+
 /// Represents the version of some piece of software.
 ///
 /// While a [Version] object has fields resembling semver, it does not
@@ -125,23 +127,23 @@ class Version implements Comparable<Version> {
   String toString() => _text;
 }
 
-/// Returns true if [targetVersion] is within the range [min] and [max]
-/// inclusive by default.
+/// Returns true if [targetVersion] is within the range [versionRange], which is
+/// treated as inclusive by default.
 ///
-/// [min] and [max] are evaluated by [Version.parse(text)].
+/// [versionRange.min] and [versionRange.max] are evaluated by
+/// [Version.parse(text)].
 ///
-/// Pass [inclusiveMin] = false for greater than and not equal to min.
-/// Pass [inclusiveMax] = false for less than and not equal to max.
+/// Pass [inclusiveMin] = false for greater than and not equal to [versionRange.min].
+/// Pass [inclusiveMax] = false for less than and not equal to [versionRange.max].
 bool isWithinVersionRange(
   String targetVersion, {
-  required String min,
-  required String max,
+  required VersionRange versionRange,
   bool inclusiveMax = true,
   bool inclusiveMin = true,
 }) {
   final Version? parsedTargetVersion = Version.parse(targetVersion);
-  final Version? minVersion = Version.parse(min);
-  final Version? maxVersion = Version.parse(max);
+  final Version? minVersion = Version.parse(versionRange.min);
+  final Version? maxVersion = Version.parse(versionRange.max);
 
   final bool withinMin = minVersion != null &&
       parsedTargetVersion != null &&

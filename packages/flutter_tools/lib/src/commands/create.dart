@@ -967,8 +967,8 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
   final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
   final VersionRange validJavaRange = gradle.getJavaVersionFor(gradleV: templateGradleVersion, agpV: templateAgpVersion);
-  // validJavaRange should have non-null verisonMin and versionMax since it based on our template AGP and Gradle versions.
-  final String validJavaRangeMessage = '(minimum compatible version: ${validJavaRange.versionMin!}, maximum compatible version: ${validJavaRange.versionMax!})';
+  // validJavaRange should have non-null min and max values since it based on our template AGP and Gradle versions.
+  final String validJavaRangeMessage = '(${validJavaRange.min!} <= compatible Java version < ${validJavaRange.max!})';
 
   return '''
 The configured version of Java detected may conflict with the $incompatibleDependency version in your new Flutter $projectType.
