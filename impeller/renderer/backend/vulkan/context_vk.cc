@@ -113,9 +113,7 @@ ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
-  if (command_pool_recycler_) {
-    command_pool_recycler_.get()->Dispose();
-  }
+  CommandPoolRecyclerVK::DestroyThreadLocalPools(this);
 }
 
 Context::BackendType ContextVK::GetBackendType() const {

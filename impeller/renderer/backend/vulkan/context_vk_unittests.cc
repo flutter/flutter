@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -23,6 +24,37 @@ TEST(ContextVKTest, DeletesCommandPools) {
   }
   ASSERT_FALSE(weak_pool.lock());
   ASSERT_FALSE(weak_context.lock());
+}
+
+TEST(ContextVKTest, DeletesCommandPoolsOnAllThreads) {
+  std::weak_ptr<ContextVK> weak_context;
+  std::weak_ptr<CommandPoolVK> weak_pool_main;
+
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  weak_pool_main = context->GetCommandPoolRecycler()->Get();
+  weak_context = context;
+  ASSERT_TRUE(weak_pool_main.lock());
+  ASSERT_TRUE(weak_context.lock());
+
+  // Start a second thread that obtains a command pool.
+  fml::AutoResetWaitableEvent latch1, latch2;
+  std::weak_ptr<CommandPoolVK> weak_pool_thread;
+  std::thread thread([&]() {
+    weak_pool_thread = context->GetCommandPoolRecycler()->Get();
+    latch1.Signal();
+    latch2.Wait();
+  });
+
+  // Delete the ContextVK on the main thread.
+  latch1.Wait();
+  context.reset();
+  ASSERT_FALSE(weak_pool_main.lock());
+  ASSERT_FALSE(weak_context.lock());
+
+  // Stop the second thread and check that its command pool has been deleted.
+  latch2.Signal();
+  thread.join();
+  ASSERT_FALSE(weak_pool_thread.lock());
 }
 
 TEST(ContextVKTest, DeletePipelineAfterContext) {
