@@ -8,7 +8,7 @@ part of zircon;
 // ignore_for_file: public_member_api_docs
 
 @pragma('vm:entry-point')
-class HandleDisposition extends NativeFieldWrapperClass1 {
+base class HandleDisposition extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   HandleDisposition(int operation, Handle handle, int type, int rights) {
     _constructor(operation, handle, type, rights);
