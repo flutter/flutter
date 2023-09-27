@@ -390,6 +390,10 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     args.aot_data = aot_data_.get();
   }
 
+  // The platform thread creates OpenGL contexts. These
+  // must be released to be used by the engine's threads.
+  FML_DCHECK(!surface_manager_ || !surface_manager_->HasContextCurrent());
+
   FlutterRendererConfig renderer_config;
 
   if (enable_impeller_) {

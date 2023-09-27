@@ -256,6 +256,11 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
   surface_height_ = height;
   render_surface_ = surface;
 
+  if (!MakeCurrent()) {
+    LogEglError("Unable to make surface current to update the swap interval");
+    return false;
+  }
+
   SetVSyncEnabled(vsync_enabled);
   return true;
 }
@@ -300,9 +305,18 @@ void AngleSurfaceManager::DestroySurface() {
   render_surface_ = EGL_NO_SURFACE;
 }
 
+bool AngleSurfaceManager::HasContextCurrent() {
+  return eglGetCurrentContext() != EGL_NO_CONTEXT;
+}
+
 bool AngleSurfaceManager::MakeCurrent() {
   return (eglMakeCurrent(egl_display_, render_surface_, render_surface_,
                          egl_context_) == EGL_TRUE);
+}
+
+bool AngleSurfaceManager::ClearCurrent() {
+  return (eglMakeCurrent(egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                         EGL_NO_CONTEXT) == EGL_TRUE);
 }
 
 bool AngleSurfaceManager::ClearContext() {
@@ -328,12 +342,6 @@ EGLSurface AngleSurfaceManager::CreateSurfaceFromHandle(
 }
 
 void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
-  if (eglMakeCurrent(egl_display_, render_surface_, render_surface_,
-                     egl_context_) != EGL_TRUE) {
-    LogEglError("Unable to make surface current to update the swap interval");
-    return;
-  }
-
   // OpenGL swap intervals can be used to prevent screen tearing.
   // If enabled, the raster thread blocks until the v-blank.
   // This is unnecessary if DWM composition is enabled.
