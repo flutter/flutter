@@ -49,5 +49,5 @@ void main() {
       '--no-pub',
       fs.path.join(projectPath, 'lib', 'main.dart'),
     ]);
-  }, skip: !const LocalPlatform().isWindows);
+  }, skip: !const LocalPlatform().isWindows); // [intended] Flutter Preview only supported on Windows currently
 }
