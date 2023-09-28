@@ -253,6 +253,15 @@ void main() {
     expect(result, const ProcessResultMatcher());
   });
 
+  testWithoutContext('flutter test should not run tests outside of the argued directory if there are none in that directory', () async {
+    final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, '$flutterTestDirectory/child_directory_with_no_tests',
+      extraArguments: const <String>['--verbose']);
+    final String stdout = (result.stdout as String).replaceAll('\r', '\n');
+    expect(stdout, contains('No tests ran.'));
+    expect(stdout, contains('No tests were found.'));
+    expect(result, const ProcessResultMatcher());
+  });
+
   testWithoutContext('flutter gold skips tests where the expectations are missing', () async {
     return _testFile('flutter_gold', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
