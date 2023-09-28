@@ -224,8 +224,14 @@ void main() {
 
     // Backwards selection.
     await gesture.down(textOffsetToPosition(paragraph, 3));
-    await tester.pumpAndSettle();
-    expect(content, isNull);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+
+    await gesture.down(textOffsetToPosition(paragraph, 3));
+    await tester.pump();
     await gesture.moveTo(textOffsetToPosition(paragraph, 0));
     await gesture.up();
     await tester.pump();
