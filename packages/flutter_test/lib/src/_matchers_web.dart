@@ -62,27 +62,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     final ui.FlutterView view = binding.platformDispatcher.implicitView!;
     final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
 
-    if (!isCanvasKit) {
-      // Unlike `flutter_tester`, we don't have the ability to render an element
-      // to an image directly. Instead, we will use `window.render()` to render
-      // only the element being requested, and send a request to the test server
-      // requesting it to take a screenshot through the browser's debug interface.
-      _renderElement(view, renderObject);
-      final String? result = await binding.runAsync<String?>(() async {
-        if (autoUpdateGoldenFiles) {
-          await webGoldenComparator.update(size.width, size.height, key);
-          return null;
-        }
-        try {
-          final bool success = await webGoldenComparator.compare(size.width, size.height, key);
-          return success ? null : 'does not match';
-        } on TestFailure catch (ex) {
-          return ex.message;
-        }
-      });
-      _renderElement(view, renderView);
-      return result;
-    } else {
+    if (isCanvasKit) {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
       return binding.runAsync<String?>(() async {
         assert(element.renderObject != null);
@@ -112,6 +92,26 @@ class MatchesGoldenFile extends AsyncMatcher {
           image.dispose();
         }
       });
+    } else {
+      // In the HTML renderer, we don't have the ability to render an element
+      // to an image directly. Instead, we will use `window.render()` to render
+      // only the element being requested, and send a request to the test server
+      // requesting it to take a screenshot through the browser's debug interface.
+      _renderElement(view, renderObject);
+      final String? result = await binding.runAsync<String?>(() async {
+        if (autoUpdateGoldenFiles) {
+          await webGoldenComparator.update(size.width, size.height, key);
+          return null;
+        }
+        try {
+          final bool success = await webGoldenComparator.compare(size.width, size.height, key);
+          return success ? null : 'does not match';
+        } on TestFailure catch (ex) {
+          return ex.message;
+        }
+      });
+      _renderElement(view, renderView);
+      return result;
     }
   }
 
