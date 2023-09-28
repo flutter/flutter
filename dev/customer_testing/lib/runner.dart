@@ -108,6 +108,18 @@ Future<bool> runTests({
       }
       if (success) {
         final Directory customerRepo = Directory(path.join(checkout.path, 'tests'));
+        for (final String setupCommand in instructions.setup) {
+          success = await shell(
+            setupCommand,
+            customerRepo,
+            verbose: verbose,
+            failedCallback: printHeader,
+          );
+          if (!success) {
+            failure('Setup step failed: $setupCommand');
+            break;
+          }
+        }
         for (final Directory updateDirectory in instructions.update) {
           final Directory resolvedUpdateDirectory = Directory(path.join(customerRepo.path, updateDirectory.path));
           if (verbose) {
