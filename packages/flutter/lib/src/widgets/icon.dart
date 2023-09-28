@@ -13,6 +13,7 @@ import 'framework.dart';
 import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'media_query.dart';
 
 /// A graphical icon widget drawn with a glyph from a font described in
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
@@ -80,6 +81,7 @@ class Icon extends StatelessWidget {
     this.shadows,
     this.semanticLabel,
     this.textDirection,
+    this.considerTextScale,
   }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
@@ -231,6 +233,15 @@ class Icon extends StatelessWidget {
   /// specified, either directly using this property or using [Directionality].
   final TextDirection? textDirection;
 
+  /// Whether the size is affected by the context's text scaler.
+  ///
+  /// If true, the icon size is going to be scaled by the [TextScaler] of the
+  /// context's [MediaQuery].
+  ///
+  /// Defaults to the nearest [IconTheme]'s
+  /// [IconThemeData.considerTextScale].
+  final bool? considerTextScale;
+
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
@@ -238,7 +249,14 @@ class Icon extends StatelessWidget {
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
-    final double? iconSize = size ?? iconTheme.size;
+    final bool? considerTextScale = this.considerTextScale ?? iconTheme.considerTextScale;
+
+    final double? tentativeIconSize = size ?? iconTheme.size;
+
+    final double? iconSize = switch ((tentativeIconSize, considerTextScale)) {
+      (final double tentativeIconSize, true) => MediaQuery.textScalerOf(context).scale(tentativeIconSize),
+      _ => tentativeIconSize,
+    };
 
     final double? iconFill = fill ?? iconTheme.fill;
 
@@ -332,5 +350,6 @@ class Icon extends StatelessWidget {
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(FlagProperty('considerTextScale', value: considerTextScale));
   }
 }
