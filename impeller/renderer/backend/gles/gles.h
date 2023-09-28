@@ -4,6 +4,8 @@
 
 #pragma once
 
+// IWYU pragma: begin_exports
 #include "GLES3/gl3.h"
 #define GL_GLEXT_PROTOTYPES
 #include "GLES2/gl2ext.h"
+// IWYU pragma: end_exports
