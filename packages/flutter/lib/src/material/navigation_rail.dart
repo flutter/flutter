@@ -103,6 +103,7 @@ class NavigationRail extends StatefulWidget {
     this.elevation,
     this.groupAlignment,
     this.labelType,
+    this.iconType,
     this.unselectedLabelTextStyle,
     this.selectedLabelTextStyle,
     this.unselectedIconTheme,
@@ -118,7 +119,14 @@ class NavigationRail extends StatefulWidget {
         assert(minWidth == null || minWidth > 0),
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
-        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
+        assert((iconType == NavigationRailIconType.selected &&
+            !(labelType == NavigationRailLabelType.selected ||
+                labelType == NavigationRailLabelType.none)) ||
+            (iconType == NavigationRailIconType.none &&
+                !(labelType == NavigationRailLabelType.selected ||
+                    labelType == NavigationRailLabelType.none)) ||
+            (iconType == NavigationRailIconType.all));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -218,11 +226,41 @@ class NavigationRail extends StatefulWidget {
   /// [NavigationRailThemeData.labelType] is null, then the default value is
   /// [NavigationRailLabelType.none].
   ///
+  /// Possible combinations of `iconType` along with `labelType` include:
+  /// ```
+  /// All Icon + All Label (default),
+  /// All Icon + Selected Label,
+  /// All Icon + No Label,
+  /// Selected Icon + All Label,
+  /// No Icon + All Label
+  /// ```
   /// See also:
   ///
   ///   * [NavigationRailLabelType] for information on the meaning of different
   ///   types.
   final NavigationRailLabelType? labelType;
+
+  /// Defines the layout and behavior of the icons for the default
+  /// [NavigationRail].
+  ///
+  /// The default value is [NavigationRailThemeData.iconType]. If
+  /// [NavigationRailThemeData.iconType] is null, then the default value is
+  /// [NavigationRailIconType.all].
+  ///
+  /// Possible combinations of `iconType` along with `labelType` include:
+  /// ```
+  /// All Icon + All Label (default),
+  /// All Icon + Selected Label,
+  /// All Icon + No Label,
+  /// Selected Icon + All Label,
+  /// No Icon + All Label
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///   * [NavigationRailLabelType] for information on the meaning of different
+  ///   types.
+  final NavigationRailIconType? iconType;
 
   /// The [TextStyle] of a destination's label when it is unselected.
   ///
@@ -405,6 +443,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final IconThemeData selectedIconTheme = widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme ?? defaults.selectedIconTheme!;
     final double groupAlignment = widget.groupAlignment ?? navigationRailTheme.groupAlignment ?? defaults.groupAlignment!;
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? defaults.labelType!;
+    final NavigationRailIconType iconType = widget.iconType ?? navigationRailTheme.iconType ?? defaults.iconType!;
     final bool useIndicator = widget.useIndicator ?? navigationRailTheme.useIndicator ?? defaults.useIndicator!;
     final Color? indicatorColor = widget.indicatorColor ?? navigationRailTheme.indicatorColor ?? defaults.indicatorColor;
     final ShapeBorder? indicatorShape = widget.indicatorShape ?? navigationRailTheme.indicatorShape ?? defaults.indicatorShape;
@@ -452,6 +491,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                             label: widget.destinations[i].label,
                             destinationAnimation: _destinationAnimations[i],
                             labelType: labelType,
+                            iconType: iconType,
                             iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
                             labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                             padding: widget.destinations[i].padding,
@@ -537,6 +577,7 @@ class _RailDestination extends StatelessWidget {
     required this.destinationAnimation,
     required this.extendedTransitionAnimation,
     required this.labelType,
+    required this.iconType,
     required this.selected,
     required this.iconTheme,
     required this.labelTextStyle,
@@ -559,6 +600,7 @@ class _RailDestination extends StatelessWidget {
   final Widget label;
   final Animation<double> destinationAnimation;
   final NavigationRailLabelType labelType;
+  final NavigationRailIconType iconType;
   final bool selected;
   final Animation<double> extendedTransitionAnimation;
   final IconThemeData iconTheme;
@@ -636,6 +678,11 @@ class _RailDestination extends StatelessWidget {
             if (spacing != null) spacing,
           ],
         );
+
+        // No switch case of [NavigationRailIconType] for
+        // [NavigationRailLabelType.none] as it shows all icons by default,
+        // and remaining configurations are restricted by assert statements.
+
         if (extendedTransitionAnimation.value == 0) {
           content = Padding(
             padding: padding ?? EdgeInsets.zero,
@@ -703,6 +750,11 @@ class _RailDestination extends StatelessWidget {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
+
+        // No switch case of [NavigationRailIconType] for
+        // [NavigationRailLabelType.selected] as it shows all icons by default,
+        // and remaining configurations are restricted by assert statements.
+
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -756,29 +808,73 @@ class _RailDestination extends StatelessWidget {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
-        content = Container(
-          constraints: BoxConstraints(
-            minWidth: minWidth,
-            minHeight: minHeight,
-          ),
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
-          child: Column(
-            children: <Widget>[
-              topSpacing,
-              _AddIndicator(
-                addIndicator: useIndicator,
-                indicatorColor: indicatorColor,
-                indicatorShape: indicatorShape,
-                isCircular: false,
-                indicatorAnimation: destinationAnimation,
-                child: themedIcon,
+
+        switch (iconType) {
+          case NavigationRailIconType.all:
+            content = Container(
+              constraints: BoxConstraints(
+                minWidth: minWidth,
+                minHeight: minHeight,
               ),
-              labelSpacing,
-              styledLabel,
-              bottomSpacing,
-            ],
-          ),
-        );
+              padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+              child: Column(
+                children: <Widget>[
+                  topSpacing,
+                  _AddIndicator(
+                    addIndicator: useIndicator,
+                    indicatorColor: indicatorColor,
+                    indicatorShape: indicatorShape,
+                    isCircular: false,
+                    indicatorAnimation: destinationAnimation,
+                    child: themedIcon,
+                  ),
+                  labelSpacing,
+                  styledLabel,
+                  bottomSpacing,
+                ],
+              ),
+            );
+          case NavigationRailIconType.selected:
+            content = Container(
+            constraints: BoxConstraints(
+              minWidth: minWidth,
+              minHeight: minHeight,
+            ),
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+            child: Column(
+              children: <Widget>[
+                topSpacing,
+                if (selected) _AddIndicator(
+                  addIndicator: useIndicator,
+                  indicatorColor: indicatorColor,
+                  indicatorShape: indicatorShape,
+                  isCircular: false,
+                  indicatorAnimation: destinationAnimation,
+                  child: themedIcon,
+                ) else const SizedBox(),
+                labelSpacing,
+                styledLabel,
+                bottomSpacing,
+              ],
+            ),
+          );
+          case NavigationRailIconType.none:
+            content = Container(
+              constraints: BoxConstraints(
+                minWidth: minWidth,
+                minHeight: minHeight,
+              ),
+              padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+              child: Column(
+                children: <Widget>[
+                  topSpacing,
+                  labelSpacing,
+                  styledLabel,
+                  bottomSpacing,
+                ],
+              ),
+            );
+        }
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
@@ -938,6 +1034,25 @@ enum NavigationRailLabelType {
   all,
 }
 
+/// Defines the behavior of the icons of a [NavigationRail].
+///
+/// See also:
+///
+///   * [NavigationRail]
+enum NavigationRailIconType {
+  /// Only the [NavigationRailDestination]s are shown.
+  none,
+
+  /// Only the selected [NavigationRailDestination] will show its label.
+  ///
+  /// The label will animate in and out as new [NavigationRailDestination]s are
+  /// selected.
+  selected,
+
+  /// All [NavigationRailDestination]s will show their label.
+  all,
+}
+
 /// Defines a [NavigationRail] button that represents one "destination" view.
 ///
 /// See also:
@@ -1038,6 +1153,7 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
         elevation: 0,
         groupAlignment: -1,
         labelType: NavigationRailLabelType.none,
+        iconType: NavigationRailIconType.all,
         useIndicator: false,
         minWidth: 72.0,
         minExtendedWidth: 256,
@@ -1086,6 +1202,7 @@ class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
         elevation: 0.0,
         groupAlignment: -1,
         labelType: NavigationRailLabelType.none,
+        iconType: NavigationRailIconType.all,
         useIndicator: true,
         minWidth: 80.0,
         minExtendedWidth: 256,
