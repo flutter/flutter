@@ -66,23 +66,17 @@ std::shared_ptr<Texture> Picture::RenderToTexture(
         size,                     // size
         "Picture Snapshot MSAA",  // label
         RenderTarget::
-            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
-#ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.
-        ,
-        std::nullopt  // stencil_attachment_config
-#endif                // FML_OS_ANDROID
+            kDefaultColorAttachmentConfigMSAA,  // color_attachment_config
+        std::nullopt                            // stencil_attachment_config
     );
   } else {
     target = RenderTarget::CreateOffscreen(
-        *impeller_context,                           // context
-        render_target_allocator,                     // allocator
-        size,                                        // size
-        "Picture Snapshot",                          // label
-        RenderTarget::kDefaultColorAttachmentConfig  // color_attachment_config
-#ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.
-        ,
+        *impeller_context,                            // context
+        render_target_allocator,                      // allocator
+        size,                                         // size
+        "Picture Snapshot",                           // label
+        RenderTarget::kDefaultColorAttachmentConfig,  // color_attachment_config
         std::nullopt  // stencil_attachment_config
-#endif                // FML_OS_ANDROID
     );
   }
   if (!target.IsValid()) {

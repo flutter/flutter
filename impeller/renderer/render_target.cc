@@ -231,11 +231,6 @@ RenderTarget RenderTarget::CreateOffscreen(
     return {};
   }
 
-// Dont force additional PSO variants on Vulkan.
-#ifdef FML_OS_ANDROID
-  FML_DCHECK(stencil_attachment_config.has_value());
-#endif  // FML_OS_ANDROID
-
   RenderTarget target;
   PixelFormat pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
   TextureDescriptor color_tex0;
@@ -277,11 +272,6 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
   if (size.IsEmpty()) {
     return {};
   }
-
-// Dont force additional PSO variants on Vulkan.
-#ifdef FML_OS_ANDROID
-  FML_DCHECK(stencil_attachment_config.has_value());
-#endif  // FML_OS_ANDROID
 
   RenderTarget target;
   PixelFormat pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
