@@ -70,7 +70,7 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
     final bool matchesRequirements;
     if (!_platform.isWindows) {
       matchesRequirements = false;
-    } else if (_features.isPreviewDeviceEnabled) {
+    } else if (!_features.isPreviewDeviceEnabled) {
       matchesRequirements = false;
     } else if (filter == null) {
       matchesRequirements = true;
