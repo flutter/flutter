@@ -964,10 +964,6 @@ class StartupTest {
           device.deviceId,
         ]);
 
-        // print('Waiting 10 seocnds...');
-        // sleep(const Duration(seconds: 10));
-        // print('Done waiting.');
-        // TODO add wait for device here.
         await device.awaitDevice();
       }
 
@@ -1095,6 +1091,8 @@ class DevtoolsStartupTest {
         '-d',
         device.deviceId,
       ]);
+
+      await device.awaitDevice();
 
       if (sawLine) {
         return TaskResult.success(null, benchmarkScoreKeys: <String>[]);
@@ -1857,6 +1855,8 @@ class MemoryTest {
 
       await adb.cancel();
       await flutter('install', options: <String>['--uninstall-only', '-d', device!.deviceId]);
+
+      await device!.awaitDevice();
 
       final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
