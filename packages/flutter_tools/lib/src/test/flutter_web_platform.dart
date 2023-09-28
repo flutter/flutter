@@ -441,6 +441,14 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (_closed) {
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
+
+    final String pathFromTest = _fileSystem.path.relative(path, from: _fileSystem.path.join(_root, 'test'));
+    final Uri suiteUrl = url.resolveUri(_fileSystem.path.toUri('${_fileSystem.path.withoutExtension(pathFromTest)}.html'));
+    final String relativePath = _fileSystem.path.relative(_fileSystem.path.normalize(path), from: _fileSystem.currentDirectory.path);
+    if (_logger.isVerbose) {
+      _logger.printTrace('Loading test suite $relativePath.');
+    }
+
     final PoolResource lockResource = await _suiteLock.request();
 
     final Runtime browser = platform.runtime;
@@ -455,17 +463,23 @@ class FlutterWebPlatform extends PlatformPlugin {
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
-    final String pathFromTest = _fileSystem.path.relative(path, from: _fileSystem.path.join(_root, 'test'));
-    final Uri suiteUrl = url.resolveUri(_fileSystem.path.toUri('${_fileSystem.path.withoutExtension(pathFromTest)}.html'));
-    final String relativePath = _fileSystem.path.relative(_fileSystem.path.normalize(path), from: _fileSystem.currentDirectory.path);
+    if (_logger.isVerbose) {
+      _logger.printTrace('Running test suite $relativePath.');
+    }
+
     final RunnerSuite suite = await _browserManager!.load(relativePath, suiteUrl, suiteConfig, message, onDone: () async {
       await _browserManager!.close();
       _browserManager = null;
       lockResource.release();
+      if (_logger.isVerbose) {
+        _logger.printTrace('Test suite $relativePath finished.');
+      }
     });
+
     if (_closed) {
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
+
     return suite;
   }
 
