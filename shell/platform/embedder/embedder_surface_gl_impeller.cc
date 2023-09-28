@@ -86,13 +86,13 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
     return;
   }
 
-  worker_->SetReactionsAllowedOnCurrentThread(true);
   auto worker_id = impeller_context_->AddReactorWorker(worker_);
   if (!worker_id.has_value()) {
     FML_LOG(ERROR) << "Could not add reactor worker.";
     return;
   }
 
+  gl_dispatch_table_.gl_clear_current_callback();
   FML_LOG(ERROR) << "Using the Impeller rendering backend (OpenGL).";
   valid_ = true;
 }
