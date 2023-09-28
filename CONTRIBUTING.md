@@ -1,6 +1,6 @@
-<!-- when editing this file also update https://github.com/flutter/.github/blob/main/CONTRIBUTING.md -->
+<!- when editing this file also update https://github.com/flutter/.github/blob/main/CONTRIBUTING.md -->
 
-Contributing to Flutter
+**Contributing to Flutter**
 =======================
 
 _tl;dr: join [Discord](https://github.com/flutter/flutter/wiki/Chat), be [courteous](CODE_OF_CONDUCT.md), follow the steps below to set up a development environment; if you stick around and contribute, you can [join the team](https://github.com/flutter/flutter/wiki/Contributor-access) and get commit access._
