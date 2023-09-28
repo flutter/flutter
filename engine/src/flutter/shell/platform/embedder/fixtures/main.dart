@@ -1298,3 +1298,25 @@ void channel_listener_response() async {
   });
   signalNativeTest();
 }
+
+@pragma('vm:entry-point')
+void render_gradient_retained() {
+  OffsetEngineLayer? offsetLayer; // Retain the offset layer.
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    Size size = Size(800.0, 600.0);
+
+    SceneBuilder builder = SceneBuilder();
+
+    offsetLayer = builder.pushOffset(0.0, 0.0, oldLayer: offsetLayer);
+
+    // display_list_layer will comparing the display_list
+    // no need to retain the picture
+    builder.addPicture(
+        Offset(0.0, 0.0), CreateGradientBox(size)); // gradient - flutter
+
+    builder.pop();
+
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
