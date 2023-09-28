@@ -116,6 +116,8 @@ class PageController extends ScrollController {
     this.initialPage = 0,
     this.keepPage = true,
     this.viewportFraction = 1.0,
+    super.onAttach,
+    super.onDetach,
   }) : assert(viewportFraction > 0.0);
 
   /// The page to show when first creating the [PageView].

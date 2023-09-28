@@ -83,6 +83,37 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
     });
 
+    testWidgetsWithLeakTracking('FixedExtentScrollController onAttach, onDetach', (WidgetTester tester) async {
+      int attach = 0;
+      int detach = 0;
+      final FixedExtentScrollController controller = FixedExtentScrollController(
+        onAttach: (_) { attach++; },
+        onDetach: (_) { detach++; },
+      );
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 50.0,
+            children: const <Widget>[],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(attach, 1);
+      expect(detach, 0);
+
+      await tester.pumpWidget(Container());
+      await tester.pumpAndSettle();
+
+      expect(attach, 1);
+      expect(detach, 1);
+    });
+
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
         () {
