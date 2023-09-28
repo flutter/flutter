@@ -54,18 +54,17 @@ void main() {
   });
 
   group('Unit testing getAnalytics', () {
-    testWithoutContext('Successfully creates the instance for standard branch',
-        () {
+    testWithoutContext('Successfully creates the instance for standard branch', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
         flutterVersion: FakeFlutterVersion(),
-        environment: <String, String>{},
+        environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
       );
 
       expect(analytics.clientId, isNot(NoOpAnalytics.staticClientId),
           reason: 'The CLIENT ID should be a randomly generated id');
-      expect(analytics is! NoOpAnalytics, true);
+      expect(analytics, isNot(isA<NoOpAnalytics>()));
     });
 
     testWithoutContext('NoOp instance for user branch', () {
@@ -75,13 +74,16 @@ void main() {
           branch: userBranch,
           frameworkRevision: '3.14.0-14.0.pre.370',
         ),
-        environment: <String, String>{},
+        environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, NoOpAnalytics.staticClientId,
-          reason: 'The client ID should match the NoOp client id');
-      expect(analytics is NoOpAnalytics, true);
+      expect(
+        analytics.clientId,
+        NoOpAnalytics.staticClientId,
+        reason: 'The client ID should match the NoOp client id',
+      );
+      expect(analytics, isA<NoOpAnalytics>());
     });
 
     testWithoutContext('NoOp instance for unknown branch', () {
@@ -90,39 +92,48 @@ void main() {
         flutterVersion: FakeFlutterVersion(
           frameworkRevision: 'unknown',
         ),
-        environment: <String, String>{},
+        environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, NoOpAnalytics.staticClientId,
-          reason: 'The client ID should match the NoOp client id');
-      expect(analytics is NoOpAnalytics, true);
+      expect(
+        analytics.clientId,
+        NoOpAnalytics.staticClientId,
+        reason: 'The client ID should match the NoOp client id',
+      );
+      expect(analytics, isA<NoOpAnalytics>());
     });
 
     testWithoutContext('NoOp instance when running on bots', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: true,
         flutterVersion: FakeFlutterVersion(),
-        environment: <String, String>{},
+        environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, NoOpAnalytics.staticClientId,
-          reason: 'The client ID should match the NoOp client id');
-      expect(analytics is NoOpAnalytics, true);
+      expect(
+        analytics.clientId,
+        NoOpAnalytics.staticClientId,
+        reason: 'The client ID should match the NoOp client id',
+      );
+      expect(analytics, isA<NoOpAnalytics>());
     });
 
     testWithoutContext('NoOp instance when suppressing via env variable', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: true,
         flutterVersion: FakeFlutterVersion(),
-        environment: <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
+        environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, NoOpAnalytics.staticClientId,
-          reason: 'The client ID should match the NoOp client id');
-      expect(analytics is NoOpAnalytics, true);
+      expect(
+        analytics.clientId,
+        NoOpAnalytics.staticClientId,
+        reason: 'The client ID should match the NoOp client id',
+      );
+      expect(analytics, isA<NoOpAnalytics>());
     });
   });
 }
