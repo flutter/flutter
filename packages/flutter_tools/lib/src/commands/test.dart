@@ -291,11 +291,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         String testPath = uri.replace(query: '').toFilePath();
         testPath = globals.fs.path.absolute(testPath);
         testPath = globals.fs.path.normalize(testPath);
-        if (globals.fs.isDirectorySync(testPath)) {
-          _testFileUris.addAll(_findTests(globals.fs.directory(testPath)).map(Uri.file));
-        } else {
-          _testFileUris.add(Uri.file(testPath).replace(query: uri.query));
-        }
+        _testFileUris.add(Uri.file(testPath).replace(query: uri.query));
       }
     }
 
@@ -470,6 +466,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.TestRunner);
+
     final int result = await testRunner.runTests(
       testWrapper,
       _testFileUris.toList(),
