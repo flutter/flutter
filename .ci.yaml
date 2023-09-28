@@ -199,6 +199,7 @@ platform_properties:
       device_type: none
   windows_arm64:
     properties:
+      arch: arm64
       dependencies: >-
         [
           {"dependency": "certs", "version": "version:9563bb"}
