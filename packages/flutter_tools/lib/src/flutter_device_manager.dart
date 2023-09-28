@@ -111,6 +111,7 @@ class FlutterDeviceManager extends DeviceManager {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
+      featureFlags: featureFlags,
     ),
     LinuxDevices(
       platform: platform,

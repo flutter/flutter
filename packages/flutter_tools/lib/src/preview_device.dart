@@ -19,6 +19,7 @@ import 'desktop_device.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
+import 'features.dart';
 import 'project.dart';
 import 'protocol_discovery.dart';
 
@@ -35,17 +36,20 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
     required FileSystem fileSystem,
     required Logger logger,
     required ProcessManager processManager,
+    required FeatureFlags featureFlags,
   }) : _artifacts = artifacts,
        _logger = logger,
        _processManager = processManager,
        _fileSystem = fileSystem,
-       _platform = platform;
+       _platform = platform,
+       _features = featureFlags;
 
   final Platform _platform;
   final Artifacts _artifacts;
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
+  final FeatureFlags _features;
 
   @override
   bool get canListAnything => _platform.isWindows;
@@ -55,16 +59,27 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) async {
-    // TODO add logic to detect support
+    final PreviewDevice device = PreviewDevice(
+      artifacts: _artifacts,
+      fileSystem: _fileSystem,
+      logger: _logger,
+      processManager: _processManager,
+      previewBinary: _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice)),
+    );
+
+    final bool matchesRequirements;
+    if (!_platform.isWindows) {
+      matchesRequirements = false;
+    } else if (_features.isPreviewDeviceEnabled) {
+      matchesRequirements = false;
+    } else if (filter == null) {
+      matchesRequirements = true;
+    } else {
+      matchesRequirements = await filter.matchesRequirements(device);
+    }
     return <Device>[
-      if (_platform.isWindows)
-        PreviewDevice(
-          artifacts: _artifacts,
-          fileSystem: _fileSystem,
-          logger: _logger,
-          processManager: _processManager,
-          previewBinary: _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice)),
-        )
+      if (matchesRequirements)
+        device,
     ];
   }
 

@@ -23,6 +23,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   String? flutterRootBackup;
@@ -109,6 +110,7 @@ void main() {
     final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
     final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
     final FakePlatform linuxPlatform = FakePlatform();
+    final TestFeatureFlags featureFlags = TestFeatureFlags(isPreviewDeviceEnabled: true);
 
     setUp(() {
       artifacts = Artifacts.test(fileSystem: fs);
@@ -122,6 +124,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: processManager,
         platform: linuxPlatform,
+        featureFlags: featureFlags,
       );
 
       final List<Device> devices = await discovery.devices();
@@ -136,6 +139,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: processManager,
         platform: macPlatform,
+        featureFlags: featureFlags,
       );
 
       final List<Device> devices = await discovery.devices();
@@ -150,6 +154,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: processManager,
         platform: windowsPlatform,
+        featureFlags: featureFlags,
       );
 
       final List<Device> devices = await discovery.devices();

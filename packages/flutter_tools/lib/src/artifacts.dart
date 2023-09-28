@@ -1131,7 +1131,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils;
 
-
   final Artifacts _parent;
   final String _webSdkPath;
   final FileSystem _fileSystem;
@@ -1182,9 +1181,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fontSubset:
         case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
-          break;
         case Artifact.flutterPreviewDevice:
-          throw UnimplementedError('TODO!'); // TODO
+          break;
       }
     }
     return _parent.getArtifactPath(artifact, platform: platform, mode: mode, environmentType: environmentType);

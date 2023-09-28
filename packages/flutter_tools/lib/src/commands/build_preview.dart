@@ -72,7 +72,6 @@ class BuildPreviewCommand extends BuildSubCommand {
         .childDirectory('runner')
         .childDirectory('Debug')
         .childFile('$appName.exe');
-    // TODO test custom build dir
     if (!previewDevice.existsSync()) {
       throw StateError('Preview device not found at ${previewDevice.absolute.path}');
     }
