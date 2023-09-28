@@ -144,11 +144,11 @@ public final class BasicMessageChannel<T> {
 
   /**
    * Toggles whether the channel should show warning messages when discarding messages due to
-   * overflow. When 'allowed' is true the channel is expected to overflow and warning messages will
+   * overflow. When 'warns' is false the channel is expected to overflow and warning messages will
    * not be shown.
    */
-  public void allowChannelBufferOverflow(boolean allowed) {
-    allowChannelBufferOverflow(messenger, name, allowed);
+  public void setWarnsOnChannelOverflow(boolean warns) {
+    setWarnsOnChannelOverflow(messenger, name, warns);
   }
 
   private static ByteBuffer packetFromEncodedMessage(ByteBuffer message) {
@@ -182,13 +182,13 @@ public final class BasicMessageChannel<T> {
 
   /**
    * Toggles whether the channel should show warning messages when discarding messages due to
-   * overflow. When 'allowed' is true the channel is expected to overflow and warning messages will
+   * overflow. When 'warns' is false the channel is expected to overflow and warning messages will
    * not be shown.
    */
-  public static void allowChannelBufferOverflow(
-      @NonNull BinaryMessenger messenger, @NonNull String channel, boolean allowed) {
+  public static void setWarnsOnChannelOverflow(
+      @NonNull BinaryMessenger messenger, @NonNull String channel, boolean warns) {
     final StandardMethodCodec codec = StandardMethodCodec.INSTANCE;
-    Object[] arguments = {channel, allowed};
+    Object[] arguments = {channel, !warns};
     MethodCall methodCall = new MethodCall("overflow", Arrays.asList(arguments));
     ByteBuffer message = codec.encodeMethodCall(methodCall);
     ByteBuffer packet = packetFromEncodedMessage(message);
