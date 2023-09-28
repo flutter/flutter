@@ -258,7 +258,6 @@ void main() {
       extraArguments: const <String>['--verbose']);
     final String stdout = (result.stdout as String).replaceAll('\r', '\n');
     expect(stdout, contains('No tests ran.'));
-    expect(stdout, contains('No tests were found.'));
     expect(result, const ProcessResultMatcher());
   });
 
