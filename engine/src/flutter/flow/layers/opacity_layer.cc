@@ -36,8 +36,6 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
 }
 
 void OpacityLayer::Preroll(PrerollContext* context) {
-  FML_DCHECK(!layers().empty());  // We can't be a leaf.
-
   auto mutator = context->state_stack.save();
   mutator.translate(offset_);
   mutator.applyOpacity(SkRect(), DlColor::toOpacity(alpha_));
