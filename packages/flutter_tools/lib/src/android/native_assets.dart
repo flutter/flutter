@@ -23,8 +23,7 @@ Future<Uri?> dryRunNativeAssetsAndroid({
   bool flutterTester = false,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) ||
-      await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
@@ -73,10 +72,12 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
 }) async {
   const OS targetOS = OS.android;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOS);
-  if (await hasNoPackageConfig(buildRunner) ||
-      await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
-        <Asset>[], yamlParentDirectory ?? buildUri_, fileSystem);
+      <Asset>[],
+      yamlParentDirectory ?? buildUri_,
+      fileSystem,
+    );
     return (nativeAssetsYaml, <Uri>[]);
   }
 
