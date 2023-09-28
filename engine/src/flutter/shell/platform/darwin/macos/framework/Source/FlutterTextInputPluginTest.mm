@@ -1361,6 +1361,89 @@
   return true;
 }
 
+- (bool)handleArrowKeyWhenImePopoverIsActive {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil]);
+
+  NSTextInputContext* textInputContext = OCMClassMock([NSTextInputContext class]);
+  OCMStub([textInputContext handleEvent:[OCMArg any]]).andReturn(YES);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  plugin.textInputContext = textInputContext;
+
+  NSDictionary* setClientConfig = @{
+    @"inputAction" : @"action",
+    @"enableDeltaModel" : @"true",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show"
+                                                             arguments:@[]]
+                    result:^(id){
+                    }];
+
+  // Set marked text, simulate active IME popover.
+  [plugin setMarkedText:@"m"
+          selectedRange:NSMakeRange(0, 1)
+       replacementRange:NSMakeRange(NSNotFound, 0)];
+
+  // Right arrow key. This, unlike the key below should be handled by the plugin.
+  NSEvent* event = [NSEvent keyEventWithType:NSEventTypeKeyDown
+                                    location:NSZeroPoint
+                               modifierFlags:0xa00100
+                                   timestamp:0
+                                windowNumber:0
+                                     context:nil
+                                  characters:@"\uF702"
+                 charactersIgnoringModifiers:@"\uF702"
+                                   isARepeat:NO
+                                     keyCode:0x4];
+
+  // Plugin should mark the event as key equivalent.
+  [plugin performKeyEquivalent:event];
+
+  if ([plugin handleKeyEvent:event] != true) {
+    return false;
+  }
+
+  // CTRL+H (delete backwards)
+  event = [NSEvent keyEventWithType:NSEventTypeKeyDown
+                           location:NSZeroPoint
+                      modifierFlags:0x40101
+                          timestamp:0
+                       windowNumber:0
+                            context:nil
+                         characters:@"\uF702"
+        charactersIgnoringModifiers:@"\uF702"
+                          isARepeat:NO
+                            keyCode:0x4];
+
+  // Plugin should mark the event as key equivalent.
+  [plugin performKeyEquivalent:event];
+
+  if ([plugin handleKeyEvent:event] != false) {
+    return false;
+  }
+
+  return true;
+}
+
 - (bool)unhandledKeyEquivalent {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
@@ -1812,6 +1895,10 @@ TEST(FlutterTextInputPluginTest, TestLocalTextAndSelectionUpdateAfterDelta) {
 
 TEST(FlutterTextInputPluginTest, TestPerformKeyEquivalent) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testPerformKeyEquivalent]);
+}
+
+TEST(FlutterTextInputPluginTest, HandleArrowKeyWhenImePopoverIsActive) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] handleArrowKeyWhenImePopoverIsActive]);
 }
 
 TEST(FlutterTextInputPluginTest, UnhandledKeyEquivalent) {

@@ -69,5 +69,6 @@
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange;
 - (NSDictionary*)editingState;
+@property(nonatomic) NSTextInputContext* textInputContext;
 @property(readwrite, nonatomic) NSString* customRunLoopMode;
 @end
