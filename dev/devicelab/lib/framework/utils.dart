@@ -507,14 +507,6 @@ Future<int> flutter(String command, {
   return exitCode;
 }
 
-
-// Future<void> waitForDevice() async {
-//   final Device device = await devices.workingDevice;
-//   await devices.deviceReady(device.deviceId);
-// }
-
-
-
 /// Starts a Flutter subprocess.
 ///
 /// The first argument is the flutter command to run.
