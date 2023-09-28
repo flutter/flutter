@@ -2401,7 +2401,7 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection.collapsed(offset: controller.text.length), // selection stays the same
+          TextSelection.collapsed(offset: controller.text.length), // selection stays the same.
           reason: pageUp.toString(),
         );
 
@@ -2454,7 +2454,7 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          const TextSelection.collapsed(offset: 0), // selection stays the same
+          const TextSelection.collapsed(offset: 0), // selection stays the same.
           reason: pageDown.toString(),
         );
 
@@ -2507,11 +2507,11 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          const TextSelection.collapsed(offset: 0), // selection stays the same
+          const TextSelection.collapsed(offset: 0), // selection stays the same.
           reason: end.toString(),
         );
 
-        // scrolls to end
+        // scrolls to end.
         final double newOffset = scrollController.position.maxScrollExtent;
 
         expect(scrollController.offset, newOffset);
@@ -2535,11 +2535,11 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection changes
+          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection changes.
           reason: end.toString(),
         );
 
-        // scrolls to end
+        // scrolls to end.
         final double newOffset = scrollController.position.maxScrollExtent;
 
         expect(scrollController.offset, newOffset);
@@ -2563,11 +2563,11 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection.collapsed(offset: controller.text.length), // selection stays the same
+          TextSelection.collapsed(offset: controller.text.length), // selection stays the same.
           reason: home.toString(),
         );
 
-        // scrolls to beginning
+        // scrolls to beginning.
         const double newOffset = 0;
 
         expect(scrollController.offset, newOffset);
@@ -2591,11 +2591,11 @@ void main() {
           expect(controller.text, longText);
           expect(
             controller.selection,
-            TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection changes
+            TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection changes.
             reason: home.toString(),
           );
 
-          // scrolls to beginning
+          // scrolls to beginning.
           const double newOffset = 0;
 
           expect(scrollController.offset, newOffset);
@@ -2716,7 +2716,7 @@ void main() {
         expect(controller.text, longText);
         expect(controller.selection.isCollapsed, isTrue);
         expect(controller.selection.baseOffset, greaterThan(initialSelectionOffset));
-        expect(scrollController.offset, initialScrollOffset); // no scroll
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('end + shift highlights selection to the end of the line, no scroll', (WidgetTester tester) async {
@@ -2739,7 +2739,7 @@ void main() {
         expect(controller.selection.isCollapsed, isFalse);
         expect(controller.selection.baseOffset, initialSelectionOffset);
         expect(controller.selection.extentOffset, greaterThan(initialSelectionOffset));
-        expect(scrollController.offset, initialScrollOffset); // no scroll
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('home moves selection to the beginning of the line, no scroll', (WidgetTester tester) async {
@@ -2761,7 +2761,7 @@ void main() {
         expect(controller.text, longText);
         expect(controller.selection.isCollapsed, isTrue);
         expect(controller.selection.baseOffset, lessThan(initialSelectionOffset));
-        expect(scrollController.offset, initialScrollOffset); // no scroll
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('home + shift highlights selection to the beginning of the line, no scroll', (WidgetTester tester) async {
@@ -2784,7 +2784,7 @@ void main() {
         expect(controller.selection.isCollapsed, isFalse);
         expect(controller.selection.baseOffset, initialSelectionOffset);
         expect(controller.selection.extentOffset, lessThan(initialSelectionOffset));
-        expect(scrollController.offset, initialScrollOffset); // no scroll
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
       }, variant: desktopExceptMacOS);
 
       testWidgetsWithLeakTracking('end + ctrl scrolls to the end of the text field and changes selection on Windows', (WidgetTester tester) async {
@@ -2805,11 +2805,11 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection.collapsed(offset: controller.text.length), // selection goes to end
+          TextSelection.collapsed(offset: controller.text.length), // selection goes to end.
           reason: end.toString(),
         );
 
-        // scrolls to end
+        // scrolls to end.
         final double newOffset = scrollController.position.maxScrollExtent;
 
         expect(scrollController.offset, newOffset);
@@ -2833,11 +2833,11 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection goes to end
+          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection goes to end.
           reason: end.toString(),
         );
 
-        // scrolls to end
+        // scrolls to end.
         final double newOffset = scrollController.position.maxScrollExtent;
 
         expect(scrollController.offset, newOffset);
@@ -2861,11 +2861,11 @@ void main() {
         expect(controller.text, longText);
         expect(
           controller.selection,
-          const TextSelection.collapsed(offset: 0), // selection goes to beginning
+          const TextSelection.collapsed(offset: 0), // selection goes to beginning.
           reason: home.toString(),
         );
 
-        // scrolls to beginning
+        // scrolls to beginning.
         const double newOffset = 0;
 
         expect(scrollController.offset, newOffset);
@@ -2889,11 +2889,11 @@ void main() {
             expect(controller.text, longText);
             expect(
               controller.selection,
-              TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection goes to beginning
+              TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection goes to beginning.
               reason: home.toString(),
             );
 
-            // scrolls to beginning
+            // scrolls to beginning.
             const double newOffset = 0;
 
             expect(scrollController.offset, newOffset);
