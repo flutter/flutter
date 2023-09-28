@@ -342,6 +342,7 @@ static char markerKey;
   // The view needs an empty frame otherwise it is visible on dark background.
   // https://github.com/flutter/flutter/issues/118504
   self = [super initWithFrame:NSZeroRect];
+  self.clipsToBounds = YES;
   if (self != nil) {
     _flutterViewController = viewController;
     _channel = [FlutterMethodChannel methodChannelWithName:kTextInputChannel
