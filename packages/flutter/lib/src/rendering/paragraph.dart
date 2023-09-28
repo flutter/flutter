@@ -132,7 +132,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
             ui.PlaceholderAlignment.belowBaseline ||
             ui.PlaceholderAlignment.bottom ||
             ui.PlaceholderAlignment.middle ||
-            ui.PlaceholderAlignment.top      => null,
+            ui.PlaceholderAlignment.top => null,
             ui.PlaceholderAlignment.baseline => child.getDistanceToBaseline(span.baseline!),
           },
         );
@@ -351,8 +351,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final List<TextSelection> results = <TextSelection>[];
     for (final _SelectableFragment fragment in _lastSelectableFragments!) {
       if (fragment._textSelectionStart != null &&
-          fragment._textSelectionEnd != null &&
-          fragment._textSelectionStart!.offset != fragment._textSelectionEnd!.offset) {
+          fragment._textSelectionEnd != null) {
         results.add(
           TextSelection(
             baseOffset: fragment._textSelectionStart!.offset,
@@ -1309,9 +1308,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
 /// A continuous, selectable piece of paragraph.
 ///
-/// Since the selections in [PlaceHolderSpan] are handled independently in its
+/// Since the selections in [PlaceholderSpan] are handled independently in its
 /// subtree, a selection in [RenderParagraph] can't continue across a
-/// [PlaceHolderSpan]. The [RenderParagraph] splits itself on [PlaceHolderSpan]
+/// [PlaceholderSpan]. The [RenderParagraph] splits itself on [PlaceholderSpan]
 /// to create multiple `_SelectableFragment`s so that they can be selected
 /// separately.
 class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutMetrics {
@@ -1720,7 +1719,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     _selectableContainsOriginWord = true;
 
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
-    if (_positionIsWithinCurrentSelection(position)) {
+    if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
       return SelectionResult.end;
     }
     final _WordBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
