@@ -2366,10 +2366,52 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all());
 
-    group('TwoDimensionalViewport showOnScreen & showInViewport', () {
+    group('showOnScreen & showInViewport', () {
       Finder findKey(ChildVicinity vicinity) {
         return find.byKey(ValueKey<ChildVicinity>(vicinity));
       }
+
+      testWidgets('getOffsetToReveal', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+
+        RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        final RevealedOffset verticalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+          axis: Axis.vertical,
+        );
+        final RevealedOffset horizontalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+          axis: Axis.horizontal,
+        );
+        expect(verticalOffset.offset, 600.0);
+        expect(verticalOffset.rect, const Rect.fromLTRB(1000.0, 400.0, 1200.0, 600.0));
+        expect(horizontalOffset.offset, 400.0);
+        expect(horizontalOffset.rect, const Rect.fromLTRB(600.0, 1000.0, 800.0, 1200.0));
+
+        // default is to use mainAxis when axis is not provided, mainAxis
+        // defaults to Axis.vertical.
+        RevealedOffset defaultOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+        );
+        expect(defaultOffset.offset, verticalOffset.offset);
+        expect(defaultOffset.rect, verticalOffset.rect);
+
+        // mainAxis as Axis.horizontal
+        await tester.pumpWidget(simpleBuilderTest(
+          useCacheExtent: true,
+          mainAxis: Axis.horizontal,
+        ));
+        viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        defaultOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+        );
+        expect(defaultOffset.offset, horizontalOffset.offset);
+        expect(defaultOffset.rect, horizontalOffset.rect);
+      });
 
       testWidgets('Axis.vertical', (WidgetTester tester) async {
         await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
