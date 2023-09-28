@@ -6,12 +6,10 @@
 
 #include <functional>
 #include <string>
-#include <vector>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "flutter/fml/trace_event.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/description_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
@@ -170,11 +168,13 @@ struct GLProc {
 
 #define FOR_EACH_IMPELLER_GLES3_PROC(PROC) PROC(BlitFramebuffer);
 
-#define FOR_EACH_IMPELLER_EXT_PROC(PROC) \
-  PROC(DiscardFramebufferEXT);           \
-  PROC(PushDebugGroupKHR);               \
-  PROC(PopDebugGroupKHR);                \
-  PROC(ObjectLabelKHR);
+#define FOR_EACH_IMPELLER_EXT_PROC(PROC)   \
+  PROC(DiscardFramebufferEXT);             \
+  PROC(FramebufferTexture2DMultisampleEXT) \
+  PROC(PushDebugGroupKHR);                 \
+  PROC(PopDebugGroupKHR);                  \
+  PROC(ObjectLabelKHR);                    \
+  PROC(RenderbufferStorageMultisampleEXT);
 
 enum class DebugResourceType {
   kTexture,
@@ -188,7 +188,7 @@ enum class DebugResourceType {
 class ProcTableGLES {
  public:
   using Resolver = std::function<void*(const char* function_name)>;
-  ProcTableGLES(Resolver resolver);
+  explicit ProcTableGLES(Resolver resolver);
 
   ~ProcTableGLES();
 
