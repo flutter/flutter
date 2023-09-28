@@ -63,8 +63,9 @@ void main() {
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, isNot('xxxx-xxxx'),
+      expect(analytics.clientId, isNot(NoOpAnalytics.staticClientId),
           reason: 'The CLIENT ID should be a randomly generated id');
+      expect(analytics is! NoOpAnalytics, true);
     });
 
     testWithoutContext('NoOp instance for user branch', () {
@@ -78,8 +79,9 @@ void main() {
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, 'xxxx-xxxx',
+      expect(analytics.clientId, NoOpAnalytics.staticClientId,
           reason: 'The client ID should match the NoOp client id');
+      expect(analytics is NoOpAnalytics, true);
     });
 
     testWithoutContext('NoOp instance for unknown branch', () {
@@ -92,8 +94,9 @@ void main() {
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, 'xxxx-xxxx',
+      expect(analytics.clientId, NoOpAnalytics.staticClientId,
           reason: 'The client ID should match the NoOp client id');
+      expect(analytics is NoOpAnalytics, true);
     });
 
     testWithoutContext('NoOp instance when running on bots', () {
@@ -104,8 +107,9 @@ void main() {
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, 'xxxx-xxxx',
+      expect(analytics.clientId, NoOpAnalytics.staticClientId,
           reason: 'The client ID should match the NoOp client id');
+      expect(analytics is NoOpAnalytics, true);
     });
 
     testWithoutContext('NoOp instance when suppressing via env variable', () {
@@ -116,8 +120,9 @@ void main() {
         analyticsOverride: analyticsOverride,
       );
 
-      expect(analytics.clientId, 'xxxx-xxxx',
+      expect(analytics.clientId, NoOpAnalytics.staticClientId,
           reason: 'The client ID should match the NoOp client id');
+      expect(analytics is NoOpAnalytics, true);
     });
   });
 }
