@@ -27,14 +27,6 @@ namespace testing {
 using OpacityLayerTest = LayerTest;
 
 #ifndef NDEBUG
-TEST_F(OpacityLayerTest, LeafLayer) {
-  auto layer =
-      std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, SkPoint::Make(0.0f, 0.0f));
-
-  EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context()),
-                            "\\!layers\\(\\)\\.empty\\(\\)");
-}
-
 TEST_F(OpacityLayerTest, PaintingEmptyLayerDies) {
   auto mock_layer = std::make_shared<MockLayer>(SkPath());
   auto layer =
