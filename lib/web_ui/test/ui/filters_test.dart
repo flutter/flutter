@@ -78,6 +78,16 @@ Future<void> testMain() async {
     await matchGoldenFile('ui_filter_matrix_imagefilter.png', region: region);
   });
 
+  test('resizing matrix filter', () async {
+    await drawTestImageWithPaint(ui.Paint()
+      ..imageFilter = ui.ImageFilter.matrix(
+        Matrix4.diagonal3Values(0.5, 0.5, 1).toFloat64(),
+        filterQuality: ui.FilterQuality.high,
+      ));
+    await matchGoldenFile('ui_filter_matrix_imagefilter_scaled.png',
+        region: region);
+  });
+
   test('composed filters', () async {
     final ui.ImageFilter filter = ui.ImageFilter.compose(
       outer: ui.ImageFilter.matrix(
