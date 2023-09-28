@@ -257,8 +257,10 @@ void main() {
     final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, '$flutterTestDirectory/child_directory_with_no_tests',
       extraArguments: const <String>['--verbose']);
     final String stdout = (result.stdout as String).replaceAll('\r', '\n');
+    final String stderr = (result.stderr as String).replaceAll('\r', '\n');
     expect(stdout, contains('No tests ran.'));
-    expect(result, const ProcessResultMatcher());
+    expect(stderr, contains('No tests were found.'));
+    expect(result, const ProcessResultMatcher(exitCode: 1));
   });
 
   testWithoutContext('flutter gold skips tests where the expectations are missing', () async {
