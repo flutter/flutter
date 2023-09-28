@@ -343,6 +343,9 @@ class FlutterWebPlatform extends PlatformPlugin {
       if (body.containsKey('bytes')) {
         bytes = base64.decode(body['bytes']! as String);
       } else {
+        // TODO(hterkelsen): Do not use browser screenshots for testing on the
+        // web once we transition off the HTML renderer. See:
+        // https://github.com/flutter/flutter/issues/135700
         try {
           final ChromeTab chromeTab = (await _browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
             return tab.url.contains(_browserManager!._browser.url!);
