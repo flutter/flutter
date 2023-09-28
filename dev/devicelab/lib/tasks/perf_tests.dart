@@ -1358,6 +1358,9 @@ const List<String> _kCommonScoreKeys = <String>[
   '99th_percentile_picture_cache_memory',
   'worst_picture_cache_memory',
   'old_gen_gc_count',
+  'average_frame_request_pending_latency',
+  '90th_percentile_frame_request_pending_latency',
+  '99th_percentile_frame_request_pending_latency'
 ];
 
 /// Measures how long it takes to compile a Flutter app to JavaScript and how
