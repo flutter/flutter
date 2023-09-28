@@ -331,6 +331,13 @@ TEST(FlutterViewControllerTest, testViewControllerIsReleased) {
   const uint64_t kPhysicalKeyTab = 0x7002b;
 
   [viewController viewWillAppear];  // Initializes the event channel.
+  // Creates a NSWindow so that FlutterView view can be first responder.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+  [window makeFirstResponder:viewController.flutterView];
   [viewController.view performKeyEquivalent:event];
 
   EXPECT_TRUE(called);
