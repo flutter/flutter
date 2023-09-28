@@ -60,6 +60,7 @@
 - (bool)testKeyEventsArePropagatedIfNotHandled;
 - (bool)testKeyEventsAreNotPropagatedIfHandled;
 - (bool)testCtrlTabKeyEventIsPropagated;
+- (bool)testKeyEquivalentIsPassedToTextInputPlugin;
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled;
 - (bool)testKeyboardIsRestartedOnEngineRestart;
 - (bool)testTrackpadGesturesAreSentToFramework;
@@ -215,6 +216,10 @@ TEST(FlutterViewControllerTest, TestCtrlTabKeyEventIsPropagated) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testCtrlTabKeyEventIsPropagated]);
 }
 
+TEST(FlutterViewControllerTest, TestKeyEquivalentIsPassedToTextInputPlugin) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEquivalentIsPassedToTextInputPlugin]);
+}
+
 TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled) {
   ASSERT_TRUE(
       [[FlutterViewControllerTestObjC alloc] testFlagsChangedEventsArePropagatedIfNotHandled]);
@@ -331,6 +336,64 @@ TEST(FlutterViewControllerTest, testViewControllerIsReleased) {
   const uint64_t kPhysicalKeyTab = 0x7002b;
 
   [viewController viewWillAppear];  // Initializes the event channel.
+  // Creates a NSWindow so that FlutterView view can be first responder.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+  [window makeFirstResponder:viewController.flutterView];
+  [viewController.view performKeyEquivalent:event];
+
+  EXPECT_TRUE(called);
+  EXPECT_EQ(last_event.type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(last_event.physical, kPhysicalKeyTab);
+  return true;
+}
+
+- (bool)testKeyEquivalentIsPassedToTextInputPlugin {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  __block bool called = false;
+  __block FlutterKeyEvent last_event;
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andDo((^(NSInvocation* invocation) {
+        FlutterKeyEvent* event;
+        [invocation getArgument:&event atIndex:2];
+        called = true;
+        last_event = *event;
+      }));
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  // Ctrl+tab
+  NSEvent* event = [NSEvent keyEventWithType:NSEventTypeKeyDown
+                                    location:NSZeroPoint
+                               modifierFlags:0x40101
+                                   timestamp:0
+                                windowNumber:0
+                                     context:nil
+                                  characters:@""
+                 charactersIgnoringModifiers:@""
+                                   isARepeat:NO
+                                     keyCode:48];
+  const uint64_t kPhysicalKeyTab = 0x7002b;
+
+  [viewController viewWillAppear];  // Initializes the event channel.
+
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+
+  [viewController.view addSubview:viewController.textInputPlugin];
+
+  // Make the textInputPlugin first responder. This should still result in
+  // view controller reporting the key event.
+  [window makeFirstResponder:viewController.textInputPlugin];
+
   [viewController.view performKeyEquivalent:event];
 
   EXPECT_TRUE(called);
