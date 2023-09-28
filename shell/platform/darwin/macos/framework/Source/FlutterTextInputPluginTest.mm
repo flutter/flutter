@@ -1962,7 +1962,7 @@ TEST(FlutterTextInputPluginTest, IsAddedAndRemovedFromViewHierarchy) {
   ASSERT_FALSE(window.firstResponder == viewController.textInputPlugin);
 }
 
-TEST(FlutterTextInputPluginTest, HasZeroSize) {
+TEST(FlutterTextInputPluginTest, HasZeroSizeAndClipsToBounds) {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
@@ -1977,6 +1977,7 @@ TEST(FlutterTextInputPluginTest, HasZeroSize) {
       [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
 
   ASSERT_TRUE(NSIsEmptyRect(plugin.frame));
+  ASSERT_TRUE(plugin.clipsToBounds);
 }
 
 }  // namespace flutter::testing
