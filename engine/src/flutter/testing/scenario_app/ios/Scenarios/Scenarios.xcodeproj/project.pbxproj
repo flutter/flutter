@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -62,6 +62,12 @@
 		6860CE252A01B2FF00B68EC5 /* golden_two_platform_view_clip_rrect_iPhone SE (3rd generation)_16.2_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6860CE222A01B2FF00B68EC5 /* golden_two_platform_view_clip_rrect_iPhone SE (3rd generation)_16.2_simulator.png */; };
 		6860CE262A01B2FF00B68EC5 /* golden_two_platform_view_clip_rect_iPhone SE (3rd generation)_16.2_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6860CE232A01B2FF00B68EC5 /* golden_two_platform_view_clip_rect_iPhone SE (3rd generation)_16.2_simulator.png */; };
 		6860CE272A01B2FF00B68EC5 /* golden_two_platform_view_clip_path_iPhone SE (3rd generation)_16.2_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6860CE242A01B2FF00B68EC5 /* golden_two_platform_view_clip_path_iPhone SE (3rd generation)_16.2_simulator.png */; };
+		686382EC2AC1F9F300E27AAD /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 686382EB2AC1F9F300E27AAD /* ShareViewController.m */; };
+		686382EF2AC1F9F300E27AAD /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 686382ED2AC1F9F300E27AAD /* MainInterface.storyboard */; };
+		686382F32AC1F9F300E27AAD /* ScenariosShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 686382E82AC1F9F300E27AAD /* ScenariosShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		686383132AC202B700E27AAD /* AppExtensionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 686383122AC202B700E27AAD /* AppExtensionTests.m */; };
+		686383152AC2175100E27AAD /* ../../Flutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* ../../Flutter.xcframework */; };
+		686383162AC2175100E27AAD /* ../../Flutter.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* ../../Flutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		68A5B63423EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */; };
 		68D4017D2564859300ECD91A /* ContinuousTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 68D4017C2564859300ECD91A /* ContinuousTexture.m */; };
 		68D93AEE2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 68D93AED2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png */; };
@@ -82,6 +88,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = 248D76C622E388370012F0C1;
 			remoteInfo = Scenarios;
+		};
+		686382F12AC1F9F300E27AAD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 248D76BF22E388370012F0C1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 686382E72AC1F9F300E27AAD;
+			remoteInfo = ScenariosShare;
+		};
+		6863830A2AC2024200E27AAD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 686383052AC2024200E27AAD /* FlutterAppExtensionTestHost.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 686382C12ABE172F00E27AAD;
+			remoteInfo = FlutterAppExtensionTestHost;
+		};
+		686383102AC2027100E27AAD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 686383052AC2024200E27AAD /* FlutterAppExtensionTestHost.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 686382C02ABE172F00E27AAD;
+			remoteInfo = FlutterAppExtensionTestHost;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -116,6 +143,28 @@
 			files = (
 				242F37A222E636DE001E83D4 /* ../../Flutter.xcframework in Embed Frameworks */,
 				242F37A322E636DE001E83D4 /* App.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		686382F42AC1F9F300E27AAD /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				686382F32AC1F9F300E27AAD /* ScenariosShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		686383172AC2175100E27AAD /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				686383162AC2175100E27AAD /* ../../Flutter.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -185,6 +234,13 @@
 		6860CE222A01B2FF00B68EC5 /* golden_two_platform_view_clip_rrect_iPhone SE (3rd generation)_16.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rrect_iPhone SE (3rd generation)_16.2_simulator.png"; sourceTree = "<group>"; };
 		6860CE232A01B2FF00B68EC5 /* golden_two_platform_view_clip_rect_iPhone SE (3rd generation)_16.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_rect_iPhone SE (3rd generation)_16.2_simulator.png"; sourceTree = "<group>"; };
 		6860CE242A01B2FF00B68EC5 /* golden_two_platform_view_clip_path_iPhone SE (3rd generation)_16.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_two_platform_view_clip_path_iPhone SE (3rd generation)_16.2_simulator.png"; sourceTree = "<group>"; };
+		686382E82AC1F9F300E27AAD /* ScenariosShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ScenariosShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		686382EA2AC1F9F300E27AAD /* ShareViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShareViewController.h; sourceTree = "<group>"; };
+		686382EB2AC1F9F300E27AAD /* ShareViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShareViewController.m; sourceTree = "<group>"; };
+		686382EE2AC1F9F300E27AAD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		686382F02AC1F9F300E27AAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		686383052AC2024200E27AAD /* FlutterAppExtensionTestHost.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = FlutterAppExtensionTestHost.xcodeproj; path = ../FlutterAppExtensionTestHost/FlutterAppExtensionTestHost.xcodeproj; sourceTree = "<group>"; };
+		686383122AC202B700E27AAD /* AppExtensionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppExtensionTests.m; sourceTree = "<group>"; };
 		68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlatformViewGestureRecognizerTests.m; sourceTree = "<group>"; };
 		68D4017B2564859300ECD91A /* ContinuousTexture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContinuousTexture.h; sourceTree = "<group>"; };
 		68D4017C2564859300ECD91A /* ContinuousTexture.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ContinuousTexture.m; sourceTree = "<group>"; };
@@ -219,15 +275,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		686382E52AC1F9F300E27AAD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				686383152AC2175100E27AAD /* ../../Flutter.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		248D76BE22E388370012F0C1 = {
 			isa = PBXGroup;
 			children = (
+				686383052AC2024200E27AAD /* FlutterAppExtensionTestHost.xcodeproj */,
 				248D76C922E388370012F0C1 /* Scenarios */,
 				248D76E222E388380012F0C1 /* ScenariosTests */,
 				248D76ED22E388380012F0C1 /* ScenariosUITests */,
+				686382E92AC1F9F300E27AAD /* ScenariosShare */,
 				248D76C822E388370012F0C1 /* Products */,
 				248D76FC22E388900012F0C1 /* Frameworks */,
 			);
@@ -239,6 +305,7 @@
 				248D76C722E388370012F0C1 /* Scenarios.app */,
 				248D76DF22E388380012F0C1 /* ScenariosTests.xctest */,
 				248D76EA22E388380012F0C1 /* ScenariosUITests.xctest */,
+				686382E82AC1F9F300E27AAD /* ScenariosShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -298,6 +365,7 @@
 				246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */,
 				0DDEBC88258830B40065D0E8 /* SpawnEngineTest.m */,
 				F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */,
+				686383122AC202B700E27AAD /* AppExtensionTests.m */,
 			);
 			path = ScenariosUITests;
 			sourceTree = "<group>";
@@ -309,6 +377,25 @@
 				246B4E4122E3B5F700073EBF /* App.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		686382E92AC1F9F300E27AAD /* ScenariosShare */ = {
+			isa = PBXGroup;
+			children = (
+				686382EA2AC1F9F300E27AAD /* ShareViewController.h */,
+				686382EB2AC1F9F300E27AAD /* ShareViewController.m */,
+				686382ED2AC1F9F300E27AAD /* MainInterface.storyboard */,
+				686382F02AC1F9F300E27AAD /* Info.plist */,
+			);
+			path = ScenariosShare;
+			sourceTree = "<group>";
+		};
+		686383062AC2024200E27AAD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6863830B2AC2024200E27AAD /* FlutterAppExtensionTestHost.app */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		F7B464DC2759D02B00079189 /* Goldens */ = {
@@ -355,10 +442,12 @@
 				248D76C422E388370012F0C1 /* Frameworks */,
 				248D76C522E388370012F0C1 /* Resources */,
 				246B4E4422E3B5F700073EBF /* Embed Frameworks */,
+				686382F42AC1F9F300E27AAD /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				686382F22AC1F9F300E27AAD /* PBXTargetDependency */,
 			);
 			name = Scenarios;
 			productName = Scenarios;
@@ -396,12 +485,31 @@
 			buildRules = (
 			);
 			dependencies = (
+				686383112AC2027100E27AAD /* PBXTargetDependency */,
 				248D76EC22E388380012F0C1 /* PBXTargetDependency */,
 			);
 			name = ScenariosUITests;
 			productName = ScenariosUITests;
 			productReference = 248D76EA22E388380012F0C1 /* ScenariosUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		686382E72AC1F9F300E27AAD /* ScenariosShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 686382F72AC1F9F300E27AAD /* Build configuration list for PBXNativeTarget "ScenariosShare" */;
+			buildPhases = (
+				686382E42AC1F9F300E27AAD /* Sources */,
+				686382E52AC1F9F300E27AAD /* Frameworks */,
+				686382E62AC1F9F300E27AAD /* Resources */,
+				686383172AC2175100E27AAD /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScenariosShare;
+			productName = ScenariosShare;
+			productReference = 686382E82AC1F9F300E27AAD /* ScenariosShare.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -426,6 +534,9 @@
 						LastSwiftMigration = 1030;
 						TestTargetID = 248D76C622E388370012F0C1;
 					};
+					686382E72AC1F9F300E27AAD = {
+						CreatedOnToolsVersion = 15.0;
+					};
 				};
 			};
 			buildConfigurationList = 248D76C222E388370012F0C1 /* Build configuration list for PBXProject "Scenarios" */;
@@ -439,14 +550,31 @@
 			mainGroup = 248D76BE22E388370012F0C1;
 			productRefGroup = 248D76C822E388370012F0C1 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 686383062AC2024200E27AAD /* Products */;
+					ProjectRef = 686383052AC2024200E27AAD /* FlutterAppExtensionTestHost.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				248D76C622E388370012F0C1 /* Scenarios */,
 				248D76DE22E388380012F0C1 /* ScenariosTests */,
 				248D76E922E388380012F0C1 /* ScenariosUITests */,
+				686382E72AC1F9F300E27AAD /* ScenariosShare */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		6863830B2AC2024200E27AAD /* FlutterAppExtensionTestHost.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = FlutterAppExtensionTestHost.app;
+			remoteRef = 6863830A2AC2024200E27AAD /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		248D76C522E388370012F0C1 /* Resources */ = {
@@ -497,6 +625,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		686382E62AC1F9F300E27AAD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				686382EF2AC1F9F300E27AAD /* MainInterface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -539,7 +675,16 @@
 				F26F15B8268B6B5600EC54D3 /* iPadGestureTests.m in Sources */,
 				246A6611252E693A00EAB0F3 /* RenderingSelectionTest.m in Sources */,
 				4F06F1B32473296E000AF246 /* LocalizationInitializationTest.m in Sources */,
+				686383132AC202B700E27AAD /* AppExtensionTests.m in Sources */,
 				0DDEBC89258830B40065D0E8 /* SpawnEngineTest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		686382E42AC1F9F300E27AAD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				686382EC2AC1F9F300E27AAD /* ShareViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -556,7 +701,28 @@
 			target = 248D76C622E388370012F0C1 /* Scenarios */;
 			targetProxy = 248D76EB22E388380012F0C1 /* PBXContainerItemProxy */;
 		};
+		686382F22AC1F9F300E27AAD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 686382E72AC1F9F300E27AAD /* ScenariosShare */;
+			targetProxy = 686382F12AC1F9F300E27AAD /* PBXContainerItemProxy */;
+		};
+		686383112AC2027100E27AAD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = FlutterAppExtensionTestHost;
+			targetProxy = 686383102AC2027100E27AAD /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		686382ED2AC1F9F300E27AAD /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				686382EE2AC1F9F300E27AAD /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		248D76F122E388380012F0C1 /* Debug */ = {
@@ -678,7 +844,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S8QB4VV633;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -701,7 +867,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S8QB4VV633;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -723,7 +889,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S8QB4VV633;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -750,7 +916,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S8QB4VV633;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -776,7 +942,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S8QB4VV633;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -802,7 +968,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S8QB4VV633;
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -821,6 +987,70 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Scenarios;
+			};
+			name = Release;
+		};
+		686382F52AC1F9F300E27AAD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScenariosShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScenariosShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 flutter. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.Scenarios.ScenariosShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		686382F62AC1F9F300E27AAD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScenariosShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScenariosShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 flutter. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.Scenarios.ScenariosShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -859,6 +1089,15 @@
 			buildConfigurations = (
 				248D76FA22E388380012F0C1 /* Debug */,
 				248D76FB22E388380012F0C1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		686382F72AC1F9F300E27AAD /* Build configuration list for PBXNativeTarget "ScenariosShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				686382F52AC1F9F300E27AAD /* Debug */,
+				686382F62AC1F9F300E27AAD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
