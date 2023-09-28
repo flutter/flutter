@@ -333,41 +333,6 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     return results;
   }
 
-  /// Collect the device state for specified deviceId.
-  /// static final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)\s+(.*)');
-  // Future<String?> getDeviceState({required String deviceId}) async {
-  //   final RegExp deviceRegex = RegExp(r'^(\S+)\s+(\S+)\s+(.*)');
-  //   final List<String> output = (await eval(adbPath, <String>['devices', '-l']))
-  //       .trim().split('\n');
-  //   String? deviceState;
-
-  //   for (final String line in output) {
-  //     // Skip lines like: * daemon started successfully *
-  //     if (line.startsWith('* daemon ')) {
-  //       continue;
-  //     }
-
-  //     if (line.startsWith('List of devices')) {
-  //       continue;
-  //     }
-
-  //     if (_kDeviceRegex.hasMatch(line)) {
-  //       final Match match = deviceRegex.firstMatch(line)!;
-
-  //       final String deviceID = match[1]!;
-  //       if (deviceID == deviceId) {
-  //         print('Found device.');
-  //         deviceState = match[2];
-  //         break;
-  //       }
-  //     } else {
-  //       throw FormatException('Failed to parse device from adb output: "$line"');
-  //     }
-  //   }
-
-  //   return deviceState;
-  // }
-
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
@@ -395,28 +360,6 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // a better method, but so far that's the best one I've found.
     await exec(adbPath, <String>['kill-server']);
   }
-
-  // @override
-  // Future<void> deviceReady(String deviceId, {RetryOptions retryOptions = const RetryOptions(
-  //   maxAttempts: 5,
-  //   delayFactor: Duration(seconds: 15),
-  //   maxDelay: Duration(seconds: 15),
-  // ), }) async {
-  //   int count = 0;
-  //   // Wait for the device through adb
-  //   await retryOptions.retry(
-  //     () async {
-  //       print('Attempt ${count++}');
-  //       final String? state = await getDeviceState(deviceId: deviceId);
-  //       print('Found state: $state');
-  //       if (state != 'device') {
-  //         throw DeviceException('Device not ready, current state = $state');
-  //       } else {
-  //         print('Found device $deviceId ready.');
-  //       }
-  //     },
-  //     retryIf: (Exception e) => e is TimeoutException || e is FormatException || e is DeviceException);
-  // }
 }
 
 class LinuxDeviceDiscovery implements DeviceDiscovery {
@@ -1042,9 +985,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   Future<void> performPreflightTasks() async {
     // Currently we do not have preflight tasks for iOS.
   }
-
-  // @override
-  // Future<void> deviceReady(String deviceId) async {}
 }
 
 /// iOS device.
