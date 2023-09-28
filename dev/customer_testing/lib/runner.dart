@@ -109,6 +109,9 @@ Future<bool> runTests({
       if (success) {
         final Directory customerRepo = Directory(path.join(checkout.path, 'tests'));
         for (final String setupCommand in instructions.setup) {
+          if (verbose) {
+            print('Running setup command: $setupCommand');
+          }
           success = await shell(
             setupCommand,
             customerRepo,
@@ -116,7 +119,7 @@ Future<bool> runTests({
             failedCallback: printHeader,
           );
           if (!success) {
-            failure('Setup step failed: $setupCommand');
+            failure('Setup command failed: $setupCommand');
             break;
           }
         }
