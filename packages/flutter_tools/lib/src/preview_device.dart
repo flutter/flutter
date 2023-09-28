@@ -59,6 +59,10 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) async {
+    if (!_platform.isWindows) {
+      // we need to early return before looking up the path of [Artifact.flutterPreviewDevice].
+      return const <Device>[];
+    }
     final PreviewDevice device = PreviewDevice(
       artifacts: _artifacts,
       fileSystem: _fileSystem,
@@ -66,11 +70,8 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
       processManager: _processManager,
       previewBinary: _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice)),
     );
-
     final bool matchesRequirements;
-    if (!_platform.isWindows) {
-      matchesRequirements = false;
-    } else if (!_features.isPreviewDeviceEnabled) {
+    if (!_features.isPreviewDeviceEnabled) {
       matchesRequirements = false;
     } else if (filter == null) {
       matchesRequirements = true;
