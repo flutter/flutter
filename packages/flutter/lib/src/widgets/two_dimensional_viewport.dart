@@ -927,7 +927,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // If an axis has not been specified, use the mainAxis.
     axis ??= mainAxis;
 
-    final (double offset, AxisDirection axisDirection) = switch (axis!) {
+    final (double offset, AxisDirection axisDirection) = switch (axis) {
       Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
       Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection),
     };
