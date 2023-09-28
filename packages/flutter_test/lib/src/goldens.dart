@@ -204,7 +204,7 @@ abstract class WebGoldenComparator {
   /// Compares the pixels of decoded png [bytes] against the golden file
   /// identified by [golden].
   ///
-  /// This will be invoked in lieu of [updateBytes] when [autoUpdateGoldenFiles]
+  /// This will be invoked in lieu of [compareBytes] when [autoUpdateGoldenFiles]
   /// is `true` (which gets set automatically by the test framework when the
   /// user runs `flutter test --update-goldens --platform=chrome`).
   ///
