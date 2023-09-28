@@ -56,7 +56,7 @@ public class MethodChannelTest {
     String channel = "flutter/test";
     MethodChannel rawChannel = new MethodChannel(dartExecutor, channel);
 
-    rawChannel.allowChannelBufferOverflow(true);
+    rawChannel.setWarnsOnChannelOverflow(false);
 
     // Created from the following Dart code:
     //   MethodCall methodCall = const MethodCall('overflow', ['flutter/test', true]);

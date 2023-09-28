@@ -159,11 +159,11 @@ public class MethodChannel {
 
   /**
    * Toggles whether the channel should show warning messages when discarding messages due to
-   * overflow. When 'allowed' is true the channel is expected to overflow and warning messages will
+   * overflow. When 'warns' is false the channel is expected to overflow and warning messages will
    * not be shown.
    */
-  public void allowChannelBufferOverflow(boolean allowed) {
-    BasicMessageChannel.allowChannelBufferOverflow(messenger, name, allowed);
+  public void setWarnsOnChannelOverflow(boolean warns) {
+    BasicMessageChannel.setWarnsOnChannelOverflow(messenger, name, warns);
   }
 
   /** A handler of incoming method calls. */
