@@ -2106,7 +2106,6 @@ targets:
       task_name: flutter_gallery__start_up
 
   - name: Linux_android flutter_gallery__start_up_delayed
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/134631
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
