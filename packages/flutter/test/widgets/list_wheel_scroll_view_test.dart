@@ -1598,6 +1598,37 @@ void main() {
     expect(revealed.rect, const Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
   });
 
+  testWidgets('will not assert on getOffsetToReveal Axis', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 500.0,
+            width: 300.0,
+            child: ListWheelScrollView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              itemExtent: 100.0,
+              children: List<Widget>.generate(10, (int i) {
+                return Center(
+                  child: SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderListWheelViewport viewport = tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
+    final RenderObject target = tester.renderObject(find.text('Item 5'));
+    viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
+  });
+
   testWidgets('ListWheelScrollView showOnScreen', (WidgetTester tester) async {
     List<Widget> outerChildren;
     final List<Widget> innerChildren = List<Widget>.generate(10, (int index) => Container());
