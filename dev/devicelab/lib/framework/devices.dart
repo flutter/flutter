@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
+import 'package:retry/retry.dart';
 
 import 'utils.dart';
 
@@ -911,15 +912,17 @@ class AndroidDevice extends Device {
   @override
   Future<void> awaitDevice() async {
     print('Waiting for device.');
-    // Maybe need to run two different commands.
-    // shellExec(command, arguments)
     final String waitOut = await adb(<String>['wait-for-device']);
     print(waitOut);
-    // final String adbShellOut = await adb(<String>['shell', r"'i=1; while [ $(($i)) -le 10 ] && [ ! -z $(getprop sys.boot_completed) ]; do echo $i; i=$(($i + 1)); sleep 1; done;'"]);
-    final String adbShellOut = await adb(<String>['shell', 'getprop sys.boot_completed']);
-    print(adbShellOut);
-    // final String adbOut = await shellEval('\'i=1; while [ \$((\$i)) -le 10 ] && [ ! -z \$(getprop sys.boot_completed) ]; do echo \$i; i=\$((\$i + 1)); sleep 1; done;\'', <String>[]);
-    // print(adbOut);
+    const RetryOptions retryOptions = RetryOptions(delayFactor: Duration(seconds: 1), maxAttempts: 30, maxDelay: Duration(minutes: 1));
+    await retryOptions.retry(() async {
+      final String adbShellOut = await adb(<String>['shell', 'getprop sys.boot_completed']);
+      if (adbShellOut != '1') {
+        print('Device not ready.');
+        print(adbShellOut);
+        throw const DeviceException('Phone not ready.');
+      }
+    }, retryIf: (Exception e) => e is DeviceException);
     print('Done waiting for device.');
   }
 }
