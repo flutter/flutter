@@ -143,7 +143,7 @@
   "expandedHint": "접힘",
   "collapsedHint": "펼침",
   "menuDismissLabel": "메뉴 닫기",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "찾기",
+  "searchWebButtonLabel": "웹 검색",
+  "shareButtonLabel": "공유..."
 }
