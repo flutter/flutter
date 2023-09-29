@@ -149,7 +149,7 @@
   "expandedHint": "מכווץ",
   "collapsedHint": "מורחב",
   "menuDismissLabel": "סגירת התפריט",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "חיפוש",
+  "searchWebButtonLabel": "חיפוש באינטרנט",
+  "shareButtonLabel": "שיתוף…"
 }
