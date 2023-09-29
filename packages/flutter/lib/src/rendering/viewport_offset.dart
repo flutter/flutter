@@ -97,7 +97,11 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// Default constructor.
   ///
   /// Allows subclasses to construct this object directly.
-  ViewportOffset();
+  ViewportOffset() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   /// Creates a viewport offset with the given [pixels] value.
   ///
