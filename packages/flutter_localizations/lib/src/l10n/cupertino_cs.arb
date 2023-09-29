@@ -34,7 +34,7 @@
   "searchTextFieldPlaceholderLabel": "Hledat",
   "noSpellCheckReplacementsLabel": "Žádná nahrazení nenalezena",
   "menuDismissLabel": "Zavřít nabídku",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Vyhledat",
+  "searchWebButtonLabel": "Vyhledávat na webu",
+  "shareButtonLabel": "Sdílet…"
 }
