@@ -217,6 +217,8 @@ class FixedExtentScrollController extends ScrollController {
   /// [initialItem] defaults to zero.
   FixedExtentScrollController({
     this.initialItem = 0,
+    super.onAttach,
+    super.onDetach,
   });
 
   /// The page to show when first creating the scroll view.
