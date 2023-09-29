@@ -1086,7 +1086,7 @@ Future<void> _runWebHtmlUnitTests() {
 }
 
 Future<void> _runWebCanvasKitUnitTests() {
-  return _runWebUnitTests('canvaskit');
+  return _runWebUnitTests('html');
 }
 
 Future<void> _runWebUnitTests(String webRenderer) async {
