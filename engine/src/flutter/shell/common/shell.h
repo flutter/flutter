@@ -650,10 +650,10 @@ class Shell final : public PlatformView::Delegate,
       fml::TimePoint frame_target_time) override;
 
   // |Animator::Delegate|
-  void OnAnimatorDraw(std::shared_ptr<LayerTreePipeline> pipeline) override;
+  void OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) override;
 
   // |Animator::Delegate|
-  void OnAnimatorDrawLastLayerTree(
+  void OnAnimatorDrawLastLayerTrees(
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override;
 
   // |Engine::Delegate|

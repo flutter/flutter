@@ -254,4 +254,8 @@ const char* FrameTimingsRecorder::GetFrameNumberTraceArg() const {
   return frame_number_trace_arg_val_.c_str();
 }
 
+void FrameTimingsRecorder::AssertInState(State state) const {
+  FML_DCHECK(state_ == state);
+}
+
 }  // namespace flutter
