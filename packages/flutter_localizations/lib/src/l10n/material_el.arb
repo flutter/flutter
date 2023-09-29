@@ -144,6 +144,6 @@
   "collapsedHint": "Αναπτύχθηκε",
   "menuDismissLabel": "Παράβλεψη μενού",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Αναζήτηση στον ιστό",
+  "shareButtonLabel": "Κοινοποίηση…"
 }
