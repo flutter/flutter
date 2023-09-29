@@ -4,6 +4,7 @@
 
 #include "impeller/aiks/canvas.h"
 
+#include <algorithm>
 #include <optional>
 #include <utility>
 
