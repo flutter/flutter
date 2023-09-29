@@ -13,6 +13,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
+#include "impeller/aiks/color_filter.h"
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/paint_pass_delegate.h"
@@ -123,13 +124,40 @@ TEST_P(AiksTest, CanRenderImage) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_P(AiksTest, CanRenderInvertedImage) {
+TEST_P(AiksTest, CanRenderInvertedImageWithColorFilter) {
   Canvas canvas;
   Paint paint;
   auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
   paint.color = Color::Red();
+  paint.color_filter =
+      ColorFilter::MakeBlend(BlendMode::kSourceOver, Color::Yellow());
   paint.invert_colors = true;
+
   canvas.DrawImage(image, Point::MakeXY(100.0, 100.0), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderColorFilterWithInvertColors) {
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::Red();
+  paint.color_filter =
+      ColorFilter::MakeBlend(BlendMode::kSourceOver, Color::Yellow());
+  paint.invert_colors = true;
+
+  canvas.DrawRect(Rect::MakeLTRB(0, 0, 100, 100), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderColorFilterWithInvertColorsDrawPaint) {
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::Red();
+  paint.color_filter =
+      ColorFilter::MakeBlend(BlendMode::kSourceOver, Color::Yellow());
+  paint.invert_colors = true;
+
+  canvas.DrawPaint(paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

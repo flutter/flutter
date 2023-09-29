@@ -8,7 +8,6 @@
 #include <cstring>
 #include <memory>
 #include <optional>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -16,20 +15,13 @@
 #include "flutter/fml/trace_event.h"
 #include "impeller/aiks/color_filter.h"
 #include "impeller/core/formats.h"
-#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/skia_conversions.h"
-#include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
-#include "impeller/entity/contents/linear_gradient_contents.h"
-#include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
-#include "impeller/entity/contents/sweep_gradient_contents.h"
-#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/entity.h"
-#include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
@@ -483,7 +475,6 @@ static std::shared_ptr<ColorFilter> ToColorFilter(
 
 // |flutter::DlOpReceiver|
 void DlDispatcher::setColorFilter(const flutter::DlColorFilter* filter) {
-  // Needs https://github.com/flutter/flutter/issues/95434
   paint_.color_filter = ToColorFilter(filter);
 }
 
