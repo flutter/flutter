@@ -44,7 +44,7 @@
   "searchTextFieldPlaceholderLabel": "بحث",
   "noSpellCheckReplacementsLabel": "لم يتم العثور على بدائل",
   "menuDismissLabel": "إغلاق القائمة",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "النظر إلى أعلى",
+  "searchWebButtonLabel": "البحث على الويب",
+  "shareButtonLabel": "مشاركة…"
 }

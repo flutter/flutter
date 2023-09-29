@@ -46,7 +46,8 @@ String generateImports(bool isSkwasm) {
         const skwasmInstance = await skwasm();
         window._flutter_skwasmInstance = skwasmInstance;
         resolve({
-          'skwasm': skwasmInstance.asm ?? skwasmInstance.wasmExports,
+          'skwasm': skwasmInstance.wasmExports,
+          'skwasmWrapper': skwasmInstance,
           'ffi': {
             'memory': skwasmInstance.wasmMemory,
           }

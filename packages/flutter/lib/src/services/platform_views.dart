@@ -201,11 +201,7 @@ class PlatformViewsService {
     return controller;
   }
 
-  // TODO(amirh): reference the iOS plugin API for registering a UIView factory
-  // once it lands.
-
-  /// This is work in progress, not yet ready to be used, and requires a custom
-  /// engine build. Creates a controller for a new iOS UIView.
+  /// Factory method to create a `UiKitView`.
   ///
   /// The `id` parameter is an unused unique identifier generated with
   /// [platformViewsRegistry].
@@ -218,6 +214,8 @@ class PlatformViewsService {
   /// The `onFocus` parameter is a callback that will be invoked when the UIKit
   /// view asks to get the input focus. If `creationParams` is non null then
   /// `creationParamsCodec` must not be null.
+  ///
+  /// See: https://docs.flutter.dev/platform-integration/ios/platform-views
   static Future<UiKitViewController> initUiKitView({
     required int id,
     required String viewType,
@@ -249,6 +247,8 @@ class PlatformViewsService {
     return UiKitViewController._(id, layoutDirection);
   }
 
+  // TODO(cbracken): Write and link website docs. https://github.com/flutter/website/issues/9424.
+  //
   /// Factory method to create an `AppKitView`.
   ///
   /// The `id` parameter is an unused unique identifier generated with
