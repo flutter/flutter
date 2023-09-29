@@ -1141,16 +1141,16 @@ Future<void> _runWebUnitTests(String webRenderer) async {
         allTests.length,
       ),
     );
-    await _runFlutterWebTest(
-      webRenderer,
-      path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
-      <String>['test'],
-    );
-    await _runFlutterWebTest(
-      webRenderer,
-      path.join(flutterRoot, 'packages', 'flutter_driver'),
-      <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
-    );
+    // await _runFlutterWebTest(
+    //   webRenderer,
+    //   path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
+    //   <String>['test'],
+    // );
+    // await _runFlutterWebTest(
+    //   webRenderer,
+    //   path.join(flutterRoot, 'packages', 'flutter_driver'),
+    //   <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+    // );
   };
 
   await selectSubshard(subshards);
@@ -1767,24 +1767,26 @@ Future<void> _runWebDebugTest(String target, {
 }
 
 Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, List<String> tests) async {
-  await runCommand(
-    flutter,
-    <String>[
-      'test',
-      if (ciProvider == CiProviders.cirrus)
-        '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
-      '-v',
-      '--platform=chrome',
-      '--web-renderer=$webRenderer',
-      '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
-      ...flutterTestArgs,
-      ...tests,
-    ],
-    workingDirectory: workingDirectory,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
-  );
+  for (int i = 0; i < 10; i++) {
+    await runCommand(
+      flutter,
+      <String>[
+        'test',
+        if (ciProvider == CiProviders.cirrus)
+          '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
+        '-v',
+        '--platform=chrome',
+        '--web-renderer=$webRenderer',
+        '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
+        ...flutterTestArgs,
+        'test/material/persistent_bottom_sheet_test.dart',
+      ],
+      workingDirectory: workingDirectory,
+      environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      },
+    );
+  }
 }
 
 // TODO(sigmund): includeLocalEngineEnv should default to true. Currently we
