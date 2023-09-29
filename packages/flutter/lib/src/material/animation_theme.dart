@@ -28,23 +28,60 @@ class AnimationThemeData with Diagnosticable {
   const AnimationThemeData({
     this.animationCurve,
     this.animationDuration,
+    this.reverseAnimationDuration,
+    this.sizeCurve,
+    this.crossFadeFirstCurve,
+    this.crossFadeSecondCurve,
+    this.switchInCurve,
+    this.switchOutCurve,
   });
 
-  /// Set value for [animationCurve],
+  /// Set value for [animationCurve].
   final Curve? animationCurve;
 
-  /// Set value for [animationDuration],
+  /// Set value for forward [animationDuration].
   final Duration? animationDuration;
+
+  /// Set value for reverse animation [Duration]s.
+  /// Found in [AnimatedCrossFade]
+  final Duration? reverseAnimationDuration;
+
+  /// Curve for size transitions found in [AnimatedCrossFade].
+  final Curve? sizeCurve;
+
+  /// Fade curve for first child for [AnimatedCrossFade].
+  final Curve? crossFadeFirstCurve;
+
+  /// Fade curve for second child for [AnimatedCrossFade].
+  final Curve? crossFadeSecondCurve;
+
+  /// In curve for [AnimatedSwitcher].
+  final Curve? switchInCurve;
+
+  /// Out curve for [AnimatedSwitcher].
+  final Curve? switchOutCurve;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   AnimationThemeData copyWith({
     Curve? animationCurve,
     Duration? animationDuration,
+    Duration? reverseAnimationDuration,
+    Curve? sizeCurve,
+    Curve? crossFadeFirstCurve,
+    Curve? crossFadeSecondCurve,
+    Curve? switchInCurve,
+    Curve? switchOutCurve,
   }) {
     return AnimationThemeData(
       animationCurve: animationCurve ?? this.animationCurve,
       animationDuration: animationDuration ?? this.animationDuration,
+      reverseAnimationDuration: reverseAnimationDuration ?? this.reverseAnimationDuration,
+      sizeCurve: sizeCurve ?? this.sizeCurve,
+      crossFadeFirstCurve: crossFadeFirstCurve ?? this.crossFadeFirstCurve,
+      crossFadeSecondCurve: crossFadeSecondCurve ?? this.crossFadeSecondCurve,
+      switchInCurve: switchInCurve ?? this.switchInCurve,
+      switchOutCurve: switchOutCurve ?? this.switchOutCurve
     );
   }
 
@@ -61,12 +98,27 @@ class AnimationThemeData with Diagnosticable {
     return AnimationThemeData(
       animationCurve: a?.animationCurve,
       animationDuration: a?.animationDuration,
+      reverseAnimationDuration: a?.reverseAnimationDuration,
+      sizeCurve: a?.sizeCurve,
+      crossFadeFirstCurve: a?.crossFadeFirstCurve,
+      crossFadeSecondCurve: a?.crossFadeSecondCurve,
+      switchInCurve: a?.switchInCurve,
+      switchOutCurve: a?.switchOutCurve,
     );
   }
 
   @override
-  int get hashCode => Object.hash(animationCurve, animationDuration);
-//
+  int get hashCode => Object.hash(
+    animationCurve,
+    animationDuration,
+    reverseAnimationDuration,
+    sizeCurve,
+    crossFadeFirstCurve,
+    crossFadeSecondCurve,
+    switchInCurve,
+    switchOutCurve,
+  );
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -77,7 +129,13 @@ class AnimationThemeData with Diagnosticable {
     }
     return other is AnimationThemeData &&
         other.animationCurve == animationCurve &&
-        other.animationDuration == animationDuration;
+        other.animationDuration == animationDuration &&
+        other.reverseAnimationDuration == reverseAnimationDuration &&
+        other.sizeCurve == sizeCurve &&
+        other.crossFadeFirstCurve == crossFadeFirstCurve &&
+        other.crossFadeSecondCurve == crossFadeSecondCurve &&
+        other.switchInCurve == switchInCurve &&
+        other.switchOutCurve == switchOutCurve;
   }
 
   @override
@@ -90,6 +148,30 @@ class AnimationThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Duration>(
       'animationDuration',
       animationDuration,
+    ));
+    properties.add(DiagnosticsProperty<Duration>(
+      'reverseAnimationDuration',
+      reverseAnimationDuration,
+    ));
+    properties.add(DiagnosticsProperty<Curve>(
+      'sizeCurve',
+      sizeCurve,
+    ));
+    properties.add(DiagnosticsProperty<Curve>(
+      'crossFadeFirstCurve',
+      crossFadeFirstCurve,
+    ));
+    properties.add(DiagnosticsProperty<Curve>(
+      'crossFadeSecondCurve',
+      crossFadeSecondCurve,
+    ));
+    properties.add(DiagnosticsProperty<Curve>(
+      'switchInCurve',
+      switchInCurve,
+    ));
+    properties.add(DiagnosticsProperty<Curve>(
+      'switchOutCurve',
+      switchOutCurve,
     ));
   }
 }
