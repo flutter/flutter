@@ -672,6 +672,9 @@ def to_gn_args(args):
   if args.enable_impeller_3d:
     gn_args['impeller_enable_3d'] = True
 
+  if args.enable_impeller_trace_canvas:
+    gn_args['impeller_trace_canvas'] = True
+
   if args.enable_impeller_vulkan:
     gn_args['impeller_enable_vulkan'] = True
 
@@ -1223,6 +1226,12 @@ def parse_args(args):
       help='Enables experimental 3d support.'
   )
 
+  parser.add_argument(
+      '--enable-impeller-trace-canvas',
+      default=False,
+      action='store_true',
+      help='Enables tracing calls to Canvas.'
+  )
   parser.add_argument(
       '--malioc-path', type=str, help='The path to the malioc tool.'
   )

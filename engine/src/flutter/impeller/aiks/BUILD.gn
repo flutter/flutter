@@ -4,12 +4,18 @@
 
 import("../tools/impeller.gni")
 
+config("impeller_canvas_recorder_config") {
+  defines = [ "IMPELLER_TRACE_CANVAS" ]
+}
+
 impeller_component("aiks") {
   sources = [
     "aiks_context.cc",
     "aiks_context.h",
     "canvas.cc",
     "canvas.h",
+    "canvas_recorder.h",
+    "canvas_type.h",
     "color_filter.cc",
     "color_filter.h",
     "color_source.cc",
@@ -26,6 +32,7 @@ impeller_component("aiks") {
     "picture.h",
     "picture_recorder.cc",
     "picture_recorder.h",
+    "trace_serializer.h",
   ]
 
   public_deps = [
@@ -35,6 +42,11 @@ impeller_component("aiks") {
   ]
 
   deps = [ "//flutter/fml" ]
+
+  if (impeller_trace_canvas) {
+    sources += [ "trace_serializer.cc" ]
+    public_configs = [ ":impeller_canvas_recorder_config" ]
+  }
 }
 
 impeller_component("aiks_playground") {
@@ -60,10 +72,12 @@ impeller_component("aiks_unittests") {
 
   sources = [
     "aiks_unittests.cc",
+    "canvas_recorder_unittests.cc",
     "canvas_unittests.cc",
     "testing/context_mock.h",
     "testing/context_spy.cc",
     "testing/context_spy.h",
+    "trace_serializer_unittests.cc",
   ]
   deps = [
     ":aiks",
@@ -75,6 +89,11 @@ impeller_component("aiks_unittests") {
     "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
     "//flutter/testing:testing_lib",
   ]
+
+  if (!impeller_trace_canvas) {
+    sources += [ "trace_serializer.cc" ]
+    public_configs = [ ":impeller_canvas_recorder_config" ]
+  }
 }
 
 impeller_component("aiks_unittests_golden") {

@@ -15,6 +15,25 @@ namespace impeller {
 
 struct Paint;
 
+class LocalMatrixImageFilter;
+class BlurImageFilter;
+class DilateImageFilter;
+class ErodeImageFilter;
+class MatrixImageFilter;
+class ComposeImageFilter;
+class ColorImageFilter;
+
+class ImageFilterVisitor {
+ public:
+  virtual void Visit(const BlurImageFilter& filter) = 0;
+  virtual void Visit(const LocalMatrixImageFilter& filter) = 0;
+  virtual void Visit(const DilateImageFilter& filter) = 0;
+  virtual void Visit(const ErodeImageFilter& filter) = 0;
+  virtual void Visit(const MatrixImageFilter& filter) = 0;
+  virtual void Visit(const ComposeImageFilter& filter) = 0;
+  virtual void Visit(const ColorImageFilter& filter) = 0;
+};
+
 /*******************************************************************************
  ******* ImageFilter
  ******************************************************************************/
@@ -65,6 +84,8 @@ class ImageFilter {
       const FilterInput::Ref& input) const = 0;
 
   virtual std::shared_ptr<ImageFilter> Clone() const = 0;
+
+  virtual void Visit(ImageFilterVisitor& visitor) = 0;
 };
 
 /*******************************************************************************
@@ -86,6 +107,9 @@ class BlurImageFilter : public ImageFilter {
 
   // |ImageFilter|
   std::shared_ptr<ImageFilter> Clone() const override;
+
+  // |ImageFilter|
+  void Visit(ImageFilterVisitor& visitor) override { visitor.Visit(*this); }
 
  private:
   Sigma sigma_x_;
@@ -111,6 +135,9 @@ class DilateImageFilter : public ImageFilter {
   // |ImageFilter|
   std::shared_ptr<ImageFilter> Clone() const override;
 
+  // |ImageFilter|
+  void Visit(ImageFilterVisitor& visitor) override { visitor.Visit(*this); }
+
  private:
   Radius radius_x_;
   Radius radius_y_;
@@ -132,6 +159,9 @@ class ErodeImageFilter : public ImageFilter {
 
   // |ImageFilter|
   std::shared_ptr<ImageFilter> Clone() const override;
+
+  // |ImageFilter|
+  void Visit(ImageFilterVisitor& visitor) override { visitor.Visit(*this); }
 
  private:
   Radius radius_x_;
@@ -155,6 +185,11 @@ class MatrixImageFilter : public ImageFilter {
   // |ImageFilter|
   std::shared_ptr<ImageFilter> Clone() const override;
 
+  // |ImageFilter|
+  void Visit(ImageFilterVisitor& visitor) override { visitor.Visit(*this); }
+
+  const Matrix& GetMatrix() const { return matrix_; }
+
  private:
   Matrix matrix_;
   SamplerDescriptor sampler_descriptor_;
@@ -176,6 +211,9 @@ class ComposeImageFilter : public ImageFilter {
 
   // |ImageFilter|
   std::shared_ptr<ImageFilter> Clone() const override;
+
+  // |ImageFilter|
+  void Visit(ImageFilterVisitor& visitor) override { visitor.Visit(*this); }
 
  private:
   std::shared_ptr<ImageFilter> inner_;
@@ -199,6 +237,9 @@ class ColorImageFilter : public ImageFilter {
   // |ImageFilter|
   std::shared_ptr<ImageFilter> Clone() const override;
 
+  // |ImageFilter|
+  void Visit(ImageFilterVisitor& visitor) override { visitor.Visit(*this); }
+
  private:
   std::shared_ptr<ColorFilter> color_filter_;
 };
@@ -220,6 +261,9 @@ class LocalMatrixImageFilter : public ImageFilter {
 
   // |ImageFilter|
   std::shared_ptr<ImageFilter> Clone() const override;
+
+  // |ImageFilter|
+  void Visit(ImageFilterVisitor& visitor) override { visitor.Visit(*this); }
 
  private:
   Matrix matrix_;

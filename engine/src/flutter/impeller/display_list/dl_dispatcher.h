@@ -6,7 +6,7 @@
 
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/fml/macros.h"
-#include "impeller/aiks/canvas.h"
+#include "impeller/aiks/canvas_type.h"
 #include "impeller/aiks/paint.h"
 
 namespace impeller {
@@ -226,7 +226,7 @@ class DlDispatcher final : public flutter::DlOpReceiver {
 
  private:
   Paint paint_;
-  Canvas canvas_;
+  CanvasType canvas_;
   Matrix initial_matrix_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DlDispatcher);
