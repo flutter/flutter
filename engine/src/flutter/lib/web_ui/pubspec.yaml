@@ -45,7 +45,7 @@ dev_dependencies:
   uuid: 4.1.0
   watcher: 1.1.0
   web_socket_channel: any
-  webdriver: 3.0.2
+  webdriver: 3.0.3
   webkit_inspection_protocol: any
   yaml: 3.0.0
   web_test_utils:
