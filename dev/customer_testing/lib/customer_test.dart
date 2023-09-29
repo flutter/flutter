@@ -39,8 +39,8 @@ class CustomerTest {
       final String updatePrefix = _directive(_TestDirective.update);
       if (line.startsWith(updatePrefix)) {
         update.add(Directory(line.substring(updatePrefix.length)));
-      } 
-      
+      }
+
       final String iterationsPrefix = _directive(_TestDirective.iterations);
       if (line.startsWith(iterationsPrefix)) {
         if (iterations != null) {
