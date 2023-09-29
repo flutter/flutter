@@ -23,7 +23,7 @@ class RuntimeDelegate {
  public:
   virtual std::string DefaultRouteName() = 0;
 
-  virtual void ScheduleFrame(bool regenerate_layer_tree = true) = 0;
+  virtual void ScheduleFrame(bool regenerate_layer_trees = true) = 0;
 
   virtual void Render(std::unique_ptr<flutter::LayerTree> layer_tree,
                       float device_pixel_ratio) = 0;

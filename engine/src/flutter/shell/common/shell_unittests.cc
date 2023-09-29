@@ -310,30 +310,26 @@ static bool ValidateShell(Shell* shell) {
   return true;
 }
 
-static bool RasterizerHasLayerTree(Shell* shell) {
+static bool RasterizerIsTornDown(Shell* shell) {
   fml::AutoResetWaitableEvent latch;
-  bool has_layer_tree = false;
+  bool is_torn_down = false;
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetRasterTaskRunner(),
-      [shell, &latch, &has_layer_tree]() {
-        has_layer_tree = shell->GetRasterizer()->GetLastLayerTree() != nullptr;
+      [shell, &latch, &is_torn_down]() {
+        is_torn_down = shell->GetRasterizer()->IsTornDown();
         latch.Signal();
       });
   latch.Wait();
-  return has_layer_tree;
+  return is_torn_down;
 }
 
 static void ValidateDestroyPlatformView(Shell* shell) {
   ASSERT_TRUE(shell != nullptr);
   ASSERT_TRUE(shell->IsSetup());
 
-  // To validate destroy platform view, we must ensure the rasterizer has a
-  // layer tree before the platform view is destroyed.
-  ASSERT_TRUE(RasterizerHasLayerTree(shell));
-
+  ASSERT_FALSE(RasterizerIsTornDown(shell));
   ShellTest::PlatformViewNotifyDestroyed(shell);
-  // Validate the layer tree is destroyed
-  ASSERT_FALSE(RasterizerHasLayerTree(shell));
+  ASSERT_TRUE(RasterizerIsTornDown(shell));
 }
 
 static std::string CreateFlagsString(std::vector<const char*>& flags) {

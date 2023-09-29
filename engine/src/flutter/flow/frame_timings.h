@@ -116,6 +116,13 @@ class FrameTimingsRecorder {
   /// Returns the recorded time from when `RecordRasterEnd` is called.
   FrameTiming GetRecordedTime() const;
 
+  /// Asserts in unopt builds that the recorder is current at the specified
+  /// state.
+  ///
+  /// Instead of adding a `GetState` method and asserting on the result, this
+  /// method prevents other logic from relying on the state.
+  void AssertInState(State state) const;
+
  private:
   FML_FRIEND_TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync);
   FML_FRIEND_TEST(FrameTimingsRecorderTest,
