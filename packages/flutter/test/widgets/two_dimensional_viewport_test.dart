@@ -1441,10 +1441,15 @@ void main() {
     // Horizontal mismatch
     expect(
       () {
+        final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(verticalOffset.dispose);
+        final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(horizontalOffset.dispose);
+
         SimpleBuilderTableViewport(
-          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalOffset: verticalOffset,
           verticalAxisDirection: AxisDirection.left,
-          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalOffset: horizontalOffset,
           horizontalAxisDirection: AxisDirection.right,
           delegate: builderDelegate,
           mainAxis: Axis.vertical,
@@ -1462,10 +1467,15 @@ void main() {
     // Vertical mismatch
     expect(
       () {
+        final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(verticalOffset.dispose);
+        final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(horizontalOffset.dispose);
+
         SimpleBuilderTableViewport(
-          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalOffset: verticalOffset,
           verticalAxisDirection: AxisDirection.up,
-          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalOffset: horizontalOffset,
           horizontalAxisDirection: AxisDirection.down,
           delegate: builderDelegate,
           mainAxis: Axis.vertical,
@@ -1483,10 +1493,15 @@ void main() {
     // Both
     expect(
       () {
+        final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(verticalOffset.dispose);
+        final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(horizontalOffset.dispose);
+
         SimpleBuilderTableViewport(
-          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalOffset: verticalOffset,
           verticalAxisDirection: AxisDirection.left,
-          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalOffset: horizontalOffset,
           horizontalAxisDirection: AxisDirection.down,
           delegate: builderDelegate,
           mainAxis: Axis.vertical,
@@ -1548,10 +1563,15 @@ void main() {
       // Horizontal mismatch
       expect(
         () {
+          final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(verticalOffset.dispose);
+          final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(horizontalOffset.dispose);
+
           RenderSimpleBuilderTableViewport(
-            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalOffset: verticalOffset,
             verticalAxisDirection: AxisDirection.left,
-            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalOffset: horizontalOffset,
             horizontalAxisDirection: AxisDirection.right,
             delegate: builderDelegate,
             mainAxis: Axis.vertical,
@@ -1570,10 +1590,15 @@ void main() {
       // Vertical mismatch
       expect(
         () {
+          final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(verticalOffset.dispose);
+          final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(horizontalOffset.dispose);
+
           RenderSimpleBuilderTableViewport(
-            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalOffset: verticalOffset,
             verticalAxisDirection: AxisDirection.up,
-            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalOffset: horizontalOffset,
             horizontalAxisDirection: AxisDirection.down,
             delegate: builderDelegate,
             mainAxis: Axis.vertical,
@@ -1592,10 +1617,15 @@ void main() {
       // Both
       expect(
         () {
+          final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(verticalOffset.dispose);
+          final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(horizontalOffset.dispose);
+
           RenderSimpleBuilderTableViewport(
-            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalOffset: verticalOffset,
             verticalAxisDirection: AxisDirection.left,
-            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalOffset: horizontalOffset,
             horizontalAxisDirection: AxisDirection.down,
             delegate: builderDelegate,
             mainAxis: Axis.vertical,
@@ -1622,10 +1652,15 @@ void main() {
         }
       );
       addTearDown(delegate.dispose);
+      final ViewportOffset verticalOffset = ViewportOffset.fixed(10.0);
+      addTearDown(verticalOffset.dispose);
+      final ViewportOffset horizontalOffset = ViewportOffset.fixed(20.0);
+      addTearDown(horizontalOffset.dispose);
+
       final RenderSimpleBuilderTableViewport renderViewport = RenderSimpleBuilderTableViewport(
-        verticalOffset: ViewportOffset.fixed(10.0),
+        verticalOffset: verticalOffset,
         verticalAxisDirection: AxisDirection.down,
-        horizontalOffset: ViewportOffset.fixed(20.0),
+        horizontalOffset: horizontalOffset,
         horizontalAxisDirection: AxisDirection.right,
         delegate: delegate,
         mainAxis: Axis.vertical,
