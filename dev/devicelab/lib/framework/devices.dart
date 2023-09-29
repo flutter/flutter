@@ -203,7 +203,7 @@ abstract class Device {
       '-d',
       deviceId]);
 
-    sleep(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
 
     await awaitDevice();
   }
