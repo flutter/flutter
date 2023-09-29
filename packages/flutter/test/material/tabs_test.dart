@@ -1643,6 +1643,54 @@ void main() {
     expect(pageController.viewportFraction, 1);
   });
 
+  testWidgets('TabBarView viewportFraction can be updated', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/135557.
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    TabController? controller;
+
+    Widget buildFrame(double viewportFraction) {
+      controller = _tabController(
+        vsync: const TestVSync(),
+        length: tabs.length,
+        initialIndex: 1,
+      );
+      return boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              controller: controller,
+            ),
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                viewportFraction: viewportFraction,
+                controller: controller,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(0.8));
+    PageView pageView = tester.widget(find.byType(PageView));
+    PageController pageController = pageView.controller;
+    expect(pageController.viewportFraction, 0.8);
+
+    // Rebuild with a different viewport fraction.
+    await tester.pumpWidget(buildFrame(0.5));
+    pageView = tester.widget(find.byType(PageView));
+    pageController = pageView.controller;
+    expect(pageController.viewportFraction, 0.5);
+  });
+
   testWidgets('TabBarView has clipBehavior Clip.hardEdge by default', (WidgetTester tester) async {
     final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
 

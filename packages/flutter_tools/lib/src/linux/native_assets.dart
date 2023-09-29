@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_builder/native_assets_builder.dart' show BuildResult;
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
-import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -22,24 +20,14 @@ Future<Uri?> dryRunNativeAssetsLinux({
   required Uri projectUri,
   bool flutterTester = false,
   required FileSystem fileSystem,
-}) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
-    return null;
-  }
-
-  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, OS.linux);
-  final Iterable<Asset> nativeAssetPaths = await dryRunNativeAssetsLinuxInternal(
-    fileSystem,
-    projectUri,
-    flutterTester,
-    buildRunner,
+}) {
+  return dryRunNativeAssetsSingleArchitecture(
+    buildRunner: buildRunner,
+    projectUri: projectUri,
+    flutterTester: flutterTester,
+    fileSystem: fileSystem,
+    os: OS.linux,
   );
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    nativeAssetPaths,
-    buildUri_,
-    fileSystem,
-  );
-  return nativeAssetsUri;
 }
 
 Future<Iterable<Asset>> dryRunNativeAssetsLinuxInternal(
@@ -47,33 +35,16 @@ Future<Iterable<Asset>> dryRunNativeAssetsLinuxInternal(
   Uri projectUri,
   bool flutterTester,
   NativeAssetsBuildRunner buildRunner,
-) async {
-  const OS targetOs = OS.linux;
-  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOs);
-
-  globals.logger.printTrace('Dry running native assets for $targetOs.');
-  final List<Asset> nativeAssets = (await buildRunner.dryRun(
-    linkModePreference: LinkModePreference.dynamic,
-    targetOs: targetOs,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-  ))
-      .assets;
-  ensureNoLinkModeStatic(nativeAssets);
-  globals.logger.printTrace('Dry running native assets for $targetOs done.');
-  final Uri? absolutePath = flutterTester ? buildUri_ : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocations(nativeAssets, absolutePath);
-  final Iterable<Asset> nativeAssetPaths = assetTargetLocations.values;
-  return nativeAssetPaths;
+) {
+  return dryRunNativeAssetsSingleArchitectureInternal(
+    fileSystem,
+    projectUri,
+    flutterTester,
+    buildRunner,
+    OS.linux,
+  );
 }
 
-/// Builds native assets.
-///
-/// If [targetPlatform] is omitted, the current target architecture is used.
-///
-/// If [flutterTester] is true, absolute paths are emitted in the native
-/// assets mapping. This can be used for JIT mode without sandbox on the host.
-/// This is used in `flutter test` and `flutter run -d flutter-tester`.
 Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsLinux({
   required NativeAssetsBuildRunner buildRunner,
   TargetPlatform? targetPlatform,
@@ -82,127 +53,16 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsLinux({
   bool flutterTester = false,
   Uri? yamlParentDirectory,
   required FileSystem fileSystem,
-}) async {
-  const OS targetOs = OS.linux;
-  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOs);
-  final Directory buildDir = fileSystem.directory(buildUri_);
-  if (!await buildDir.exists()) {
-    // CMake requires the folder to exist to do copying.
-    await buildDir.create(recursive: true);
-  }
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
-    final Uri nativeAssetsYaml = await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory ?? buildUri_, fileSystem);
-    return (nativeAssetsYaml, <Uri>[]);
-  }
-
-  final Target target = targetPlatform != null ? _getNativeTarget(targetPlatform) : Target.current;
-  final native_assets_cli.BuildMode buildModeCli = nativeAssetsBuildMode(buildMode);
-
-  globals.logger.printTrace('Building native assets for $target $buildModeCli.');
-  final BuildResult result = await buildRunner.build(
-    linkModePreference: LinkModePreference.dynamic,
-    target: target,
-    buildMode: buildModeCli,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    cCompilerConfig: await buildRunner.cCompilerConfig,
+}) {
+  return buildNativeAssetsSingleArchitecture(
+    buildRunner: buildRunner,
+    targetPlatform: targetPlatform,
+    projectUri: projectUri,
+    buildMode: buildMode,
+    flutterTester: flutterTester,
+    yamlParentDirectory: yamlParentDirectory,
+    fileSystem: fileSystem,
   );
-  final List<Asset> nativeAssets = result.assets;
-  final Set<Uri> dependencies = result.dependencies.toSet();
-  ensureNoLinkModeStatic(nativeAssets);
-  globals.logger.printTrace('Building native assets for $target done.');
-  final Uri? absolutePath = flutterTester ? buildUri_ : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocations(nativeAssets, absolutePath);
-  await _copyNativeAssetsLinux(
-    buildUri_,
-    assetTargetLocations,
-    buildMode,
-    fileSystem,
-  );
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    assetTargetLocations.values,
-    yamlParentDirectory ?? buildUri_,
-    fileSystem,
-  );
-  return (nativeAssetsUri, dependencies.toList());
-}
-
-Map<Asset, Asset> _assetTargetLocations(
-  List<Asset> nativeAssets,
-  Uri? absolutePath,
-) =>
-    <Asset, Asset>{
-      for (final Asset asset in nativeAssets) asset: _targetLocationLinux(asset, absolutePath),
-    };
-
-Asset _targetLocationLinux(Asset asset, Uri? absolutePath) {
-  final AssetPath path = asset.path;
-  switch (path) {
-    case AssetSystemPath _:
-    case AssetInExecutable _:
-    case AssetInProcess _:
-      return asset;
-    case AssetAbsolutePath _:
-      final String fileName = path.uri.pathSegments.last;
-      Uri uri;
-      if (absolutePath != null) {
-        // Flutter tester needs full host paths.
-        uri = absolutePath.resolve(fileName);
-      } else {
-        // Flutter Desktop needs "absolute" paths inside the app.
-        // "relative" in the context of native assets would be relative to the
-        // kernel or aot snapshot.
-        uri = Uri(path: fileName);
-      }
-      return asset.copyWith(path: AssetAbsolutePath(uri));
-  }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
-}
-
-/// Extract the [Target] from a [TargetPlatform].
-Target _getNativeTarget(TargetPlatform targetPlatform) {
-  switch (targetPlatform) {
-    case TargetPlatform.linux_x64:
-      return Target.linuxX64;
-    case TargetPlatform.linux_arm64:
-      return Target.linuxArm64;
-    case TargetPlatform.android:
-    case TargetPlatform.ios:
-    case TargetPlatform.darwin:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      throw Exception('Unknown targetPlatform: $targetPlatform.');
-  }
-}
-
-Future<void> _copyNativeAssetsLinux(
-  Uri buildUri,
-  Map<Asset, Asset> assetTargetLocations,
-  BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
-  if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
-    if (!buildDir.existsSync()) {
-      buildDir.createSync(recursive: true);
-    }
-    for (final MapEntry<Asset, Asset> assetMapping in assetTargetLocations.entries) {
-      final Uri source = (assetMapping.key.path as AssetAbsolutePath).uri;
-      final Uri target = (assetMapping.value.path as AssetAbsolutePath).uri;
-      final Uri targetUri = buildUri.resolveUri(target);
-      final String targetFullPath = targetUri.toFilePath();
-      await fileSystem.file(source).copy(targetFullPath);
-    }
-    globals.logger.printTrace('Copying native assets done.');
-  }
 }
 
 /// Flutter expects `clang++` to be on the path on Linux hosts.
