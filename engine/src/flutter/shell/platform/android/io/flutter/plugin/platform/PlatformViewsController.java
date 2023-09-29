@@ -147,7 +147,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Whether software rendering is used.
   private boolean usesSoftwareRendering = false;
 
-  private static boolean enableHardwareBufferRenderingTarget = true;
+  private static boolean enableHardwareBufferRenderingTarget = false;
 
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
