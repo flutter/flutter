@@ -126,7 +126,7 @@ class NavigationRail extends StatefulWidget {
             (iconType == NavigationRailIconType.none &&
                 !(labelType == NavigationRailLabelType.selected ||
                     labelType == NavigationRailLabelType.none)) ||
-            (iconType == NavigationRailIconType.all));
+            (iconType == NavigationRailIconType.all) || iconType == null);
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
