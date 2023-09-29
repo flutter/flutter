@@ -44,6 +44,9 @@ declare_args() {
 
   # Enable experimental 3D scene rendering.
   impeller_enable_3d = false
+
+  # Enable to get trace statements for canvas usage.
+  impeller_trace_canvas = false
 }
 
 declare_args() {
