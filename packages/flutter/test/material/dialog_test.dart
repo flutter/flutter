@@ -165,7 +165,7 @@ void main() {
 
     expect(find.text(dialogTextM2), findsOneWidget);
 
-    Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, Colors.grey[800]);
 
     // Try to dismiss the fullscreen dialog with the escape key.
@@ -190,7 +190,7 @@ void main() {
 
     expect(find.text(dialogTextM3), findsOneWidget);
 
-    materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, material3Theme.colorScheme.surface);
 
     // Try to dismiss the fullscreen dialog with the escape key.
