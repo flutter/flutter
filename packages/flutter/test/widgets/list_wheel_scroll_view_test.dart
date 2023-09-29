@@ -83,6 +83,37 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
     });
 
+    testWidgetsWithLeakTracking('FixedExtentScrollController onAttach, onDetach', (WidgetTester tester) async {
+      int attach = 0;
+      int detach = 0;
+      final FixedExtentScrollController controller = FixedExtentScrollController(
+        onAttach: (_) { attach++; },
+        onDetach: (_) { detach++; },
+      );
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 50.0,
+            children: const <Widget>[],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(attach, 1);
+      expect(detach, 0);
+
+      await tester.pumpWidget(Container());
+      await tester.pumpAndSettle();
+
+      expect(attach, 1);
+      expect(detach, 1);
+    });
+
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
         () {
@@ -1596,6 +1627,37 @@ void main() {
     revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 500.0);
     expect(revealed.rect, const Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
+  });
+
+  testWidgets('will not assert on getOffsetToReveal Axis', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 500.0,
+            width: 300.0,
+            child: ListWheelScrollView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              itemExtent: 100.0,
+              children: List<Widget>.generate(10, (int i) {
+                return Center(
+                  child: SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderListWheelViewport viewport = tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
+    final RenderObject target = tester.renderObject(find.text('Item 5'));
+    viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
   });
 
   testWidgets('ListWheelScrollView showOnScreen', (WidgetTester tester) async {

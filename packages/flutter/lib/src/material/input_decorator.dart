@@ -2905,7 +2905,6 @@ class InputDecoration {
   /// {@endtemplate}
   final TextStyle? errorStyle;
 
-
   /// The maximum number of lines the [errorText] can occupy.
   ///
   /// Defaults to null, which means that the [errorText] will be limited
