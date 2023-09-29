@@ -67,6 +67,8 @@ struct Paint {
   std::shared_ptr<ColorFilter> color_filter;
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;
 
+  std::shared_ptr<ColorFilter> GetColorFilter() const;
+
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
   /// @return     The filter-wrapped contents. If there are no filters that need
@@ -108,9 +110,6 @@ struct Paint {
       std::shared_ptr<Contents> input,
       ColorFilterContents::AbsorbOpacity absorb_opacity =
           ColorFilterContents::AbsorbOpacity::kNo) const;
-
-  std::shared_ptr<Contents> WithInvertFilter(
-      std::shared_ptr<Contents> input) const;
 };
 
 }  // namespace impeller

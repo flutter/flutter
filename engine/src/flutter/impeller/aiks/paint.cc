@@ -14,6 +14,18 @@
 
 namespace impeller {
 
+/// A color matrix which inverts colors.
+// clang-format off
+constexpr ColorMatrix kColorInversion = {
+  .array = {
+    -1.0,    0,    0, 1.0, 0, //
+       0, -1.0,    0, 1.0, 0, //
+       0,    0, -1.0, 1.0, 0, //
+     1.0,  1.0,  1.0, 1.0, 0  //
+  }
+};
+// clang-format on
+
 std::shared_ptr<Contents> Paint::CreateContentsForEntity(const Path& path,
                                                          bool cover) const {
   std::unique_ptr<Geometry> geometry;
@@ -38,6 +50,7 @@ std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
   // Attempt to apply the color filter on the CPU first.
   // Note: This is not just an optimization; some color sources rely on
   //       CPU-applied color filters to behave properly.
+  auto color_filter = GetColorFilter();
   bool needs_color_filter = !!color_filter;
   if (color_filter &&
       contents->ApplyColorFilter(color_filter->GetCPUColorFilterProc())) {
@@ -59,7 +72,6 @@ std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
 std::shared_ptr<Contents> Paint::WithFilters(
     std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, ColorFilterContents::AbsorbOpacity::kYes);
-  input = WithInvertFilter(input);
   auto image_filter =
       WithImageFilter(input, Matrix(), Entity::RenderingMode::kDirect);
   if (image_filter) {
@@ -111,6 +123,7 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
     return input;
   }
 
+  auto color_filter = GetColorFilter();
   if (!color_filter) {
     return input;
   }
@@ -121,31 +134,8 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
   if (input->ApplyColorFilter(color_filter->GetCPUColorFilterProc())) {
     return input;
   }
-
   return color_filter->WrapWithGPUColorFilter(FilterInput::Make(input),
                                               absorb_opacity);
-}
-
-/// A color matrix which inverts colors.
-// clang-format off
-constexpr ColorMatrix kColorInversion = {
-  .array = {
-    -1.0,    0,    0, 1.0, 0, //
-       0, -1.0,    0, 1.0, 0, //
-       0,    0, -1.0, 1.0, 0, //
-     1.0,  1.0,  1.0, 1.0, 0  //
-  }
-};
-// clang-format on
-
-std::shared_ptr<Contents> Paint::WithInvertFilter(
-    std::shared_ptr<Contents> input) const {
-  if (!invert_colors) {
-    return input;
-  }
-
-  return ColorFilterContents::MakeColorMatrix(
-      {FilterInput::Make(std::move(input))}, kColorInversion);
 }
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
@@ -208,8 +198,22 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   return FilterContents::MakeBorderMaskBlur(input, sigma, sigma, style);
 }
 
+std::shared_ptr<ColorFilter> Paint::GetColorFilter() const {
+  if (invert_colors && color_filter) {
+    auto filter = ColorFilter::MakeMatrix(kColorInversion);
+    return ColorFilter::MakeComposed(filter, color_filter);
+  }
+  if (invert_colors) {
+    return ColorFilter::MakeMatrix(kColorInversion);
+  }
+  if (color_filter) {
+    return color_filter;
+  }
+  return nullptr;
+}
+
 bool Paint::HasColorFilter() const {
-  return !!color_filter;
+  return !!color_filter || invert_colors;
 }
 
 }  // namespace impeller
