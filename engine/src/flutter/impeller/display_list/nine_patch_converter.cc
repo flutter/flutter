@@ -61,7 +61,7 @@ void NinePatchConverter::DrawNinePatch(const std::shared_ptr<Image>& image,
                                        Rect center,
                                        Rect dst,
                                        const SamplerDescriptor& sampler,
-                                       Canvas* canvas,
+                                       CanvasType* canvas,
                                        Paint* paint) {
   if (dst.IsEmpty()) {
     return;
