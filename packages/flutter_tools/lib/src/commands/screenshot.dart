@@ -18,7 +18,6 @@ const String _kType = 'type';
 const String _kVmServiceUrl = 'vm-service-url';
 const String _kDeviceType = 'device';
 const String _kSkiaType = 'skia';
-const String _kRasterizerType = 'rasterizer';
 
 class ScreenshotCommand extends FlutterCommand {
   ScreenshotCommand({required this.fs}) {
@@ -33,7 +32,7 @@ class ScreenshotCommand extends FlutterCommand {
       aliases: <String>[ 'observatory-url' ], // for historical reasons
       valueHelp: 'URI',
       help: 'The VM Service URL to which to connect.\n'
-          'This is required when "--$_kType" is "$_kSkiaType" or "$_kRasterizerType".\n'
+          'This is required when "--$_kType" is "$_kSkiaType".\n'
           'To find the VM service URL, use "flutter run" and look for '
           '"A Dart VM Service ... is available at" in the output.',
     );
@@ -41,13 +40,12 @@ class ScreenshotCommand extends FlutterCommand {
       _kType,
       valueHelp: 'type',
       help: 'The type of screenshot to retrieve.',
-      allowed: const <String>[_kDeviceType, _kSkiaType, _kRasterizerType],
+      allowed: const <String>[_kDeviceType, _kSkiaType],
       allowedHelp: const <String, String>{
         _kDeviceType: "Delegate to the device's native screenshot capabilities. This "
                       'screenshots the entire screen currently being displayed (including content '
                       'not rendered by Flutter, like the device status bar).',
         _kSkiaType: 'Render the Flutter app as a Skia picture. Requires "--$_kVmServiceUrl".',
-        _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires "--$_kVmServiceUrl."',
       },
       defaultsTo: _kDeviceType,
     );
@@ -116,8 +114,6 @@ class ScreenshotCommand extends FlutterCommand {
         await runScreenshot(outputFile);
       case _kSkiaType:
         success = await runSkia(outputFile);
-      case _kRasterizerType:
-        success = await runRasterizer(outputFile);
     }
 
     return success ? FlutterCommandResult.success()
@@ -167,30 +163,6 @@ class ScreenshotCommand extends FlutterCommand {
     );
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp.json?['skp'] as String));
-    await sink.close();
-    _showOutputFileInfo(outputFile);
-    ensureOutputIsNotJsonRpcError(outputFile);
-    return true;
-  }
-
-  Future<bool> runRasterizer(File? outputFile) async {
-    final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
-    final FlutterVmService vmService = await connectToVmService(vmServiceUrl, logger: globals.logger);
-    final vm_service.Response? response = await vmService.screenshot();
-    if (response == null) {
-      globals.printError(
-        'The screenshot request failed, probably because the device was '
-        'disconnected',
-      );
-      return false;
-    }
-    outputFile ??= globals.fsUtils.getUniqueFile(
-      fs.currentDirectory,
-      'flutter',
-      'png',
-    );
-    final IOSink sink = outputFile.openWrite();
-    sink.add(base64.decode(response.json?['screenshot'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
     ensureOutputIsNotJsonRpcError(outputFile);

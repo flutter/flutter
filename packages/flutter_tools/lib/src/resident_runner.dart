@@ -1017,17 +1017,17 @@ abstract class ResidentHandlers {
   }
 
   Future<bool> _takeVmServiceScreenshot(FlutterDevice device, File outputFile) async {
-    final bool isWebDevice = device.targetPlatform == TargetPlatform.web_javascript;
+    if (device.targetPlatform != TargetPlatform.web_javascript) {
+      return false;
+    }
     assert(supportsServiceProtocol);
 
     return _toggleDebugBanner(device, () async {
-      final vm_service.Response? response = isWebDevice
-        ? await device.vmService!.callMethodWrapper('ext.dwds.screenshot')
-        : await device.vmService!.screenshot();
+      final vm_service.Response? response =  await device.vmService!.callMethodWrapper('ext.dwds.screenshot');
       if (response == null) {
        throw Exception('Failed to take screenshot');
       }
-      final String data = response.json![isWebDevice ? 'data' : 'screenshot'] as String;
+      final String data = response.json!['data'] as String;
       outputFile.writeAsBytesSync(base64.decode(data));
     });
   }
