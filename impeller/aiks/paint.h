@@ -61,7 +61,6 @@ struct Paint {
   Scalar stroke_miter = 4.0;
   Style style = Style::kFill;
   BlendMode blend_mode = BlendMode::kSourceOver;
-  bool invert_colors = false;
 
   std::shared_ptr<ImageFilter> image_filter;
   std::shared_ptr<ColorFilter> color_filter;
@@ -108,9 +107,6 @@ struct Paint {
       std::shared_ptr<Contents> input,
       ColorFilterContents::AbsorbOpacity absorb_opacity =
           ColorFilterContents::AbsorbOpacity::kNo) const;
-
-  std::shared_ptr<Contents> WithInvertFilter(
-      std::shared_ptr<Contents> input) const;
 };
 
 }  // namespace impeller
