@@ -41,10 +41,10 @@ class FakeAnimatorDelegate : public Animator::Delegate {
 
   MOCK_METHOD(void,
               OnAnimatorDraw,
-              (std::shared_ptr<LayerTreePipeline> pipeline),
+              (std::shared_ptr<FramePipeline> pipeline),
               (override));
 
-  void OnAnimatorDrawLastLayerTree(
+  void OnAnimatorDrawLastLayerTrees(
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override {}
 
   bool notify_idle_called_ = false;
