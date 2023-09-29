@@ -8,7 +8,6 @@
 #include <cstring>
 #include <memory>
 #include <optional>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -16,20 +15,13 @@
 #include "flutter/fml/trace_event.h"
 #include "impeller/aiks/color_filter.h"
 #include "impeller/core/formats.h"
-#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/skia_conversions.h"
-#include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
-#include "impeller/entity/contents/linear_gradient_contents.h"
-#include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
-#include "impeller/entity/contents/sweep_gradient_contents.h"
-#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/entity.h"
-#include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
@@ -40,6 +32,18 @@
 #endif  // IMPELLER_ENABLE_3D
 
 namespace impeller {
+
+/// A color matrix which inverts colors.
+// clang-format off
+constexpr ColorMatrix kColorInversion = {
+  .array = {
+    -1.0,    0,    0, 1.0, 0, //
+       0, -1.0,    0, 1.0, 0, //
+       0,    0, -1.0, 1.0, 0, //
+     1.0,  1.0,  1.0, 1.0, 0  //
+  }
+};
+// clang-format on
 
 #define UNIMPLEMENTED \
   FML_DLOG(ERROR) << "Unimplemented detail in " << __FUNCTION__;
@@ -484,12 +488,24 @@ static std::shared_ptr<ColorFilter> ToColorFilter(
 // |flutter::DlOpReceiver|
 void DlDispatcher::setColorFilter(const flutter::DlColorFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
-  paint_.color_filter = ToColorFilter(filter);
+  if (paint_.color_filter) {
+    auto color_filter = ToColorFilter(filter);
+    paint_.color_filter =
+        ColorFilter::MakeComposed(paint_.color_filter, color_filter);
+  } else {
+    paint_.color_filter = ToColorFilter(filter);
+  }
 }
 
 // |flutter::DlOpReceiver|
 void DlDispatcher::setInvertColors(bool invert) {
-  paint_.invert_colors = invert;
+  if (paint_.color_filter) {
+    auto invert_filter = ColorFilter::MakeMatrix(kColorInversion);
+    paint_.color_filter =
+        ColorFilter::MakeComposed(invert_filter, paint_.color_filter);
+  } else {
+    paint_.color_filter = ColorFilter::MakeMatrix(kColorInversion);
+  }
 }
 
 // |flutter::DlOpReceiver|

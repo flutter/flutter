@@ -59,7 +59,6 @@ std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
 std::shared_ptr<Contents> Paint::WithFilters(
     std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, ColorFilterContents::AbsorbOpacity::kYes);
-  input = WithInvertFilter(input);
   auto image_filter =
       WithImageFilter(input, Matrix(), Entity::RenderingMode::kDirect);
   if (image_filter) {
@@ -121,31 +120,8 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
   if (input->ApplyColorFilter(color_filter->GetCPUColorFilterProc())) {
     return input;
   }
-
   return color_filter->WrapWithGPUColorFilter(FilterInput::Make(input),
                                               absorb_opacity);
-}
-
-/// A color matrix which inverts colors.
-// clang-format off
-constexpr ColorMatrix kColorInversion = {
-  .array = {
-    -1.0,    0,    0, 1.0, 0, //
-       0, -1.0,    0, 1.0, 0, //
-       0,    0, -1.0, 1.0, 0, //
-     1.0,  1.0,  1.0, 1.0, 0  //
-  }
-};
-// clang-format on
-
-std::shared_ptr<Contents> Paint::WithInvertFilter(
-    std::shared_ptr<Contents> input) const {
-  if (!invert_colors) {
-    return input;
-  }
-
-  return ColorFilterContents::MakeColorMatrix(
-      {FilterInput::Make(std::move(input))}, kColorInversion);
 }
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
