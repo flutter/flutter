@@ -47,6 +47,7 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
+    this.readOnly = true,
     required this.child,
   });
 
@@ -86,6 +87,11 @@ class SelectionArea extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// Whether the contents of this [SelectionArea] are read only.
+  ///
+  /// Defaults to true.
+  final bool readOnly;
 
   /// The child widget this selection area applies to.
   ///
@@ -127,6 +133,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       contextMenuBuilder: widget.contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
+      readOnly: widget.readOnly,
       child: widget.child,
     );
   }

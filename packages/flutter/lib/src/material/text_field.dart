@@ -1461,6 +1461,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     Widget selectionAreaBuilder = SelectionArea(
+      readOnly: false,
       child: Builder(
         builder: (BuildContext context) {
           final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);

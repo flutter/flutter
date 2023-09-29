@@ -215,6 +215,7 @@ class SelectableRegion extends StatefulWidget {
     required this.selectionControls,
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.readOnly = true,
     this.onSelectionChanged,
   });
 
@@ -247,6 +248,11 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// Whether the contents of this [SelectableRegion] are read only.
+  ///
+  /// Defaults to true.
+  final bool readOnly;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -607,21 +613,78 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
+  void _showMagnifier(Offset positionToShow) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay?.updateMagnifier(_buildInfoForMagnifier(
+        positionToShow,
+        _selectionDelegate.value.startSelectionPoint!,
+      ));
+    } else {
+      _selectionOverlay?.showMagnifier(_buildInfoForMagnifier(
+        positionToShow,
+        _selectionDelegate.value.startSelectionPoint!,
+      ));
+    }
+  }
+
+  void _hideMagnifier() {
+    _selectionOverlay?.hideMagnifier();
+  }
+
+  bool _longPressStartedWithoutFocus = false;
   void _handleTouchLongPressStart(LongPressStartDetails details) {
     HapticFeedback.selectionClick();
+    if (!widget.focusNode.hasFocus && defaultTargetPlatform == TargetPlatform.iOS) {
+      _longPressStartedWithoutFocus = true;
+    }
     widget.focusNode.requestFocus();
-    _selectWordAt(offset: details.globalPosition);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (_longPressStartedWithoutFocus || widget.readOnly) {
+          _selectWordAt(offset: details.globalPosition);
+        } else {
+          _collapseSelectionAt(offset: details.globalPosition);
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _selectWordAt(offset: details.globalPosition);
+    }
+
     // Platforms besides Android will show the text selection handles when
     // the long press is initiated. Android shows the text selection handles when
     // the long press has ended, usually after a pointer up event is received.
     if (defaultTargetPlatform != TargetPlatform.android) {
       _showHandles();
     }
+    _showMagnifier(details.globalPosition);
     _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (_longPressStartedWithoutFocus || widget.readOnly) {
+          _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+        } else {
+          _collapseSelectionAt(offset: details.globalPosition);
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+    }
+
+    _showMagnifier(details.globalPosition);
     _updateSelectedContentIfNeeded();
   }
 
@@ -632,6 +695,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
+    _longPressStartedWithoutFocus = false;
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
