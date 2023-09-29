@@ -203,6 +203,8 @@ abstract class Device {
       '-d',
       deviceId]);
 
+    sleep(const Duration(seconds: 2));
+
     await awaitDevice();
   }
 
@@ -867,7 +869,7 @@ class AndroidDevice extends Device {
     print('Waiting for device.');
     final String waitOut = await adb(<String>['wait-for-device']);
     print(waitOut);
-    const RetryOptions retryOptions = RetryOptions(delayFactor: Duration(seconds: 1), maxAttempts: 30, maxDelay: Duration(minutes: 1));
+    const RetryOptions retryOptions = RetryOptions(delayFactor: Duration(seconds: 1), maxAttempts: 10, maxDelay: Duration(minutes: 1));
     await retryOptions.retry(() async {
       final String adbShellOut = await adb(<String>['shell', 'getprop sys.boot_completed']);
       if (adbShellOut != '1') {
