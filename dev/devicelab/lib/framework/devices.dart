@@ -194,7 +194,17 @@ abstract class Device {
   /// Stop a process.
   Future<void> stop(String packageName);
 
+  /// Wait for the device to become ready.
   Future<void> awaitDevice();
+
+  Future<void> uninstallApp() async {
+    await flutter('install', options: <String>[
+      '--uninstall-only',
+      '-d',
+      deviceId]);
+
+    await awaitDevice();
+  }
 
   @override
   String toString() {
