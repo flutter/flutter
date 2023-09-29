@@ -696,6 +696,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _showHandles();
     }
     _longPressStartedWithoutFocus = false;
+    _hideMagnifier();
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
