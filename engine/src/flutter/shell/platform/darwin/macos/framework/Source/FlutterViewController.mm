@@ -169,7 +169,7 @@ NSData* currentKeyboardLayoutData() {
 /**
  * Private interface declaration for FlutterViewController.
  */
-@interface FlutterViewController () <FlutterViewReshapeListener>
+@interface FlutterViewController () <FlutterViewDelegate>
 
 /**
  * The tracking area used to generate hover events, if enabled.
@@ -831,7 +831,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                                           commandQueue:(id<MTLCommandQueue>)commandQueue {
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
-                                reshapeListener:self
+                                       delegate:self
                              threadSynchronizer:_threadSynchronizer
                                          viewId:_viewId];
 }
@@ -851,13 +851,22 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return [FlutterDartProject lookupKeyForAsset:asset fromPackage:package];
 }
 
-#pragma mark - FlutterViewReshapeListener
+#pragma mark - FlutterViewDelegate
 
 /**
  * Responds to view reshape by notifying the engine of the change in dimensions.
  */
 - (void)viewDidReshape:(NSView*)view {
+  FML_DCHECK(view == _flutterView);
   [_engine updateWindowMetricsForViewController:self];
+}
+
+- (BOOL)viewShouldAcceptFirstResponder:(NSView*)view {
+  FML_DCHECK(view == _flutterView);
+  // Only allow FlutterView to become first responder if TextInputPlugin is
+  // not active. Otherwise a mouse event inside FlutterView would cause the
+  // TextInputPlugin to lose first responder status.
+  return !_textInputPlugin.isFirstResponder;
 }
 
 #pragma mark - FlutterPluginRegistry

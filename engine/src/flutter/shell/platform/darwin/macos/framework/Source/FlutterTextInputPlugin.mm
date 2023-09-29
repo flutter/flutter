@@ -384,10 +384,7 @@ static char markerKey;
 
 - (void)resignAndRemoveFromSuperview {
   if (self.superview != nil) {
-    // With accessiblity enabled TextInputPlugin is inside _client, so take the
-    // nextResponder from the _client.
-    NSResponder* nextResponder = _client != nil ? _client.nextResponder : self.nextResponder;
-    [self.window makeFirstResponder:nextResponder];
+    [self.window makeFirstResponder:_flutterViewController.flutterView];
     [self removeFromSuperview];
   }
 }
