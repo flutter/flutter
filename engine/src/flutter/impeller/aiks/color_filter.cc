@@ -3,10 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/aiks/color_filter.h"
-
-#include <utility>
 #include "impeller/entity/contents/filters/color_filter_contents.h"
-#include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/geometry/color.h"
 
@@ -35,12 +32,6 @@ std::shared_ptr<ColorFilter> ColorFilter::MakeSrgbToLinear() {
 
 std::shared_ptr<ColorFilter> ColorFilter::MakeLinearToSrgb() {
   return std::make_shared<LinearToSrgbColorFilter>();
-}
-
-std::shared_ptr<ColorFilter> ColorFilter::MakeComposed(
-    const std::shared_ptr<ColorFilter>& outer,
-    const std::shared_ptr<ColorFilter>& inner) {
-  return std::make_shared<ComposedColorFilter>(outer, inner);
 }
 
 /*******************************************************************************
@@ -149,42 +140,6 @@ ColorFilter::ColorFilterProc LinearToSrgbColorFilter::GetCPUColorFilterProc()
 
 std::shared_ptr<ColorFilter> LinearToSrgbColorFilter::Clone() const {
   return std::make_shared<LinearToSrgbColorFilter>(*this);
-}
-
-/*******************************************************************************
- ******* ComposedColorFilter
- ******************************************************************************/
-
-ComposedColorFilter::ComposedColorFilter(
-    const std::shared_ptr<ColorFilter>& outer,
-    const std::shared_ptr<ColorFilter>& inner)
-    : outer_(outer), inner_(inner) {}
-
-ComposedColorFilter::~ComposedColorFilter() = default;
-
-std::shared_ptr<ColorFilterContents>
-ComposedColorFilter::WrapWithGPUColorFilter(
-    std::shared_ptr<FilterInput> input,
-    ColorFilterContents::AbsorbOpacity absorb_opacity) const {
-  std::shared_ptr<FilterContents> inner = inner_->WrapWithGPUColorFilter(
-      input, ColorFilterContents::AbsorbOpacity::kNo);
-  return outer_->WrapWithGPUColorFilter(FilterInput::Make(inner),
-                                        absorb_opacity);
-}
-
-// |ColorFilter|
-ColorFilter::ColorFilterProc ComposedColorFilter::GetCPUColorFilterProc()
-    const {
-  return [inner = inner_, outer = outer_](Color color) {
-    auto inner_proc = inner->GetCPUColorFilterProc();
-    auto outer_proc = outer->GetCPUColorFilterProc();
-    return outer_proc(inner_proc(color));
-  };
-}
-
-// |ColorFilter|
-std::shared_ptr<ColorFilter> ComposedColorFilter::Clone() const {
-  return std::make_shared<ComposedColorFilter>(outer_, inner_);
 }
 
 }  // namespace impeller
