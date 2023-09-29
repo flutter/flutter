@@ -199,6 +199,8 @@ platform_properties:
       device_type: none
   windows_arm64:
     properties:
+      # The arch can be removed after https://github.com/flutter/flutter/issues/135722.
+      arch: arm
       dependencies: >-
         [
           {"dependency": "certs", "version": "version:9563bb"}
