@@ -1767,7 +1767,7 @@ Future<void> _runWebDebugTest(String target, {
 }
 
 Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, List<String> tests) async {
-  for (int i = 0; i < 30; i++) {
+  for (int i = 0; i < 45; i++) {
     await runCommand(
       flutter,
       <String>[
