@@ -2049,6 +2049,41 @@ TEST(FlutterTextInputPluginTest, IsAddedAndRemovedFromViewHierarchy) {
   ASSERT_FALSE(window.firstResponder == viewController.textInputPlugin);
 }
 
+TEST(FlutterTextInputPluginTest, FirstResponderIsCorrect) {
+  FlutterEngine* engine = CreateTestEngine();
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [viewController loadView];
+
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+
+  ASSERT_TRUE(viewController.flutterView.acceptsFirstResponder);
+
+  [window makeFirstResponder:viewController.flutterView];
+
+  [viewController.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show" arguments:@[]]
+                result:^(id){
+                }];
+
+  ASSERT_TRUE(window.firstResponder == viewController.textInputPlugin);
+
+  ASSERT_FALSE(viewController.flutterView.acceptsFirstResponder);
+
+  [viewController.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.hide" arguments:@[]]
+                result:^(id){
+                }];
+
+  ASSERT_TRUE(viewController.flutterView.acceptsFirstResponder);
+  ASSERT_TRUE(window.firstResponder == viewController.flutterView);
+}
+
 TEST(FlutterTextInputPluginTest, HasZeroSizeAndClipsToBounds) {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));

@@ -11,7 +11,7 @@
 
 @interface FlutterView () <FlutterSurfaceManagerDelegate> {
   int64_t _viewId;
-  __weak id<FlutterViewReshapeListener> _reshapeListener;
+  __weak id<FlutterViewDelegate> _viewDelegate;
   FlutterThreadSynchronizer* _threadSynchronizer;
   FlutterSurfaceManager* _surfaceManager;
 }
@@ -22,7 +22,7 @@
 
 - (instancetype)initWithMTLDevice:(id<MTLDevice>)device
                      commandQueue:(id<MTLCommandQueue>)commandQueue
-                  reshapeListener:(id<FlutterViewReshapeListener>)reshapeListener
+                         delegate:(id<FlutterViewDelegate>)delegate
                threadSynchronizer:(FlutterThreadSynchronizer*)threadSynchronizer
                            viewId:(int64_t)viewId {
   self = [super initWithFrame:NSZeroRect];
@@ -31,7 +31,7 @@
     [self setBackgroundColor:[NSColor blackColor]];
     [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
     _viewId = viewId;
-    _reshapeListener = reshapeListener;
+    _viewDelegate = delegate;
     _threadSynchronizer = threadSynchronizer;
     _surfaceManager = [[FlutterSurfaceManager alloc] initWithDevice:device
                                                        commandQueue:commandQueue
@@ -54,7 +54,7 @@
   [_threadSynchronizer beginResizeForView:_viewId
                                      size:scaledSize
                                    notify:^{
-                                     [_reshapeListener viewDidReshape:self];
+                                     [_viewDelegate viewDidReshape:self];
                                    }];
 }
 
@@ -89,7 +89,9 @@
 }
 
 - (BOOL)acceptsFirstResponder {
-  return YES;
+  // This is to ensure that FlutterView does not take first responder status from TextInputPlugin
+  // on mouse clicks.
+  return [_viewDelegate viewShouldAcceptFirstResponder:self];
 }
 
 - (void)cursorUpdate:(NSEvent*)event {
@@ -104,7 +106,7 @@
 - (void)viewDidChangeBackingProperties {
   [super viewDidChangeBackingProperties];
   // Force redraw
-  [_reshapeListener viewDidReshape:self];
+  [_viewDelegate viewDidReshape:self];
 }
 
 - (BOOL)layer:(CALayer*)layer
