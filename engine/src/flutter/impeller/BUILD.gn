@@ -38,10 +38,6 @@ config("impeller_public_config") {
     defines += [ "IMPELLER_TRACE_ALL_GL_CALLS" ]
   }
 
-  if (impeller_error_check_all_gl_calls) {
-    defines += [ "IMPELLER_ERROR_CHECK_ALL_GL_CALLS" ]
-  }
-
   if (is_win) {
     defines += [
       # TODO(dnfield): https://github.com/flutter/flutter/issues/50053
