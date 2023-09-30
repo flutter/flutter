@@ -1030,6 +1030,43 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, shape);
   });
 
+  testWidgetsWithLeakTracking('Destinations respect their disabled state', (WidgetTester tester) async {
+    int selectedIndex = 0;
+
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bookmark),
+              label: 'Bookmark',
+              enabled: false,
+            ),
+          ],
+          onDestinationSelected: (int i) => selectedIndex = i,
+          selectedIndex: selectedIndex,
+        ),
+      )
+    );
+
+    await tester.tap(find.text('AC'));
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Alarm'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Bookmark'));
+    expect(selectedIndex, 1);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

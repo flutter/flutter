@@ -144,7 +144,7 @@
   "expandedHint": "Contraído",
   "collapsedHint": "Desplegado",
   "menuDismissLabel": "Cerrar menú",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Buscador visual",
+  "searchWebButtonLabel": "Buscar en la Web",
+  "shareButtonLabel": "Compartir..."
 }

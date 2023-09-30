@@ -1441,10 +1441,15 @@ void main() {
     // Horizontal mismatch
     expect(
       () {
+        final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(verticalOffset.dispose);
+        final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(horizontalOffset.dispose);
+
         SimpleBuilderTableViewport(
-          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalOffset: verticalOffset,
           verticalAxisDirection: AxisDirection.left,
-          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalOffset: horizontalOffset,
           horizontalAxisDirection: AxisDirection.right,
           delegate: builderDelegate,
           mainAxis: Axis.vertical,
@@ -1462,10 +1467,15 @@ void main() {
     // Vertical mismatch
     expect(
       () {
+        final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(verticalOffset.dispose);
+        final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(horizontalOffset.dispose);
+
         SimpleBuilderTableViewport(
-          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalOffset: verticalOffset,
           verticalAxisDirection: AxisDirection.up,
-          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalOffset: horizontalOffset,
           horizontalAxisDirection: AxisDirection.down,
           delegate: builderDelegate,
           mainAxis: Axis.vertical,
@@ -1483,10 +1493,15 @@ void main() {
     // Both
     expect(
       () {
+        final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(verticalOffset.dispose);
+        final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(horizontalOffset.dispose);
+
         SimpleBuilderTableViewport(
-          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalOffset: verticalOffset,
           verticalAxisDirection: AxisDirection.left,
-          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalOffset: horizontalOffset,
           horizontalAxisDirection: AxisDirection.down,
           delegate: builderDelegate,
           mainAxis: Axis.vertical,
@@ -1548,10 +1563,15 @@ void main() {
       // Horizontal mismatch
       expect(
         () {
+          final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(verticalOffset.dispose);
+          final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(horizontalOffset.dispose);
+
           RenderSimpleBuilderTableViewport(
-            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalOffset: verticalOffset,
             verticalAxisDirection: AxisDirection.left,
-            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalOffset: horizontalOffset,
             horizontalAxisDirection: AxisDirection.right,
             delegate: builderDelegate,
             mainAxis: Axis.vertical,
@@ -1570,10 +1590,15 @@ void main() {
       // Vertical mismatch
       expect(
         () {
+          final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(verticalOffset.dispose);
+          final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(horizontalOffset.dispose);
+
           RenderSimpleBuilderTableViewport(
-            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalOffset: verticalOffset,
             verticalAxisDirection: AxisDirection.up,
-            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalOffset: horizontalOffset,
             horizontalAxisDirection: AxisDirection.down,
             delegate: builderDelegate,
             mainAxis: Axis.vertical,
@@ -1592,10 +1617,15 @@ void main() {
       // Both
       expect(
         () {
+          final ViewportOffset verticalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(verticalOffset.dispose);
+          final ViewportOffset horizontalOffset = ViewportOffset.fixed(0.0);
+          addTearDown(horizontalOffset.dispose);
+
           RenderSimpleBuilderTableViewport(
-            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalOffset: verticalOffset,
             verticalAxisDirection: AxisDirection.left,
-            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalOffset: horizontalOffset,
             horizontalAxisDirection: AxisDirection.down,
             delegate: builderDelegate,
             mainAxis: Axis.vertical,
@@ -1622,10 +1652,15 @@ void main() {
         }
       );
       addTearDown(delegate.dispose);
+      final ViewportOffset verticalOffset = ViewportOffset.fixed(10.0);
+      addTearDown(verticalOffset.dispose);
+      final ViewportOffset horizontalOffset = ViewportOffset.fixed(20.0);
+      addTearDown(horizontalOffset.dispose);
+
       final RenderSimpleBuilderTableViewport renderViewport = RenderSimpleBuilderTableViewport(
-        verticalOffset: ViewportOffset.fixed(10.0),
+        verticalOffset: verticalOffset,
         verticalAxisDirection: AxisDirection.down,
-        horizontalOffset: ViewportOffset.fixed(20.0),
+        horizontalOffset: horizontalOffset,
         horizontalAxisDirection: AxisDirection.right,
         delegate: delegate,
         mainAxis: Axis.vertical,
@@ -2366,10 +2401,52 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all());
 
-    group('TwoDimensionalViewport showOnScreen & showInViewport', () {
+    group('showOnScreen & showInViewport', () {
       Finder findKey(ChildVicinity vicinity) {
         return find.byKey(ValueKey<ChildVicinity>(vicinity));
       }
+
+      testWidgets('getOffsetToReveal', (WidgetTester tester) async {
+        await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
+
+        RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        final RevealedOffset verticalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+          axis: Axis.vertical,
+        );
+        final RevealedOffset horizontalOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+          axis: Axis.horizontal,
+        );
+        expect(verticalOffset.offset, 600.0);
+        expect(verticalOffset.rect, const Rect.fromLTRB(1000.0, 400.0, 1200.0, 600.0));
+        expect(horizontalOffset.offset, 400.0);
+        expect(horizontalOffset.rect, const Rect.fromLTRB(600.0, 1000.0, 800.0, 1200.0));
+
+        // default is to use mainAxis when axis is not provided, mainAxis
+        // defaults to Axis.vertical.
+        RevealedOffset defaultOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+        );
+        expect(defaultOffset.offset, verticalOffset.offset);
+        expect(defaultOffset.rect, verticalOffset.rect);
+
+        // mainAxis as Axis.horizontal
+        await tester.pumpWidget(simpleBuilderTest(
+          useCacheExtent: true,
+          mainAxis: Axis.horizontal,
+        ));
+        viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        defaultOffset = viewport.getOffsetToReveal(
+          tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
+          1.0,
+        );
+        expect(defaultOffset.offset, horizontalOffset.offset);
+        expect(defaultOffset.rect, horizontalOffset.rect);
+      });
 
       testWidgets('Axis.vertical', (WidgetTester tester) async {
         await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
