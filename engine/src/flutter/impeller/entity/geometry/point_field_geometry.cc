@@ -287,8 +287,9 @@ std::optional<Rect> PointFieldGeometry::GetCoverage(
       right = std::max(right, it->x);
       bottom = std::max(bottom, it->y);
     }
-    return Rect::MakeLTRB(left - radius_, top - radius_, right + radius_,
-                          bottom + radius_);
+    auto coverage = Rect::MakeLTRB(left - radius_, top - radius_,
+                                   right + radius_, bottom + radius_);
+    return coverage.TransformBounds(transform);
   }
   return std::nullopt;
 }
