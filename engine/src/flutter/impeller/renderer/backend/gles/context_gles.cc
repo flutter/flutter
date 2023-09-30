@@ -65,8 +65,7 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
             .SetSupportsOffscreenMSAA(false)
             .SetSupportsSSBO(false)
             .SetSupportsBufferToTextureBlits(false)
-            .SetSupportsTextureToTextureBlits(
-                reactor_->GetProcTable().BlitFramebuffer.IsAvailable())
+            .SetSupportsTextureToTextureBlits(false)
             .SetSupportsFramebufferFetch(false)
             .SetDefaultColorFormat(PixelFormat::kR8G8B8A8UNormInt)
             .SetDefaultStencilFormat(PixelFormat::kS8UInt)
