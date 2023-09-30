@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 /// Typically a [AnimationThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.animationTheme].
 ///
-/// All [AnimationThemeData] properties have values by default,
+/// All [AnimationThemeData] properties are null by default,
 /// and can be changed by using [ThemeData.animationTheme].
 ///
 /// See also:
@@ -36,29 +36,35 @@ class AnimationThemeData with Diagnosticable {
     this.switchOutCurve,
   });
 
-  /// Set value for [animationCurve].
+  /// Set curve for widgets such as [AnimatedContainer], [AnimatedPadding], and
+  /// other [ImplicitlyAnimatedWidget]s.
   final Curve? animationCurve;
 
-  /// Set value for forward [animationDuration].
+  /// Set value for forward animation [Duration].
+  /// This parameter is used by [AnimatedContainer], [AnimatedPadding],
+  /// [AnimatedOpacity] and other [ImplicitlyAnimatedWidget]s as their duration.
+  ///
+  /// Widgets such as [AnimatedCrossFade] and [AnimatedSwitcher] use this
+  /// parameter as forward animation duration.
   final Duration? animationDuration;
 
-  /// Set value for reverse animation [Duration]s.
-  /// Found in [AnimatedCrossFade]
+  /// Set value for reverse animation [Duration].
+  /// Used by [AnimatedCrossFade] to switch between it's children.
   final Duration? reverseAnimationDuration;
 
-  /// Curve for size transitions found in [AnimatedCrossFade].
+  /// Set curve for size transition used by [AnimatedCrossFade].
   final Curve? sizeCurve;
 
-  /// Fade curve for first child for [AnimatedCrossFade].
+  /// Set fade curve to be used by [AnimatedCrossFade]'s first child.
   final Curve? crossFadeFirstCurve;
 
-  /// Fade curve for second child for [AnimatedCrossFade].
+  /// Set fade curve to be used by [AnimatedCrossFade]'s second child.
   final Curve? crossFadeSecondCurve;
 
-  /// In curve for [AnimatedSwitcher].
+  /// Set in curve to be used by [AnimatedSwitcher].
   final Curve? switchInCurve;
 
-  /// Out curve for [AnimatedSwitcher].
+  /// Set out curve to be used by [AnimatedSwitcher].
   final Curve? switchOutCurve;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -85,7 +91,7 @@ class AnimationThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [Badge] themes.
+  /// Linearly interpolate between two [AnimationTheme].
   /// TODO: work on lerp
   static AnimationThemeData lerp(
     AnimationThemeData? a,
@@ -189,8 +195,8 @@ class AnimationTheme extends InheritedTheme {
     required super.child,
   });
 
-  /// Specifies the default animationDuration and animationCurve
-  /// overrides for descendant [Animation] widgets.
+
+  /// Override for descendant [Animation] widgets.
   final AnimationThemeData data;
 
   /// The closest instance of this class that encloses the given context.
