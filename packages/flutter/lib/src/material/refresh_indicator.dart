@@ -234,14 +234,9 @@ class RefreshIndicator extends StatefulWidget {
 
   /// A function used to get current status of [RefreshIndicator] to update UI
   /// as required while using [RefreshIndicator.noSpinner].
-  /// ```
-  ///   drag,     while pointer is down.
-  ///   armed,    when dragged far enough that an up event will run the onRefresh callback.
-  ///   snap,     while animating to the indicator's final "displacement".
-  ///   refresh,  while running the refresh callback.
-  ///   done,     while animating the indicator's fade-out after refreshing.
-  ///   canceled, while animating the indicator's fade-out after not arming.
-  ///```
+  ///
+  /// Returns value of these enums as string: [_RefreshIndicatorMode]
+  ///
   final void Function(String? mode)? onModeChange;
 
   /// The progress indicator's foreground color. The current theme's
