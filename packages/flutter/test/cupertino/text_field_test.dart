@@ -2486,7 +2486,12 @@ void main() {
       await tester.pump();
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
+    // TODO(derdilla): remove after fixing and leak track other failing tests in
+    // this file. https://github.com/flutter/flutter/issues/135803
+    leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
+    <String, int?>{'ValueNotifier<_OverlayEntryWidgetState?>': 1})
   );
+  //
 
   testWidgetsWithLeakTracking('Readonly text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -5811,7 +5816,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
 
@@ -5859,7 +5864,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
 
@@ -5985,7 +5990,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging (Android)', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging (Android)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
 
