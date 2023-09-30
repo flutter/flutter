@@ -2417,6 +2417,14 @@ TEST_P(EntityTest, PointFieldGeometryDivisions) {
   ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(20000.0, true), 140u);
 }
 
+TEST_P(EntityTest, PointFieldGeometryCoverage) {
+  std::vector<Point> points = {{10, 20}, {100, 200}};
+  auto geometry = Geometry::MakePointField(points, 5.0, false);
+  ASSERT_EQ(*geometry->GetCoverage(Matrix()), Rect::MakeLTRB(5, 15, 105, 205));
+  ASSERT_EQ(*geometry->GetCoverage(Matrix::MakeTranslation({30, 0, 0})),
+            Rect::MakeLTRB(35, 15, 135, 205));
+}
+
 TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
   Entity entity;
   entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
