@@ -248,17 +248,17 @@ class NavigationRail extends StatefulWidget {
   /// [NavigationRailIconType.all].
   ///
   /// Possible combinations of `iconType` along with `labelType` include:
-  /// ```
-  /// All Icon + All Label (default),
-  /// All Icon + Selected Label,
-  /// All Icon + No Label,
-  /// Selected Icon + All Label,
-  /// No Icon + All Label
-  /// ```
+  ///
+  /// `All Icon + All Label (default),`
+  /// `All Icon + Selected Label,`
+  /// `All Icon + No Label,`
+  /// `Selected Icon + All Label,`
+  /// `No Icon + All Label`
+  ///
   ///
   /// See also:
   ///
-  ///   * [NavigationRailLabelType] for information on the meaning of different
+  ///   * [NavigationRailIconType] for information on the meaning of different
   ///   types.
   final NavigationRailIconType? iconType;
 
