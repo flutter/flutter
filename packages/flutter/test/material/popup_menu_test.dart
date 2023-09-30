@@ -3785,6 +3785,117 @@ void main() {
     await tester.pumpAndSettle();
     expect(count, 1);
   });
+
+  testWidgetsWithLeakTracking('animationDuration works as expected in showMenu', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  key: buttonKey,
+                  child: const Text('Tap'),
+                  onPressed: () {
+                    showMenu(
+                      context: context,
+                      animationDuration: const Duration(milliseconds: 400),
+                      position: RelativeRect.fill,
+                      items: <PopupMenuItem<String>>[
+                        const PopupMenuItem<String>(
+                          child: Text('Item 0'),
+                        ),
+                        const PopupMenuItem<String>(
+                          child: Text('Item 1'),
+                        ),
+                      ]
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      )
+    );
+
+    expect(find.text('Item 0'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+
+    // Show the menu.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    // Items should be visible during the transition.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 51));
+
+    // Menu should not be visible after 401 milliseconds.
+    expect(find.text('Item 0'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('animationDuration works as expected in PopupMenuButton', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              animationDuration: const Duration(milliseconds: 400),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('Item 0'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    // Items should be visible during the transition.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 51));
+
+    // Menu should not be visible after 401 milliseconds.
+    expect(find.text('Item 0'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+  });
 }
 
 class TestApp extends StatelessWidget {

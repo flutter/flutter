@@ -809,6 +809,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.capturedThemes,
     this.constraints,
     required this.clipBehavior,
+    this.animationDuration,
     super.settings,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
@@ -828,6 +829,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final CapturedThemes capturedThemes;
   final BoxConstraints? constraints;
   final Clip clipBehavior;
+  final Duration? animationDuration;
 
   @override
   Animation<double> createAnimation() {
@@ -839,7 +841,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => _kMenuDuration;
+  Duration get transitionDuration => animationDuration ?? _kMenuDuration;
 
   @override
   bool get barrierDismissible => true;
@@ -947,6 +949,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// The `clipBehavior` argument is used to clip the shape of the menu. Defaults to
 /// [Clip.none].
 ///
+/// The `animationDuration` argument determines the duration of time it takes for the
+/// popup menu transition to complete. The default value is 300 ms.
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -971,6 +976,7 @@ Future<T?> showMenu<T>({
   BoxConstraints? constraints,
   Clip clipBehavior = Clip.none,
   RouteSettings? routeSettings,
+  Duration? animationDuration,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1002,6 +1008,7 @@ Future<T?> showMenu<T>({
     constraints: constraints,
     clipBehavior: clipBehavior,
     settings: routeSettings,
+    animationDuration: animationDuration,
   ));
 }
 
@@ -1122,6 +1129,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.constraints,
     this.position,
     this.clipBehavior = Clip.none,
+    this.animationDuration,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1279,6 +1287,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// over the button that was used to create it.
   final PopupMenuPosition? position;
 
+  /// Determines the duration of time it takes for the popup menu transition to
+  /// complete. The default value is 300 ms.
+  final Duration? animationDuration;
+
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// The [clipBehavior] argument is used the clip shape of the menu.
@@ -1342,6 +1354,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         color: widget.color ?? popupMenuTheme.color,
         constraints: widget.constraints,
         clipBehavior: widget.clipBehavior,
+        animationDuration: widget.animationDuration,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
