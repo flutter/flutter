@@ -273,6 +273,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Floating action button shrinks when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     const double kBottomSheetDominatesPercentage = 0.3;
 
     await tester.pumpWidget(MaterialApp(home: Scaffold(
@@ -312,6 +313,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Scaffold shows scrim when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     const double kBottomSheetDominatesPercentage = 0.3;
     const double kMinBottomSheetScrimOpacity = 0.1;
     const double kMaxBottomSheetScrimOpacity = 0.6;
@@ -2762,6 +2764,7 @@ void main() {
 
   testWidgetsWithLeakTracking('showBottomSheet removes scrim when draggable sheet is dismissed', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     PersistentBottomSheetController<void>? sheetController;
 
