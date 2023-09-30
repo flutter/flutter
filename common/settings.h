@@ -218,6 +218,9 @@ struct Settings {
   bool enable_impeller = false;
 #endif
 
+  // Indicates if image reader backed platform views are disabled.
+  bool disable_image_reader_platform_views = false;
+
   // Requests a particular backend to be used (ex "opengles" or "vulkan")
   std::optional<std::string> impeller_backend;
 
