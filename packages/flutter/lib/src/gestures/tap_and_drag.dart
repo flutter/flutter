@@ -76,9 +76,6 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
 class TapDragDownDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragDownCallback].
-  ///
-  /// The [globalPosition], [localPosition], and [consecutiveTapCount]
-  /// arguments must be provided and must not be null.
   TapDragDownDetails({
     required this.globalPosition,
     required this.localPosition,
@@ -130,9 +127,6 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
 class TapDragUpDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragUpCallback].
-  ///
-  /// The [kind], [globalPosition], [localPosition], and [consecutiveTapCount]
-  /// arguments must be provided and must not be null.
   TapDragUpDetails({
     required this.kind,
     required this.globalPosition,
@@ -184,9 +178,6 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
 class TapDragStartDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragStartCallback].
-  ///
-  /// The [globalPosition], [localPosition], and [consecutiveTapCount]
-  /// arguments must be provided and must not be null.
   TapDragStartDetails({
     this.sourceTimeStamp,
     required this.globalPosition,
@@ -253,13 +244,8 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 class TapDragUpdateDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragUpdateCallback].
   ///
-  /// The [delta] argument must not be null.
-  ///
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
-  ///
-  /// The [globalPosition], [localPosition], [offsetFromOrigin], [localOffsetFromOrigin],
-  /// and [consecutiveTapCount] arguments must be provided and must not be null.
   TapDragUpdateDetails({
     this.sourceTimeStamp,
     this.delta = Offset.zero,
@@ -378,10 +364,6 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 class TapDragEndDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragEndCallback].
-  ///
-  /// The [velocity] argument must not be null.
-  ///
-  /// The [consecutiveTapCount] argument must be provided and must not be null.
   TapDragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,

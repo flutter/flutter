@@ -9,6 +9,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _MockAnimationController extends AnimationController {
   _MockAnimationController()
@@ -42,7 +43,7 @@ void main() {
   }
 
   group('Raw Magnifier', () {
-    testWidgets('should render with correct focal point and decoration',
+    testWidgetsWithLeakTracking('should render with correct focal point and decoration',
         (WidgetTester tester) async {
       final Key appKey = UniqueKey();
       const Size magnifierSize = Size(100, 100);
@@ -116,7 +117,7 @@ void main() {
         magnifierController.removeFromOverlay();
       });
 
-      testWidgets(
+      testWidgetsWithLeakTracking(
           'should immediately remove from overlay on no animation controller',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
@@ -149,7 +150,7 @@ void main() {
         });
       });
 
-      testWidgets('should update shown based on animation status',
+      testWidgetsWithLeakTracking('should update shown based on animation status',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final MagnifierController magnifierController =
@@ -214,7 +215,7 @@ void main() {
     });
 
     group('show', () {
-      testWidgets('should insert below below widget', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should insert below below widget', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Text('text'),
         ));
@@ -226,6 +227,7 @@ void main() {
 
         final OverlayEntry fakeBeforeOverlayEntry =
             OverlayEntry(builder: (_) => fakeBefore);
+        addTearDown(() => fakeBeforeOverlayEntry..remove()..dispose());
 
         Overlay.of(context).insert(fakeBeforeOverlayEntry);
         magnifierController.show(
@@ -247,7 +249,7 @@ void main() {
         expect(allOverlayChildren.first.widget.key, fakeMagnifier.key);
       });
 
-      testWidgets('should insert newly built widget without animating out if overlay != null',
+      testWidgetsWithLeakTracking('should insert newly built widget without animating out if overlay != null',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =

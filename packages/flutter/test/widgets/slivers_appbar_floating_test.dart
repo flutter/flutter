@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
@@ -25,7 +26,7 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 }
 
 void main() {
-  testWidgets("Sliver appbars - floating - scroll offset doesn't change", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Sliver appbars - floating - scroll offset doesn't change", (WidgetTester tester) async {
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
       Directionality(
@@ -53,7 +54,7 @@ void main() {
     expect(position.maxScrollExtent, max);
   });
 
-  testWidgets('Sliver appbars - floating - normal behavior works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - floating - normal behavior works', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
@@ -125,7 +126,7 @@ void main() {
     verifyPaintPosition(key3, Offset.zero, true);
   });
 
-  testWidgets('Sliver appbars - floating - no floating behavior when animating', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - floating - no floating behavior when animating', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
@@ -160,7 +161,7 @@ void main() {
     verifyPaintPosition(key3, Offset.zero, true);
   });
 
-  testWidgets('Sliver appbars - floating - floating behavior when dragging down', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - floating - floating behavior when dragging down', (WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
@@ -197,7 +198,7 @@ void main() {
     verifyPaintPosition(key3, Offset.zero, true);
   });
 
-  testWidgets('Sliver appbars - floating - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - floating - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -258,7 +259,7 @@ void main() {
       expect(geometry.paintExtent, paintExtent);
     }
 
-    testWidgets('SliverAppBar', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverAppBar', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverAppBar(
         key: appBarKey,
@@ -312,7 +313,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('SliverPersistentHeader', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverPersistentHeader', (WidgetTester tester) async {
       final GlobalKey headerKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverPersistentHeader(
         key: headerKey,
@@ -354,7 +355,7 @@ void main() {
       verifyGeometry(key: headerKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('and snapping SliverAppBar', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('and snapping SliverAppBar', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverAppBar(
         key: appBarKey,

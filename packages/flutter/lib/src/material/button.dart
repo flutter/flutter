@@ -40,11 +40,8 @@ import 'theme_data.dart';
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
-  /// The [shape], [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], [disabledElevation], [padding], [constraints],
-  /// [autofocus], and [clipBehavior] arguments must not be null. Additionally,
-  /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
-  /// [disabledElevation] must be non-negative.
+  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
+  /// and [disabledElevation] parameters must be non-negative.
   const RawMaterialButton({
     super.key,
     required this.onPressed,
@@ -288,7 +285,7 @@ class RawMaterialButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.

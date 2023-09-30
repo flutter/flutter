@@ -20,8 +20,6 @@ export 'package:flutter/scheduler.dart' show TickerProvider;
 /// [TickerProviderStateMixin] or a [SingleTickerProviderStateMixin].
 class TickerMode extends StatefulWidget {
   /// Creates a widget that enables or disables tickers.
-  ///
-  /// The [enabled] argument must not be null.
   const TickerMode({
     super.key,
     required this.enabled,
