@@ -1664,6 +1664,7 @@
 ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_ia32_test.cc
 ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_riscv_test.cc
 ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_test.cc
+../../../third_party/dart/runtime/vm/compiler/assembler/assembler_test.h
 ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_x64_test.cc
 ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_test.cc
 ../../../third_party/dart/runtime/vm/compiler/backend/bce_test.cc
