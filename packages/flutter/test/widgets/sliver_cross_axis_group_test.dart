@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -327,7 +328,7 @@ void main() {
 
   testWidgets('Assertion error when SliverExpanded is used outside of SliverCrossAxisGroup', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
     await tester.pumpWidget(
@@ -459,7 +460,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Assertion error when constrained widget runs out of cross axis extent', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
     final List<int> items = List<int>.generate(20, (int i) => i);
@@ -481,7 +482,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Assertion error when expanded widget runs out of cross axis extent', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
     final List<int> items = List<int>.generate(20, (int i) => i);

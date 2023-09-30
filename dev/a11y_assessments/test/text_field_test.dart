@@ -11,12 +11,23 @@ import 'test_utils.dart';
 void main() {
   testWidgets('text field can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldUseCase());
-    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byType(TextField), findsExactly(2));
 
-    await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'abc');
-    await tester.pumpAndSettle();
-    expect(find.text('abc'), findsOneWidget);
+    // Test the enabled text field
+    {
+      final Finder finder = find.byKey(const Key('enabled text field'));
+      await tester.tap(finder);
+      await tester.pumpAndSettle();
+      await tester.enterText(finder, 'abc');
+      await tester.pumpAndSettle();
+      expect(find.text('abc'), findsOneWidget);
+    }
+
+    // Test the disabled text field
+    {
+      final Finder finder = find.byKey(const Key('disabled text field'));
+      final TextField textField = tester.widget<TextField>(finder);
+      expect(textField.enabled, isFalse);
+    }
   });
 }
