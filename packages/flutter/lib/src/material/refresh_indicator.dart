@@ -234,7 +234,7 @@ class RefreshIndicator extends StatefulWidget {
 
   /// A function used to get current status of [RefreshIndicator] to update UI
   /// as required while using [RefreshIndicator.noSpinner].
-  /// ```dart
+  /// ```
   ///   drag,     while pointer is down.
   ///   armed,    when dragged far enough that an up event will run the onRefresh callback.
   ///   snap,     while animating to the indicator's final "displacement".
