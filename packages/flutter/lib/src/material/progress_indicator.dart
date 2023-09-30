@@ -865,7 +865,20 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     super.semanticsLabel,
     super.semanticsValue,
     super.strokeCap,
+    this.elevation = 2.0,
+    this.indicatorMargin = const EdgeInsets.all(4.0),
+    this.indicatorPadding = const EdgeInsets.all(12.0),
   });
+
+  /// {@macro flutter.material.material.elevation}
+  final double elevation;
+
+  /// The amount of space by which to inset the whole indicator.
+  /// It accommodates the [elevation] of the indicator.
+  final EdgeInsetsGeometry indicatorMargin;
+
+  /// The amount of space by which to inset the inner refresh indicator.
+  final EdgeInsetsGeometry indicatorPadding;
 
   /// Default stroke width.
   static const double defaultStrokeWidth = 2.5;
@@ -912,6 +925,10 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   // Last value received from the widget before null.
   double? _lastValue;
+
+  /// Force casting the widget as [RefreshProgressIndicator].
+  @override
+  RefreshProgressIndicator get widget => super.widget as RefreshProgressIndicator;
 
   // Always show the indeterminate version of the circular progress indicator.
   //
@@ -973,13 +990,13 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
       child: Container(
         width: _indicatorSize,
         height: _indicatorSize,
-        margin: const EdgeInsets.all(4.0), // accommodate the shadow
+        margin: widget.indicatorMargin,
         child: Material(
           type: MaterialType.circle,
           color: backgroundColor,
-          elevation: 2.0,
+          elevation: widget.elevation,
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: widget.indicatorPadding,
             child: Opacity(
               opacity: opacity,
               child: Transform.rotate(

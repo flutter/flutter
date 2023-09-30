@@ -52,6 +52,13 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// fire when [pixels] changes without [size] changing. For example, if the
 /// constraints provided to an attached sheet change.
 class DraggableScrollableController extends ChangeNotifier {
+  /// Creates a controller for [DraggableScrollableSheet].
+  DraggableScrollableController() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   _DraggableScrollableSheetScrollController? _attachedController;
   final Set<AnimationController> _animationControllers = <AnimationController>{};
 
