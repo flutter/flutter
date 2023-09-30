@@ -13,10 +13,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
-  testWidgets('Transform origin', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform origin', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
@@ -64,7 +65,7 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Transform alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
@@ -112,7 +113,7 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Transform AlignmentDirectional alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform AlignmentDirectional alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
 
     Widget buildFrame(TextDirection textDirection, AlignmentGeometry alignment) {
@@ -183,7 +184,7 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Transform offset + alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform offset + alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
@@ -232,7 +233,7 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Composited transform offset', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Composited transform offset', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: SizedBox(
@@ -261,7 +262,7 @@ void main() {
     expect(transform.getTranslation(), equals(Vector3(100.0, 75.0, 0.0)));
   });
 
-  testWidgets('Transform.rotate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.rotate', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2.0,
@@ -283,7 +284,7 @@ void main() {
     ]);
   });
 
-  testWidgets('applyPaintTransform of Transform in Padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('applyPaintTransform of Transform in Padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       Padding(
         padding: const EdgeInsets.only(
@@ -301,7 +302,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(30.0, 20.0));
   });
 
-  testWidgets('Transform.translate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.translate', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
@@ -316,7 +317,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)), const Offset(100.0, 50.0));
   });
 
-  testWidgets('Transform.scale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.scale', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
@@ -339,7 +340,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Transform with nan value short-circuits rendering', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform with nan value short-circuits rendering', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform(
         transform: Matrix4.identity()
@@ -351,7 +352,7 @@ void main() {
     expect(tester.layers, hasLength(1));
   });
 
-  testWidgets('Transform with inf value short-circuits rendering', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform with inf value short-circuits rendering', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform(
         transform: Matrix4.identity()
@@ -363,7 +364,7 @@ void main() {
     expect(tester.layers, hasLength(1));
   });
 
-  testWidgets('Transform with -inf value short-circuits rendering', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform with -inf value short-circuits rendering', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform(
         transform: Matrix4.identity()
@@ -375,7 +376,7 @@ void main() {
     expect(tester.layers, hasLength(1));
   });
 
-  testWidgets('Transform.rotate does not remove layers due to singular short-circuit', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.rotate does not remove layers due to singular short-circuit', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2,
@@ -386,7 +387,7 @@ void main() {
     expect(tester.layers, hasLength(3));
   });
 
-  testWidgets('Transform.rotate creates nice rotation matrices for 0, 90, 180, 270 degrees', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.rotate creates nice rotation matrices for 0, 90, 180, 270 degrees', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2,
@@ -447,7 +448,7 @@ void main() {
     expect(tester.layers, hasLength(2));
   });
 
-  testWidgets('Transform.scale with 0.0 does not paint child layers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.scale with 0.0 does not paint child layers', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.scale(
         scale: 0.0,
@@ -486,7 +487,7 @@ void main() {
   });
 
 
-  testWidgets('Translated child into translated box - hit test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Translated child into translated box - hit test', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     bool pointerDown = false;
     await tester.pumpWidget(
@@ -524,7 +525,7 @@ void main() {
     );
   }
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
       for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
@@ -532,6 +533,7 @@ void main() {
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
         final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
+        addTearDown(imageWithCompositing.dispose);
 
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
@@ -545,7 +547,7 @@ void main() {
     return numbers.map<double>((String str) => double.parse(str.trim())).toList();
   }
 
-  testWidgets('Transform.translate with FilterQuality produces filter layer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.translate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(25.0, 25.0),
@@ -563,7 +565,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.scale(
         scale: 3.14159,
@@ -581,7 +583,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 4,
@@ -599,7 +601,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       SizedBox(width: 400, height: 400,
         child: Center(
@@ -621,7 +623,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 4,
@@ -657,7 +659,7 @@ void main() {
     expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
   });
 
-  testWidgets('Transform layers with filterQuality golden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transform layers with filterQuality golden', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -701,7 +703,7 @@ void main() {
     );
   });
 
-  testWidgets("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters to be non-null", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters to be non-null", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -719,7 +721,7 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets("Transform.scale() needs at least one of 'scale', 'scaleX' and 'scaleY' to be non-null, otherwise throws AssertionError", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Transform.scale() needs at least one of 'scale', 'scaleX' and 'scaleY' to be non-null, otherwise throws AssertionError", (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -734,7 +736,7 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets("Transform.scale() scales widget uniformly with 'scale' parameter", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Transform.scale() scales widget uniformly with 'scale' parameter", (WidgetTester tester) async {
     const double scale = 1.5;
     const double height = 100;
     const double width = 150;
@@ -760,7 +762,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 
-  testWidgets("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (WidgetTester tester) async {
     const double scaleX = 1.5;
     const double scaleY = 1.2;
     const double height = 100;
@@ -788,7 +790,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Transform.flip does flip child correctly',
     (WidgetTester tester) async {
       const Offset topRight = Offset(60, 20);

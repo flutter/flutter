@@ -861,12 +861,13 @@ void main() {
     expect(targetMidLeftPage1, findsOneWidget);
   });
 
-  testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ensureVisible does not move TabViews', (WidgetTester tester) async {
     final TickerProvider vsync = TestTickerProvider();
     final TabController controller = TabController(
       length: 3,
       vsync: vsync,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
