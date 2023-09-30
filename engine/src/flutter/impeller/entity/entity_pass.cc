@@ -202,8 +202,8 @@ std::optional<Rect> EntityPass::GetSubpassCoverage(
   // has deviated too much from the parent pass to safely intersect with the
   // pass coverage limit.
   coverage_limit =
-      (image_filter && image_filter->IsTranslationOnly() ? std::nullopt
-                                                         : coverage_limit);
+      (image_filter && !image_filter->IsTranslationOnly() ? std::nullopt
+                                                          : coverage_limit);
 
   auto entities_coverage = subpass.GetElementsCoverage(coverage_limit);
   // The entities don't cover anything. There is nothing to do.
