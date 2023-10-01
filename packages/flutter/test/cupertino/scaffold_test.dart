@@ -6,12 +6,13 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
-  testWidgets('Contents are behind translucent bar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Contents are behind translucent bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -27,7 +28,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), Offset.zero);
   });
 
-  testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Opaque bar pushes contents down', (WidgetTester tester) async {
     late BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -102,7 +103,7 @@ void main() {
     expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.darkColor));
   });
 
-  testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Contents padding from viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -160,7 +161,7 @@ void main() {
     expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
-  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     const Widget child = CupertinoPageScaffold(
       resizeToAvoidBottomInset: false,
       navigationBar: CupertinoNavigationBar(
@@ -198,7 +199,7 @@ void main() {
     expect(initialPoint, finalPoint);
   });
 
-  testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Contents are between opaque bars', (WidgetTester tester) async {
     const Center page1Center = Center();
 
     await tester.pumpWidget(
@@ -235,7 +236,7 @@ void main() {
     expect(tester.getSize(find.byWidget(page1Center)).height, 600.0 - 44.0 - 50.0);
   });
 
-  testWidgets('Contents have automatic sliver padding between translucent bars', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Contents have automatic sliver padding between translucent bars', (WidgetTester tester) async {
     const SizedBox content = SizedBox(height: 600.0, width: 600.0);
 
     await tester.pumpWidget(
@@ -289,7 +290,7 @@ void main() {
     expect(tester.getBottomLeft(find.byWidget(content)).dy, 600 - 20.0 - 50.0);
   });
 
-  testWidgets('iOS independent tab navigation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('iOS independent tab navigation', (WidgetTester tester) async {
     // A full on iOS information architecture app with 2 tabs, and 2 pages
     // in each with independent navigation states.
     await tester.pumpWidget(
@@ -398,7 +399,7 @@ void main() {
     expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);
   });
 
-  testWidgets('Decorated with white background by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -414,7 +415,7 @@ void main() {
     expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
-  testWidgets('Overrides background color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Overrides background color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -431,7 +432,7 @@ void main() {
     expect(decoration.color, const Color(0xFF010203));
   });
 
-  testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         builder: (BuildContext context, Widget? child) {
@@ -483,7 +484,7 @@ void main() {
     expect(find.text('12'), findsNothing);
   });
 
-  testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('resizeToAvoidBottomInset is supported even when no navigationBar', (WidgetTester tester) async {
     Widget buildFrame(bool showNavigationBar, bool showKeyboard) {
       return CupertinoApp(
         home: MediaQuery(
@@ -528,7 +529,7 @@ void main() {
     expect(positionWithInsetNoNavBar, equals(positionWithInsetWithNavBar));
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
