@@ -196,19 +196,27 @@ class TabController extends ChangeNotifier {
     _index = value;
     if (duration != null && duration > Duration.zero) {
       _indexIsChangingCount += 1;
+      _indexChangingDuration = duration;
+      _indexChangingCurve = curve;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
         .animateTo(_index.toDouble(), duration: duration, curve: curve!)
         .whenCompleteOrCancel(() {
           if (_animationController != null) { // don't notify if we've been disposed
             _indexIsChangingCount -= 1;
+            _indexChangingDuration = null;
+            _indexChangingCurve = null;
             notifyListeners();
           }
         });
     } else {
       _indexIsChangingCount += 1;
+      _indexChangingDuration = animationDuration;
+      _indexChangingCurve = Curves.ease;
       _animationController!.value = _index.toDouble();
       _indexIsChangingCount -= 1;
+      _indexChangingDuration = null;
+      _indexChangingCurve = null;
       notifyListeners();
     }
   }
@@ -242,6 +250,26 @@ class TabController extends ChangeNotifier {
   /// consequence of the user dragging (and "flinging") the [TabBarView].
   bool get indexIsChanging => _indexIsChangingCount != 0;
   int _indexIsChangingCount = 0;
+
+  /// The Duration used to animate [previousIndex] to [index] as a
+  /// consequence of calling [animateTo].
+  ///
+  /// This value is specifically set during the [animateTo] animation that's
+  /// triggered when the user taps a [TabBar] tab. It is intended to apply the
+  /// animation parameters to the [TabBarView]. It becomes null when [offset]
+  /// is changing as a result of the user dragging (and "flinging") the [TabBarView].
+  Duration? get indexChangingDuration => _indexChangingDuration;
+  Duration? _indexChangingDuration;
+
+  /// The Duration used to animate [previousIndex] to [index] as a
+  /// consequence of calling [animateTo].
+  ///
+  /// This value is specifically set during the [animateTo] animation that's
+  /// triggered when the user taps a [TabBar] tab. It is intended to apply the
+  /// animation parameters to the [TabBarView]. It becomes null when [offset]
+  /// is changing as a result of the user dragging (and "flinging") the [TabBarView].
+  Curve? get indexChangingCurve => _indexChangingCurve;
+  Curve? _indexChangingCurve;
 
   /// Immediately sets [index] and [previousIndex] and then plays the
   /// [animation] from its current value to [index].
