@@ -291,7 +291,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         String testPath = uri.replace(query: '').toFilePath();
         testPath = globals.fs.path.absolute(testPath);
         testPath = globals.fs.path.normalize(testPath);
-        _testFileUris.add(Uri.file(testPath).replace(query: uri.query));
+        if (globals.fs.isDirectorySync(testPath)) {
+          _testFileUris.add(Uri.directory(testPath).replace(query: uri.query));
+        } else {
+          _testFileUris.add(Uri.file(testPath).replace(query: uri.query));
+        }
       }
     }
 
