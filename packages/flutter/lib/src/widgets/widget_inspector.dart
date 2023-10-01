@@ -374,6 +374,7 @@ class _ScreenshotData {
   }
 
   /// Releases allocated resources.
+  @mustCallSuper
   void dispose() {
     containerLayer.dispose();
   }
