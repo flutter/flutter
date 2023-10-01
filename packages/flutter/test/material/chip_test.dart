@@ -290,12 +290,7 @@ void main() {
     expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134394
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{'OpacityLayer': 2},
-  ));
+  });
 
   testWidgetsWithLeakTracking('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
