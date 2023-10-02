@@ -1,4 +1,4 @@
-Signature: 872e98b33bc7fbb2b59d6f1a9ad7d921
+Signature: 7ff9cd9634b1d7d54fbae96d5ff535a9
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8952,6 +8952,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/PathAtlas.cpp + ../../../thir
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/PathAtlas.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/ProxyCache.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/ProxyCache.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/RasterPathAtlas.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/RasterPathAtlas.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/ReadSwizzle.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/YUVABackendTextures.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.cpp + ../../../third_party/skia/LICENSE
@@ -9220,6 +9222,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/PathAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PathAtlas.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ProxyCache.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ProxyCache.h
+FILE: ../../../third_party/skia/src/gpu/graphite/RasterPathAtlas.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/RasterPathAtlas.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ReadSwizzle.h
 FILE: ../../../third_party/skia/src/gpu/graphite/YUVABackendTextures.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/YUVATextureProxies.cpp
