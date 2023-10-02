@@ -13,7 +13,7 @@ class ListViewExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: const ListViewExample());
+    return const MaterialApp(home: ListViewExample());
   }
 }
 
@@ -40,7 +40,7 @@ class _ListViewExampleState extends State<ListViewExample> {
         child: ListView.custom(
           childrenDelegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
-              return KeepAlive(
+              return KeepAliveItem(
                 data: items[index],
                 key: ValueKey<String>(items[index]),
               );
@@ -73,8 +73,8 @@ class _ListViewExampleState extends State<ListViewExample> {
   }
 }
 
-class KeepAlive extends StatefulWidget {
-  const KeepAlive({
+class KeepAliveItem extends StatefulWidget {
+  const KeepAliveItem({
     required Key key,
     required this.data,
   }) : super(key: key);
@@ -82,10 +82,10 @@ class KeepAlive extends StatefulWidget {
   final String data;
 
   @override
-  State<KeepAlive> createState() => _KeepAliveState();
+  State<KeepAliveItem> createState() => _KeepAliveItemState();
 }
 
-class _KeepAliveState extends State<KeepAlive>
+class _KeepAliveItemState extends State<KeepAliveItem>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
