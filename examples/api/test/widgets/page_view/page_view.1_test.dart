@@ -14,8 +14,8 @@ void main() {
       await tester.pumpWidget(const example.PageViewExampleApp());
       final Finder pageView = find.byType(PageView);
       final Finder reverseFinder = find.text('Reverse items');
-      final Finder firstItemFinder = find.byKey(ValueKey<String>('1'));
-      final Finder lastItemFinder = find.byKey(ValueKey<String>('5'));
+      final Finder firstItemFinder = find.byKey(const ValueKey<String>('1'));
+      final Finder lastItemFinder = find.byKey(const ValueKey<String>('5'));
       expect(pageView, findsOneWidget);
       expect(reverseFinder, findsOneWidget);
       expect(firstItemFinder, findsOneWidget);
