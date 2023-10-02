@@ -8,23 +8,22 @@ import 'package:flutter_api_samples/widgets/page_view/page_view.1.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tapping Reverse button should reverse PageView',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.PageViewExampleApp(),
-    );
-
-    final Finder pageView = find.byType(PageView);
-    final Finder reverseFinder = find.text('Reverse items');
-    final Finder firstItemFinder = find.byKey(ValueKey<String>('1'));
-    final Finder lastItemFinder = find.byKey(ValueKey<String>('5'));
-    expect(pageView, findsOneWidget);
-    expect(reverseFinder, findsOneWidget);
-    expect(firstItemFinder, findsOneWidget);
-    expect(lastItemFinder, findsNothing);
-    await tester.tap(reverseFinder);
-    await tester.pump();
-    expect(firstItemFinder, findsNothing);
-    expect(lastItemFinder, findsOneWidget);
-  });
+  testWidgets(
+    'tapping Reverse button should reverse PageView',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.PageViewExampleApp());
+      final Finder pageView = find.byType(PageView);
+      final Finder reverseFinder = find.text('Reverse items');
+      final Finder firstItemFinder = find.byKey(ValueKey<String>('1'));
+      final Finder lastItemFinder = find.byKey(ValueKey<String>('5'));
+      expect(pageView, findsOneWidget);
+      expect(reverseFinder, findsOneWidget);
+      expect(firstItemFinder, findsOneWidget);
+      expect(lastItemFinder, findsNothing);
+      await tester.tap(reverseFinder);
+      await tester.pump();
+      expect(firstItemFinder, findsNothing);
+      expect(lastItemFinder, findsOneWidget);
+    },
+  );
 }
