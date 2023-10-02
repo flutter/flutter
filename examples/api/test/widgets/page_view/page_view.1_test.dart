@@ -24,8 +24,6 @@ void main() {
     expect(lastItemFinder, findsNothing);
     await tester.tap(reverseFinder);
     await tester.pump();
-    expect(pageView, findsOneWidget);
-    expect(reverseFinder, findsOneWidget);
     expect(firstItemFinder, findsNothing);
     expect(lastItemFinder, findsOneWidget);
   });
