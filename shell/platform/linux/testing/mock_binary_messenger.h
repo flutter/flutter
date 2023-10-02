@@ -59,10 +59,10 @@ class MockBinaryMessenger {
                int64_t new_size));
 
   MOCK_METHOD(void,
-              fl_binary_messenger_set_allow_channel_overflow,
+              fl_binary_messenger_set_warns_on_channel_overflow,
               (FlBinaryMessenger * messenger,
                const gchar* channel,
-               bool allowed));
+               bool warns));
 
   bool HasMessageHandler(const gchar* channel) const;
 

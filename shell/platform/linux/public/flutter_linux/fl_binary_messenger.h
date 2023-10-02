@@ -98,9 +98,9 @@ struct _FlBinaryMessengerInterface {
                          const gchar* channel,
                          int64_t new_size);
 
-  void (*set_allow_channel_overflow)(FlBinaryMessenger* messenger,
-                                     const gchar* channel,
-                                     bool allowed);
+  void (*set_warns_on_channel_overflow)(FlBinaryMessenger* messenger,
+                                        const gchar* channel,
+                                        bool warns);
 };
 
 struct _FlBinaryMessengerResponseHandleClass {
@@ -210,19 +210,19 @@ void fl_binary_messenger_resize_channel(FlBinaryMessenger* messenger,
                                         int64_t new_size);
 
 /**
- * fl_binary_messenger_set_allow_channel_overflow:
+ * fl_binary_messenger_set_warns_on_channel_overflow:
  * @messenger: an #FlBinaryMessenger.
  * @channel: channel to be allowed to overflow silently.
- * @allowed: when true the channel is expected to overflow and warning messages
+ * @warns: when false, the channel is expected to overflow and warning messages
  * will not be shown.
  *
  * Sends a message to the control channel asking to allow or disallow a channel
  * to overflow silently.
  */
-void fl_binary_messenger_set_allow_channel_overflow(
+void fl_binary_messenger_set_warns_on_channel_overflow(
     FlBinaryMessenger* messenger,
     const gchar* channel,
-    bool allowed);
+    bool warns);
 
 G_END_DECLS
 

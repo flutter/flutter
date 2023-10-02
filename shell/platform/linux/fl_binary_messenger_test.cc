@@ -136,9 +136,9 @@ static void resize_channel(FlBinaryMessenger* messenger,
   // Fake implementation. Do nothing.
 }
 
-static void set_allow_channel_overflow(FlBinaryMessenger* messenger,
-                                       const gchar* channel,
-                                       bool allowed) {
+static void set_warns_on_channel_overflow(FlBinaryMessenger* messenger,
+                                          const gchar* channel,
+                                          bool warns) {
   // Fake implementation. Do nothing.
 }
 
@@ -149,7 +149,7 @@ static void fl_fake_binary_messenger_iface_init(
   iface->send_on_channel = send_on_channel;
   iface->send_on_channel_finish = send_on_channel_finish;
   iface->resize_channel = resize_channel;
-  iface->set_allow_channel_overflow = set_allow_channel_overflow;
+  iface->set_warns_on_channel_overflow = set_warns_on_channel_overflow;
 }
 
 static void fl_fake_binary_messenger_init(FlFakeBinaryMessenger* self) {}
@@ -455,7 +455,7 @@ TEST(FlBinaryMessengerTest, ResizeChannel) {
 }
 
 // Checks if the 'overflow' command is sent and is well-formed.
-TEST(FlBinaryMessengerTest, AllowOverflowChannel) {
+TEST(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
   g_autoptr(FlEngine) engine = make_mock_engine();
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
@@ -495,8 +495,8 @@ TEST(FlBinaryMessengerTest, AllowOverflowChannel) {
   EXPECT_EQ(error, nullptr);
 
   FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
-  fl_binary_messenger_set_allow_channel_overflow(messenger, "flutter/test",
-                                                 true);
+  fl_binary_messenger_set_warns_on_channel_overflow(messenger, "flutter/test",
+                                                    false);
 
   EXPECT_TRUE(called);
 }
@@ -542,8 +542,8 @@ TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
         return kInvalidArguments;
       }));
 
-  fl_binary_messenger_set_allow_channel_overflow(messenger, "flutter/test",
-                                                 true);
+  fl_binary_messenger_set_warns_on_channel_overflow(messenger, "flutter/test",
+                                                    false);
 
   EXPECT_TRUE(called);
 
