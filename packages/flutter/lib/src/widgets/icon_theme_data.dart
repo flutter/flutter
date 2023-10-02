@@ -230,6 +230,6 @@ class IconThemeData with Diagnosticable {
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
-    properties.add(FlagProperty('considerTextScale', value: considerTextScale));
+    properties.add(DiagnosticsProperty<bool>('considerTextScale', considerTextScale, defaultValue: null));
   }
 }

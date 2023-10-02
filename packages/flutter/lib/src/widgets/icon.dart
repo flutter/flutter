@@ -350,6 +350,6 @@ class Icon extends StatelessWidget {
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(FlagProperty('considerTextScale', value: considerTextScale));
+    properties.add(DiagnosticsProperty<bool>('considerTextScale', considerTextScale, defaultValue: null));
   }
 }
