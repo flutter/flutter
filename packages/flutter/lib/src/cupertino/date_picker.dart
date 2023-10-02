@@ -1968,7 +1968,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   // The currently selected values of the picker.
   int? selectedHour;
-  final List<FixedExtentScrollController> _scrollControllersToDispose = <FixedExtentScrollController>[];
+
+  FixedExtentScrollController? _hourScrollController;
+  FixedExtentScrollController? _minuteScrollController;
+  FixedExtentScrollController? _secondScrollController;
 
   late int selectedMinute;
   int? selectedSecond;
@@ -2021,9 +2024,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   void dispose() {
     PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     textPainter.dispose();
-    for (final FixedExtentScrollController scrollController in _scrollControllersToDispose) {
-      scrollController.dispose();
-    }
+
+    _hourScrollController?.dispose();
+    _minuteScrollController?.dispose();
+    _secondScrollController?.dispose();
     super.dispose();
   }
 
@@ -2169,12 +2173,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    final FixedExtentScrollController scrollController = FixedExtentScrollController(
+    _hourScrollController?.dispose();
+    _hourScrollController = FixedExtentScrollController(
         initialItem: selectedHour!
     );
-    _scrollControllersToDispose.add(scrollController);
     return CupertinoPicker(
-      scrollController: scrollController,
+      scrollController: _hourScrollController,
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(additionalPadding.start, 0),
       itemExtent: widget.itemExtent,
@@ -2232,12 +2236,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    final FixedExtentScrollController scrollController = FixedExtentScrollController(
+    _minuteScrollController?.dispose();
+    _minuteScrollController = FixedExtentScrollController(
       initialItem: selectedMinute ~/ widget.minuteInterval,
     );
-    _scrollControllersToDispose.add(scrollController);
     return CupertinoPicker(
-      scrollController: scrollController,
+      scrollController: _minuteScrollController,
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,
@@ -2300,12 +2304,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildSecondPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    final FixedExtentScrollController scrollController = FixedExtentScrollController(
+    _secondScrollController?.dispose();
+    _secondScrollController = FixedExtentScrollController(
       initialItem: selectedSecond! ~/ widget.secondInterval,
     );
-    _scrollControllersToDispose.add(scrollController);
     return CupertinoPicker(
-      scrollController: scrollController,
+      scrollController: _secondScrollController,
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,
