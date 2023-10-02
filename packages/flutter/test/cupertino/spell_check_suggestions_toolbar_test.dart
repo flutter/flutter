@@ -7,11 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('more than three suggestions throws an error', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('more than three suggestions throws an error', (WidgetTester tester) async {
     Future<void> pumpToolbar(List<String> suggestions) async {
       await tester.pumpWidget(
         CupertinoApp(
@@ -61,10 +62,14 @@ void main() {
     expect(labels, isNot(contains('yeller')));
   });
 
-  testWidgets('buildButtonItems builds a disabled "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('buildButtonItems builds a disabled "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
-        home: _FakeEditableText(),
+        home: _FakeEditableText(focusNode, controller),
       ),
     );
     final _FakeEditableTextState editableTextState =
@@ -80,9 +85,11 @@ void main() {
 }
 
 class _FakeEditableText extends EditableText {
-  _FakeEditableText() : super(
-    controller: TextEditingController(),
-    focusNode: FocusNode(),
+  /// The parameters focusNode and controller are needed here so the can be
+  /// safely disposed after the test is completed.
+  _FakeEditableText(FocusNode focusNode, TextEditingController controller) : super(
+    controller: controller,
+    focusNode: focusNode,
     backgroundCursorColor: CupertinoColors.white,
     cursorColor: CupertinoColors.white,
     style: const TextStyle(),

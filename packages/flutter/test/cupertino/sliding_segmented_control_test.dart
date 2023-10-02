@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -93,7 +94,7 @@ void main() {
     groupValue = 0;
   });
 
-  testWidgets('Need at least 2 children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Need at least 2 children', (WidgetTester tester) async {
     groupValue = null;
     await expectLater(
       () => tester.pumpWidget(
@@ -146,7 +147,7 @@ void main() {
     );
   });
 
-  testWidgets('Padding works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Padding works', (WidgetTester tester) async {
     const Key key = Key('Container');
 
     const Map<int, Widget> children = <int, Widget>{
@@ -223,7 +224,7 @@ void main() {
     await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
   });
 
-  testWidgets('Tap changes toggle state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tap changes toggle state', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -255,7 +256,7 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Segmented controls respect theme',
     (WidgetTester tester) async {
       const Map<int, Widget> children = <int, Widget>{
@@ -293,7 +294,7 @@ void main() {
     },
   );
 
-  testWidgets('SegmentedControl dark mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedControl dark mode', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Icon(IconData(1)),
@@ -345,7 +346,7 @@ void main() {
     expect(decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Children can be non-Text or Icon widgets (in this case, '
         'a Container or Placeholder widget)',
     (WidgetTester tester) async {
@@ -369,13 +370,13 @@ void main() {
     },
   );
 
-  testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     expect(getHighlightedIndex(tester), 0);
   });
 
-  testWidgets('Null input for value results in no child initially selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Null input for value results in no child initially selected', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -401,7 +402,7 @@ void main() {
     expect(getHighlightedIndex(tester), null);
   });
 
-  testWidgets('Long press not-selected child interactions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Long press not-selected child interactions', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -465,7 +466,7 @@ void main() {
     expect(getChildOpacityByName('Child 2'), 0.2);
   });
 
-  testWidgets('Long press does not change the opacity of currently-selected child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Long press does not change the opacity of currently-selected child', (WidgetTester tester) async {
     double getChildOpacityByName(String childName) {
       return tester.renderObject<RenderAnimatedOpacity>(
         find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
@@ -482,7 +483,7 @@ void main() {
     expect(getChildOpacityByName('Child 1'), 1);
   });
 
-  testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(height: 100.0)),
       1: Container(constraints: const BoxConstraints.tightFor(height: 400.0)),
@@ -512,7 +513,7 @@ void main() {
     );
   });
 
-  testWidgets('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
       1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
@@ -543,7 +544,7 @@ void main() {
     expect(childWidth, 200.0 + 9.25 * 2);
   });
 
-  testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Width is finite in unbounded space', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: SizedBox(width: 50),
       1: SizedBox(width: 70),
@@ -576,7 +577,7 @@ void main() {
     );
   });
 
-  testWidgets('Directionality test - RTL should reverse order of widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Directionality test - RTL should reverse order of widgets', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -603,7 +604,7 @@ void main() {
     expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
-  testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -640,7 +641,7 @@ void main() {
     expect(getHighlightedIndex(tester), 0);
   });
 
-  testWidgets('Segmented control semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Segmented control semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
@@ -733,7 +734,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const SizedBox();
@@ -761,7 +762,7 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
@@ -793,7 +794,7 @@ void main() {
     expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
   });
 
-  testWidgets('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     final Rect initialRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
@@ -874,7 +875,7 @@ void main() {
     expect(currentThumbScale(tester), moreOrLessEquals(1, epsilon: 0.01));
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Thumb does not go out of bounds in animation',
     (WidgetTester tester) async {
       const Map<int, Widget> children = <int, Widget>{
@@ -931,7 +932,7 @@ void main() {
     },
   );
 
-  testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
@@ -981,7 +982,7 @@ void main() {
     );
   });
 
-  testWidgets('Insert segment while animation is running', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Insert segment while animation is running', (WidgetTester tester) async {
     final Map<int, Widget> children = SplayTreeMap<int, Widget>((int a, int b) => a - b);
 
     children[0] = const Text('A');
@@ -1027,7 +1028,7 @@ void main() {
     );
   });
 
-  testWidgets('change selection programmatically when dragging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('change selection programmatically when dragging', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
@@ -1086,7 +1087,7 @@ void main() {
     expect(callbackCalled, isFalse);
   });
 
-  testWidgets('Disallow new gesture when dragging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disallow new gesture when dragging', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
@@ -1141,7 +1142,7 @@ void main() {
     expect(callbackCalled, isFalse);
   });
 
-  testWidgets('gesture outlives the widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('gesture outlives the widget', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63338.
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
@@ -1179,7 +1180,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('computeDryLayout is pure', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('computeDryLayout is pure', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/73362.
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
@@ -1213,7 +1214,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Has consistent size, independent of groupValue', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Has consistent size, independent of groupValue', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62063.
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
@@ -1247,12 +1248,13 @@ void main() {
     }
   });
 
-  testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
     };
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1333,7 +1335,7 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Hovering over Cupertino sliding segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hovering over Cupertino sliding segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('BB'),

@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Future<void> startTransitionBetween(
   WidgetTester tester, {
@@ -131,7 +132,7 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
 }
 
 void main() {
-  testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle moves between middle and back label', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -159,7 +160,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom middle moves between middle and back label RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle moves between middle and back label RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -186,7 +187,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom middle never changes size during the animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle never changes size during the animation', (WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
     addTearDown(() async {
       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
@@ -207,7 +208,7 @@ void main() {
     }
   });
 
-  testWidgets('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -251,7 +252,7 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
-  testWidgets('Font transitions respect themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Font transitions respect themes', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -299,7 +300,7 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
-  testWidgets('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -333,7 +334,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
 
-  testWidgets('Turning off transition works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Turning off transition works', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoNavigationBar(
@@ -357,7 +358,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
 
-  testWidgets('Popping mid-transition is symmetrical', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popping mid-transition is symmetrical', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -405,7 +406,7 @@ void main() {
     checkColorAndPositionAt50ms();
   });
 
-  testWidgets('Popping mid-transition is symmetrical RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popping mid-transition is symmetrical RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -456,7 +457,7 @@ void main() {
     checkColorAndPositionAt50ms();
   });
 
-  testWidgets('There should be no global keys in the hero flight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('There should be no global keys in the hero flight', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -471,7 +472,7 @@ void main() {
     );
   });
 
-  testWidgets('DartPerformanceMode is latency mid-animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DartPerformanceMode is latency mid-animation', (WidgetTester tester) async {
     DartPerformanceMode? mode;
 
     // before the animation starts, no requests are active.
@@ -491,7 +492,7 @@ void main() {
     expect(mode, isNull);
   });
 
-  testWidgets('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -566,7 +567,7 @@ void main() {
     expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Transition box grows to large title size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transition box grows to large title size', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -590,7 +591,7 @@ void main() {
     checkBackgroundBoxHeight(tester, 84.33018499612808);
   });
 
-  testWidgets('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -614,7 +615,7 @@ void main() {
     checkBackgroundBoxHeight(tester, 55.66981500387192);
   });
 
-  testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hero flight removed at the end of page transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -629,7 +630,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 1')), throwsAssertionError);
   });
 
-  testWidgets('Exact widget is reused to build inside the transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Exact widget is reused to build inside the transition', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -645,7 +646,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
-  testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -662,9 +663,10 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsNothing);
   });
 
-  testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -710,7 +712,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
-  testWidgets('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: scaffoldForNavBar(null),
@@ -749,7 +751,7 @@ void main() {
     ));
   });
 
-  testWidgets('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         builder: (BuildContext context, Widget? navigator) {
@@ -801,7 +803,7 @@ void main() {
     );
   });
 
-  testWidgets('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -827,7 +829,7 @@ void main() {
     expect(tester.getTopLeft(backChevrons.last), const Offset(14.0, 7.0));
   });
 
-  testWidgets('Bottom middle just fades if top page has a custom leading', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle just fades if top page has a custom leading', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -858,7 +860,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom leading fades in place', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom leading fades in place', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(leading: Text('custom')),
@@ -884,7 +886,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom trailing fades in place', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom trailing fades in place', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(trailing: Text('custom')),
@@ -916,7 +918,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom back label fades and slides to the left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom back label fades and slides to the left', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -958,7 +960,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom back label fades and slides to the right in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom back label fades and slides to the right in RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -1002,7 +1004,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom large title moves to top back label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom large title moves to top back label', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1054,7 +1056,7 @@ void main() {
     );
   });
 
-  testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Long title turns into the word back mid transition', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1104,7 +1106,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom large title and top back label transitions their font', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom large title and top back label transitions their font', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1143,7 +1145,7 @@ void main() {
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
   });
 
-  testWidgets('Top middle fades in and slides in from the right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top middle fades in and slides in from the right', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1174,7 +1176,7 @@ void main() {
     );
   });
 
-  testWidgets('Top middle never changes size during the animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top middle never changes size during the animation', (WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
     addTearDown(() async {
       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
@@ -1198,7 +1200,7 @@ void main() {
     }
   });
 
-  testWidgets('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1230,7 +1232,7 @@ void main() {
     );
   });
 
-  testWidgets('Top large title fades in and slides in from the right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top large title fades in and slides in from the right', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1256,7 +1258,7 @@ void main() {
     );
   });
 
-  testWidgets('Top large title fades in and slides in from the left in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top large title fades in and slides in from the left in RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1283,7 +1285,7 @@ void main() {
     );
   });
 
-  testWidgets('Components are not unnecessarily rebuilt during transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Components are not unnecessarily rebuilt during transitions', (WidgetTester tester) async {
     int bottomBuildTimes = 0;
     int topBuildTimes = 0;
     await startTransitionBetween(
@@ -1328,7 +1330,7 @@ void main() {
     expect(topBuildTimes, 3);
   });
 
-  testWidgets('Back swipe gesture transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back swipe gesture transitions', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -1391,7 +1393,7 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1', textScale: 99);
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -1399,7 +1401,7 @@ void main() {
     expect(tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaleFactor, 1);
   });
 
-  testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
