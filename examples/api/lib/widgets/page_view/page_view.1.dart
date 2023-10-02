@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for a [PageView] using the `findChildIndexCallback` argument
-
 void main() => runApp(const PageViewExampleApp());
 
 class PageViewExampleApp extends StatelessWidget {
@@ -13,7 +12,7 @@ class PageViewExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: const PageViewExample());
+    return const MaterialApp(home: PageViewExample());
   }
 }
 
@@ -41,7 +40,7 @@ class _PageViewExampleState extends State<PageViewExample> {
         child: PageView.custom(
           childrenDelegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
-              return KeepAlive(
+              return KeepAliveItem(
                 data: items[index],
                 key: ValueKey<String>(items[index]),
               );
@@ -74,16 +73,16 @@ class _PageViewExampleState extends State<PageViewExample> {
   }
 }
 
-class KeepAlive extends StatefulWidget {
-  const KeepAlive({super.key, required this.data});
+class KeepAliveItem extends StatefulWidget {
+  const KeepAliveItem({super.key, required this.data});
 
   final String data;
 
   @override
-  State<KeepAlive> createState() => _KeepAliveState();
+  State<KeepAliveItem> createState() => _KeepAliveItemState();
 }
 
-class _KeepAliveState extends State<KeepAlive>
+class _KeepAliveItemState extends State<KeepAliveItem>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
