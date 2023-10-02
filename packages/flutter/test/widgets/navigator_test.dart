@@ -121,7 +121,7 @@ class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
 }
 
 void main() {
-  testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const FirstWidget(), // X
       '/second': (BuildContext context) => const SecondWidget(), // Y
@@ -171,7 +171,7 @@ void main() {
     expect(find.text('Y', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Navigator.of fails gracefully when not found in context', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.of fails gracefully when not found in context', (WidgetTester tester) async {
     const Key targetKey = Key('foo');
     dynamic exception;
     final Widget widget = ThirdWidget(
@@ -186,7 +186,7 @@ void main() {
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
-  testWidgets('Navigator can push Route created through page class as Pageless route', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator can push Route created through page class as Pageless route', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -206,7 +206,7 @@ void main() {
     expect(find.text('home'), findsOneWidget);
   });
 
-  testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator can set clip behavior', (WidgetTester tester) async {
     const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
     await tester.pumpWidget(
       MediaQuery(
@@ -239,7 +239,7 @@ void main() {
     expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
   });
 
-  testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
     final List<Page<void>> pages = <Page<void>>[
       const ZeroTransitionPage(name: 'Page 1'),
       const ZeroTransitionPage(name: 'Page 2'),
@@ -279,7 +279,7 @@ void main() {
     expect(observations[0].previous, 'Page 1');
   });
 
-  testWidgets('Navigator.of rootNavigator finds root Navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.of rootNavigator finds root Navigator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Column(
@@ -347,7 +347,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Dialog')).dy, 0.0);
   });
 
-  testWidgets('Gestures between push and build are ignored', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Gestures between push and build are ignored', (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) {
@@ -377,7 +377,7 @@ void main() {
     expect(log, equals(<String>['left']));
   });
 
-  testWidgets('pushnamed can handle Object as type', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pushnamed can handle Object as type', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('/'),
@@ -397,7 +397,7 @@ void main() {
     expect(find.text('/second'), findsOneWidget);
   });
 
-  testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Pending gestures are rejected', (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) {
@@ -428,7 +428,7 @@ void main() {
     expect(log, equals(<String>['left']));
   });
 
-  testWidgets('popAndPushNamed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed(context, '/B'); }),
@@ -455,7 +455,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('popAndPushNamed with explicit void type parameter', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('popAndPushNamed with explicit void type parameter', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed<void>(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed<void, void>(context, '/B'); }),
@@ -482,7 +482,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('Push and pop should trigger the observers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Push and pop should trigger the observers', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
@@ -542,7 +542,7 @@ void main() {
     expect(isPopped, isTrue);
   });
 
-  testWidgets('Add and remove an observer should work', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Add and remove an observer should work', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
@@ -589,7 +589,7 @@ void main() {
     expect(isPopped, isFalse);
   });
 
-  testWidgets('initial route trigger observer in the right order', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('initial route trigger observer in the right order', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => const Text('/'),
       '/A': (BuildContext context) => const Text('A'),
@@ -663,7 +663,7 @@ void main() {
     MemoryAllocations.instance.removeListener(listener);
   });
 
-  testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/61346.
     Widget buildNavigator() {
       return Navigator(
@@ -676,6 +676,8 @@ void main() {
       );
     }
     final TabController controller = TabController(length: 3, vsync: tester);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       TestDependencies(
         child: TabBarView(
@@ -694,7 +696,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Page-based route pop before push finishes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Page-based route pop before push finishes', (WidgetTester tester) async {
     List<Page<void>> pages = <Page<void>>[const MaterialPage<void>(child: Text('Page 1'))];
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     Widget buildNavigator() {
@@ -730,7 +732,7 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
   });
 
-  testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Pages update does update overlay correctly', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/64941.
     List<Page<void>> pages = const <Page<void>>[
       MaterialPage<void>(
@@ -779,7 +781,7 @@ void main() {
     expect(find.text('page 0'), findsNothing);
   });
 
-  testWidgets('replaceNamed replaces', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('replaceNamed replaces', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
@@ -801,7 +803,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('pushReplacement sets secondaryAnimation after transition, with history change during transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pushReplacement sets secondaryAnimation after transition, with history change during transition', (WidgetTester tester) async {
     final Map<String, SlideInOutPageRoute<dynamic>> routes = <String, SlideInOutPageRoute<dynamic>>{};
     final Map<String, WidgetBuilder> builders = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
@@ -858,7 +860,7 @@ void main() {
     expect(routes['/A']!.secondaryAnimation!.value, equals(routes['/C']!.animation!.value));
   });
 
-  testWidgets('new route removed from navigator history during pushReplacement transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('new route removed from navigator history during pushReplacement transition', (WidgetTester tester) async {
     final Map<String, SlideInOutPageRoute<dynamic>> routes = <String, SlideInOutPageRoute<dynamic>>{};
     final Map<String, WidgetBuilder> builders = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
@@ -904,7 +906,7 @@ void main() {
     expect(routes['/']!.animation!.value, equals(1.0));
   });
 
-  testWidgets('pushReplacement triggers secondaryAnimation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pushReplacement triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
         id: '/',
@@ -953,7 +955,7 @@ void main() {
     expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
   });
 
-  testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56892.
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => const OnTapPage(
@@ -1021,7 +1023,7 @@ void main() {
     expect(find.text('C'), isOnstage);
   });
 
-  testWidgets('Able to pop all routes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Able to pop all routes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => const OnTapPage(
         id: '/',
@@ -1048,7 +1050,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
         id: '/',
@@ -1102,7 +1104,7 @@ void main() {
     expect(find.text('B'), isOnstage);
   });
 
-  testWidgets('pushAndRemoveUntil does not remove routes below the first route that pass the predicate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pushAndRemoveUntil does not remove routes below the first route that pass the predicate', (WidgetTester tester) async {
     // Regression https://github.com/flutter/flutter/issues/56688
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -1138,7 +1140,7 @@ void main() {
     expect(find.text('home'), isOnstage);
   });
 
-  testWidgets('replaceNamed returned value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('replaceNamed returned value', (WidgetTester tester) async {
     late Future<String?> value;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -1187,7 +1189,7 @@ void main() {
     expect(replaceNamedValue, 'B');
   });
 
-  testWidgets('removeRoute', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('removeRoute', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B'); }),
@@ -1273,7 +1275,7 @@ void main() {
     expect(previousRoute, routes['/']);
   });
 
-  testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('remove a route whose value is awaited', (WidgetTester tester) async {
     late Future<String?> pageValue;
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
       '/':  (BuildContext context) => OnTapPage(id: '/', onTap: () { pageValue = Navigator.pushNamed(context, '/A'); }),
@@ -1301,7 +1303,7 @@ void main() {
     navigator.removeRoute(routes['/A']!); // stack becomes /, pageValue will not complete
   });
 
-  testWidgets('replacing route can be observed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('replacing route can be observed', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final List<String> log = <String>[];
     final TestObserver observer = TestObserver()
@@ -1371,7 +1373,7 @@ void main() {
     expect(log, <String>['pushed / (previous is <none>)', 'pushed B (previous is /)', 'pushed C (previous is B)', 'replaced B with D']);
   });
 
-  testWidgets('didStartUserGesture observable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('didStartUserGesture observable', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
@@ -1402,7 +1404,7 @@ void main() {
     expect(observedPreviousRoute.settings.name, '/');
   });
 
-  testWidgets('ModalRoute.of sets up a route to rebuild if its state changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ModalRoute.of sets up a route to rebuild if its state changes', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final List<String> log = <String>[];
     late Route<void> routeB;
@@ -1469,7 +1471,7 @@ void main() {
     expect(log, <String>['building B', 'building C', 'found C', 'building D']);
   });
 
-  testWidgets("Routes don't rebuild just because their animations ended", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Routes don't rebuild just because their animations ended", (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final List<String> log = <String>[];
     Route<dynamic>? nextRoute = PageRouteBuilder<int>(
@@ -1512,7 +1514,7 @@ void main() {
     expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
   });
 
-  testWidgets('route semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('route semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(id: '1', onTap: () { Navigator.pushNamed(context, '/A'); }),
@@ -1569,7 +1571,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('arguments for named routes on Navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('arguments for named routes on Navigator', (WidgetTester tester) async {
     late GlobalKey currentRouteKey;
     final List<Object?> arguments = <Object?>[];
 
@@ -1643,7 +1645,7 @@ void main() {
     arguments.clear();
   });
 
-  testWidgets('arguments for named routes on NavigatorState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('arguments for named routes on NavigatorState', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     final List<Object?> arguments = <Object?>[];
 
@@ -1714,7 +1716,7 @@ void main() {
     arguments.clear();
   });
 
-  testWidgets('Initial route can have gaps', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Initial route can have gaps', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
     const Key keyRoot = Key('Root');
     const Key keyA = Key('A');
@@ -1745,7 +1747,7 @@ void main() {
     expect(find.byKey(keyABC, skipOffstage: false), findsNothing);
   });
 
-  testWidgets('The full initial route has to be matched', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The full initial route has to be matched', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
     const Key keyRoot = Key('Root');
     const Key keyA = Key('A');
@@ -1775,7 +1777,7 @@ void main() {
     expect(find.byKey(keyAB), findsNothing);
   });
 
-  testWidgets("Popping immediately after pushing doesn't crash", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Popping immediately after pushing doesn't crash", (WidgetTester tester) async {
     // Added this test to protect against regression of https://github.com/flutter/flutter/issues/45539
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () {
@@ -1824,7 +1826,7 @@ void main() {
   });
 
   group('error control test', () {
-    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(Navigator(
         key: navigatorKey,
@@ -1850,7 +1852,7 @@ void main() {
       );
     });
 
-    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(Navigator(
         key: navigatorKey,
@@ -1877,7 +1879,7 @@ void main() {
     });
   });
 
-  testWidgets('OverlayEntry of topmost initial route is marked as opaque', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverlayEntry of topmost initial route is marked as opaque', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/38038.
 
     final Key root = UniqueKey();
@@ -1901,7 +1903,7 @@ void main() {
     expect(find.byKey(topmost), findsOneWidget);
   });
 
-  testWidgets('OverlayEntry of topmost route is set to opaque after Push', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverlayEntry of topmost route is set to opaque after Push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/38038.
 
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -1928,7 +1930,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/A')), findsOneWidget);
   });
 
-  testWidgets('OverlayEntry of topmost route is set to opaque after Replace', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverlayEntry of topmost route is set to opaque after Replace', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/38038.
 
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -1973,7 +1975,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
   });
 
-  testWidgets('Pushing opaque Route does not rebuild routes below', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Pushing opaque Route does not rebuild routes below', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/45797.
 
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -2007,7 +2009,7 @@ void main() {
     expect(tester.state<StatefulTestState>(find.byKey(topRoute)).rebuildCount, 1);
   });
 
-  testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('initial routes below opaque route are offstage', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       TestDependencies(
@@ -2048,7 +2050,7 @@ void main() {
     expect(find.text('+/a/b+'), findsNothing);
   });
 
-  testWidgets('Can provide custom onGenerateInitialRoutes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can provide custom onGenerateInitialRoutes', (WidgetTester tester) async {
     bool onGenerateInitialRoutesCalled = false;
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -2081,7 +2083,7 @@ void main() {
     expect(find.text('World'), findsNothing);
   });
 
-  testWidgets('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -2094,7 +2096,7 @@ void main() {
     expect(state, testKey.currentState);
   });
 
-  testWidgets('Navigator.of able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.of able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -2116,7 +2118,7 @@ void main() {
     expect(state, root.currentState);
   });
 
-  testWidgets('Navigator.maybeOf throws when there is no navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.maybeOf throws when there is no navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(SizedBox(key: testKey));
 
@@ -2125,7 +2127,7 @@ void main() {
     }, throwsFlutterError);
   });
 
-  testWidgets('Navigator.maybeOf works when there is no navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.maybeOf works when there is no navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(SizedBox(key: testKey));
 
@@ -2133,7 +2135,7 @@ void main() {
     expect(state, isNull);
   });
 
-  testWidgets('Navigator.maybeOf able to handle input context is a navigator context', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.maybeOf able to handle input context is a navigator context', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
         MaterialApp(
@@ -2147,7 +2149,7 @@ void main() {
     expect(state, testKey.currentState);
   });
 
-  testWidgets('Navigator.maybeOf able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator.maybeOf able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -2170,7 +2172,7 @@ void main() {
     expect(state, root.currentState);
   });
 
-  testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pushAndRemove until animates the push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25080.
 
     const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 120);
@@ -2252,7 +2254,7 @@ void main() {
     expect(find.text('Route: 4', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Wrapping TickerMode can turn off ticking in routes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrapping TickerMode can turn off ticking in routes', (WidgetTester tester) async {
     int tickCount = 0;
     Widget widgetUnderTest({required bool enabled}) {
       return TickerMode(
@@ -2345,7 +2347,7 @@ void main() {
     expect(popNextOfFirst, secondRoute);
   });
 
-  testWidgets('hero controller scope works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hero controller scope works', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> top = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
 
@@ -2415,7 +2417,7 @@ void main() {
     expect(observations[1].previous, 'top1');
   });
 
-  testWidgets('hero controller can correctly transfer subscription - replacing navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hero controller can correctly transfer subscription - replacing navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
 
@@ -2484,7 +2486,7 @@ void main() {
     expect(observations[0].previous, 'navigator2');
   });
 
-  testWidgets('hero controller can correctly transfer subscription - swapping navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hero controller can correctly transfer subscription - swapping navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
 
@@ -2624,7 +2626,7 @@ void main() {
     expect(observations2[1].previous, 'navigator1');
   });
 
-  testWidgets('hero controller subscribes to multiple navigators does throw', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hero controller subscribes to multiple navigators does throw', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
     await tester.pumpWidget(
       HeroControllerScope(
@@ -2662,7 +2664,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('hero controller throws has correct error message', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hero controller throws has correct error message', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
     await tester.pumpWidget(
       HeroControllerScope(
@@ -2746,7 +2748,7 @@ void main() {
       );
     }
 
-    testWidgets('can initialize with pages list', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can initialize with pages list', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       final List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name:'initial'),
@@ -2784,7 +2786,7 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
 
-    testWidgets('can handle duplicate page key if update before transition finishes', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can handle duplicate page key if update before transition finishes', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/97363.
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       final List<TestPage> myPages1 = <TestPage>[
@@ -2840,7 +2842,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('throw if onPopPage callback is not provided', (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name:'initial'),
         const TestPage(key: ValueKey<String>('2'), name:'second'),
@@ -2910,7 +2912,7 @@ void main() {
       );
     });
 
-    testWidgets('Can pop route with local history entries using page api', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can pop route with local history entries using page api', (WidgetTester tester) async {
       List<Page<void>> myPages = const <Page<void>>[
         MaterialPage<void>(child: Text('page1')),
         MaterialPage<void>(child: Text('page2')),
@@ -2961,7 +2963,7 @@ void main() {
       expect(entryRemoved, isTrue);
     });
 
-    testWidgets('ModalRoute must comply with willHandlePopInternally when there is a PopScope', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ModalRoute must comply with willHandlePopInternally when there is a PopScope', (WidgetTester tester) async {
       const List<Page<void>> myPages = <Page<void>>[
         MaterialPage<void>(child: Text('page1')),
         MaterialPage<void>(
@@ -2994,7 +2996,7 @@ void main() {
       expect(route.didPop(null), true);
     });
 
-    testWidgets('can push and pop pages using page api', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can push and pop pages using page api', (WidgetTester tester) async {
       late Animation<double> secondaryAnimationOfRouteOne;
       late Animation<double> primaryAnimationOfRouteOne;
       late Animation<double> secondaryAnimationOfRouteTwo;
@@ -3143,7 +3145,7 @@ void main() {
       expect(primaryAnimationOfRouteThree.status, AnimationStatus.dismissed);
     });
 
-    testWidgets('can modify routes history and secondary animation still works', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can modify routes history and secondary animation still works', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       late Animation<double> secondaryAnimationOfRouteOne;
       late Animation<double> primaryAnimationOfRouteOne;
@@ -3254,7 +3256,7 @@ void main() {
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.dismissed);
     });
 
-    testWidgets('Pop no animation page does not crash', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Pop no animation page does not crash', (WidgetTester tester) async {
       // Regression Test for https://github.com/flutter/flutter/issues/86604.
       Widget buildNavigator(bool secondPage) {
         return TestDependencies(
@@ -3279,7 +3281,7 @@ void main() {
       expect(find.text('page1'), findsOneWidget);
     });
 
-    testWidgets('can work with pageless route', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can work with pageless route', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name:'initial'),
@@ -3427,7 +3429,7 @@ void main() {
       expect(myPages.length, 1);
     });
 
-    testWidgets('complex case 1', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('complex case 1', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
@@ -3564,7 +3566,7 @@ void main() {
     });
 
     //Regression test for https://github.com/flutter/flutter/issues/115887
-    testWidgets('Complex case 2', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Complex case 2', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name:'initial'),
@@ -3628,7 +3630,7 @@ void main() {
       expect(find.text('second-pageless1'), findsNothing);
     });
 
-    testWidgets('complex case 1 - with always remove transition delegate', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('complex case 1 - with always remove transition delegate', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       final AlwaysRemoveTransitionDelegate transitionDelegate = AlwaysRemoveTransitionDelegate();
       List<TestPage> myPages = <TestPage>[
@@ -3773,7 +3775,7 @@ void main() {
       expect(find.text('forth'), findsOneWidget);
     });
 
-    testWidgets('can repush a page that was previously popped before it has finished popping', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can repush a page that was previously popped before it has finished popping', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<Page<dynamic>> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
@@ -3825,7 +3827,7 @@ void main() {
       expect(find.text('second'), findsOneWidget);
     });
 
-    testWidgets('can update pages before a route has finished popping', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can update pages before a route has finished popping', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<Page<dynamic>> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name: 'initial'),
@@ -3876,7 +3878,7 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
 
-    testWidgets('can update pages before a pageless route has finished popping', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can update pages before a pageless route has finished popping', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/68162.
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<Page<dynamic>> myPages = <TestPage>[
@@ -3923,7 +3925,7 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
 
-    testWidgets('pages remove and add trigger observer in the right order', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('pages remove and add trigger observer in the right order', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name:'first'),
@@ -4016,7 +4018,7 @@ void main() {
     });
   });
 
-  testWidgets('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
     final NavigatorObserver observer = NavigatorObserver();
     Widget build([Key? key]) {
       return TestDependencies(
@@ -4051,7 +4053,7 @@ void main() {
     expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
   });
 
-  testWidgets('Navigator requests focus if requestFocus is true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator requests focus if requestFocus is true', (WidgetTester tester) async {
     final GlobalKey navigatorKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
     final Map<String, Widget> routes = <String, Widget>{
@@ -4060,6 +4062,7 @@ void main() {
     };
     late final NavigatorState navigator = navigatorKey.currentState! as NavigatorState;
     final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -4126,7 +4129,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('Navigator does not request focus if requestFocus is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator does not request focus if requestFocus is false', (WidgetTester tester) async {
     final GlobalKey navigatorKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
     final Map<String, Widget> routes = <String, Widget>{
@@ -4136,6 +4139,7 @@ void main() {
     late final NavigatorState navigator =
     navigatorKey.currentState! as NavigatorState;
     final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -4192,7 +4196,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('class implementing NavigatorObserver can be used without problems', (WidgetTester tester) async {
     final _MockNavigatorObserver observer = _MockNavigatorObserver();
     Widget build([Key? key]) {
       return TestDependencies(
@@ -4224,7 +4228,7 @@ void main() {
     observer._checkInvocations(<Symbol>[#navigator, #navigator]);
   });
 
-  testWidgets("Navigator doesn't override FocusTraversalPolicy of ancestors", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Navigator doesn't override FocusTraversalPolicy of ancestors", (WidgetTester tester) async {
     FocusTraversalPolicy? policy;
     await tester.pumpWidget(
       TestDependencies(
@@ -4247,7 +4251,7 @@ void main() {
     expect(policy, isA<WidgetOrderTraversalPolicy>());
   });
 
-  testWidgets('Navigator inserts ReadingOrderTraversalPolicy if no ancestor has a policy', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigator inserts ReadingOrderTraversalPolicy if no ancestor has a policy', (WidgetTester tester) async {
     FocusTraversalPolicy? policy;
     await tester.pumpWidget(
       TestDependencies(
@@ -4302,7 +4306,7 @@ void main() {
           .setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
-    testWidgets('a single route is already defaulted to false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('a single route is already defaulted to false', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -4317,7 +4321,7 @@ void main() {
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
-    testWidgets('navigating around a single Navigator with .pop', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('navigating around a single Navigator with .pop', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           initialRoute: '/',
@@ -4394,7 +4398,7 @@ void main() {
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
-    testWidgets('navigating around a single Navigator with system back', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('navigating around a single Navigator with system back', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           initialRoute: '/',
@@ -4471,7 +4475,7 @@ void main() {
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
-    testWidgets('a single Navigator with a PopScope that defaults to enabled', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('a single Navigator with a PopScope that defaults to enabled', (WidgetTester tester) async {
       bool canPop = true;
       late StateSetter setState;
       await tester.pumpWidget(
@@ -4511,7 +4515,7 @@ void main() {
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
-    testWidgets('a single Navigator with a PopScope that defaults to disabled', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('a single Navigator with a PopScope that defaults to disabled', (WidgetTester tester) async {
       bool canPop = false;
       late StateSetter setState;
       await tester.pumpWidget(
@@ -4553,7 +4557,7 @@ void main() {
 
     // Test both system back gestures and Navigator.pop.
     for (final _BackType backType in _BackType.values) {
-      testWidgets('navigating around nested Navigators', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('navigating around nested Navigators', (WidgetTester tester) async {
         final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
         final GlobalKey<NavigatorState> nestedNav = GlobalKey<NavigatorState>();
         Future<void> goBack() async {
@@ -4653,7 +4657,7 @@ void main() {
       );
     }
 
-    testWidgets('nested Navigators with a nested PopScope', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('nested Navigators with a nested PopScope', (WidgetTester tester) async {
       bool canPop = true;
       late StateSetter setState;
       await tester.pumpWidget(
@@ -4780,7 +4784,7 @@ void main() {
     );
 
     group('Navigator page API', () {
-      testWidgets('starting with one route as usual', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('starting with one route as usual', (WidgetTester tester) async {
         late StateSetter builderSetState;
         final List<_Page> pages = <_Page>[_Page.home];
         bool canPop() => pages.length <= 1;
@@ -4898,7 +4902,7 @@ void main() {
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
 
-      testWidgets('starting with existing route history', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('starting with existing route history', (WidgetTester tester) async {
         final List<_Page> pages = <_Page>[_Page.home, _Page.one];
         bool canPop() => pages.length <= 1;
 
