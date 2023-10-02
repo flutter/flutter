@@ -24,10 +24,7 @@ class CustomerTest {
         continue;
       }
 
-      final bool isUnknownDirective = _TestDirective.values.firstWhereOrNull(
-            (_TestDirective d) => line.startsWith(d.name),
-          ) ==
-          null;
+      final bool isUnknownDirective = _TestDirective.values.firstWhereOrNull((_TestDirective d) => line.startsWith(d.name)) == null;
       if (isUnknownDirective) {
         throw FormatException('${errorPrefix}Unexpected directive:\n$line');
       }
