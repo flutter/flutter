@@ -111,7 +111,7 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgetsWithLeakTracking('Dialog Defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -131,10 +131,14 @@ void main() {
       find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
     );
     expect(bottomLeft.dy, 360.0);
+  });
 
-    await tester.tapAt(const Offset(10.0, 10.0));
-    await tester.pumpAndSettle();
-
+  testWidgetsWithLeakTracking('Material3 - Dialog Defaults', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      content: Text('Y'),
+      actions: <Widget>[ ],
+    );
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
     await tester.tap(find.text('X'));
@@ -146,9 +150,8 @@ void main() {
     expect(material3Widget.elevation, 6.0);
   });
 
-  testWidgetsWithLeakTracking('Dialog.fullscreen Defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
     const String dialogTextM2 = 'Fullscreen Dialog - M2';
-    const String dialogTextM3 = 'Fullscreen Dialog - M3';
 
     await tester.pumpWidget(_buildAppWithDialog(
       theme: material2Theme,
@@ -162,7 +165,7 @@ void main() {
 
     expect(find.text(dialogTextM2), findsOneWidget);
 
-    Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, Colors.grey[800]);
 
     // Try to dismiss the fullscreen dialog with the escape key.
@@ -170,6 +173,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(dialogTextM2), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
+    const String dialogTextM3 = 'Fullscreen Dialog - M3';
 
     await tester.pumpWidget(_buildAppWithDialog(
       theme: material3Theme,
@@ -183,7 +190,7 @@ void main() {
 
     expect(find.text(dialogTextM3), findsOneWidget);
 
-    materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, material3Theme.colorScheme.surface);
 
     // Try to dismiss the fullscreen dialog with the escape key.
@@ -644,7 +651,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
-  testWidgetsWithLeakTracking('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -700,10 +707,28 @@ void main() {
       tester.getBottomRight(find.byKey(key2)).dx,
       tester.getBottomRight(_findButtonBar()).dx - 8.0,
     ); // right
+  });
 
-    // Dismiss it and test material 3 dialog
-    await tester.tapAt(const Offset(10.0, 10.0));
-    await tester.pumpAndSettle();
+  testWidgetsWithLeakTracking('Material3 - AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        ElevatedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('button 1'),
+        ),
+        ElevatedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('button 2'),
+        ),
+      ],
+    );
 
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
