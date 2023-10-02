@@ -131,14 +131,14 @@ static void fl_mock_binary_messenger_resize_channel(
   self->mock->fl_binary_messenger_resize_channel(messenger, channel, new_size);
 }
 
-static void fl_mock_binary_messenger_set_allow_channel_overflow(
+static void fl_mock_binary_messenger_set_warns_on_channel_overflow(
     FlBinaryMessenger* messenger,
     const gchar* channel,
-    bool allowed) {
+    bool warns) {
   g_return_if_fail(FL_IS_MOCK_BINARY_MESSENGER(messenger));
   FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(messenger);
-  self->mock->fl_binary_messenger_set_allow_channel_overflow(messenger, channel,
-                                                             allowed);
+  self->mock->fl_binary_messenger_set_warns_on_channel_overflow(messenger,
+                                                                channel, warns);
 }
 
 static void fl_mock_binary_messenger_iface_init(
@@ -150,8 +150,8 @@ static void fl_mock_binary_messenger_iface_init(
   iface->send_on_channel_finish =
       fl_mock_binary_messenger_send_on_channel_finish;
   iface->resize_channel = fl_mock_binary_messenger_resize_channel;
-  iface->set_allow_channel_overflow =
-      fl_mock_binary_messenger_set_allow_channel_overflow;
+  iface->set_warns_on_channel_overflow =
+      fl_mock_binary_messenger_set_warns_on_channel_overflow;
 }
 
 static void fl_mock_binary_messenger_init(FlMockBinaryMessenger* self) {}
