@@ -11,10 +11,7 @@ void main() {
   testWidgets(
     'tapping Reverse button should reverse ListView',
     (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.ListViewExampleApp(),
-      );
-
+      await tester.pumpWidget(const example.ListViewExampleApp());
       final Finder listView = find.byType(ListView);
       final Finder reverseFinder = find.text('Reverse items');
       expect(listView, findsOneWidget);
