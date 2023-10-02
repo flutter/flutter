@@ -13,12 +13,7 @@ class PageViewExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('PageView Sample')),
-        body: const PageViewExample(),
-      ),
-    );
+    return MaterialApp(home: const PageViewExample());
   }
 }
 
@@ -41,6 +36,7 @@ class _PageViewExampleState extends State<PageViewExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('PageView Sample')),
       body: SafeArea(
         child: PageView.custom(
           childrenDelegate: SliverChildBuilderDelegate(
