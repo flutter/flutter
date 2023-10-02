@@ -2173,8 +2173,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    _hourScrollController?.dispose();
-    _hourScrollController = FixedExtentScrollController(
+    _hourScrollController ??= FixedExtentScrollController(
         initialItem: selectedHour!
     );
     return CupertinoPicker(
@@ -2236,8 +2235,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    _minuteScrollController?.dispose();
-    _minuteScrollController = FixedExtentScrollController(
+    _minuteScrollController ??= FixedExtentScrollController(
       initialItem: selectedMinute ~/ widget.minuteInterval,
     );
     return CupertinoPicker(
@@ -2304,8 +2302,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildSecondPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    _secondScrollController?.dispose();
-    _secondScrollController = FixedExtentScrollController(
+    _secondScrollController ??= FixedExtentScrollController(
       initialItem: selectedSecond! ~/ widget.secondInterval,
     );
     return CupertinoPicker(
