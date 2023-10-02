@@ -16,12 +16,12 @@ void main() {
       final Finder reverseFinder = find.text('Reverse items');
       expect(listView, findsOneWidget);
       expect(reverseFinder, findsOneWidget);
-      final Finder keepAliveFinder = find.byType(KeepAlive);
-      KeepAlive firstWidget = tester.firstWidget(keepAliveFinder);
+      final Finder keepAliveItemFinder = find.byType(KeepAliveItem);
+      KeepAliveItem firstWidget = tester.firstWidget(keepAliveItemFinder);
       expect(firstWidget.data, '1');
       await tester.tap(reverseFinder);
       await tester.pump();
-      firstWidget = tester.firstWidget(keepAliveFinder);
+      firstWidget = tester.firstWidget(keepAliveItemFinder);
       expect(firstWidget.data, '5');
     },
   );
