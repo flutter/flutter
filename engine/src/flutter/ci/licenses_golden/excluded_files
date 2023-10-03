@@ -389,6 +389,7 @@
 ../../../flutter/sky/tools/install_framework_headers.py
 ../../../flutter/sky/tools/objcopy.py
 ../../../flutter/testing
+../../../flutter/third_party/.clang-tidy
 ../../../flutter/third_party/accessibility/README.md
 ../../../flutter/third_party/accessibility/ax/ax_enum_util_unittest.cc
 ../../../flutter/third_party/accessibility/ax/ax_event_generator_unittest.cc
