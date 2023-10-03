@@ -1,4 +1,4 @@
-Signature: d69b6e8ce8708dc2d664a217c6abbb2f
+Signature: 9942a543a516ffcf0d69f9e5bf226b0d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -385,15 +385,6 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
-FILE: ../../../third_party/skia/relnotes/crop-imagefilter.md
-FILE: ../../../third_party/skia/relnotes/directcontext_gl.md
-FILE: ../../../third_party/skia/relnotes/directcontext_submit.md
-FILE: ../../../third_party/skia/relnotes/mesh-child-effect.md
-FILE: ../../../third_party/skia/relnotes/mesh-child-params.md
-FILE: ../../../third_party/skia/relnotes/minify-mesh.md
-FILE: ../../../third_party/skia/relnotes/patheffects.md
-FILE: ../../../third_party/skia/relnotes/shadowflags.md
-FILE: ../../../third_party/skia/relnotes/skpicture_png.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.unoptimized.sksl
