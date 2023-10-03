@@ -356,6 +356,10 @@ abstract class RawKeyEvent with Diagnosticable {
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
           );
+          final Object? characters = message['characters'];
+          if (characters is String && characters.isNotEmpty) {
+            character = characters;
+          }
         case 'linux':
           final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
           data = RawKeyEventDataLinux(
