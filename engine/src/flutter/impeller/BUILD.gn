@@ -109,6 +109,10 @@ impeller_component("impeller_unittests") {
     deps += [ "//flutter/impeller/renderer/backend/vulkan:vulkan_unittests" ]
   }
 
+  if (impeller_enable_opengles) {
+    deps += [ "//flutter/impeller/renderer/backend/gles:gles_unittests" ]
+  }
+
   if (glfw_vulkan_library != "") {
     deps += [
       "//third_party/swiftshader",
