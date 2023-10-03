@@ -559,8 +559,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // Notify that _childIsOpen changed state, but only if not
       // currently disposing.
       _parent?._childChangedOpenState();
-      widget.onClose?.call();
-      setState(() {});
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        widget.onClose?.call();
+        setState(() {});
+      });
     }
   }
 
