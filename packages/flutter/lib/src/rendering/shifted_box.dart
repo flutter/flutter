@@ -679,22 +679,21 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
-    if (child != null) {
-      child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      switch (fit) {
-        case OverflowBoxFit.max:
-          break;
-        case OverflowBoxFit.deferToChild:
+    switch (fit) {
+      case OverflowBoxFit.max:
+        if (child != null) {
+          child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+          alignChild();
+        }
+
+      case OverflowBoxFit.deferToChild:
+        if (child != null) {
+          child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
           size = constraints.constrain(child!.size);
-      }
-      alignChild();
-    } else {
-      switch (fit) {
-        case OverflowBoxFit.max:
-          break;
-        case OverflowBoxFit.deferToChild:
+          alignChild();
+        } else {
           size = constraints.smallest;
-      }
+        }
     }
   }
 
