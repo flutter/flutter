@@ -511,7 +511,8 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 }
 
-/// How much space should be occupied by the [OverflowBox].
+/// How much space should be occupied by the [OverflowBox] if there is no
+/// overflow.
 ///
 /// See also:
 ///
