@@ -290,7 +290,6 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
     case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-    case ReleasePhase.PUBLISH_CHANNEL: // TODO(chillers): Remove once protoc run.
     case ReleasePhase.VERIFY_RELEASE:
     case ReleasePhase.RELEASE_COMPLETED:
      final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);

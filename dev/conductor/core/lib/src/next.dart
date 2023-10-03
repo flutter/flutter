@@ -13,7 +13,6 @@ import 'proto/conductor_state.pb.dart' as pb;
 import 'proto/conductor_state.pbenum.dart';
 import 'repository.dart';
 import 'state.dart' as state_import;
-import 'state.dart';
 
 const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
@@ -147,7 +146,7 @@ class NextContext extends Context {
         if (!autoAccept) {
           final bool response = await prompt(
             'Has CI passed for the engine PR?\n\n'
-            '${luciConsoleLink(state.releaseChannel, 'engine')}'
+            '${state_import.luciConsoleLink(state.releaseChannel, 'engine')}'
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -188,10 +187,10 @@ class NextContext extends Context {
               addFirst: true,
           );
           // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
+          state.framework.cherrypicks.add(pb.Cherrypick.create()
+                  ..appliedRevision = revision
+                  ..state = pb.CherrypickState.COMPLETED
+          );
         }
         stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
         needsCommit = await framework.updateEngineRevision(engineRevision);
@@ -201,10 +200,10 @@ class NextContext extends Context {
               addFirst: true,
           );
           // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
+          state.framework.cherrypicks.add(pb.Cherrypick.create()
+                  ..appliedRevision = revision
+                  ..state = pb.CherrypickState.COMPLETED
+          );
         }
 
         final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];

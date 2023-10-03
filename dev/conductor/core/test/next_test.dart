@@ -94,22 +94,26 @@ void main() {
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
         );
-        final pb.ConductorState state = pb.ConductorState(
-          releaseChannel: releaseChannel,
-          engine: pb.Repository(
-            candidateBranch: candidateBranch,
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: 'abc123',
-                state: pb.CherrypickState.COMPLETED,
-              ),
-            ],
-            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
-            workingBranch: workingBranch,
-            upstream: pb.Remote(name: 'upstream', url: remoteUrl),
-            mirror: pb.Remote(name: 'mirror', url: remoteUrl),
-          ),
-          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
+        final pb.ConductorState state = (pb.ConductorState.create()
+          ..releaseChannel = releaseChannel
+          ..engine = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..cherrypicks.add(pb.Cherrypick.create()
+                ..trunkRevision ='abc123'
+                ..state = pb.CherrypickState.COMPLETED
+            )
+            ..checkoutPath = fileSystem.path.join(checkoutsParentDirectory, 'engine')
+            ..workingBranch = workingBranch
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = remoteUrl
+            )
+            ..mirror = (pb.Remote.create()
+              ..name = 'mirror'
+              ..url = remoteUrl
+            )
+          )
+          ..currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -162,23 +166,28 @@ void main() {
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
         );
-        final pb.ConductorState state = pb.ConductorState(
-          currentPhase: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
-          engine: pb.Repository(
-            candidateBranch: candidateBranch,
-            checkoutPath: fileSystem.path.join(checkoutsParentDirectory, 'engine'),
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: revision2,
-                state: pb.CherrypickState.PENDING,
-              ),
-            ],
-            workingBranch: workingBranch,
-            upstream: pb.Remote(name: 'upstream', url: remoteUrl),
-            mirror: pb.Remote(name: 'mirror', url: remoteUrl),
-          ),
-          releaseChannel: releaseChannel,
-          releaseVersion: releaseVersion,
+        final pb.ConductorState state = (pb.ConductorState.create()
+          ..currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS
+          ..engine = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..checkoutPath = fileSystem.path.join(checkoutsParentDirectory, 'engine')
+            ..cherrypicks.add(
+              pb.Cherrypick.create()
+                ..trunkRevision = revision2
+                ..state = pb.CherrypickState.PENDING
+              )
+            ..workingBranch = workingBranch
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = remoteUrl
+            )
+            ..mirror = (pb.Remote.create()
+              ..name = 'mirror'
+              ..url = remoteUrl
+            )
+          )
+          ..releaseChannel = releaseChannel
+          ..releaseVersion = releaseVersion
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -222,17 +231,16 @@ void main() {
       late FakePlatform platform;
 
       setUp(() {
-        state = pb.ConductorState(
-          releaseChannel: releaseChannel,
-          engine: pb.Repository(
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: 'abc123',
-                state: pb.CherrypickState.PENDING,
-              ),
-            ],
-          ),
-          currentPhase: ReleasePhase.CODESIGN_ENGINE_BINARIES,
+        state = (pb.ConductorState.create()
+          ..releaseChannel = releaseChannel
+          ..engine = (pb.Repository.create()
+            ..cherrypicks.add(
+              pb.Cherrypick.create()
+                ..trunkRevision = 'abc123'
+                ..state = pb.CherrypickState.PENDING
+              )
+          )
+          ..currentPhase = ReleasePhase.CODESIGN_ENGINE_BINARIES
         );
 
         processManager = FakeProcessManager.empty();
@@ -336,30 +344,38 @@ void main() {
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
         );
-        state = pb.ConductorState(
-          releaseChannel: releaseChannel,
-          releaseVersion: releaseVersion,
-          framework: pb.Repository(
-            candidateBranch: candidateBranch,
-            checkoutPath: frameworkCheckoutPath,
-            cherrypicks: <pb.Cherrypick>[
-              pb.Cherrypick(
-                trunkRevision: frameworkCherrypick,
-                state: pb.CherrypickState.PENDING,
-              ),
-            ],
-            mirror: pb.Remote(name: 'mirror', url: mirrorRemoteUrl),
-            upstream: pb.Remote(name: 'upstream', url: upstreamRemoteUrl),
-            workingBranch: workingBranch,
-          ),
-          engine: pb.Repository(
-            candidateBranch: candidateBranch,
-            checkoutPath: engineCheckoutPath,
-            dartRevision: 'cdef0123',
-            workingBranch: workingBranch,
-            upstream: pb.Remote(name: 'upstream', url: engineUpstreamRemoteUrl),
-          ),
-          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
+        state = (pb.ConductorState.create()
+          ..releaseChannel = releaseChannel
+          ..releaseVersion = releaseVersion
+          ..framework = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..checkoutPath = frameworkCheckoutPath
+            ..cherrypicks.add(
+              pb.Cherrypick.create()
+                ..trunkRevision = frameworkCherrypick
+                ..state = pb.CherrypickState.PENDING
+            )
+            ..mirror = (pb.Remote.create()
+              ..name = 'mirror'
+              ..url = mirrorRemoteUrl
+            )
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = upstreamRemoteUrl
+            )
+            ..workingBranch = workingBranch
+          )
+          ..engine = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..checkoutPath = engineCheckoutPath
+            ..dartRevision = 'cdef0123'
+            ..workingBranch = workingBranch
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = engineUpstreamRemoteUrl
+            )
+          )
+          ..currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS
         );
         // create engine repo
         fileSystem.directory(engineCheckoutPath).createSync(recursive: true);
@@ -423,23 +439,32 @@ void main() {
             stdout: revision4,
           ),
         ]);
-        final pb.ConductorState state = pb.ConductorState(
-          releaseChannel: releaseChannel,
-          releaseVersion: releaseVersion,
-          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
-          framework: pb.Repository(
-            candidateBranch: candidateBranch,
-            checkoutPath: frameworkCheckoutPath,
-            mirror: pb.Remote(name: 'mirror', url: mirrorRemoteUrl),
-            upstream: pb.Remote(name: 'upstream', url: upstreamRemoteUrl),
-            workingBranch: workingBranch,
-          ),
-          engine: pb.Repository(
-            candidateBranch: candidateBranch,
-            checkoutPath: engineCheckoutPath,
-            upstream: pb.Remote(name: 'upstream', url: engineUpstreamRemoteUrl),
-            currentGitHead: revision1,
-          ),
+        final pb.ConductorState state = (pb.ConductorState.create()
+          ..releaseChannel = releaseChannel
+          ..releaseVersion = releaseVersion
+          ..currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS
+          ..framework = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..checkoutPath = frameworkCheckoutPath
+            ..mirror = (pb.Remote.create()
+              ..name = 'mirror'
+              ..url = mirrorRemoteUrl
+            )
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = upstreamRemoteUrl
+            )
+            ..workingBranch = workingBranch
+          )
+          ..engine = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..checkoutPath = engineCheckoutPath
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = engineUpstreamRemoteUrl
+            )
+            ..currentGitHead = revision1
+          )
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -516,23 +541,32 @@ void main() {
             stdout: revision4,
           ),
         ]);
-        final pb.ConductorState state = pb.ConductorState(
-          releaseChannel: releaseChannel,
-          releaseVersion: releaseVersion,
-          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
-          framework: pb.Repository(
-            candidateBranch: candidateBranch,
-            checkoutPath: frameworkCheckoutPath,
-            mirror: pb.Remote(name: 'mirror', url: mirrorRemoteUrl),
-            upstream: pb.Remote(name: 'upstream', url: upstreamRemoteUrl),
-            workingBranch: workingBranch,
-          ),
-          engine: pb.Repository(
-            candidateBranch: candidateBranch,
-            checkoutPath: engineCheckoutPath,
-            upstream: pb.Remote(name: 'upstream', url: engineUpstreamRemoteUrl),
-            dartRevision: 'abc123',
-          ),
+        final pb.ConductorState state = (pb.ConductorState.create()
+          ..releaseChannel = releaseChannel
+          ..releaseVersion = releaseVersion
+          ..currentPhase = ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS
+          ..framework = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..checkoutPath = frameworkCheckoutPath
+            ..mirror = (pb.Remote.create()
+              ..name = 'mirror'
+              ..url = mirrorRemoteUrl
+            )
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = upstreamRemoteUrl
+            )
+            ..workingBranch = workingBranch
+          )
+          ..engine = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..checkoutPath = engineCheckoutPath
+            ..upstream = (pb.Remote.create()
+              ..name = 'upstream'
+              ..url = engineUpstreamRemoteUrl
+            )
+            ..dartRevision = 'abc123'
+          )
         );
         writeStateToFile(
           fileSystem.file(stateFile),
@@ -737,31 +771,26 @@ void main() {
     });
 
     group('PUBLISH_VERSION to VERIFY_RELEASE', () {
-      const String remoteName = 'upstream';
       const String releaseVersion = '1.2.0-3.0.pre';
       late pb.ConductorState state;
-      late FakePlatform platform;
 
       setUp(() {
-        state = pb.ConductorState(
-          releaseChannel: releaseChannel,
-          currentPhase: ReleasePhase.PUBLISH_VERSION,
-          framework: pb.Repository(
-            candidateBranch: candidateBranch,
-            upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
-          ),
-          engine: pb.Repository(
-            candidateBranch: candidateBranch,
-            upstream: pb.Remote(url: EngineRepository.defaultUpstream),
-          ),
-          releaseVersion: releaseVersion,
-        );
-        platform = FakePlatform(
-          environment: <String, String>{
-            'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
-          },
-          operatingSystem: localOperatingSystem,
-          pathSeparator: localPathSeparator,
+        state = (pb.ConductorState.create()
+          ..releaseChannel = releaseChannel
+          ..currentPhase = ReleasePhase.PUBLISH_VERSION
+          ..framework = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..upstream = (pb.Remote.create()
+              ..url = FrameworkRepository.defaultUpstream
+            )
+          )
+          ..engine = (pb.Repository.create()
+            ..candidateBranch = candidateBranch
+            ..upstream = (pb.Remote.create()
+              ..url = EngineRepository.defaultUpstream
+            )
+          )
+          ..releaseVersion = releaseVersion
         );
       });
 
@@ -817,9 +846,8 @@ void main() {
         operatingSystem: localOperatingSystem,
         pathSeparator: localPathSeparator,
       );
-      final pb.ConductorState state = pb.ConductorState(
-        currentPhase: ReleasePhase.RELEASE_COMPLETED,
-      );
+      final pb.ConductorState state = pb.ConductorState.create()
+        ..currentPhase = ReleasePhase.RELEASE_COMPLETED;
       writeStateToFile(
         fileSystem.file(stateFile),
         state,
