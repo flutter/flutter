@@ -148,6 +148,7 @@ class ScaleUpdateDetails {
     this.rotation = 0.0,
     this.pointerCount = 0,
     this.focalPointDelta = Offset.zero,
+    this.sourceTimeStamp,
   }) : assert(scale >= 0.0),
        assert(horizontalScale >= 0.0),
        assert(verticalScale >= 0.0),
@@ -224,6 +225,12 @@ class ScaleUpdateDetails {
   /// Typically this is the number of fingers being used to pan the widget using the gesture
   /// recognizer.
   final int pointerCount;
+
+  /// Recorded timestamp of the source pointer event that triggered the drag
+  /// event.
+  ///
+  /// Could be null if triggered from proxied events such as accessibility.
+  final Duration? sourceTimeStamp;
 
   @override
   String toString() => 'ScaleUpdateDetails('
@@ -707,6 +714,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             rotation: _computeRotationFactor(),
             pointerCount: pointerCount,
             focalPointDelta: _delta,
+            sourceTimeStamp: event.timeStamp,
           ));
         });
       }
