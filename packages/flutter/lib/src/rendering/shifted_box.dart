@@ -669,8 +669,11 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       case OverflowBoxFit.max:
         return constraints.biggest;
       case OverflowBoxFit.deferToChild:
-        // We cannot compute dry layout, since it depends on the child
-        return super.computeDryLayout(constraints);
+        if (child != null) {
+          return child!.getDryLayout(constraints);
+        } else {
+          return constraints.smallest;
+        }
     }
   }
 
