@@ -241,7 +241,8 @@ class ScaleUpdateDetails {
     ' verticalScale: $verticalScale,'
     ' rotation: $rotation,'
     ' pointerCount: $pointerCount,'
-    ' focalPointDelta: $focalPointDelta)';
+    ' focalPointDelta: $focalPointDelta,'
+    ' sourceTimeStamp: $sourceTimeStamp)';
 }
 
 /// Details for [GestureScaleEndCallback].
