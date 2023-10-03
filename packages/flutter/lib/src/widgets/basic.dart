@@ -3094,7 +3094,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// The way to size the render object.
   ///
   /// This only affects scenario when the child does not indeed overflow.
-  /// If set to [OverflowBoxFit.passthrough], the render object will size itself to
+  /// If set to [OverflowBoxFit.deferToChild], the render object will size itself to
   /// match the size of its child within the constraints of its parent or be
   /// as small as the parent allows if no child is set. If set to
   /// [OverflowBoxFit.max] (the default), the render object will size itself
