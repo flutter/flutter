@@ -654,15 +654,23 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   // If deferToChild, the size will be as small as its child when non-overflowing,
   // thus is cannot be sizedByParent.
   @override
-  bool get sizedByParent => fit != OverflowBoxFit.deferToChild;
+  bool get sizedByParent {
+    switch (fit) {
+      case OverflowBoxFit.max:
+        return true;
+      case OverflowBoxFit.deferToChild:
+        return false;
+    }
+  }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (fit == OverflowBoxFit.deferToChild) {
-      // We cannot compute dry layout, since it depends on the child
-      return super.computeDryLayout(constraints);
-    } else {
-      return constraints.biggest;
+    switch (fit) {
+      case OverflowBoxFit.max:
+        return constraints.biggest;
+      case OverflowBoxFit.deferToChild:
+        // We cannot compute dry layout, since it depends on the child
+        return super.computeDryLayout(constraints);
     }
   }
 
@@ -670,13 +678,19 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   void performLayout() {
     if (child != null) {
       child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      if (fit == OverflowBoxFit.deferToChild) {
-        size = constraints.constrain(child!.size);
+      switch (fit) {
+        case OverflowBoxFit.max:
+          break;
+        case OverflowBoxFit.deferToChild:
+          size = constraints.constrain(child!.size);
       }
       alignChild();
     } else {
-      if (fit == OverflowBoxFit.deferToChild) {
-        size = constraints.smallest;
+      switch (fit) {
+        case OverflowBoxFit.max:
+          break;
+        case OverflowBoxFit.deferToChild:
+          size = constraints.smallest;
       }
     }
   }
