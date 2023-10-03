@@ -52,7 +52,7 @@ void main() {
                 key: key,
                 child: OverflowBox(
                   maxHeight: 1000000,
-                  fit: OverflowBoxFit.passthrough,
+                  fit: OverflowBoxFit.deferToChild,
                   child: child,
                 ),
               ),

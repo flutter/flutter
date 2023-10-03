@@ -526,7 +526,7 @@ enum OverflowBoxFit {
   /// More specifically, the render object will size itself to match the size of
   /// its child within the constraints of its parent or be as small as the
   /// parent allows if no child is set.
-  passthrough,
+  deferToChild,
 }
 
 /// A render object that imposes different constraints on its child than it gets
@@ -650,14 +650,14 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     );
   }
 
-  // If passthrough, the size will be as small as its child when non-overflowing,
+  // If deferToChild, the size will be as small as its child when non-overflowing,
   // thus is cannot be sizedByParent.
   @override
-  bool get sizedByParent => fit != OverflowBoxFit.passthrough;
+  bool get sizedByParent => fit != OverflowBoxFit.deferToChild;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (fit == OverflowBoxFit.passthrough) {
+    if (fit == OverflowBoxFit.deferToChild) {
       // We cannot compute dry layout, since it depends on the child
       return super.computeDryLayout(constraints);
     } else {
@@ -669,12 +669,12 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   void performLayout() {
     if (child != null) {
       child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      if (fit == OverflowBoxFit.passthrough) {
+      if (fit == OverflowBoxFit.deferToChild) {
         size = constraints.constrain(child!.size);
       }
       alignChild();
     } else {
-      if (fit == OverflowBoxFit.passthrough) {
+      if (fit == OverflowBoxFit.deferToChild) {
         size = constraints.smallest;
       }
     }
