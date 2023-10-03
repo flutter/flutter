@@ -20,7 +20,7 @@ class CustomerTest {
     bool hasTests = false;
     for (final String line in testFile.readAsLinesSync().map((String line) => line.trim())) {
       if (line.isEmpty || line.startsWith('#')) {
-        // blank line or comment
+        // Blank line or comment.
         continue;
       }
 
