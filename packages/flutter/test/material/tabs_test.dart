@@ -1497,6 +1497,92 @@ void main() {
     expect(position.pixels, 800);
   });
 
+  testWidgets('TabController animateTo applies duration to TabBarView PageView transitions', (WidgetTester tester) async {
+    const Duration tabControllerDuration = Duration(seconds: 2);
+    final TabController controller = TabController(length: 3, vsync: const TestVSync(), animationDuration: tabControllerDuration);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TabBarView(
+            controller: controller,
+            children: const <Widget>[
+              Center(child: Text('Tab 1 Content')),
+              Center(child: Text('Tab 2 Content')),
+              Center(child: Text('Tab 3 Content')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final PageController pageController = tester.widget<PageView>(find.byType(PageView)).controller;
+
+    // Duration is four time the TabController animation duration
+    // so that if pageController use the aniamateTo duration,
+    // animation doesn't complete yet when we pump half the duration.
+    final Duration animateToDuration = tabControllerDuration * 4;
+
+    controller.animateTo(1, duration: animateToDuration);
+    await tester.pump();  // Start the animation
+
+    // Pump half the duration of the animation.
+    // not expect to be on the second page yet.
+    await tester.pump(animateToDuration ~/2);
+    expect(pageController.page, lessThan(1.0));
+
+    await tester.pumpAndSettle();
+
+    expect(pageController.page, 1.0);
+  });
+
+  testWidgets('TabController animateTo applies curve to TabBarView PageView transitions', (WidgetTester tester) async {
+    const Duration tabControllerDuration = Duration(seconds: 2);
+    final TabController controller = TabController(length: 3, vsync: const TestVSync(), animationDuration: tabControllerDuration);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TabBarView(
+            controller: controller,
+            children: const <Widget>[
+              Center(child: Text('Tab 1 Content')),
+              Center(child: Text('Tab 2 Content')),
+              Center(child: Text('Tab 3 Content')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final PageController pageController = tester.widget<PageView>(find.byType(PageView)).controller;
+    Curve animateToCurve = Curves.bounceInOut;
+
+    controller.animateTo(1, curve: animateToCurve);
+    await tester.pump();
+
+    await tester.pump(tabControllerDuration ~/ 4);
+    expect(pageController.page, animateToCurve.transform(0.25));
+
+    await tester.pumpAndSettle();
+
+    expect(pageController.page, 1.0);
+
+    animateToCurve = Curves.easeInOut;
+    controller.animateTo(2, curve: animateToCurve);
+
+    await tester.pump();
+
+    await tester.pump(tabControllerDuration ~/ 4);
+    expect(pageController.page, 1 + animateToCurve.transform(0.25));
+
+    await tester.pumpAndSettle();
+
+    expect(pageController.page, 2.0);
+  });
+
+
+
   testWidgets('TabBarView animation can be interrupted', (WidgetTester tester) async {
     const Duration animationDuration = Duration(seconds: 2);
     final List<String> tabs = <String>['A', 'B', 'C'];
