@@ -2583,7 +2583,7 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    this.floatingLabelGap,
+    this.floatingLabelGap = 4.0,
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.isCollapsed,
