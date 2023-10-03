@@ -2919,7 +2919,9 @@ class InputDecoration {
   final int? errorMaxLines;
 
   /// {@template flutter.material.inputDecoration.floatingLabelGap}
-  /// Defines the vertical gap between the inline elements and the floating label.
+  /// Defines the modifier for the vertical gap between the inline elements and
+  /// the floating label. Is not the number of pixels. Actual calculation is:
+  /// `(floatingLabelGap + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);`
   ///
   /// Default is 4.0.
   /// {@endtemplate}
