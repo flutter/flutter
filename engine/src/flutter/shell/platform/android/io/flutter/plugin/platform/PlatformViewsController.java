@@ -974,7 +974,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static PlatformViewRenderTarget makePlatformViewRenderTarget(
       TextureRegistry textureRegistry) {
-    if (enableHardwareBufferRenderingTarget && Build.VERSION.SDK_INT >= 29) {
+    if (enableHardwareBufferRenderingTarget && Build.VERSION.SDK_INT >= 33) {
       final TextureRegistry.ImageTextureEntry textureEntry = textureRegistry.createImageTexture();
       Log.i(TAG, "PlatformView is using ImageReader backend");
       return new ImageReaderPlatformViewRenderTarget(textureEntry);
