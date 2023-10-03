@@ -75,7 +75,7 @@ void main() {
           children: <Widget>[
             Container(
               key: key,
-              child: OverflowBox(
+              child: const OverflowBox(
                 maxHeight: 1000000,
                 fit: OverflowBoxFit.deferToChild,
                 // no child
