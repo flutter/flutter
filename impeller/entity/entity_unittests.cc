@@ -1631,12 +1631,12 @@ TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
   }
 }
 
-TEST_P(EntityTest, ClipContentsGetStencilCoverageIsCorrect) {
+TEST_P(EntityTest, ClipContentsGetClipCoverageIsCorrect) {
   // Intersection: No stencil coverage, no geometry.
   {
     auto clip = std::make_shared<ClipContents>();
     clip->SetClipOperation(Entity::ClipOperation::kIntersect);
-    auto result = clip->GetStencilCoverage(Entity{}, Rect{});
+    auto result = clip->GetClipCoverage(Entity{}, Rect{});
 
     ASSERT_FALSE(result.coverage.has_value());
   }
@@ -1647,7 +1647,7 @@ TEST_P(EntityTest, ClipContentsGetStencilCoverageIsCorrect) {
     clip->SetClipOperation(Entity::ClipOperation::kIntersect);
     clip->SetGeometry(Geometry::MakeFillPath(
         PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath()));
-    auto result = clip->GetStencilCoverage(Entity{}, Rect{});
+    auto result = clip->GetClipCoverage(Entity{}, Rect{});
 
     ASSERT_FALSE(result.coverage.has_value());
   }
@@ -1657,7 +1657,7 @@ TEST_P(EntityTest, ClipContentsGetStencilCoverageIsCorrect) {
     auto clip = std::make_shared<ClipContents>();
     clip->SetClipOperation(Entity::ClipOperation::kIntersect);
     auto result =
-        clip->GetStencilCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
+        clip->GetClipCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
 
     ASSERT_FALSE(result.coverage.has_value());
   }
@@ -1669,11 +1669,11 @@ TEST_P(EntityTest, ClipContentsGetStencilCoverageIsCorrect) {
     clip->SetGeometry(Geometry::MakeFillPath(
         PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 50, 50)).TakePath()));
     auto result =
-        clip->GetStencilCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
+        clip->GetClipCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
 
     ASSERT_TRUE(result.coverage.has_value());
     ASSERT_RECT_NEAR(result.coverage.value(), Rect::MakeLTRB(0, 0, 50, 50));
-    ASSERT_EQ(result.type, Contents::StencilCoverage::Type::kAppend);
+    ASSERT_EQ(result.type, Contents::ClipCoverage::Type::kAppend);
   }
 
   // Difference: With stencil coverage, with geometry.
@@ -1683,11 +1683,11 @@ TEST_P(EntityTest, ClipContentsGetStencilCoverageIsCorrect) {
     clip->SetGeometry(Geometry::MakeFillPath(
         PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 50, 50)).TakePath()));
     auto result =
-        clip->GetStencilCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
+        clip->GetClipCoverage(Entity{}, Rect::MakeLTRB(0, 0, 100, 100));
 
     ASSERT_TRUE(result.coverage.has_value());
     ASSERT_RECT_NEAR(result.coverage.value(), Rect::MakeLTRB(0, 0, 100, 100));
-    ASSERT_EQ(result.type, Contents::StencilCoverage::Type::kAppend);
+    ASSERT_EQ(result.type, Contents::ClipCoverage::Type::kAppend);
   }
 }
 

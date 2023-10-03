@@ -104,17 +104,15 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
   }
 
   if (blur_sigma_.sigma < kEhCloseEnough) {
-    return Entity::FromSnapshot(
-        input_snapshot.value(), entity.GetBlendMode(),
-        entity.GetStencilDepth());  // No blur to render.
+    return Entity::FromSnapshot(input_snapshot.value(), entity.GetBlendMode(),
+                                entity.GetClipDepth());  // No blur to render.
   }
 
   // If the radius length is < .5, the shader will take at most 1 sample,
   // resulting in no blur.
   if (transformed_blur_radius_length < .5) {
-    return Entity::FromSnapshot(
-        input_snapshot.value(), entity.GetBlendMode(),
-        entity.GetStencilDepth());  // No blur to render.
+    return Entity::FromSnapshot(input_snapshot.value(), entity.GetBlendMode(),
+                                entity.GetClipDepth());  // No blur to render.
   }
 
   // A matrix that rotates the snapshot space such that the blur direction is
@@ -273,7 +271,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
                                               (scaled_size / floored_size)),
                .sampler_descriptor = sampler_desc,
                .opacity = input_snapshot->opacity},
-      entity.GetBlendMode(), entity.GetStencilDepth());
+      entity.GetBlendMode(), entity.GetClipDepth());
 }
 
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(

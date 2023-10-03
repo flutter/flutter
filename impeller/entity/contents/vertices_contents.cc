@@ -137,7 +137,7 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetTexturePipeline(opts);
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
   cmd.BindVertices(geometry_result.vertex_buffer);
 
   VS::FrameInfo frame_info;
@@ -187,7 +187,7 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetGeometryColorPipeline(opts);
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
   cmd.BindVertices(geometry_result.vertex_buffer);
 
   VS::FrameInfo frame_info;

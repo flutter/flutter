@@ -250,7 +250,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     DEBUG_COMMAND_INFO(
         cmd, SPrintF("DrawAtlas Blend (%s)", BlendModeToString(blend_mode_)));
     cmd.BindVertices(vtx_buffer);
-    cmd.stencil_reference = entity.GetStencilDepth();
+    cmd.stencil_reference = entity.GetClipDepth();
     auto options = OptionsFromPass(pass);
     cmd.pipeline = renderer.GetPorterDuffBlendPipeline(options);
 
@@ -425,7 +425,7 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   cmd.pipeline = renderer.GetTexturePipeline(options);
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   FS::BindTextureSampler(cmd, texture,
@@ -515,7 +515,7 @@ bool AtlasColorContents::Render(const ContentContext& renderer,
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.blend_mode = BlendMode::kSourceOver;
   cmd.pipeline = renderer.GetGeometryColorPipeline(opts);
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));

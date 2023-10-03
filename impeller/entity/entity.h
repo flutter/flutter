@@ -65,7 +65,7 @@ class Entity {
   static std::optional<Entity> FromSnapshot(
       const std::optional<Snapshot>& snapshot,
       BlendMode blend_mode = BlendMode::kSourceOver,
-      uint32_t stencil_depth = 0);
+      uint32_t clip_depth = 0);
 
   Entity();
 
@@ -77,20 +77,20 @@ class Entity {
 
   std::optional<Rect> GetCoverage() const;
 
-  Contents::StencilCoverage GetStencilCoverage(
-      const std::optional<Rect>& current_stencil_coverage) const;
+  Contents::ClipCoverage GetClipCoverage(
+      const std::optional<Rect>& current_clip_coverage) const;
 
-  bool ShouldRender(const std::optional<Rect>& stencil_coverage) const;
+  bool ShouldRender(const std::optional<Rect>& clip_coverage) const;
 
   void SetContents(std::shared_ptr<Contents> contents);
 
   const std::shared_ptr<Contents>& GetContents() const;
 
-  void SetStencilDepth(uint32_t stencil_depth);
+  void SetClipDepth(uint32_t clip_depth);
 
   void IncrementStencilDepth(uint32_t increment);
 
-  uint32_t GetStencilDepth() const;
+  uint32_t GetClipDepth() const;
 
   void SetBlendMode(BlendMode blend_mode);
 
@@ -116,7 +116,7 @@ class Entity {
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
-  uint32_t stencil_depth_ = 0u;
+  uint32_t clip_depth_ = 0u;
   mutable Capture capture_;
 };
 
