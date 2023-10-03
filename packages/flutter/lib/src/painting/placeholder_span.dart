@@ -72,20 +72,6 @@ abstract class PlaceholderSpan extends InlineSpan {
     collector.add(InlineSpanSemanticsInformation.placeholder);
   }
 
-  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
-  /// to be able to construct a [SemanticsNode].
-  ///
-  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (0xFFFC) that is inserted to represent it.
-  ///
-  /// Null is added to `semanticsElements` for [PlaceholderSpan]s.
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    semanticsOffsets.add(offset.value);
-    semanticsOffsets.add(offset.value + 1);
-    semanticsElements.add(null); // null indicates this is a placeholder.
-    offset.increment(1);
-  }
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
