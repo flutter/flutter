@@ -8,7 +8,6 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
@@ -30,7 +29,7 @@ class ReactorGLES {
 
   using Ref = std::shared_ptr<ReactorGLES>;
 
-  ReactorGLES(std::unique_ptr<ProcTableGLES> gl);
+  explicit ReactorGLES(std::unique_ptr<ProcTableGLES> gl);
 
   ~ReactorGLES();
 
@@ -63,8 +62,7 @@ class ReactorGLES {
 
     LiveHandle() = default;
 
-    explicit LiveHandle(std::optional<GLuint> p_name)
-        : name(std::move(p_name)) {}
+    explicit LiveHandle(std::optional<GLuint> p_name) : name(p_name) {}
 
     constexpr bool IsLive() const { return name.has_value(); }
   };
@@ -99,6 +97,8 @@ class ReactorGLES {
   bool ConsolidateHandles();
 
   bool FlushOps();
+
+  void SetupDebugGroups();
 
   FML_DISALLOW_COPY_AND_ASSIGN(ReactorGLES);
 };

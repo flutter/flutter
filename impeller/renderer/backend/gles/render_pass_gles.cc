@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/gles/render_pass_gles.h"
 
 #include "flutter/fml/trace_event.h"
+#include "fml/closure.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
