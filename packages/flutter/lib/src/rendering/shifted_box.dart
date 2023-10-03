@@ -627,9 +627,10 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// The way to size the render object.
   ///
   /// This only affects scenario when the child does not indeed overflow.
-  /// If set to true, the render object will size itself to match the size of
-  /// its child within the constraints of its parent or be as small as the
-  /// parent allows if no child is set. If set to false (the default), the
+  /// If set to [OverflowBoxFit.deferToChild], the render object will size
+  /// itself to match the size of its child within the constraints of its
+  /// parent or be as small as the parent allows if no child is set.
+  /// If set to [OverflowBoxFit.max] (the default), the
   /// render object will size itself to be as large as the parent allows.
   OverflowBoxFit get fit => _fit;
   OverflowBoxFit _fit;
