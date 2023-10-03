@@ -96,7 +96,7 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
     color = Color::White();
   }
   cmd.pipeline = renderer.GetRRectBlurPipeline(opts);
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 

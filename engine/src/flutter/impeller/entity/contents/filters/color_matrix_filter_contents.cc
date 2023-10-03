@@ -57,7 +57,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
                                const Entity& entity, RenderPass& pass) -> bool {
     Command cmd;
     DEBUG_COMMAND_INFO(cmd, "Color Matrix Filter");
-    cmd.stencil_reference = entity.GetStencilDepth();
+    cmd.stencil_reference = entity.GetClipDepth();
 
     auto options = OptionsFromPassAndEntity(pass, entity);
     cmd.pipeline = renderer.GetColorMatrixColorFilterPipeline(options);
@@ -117,7 +117,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
-  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetClipDepth(entity.GetClipDepth());
   sub_entity.SetBlendMode(entity.GetBlendMode());
   return sub_entity;
 }

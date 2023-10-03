@@ -170,7 +170,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   cmd.pipeline = renderer.GetTexturePipeline(pipeline_options);
 #endif  // IMPELLER_ENABLE_OPENGLES
 
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
   if (is_external_texture) {

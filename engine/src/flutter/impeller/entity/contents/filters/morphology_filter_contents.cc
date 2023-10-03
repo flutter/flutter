@@ -59,7 +59,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
   if (radius_.radius < kEhCloseEnough) {
     return Entity::FromSnapshot(input_snapshot.value(), entity.GetBlendMode(),
-                                entity.GetStencilDepth());
+                                entity.GetClipDepth());
   }
 
   auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
@@ -153,7 +153,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
                .transform = Matrix::MakeTranslation(coverage.origin),
                .sampler_descriptor = sampler_desc,
                .opacity = input_snapshot->opacity},
-      entity.GetBlendMode(), entity.GetStencilDepth());
+      entity.GetBlendMode(), entity.GetClipDepth());
 }
 
 std::optional<Rect> DirectionalMorphologyFilterContents::GetFilterCoverage(

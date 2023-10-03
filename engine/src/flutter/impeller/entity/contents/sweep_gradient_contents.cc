@@ -105,7 +105,7 @@ bool SweepGradientContents::RenderSSBO(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "SweepGradientSSBOFill");
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
@@ -167,7 +167,7 @@ bool SweepGradientContents::RenderTexture(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "SweepGradientFill");
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {
