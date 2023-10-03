@@ -29,13 +29,13 @@ class ClipContents final : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
-  StencilCoverage GetStencilCoverage(
+  ClipCoverage GetClipCoverage(
       const Entity& entity,
-      const std::optional<Rect>& current_stencil_coverage) const override;
+      const std::optional<Rect>& current_clip_coverage) const override;
 
   // |Contents|
   bool ShouldRender(const Entity& entity,
-                    const std::optional<Rect>& stencil_coverage) const override;
+                    const std::optional<Rect>& clip_coverage) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -70,13 +70,13 @@ class ClipRestoreContents final : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
-  StencilCoverage GetStencilCoverage(
+  ClipCoverage GetClipCoverage(
       const Entity& entity,
-      const std::optional<Rect>& current_stencil_coverage) const override;
+      const std::optional<Rect>& current_clip_coverage) const override;
 
   // |Contents|
   bool ShouldRender(const Entity& entity,
-                    const std::optional<Rect>& stencil_coverage) const override;
+                    const std::optional<Rect>& clip_coverage) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,

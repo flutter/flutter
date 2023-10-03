@@ -21,7 +21,7 @@ namespace impeller {
 std::optional<Entity> Entity::FromSnapshot(
     const std::optional<Snapshot>& snapshot,
     BlendMode blend_mode,
-    uint32_t stencil_depth) {
+    uint32_t clip_depth) {
   if (!snapshot.has_value()) {
     return std::nullopt;
   }
@@ -36,7 +36,7 @@ std::optional<Entity> Entity::FromSnapshot(
 
   Entity entity;
   entity.SetBlendMode(blend_mode);
-  entity.SetStencilDepth(stencil_depth);
+  entity.SetClipDepth(clip_depth);
   entity.SetTransformation(snapshot->transform);
   entity.SetContents(contents);
   return entity;
@@ -62,16 +62,16 @@ std::optional<Rect> Entity::GetCoverage() const {
   return contents_->GetCoverage(*this);
 }
 
-Contents::StencilCoverage Entity::GetStencilCoverage(
-    const std::optional<Rect>& current_stencil_coverage) const {
+Contents::ClipCoverage Entity::GetClipCoverage(
+    const std::optional<Rect>& current_clip_coverage) const {
   if (!contents_) {
     return {};
   }
-  return contents_->GetStencilCoverage(*this, current_stencil_coverage);
+  return contents_->GetClipCoverage(*this, current_clip_coverage);
 }
 
-bool Entity::ShouldRender(const std::optional<Rect>& stencil_coverage) const {
-  return contents_->ShouldRender(*this, stencil_coverage);
+bool Entity::ShouldRender(const std::optional<Rect>& clip_coverage) const {
+  return contents_->ShouldRender(*this, clip_coverage);
 }
 
 void Entity::SetContents(std::shared_ptr<Contents> contents) {
@@ -82,16 +82,16 @@ const std::shared_ptr<Contents>& Entity::GetContents() const {
   return contents_;
 }
 
-void Entity::SetStencilDepth(uint32_t depth) {
-  stencil_depth_ = depth;
+void Entity::SetClipDepth(uint32_t depth) {
+  clip_depth_ = depth;
 }
 
-uint32_t Entity::GetStencilDepth() const {
-  return stencil_depth_;
+uint32_t Entity::GetClipDepth() const {
+  return clip_depth_;
 }
 
 void Entity::IncrementStencilDepth(uint32_t increment) {
-  stencil_depth_ += increment;
+  clip_depth_ += increment;
 }
 
 void Entity::SetBlendMode(BlendMode blend_mode) {

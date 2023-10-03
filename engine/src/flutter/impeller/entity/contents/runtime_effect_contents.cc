@@ -153,7 +153,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "RuntimeEffectContents");
   cmd.pipeline = pipeline;
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
   cmd.BindVertices(geometry_result.vertex_buffer);
 
   //--------------------------------------------------------------------------

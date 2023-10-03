@@ -114,7 +114,7 @@ static std::optional<Entity> AdvancedBlend(
         return std::nullopt;
       }
       return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
-                                  entity.GetStencilDepth());
+                                  entity.GetClipDepth());
     }
     auto maybe_src_uvs = src_snapshot->GetCoverageUVs(coverage);
     if (!maybe_src_uvs.has_value()) {
@@ -122,7 +122,7 @@ static std::optional<Entity> AdvancedBlend(
         return std::nullopt;
       }
       return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
-                                  entity.GetStencilDepth());
+                                  entity.GetClipDepth());
     }
     src_uvs = maybe_src_uvs.value();
   }
@@ -242,7 +242,7 @@ static std::optional<Entity> AdvancedBlend(
                           ? 1.0f
                           : dst_snapshot->opacity) *
                      alpha.value_or(1.0)},
-      entity.GetBlendMode(), entity.GetStencilDepth());
+      entity.GetBlendMode(), entity.GetClipDepth());
 }
 
 std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
@@ -294,7 +294,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     DEBUG_COMMAND_INFO(cmd, SPrintF("Foreground Advanced Blend Filter (%s)",
                                     BlendModeToString(blend_mode)));
     cmd.BindVertices(vtx_buffer);
-    cmd.stencil_reference = entity.GetStencilDepth();
+    cmd.stencil_reference = entity.GetClipDepth();
     auto options = OptionsFromPass(pass);
 
     switch (blend_mode) {
@@ -391,7 +391,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
-  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetClipDepth(entity.GetClipDepth());
 
   return sub_entity;
 }
@@ -416,7 +416,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
     Entity foreground_entity;
     foreground_entity.SetBlendMode(entity.GetBlendMode());
-    foreground_entity.SetStencilDepth(entity.GetStencilDepth());
+    foreground_entity.SetClipDepth(entity.GetClipDepth());
     foreground_entity.SetContents(std::move(contents));
     return foreground_entity;
   }
@@ -429,7 +429,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
   if (blend_mode == BlendMode::kDestination) {
     return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
-                                entity.GetStencilDepth());
+                                entity.GetClipDepth());
   }
 
   RenderProc render_proc = [foreground_color, coverage, dst_snapshot,
@@ -467,7 +467,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     DEBUG_COMMAND_INFO(cmd, SPrintF("Foreground PorterDuff Blend Filter (%s)",
                                     BlendModeToString(blend_mode)));
     cmd.BindVertices(vtx_buffer);
-    cmd.stencil_reference = entity.GetStencilDepth();
+    cmd.stencil_reference = entity.GetClipDepth();
     auto options = OptionsFromPass(pass);
     cmd.pipeline = renderer.GetPorterDuffBlendPipeline(options);
 
@@ -519,7 +519,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
-  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetClipDepth(entity.GetClipDepth());
 
   return sub_entity;
 }
@@ -672,7 +672,7 @@ static std::optional<Entity> PipelineBlend(
                           ? 1.0f
                           : dst_snapshot->opacity) *
                      alpha.value_or(1.0)},
-      entity.GetBlendMode(), entity.GetStencilDepth());
+      entity.GetBlendMode(), entity.GetClipDepth());
 }
 
 #define BLEND_CASE(mode)                                                      \

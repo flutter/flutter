@@ -54,7 +54,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "Solid Fill");
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);

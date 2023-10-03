@@ -100,7 +100,7 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "ConicalGradientSSBOFill");
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
@@ -168,7 +168,7 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "ConicalGradientFill");
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {

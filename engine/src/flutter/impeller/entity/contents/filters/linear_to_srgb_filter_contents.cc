@@ -47,7 +47,7 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
                                const Entity& entity, RenderPass& pass) -> bool {
     Command cmd;
     DEBUG_COMMAND_INFO(cmd, "Linear to sRGB Filter");
-    cmd.stencil_reference = entity.GetStencilDepth();
+    cmd.stencil_reference = entity.GetClipDepth();
 
     auto options = OptionsFromPassAndEntity(pass, entity);
     cmd.pipeline = renderer.GetLinearToSrgbFilterPipeline(options);
@@ -98,7 +98,7 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
-  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetClipDepth(entity.GetClipDepth());
   sub_entity.SetBlendMode(entity.GetBlendMode());
   return sub_entity;
 }

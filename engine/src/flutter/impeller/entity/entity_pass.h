@@ -43,12 +43,12 @@ class EntityPass {
       const Matrix& effect_transform,
       Entity::RenderingMode rendering_mode)>;
 
-  struct StencilCoverageLayer {
+  struct ClipCoverageLayer {
     std::optional<Rect> coverage;
-    size_t stencil_depth;
+    size_t clip_depth;
   };
 
-  using StencilCoverageStack = std::vector<StencilCoverageLayer>;
+  using ClipCoverageStack = std::vector<ClipCoverageLayer>;
 
   EntityPass();
 
@@ -129,9 +129,9 @@ class EntityPass {
 
   void SetTransformation(Matrix xformation);
 
-  void SetStencilDepth(size_t stencil_depth);
+  void SetClipDepth(size_t clip_depth);
 
-  size_t GetStencilDepth();
+  size_t GetClipDepth();
 
   void SetBlendMode(BlendMode blend_mode);
 
@@ -182,8 +182,8 @@ class EntityPass {
                                    ISize root_pass_size,
                                    Point global_pass_position,
                                    uint32_t pass_depth,
-                                   StencilCoverageStack& stencil_coverage_stack,
-                                   size_t stencil_depth_floor) const;
+                                   ClipCoverageStack& clip_coverage_stack,
+                                   size_t clip_depth_floor) const;
 
   //----------------------------------------------------------------------------
   /// @brief     OnRender is the internal command recording routine for
@@ -217,20 +217,20 @@ class EntityPass {
   ///                                      and debugging purposes. This can vary
   ///                                      depending on whether passes are
   ///                                      collapsed or not.
-  /// @param[in]  stencil_coverage_stack   A global stack of coverage rectangles
-  ///                                      for the stencil buffer at each depth.
+  /// @param[in]  clip_coverage_stack      A global stack of coverage rectangles
+  ///                                      for the clip buffer at each depth.
   ///                                      Higher depths are more restrictive.
   ///                                      Used to cull Elements that we
   ///                                      know won't result in a visible
   ///                                      change.
-  /// @param[in]  stencil_depth_floor      The stencil depth that a value of
+  /// @param[in]  clip_depth_floor         The clip depth that a value of
   ///                                      zero corresponds to in the given
-  ///                                      `pass_target` stencil buffer.
+  ///                                      `pass_target` clip buffer.
   ///                                      When new `pass_target`s are created
-  ///                                      for subpasses, their stencils are
+  ///                                      for subpasses, their clip buffers are
   ///                                      initialized at zero, and so this
   ///                                      value is used to offset Entity clip
-  ///                                      depths to match the stencil.
+  ///                                      depths to match the clip buffer.
   /// @param[in]  backdrop_filter_contents Optional. Is supplied, this contents
   ///                                      is rendered prior to anything else in
   ///                                      the `EntityPass`, offset by the
@@ -249,8 +249,8 @@ class EntityPass {
                 Point global_pass_position,
                 Point local_pass_position,
                 uint32_t pass_depth,
-                StencilCoverageStack& stencil_coverage_stack,
-                size_t stencil_depth_floor = 0,
+                ClipCoverageStack& clip_coverage_stack,
+                size_t clip_depth_floor = 0,
                 std::shared_ptr<Contents> backdrop_filter_contents = nullptr,
                 const std::optional<InlinePassContext::RenderPassResult>&
                     collapsed_parent_pass = std::nullopt) const;
@@ -261,7 +261,7 @@ class EntityPass {
 
   EntityPass* superpass_ = nullptr;
   Matrix xformation_;
-  size_t stencil_depth_ = 0u;
+  size_t clip_depth_ = 0u;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool flood_clip_ = false;
   bool enable_offscreen_debug_checkerboard_ = false;

@@ -98,7 +98,7 @@ bool TextContents::Render(const ContentContext& renderer,
   } else {
     cmd.pipeline = renderer.GetGlyphAtlasColorPipeline(opts);
   }
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   using VS = GlyphAtlasPipeline::VertexShader;
   using FS = GlyphAtlasPipeline::FragmentShader;

@@ -76,7 +76,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "Framebuffer Advanced Blend Filter");
   cmd.BindVertices(vtx_buffer);
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   switch (blend_mode_) {
     case BlendMode::kScreen:

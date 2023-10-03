@@ -114,7 +114,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
 
     cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);
     cmd.BindVertices(vtx_buffer);
-    cmd.stencil_reference = entity.GetStencilDepth();
+    cmd.stencil_reference = entity.GetClipDepth();
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
@@ -146,7 +146,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
-  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetClipDepth(entity.GetClipDepth());
   sub_entity.SetBlendMode(entity.GetBlendMode());
   return sub_entity;
 }

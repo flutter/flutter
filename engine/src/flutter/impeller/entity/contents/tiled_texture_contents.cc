@@ -145,7 +145,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
     DEBUG_COMMAND_INFO(cmd, "TextureFill");
   }
 
-  cmd.stencil_reference = entity.GetStencilDepth();
+  cmd.stencil_reference = entity.GetClipDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   if (geometry_result.prevent_overdraw) {

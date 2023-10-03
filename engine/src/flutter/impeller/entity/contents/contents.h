@@ -36,7 +36,7 @@ class Contents {
   /// unpremultiplied color.
   using ColorFilterProc = std::function<Color(Color)>;
 
-  struct StencilCoverage {
+  struct ClipCoverage {
     enum class Type { kNoChange, kAppend, kRestore };
 
     Type type = Type::kNoChange;
@@ -89,18 +89,18 @@ class Contents {
   virtual bool IsOpaque() const;
 
   //----------------------------------------------------------------------------
-  /// @brief Given the current screen space bounding rectangle of the stencil,
-  ///        return the expected stencil coverage after this draw call. This
-  ///        should only be implemented for contents that may write to the
-  ///        stencil buffer.
+  /// @brief Given the current screen space bounding rectangle of the clip
+  ///        buffer, return the expected clip coverage after this draw call.
+  ///        This should only be implemented for contents that may write to the
+  ///        clip buffer.
   ///
-  virtual StencilCoverage GetStencilCoverage(
+  virtual ClipCoverage GetClipCoverage(
       const Entity& entity,
-      const std::optional<Rect>& current_stencil_coverage) const;
+      const std::optional<Rect>& current_clip_coverage) const;
 
   //----------------------------------------------------------------------------
   /// @brief Render this contents to a snapshot, respecting the entity's
-  ///        transform, path, stencil depth, and blend mode.
+  ///        transform, path, clip depth, and blend mode.
   ///        The result texture size is always the size of
   ///        `GetCoverage(entity)`.
   ///
@@ -113,7 +113,7 @@ class Contents {
       const std::string& label = "Snapshot") const;
 
   virtual bool ShouldRender(const Entity& entity,
-                            const std::optional<Rect>& stencil_coverage) const;
+                            const std::optional<Rect>& clip_coverage) const;
 
   //----------------------------------------------------------------------------
   /// @brief  Return the color source's intrinsic size, if available.
