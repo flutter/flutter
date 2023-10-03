@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestFlowDelegate extends FlowDelegate {
   TestFlowDelegate({required this.startOffset}) : super(repaint: startOffset);
@@ -61,7 +62,7 @@ class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
 }
 
 void main() {
-  testWidgets('Flow control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Flow control test', (WidgetTester tester) async {
     final AnimationController startOffset = AnimationController.unbounded(
       vsync: tester,
     );
@@ -115,7 +116,7 @@ void main() {
     expect(log, equals(<int>[0]));
   });
 
-  testWidgets('paintChild gets called twice', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('paintChild gets called twice', (WidgetTester tester) async {
     await tester.pumpWidget(
       Flow(
         delegate: DuplicatePainterOpacityFlowDelegate(1.0),
@@ -137,7 +138,7 @@ void main() {
     ));
   });
 
-  testWidgets('Flow opacity layer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Flow opacity layer', (WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow(
@@ -157,7 +158,7 @@ void main() {
     expect(layer!.firstChild, isA<TransformLayer>());
   });
 
-  testWidgets('Flow can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Flow can set and update clipBehavior', (WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow(
@@ -186,7 +187,7 @@ void main() {
     }
   });
 
-  testWidgets('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow.unwrapped(

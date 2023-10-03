@@ -70,6 +70,7 @@ void main() {
       vsync: const TestVSync(),
       length: 3,
     );
+    addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 0);
@@ -91,6 +92,7 @@ void main() {
       vsync: const TestVSync(),
       length: 3,
     );
+    addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 0);
@@ -135,6 +137,7 @@ void main() {
       initialIndex: 1,
       length: 3,
     );
+    addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 1);
@@ -185,7 +188,6 @@ void main() {
     await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
-
   });
 
   testWidgetsWithLeakTracking('PageSelector indicatorColors', (WidgetTester tester) async {
@@ -197,6 +199,7 @@ void main() {
       initialIndex: 1,
       length: 3,
     );
+    addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController, color: kRed, selectedColor: kBlue));
 
     expect(tabController.index, 1);
@@ -207,12 +210,13 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
   });
 
-  testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector indicatorSize', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
     );
+    addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController, indicatorSize: 16.0));
 
     final Iterable<Element> indicatorElements = find.descendant(
@@ -228,12 +232,13 @@ void main() {
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
 
-    testWidgetsWithLeakTracking('PageSelector circle border', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector circle border', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
     );
+    addTearDown(tabController.dispose);
 
     Iterable<TabPageSelectorIndicator> indicators;
 

@@ -5,9 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('OverflowBox control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverflowBox control test', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Align(
       alignment: Alignment.bottomRight,
@@ -33,7 +34,7 @@ void main() {
   // Adapted from https://github.com/flutter/flutter/issues/129094
   group('OverflowBox behavior with long and short content', () {
     for (final bool contentSuperLong in <bool>[false, true]) {
-      testWidgets('contentSuperLong=$contentSuperLong', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('contentSuperLong=$contentSuperLong', (WidgetTester tester) async {
         final GlobalKey<State<StatefulWidget>> key = GlobalKey();
 
         final Column child = Column(
@@ -64,7 +65,7 @@ void main() {
     }
   });
 
-  testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
@@ -85,7 +86,7 @@ void main() {
     ]);
   });
 
-  testWidgets('SizedOverflowBox alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedOverflowBox alignment', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
@@ -108,7 +109,7 @@ void main() {
     );
   });
 
-  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
