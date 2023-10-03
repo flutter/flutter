@@ -1608,6 +1608,26 @@ TEST_P(AiksTest, DrawPaintWithAdvancedBlendOverFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, DrawAdvancedBlendPartlyOffscreen) {
+  std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                               Color{0.1294, 0.5882, 0.9529, 1.0}};
+  std::vector<Scalar> stops = {0.0, 1.0};
+
+  Paint paint = {
+      .color_source = ColorSource::MakeLinearGradient(
+          {0, 0}, {100, 100}, std::move(colors), std::move(stops),
+          Entity::TileMode::kRepeat, Matrix::MakeScale(Vector3(0.3, 0.3, 0.3))),
+      .blend_mode = BlendMode::kLighten,
+  };
+
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color::Blue()});
+  canvas.Scale(Vector2(2, 2));
+  canvas.ClipRect(Rect::MakeLTRB(0, 0, 200, 200));
+  canvas.DrawCircle({100, 100}, 100, paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 #define BLEND_MODE_TUPLE(blend_mode) {#blend_mode, BlendMode::k##blend_mode},
 
 struct BlendModeSelection {
