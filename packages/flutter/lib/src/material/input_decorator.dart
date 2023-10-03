@@ -2416,7 +2416,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the default vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = ((decoration.floatingLabelGap ?? 4.0) + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
+      floatingLabelHeight = (decoration.floatingLabelGap + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
@@ -2630,7 +2630,7 @@ class InputDecoration {
   /// Sets the [isCollapsed] property to true.
   const InputDecoration.collapsed({
     required this.hintText,
-    this.floatingLabelGap,
+    this.floatingLabelGap = 4.0,
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.hintStyle,
@@ -2923,7 +2923,7 @@ class InputDecoration {
   ///
   /// Default is 4.0.
   /// {@endtemplate}
-  final double? floatingLabelGap;
+  final double floatingLabelGap;
 
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
   /// Defines **how** the floating label should behave.
