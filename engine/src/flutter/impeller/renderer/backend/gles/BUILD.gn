@@ -2,12 +2,26 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/vulkan/config.gni")
 import("../../../tools/impeller.gni")
 
 config("gles_config") {
   # Generic GL/GLES/EGL/Vulkan headers. Any will do. We just pick one from Angle
   # because they are there.
   include_dirs = [ "//third_party/angle/include" ]
+}
+
+impeller_component("gles_unittests") {
+  testonly = true
+  sources = [
+    "test/mock_gles.cc",
+    "test/mock_gles.h",
+    "test/mock_gles_unittests.cc",
+  ]
+  deps = [
+    ":gles",
+    "//flutter/testing:testing_lib",
+  ]
 }
 
 impeller_component("gles") {
