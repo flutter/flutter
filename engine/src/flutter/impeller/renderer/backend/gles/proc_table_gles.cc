@@ -322,6 +322,7 @@ void ProcTableGLES::PushDebugGroup(const std::string& label) const {
   if (debug_label_max_length_ <= 0) {
     return;
   }
+
   UniqueID id;
   const auto label_length =
       std::min<GLsizei>(debug_label_max_length_ - 1, label.size());
@@ -336,6 +337,7 @@ void ProcTableGLES::PopDebugGroup() const {
   if (debug_label_max_length_ <= 0) {
     return;
   }
+
   PopDebugGroupKHR();
 }
 

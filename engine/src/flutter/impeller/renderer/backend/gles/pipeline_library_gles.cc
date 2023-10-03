@@ -9,6 +9,7 @@
 
 #include "flutter/fml/container.h"
 #include "flutter/fml/trace_event.h"
+#include "fml/closure.h"
 #include "impeller/base/promise.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"

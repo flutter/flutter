@@ -16,7 +16,7 @@ class ProcTableGLES;
 
 class DescriptionGLES {
  public:
-  DescriptionGLES(const ProcTableGLES& gl);
+  explicit DescriptionGLES(const ProcTableGLES& gl);
 
   ~DescriptionGLES();
 
@@ -28,6 +28,7 @@ class DescriptionGLES {
 
   bool HasExtension(const std::string& ext) const;
 
+  /// @brief      Returns whether GLES includes the debug extension.
   bool HasDebugExtension() const;
 
  private:

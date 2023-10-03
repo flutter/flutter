@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "flutter/fml/trace_event.h"
+#include "fml/logging.h"
 #include "impeller/base/validation.h"
 
 namespace impeller {
@@ -233,6 +234,13 @@ bool ReactorGLES::ConsolidateHandles() {
 
 bool ReactorGLES::FlushOps() {
   TRACE_EVENT0("impeller", __FUNCTION__);
+
+#ifdef IMPELLER_DEBUG
+  // glDebugMessageControl sometimes must be called before glPushDebugGroup:
+  // https://github.com/flutter/flutter/issues/135715#issuecomment-1740153506
+  SetupDebugGroups();
+#endif
+
   // Do NOT hold the ops or handles locks while performing operations in case
   // the ops enqueue more ops.
   decltype(ops_) ops;
@@ -245,6 +253,16 @@ bool ReactorGLES::FlushOps() {
     op(*this);
   }
   return true;
+}
+
+void ReactorGLES::SetupDebugGroups() {
+  // Setup of a default active debug group: Filter everything in.
+  proc_table_->DebugMessageControlKHR(GL_DONT_CARE,  // source
+                                      GL_DONT_CARE,  // type
+                                      GL_DONT_CARE,  // severity
+                                      0,             // count
+                                      nullptr,       // ids
+                                      GL_TRUE);      // enabled
 }
 
 void ReactorGLES::SetDebugLabel(const HandleGLES& handle, std::string label) {
