@@ -565,8 +565,6 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
       description.writeln(error.toString());
       description.write(stack.toString());
       result = false;
-    } finally {
-      context.dispose();
     }
     if (!result) {
       if (canvas.invocations.isNotEmpty) {
