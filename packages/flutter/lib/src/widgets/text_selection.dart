@@ -1331,8 +1331,7 @@ class SelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  /// A pair of handles. If this is non-null, there are always 2, though the
-  /// second is hidden when the selection is collapsed.
+  /// A pair of handles. The second is hidden when the selection is collapsed.
   ({OverlayEntry start, OverlayEntry end})? _handles;
 
   /// A copy/paste toolbar.
