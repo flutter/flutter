@@ -50,6 +50,7 @@ void main() {
       disabledThumbColor: Color(0xFF000013),
       overlayColor: Color(0xFF000014),
       valueIndicatorColor: Color(0xFF000015),
+      valueIndicatorStrokeColor: Color(0xFF000015),
       overlayShape: RoundSliderOverlayShape(),
       tickMarkShape: RoundSliderTickMarkShape(),
       thumbShape: RoundSliderThumbShape(),
@@ -87,6 +88,7 @@ void main() {
       'disabledThumbColor: Color(0xff000013)',
       'overlayColor: Color(0xff000014)',
       'valueIndicatorColor: Color(0xff000015)',
+      'valueIndicatorStrokeColor: Color(0xff000015)',
       "overlayShape: Instance of 'RoundSliderOverlayShape'",
       "tickMarkShape: Instance of 'RoundSliderTickMarkShape'",
       "thumbShape: Instance of 'RoundSliderThumbShape'",
@@ -630,6 +632,7 @@ void main() {
     expect(sliderTheme.disabledThumbColor, equals(customColor2.withAlpha(0x52)));
     expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x1f)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
+    expect(sliderTheme.valueIndicatorStrokeColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.valueIndicatorTextStyle!.color, equals(customColor4));
   });
 
@@ -688,6 +691,7 @@ void main() {
     expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
     expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorStrokeColor, equals(middleGrey.withAlpha(0xff)));
     expect(lerp.valueIndicatorTextStyle!.color, equals(middleGrey.withAlpha(0xff)));
   });
 
