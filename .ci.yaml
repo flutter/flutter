@@ -2535,6 +2535,7 @@ targets:
       task_name: platform_channels_benchmarks
 
   - name: Linux_android platform_channel_sample_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135978
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
