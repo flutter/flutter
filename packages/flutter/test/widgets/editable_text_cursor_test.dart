@@ -287,9 +287,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(renderEditable.cursorColor!.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  },
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  );
+  });
 
   testWidgetsWithLeakTracking('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
