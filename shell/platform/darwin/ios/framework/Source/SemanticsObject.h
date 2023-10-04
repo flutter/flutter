@@ -18,6 +18,7 @@ constexpr float kScrollExtentMaxForInf = 1000;
 
 @class FlutterCustomAccessibilityAction;
 @class FlutterPlatformViewSemanticsContainer;
+@class FlutterTouchInterceptingView;
 
 /**
  * A node in the iOS semantics tree. This object is a wrapper over a native accessibiliy
@@ -171,7 +172,8 @@ constexpr float kScrollExtentMaxForInf = 1000;
 
 - (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
                            uid:(int32_t)uid
-                  platformView:(UIView*)platformView NS_DESIGNATED_INITIALIZER;
+                  platformView:(FlutterTouchInterceptingView*)platformView
+    NS_DESIGNATED_INITIALIZER;
 
 @end
 
