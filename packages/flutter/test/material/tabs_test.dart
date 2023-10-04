@@ -4206,14 +4206,20 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(10));
+    await tester.pumpWidget(buildFrame(15));
     PageView pageView = tester.widget(find.byType(PageView));
     final PageController pageController1 = pageView.controller;
+    TabController tabController = DefaultTabController.of(tester.element(find.text('Page 14')));
+    expect(tabController.index, 14);
+    expect(pageController1.page, 14);
 
     // Rebuild with a new default tab controller with more tabs.
-    await tester.pumpWidget(buildFrame(15));
+    await tester.pumpWidget(buildFrame(10));
     pageView = tester.widget(find.byType(PageView));
     final PageController pageController2 = pageView.controller;
+    tabController = DefaultTabController.of(tester.element(find.text('Page 9')));
+    expect(tabController.index, 9);
+    expect(pageController2.page, 9);
 
     expect(pageController1, equals(pageController2));
   });
