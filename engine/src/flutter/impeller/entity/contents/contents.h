@@ -66,7 +66,14 @@ class Contents {
                       RenderPass& pass) const = 0;
 
   //----------------------------------------------------------------------------
-  /// @brief Get the screen space bounding rectangle that this contents affects.
+  /// @brief   Get the area of the render pass that will be affected when this
+  ///          contents is rendered.
+  ///
+  ///          During rendering, coverage coordinates count pixels from the top
+  ///          left corner of the framebuffer.
+  ///
+  /// @return  The coverage rectangle. An `std::nullopt` result means that
+  ///          rendering this contents has no effect on the output color.
   ///
   virtual std::optional<Rect> GetCoverage(const Entity& entity) const = 0;
 
@@ -89,10 +96,13 @@ class Contents {
   virtual bool IsOpaque() const;
 
   //----------------------------------------------------------------------------
-  /// @brief Given the current screen space bounding rectangle of the clip
+  /// @brief Given the current pass space bounding rectangle of the clip
   ///        buffer, return the expected clip coverage after this draw call.
   ///        This should only be implemented for contents that may write to the
   ///        clip buffer.
+  ///
+  ///        During rendering, coverage coordinates count pixels from the top
+  ///        left corner of the framebuffer.
   ///
   virtual ClipCoverage GetClipCoverage(
       const Entity& entity,
