@@ -3488,11 +3488,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
-      if (kIsWeb) {
-        _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
-      } else {
-        widget.focusNode.unfocus();
-      }
+      widget.focusNode.unfocus();
     }
   }
 

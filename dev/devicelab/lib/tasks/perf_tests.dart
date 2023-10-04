@@ -958,11 +958,7 @@ class StartupTest {
           }
         }
 
-        await flutter('install', options: <String>[
-          '--uninstall-only',
-          '-d',
-          device.deviceId,
-        ]);
+        await device.uninstallApp();
       }
 
       final Map<String, dynamic> averageResults = _average(results, iterations);
@@ -1084,11 +1080,7 @@ class DevtoolsStartupTest {
         await process.exitCode;
       }
 
-      await flutter('install', options: <String>[
-        '--uninstall-only',
-        '-d',
-        device.deviceId,
-      ]);
+      await device.uninstallApp();
 
       if (sawLine) {
         return TaskResult.success(null, benchmarkScoreKeys: <String>[]);
@@ -1850,7 +1842,7 @@ class MemoryTest {
       }
 
       await adb.cancel();
-      await flutter('install', options: <String>['--uninstall-only', '-d', device!.deviceId]);
+      await device!.uninstallApp();
 
       final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
