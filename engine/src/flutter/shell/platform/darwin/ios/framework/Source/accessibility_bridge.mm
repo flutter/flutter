@@ -279,7 +279,7 @@ static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
     return [[[FlutterPlatformViewSemanticsContainer alloc]
         initWithBridge:weak_ptr
                    uid:node.id
-          platformView:weak_ptr->GetPlatformViewsController()->GetPlatformViewByID(
+          platformView:weak_ptr->GetPlatformViewsController()->GetFlutterTouchInterceptingViewByID(
                            node.platformViewId)] autorelease];
   } else {
     return [[[FlutterSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id] autorelease];

@@ -157,9 +157,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @property(nonatomic, retain) FlutterSemanticsScrollView* scrollView;
 @end
 
-@implementation FlutterScrollableSemanticsObject {
-  fml::scoped_nsobject<SemanticsObjectContainer> _container;
-}
+@implementation FlutterScrollableSemanticsObject
 
 - (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
                            uid:(int32_t)uid {
@@ -865,9 +863,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
                            uid:(int32_t)uid
-                  platformView:(nonnull UIView*)platformView {
+                  platformView:(nonnull FlutterTouchInterceptingView*)platformView {
   if (self = [super initWithBridge:bridge uid:uid]) {
     _platformView = [platformView retain];
+    [platformView setFlutterAccessibilityContainer:self];
   }
   return self;
 }
@@ -880,12 +879,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (id)nativeAccessibility {
   return _platformView;
-}
-
-#pragma mark - UIAccessibilityContainer overrides
-
-- (NSArray*)accessibilityElements {
-  return @[ _platformView ];
 }
 
 @end

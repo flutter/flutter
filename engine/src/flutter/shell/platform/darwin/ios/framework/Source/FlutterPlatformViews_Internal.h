@@ -12,6 +12,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 
 @class FlutterTouchInterceptingView;
@@ -230,9 +231,16 @@ class FlutterPlatformViewsController {
   // Returns the `FlutterPlatformView`'s `view` object associated with the view_id.
   //
   // If the `FlutterPlatformViewsController` does not contain any `FlutterPlatformView` object or
-  // a `FlutterPlatformView` object asscociated with the view_id cannot be found, the method
+  // a `FlutterPlatformView` object associated with the view_id cannot be found, the method
   // returns nil.
   UIView* GetPlatformViewByID(int64_t view_id);
+
+  // Returns the `FlutterTouchInterceptingView` with the view_id.
+  //
+  // If the `FlutterPlatformViewsController` does not contain any `FlutterPlatformView` object or
+  // a `FlutterPlatformView` object associated with the view_id cannot be found, the method
+  // returns nil.
+  FlutterTouchInterceptingView* GetFlutterTouchInterceptingViewByID(int64_t view_id);
 
   PostPrerollResult PostPrerollAction(
       const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger);
@@ -424,6 +432,9 @@ class FlutterPlatformViewsController {
 
 // Get embedded view
 - (UIView*)embeddedView;
+
+// Sets flutterAccessibilityContainer as this view's accessibilityContainer.
+- (void)setFlutterAccessibilityContainer:(NSObject*)flutterAccessibilityContainer;
 @end
 
 @interface UIView (FirstResponder)
