@@ -11,6 +11,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
@@ -3097,6 +3098,14 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutterPlatformViewsController->Reset();
   XCTAssertEqual(mockFlutterView.subviews.count, 1u);
   XCTAssertEqual(mockFlutterView.subviews.firstObject, someView);
+}
+
+- (void)testFlutterTouchInterceptingViewLinksToAccessibilityContainer {
+  FlutterTouchInterceptingView* touchInteceptorView =
+      [[[FlutterTouchInterceptingView alloc] init] autorelease];
+  NSObject* container = [[[NSObject alloc] init] autorelease];
+  [touchInteceptorView setFlutterAccessibilityContainer:container];
+  XCTAssertEqualObjects([touchInteceptorView accessibilityContainer], container);
 }
 
 @end
