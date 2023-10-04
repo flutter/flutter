@@ -47,6 +47,9 @@ enum CanvasRecorderOp : uint16_t {
   DrawAtlas,
 };
 
+// Canvas recorder should only be used when IMPELLER_TRACE_CANVAS is defined
+// (never in production code).
+#ifdef IMPELLER_TRACE_CANVAS
 /// Static polymorphic replacement for impeller::Canvas that records methods
 /// called on an impeller::Canvas and forwards it to a real instance.
 /// TODO(https://github.com/flutter/flutter/issues/135718): Move this recorder
@@ -55,12 +58,6 @@ enum CanvasRecorderOp : uint16_t {
 template <typename Serializer>
 class CanvasRecorder {
  public:
-#ifndef IMPELLER_TRACE_CANVAS
-  // Canvas recorder should only be used when IMPELLER_TRACE_CANVAS is defined
-  // (never in production code).
-  static_assert(false);
-#endif
-
   CanvasRecorder() : canvas_() { serializer_.Write(CanvasRecorderOp::New); }
 
   explicit CanvasRecorder(Rect cull_rect) : canvas_(cull_rect) {
@@ -286,5 +283,6 @@ class CanvasRecorder {
   Canvas canvas_;
   Serializer serializer_;
 };
+#endif
 
 }  // namespace impeller
