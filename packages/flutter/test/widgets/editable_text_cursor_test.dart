@@ -327,11 +327,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   },
   variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 6},
-  ));
+  );
 
   testWidgetsWithLeakTracking('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
@@ -370,12 +366,7 @@ void main() {
     expect(renderEditable, paints..rect(color: defaultCursorColor));
 
     EditableText.debugDeterministicCursor = false;
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 4},
-  ));
+  });
 
   testWidgetsWithLeakTracking('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
@@ -455,11 +446,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   },
   variant: KeySimulatorTransitModeVariant.all(),
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 18},
-  ));
+  );
 
   testWidgetsWithLeakTracking('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
@@ -487,12 +474,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 3},
-  ));
+  });
 
   testWidgetsWithLeakTracking('Cursor does not show when not focused', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106512 .
@@ -522,12 +504,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 2},
-  ));
+  });
 
   testWidgetsWithLeakTracking('Cursor radius is 2.0', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
@@ -1026,11 +1003,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   },
   variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 4},
-  ));
+  );
 
   testWidgetsWithLeakTracking('cursor layout', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -1282,11 +1255,7 @@ void main() {
     );
   },
   skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 1},
-  ));
+  );
 
   testWidgetsWithLeakTracking('getLocalRectForCaret reports the real caret Rect', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -1332,9 +1301,5 @@ void main() {
     }
   },
   variant: TargetPlatformVariant.all(),
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 792},
-  ));
+  );
 }
