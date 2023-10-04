@@ -656,10 +656,10 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    useDartDefineFromFileOption();
+    _usesDartDefineFromFileOption();
   }
 
-  void useDartDefineFromFileOption() {
+  void _usesDartDefineFromFileOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
       help:
