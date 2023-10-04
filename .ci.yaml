@@ -2003,6 +2003,7 @@ targets:
       task_name: devtools_profile_start_test
 
   - name: Linux_android drive_perf_debug_warning
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135965
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
