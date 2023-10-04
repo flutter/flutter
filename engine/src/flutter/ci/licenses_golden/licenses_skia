@@ -1,4 +1,4 @@
-Signature: 0a37c303db2f6f63968d36120c2cac3f
+Signature: d72beebe131c4417117b05ec3c646820
 
 ====================================================================================================
 LIBRARY: etc1
@@ -317,6 +317,7 @@ ORIGIN: ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/.bazelignore
 FILE: ../../../third_party/skia/.bazelproject
+FILE: ../../../third_party/skia/Cargo.toml
 FILE: ../../../third_party/skia/RELEASE_NOTES.md
 FILE: ../../../third_party/skia/go.mod
 FILE: ../../../third_party/skia/go.sum
@@ -386,6 +387,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
+FILE: ../../../third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.minified.sksl
