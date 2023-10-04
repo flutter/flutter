@@ -1025,7 +1025,7 @@ class SelectionOverlay {
         context: context,
         below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
             ? null
-            : _handles?.$1,
+            : _handles?.start,
         builder: (_) => builtMagnifier);
   }
 
@@ -1333,7 +1333,7 @@ class SelectionOverlay {
 
   /// A pair of handles. If this is non-null, there are always 2, though the
   /// second is hidden when the selection is collapsed.
-  (OverlayEntry, OverlayEntry)? _handles;
+  ({OverlayEntry start, OverlayEntry end})? _handles;
 
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
@@ -1352,11 +1352,11 @@ class SelectionOverlay {
     }
 
     _handles = (
-      OverlayEntry(builder: _buildStartHandle),
-      OverlayEntry(builder: _buildEndHandle),
+      start: OverlayEntry(builder: _buildStartHandle),
+      end: OverlayEntry(builder: _buildEndHandle),
     );
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)
-        .insertAll(<OverlayEntry>[_handles!.$1, _handles!.$2]);
+        .insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -1364,10 +1364,10 @@ class SelectionOverlay {
   /// {@endtemplate}
   void hideHandles() {
     if (_handles != null) {
-      _handles!.$1.remove();
-      _handles!.$1.dispose();
-      _handles!.$2.remove();
-      _handles!.$2.dispose();
+      _handles!.start.remove();
+      _handles!.start.dispose();
+      _handles!.end.remove();
+      _handles!.end.dispose();
       _handles = null;
     }
   }
@@ -1445,8 +1445,8 @@ class SelectionOverlay {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _buildScheduled = false;
         if (_handles != null) {
-          _handles!.$1.markNeedsBuild();
-          _handles!.$2.markNeedsBuild();
+          _handles!.start.markNeedsBuild();
+          _handles!.end.markNeedsBuild();
         }
         _toolbar?.markNeedsBuild();
         if (_contextMenuController.isShown) {
@@ -1457,8 +1457,8 @@ class SelectionOverlay {
       });
     } else {
       if (_handles != null) {
-        _handles!.$1.markNeedsBuild();
-        _handles!.$2.markNeedsBuild();
+        _handles!.start.markNeedsBuild();
+        _handles!.end.markNeedsBuild();
       }
       _toolbar?.markNeedsBuild();
       if (_contextMenuController.isShown) {
@@ -1475,10 +1475,10 @@ class SelectionOverlay {
   void hide() {
     _magnifierController.hide();
     if (_handles != null) {
-      _handles!.$1.remove();
-      _handles!.$1.dispose();
-      _handles!.$2.remove();
-      _handles!.$2.dispose();
+      _handles!.start.remove();
+      _handles!.start.dispose();
+      _handles!.end.remove();
+      _handles!.end.dispose();
       _handles = null;
     }
     if (_toolbar != null || _contextMenuController.isShown || _spellCheckToolbarController.isShown) {
