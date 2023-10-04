@@ -288,11 +288,8 @@ void main() {
     expect(renderEditable.cursorColor!.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 5},
-  ));
+  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
+  );
 
   testWidgetsWithLeakTracking('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
