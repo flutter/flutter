@@ -686,6 +686,41 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
 
+    testWidgetsWithLeakTracking('Requesting nextFocus on node focuses its descendant', (WidgetTester tester) async {
+      for (final bool canRequestFocus in <bool>{true, false}) {
+        final FocusNode node1 = FocusNode();
+        final FocusNode node2 = FocusNode();
+        addTearDown(() {
+          node1.dispose();
+          node2.dispose();
+        });
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusTraversalGroup(
+              policy: ReadingOrderTraversalPolicy(),
+              child: FocusScope(
+                child: Focus(
+                  focusNode: node1,
+                  canRequestFocus: canRequestFocus,
+                  child: Focus(
+                    focusNode: node2,
+                    child: Container(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final bool didFindNode = node1.nextFocus();
+        await tester.pump();
+        expect(didFindNode, isTrue);
+        expect(node1.hasPrimaryFocus, isFalse);
+        expect(node2.hasPrimaryFocus, isTrue);
+      }
+    });
+
     testWidgetsWithLeakTracking('Move reading focus to previous node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
