@@ -1302,13 +1302,3 @@ class _TestRunCommandThatOnlyValidates extends RunCommand {
     return FlutterCommandResult.success();
   }
 }
-
-
-Iterable<String> _decodeDartDefines(Environment environment) {
-  final String encodedDefines = environment.defines[kDartDefines]!;
-  const Utf8Decoder byteDecoder = Utf8Decoder();
-  return encodedDefines
-      .split(',')
-      .map<Uint8List>(base64.decode)
-      .map<String>(byteDecoder.convert);
-}
