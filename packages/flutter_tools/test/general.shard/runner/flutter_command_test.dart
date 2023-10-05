@@ -1018,7 +1018,7 @@ void main() {
           '--dart-define-from-file=config.json',
         ]);
         expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
-          throwsToolExit(message: 'Json config define file "--dart-define-from-file=config.json" format err'));
+          throwsToolExit(message: 'Unable to parse config.json. FormatException: Missing expected digit'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         Logger: () => logger,
@@ -1061,7 +1061,7 @@ void main() {
           '--dart-define-from-file=config.json']);
 
         expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
-            throwsToolExit(message: 'Json config define file "--dart-define-from-file=config.json" format err, please fix first! format err:'));
+            throwsToolExit(message: 'Unable to parse config.json. FormatException: '));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         Logger: () => logger,
