@@ -188,6 +188,7 @@ if (enable_unittests) {
       "//flutter/common/graphics",
       "//flutter/display_list/testing:display_list_testing",
       "//flutter/fml",
+      "//flutter/shell/common:base64",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
       "//third_party/dart/runtime:libdart_jit",  # for tracing
