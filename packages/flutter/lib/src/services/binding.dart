@@ -14,6 +14,7 @@ import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
+import 'platform_channel.dart';
 import 'restoration.dart';
 import 'service_extensions.dart';
 import 'system_channels.dart';
@@ -224,6 +225,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       );
       return true;
     }());
+
+    if (!kReleaseMode) {
+      registerBoolServiceExtension(
+        name: ServicesServiceExtensions.profilePlatformChannels.name,
+        getter: () async => kProfilePlatformChannels,
+        setter: (bool value) async {
+          kProfilePlatformChannels = value;
+        },
+      );
+    }
   }
 
   /// Called in response to the `ext.flutter.evict` service extension.

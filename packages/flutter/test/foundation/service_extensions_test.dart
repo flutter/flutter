@@ -183,7 +183,7 @@ void main() {
     // framework, excluding any that are for the widget inspector (see
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions). Any test counted here must be tested in this file!
-    const int serviceExtensionCount = 29;
+    const int serviceExtensionCount = 30;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
     expect(testedExtensions, hasLength(serviceExtensionCount));
@@ -595,6 +595,37 @@ void main() {
     expect(binding.frameScheduled, isFalse);
 
     testedExtensions.add(RenderingServiceExtensions.profileRenderObjectLayouts.name);
+  });
+
+  test('Service extensions - profilePlatformChannels', () async {
+    Map<String, dynamic> result;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(kProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(kProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{'enabled': 'true'});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(kProfilePlatformChannels, true);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(kProfilePlatformChannels, true);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{'enabled': 'false'});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(kProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(kProfilePlatformChannels, false);
+
+    expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(ServicesServiceExtensions.profilePlatformChannels.name);
   });
 
   test('Service extensions - evict', () async {

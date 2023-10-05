@@ -32,7 +32,7 @@ export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 /// The statistics include the total bytes transmitted and the average number of
 /// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
-const bool kProfilePlatformChannels = false;
+bool kProfilePlatformChannels = false;
 
 bool _profilePlatformChannelsIsRunning = false;
 const Duration _profilePlatformChannelsRate = Duration(seconds: 1);
