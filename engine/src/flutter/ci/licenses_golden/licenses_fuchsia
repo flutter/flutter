@@ -1,4 +1,4 @@
-Signature: 851b3937fdef6e5331cd58b8a1140094
+Signature: a5564d09f645ecd5585b06d44af67877
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -4359,6 +4359,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/driver_runtime.cc + ..
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/environment_variables.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_environment.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_node.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_ostream.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4426,6 +4427,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/driver_runtime.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/environment_variables.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_environment.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_node.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_ostream.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h
