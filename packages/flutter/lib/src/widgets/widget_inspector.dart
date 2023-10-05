@@ -372,6 +372,12 @@ class _ScreenshotData {
   set screenshotOffset(Offset offset) {
     containerLayer.offset = offset;
   }
+
+  /// Releases allocated resources.
+  @mustCallSuper
+  void dispose() {
+    containerLayer.dispose();
+  }
 }
 
 /// A place to paint to build screenshots of [RenderObject]s.
@@ -550,7 +556,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     Rect renderBounds, {
     double pixelRatio = 1.0,
     bool debugPaint = false,
-  }) {
+  }) async {
     RenderObject repaintBoundary = renderObject;
     while (!repaintBoundary.isRepaintBoundary) {
       repaintBoundary = repaintBoundary.parent!;
@@ -604,7 +610,15 @@ class _ScreenshotPaintingContext extends PaintingContext {
     // been called successfully for all layers in the regular scene.
     repaintBoundary.debugLayer!.buildScene(ui.SceneBuilder());
 
-    return data.containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
+    final ui.Image image;
+
+    try {
+      image = await data.containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
+    } finally {
+      data.dispose();
+    }
+
+    return image;
   }
 }
 
@@ -616,8 +630,6 @@ class _ScreenshotPaintingContext extends PaintingContext {
 class _DiagnosticsPathNode {
   /// Creates a full description of a step in a path through a tree of
   /// [DiagnosticsNode] objects.
-  ///
-  /// The [node] and [child] arguments must not be null.
   _DiagnosticsPathNode({
     required this.node,
     required this.children,
@@ -1284,6 +1296,7 @@ mixin WidgetInspectorService {
           return <String, Object?>{'result': null};
         }
         final ByteData? byteData = await image.toByteData(format:ui.ImageByteFormat.png);
+        image.dispose();
 
         return <String, Object>{
           'result': base64.encoder.convert(Uint8List.view(byteData!.buffer)),
@@ -2665,8 +2678,6 @@ class _WidgetForTypeTests extends Widget {
 /// bottom left corner of the application switches back to select mode.
 class WidgetInspector extends StatefulWidget {
   /// Creates a widget that enables inspection for the child.
-  ///
-  /// The [child] argument must not be null.
   const WidgetInspector({
     super.key,
     required this.child,
@@ -2895,7 +2906,7 @@ class InspectorSelection with ChangeNotifier {
   /// Creates an instance of [InspectorSelection].
   InspectorSelection() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -3001,7 +3012,6 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 }
 
 class _RenderInspectorOverlay extends RenderBox {
-  /// The arguments must not be null.
   _RenderInspectorOverlay({ required InspectorSelection selection })
     : _selection = selection;
 
@@ -3143,7 +3153,7 @@ class _InspectorOverlayLayer extends Layer {
   _InspectorOverlayRenderState? _lastState;
 
   /// Picture generated from _lastState.
-  late ui.Picture _picture;
+  ui.Picture? _picture;
 
   TextPainter? _textPainter;
   double? _textPainterMaxWidth;
@@ -3152,6 +3162,7 @@ class _InspectorOverlayLayer extends Layer {
   void dispose() {
     _textPainter?.dispose();
     _textPainter = null;
+    _picture?.dispose();
     super.dispose();
   }
 
@@ -3186,9 +3197,10 @@ class _InspectorOverlayLayer extends Layer {
 
     if (state != _lastState) {
       _lastState = state;
+      _picture?.dispose();
       _picture = _buildPicture(state);
     }
-    builder.addPicture(Offset.zero, _picture);
+    builder.addPicture(Offset.zero, _picture!);
   }
 
   ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
@@ -3543,16 +3555,12 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
 ///
 /// The [value] for this property is a string representation of the Flutter
 /// DevTools url.
-///
-/// Properties `description` and `url` must not be null.
 class DevToolsDeepLinkProperty extends DiagnosticsProperty<String> {
   /// Creates a diagnostics property that displays a deep link to Flutter DevTools.
   ///
   /// The [value] of this property will return a map of data for the Flutter
   /// DevTools deep link, including the full `url`, the Flutter DevTools `screenId`,
   /// and the `objectId` in Flutter DevTools that this diagnostic references.
-  ///
-  /// The `description` and `url` arguments must not be null.
   DevToolsDeepLinkProperty(String description, String url)
     : super('', url, description: description, level: DiagnosticLevel.info);
 }

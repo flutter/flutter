@@ -15,14 +15,14 @@ const String _kInitialVersion = '3.0.0';
 const String _kBranch = 'beta';
 
 final Stdio stdio = Stdio();
-final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
+final BufferLogger logger = BufferLogger.test(
   terminal: AnsiTerminal(
     platform: platform,
     stdio: stdio,
   ),
-  stdio: stdio,
   outputPreferences: OutputPreferences.test(wrapText: true),
-));
+);
+final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: logger);
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
@@ -48,13 +48,29 @@ void main() {
       'git', 'config', '--system', 'core.longpaths', 'true',
     ]);
 
+    void checkExitCode(int code) {
+      expect(
+        exitCode,
+        0,
+        reason: '''
+trace:
+${logger.traceText}
+
+status:
+${logger.statusText}
+
+error:
+${logger.errorText}''',
+      );
+    }
+
     printOnFailure('Step 1 - clone the $_kBranch of flutter into the test directory');
     exitCode = await processUtils.stream(<String>[
       'git',
       'clone',
       'https://github.com/flutter/flutter.git',
     ], workingDirectory: parentDirectory.path, trace: true);
-    expect(exitCode, 0);
+    checkExitCode(exitCode);
 
     printOnFailure('Step 2 - switch to the $_kBranch');
     exitCode = await processUtils.stream(<String>[
@@ -65,7 +81,7 @@ void main() {
       _kBranch,
       'origin/$_kBranch',
     ], workingDirectory: testDirectory.path, trace: true);
-    expect(exitCode, 0);
+    checkExitCode(exitCode);
 
     printOnFailure('Step 3 - revert back to $_kInitialVersion');
     exitCode = await processUtils.stream(<String>[
@@ -74,7 +90,7 @@ void main() {
       '--hard',
       _kInitialVersion,
     ], workingDirectory: testDirectory.path, trace: true);
-    expect(exitCode, 0);
+    checkExitCode(exitCode);
 
     printOnFailure('Step 4 - upgrade to the newest $_kBranch');
     // This should update the persistent tool state with the sha for HEAD
@@ -84,8 +100,10 @@ void main() {
       'upgrade',
       '--verbose',
       '--working-directory=${testDirectory.path}',
-    ], workingDirectory: testDirectory.path, trace: true);
-    expect(exitCode, 0);
+      // we intentionally run this in a directory outside the test repo to
+      // verify the tool overrides the working directory when invoking git
+    ], workingDirectory: parentDirectory.path, trace: true);
+    checkExitCode(exitCode);
 
     printOnFailure('Step 5 - verify that the version is different');
     final RunResult versionResult = await processUtils.run(<String>[
@@ -105,8 +123,8 @@ void main() {
       'downgrade',
       '--no-prompt',
       '--working-directory=${testDirectory.path}',
-    ], workingDirectory: testDirectory.path, trace: true);
-    expect(exitCode, 0);
+    ], workingDirectory: parentDirectory.path, trace: true);
+    checkExitCode(exitCode);
 
     printOnFailure('Step 7 - verify downgraded version matches original version');
     final RunResult oldVersionResult = await processUtils.run(<String>[

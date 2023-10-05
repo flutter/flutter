@@ -146,8 +146,6 @@ class SafeArea extends StatelessWidget {
 ///    system.
 class SliverSafeArea extends StatelessWidget {
   /// Creates a sliver that avoids operating system interfaces.
-  ///
-  /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
     super.key,
     this.left = true,

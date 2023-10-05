@@ -293,7 +293,6 @@ ArgParser createArgParser(List<String> taskNames) {
     )
     ..addFlag(
       'exit',
-      defaultsTo: true,
       help: 'Exit on the first test failure. Currently flakes are intentionally (though '
             'incorrectly) not considered to be failures.',
     )

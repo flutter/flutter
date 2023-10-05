@@ -13,7 +13,7 @@ class TestCommand extends Command<void> {
         help: 'The name of a task listed under bin/tasks.\n'
             '   Example: complex_layout__start_up.\n');
     argParser.addMultiOption('task-args',
-        help: 'The name of a task listed under bin/tasks.\n'
+        help: 'List of arguments to pass to the task.\n'
             'For example, "--task-args build" is passed as "bin/task/task.dart --build"');
     argParser.addOption(
       'device-id',
@@ -23,6 +23,11 @@ class TestCommand extends Command<void> {
           'mobile device. This still respects the device operating system\n'
           'settings in the test case, and will results in error if no device\n'
           'with given ID/ID prefix is found.',
+    );
+    argParser.addFlag(
+      'exit',
+      help: 'Exit on the first test failure. Currently flakes are intentionally (though '
+            'incorrectly) not considered to be failures.',
     );
     argParser.addOption(
       'git-branch',
@@ -90,6 +95,7 @@ class TestCommand extends Command<void> {
       silent: (argResults!['silent'] as bool?) ?? false,
       useEmulator: (argResults!['use-emulator'] as bool?) ?? false,
       taskArgs: taskArgs,
+      exitOnFirstTestFailure: argResults!['exit'] as bool,
     );
   }
 }
