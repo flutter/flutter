@@ -232,6 +232,7 @@
 ../../../flutter/runtime/no_dart_plugin_registrant_unittests.cc
 ../../../flutter/runtime/type_conversions_unittests.cc
 ../../../flutter/shell/common/animator_unittests.cc
+../../../flutter/shell/common/base64_unittests.cc
 ../../../flutter/shell/common/context_options_unittests.cc
 ../../../flutter/shell/common/dl_op_spy_unittests.cc
 ../../../flutter/shell/common/engine_unittests.cc

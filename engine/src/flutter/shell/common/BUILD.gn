@@ -143,6 +143,7 @@ source_set("common") {
     "//flutter/fml",
     "//flutter/lib/ui",
     "//flutter/runtime",
+    "//flutter/shell/common:base64",
     "//flutter/shell/profiling",
     "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
@@ -156,6 +157,15 @@ source_set("common") {
 
     deps += [ "//flutter/impeller" ]
   }
+}
+
+# These are in their own source_set to avoid a dependency cycle with //common/graphics
+source_set("base64") {
+  sources = [
+    "base64.cc",
+    "base64.h",
+  ]
+  deps = [ "//flutter/fml" ]
 }
 
 template("shell_host_executable") {
@@ -293,6 +303,7 @@ if (enable_unittests) {
 
     sources = [
       "animator_unittests.cc",
+      "base64_unittests.cc",
       "context_options_unittests.cc",
       "dl_op_spy_unittests.cc",
       "engine_unittests.cc",
@@ -312,6 +323,7 @@ if (enable_unittests) {
       ":shell_unittests_fixtures",
       "//flutter/assets",
       "//flutter/common/graphics",
+      "//flutter/shell/common:base64",
       "//flutter/shell/profiling:profiling_unittests",
       "//flutter/shell/version",
       "//flutter/testing:fixture_test",

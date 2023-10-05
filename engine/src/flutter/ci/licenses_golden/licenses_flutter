@@ -2246,6 +2246,8 @@ ORIGIN: ../../../flutter/runtime/test_font_data.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/runtime/test_font_data.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/common/animator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/common/animator.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/common/base64.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/common/base64.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/common/context_options.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/common/context_options.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/common/dart_native_benchmarks.cc + ../../../flutter/LICENSE
@@ -5008,6 +5010,8 @@ FILE: ../../../flutter/runtime/test_font_data.cc
 FILE: ../../../flutter/runtime/test_font_data.h
 FILE: ../../../flutter/shell/common/animator.cc
 FILE: ../../../flutter/shell/common/animator.h
+FILE: ../../../flutter/shell/common/base64.cc
+FILE: ../../../flutter/shell/common/base64.h
 FILE: ../../../flutter/shell/common/context_options.cc
 FILE: ../../../flutter/shell/common/context_options.h
 FILE: ../../../flutter/shell/common/dart_native_benchmarks.cc
