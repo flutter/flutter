@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: prefer_final_locals, always_specify_types
-// Ignoring these rules helps to declutter the below switch expressions,
-// although reinstating prefer_final_locals could give a small performance boost.
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -60,8 +56,7 @@ import 'image.dart';
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
-  /// The [decoration] and [position] arguments must not be null. By default the
-  /// decoration paints behind the child.
+  /// By default the decoration paints behind the child.
   const DecoratedBox({
     super.key,
     required this.decoration,
@@ -107,54 +102,6 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
-}
-
-class _DynamicBox extends StatelessWidget {
-  /// This class determines which widget to build based on config's type.
-  const _DynamicBox(this.config, {required this.child});
-
-  final dynamic config;
-  final Widget child;
-
-  Never error(String description) => throw Exception('$description: $config');
-
-  @override
-  Widget build(BuildContext context) => switch (config) {
-        null || (null, null) || (null, null, null) || (null, Clip.none) => child,
-
-        EdgeInsets p when p.isNonNegative => Padding(padding: p, child: child),
-        EdgeInsets() => error('negative padding'),
-
-        (double? w, double? h, null) => SizedBox(width: w, height: h, child: child),
-        (double? w, double? h, BoxConstraints c) when c.debugAssertIsValid() => ConstrainedBox(
-            constraints: (w != null || h != null) ? c.tighten(width: w, height: h) : c,
-            child: child,
-          ),
-        (_, _, BoxConstraints()) => error('invalid constraints'),
-
-        Color c => ColoredBox(color: c, child: child),
-
-        (Decoration d, Clip.none) when d.debugAssertIsValid() => DecoratedBox(decoration: d, child: child),
-        (Decoration d, Clip c) when d.debugAssertIsValid() => DecoratedBox(
-            decoration: d,
-            child: ClipPath(
-              clipper: _DecorationClipper(
-                textDirection: Directionality.maybeOf(context),
-                decoration: d,
-              ),
-              clipBehavior: c,
-              child: child,
-            ),
-          ),
-        (null, Clip c) when c != Clip.none => error('$c with no decoration'),
-        (Decoration(), _) => error('invalid foreground decoration'),
-
-        Alignment a => Align(alignment: a, child: child),
-
-        (Matrix4 t, AlignmentGeometry? a) => Transform(transform: t, alignment: a, child: child),
-
-        _ => error('problem with config type ${config.runtimeType}'),
-      };
 }
 
 /// A convenience widget that combines common painting, positioning, and sizing
@@ -410,14 +357,23 @@ class Container extends StatelessWidget {
   /// method throws an [UnsupportedError].)
   final Clip clipBehavior;
 
+  BoxConstraints? get _constraints =>
+      (width != null || height != null)
+        ? constraints?.tighten(width: width, height: height)
+          ?? BoxConstraints.tightFor(width: width, height: height)
+        : constraints;
+
   EdgeInsetsGeometry? get _paddingIncludingDecoration => switch ((decoration?.padding, padding)) {
-        (null, final pad) || (final pad, null) => pad,
-        (final deco, final pad) => pad!.add(deco!),
+        (null, final EdgeInsetsGeometry? padding) || (final EdgeInsetsGeometry? padding, null) => padding,
+        _ => padding!.add(decoration!.padding),
       };
 
   Widget get _child {
     if (child != null) {
-      return _DynamicBox(alignment, child: child!);
+      if (alignment != null) {
+        return Align(alignment: alignment!, child: child);
+      }
+      return child!;
     }
     if (constraints?.isTight ?? true) {
       return const LimitedBox(
@@ -427,25 +383,58 @@ class Container extends StatelessWidget {
       );
     }
     return const SizedBox.shrink();
-  }
+    }
 
-  List<dynamic> get _layers => [
-        _paddingIncludingDecoration,
-        (decoration, clipBehavior),
-        foregroundDecoration,
-        color,
-        (width, height, constraints),
-        margin,
-        (transform, transformAlignment),
-      ];
-
-  @override
+    @override
   Widget build(BuildContext context) {
     Widget current = _child;
 
-    for (final layer in _layers) {
-      current = _DynamicBox(layer, child: current);
+    final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
+    if (effectivePadding != null) {
+      current = Padding(padding: effectivePadding, child: current);
     }
+
+    if (color != null) {
+      current = ColoredBox(color: color!, child: current);
+    }
+
+    if (clipBehavior != Clip.none) {
+      assert(decoration != null);
+      current = ClipPath(
+        clipper: _DecorationClipper(
+          textDirection: Directionality.maybeOf(context),
+          decoration: decoration!,
+        ),
+        clipBehavior: clipBehavior,
+        child: current,
+      );
+    }
+
+    if (decoration != null) {
+      current = DecoratedBox(decoration: decoration!, child: current);
+    }
+
+    if (foregroundDecoration != null) {
+      current = DecoratedBox(
+        decoration: foregroundDecoration!,
+        position: DecorationPosition.foreground,
+        child: current,
+      );
+    }
+
+    final BoxConstraints? effectiveConstraints = _constraints;
+    if (effectiveConstraints != null) {
+      current = ConstrainedBox(constraints: effectiveConstraints, child: current);
+    }
+
+    if (margin != null) {
+      current = Padding(padding: margin!, child: current);
+    }
+
+    if (transform != null) {
+      current = Transform(transform: transform!, alignment: transformAlignment, child: current);
+    }
+
     return current;
   }
 
