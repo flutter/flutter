@@ -863,6 +863,32 @@ void main() {
         ProcessManager: () => processManager,
       });
 
+      testUsingContext('throws a ToolExit when the provided .env file is malformed', () async {
+        fileSystem
+            .file(fileSystem.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('.env').writeAsString('what is this');
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=.env',
+        ]);
+
+       expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+          throwsToolExit(message: 'Unable to parse file provided for '
+          '--${FlutterOptions.kDartDefineFromFileOption}.\n'
+          'Invalid property line: what is this'));
+
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
       testUsingContext('throws a ToolExit when .env file contains a multiline value', () async {
         fileSystem
             .file(fileSystem.path.join('lib', 'main.dart'))
@@ -978,7 +1004,7 @@ void main() {
         ProcessManager: () => processManager,
       });
 
-      testUsingContext('throws a ToolExit when the file cannot be parsed', () async {
+      testUsingContext('throws a ToolExit when the argued path points to a directory', () async {
         fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
         fileSystem.file('.packages').createSync();
@@ -1027,7 +1053,7 @@ void main() {
         ProcessManager: () => processManager,
       });
 
-      testUsingContext('test --dart-define-from-file option with err file format', () async {
+      testUsingContext('throws a ToolExit when the provided file does not exist', () async {
         fileSystem.directory('config').createSync();
         await dummyCommandRunner.run(<String>[
           'dummy',
@@ -1035,33 +1061,6 @@ void main() {
           '--dart-define-from-file=config']);
         expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
             throwsToolExit(message: 'Did not find the file passed to "--dart-define-from-file". Path: config'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        FileSystemUtils: () => fileSystemUtils,
-        Platform: () => platform,
-        ProcessManager: () => processManager,
-      });
-
-      testUsingContext('test --dart-define-from-file option with err json format', () async {
-        await fileSystem.file('config.json').writeAsString(
-            '''
-              {
-                "kInt": 1,
-                "kDouble": 1.1,
-                "name": "err json format,
-                "title": "this is title from config json file"
-              }
-            '''
-        );
-
-        await dummyCommandRunner.run(<String>[
-          'dummy',
-          '--dart-define=k=v',
-          '--dart-define-from-file=config.json']);
-
-        expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
-            throwsToolExit(message: 'Unable to parse config.json. FormatException: '));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         Logger: () => logger,
