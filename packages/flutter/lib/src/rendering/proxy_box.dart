@@ -4989,6 +4989,7 @@ class RenderAnnotatedRegion<T extends Object> extends RenderProxyBox {
     RenderBox? child,
   }) : _value = value,
        _sized = sized,
+       _handle = LayerHandle<AnnotatedRegionLayer<T>>(),
        super(child);
 
   /// A value which can be retrieved using [Layer.find].
@@ -5013,6 +5014,8 @@ class RenderAnnotatedRegion<T extends Object> extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  final LayerHandle<AnnotatedRegionLayer<T>> _handle;
+
   @override
   final bool alwaysNeedsCompositing = true;
 
@@ -5024,6 +5027,13 @@ class RenderAnnotatedRegion<T extends Object> extends RenderProxyBox {
       size: sized ? size : null,
       offset: sized ? offset : null,
     );
+    _handle.layer = layer;
     context.pushLayer(layer, super.paint, offset);
+  }
+
+  @override
+  void dispose() {
+    _handle.layer = null;
+    super.dispose();
   }
 }
