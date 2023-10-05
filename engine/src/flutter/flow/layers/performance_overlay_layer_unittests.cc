@@ -10,6 +10,7 @@
 #include "flutter/flow/flow_test_utils.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/testing/layer_test.h"
+#include "flutter/shell/common/base64.h"
 #include "flutter/testing/mock_canvas.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -18,7 +19,6 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
-#include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
 namespace testing {
@@ -111,11 +111,13 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
     wstream.write(snapshot_data->data(), snapshot_data->size());
     wstream.flush();
 
+    // TODO(kjlubick) We shouldn't need to call Encode once to pre-flight the
+    // encode length. It should be ceil(4/3 * sksl.value->size()).
     size_t b64_size =
-        SkBase64::Encode(snapshot_data->data(), snapshot_data->size(), nullptr);
+        Base64::Encode(snapshot_data->data(), snapshot_data->size(), nullptr);
     sk_sp<SkData> b64_data = SkData::MakeUninitialized(b64_size + 1);
     char* b64_char = static_cast<char*>(b64_data->writable_data());
-    SkBase64::Encode(snapshot_data->data(), snapshot_data->size(), b64_char);
+    Base64::Encode(snapshot_data->data(), snapshot_data->size(), b64_char);
     b64_char[b64_size] = 0;  // make it null terminated for printing
 
     EXPECT_TRUE(golden_data_matches)

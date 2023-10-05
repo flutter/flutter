@@ -14,6 +14,7 @@
 #include "flutter/flow/layers/offscreen_surface.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/shell/common/base64.h"
 #include "flutter/shell/common/serialization_callbacks.h"
 #include "fml/make_copyable.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -32,7 +33,6 @@
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/GrTypes.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
 
@@ -910,9 +910,11 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
   }
 
   if (base64_encode) {
-    size_t b64_size = SkBase64::Encode(data->data(), data->size(), nullptr);
+    // TODO(kjlubick) We shouldn't need to call Encode once to pre-flight the
+    // encode length. It should be ceil(4/3 * sksl.value->size()).
+    size_t b64_size = Base64::Encode(data->data(), data->size(), nullptr);
     auto b64_data = SkData::MakeUninitialized(b64_size);
-    SkBase64::Encode(data->data(), data->size(), b64_data->writable_data());
+    Base64::Encode(data->data(), data->size(), b64_data->writable_data());
     return Rasterizer::Screenshot{b64_data, layer_tree->frame_size(), format};
   }
 
