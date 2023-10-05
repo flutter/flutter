@@ -92,13 +92,10 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final String label;
-    switch (position) {
-      case DecorationPosition.background:
-        label = 'bg';
-      case DecorationPosition.foreground:
-        label = 'fg';
-    }
+    final String label = switch (position) {
+      DecorationPosition.background => 'bg',
+      DecorationPosition.foreground => 'fg',
+    };
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
@@ -322,8 +319,11 @@ class Container extends StatelessWidget {
   /// The decoration to paint in front of the [child].
   final Decoration? foregroundDecoration;
 
-  /// Constraints for the [child]'s width/height, in logical pixels.
-  final double? width, height;
+  /// Constraints for the [child]'s width, in logical pixels.
+  final double? width;
+  
+  /// Constraints for the [child]'s height, in logical pixels.
+  final double? height;
 
   /// Additional constraints to apply to the child.
   ///
@@ -391,6 +391,7 @@ class Container extends StatelessWidget {
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null) {
+      assert(padding == null || padding!.isNonNegative);
       current = Padding(padding: effectivePadding, child: current);
     }
 
@@ -398,6 +399,7 @@ class Container extends StatelessWidget {
       current = ColoredBox(color: color!, child: current);
     }
 
+    assert(decoration == null || decoration!.debugAssertIsValid());
     if (clipBehavior != Clip.none) {
       assert(decoration != null);
       current = ClipPath(
@@ -422,12 +424,15 @@ class Container extends StatelessWidget {
       );
     }
 
+    assert(constraints == null || constraints!.debugAssertIsValid());
     final BoxConstraints? effectiveConstraints = _constraints;
     if (effectiveConstraints != null) {
+
       current = ConstrainedBox(constraints: effectiveConstraints, child: current);
     }
 
     if (margin != null) {
+      assert(margin!.isNonNegative);
       current = Padding(padding: margin!, child: current);
     }
 
