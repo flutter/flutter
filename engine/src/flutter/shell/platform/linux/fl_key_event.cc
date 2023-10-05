@@ -9,21 +9,27 @@ static void dispose_origin_from_gdk_event(gpointer origin) {
   gdk_event_free(reinterpret_cast<GdkEvent*>(origin));
 }
 
-FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* raw_event) {
-  g_return_val_if_fail(raw_event != nullptr, nullptr);
-  GdkEventKey* event = reinterpret_cast<GdkEventKey*>(raw_event);
-  GdkEventType type = event->type;
+FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* event) {
+  g_return_val_if_fail(event != nullptr, nullptr);
+  GdkEventType type = gdk_event_get_event_type(event);
   g_return_val_if_fail(type == GDK_KEY_PRESS || type == GDK_KEY_RELEASE,
                        nullptr);
   FlKeyEvent* result = g_new(FlKeyEvent, 1);
 
-  result->time = event->time;
+  guint16 keycode = 0;
+  gdk_event_get_keycode(event, &keycode);
+  guint keyval = 0;
+  gdk_event_get_keyval(event, &keyval);
+  GdkModifierType state = static_cast<GdkModifierType>(0);
+  gdk_event_get_state(event, &state);
+
+  result->time = gdk_event_get_time(event);
   result->is_press = type == GDK_KEY_PRESS;
-  result->keycode = event->hardware_keycode;
-  result->keyval = event->keyval;
-  result->state = event->state;
-  result->string = g_strdup(event->string);
-  result->group = event->group;
+  result->keycode = keycode;
+  result->keyval = keyval;
+  result->state = state;
+  result->string = g_strdup(event->key.string);
+  result->group = event->key.group;
   result->origin = event;
   result->dispose_origin = dispose_origin_from_gdk_event;
 
