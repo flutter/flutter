@@ -31,7 +31,6 @@ import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
-import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
@@ -1196,30 +1195,15 @@ class WidgetsApp extends StatefulWidget {
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
-  @Deprecated(
-    'Use debugShowWidgetInspectorOverrideNotifier.value instead. '
-    'This feature was deprecated after v3.13.0-19.0.pre.'
-  )
   bool get debugShowWidgetInspectorOverride {
-    return debugShowWidgetInspectorOverrideNotifier.value;
+    return _debugShowWidgetInspectorOverrideNotifier.value;
   }
-  @Deprecated(
-    'Use debugShowWidgetInspectorOverrideNotifier.value instead. '
-    'This feature was deprecated after v3.13.0-19.0.pre.'
-  )
   set debugShowWidgetInspectorOverride(bool value) {
-    return debugShowWidgetInspectorOverrideNotifier.value = value;
+    _debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  /// If true, the [WidgetInspector] is added to the tree and made visible.
-  ///
-  /// Used by the `debugShowWidgetInspector` debugging extension.
-  ///
-  /// The inspector allows you to select a location on your device or emulator
-  /// and view what widgets and render objects associated with it. An outline of
-  /// the selected widget and some summary information is shown on device and
-  /// more detailed information is shown in the IDE or DevTools.
-  static final ValueListener<bool> debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier =
+      ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1767,9 +1751,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(() {
       result = ValueListenableBuilder<bool>(
-        valueListenable: WidgetsApp.debugShowWidgetInspectorOverrideNotifier,
-        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
-          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
+        valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
+        builder: (BuildContext context, bool debugShowWidgetInspectorOverride,
+            Widget? child) {
+          if (widget.debugShowWidgetInspector ||
+              debugShowWidgetInspectorOverride) {
             return WidgetInspector(
               selectButtonBuilder: widget.inspectorSelectButtonBuilder,
               child: child!,
@@ -1779,7 +1765,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         },
         child: result,
       );
-      if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
+      if (widget.debugShowCheckedModeBanner &&
+          WidgetsApp.debugAllowBannerOverride) {
         result = CheckedModeBanner(
           child: result,
         );
