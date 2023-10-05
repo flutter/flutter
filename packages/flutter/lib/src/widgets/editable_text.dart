@@ -4535,6 +4535,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ? _value.selection != value.selection
       : _value != value;
     if (shouldShowCaret) {
+      debugPrint('showing caret');
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
 
