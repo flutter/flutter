@@ -1559,7 +1559,9 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  // Test case for https://github.com/flutter/flutter/issues/123523.
+  // Test case for
+  // https://github.com/flutter/flutter/issues/123523
+  // https://github.com/flutter/flutter/issues/134846 .
   testWidgetsWithLeakTracking(
       'The focus and callback behavior are correct when TextInputClient.onConnectionClosed message received',
       (WidgetTester tester) async {
@@ -1597,17 +1599,9 @@ void main() {
     editableText.connectionClosed();
     await tester.pump();
 
-    if (kIsWeb) {
-      expect(onSubmittedInvoked, isTrue);
-      expect(onEditingCompleteInvoked, isTrue);
-      // Because we add the onEditingComplete and we didn't unfocus there, so focus still exists.
-      expect(focusNode.hasFocus, isTrue);
-    } else {
-      // For mobile and other platforms, calling connectionClosed will only unfocus.
-      expect(focusNode.hasFocus, isFalse);
-      expect(onEditingCompleteInvoked, isFalse);
-      expect(onSubmittedInvoked, isFalse);
-    }
+    expect(focusNode.hasFocus, isFalse);
+    expect(onEditingCompleteInvoked, isFalse);
+    expect(onSubmittedInvoked, isFalse);
   });
 
   testWidgetsWithLeakTracking('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {

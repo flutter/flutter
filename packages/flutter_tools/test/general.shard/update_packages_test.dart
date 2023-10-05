@@ -106,8 +106,9 @@ void main() {
         'flutter_template_images',
         'video_player',
         'material_color_utilities',
-        'url_launcher_android',
         'archive',
+        'leak_tracker',
+        'leak_tracker_flutter_testing',
       ]),
     );
   });

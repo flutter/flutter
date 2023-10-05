@@ -371,9 +371,6 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   ///
   /// Used by [Scaffold] and [SliverAppBar]. [child] must have a
   /// [FlexibleSpaceBar] widget in its tree for the settings to take affect.
-  ///
-  /// The required [toolbarOpacity], [minExtent], [maxExtent], [currentExtent],
-  /// and [child] parameters must not be null.
   const FlexibleSpaceBarSettings({
     super.key,
     required this.toolbarOpacity,
