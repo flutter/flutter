@@ -6,6 +6,7 @@
 
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/gles/command_buffer_gles.h"
 
 namespace impeller {
 
@@ -58,27 +59,7 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
         std::shared_ptr<SamplerLibraryGLES>(new SamplerLibraryGLES());
   }
 
-  // Create the device capabilities.
-  {
-    device_capabilities_ =
-        CapabilitiesBuilder()
-            .SetSupportsOffscreenMSAA(false)
-            .SetSupportsSSBO(false)
-            .SetSupportsBufferToTextureBlits(false)
-            .SetSupportsTextureToTextureBlits(false)
-            .SetSupportsFramebufferFetch(false)
-            .SetDefaultColorFormat(PixelFormat::kR8G8B8A8UNormInt)
-            .SetDefaultStencilFormat(PixelFormat::kS8UInt)
-            .SetDefaultDepthStencilFormat(PixelFormat::kD24UnormS8Uint)
-            .SetSupportsCompute(false)
-            .SetSupportsComputeSubgroups(false)
-            .SetSupportsReadFromResolve(false)
-            .SetSupportsReadFromOnscreenTexture(false)
-            .SetSupportsDecalSamplerAddressMode(false)
-            .SetSupportsDeviceTransientTextures(false)
-            .Build();
-  }
-
+  device_capabilities_ = reactor_->GetProcTable().GetCapabilities();
   is_valid_ = true;
 }
 

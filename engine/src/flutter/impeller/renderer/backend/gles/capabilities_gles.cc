@@ -103,4 +103,60 @@ size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
   FML_UNREACHABLE();
 }
 
+bool CapabilitiesGLES::SupportsOffscreenMSAA() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsSSBO() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsBufferToTextureBlits() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsTextureToTextureBlits() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsFramebufferFetch() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsCompute() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsComputeSubgroups() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsReadFromOnscreenTexture() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsReadFromResolve() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsDecalSamplerAddressMode() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsDeviceTransientTextures() const {
+  return false;
+}
+
+PixelFormat CapabilitiesGLES::GetDefaultColorFormat() const {
+  return PixelFormat::kR8G8B8A8UNormInt;
+}
+
+PixelFormat CapabilitiesGLES::GetDefaultStencilFormat() const {
+  return PixelFormat::kS8UInt;
+}
+
+PixelFormat CapabilitiesGLES::GetDefaultDepthStencilFormat() const {
+  return PixelFormat::kD24UnormS8Uint;
+}
+
 }  // namespace impeller

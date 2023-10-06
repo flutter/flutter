@@ -14,6 +14,7 @@ config("gles_config") {
 impeller_component("gles_unittests") {
   testonly = true
   sources = [
+    "test/capabilities_unittests.cc",
     "test/mock_gles.cc",
     "test/mock_gles.h",
     "test/mock_gles_unittests.cc",
