@@ -22,10 +22,25 @@ const Set<String> _kValidPluginPlatforms = <String>{
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
-  FlutterManifest._({required Logger logger}) : _logger = logger;
+  FlutterManifest._(Map<Object?, Object?>? descriptor, {
+    required Logger logger,
+  }) :
+       _logger = logger {
+    final Map<String, Object?> castedDescriptor = descriptor == null ?
+      const <String, Object?>{} :
+      (descriptor as YamlMap).cast<String, Object?>();
+
+    final Map<Object?, Object?>? flutterManifest = castedDescriptor['flutter'] as Map<Object?, Object?>?;
+    _descriptor = castedDescriptor;
+    _flutterDescriptor = flutterManifest == null ?
+      const <String, Object?>{} :
+      flutterManifest.cast<String, Object?>();
+  }
 
   /// Returns an empty manifest.
-  factory FlutterManifest.empty({ required Logger logger }) = FlutterManifest._;
+  factory FlutterManifest.empty({ required Logger logger }) {
+    return FlutterManifest._(null, logger: logger);
+  }
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static FlutterManifest? createFromPath(String path, {
@@ -49,29 +64,17 @@ class FlutterManifest {
     if (yamlDocument != null && !_validate(yamlDocument, logger)) {
       return null;
     }
-
-    final FlutterManifest pubspec = FlutterManifest._(logger: logger);
-    final Map<Object?, Object?>? yamlMap = yamlDocument as YamlMap?;
-    if (yamlMap != null) {
-      pubspec._descriptor = yamlMap.cast<String, Object?>();
-    }
-
-    final Map<Object?, Object?>? flutterMap = pubspec._descriptor['flutter'] as Map<Object?, Object?>?;
-    if (flutterMap != null) {
-      pubspec._flutterDescriptor = flutterMap.cast<String, Object?>();
-    }
-
-    return pubspec;
+    return FlutterManifest._(yamlDocument as YamlMap?, logger: logger);
   }
 
   final Logger _logger;
 
   /// A map representation of the entire `pubspec.yaml` file.
-  Map<String, Object?> _descriptor = <String, Object?>{};
+  late final Map<String, Object?> _descriptor;
+
+  late final Map<String, Object?> _flutterDescriptor;
 
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
-  Map<String, Object?> _flutterDescriptor = <String, Object?>{};
-
   Map<String, Object?> get flutterDescriptor => _flutterDescriptor;
 
   /// True if the `pubspec.yaml` file does not exist.
@@ -236,6 +239,7 @@ class FlutterManifest {
       if (assets == null) {
         assetsUri = const <Uri>[];
       } else {
+
         for (final Object? asset in assets) {
           if (asset is! String || asset == '') {
             _logger.printError('Deferred component asset manifest contains a null or empty uri.');
@@ -311,14 +315,15 @@ class FlutterManifest {
         : fontList.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>().toList();
   }
 
-  late final List<Uri> assets = _computeAssets();
-  List<Uri> _computeAssets() {
-    final List<Object?>? assets = _flutterDescriptor['assets'] as List<Object?>?;
-    if (assets == null) {
+  late final List<Uri> assets = _computeAssets(_flutterDescriptor['assets']);
+
+  List<Uri> _computeAssets(Object? yamlObject) {
+    final List<Object?>? asList = yamlObject as List<Object?>?;
+    if (asList == null) {
       return const <Uri>[];
     }
     final List<Uri> results = <Uri>[];
-    for (final Object? asset in assets) {
+    for (final Object? asset in asList) {
       if (asset is! String || asset == '') {
         _logger.printError('Asset manifest contains a null or empty uri.');
         continue;
@@ -462,7 +467,6 @@ class FontAsset {
   @override
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
-
 
 bool _validate(Object? manifest, Logger logger) {
   final List<String> errors = <String>[];
