@@ -391,6 +391,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   void dispose() {
+    _leaderLayerHandler.layer = null;
     _foregroundRenderObject?.dispose();
     _foregroundRenderObject = null;
     _backgroundRenderObject?.dispose();
@@ -2471,14 +2472,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
+  final LayerHandle<LeaderLayer> _leaderLayerHandler = LayerHandle<LeaderLayer>();
+
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints, Offset offset) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
       clampDouble(startPoint.dx, 0.0, size.width),
       clampDouble(startPoint.dy, 0.0, size.height),
     );
+    _leaderLayerHandler.layer = LeaderLayer(link: startHandleLayerLink, offset: startPoint + offset);
     context.pushLayer(
-      LeaderLayer(link: startHandleLayerLink, offset: startPoint + offset),
+      _leaderLayerHandler.layer!,
       super.paint,
       Offset.zero,
     );
