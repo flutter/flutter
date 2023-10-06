@@ -6766,7 +6766,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => 'Kein Zeichen übrig';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -6899,49 +6899,22 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
   });
 
   @override
-  String get timePickerDialHelpText => 'UHRZEIT AUSWÄHLEN';
-
-  @override
-  String get timePickerInputHelpText => 'ZEIT EINGEBEN';
-
-  @override
-  String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
-
-  @override
-  String get dateRangePickerHelpText => 'ZEITRAUM AUSWÄHLEN';
-
-  @override
-  String get datePickerHelpText => 'DATUM AUSWÄHLEN';
-
-  @override
-  String get saveButtonLabel => 'SPEICHERN';
-
-  @override
-  String get dateOutOfRangeLabel => 'Ausserhalb des Zeitraums.';
+  String get closeButtonLabel => 'Schliessen';
 
   @override
   String get closeButtonTooltip => 'Schliessen';
 
   @override
-  String get firstPageTooltip => 'First page';
+  String get dateOutOfRangeLabel => 'Ausserhalb des Zeitraums.';
 
   @override
-  String get lastPageTooltip => 'Last page';
-
-  @override
-  String get cancelButtonLabel => 'ABBRECHEN';
-
-  @override
-  String get closeButtonLabel => 'SCHLIEẞEN';
-
-  @override
-  String get continueButtonLabel => 'WEITER';
-
-  @override
-  String get viewLicensesButtonLabel => 'LIZENZEN ANZEIGEN';
+  String get menuDismissLabel => 'Menü schliessen';
 
   @override
   String get modalBarrierDismissLabel => 'Schliessen';
+
+  @override
+  String get scrimOnTapHintRaw => r'$modalRouteContentName schliessen';
 }
 
 /// The translations for Modern Greek (`el`).

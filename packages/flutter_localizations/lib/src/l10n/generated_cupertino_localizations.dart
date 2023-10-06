@@ -2306,7 +2306,7 @@ class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
   });
 
   @override
-  String get selectAllButtonLabel => 'Alles auswählen';
+  String get menuDismissLabel => 'Menü schliessen';
 
   @override
   String get modalBarrierDismissLabel => 'Schliessen';
