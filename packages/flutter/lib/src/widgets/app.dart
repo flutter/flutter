@@ -1198,10 +1198,10 @@ class WidgetsApp extends StatefulWidget {
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
-  bool get debugShowWidgetInspectorOverride {
+  static bool get debugShowWidgetInspectorOverride {
     return _debugShowWidgetInspectorOverrideNotifier.value;
   }
-  set debugShowWidgetInspectorOverride(bool value) {
+  static set debugShowWidgetInspectorOverride(bool value) {
     _debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
