@@ -1,8 +1,8 @@
 {
-	"closeButtonLabel": "Schliessen",
-	"closeButtonTooltip": "Schliessen",
-	"dateOutOfRangeLabel": "Ausserhalb des Zeitraums.",
-	"menuDismissLabel": "Menü schliessen",
-	"modalBarrierDismissLabel": "Schliessen",
-	"scrimOnTapHint": "$modalRouteContentName schliessen"
+  "closeButtonLabel": "Schliessen",
+  "closeButtonTooltip": "Schliessen",
+  "dateOutOfRangeLabel": "Ausserhalb des Zeitraums.",
+  "menuDismissLabel": "Menü schliessen",
+  "modalBarrierDismissLabel": "Schliessen",
+  "scrimOnTapHint": "$modalRouteContentName schliessen"
 }
