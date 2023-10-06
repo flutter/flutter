@@ -513,10 +513,6 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 
 /// How much space should be occupied by the [OverflowBox] if there is no
 /// overflow.
-///
-/// See also:
-///
-///  * [OverflowBox], the widget using this enum.
 enum OverflowBoxFit {
   /// The widget will size itself to be as large as the parent allows.
   max,
