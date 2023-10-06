@@ -899,8 +899,6 @@ class BoxHitTestResult extends HitTestResult {
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
-  ///
-  /// The [localPosition] argument must not be null.
   BoxHitTestEntry(super.target, this.localPosition);
 
   /// The position of the hit test in the local coordinates of [target].
@@ -911,6 +909,15 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
+///
+/// {@tool dartpad}
+/// Parent data is used to communicate to a render object about its
+/// children. In this example, there are two render objects that perform
+/// text layout. They use parent data to identify the kind of child they
+/// are laying out, and space the children accordingly.
+///
+/// ** See code in examples/api/lib/rendering/box/parent_data.0.dart **
+/// {@end-tool}
 class BoxParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system.
   Offset offset = Offset.zero;

@@ -16,11 +16,17 @@ import java.nio.file.Paths
 
 String storageUrl = System.getenv('FLUTTER_STORAGE_BASE_URL') ?: "https://storage.googleapis.com"
 
+String engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.realm")
+        .toFile().text.trim()
+if (engineRealm) {
+    engineRealm = engineRealm + "/"
+}
+
 repositories {
     google()
     mavenCentral()
     maven {
-        url "$storageUrl/download.flutter.io"
+        url "$storageUrl/${engineRealm}download.flutter.io"
     }
 }
 

@@ -103,13 +103,7 @@ class SelectionArea extends StatefulWidget {
 }
 
 class _SelectionAreaState extends State<SelectionArea> {
-  FocusNode get _effectiveFocusNode {
-    if (widget.focusNode != null) {
-      return widget.focusNode!;
-    }
-    _internalNode ??= FocusNode();
-    return _internalNode!;
-  }
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalNode ??= FocusNode());
   FocusNode? _internalNode;
 
   @override
@@ -121,20 +115,12 @@ class _SelectionAreaState extends State<SelectionArea> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    TextSelectionControls? controls = widget.selectionControls;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        controls ??= materialTextSelectionHandleControls;
-      case TargetPlatform.iOS:
-        controls ??= cupertinoTextSelectionHandleControls;
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        controls ??= desktopTextSelectionHandleControls;
-      case TargetPlatform.macOS:
-        controls ??= cupertinoDesktopTextSelectionHandleControls;
-    }
-
+    final TextSelectionControls controls = widget.selectionControls ?? switch (Theme.of(context).platform) {
+      TargetPlatform.android || TargetPlatform.fuchsia => materialTextSelectionHandleControls,
+      TargetPlatform.linux || TargetPlatform.windows   => desktopTextSelectionHandleControls,
+      TargetPlatform.iOS                               => cupertinoTextSelectionHandleControls,
+      TargetPlatform.macOS                             => cupertinoDesktopTextSelectionHandleControls,
+    };
     return SelectableRegion(
       selectionControls: controls,
       focusNode: _effectiveFocusNode,

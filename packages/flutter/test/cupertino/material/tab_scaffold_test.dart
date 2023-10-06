@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../../image_data.dart';
 
@@ -17,9 +18,14 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  testWidgets('Last tab gets focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    final List<FocusNode> focusNodes = <FocusNode>[];
+    for (int i = 0; i < 2; i++) {
+      final FocusNode focusNode = FocusNode();
+      focusNodes.add(focusNode);
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -52,10 +58,13 @@ void main() {
     expect(focusNodes[1].hasFocus, isFalse);
   });
 
-  testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = <FocusNode>[
-      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
-    ];
+  testWidgetsWithLeakTracking('Do not affect focus order in the route', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = <FocusNode>[];
+    for (int i = 0; i < 4; i++) {
+      final FocusNode focusNode = FocusNode();
+      focusNodes.add(focusNode);
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -118,7 +127,7 @@ void main() {
     );
   });
 
-  testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab bar respects themes', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -176,7 +185,7 @@ void main() {
     expect(tab2.text.style!.color!.value, CupertinoColors.systemRed.darkColor.value);
   });
 
-  testWidgets('dark mode background color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('dark mode background color', (WidgetTester tester) async {
     const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF123456),
       darkColor: Color(0xFF654321),
@@ -229,7 +238,7 @@ void main() {
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
   });
 
-  testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not lose state when focusing on text input', (WidgetTester tester) async {
     // Regression testing for https://github.com/flutter/flutter/issues/28457.
 
     await tester.pumpWidget(
@@ -275,7 +284,7 @@ void main() {
     expect(find.text("don't lose me"), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
@@ -311,10 +320,10 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems, isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
   });
 }
 

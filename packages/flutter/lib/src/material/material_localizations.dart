@@ -115,6 +115,15 @@ abstract class MaterialLocalizations {
   /// Label for "select all" edit buttons and menu items.
   String get selectAllButtonLabel;
 
+  /// Label for "look up" edit buttons and menu items.
+  String get lookUpButtonLabel;
+
+  /// Label for "search web" edit buttons and menu items.
+  String get searchWebButtonLabel;
+
+  /// Label for "share" edit buttons and menu items.
+  String get shareButtonLabel;
+
   /// Label for the [AboutDialog] button that shows the [LicensePage].
   String get viewLicensesButtonLabel;
 
@@ -138,6 +147,10 @@ abstract class MaterialLocalizations {
   /// A modal barrier can for example be found behind an alert or popup to block
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) for a
+  /// context menu to indicate that a tap dismisses the context menu.
+  String get menuDismissLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// drawer widget is opened.
@@ -166,10 +179,11 @@ abstract class MaterialLocalizations {
   /// Label indicating that a given date is the current date.
   String get currentDateLabel;
 
-  /// Label for the scrim rendered underneath the content of a modal route.
+  /// Label for the scrim rendered underneath a [BottomSheet].
   String get scrimLabel;
 
-  /// Label for a BottomSheet.
+  /// Label for a [BottomSheet], used as the `modalRouteContentName` of the
+  /// [scrimOnTapHint].
   String get bottomSheetLabel;
 
   /// Hint text announced when tapping on the scrim underneath the content of
@@ -1175,6 +1189,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get selectAllButtonLabel => 'Select all';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get viewLicensesButtonLabel => 'View licenses';
 
   @override
@@ -1191,6 +1214,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;

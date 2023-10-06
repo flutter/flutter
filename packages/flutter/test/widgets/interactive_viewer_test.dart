@@ -8,14 +8,24 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
 import 'gesture_utils.dart';
 
 void main() {
   group('InteractiveViewer', () {
-    testWidgets('child fits in viewport', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+     late TransformationController transformationController;
+
+    setUp(() {
+      transformationController = TransformationController();
+    });
+
+    tearDown(() {
+      transformationController.dispose();
+    });
+
+    testWidgetsWithLeakTracking('child fits in viewport', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -65,8 +75,7 @@ void main() {
       expect(transformationController.value, isNot(equals(Matrix4.identity())));
     });
 
-    testWidgets('boundary slightly bigger than child', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('boundary slightly bigger than child', (WidgetTester tester) async {
       const double boundaryMargin = 10.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -121,8 +130,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), 200.0 / 220.0);
     });
 
-    testWidgets('child bigger than viewport', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('child bigger than viewport', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -197,8 +205,7 @@ void main() {
       expect(transformationController.value, isNot(equals(Matrix4.identity())));
     });
 
-    testWidgets('child has no dimensions', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('child has no dimensions', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -232,8 +239,7 @@ void main() {
       expect(tester.takeException(), isAssertionError);
     });
 
-    testWidgets('no boundary', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('no boundary', (WidgetTester tester) async {
       const double minScale = 0.8;
       await tester.pumpWidget(
         MaterialApp(
@@ -288,8 +294,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), minScale);
     });
 
-    testWidgets('PanAxis.free allows panning in all directions for diagonal gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('PanAxis.free allows panning in all directions for diagonal gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -326,8 +331,7 @@ void main() {
       expect(translation.y, childOffset.dy - childInterior.dy);
     });
 
-    testWidgets('PanAxis.aligned allows panning in one direction only for diagonal gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('PanAxis.aligned allows panning in one direction only for diagonal gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -365,8 +369,7 @@ void main() {
       expect(translation.y, childOffset.dy - childInterior.dy);
     });
 
-    testWidgets('PanAxis.aligned allows panning in one direction only for horizontal leaning gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('PanAxis.aligned allows panning in one direction only for horizontal leaning gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -404,8 +407,7 @@ void main() {
       expect(translation.y, 0.0);
     });
 
-    testWidgets('PanAxis.horizontal allows panning in the horizontal direction only for diagonal gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('PanAxis.horizontal allows panning in the horizontal direction only for diagonal gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -443,8 +445,7 @@ void main() {
       expect(translation.y, 0.0);
     });
 
-    testWidgets('PanAxis.horizontal allows panning in the horizontal direction only for horizontal leaning gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('PanAxis.horizontal allows panning in the horizontal direction only for horizontal leaning gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -482,8 +483,7 @@ void main() {
       expect(translation.y, 0.0);
     });
 
-     testWidgets('PanAxis.horizontal does not allow panning in vertical direction on vertical gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+     testWidgetsWithLeakTracking('PanAxis.horizontal does not allow panning in vertical direction on vertical gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -521,8 +521,7 @@ void main() {
       expect(translation.y, 0.0);
     });
 
-    testWidgets('PanAxis.vertical allows panning in the vertical direction only for diagonal gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('PanAxis.vertical allows panning in the vertical direction only for diagonal gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -560,8 +559,7 @@ void main() {
       expect(translation.x, 0.0);
     });
 
-    testWidgets('PanAxis.vertical allows panning in the vertical direction only for vertical leaning gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('PanAxis.vertical allows panning in the vertical direction only for vertical leaning gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -599,8 +597,7 @@ void main() {
       expect(translation.x, 0.0);
     });
 
-     testWidgets('PanAxis.vertical does not allow panning in horizontal direction on vertical gesture', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+     testWidgetsWithLeakTracking('PanAxis.vertical does not allow panning in horizontal direction on vertical gesture', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -638,8 +635,7 @@ void main() {
       expect(translation.y, 0.0);
     });
 
-    testWidgets('inertia fling and boundary sliding', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('inertia fling and boundary sliding', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -697,8 +693,7 @@ void main() {
       expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
     });
 
-    testWidgets('Scaling automatically causes a centering translation', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('Scaling automatically causes a centering translation', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       const double minScale = 0.1;
       await tester.pumpWidget(
@@ -782,8 +777,7 @@ void main() {
       expect(newSceneFocalPoint.dy, moreOrLessEquals(sceneFocalPoint.dy, epsilon: 1.0));
     });
 
-    testWidgets('Scaling automatically causes a centering translation even when alignPanAxis is set', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('Scaling automatically causes a centering translation even when alignPanAxis is set', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       const double minScale = 0.1;
       await tester.pumpWidget(
@@ -874,8 +868,7 @@ void main() {
       expect(newSceneFocalPoint.dy, moreOrLessEquals(sceneFocalPoint.dy, epsilon: 1.0));
     });
 
-    testWidgets('Can scale with mouse', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('Can scale with mouse', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -896,8 +889,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
 
-    testWidgets('Cannot scale with mouse when scale is disabled', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('Cannot scale with mouse when scale is disabled', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -919,8 +911,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
     });
 
-    testWidgets('Scale with mouse returns onInteraction properties', (WidgetTester tester) async{
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('Scale with mouse returns onInteraction properties', (WidgetTester tester) async{
       late Offset focalPoint;
       late Offset localFocalPoint;
       late double scaleChange;
@@ -971,8 +962,7 @@ void main() {
       expect(scenePoint, const Offset(100, 100));
     });
 
-     testWidgets('Scaling amount is equal forth and back with a mouse scroll', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+     testWidgetsWithLeakTracking('Scaling amount is equal forth and back with a mouse scroll', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1003,8 +993,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
     });
 
-    testWidgets('onInteraction can be used to get scene point', (WidgetTester tester) async{
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('onInteraction can be used to get scene point', (WidgetTester tester) async{
       late Offset focalPoint;
       late Offset localFocalPoint;
       late double scaleChange;
@@ -1057,8 +1046,7 @@ void main() {
       expect(scenePoint.dy, greaterThan(0.0));
     });
 
-    testWidgets('onInteraction is called even when disabled (touch)', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('onInteraction is called even when disabled (touch)', (WidgetTester tester) async {
       bool calledStart = false;
       bool calledUpdate = false;
       bool calledEnd = false;
@@ -1129,8 +1117,7 @@ void main() {
       expect(calledEnd, isTrue);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-    testWidgets('onInteraction is called even when disabled (mouse)', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('onInteraction is called even when disabled (mouse)', (WidgetTester tester) async {
       bool calledStart = false;
       bool calledUpdate = false;
       bool calledEnd = false;
@@ -1189,10 +1176,9 @@ void main() {
       expect(calledEnd, isTrue);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows }));
 
-    testWidgets('viewport changes size', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('viewport changes size', (WidgetTester tester) async {
       addTearDown(tester.view.reset);
 
-      final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1239,8 +1225,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
     });
 
-    testWidgets('gesture can start as pan and become scale', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('gesture can start as pan and become scale', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1297,8 +1282,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/65304
-    testWidgets('can view beyond boundary when necessary for a small child', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('can view beyond boundary when necessary for a small child', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1337,8 +1321,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
     });
 
-    testWidgets('scale does not jump when wrapped in GestureDetector', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('scale does not jump when wrapped in GestureDetector', (WidgetTester tester) async {
       double? initialScale;
       double? scale;
       await tester.pumpWidget(
@@ -1413,7 +1396,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
 
-    testWidgets('Check if ClipRect is present in the tree', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Check if ClipRect is present in the tree', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1454,8 +1437,7 @@ void main() {
       );
     });
 
-    testWidgets('builder can change widgets that are off-screen', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('builder can change widgets that are off-screen', (WidgetTester tester) async {
       const double childHeight = 10.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1539,7 +1521,7 @@ void main() {
     // Accessing the intrinsic size of a LayoutBuilder throws an error, so
     // InteractiveViewer only uses a LayoutBuilder when it's needed by
     // InteractiveViewer.builder.
-    testWidgets('LayoutBuilder is only used for InteractiveViewer.builder', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('LayoutBuilder is only used for InteractiveViewer.builder', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1571,9 +1553,8 @@ void main() {
       expect(find.byType(LayoutBuilder), findsOneWidget);
     });
 
-    testWidgets('scaleFactor', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('scaleFactor', (WidgetTester tester) async {
       const double scrollAmount = 30.0;
-      final TransformationController transformationController = TransformationController();
       Future<void> pumpScaleFactor(double scaleFactor) {
         return tester.pumpWidget(
           MaterialApp(
@@ -1651,7 +1632,7 @@ void main() {
       expect(scaleHighZoomedIn - scaleHighZoomedOut, lessThan(scaleZoomedIn - scaleZoomedOut));
     });
 
-    testWidgets('alignment argument is used properly', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('alignment argument is used properly', (WidgetTester tester) async {
       const Alignment alignment = Alignment.center;
 
       await tester.pumpWidget(MaterialApp(
@@ -1667,9 +1648,10 @@ void main() {
       expect(transform.alignment, alignment);
     });
 
-    testWidgets('interactionEndFrictionCoefficient', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('interactionEndFrictionCoefficient', (WidgetTester tester) async {
       // Use the default interactionEndFrictionCoefficient.
       final TransformationController transformationController1 = TransformationController();
+      addTearDown(transformationController1.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1695,6 +1677,7 @@ void main() {
 
       // Next try a custom interactionEndFrictionCoefficient.
       final TransformationController transformationController2 = TransformationController();
+      addTearDown(transformationController2.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1723,8 +1706,7 @@ void main() {
       expect(translation2.y, lessThan(translation1.y));
     });
 
-    testWidgets('discrete scroll pointer events', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('discrete scroll pointer events', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1767,8 +1749,7 @@ void main() {
       expect(translation.y, -125);
     });
 
-    testWidgets('discrete scale pointer event', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('discrete scale pointer event', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1804,8 +1785,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), 2.5); // capped at maxScale (2.5)
     });
 
-    testWidgets('trackpadScrollCausesScale', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('trackpadScrollCausesScale', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1840,8 +1820,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.499302500056767));
     });
 
-    testWidgets('trackpad pointer scroll events cause scale', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('trackpad pointer scroll events cause scale', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1891,8 +1870,7 @@ void main() {
       expect(translation.y, moreOrLessEquals(-99.37155332430822));
     });
 
-    testWidgets('Scaling inertia', (WidgetTester tester) async {
-      final TransformationController transformationController = TransformationController();
+    testWidgetsWithLeakTracking('Scaling inertia', (WidgetTester tester) async {
       const double boundaryMargin = 50.0;
       await tester.pumpWidget(
         MaterialApp(

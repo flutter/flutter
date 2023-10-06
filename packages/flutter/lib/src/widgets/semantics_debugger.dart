@@ -21,8 +21,6 @@ import 'view.dart';
 class SemanticsDebugger extends StatefulWidget {
   /// Creates a widget that visualizes the semantics for the child.
   ///
-  /// The [child] argument must not be null.
-  ///
   /// [labelStyle] dictates the [TextStyle] used for the semantics labels.
   const SemanticsDebugger({
     super.key,
@@ -47,25 +45,31 @@ class SemanticsDebugger extends StatefulWidget {
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {
-  late _SemanticsClient _client;
+  _SemanticsClient? _client;
+  PipelineOwner? _pipelineOwner;
 
   @override
   void initState() {
     super.initState();
-    // TODO(abarth): We shouldn't reach out to the WidgetsBinding.instance
-    // static here because we might not be in a tree that's attached to that
-    // binding. Instead, we should find a way to get to the PipelineOwner from
-    // the BuildContext.
-    _client = _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
-      ..addListener(_update);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final PipelineOwner newOwner = View.pipelineOwnerOf(context);
+    if (newOwner != _pipelineOwner) {
+      _client?.dispose();
+      _client = _SemanticsClient(newOwner)
+        ..addListener(_update);
+      _pipelineOwner = newOwner;
+    }
+  }
+
+  @override
   void dispose() {
-    _client
-      ..removeListener(_update)
-      ..dispose();
+    _client?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -145,19 +149,15 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   }
 
   void _performAction(Offset position, SemanticsAction action) {
-    _pipelineOwner.semanticsOwner?.performActionAt(position, action);
+    _pipelineOwner?.semanticsOwner?.performActionAt(position, action);
   }
-
-  // TODO(abarth): This shouldn't be a static. We should get the pipeline owner
-  // from [context] somehow.
-  PipelineOwner get _pipelineOwner => WidgetsBinding.instance.pipelineOwner;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       foregroundPainter: _SemanticsDebuggerPainter(
-        _pipelineOwner,
-        _client.generation,
+        _pipelineOwner!,
+        _client!.generation,
         _lastPointerDownLocation, // in physical pixels
         View.of(context).devicePixelRatio,
         widget.labelStyle,

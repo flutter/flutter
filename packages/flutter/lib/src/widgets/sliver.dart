@@ -177,8 +177,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   ///
   /// {@tool snippet}
-  /// This example, which would be inserted into a [CustomScrollView.slivers]
-  /// list, shows an infinite number of items in varying shades of blue:
+  /// This example, which would be provided in [CustomScrollView.slivers],
+  /// shows an infinite number of items in varying shades of blue:
   ///
   /// ```dart
   /// SliverList.builder(
@@ -236,10 +236,11 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
-  /// {@tool snippet}
   ///
+  /// {@tool snippet}
   /// This example shows how to create a [SliverList] whose [Container] items
-  /// are separated by [Divider]s.
+  /// are separated by [Divider]s. The [SliverList] would be provided in
+  /// [CustomScrollView.slivers].
   ///
   /// ```dart
   /// SliverList.separated(
@@ -303,8 +304,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   ///
   /// {@tool snippet}
-  /// This example, which would be inserted into a [CustomScrollView.slivers]
-  /// list, shows an infinite number of items in varying shades of blue:
+  /// This example, which would be provided in [CustomScrollView.slivers],
+  /// shows a list containing two [Text] widgets:
   ///
   /// ```dart
   /// SliverList.list(
@@ -1112,8 +1113,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 class SliverOpacity extends SingleChildRenderObjectWidget {
   /// Creates a sliver that makes its sliver child partially transparent.
   ///
-  /// The [opacity] argument must not be null and must be between 0.0 and 1.0
-  /// (inclusive).
+  /// The [opacity] argument must be between zero and one, inclusive.
   const SliverOpacity({
     super.key,
     required this.opacity,
@@ -1126,8 +1126,6 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
   /// (i.e. invisible).
-  ///
-  /// The opacity must not be null.
   ///
   /// Values 1.0 and 0.0 are painted with a fast path. Other values
   /// require painting the sliver child into an intermediate buffer, which is
@@ -1178,15 +1176,20 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 /// child as usual. It just cannot be the target of located events, because it
 /// returns false from [RenderSliver.hitTest].
 ///
-/// {@macro flutter.widgets.IgnorePointer.Semantics}
+/// ## Semantics
+///
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
+///
+/// {@macro flutter.widgets.IgnorePointer.semantics}
+///
+/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 ///
 /// See also:
 ///
 ///  * [IgnorePointer], the equivalent widget for boxes.
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
-  ///
-  /// The [ignoring] argument must not be null.
   const SliverIgnorePointer({
     super.key,
     this.ignoring = true,
@@ -1203,13 +1206,13 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this sliver is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   final bool ignoring;
 
   /// Whether the semantics of this sliver is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   @Deprecated(
     'Create a custom sliver ignore pointer widget instead. '
     'This feature was deprecated after v3.8.0-12.0.pre.'
@@ -1303,8 +1306,8 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
-/// This widget is for use in [SliverWithKeepAliveWidget]s, such as
-/// [SliverGrid] or [SliverList].
+/// This widget is for use in a [RenderAbstractViewport]s, such as
+/// [Viewport] or [TwoDimensionalViewport].
 ///
 /// This widget is rarely used directly. The [SliverChildBuilderDelegate] and
 /// [SliverChildListDelegate] delegates, used with [SliverList] and
@@ -1314,6 +1317,9 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// each child, causing [KeepAlive] widgets to be automatically added and
 /// configured in response to [KeepAliveNotification]s.
 ///
+/// The same `addAutomaticKeepAlives` feature is supported by the
+/// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
+///
 /// Therefore, to keep a widget alive, it is more common to use those
 /// notifications than to directly deal with [KeepAlive] widgets.
 ///
@@ -1322,8 +1328,6 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// for that mixin class for details.
 class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
-  ///
-  /// The [child] and [keepAlive] arguments must not be null.
   const KeepAlive({
     super.key,
     required this.keepAlive,
@@ -1357,7 +1361,10 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  Type get debugTypicalAncestorWidgetClass => SliverWithKeepAliveWidget;
+  Type get debugTypicalAncestorWidgetClass => throw FlutterError('Multiple Types are supported, use debugTypicalAncestorWidgetDescription.');
+
+  @override
+  String get debugTypicalAncestorWidgetDescription => 'SliverWithKeepAliveWidget or TwoDimensionalViewport';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -62,8 +62,6 @@ import 'theme_data.dart';
 ///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
   /// Create an ElevatedButton.
-  ///
-  /// The [autofocus] and [clipBehavior] arguments must not be null.
   const ElevatedButton({
     super.key,
     required super.onPressed,
@@ -83,8 +81,6 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
-  ///
-  /// The [icon] and [label] arguments must not be null.
   factory ElevatedButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -398,7 +394,7 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
      EdgeInsets.symmetric(horizontal: padding1x),
      EdgeInsets.symmetric(horizontal: padding1x / 2),
      EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
-    MediaQuery.textScaleFactorOf(context),
+    MediaQuery.textScalerOf(context).textScaleFactor,
   );
 }
 
@@ -506,12 +502,12 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
       const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-      MediaQuery.textScaleFactorOf(context),
+      MediaQuery.textScalerOf(context).textScaleFactor,
     ) : ButtonStyleButton.scaledPadding(
       const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.textScaleFactorOf(context),
+      MediaQuery.textScalerOf(context).textScaleFactor,
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
@@ -527,7 +523,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScaleFactorOf(context);
+    final double scale = MediaQuery.textScalerOf(context).textScaleFactor;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,

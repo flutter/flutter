@@ -559,6 +559,42 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('values from --dart-define supersede values from --dart-define-from-file', () async {
+    globals.fs
+        .file(globals.fs.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file('.env').writeAsStringSync('''
+        MY_VALUE=VALUE_FROM_ENV_FILE
+      ''');
+    final CommandRunner<void> runner =
+        createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+    ));
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define=MY_VALUE=VALUE_FROM_COMMAND',
+      '--dart-define-from-file=.env',
+    ]);
+
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true),
+            (Target target, Environment environment) {
+          expect(
+            _decodeDartDefines(environment),
+            containsAllInOrder(const <String>[
+              'MY_VALUE=VALUE_FROM_ENV_FILE',
+              'MY_VALUE=VALUE_FROM_COMMAND',
+            ]),
+          );
+        }),
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('--dart-define-from-file correctly parses a valid env file', () async {
     globals.fs
         .file(globals.fs.path.join('lib', 'main.dart'))
@@ -763,7 +799,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--dart-define-from-file=config',
-    ]), throwsToolExit(message: 'Json config define file "--dart-define-from-file=config" is not a file, please fix first!'));
+    ]), throwsToolExit(message: 'Did not find the file passed to "--dart-define-from-file". Path: config'));
   }, overrides: <Type, Generator>{
     FileSystem: fsFactory,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
@@ -820,6 +856,7 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
+    Uri? nativeAssets,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {}
 }

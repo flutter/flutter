@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '_goldens_io.dart'
   if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
@@ -23,7 +24,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  LeakTrackingTestConfig.warnForNonSupportedPlatforms = false;
+  LeakTracking.warnForUnsupportedPlatforms = false;
+  setLeakTrackingTestSettings(
+    LeakTrackingTestSettings(switches: const Switches(disableNotGCed: true))
+  );
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);

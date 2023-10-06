@@ -69,6 +69,13 @@ enum _SwitchType { material, adaptive }
 /// ** See code in examples/api/lib/material/switch/switch.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to use the ambient [CupertinoThemeData] to style all
+/// widgets which would otherwise use iOS defaults.
+///
+/// ** See code in examples/api/lib/material/switch/switch.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -171,8 +178,6 @@ class Switch extends StatelessWidget {
         _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the user toggles the switch on or off.
@@ -705,7 +710,7 @@ class _MaterialSwitch extends StatefulWidget {
   final MaterialStateProperty<Color?>? overlayColor;
   final double? splashRadius;
   final FocusNode? focusNode;
-  final Function(bool)? onFocusChange;
+  final ValueChanged<bool>? onFocusChange;
   final bool autofocus;
   final Size size;
 

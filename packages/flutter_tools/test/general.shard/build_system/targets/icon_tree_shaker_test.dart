@@ -411,7 +411,7 @@ void main() {
 
     expect(result, isTrue);
     final List<String> codePoints = stdinSink.getAndClear().trim().split(whitespace);
-    expect(codePoints, isNot(contains('32')));
+    expect(codePoints, isNot(contains('optional:32')));
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -456,7 +456,7 @@ void main() {
 
     expect(result, isTrue);
     final List<String> codePoints = stdinSink.getAndClear().trim().split(whitespace);
-    expect(codePoints, containsAllInOrder(const <String>['59470', '32']));
+    expect(codePoints, containsAllInOrder(const <String>['59470', 'optional:32']));
 
     expect(processManager, hasNoRemainingExpectations);
   });

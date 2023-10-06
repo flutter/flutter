@@ -202,8 +202,6 @@ class MaterialApp extends StatefulWidget {
   /// unsupported route.
   ///
   /// This class creates an instance of [WidgetsApp].
-  ///
-  /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const MaterialApp({
     super.key,
     this.navigatorKey,
@@ -214,6 +212,7 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
+    this.onNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
     this.title = '',
@@ -267,6 +266,7 @@ class MaterialApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.onNavigationNotification,
     this.color,
     this.theme,
     this.darkTheme,
@@ -342,6 +342,9 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
   final RouteFactory? onUnknownRoute;
+
+  /// {@macro flutter.widgets.widgetsApp.onNavigationNotification}
+  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
@@ -780,35 +783,26 @@ class MaterialApp extends StatefulWidget {
 /// discoverable, so consider adding a Scrollbar in these cases, either directly
 /// or through the [buildScrollbar] method.
 ///
-/// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
-/// overscroll indicator that is used on [TargetPlatform.android]. When null,
-/// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
-/// overscroll indicator is the [GlowingOverscrollIndicator]. These properties
-/// are deprecated. In order to use the [StretchingOverscrollIndicator], use
-/// the [ThemeData.useMaterial3] flag, or override
-/// [ScrollBehavior.buildOverscrollIndicator].
+/// [ThemeData.useMaterial3] specifies the
+/// overscroll indicator that is used on [TargetPlatform.android], which
+/// defaults to true, resulting in a [StretchingOverscrollIndicator]. Setting
+/// [ThemeData.useMaterial3] to false will instead use a
+/// [GlowingOverscrollIndicator].
 ///
 /// See also:
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
 class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
-  /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
+  /// [StretchingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform and provided [ScrollableDetails].
   ///
-  /// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
-  /// overscroll indicator that is used on [TargetPlatform.android]. When null,
-  /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
-  /// overscroll indicator is the [GlowingOverscrollIndicator].
-  const MaterialScrollBehavior({
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    super.androidOverscrollIndicator,
-  }) : _androidOverscrollIndicator = androidOverscrollIndicator;
-
-  final AndroidOverscrollIndicator? _androidOverscrollIndicator;
+  /// [ThemeData.useMaterial3] specifies the
+  /// overscroll indicator that is used on [TargetPlatform.android], which
+  /// defaults to true, resulting in a [StretchingOverscrollIndicator]. Setting
+  /// [ThemeData.useMaterial3] to false will instead use a
+  /// [GlowingOverscrollIndicator].
+  const MaterialScrollBehavior();
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
@@ -842,14 +836,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    late final AndroidOverscrollIndicator indicator;
-    if (Theme.of(context).useMaterial3) {
-      indicator = AndroidOverscrollIndicator.stretch;
-    } else {
-      indicator = _androidOverscrollIndicator
-        ?? Theme.of(context).androidOverscrollIndicator
-        ?? androidOverscrollIndicator;
-    }
+    final AndroidOverscrollIndicator indicator = Theme.of(context).useMaterial3
+        ? AndroidOverscrollIndicator.stretch
+        : AndroidOverscrollIndicator.glow;
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -887,6 +876,12 @@ class _MaterialAppState extends State<MaterialApp> {
   void initState() {
     super.initState();
     _heroController = MaterialApp.createMaterialHeroController();
+  }
+
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
   }
 
   // Combine the Localizations for Material with the ones contributed
@@ -1019,6 +1014,7 @@ class _MaterialAppState extends State<MaterialApp> {
       onGenerateRoute: widget.onGenerateRoute,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onUnknownRoute: widget.onUnknownRoute,
+      onNavigationNotification: widget.onNavigationNotification,
       builder: _materialBuilder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,

@@ -234,7 +234,6 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
       pollingDeviceDiscovery.startPolling();
-      time.elapse(const Duration(milliseconds: 4001));
 
       // First check should use the default polling timeout
       // to quickly populate the list.
@@ -881,6 +880,26 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for physical CoreDevice with debugging enabled with no launch arguments', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        null,
+        <String, Object?>{},
+        isCoreDevice: true,
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
         ].join(' '),
       );
     });

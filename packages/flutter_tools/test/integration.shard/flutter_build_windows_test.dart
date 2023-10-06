@@ -45,6 +45,7 @@ void main() {
         projectRoot.path,
         'build',
         'windows',
+        'x64',
         'runner',
         'Release',
       ));

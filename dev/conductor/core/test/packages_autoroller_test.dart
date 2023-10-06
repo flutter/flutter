@@ -11,8 +11,8 @@ import 'package:conductor_core/packages_autoroller.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import './common.dart';
 import '../bin/packages_autoroller.dart' show run;
+import 'common.dart';
 
 void main() {
   const String flutterRoot = '/flutter';
@@ -170,7 +170,7 @@ void main() {
     await expectLater(
       () async {
         final Future<void> rollFuture = autoroller.roll();
-        await controller.stream.drain();
+        await controller.stream.drain<Object?>();
         await rollFuture;
       },
       throwsA(isA<Exception>().having(
@@ -214,7 +214,7 @@ void main() {
       ], stdout: '[{"number": 123}]'),
     ]);
     final Future<void> rollFuture = autoroller.roll();
-    await controller.stream.drain();
+    await controller.stream.drain<Object?>();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
     expect(stdio.stdout, contains('flutter-pub-roller-bot already has open tool PRs'));
@@ -312,7 +312,7 @@ void main() {
       ]),
     ]);
     final Future<void> rollFuture = autoroller.roll();
-    await controller.stream.drain();
+    await controller.stream.drain<Object?>();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -512,4 +512,35 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+
+  test('VerboseStdio logger can filter out confidential pattern', () async {
+    const String token = 'secret';
+    const String replacement = 'replacement';
+    final VerboseStdio stdio = VerboseStdio(
+      stdin: _NoOpStdin(),
+      stderr: _NoOpStdout(),
+      stdout: _NoOpStdout(),
+      filter: (String msg) => msg.replaceAll(token, replacement),
+    );
+    stdio.printStatus('Hello');
+    expect(stdio.logs.last, '[status] Hello');
+
+    stdio.printStatus('Using $token');
+    expect(stdio.logs.last, '[status] Using $replacement');
+
+    stdio.printWarning('Using $token');
+    expect(stdio.logs.last, '[warning] Using $replacement');
+
+    stdio.printError('Using $token');
+    expect(stdio.logs.last, '[error] Using $replacement');
+
+    stdio.printTrace('Using $token');
+    expect(stdio.logs.last, '[trace] Using $replacement');
+  });
+}
+
+class _NoOpStdin extends Fake implements io.Stdin {}
+class _NoOpStdout extends Fake implements io.Stdout {
+  @override
+  void writeln([Object? object]) {}
 }

@@ -34,6 +34,7 @@ typedef DebugPrintCallback = void Function(String? message, { int? wrapWidth });
 /// See also:
 ///
 ///   * [DebugPrintCallback], for function parameters and usage details.
+///   * [debugPrintThrottled], the default implementation.
 DebugPrintCallback debugPrint = debugPrintThrottled;
 
 /// Alternative implementation of [debugPrint] that does not throttle.
@@ -48,6 +49,8 @@ void debugPrintSynchronously(String? message, { int? wrapWidth }) {
 
 /// Implementation of [debugPrint] that throttles messages. This avoids dropping
 /// messages on platforms that rate-limit their logging (for example, Android).
+///
+/// If `wrapWidth` is not null, the message is wrapped using [debugWordWrap].
 void debugPrintThrottled(String? message, { int? wrapWidth }) {
   final List<String> messageLines = message?.split('\n') ?? <String>['null'];
   if (wrapWidth != null) {
@@ -99,6 +102,9 @@ final RegExp _indentPattern = RegExp('^ *(?:[-+*] |[0-9]+[.):] )?');
 enum _WordWrapParseMode { inSpace, inWord, atBreak }
 
 /// Wraps the given string at the given width.
+///
+/// The `message` should not contain newlines (`\n`, U+000A). Strings that may
+/// contain newlines should be [String.split] before being wrapped.
 ///
 /// Wrapping occurs at space characters (U+0020). Lines that start with an
 /// octothorpe ("#", U+0023) are not wrapped (so for example, Dart stack traces

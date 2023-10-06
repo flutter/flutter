@@ -32,5 +32,9 @@
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
   "searchTextFieldPlaceholderLabel": "Hledat",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Žádná nahrazení nenalezena",
+  "menuDismissLabel": "Zavřít nabídku",
+  "lookUpButtonLabel": "Vyhledat",
+  "searchWebButtonLabel": "Vyhledávat na webu",
+  "shareButtonLabel": "Sdílet…"
 }

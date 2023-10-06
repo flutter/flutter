@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
-import 'package:flutter/src/services/dom.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
 import '_test_http_request.dart';
@@ -20,7 +20,7 @@ void runTests() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))
+      ..mockEvent = MockEvent('load', web.Event('test error'))
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
@@ -46,7 +46,7 @@ void runTests() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
-      ..mockEvent = MockEvent('error', createDomEvent('Event', 'test error'));
+      ..mockEvent = MockEvent('error', web.Event('test error'));
 
 
     httpRequestFactory = () {
@@ -64,14 +64,14 @@ void runTests() {
     );
 
     await tester.pumpWidget(image);
-    expect((tester.takeException() as DomProgressEvent).type, 'test error');
+    expect((tester.takeException() as web.ProgressEvent).type, 'test error');
   });
 
   testWidgets('loads an image from the network with empty response',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))
+      ..mockEvent = MockEvent('load', web.Event('test error'))
       ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {

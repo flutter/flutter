@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -43,6 +44,44 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   void initInstances() {
     super.initInstances();
     _instance = this;
+    // TODO(goderbauer): Create (fake) window if embedder doesn't provide an implicit view.
+    assert(platformDispatcher.implicitView != null);
+    _renderView = initRenderView(platformDispatcher.implicitView!);
+  }
+
+  @override
+  RenderView get renderView => _renderView;
+  late RenderView _renderView;
+
+  @override
+  PipelineOwner get pipelineOwner => rootPipelineOwner;
+
+  /// Creates a [RenderView] object to be the root of the
+  /// [RenderObject] rendering tree, and initializes it so that it
+  /// will be rendered when the next frame is requested.
+  ///
+  /// Called automatically when the binding is created.
+  RenderView initRenderView(FlutterView view) {
+    final RenderView renderView = RenderView(view: view);
+    rootPipelineOwner.rootNode = renderView;
+    addRenderView(renderView);
+    renderView.prepareInitialFrame();
+    return renderView;
+  }
+
+  @override
+  PipelineOwner createRootPipelineOwner() {
+    return PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        renderView.scheduleInitialSemantics();
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) {
+        renderView.updateSemantics(update);
+      },
+      onSemanticsOwnerDisposed: () {
+        renderView.clearSemantics();
+      },
+    );
   }
 
   /// Creates and initializes the binding. This function is
@@ -139,23 +178,25 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
     FlutterError.onError = _errors.add;
     try {
-      pipelineOwner.flushLayout();
+      rootPipelineOwner.flushLayout();
       if (phase == EnginePhase.layout) {
         return;
       }
-      pipelineOwner.flushCompositingBits();
+      rootPipelineOwner.flushCompositingBits();
       if (phase == EnginePhase.compositingBits) {
         return;
       }
-      pipelineOwner.flushPaint();
+      rootPipelineOwner.flushPaint();
       if (phase == EnginePhase.paint) {
         return;
       }
-      renderView.compositeFrame();
+      for (final RenderView renderView in renderViews) {
+        renderView.compositeFrame();
+      }
       if (phase == EnginePhase.composite) {
         return;
       }
-      pipelineOwner.flushSemantics();
+      rootPipelineOwner.flushSemantics();
       if (phase == EnginePhase.flushSemantics) {
         return;
       }

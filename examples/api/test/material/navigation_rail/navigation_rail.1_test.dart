@@ -94,4 +94,24 @@ void main() {
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byType(IconButton), findsOneWidget);
   });
+
+  testWidgets('Destinations have badge', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.NavigationRailExampleApp(),
+    );
+
+    // Test badge wthout label.
+    final Badge notificationBadge = tester.firstWidget(find.ancestor(
+      of: find.byIcon(Icons.bookmark_border),
+      matching: find.byType(Badge),
+    ));
+    expect(notificationBadge.label, null);
+
+    // Test badge with label.
+    final Badge messagesBadge = tester.firstWidget(find.ancestor(
+      of: find.byIcon(Icons.star_border),
+      matching: find.byType(Badge),
+    ));
+    expect(messagesBadge.label, isNotNull);
+  });
 }

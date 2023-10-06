@@ -89,7 +89,7 @@ void main() {
     int flutterAssetsCallCount = 0;
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       flutterAssetsCallCount += 1;
-      return Uint8List.fromList('test_asset_data'.codeUnits).buffer.asByteData();
+      return ByteData.sublistView(utf8.encode('test_asset_data'));
     });
 
     await rootBundle.loadString('test_asset');

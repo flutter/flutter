@@ -24,7 +24,7 @@ apply plugin: "com.android.dynamic-feature"
 
 android {
     namespace "io.flutter.integration.deferred_components_test.component1"
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     sourceSets {
         applicationVariants.all { variant ->
@@ -35,7 +35,7 @@ android {
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
