@@ -363,31 +363,25 @@ class Container extends StatelessWidget {
           ?? BoxConstraints.tightFor(width: width, height: height)
         : constraints;
 
-  EdgeInsetsGeometry? get _paddingIncludingDecoration => switch ((decoration?.padding, padding)) {
+  EdgeInsetsGeometry? get _paddingIncludingDecoration =>
+      switch ((decoration?.padding, padding)) {
         (null, final EdgeInsetsGeometry? padding) || (final EdgeInsetsGeometry? padding, null) => padding,
         _ => padding!.add(decoration!.padding),
       };
 
-  Widget get _child {
-    if (child != null) {
-      if (alignment != null) {
-        return Align(alignment: alignment!, child: child);
-      }
-      return child!;
-    }
-    if (constraints?.isTight ?? true) {
-      return const LimitedBox(
+  @override
+  Widget build(BuildContext context) {
+    Widget? current = child;
+
+    if (child == null && (constraints == null || !constraints!.isTight)) {
+      current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
-        child: SizedBox.expand(),
+        child: ConstrainedBox(constraints: const BoxConstraints.expand()),
       );
+    } else if (alignment != null) {
+      current = Align(alignment: alignment!, child: current);
     }
-    return const SizedBox.shrink();
-    }
-
-    @override
-  Widget build(BuildContext context) {
-    Widget current = _child;
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null) {
@@ -440,7 +434,7 @@ class Container extends StatelessWidget {
       current = Transform(transform: transform!, alignment: transformAlignment, child: current);
     }
 
-    return current;
+    return current!;
   }
 
   @override
