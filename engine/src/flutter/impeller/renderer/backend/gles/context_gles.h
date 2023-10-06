@@ -7,7 +7,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/gles/allocator_gles.h"
-#include "impeller/renderer/backend/gles/command_buffer_gles.h"
+#include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_library_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/sampler_library_gles.h"
@@ -44,6 +44,9 @@ class ContextGLES final : public Context,
   std::shared_ptr<PipelineLibraryGLES> pipeline_library_;
   std::shared_ptr<SamplerLibraryGLES> sampler_library_;
   std::shared_ptr<AllocatorGLES> resource_allocator_;
+  // Note: This is stored separately from the ProcTableGLES CapabilitiesGLES
+  // in order to satisfy the Context::GetCapabilities signature which returns
+  // a reference.
   std::shared_ptr<const Capabilities> device_capabilities_;
   bool is_valid_ = false;
 

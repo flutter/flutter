@@ -229,7 +229,7 @@ class ProcTableGLES {
 
   const DescriptionGLES* GetDescription() const;
 
-  const CapabilitiesGLES* GetCapabilities() const;
+  const std::shared_ptr<const CapabilitiesGLES>& GetCapabilities() const;
 
   std::string DescribeCurrentFramebuffer() const;
 
@@ -248,7 +248,7 @@ class ProcTableGLES {
  private:
   bool is_valid_ = false;
   std::unique_ptr<DescriptionGLES> description_;
-  std::unique_ptr<CapabilitiesGLES> capabilities_;
+  std::shared_ptr<const CapabilitiesGLES> capabilities_;
   GLint debug_label_max_length_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ProcTableGLES);
