@@ -198,12 +198,10 @@ std::optional<Rect> EntityPass::GetSubpassCoverage(
   std::shared_ptr<FilterContents> image_filter =
       subpass.delegate_->WithImageFilter(Rect(), subpass.xformation_);
 
-  // If the filter graph transforms the basis of the subpass, then its space
-  // has deviated too much from the parent pass to safely intersect with the
-  // pass coverage limit.
-  coverage_limit =
-      (image_filter && !image_filter->IsTranslationOnly() ? std::nullopt
-                                                          : coverage_limit);
+  // If the subpass has an image filter, then its coverage space may deviate
+  // from the parent pass and make intersecting with the pass coverage limit
+  // unsafe.
+  coverage_limit = image_filter ? std::nullopt : coverage_limit;
 
   auto entities_coverage = subpass.GetElementsCoverage(coverage_limit);
   // The entities don't cover anything. There is nothing to do.
@@ -641,6 +639,14 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     auto subpass_capture = capture.CreateChild("EntityPass");
     subpass_capture.AddRect("Coverage", *subpass_coverage, {.readonly = true});
 
+    // Start non-collapsed subpasses with a fresh clip coverage stack limited by
+    // the subpass coverage. This is important because image filters applied to
+    // save layers may transform the subpass texture after it's rendered,
+    // causing parent clip coverage to get misaligned with the actual area that
+    // the subpass will affect in the parent pass.
+    ClipCoverageStack subpass_clip_coverage_stack = {ClipCoverageLayer{
+        .coverage = subpass_coverage, .clip_depth = subpass->clip_depth_}};
+
     // Stencil textures aren't shared between EntityPasses (as much of the
     // time they are transient).
     if (!subpass->OnRender(
@@ -652,7 +658,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
             subpass_coverage->origin -
                 global_pass_position,         // local_pass_position
             ++pass_depth,                     // pass_depth
-            clip_coverage_stack,              // clip_coverage_stack
+            subpass_clip_coverage_stack,      // clip_coverage_stack
             subpass->clip_depth_,             // clip_depth_floor
             subpass_backdrop_filter_contents  // backdrop_filter_contents
             )) {
