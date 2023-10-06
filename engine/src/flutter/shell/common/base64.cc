@@ -116,42 +116,41 @@ Base64::Error Base64::Decode(const void* srcv,
 }
 
 size_t Base64::Encode(const void* srcv, size_t length, void* dstv) {
+  FML_DCHECK(dstv);
   const unsigned char* src = static_cast<const unsigned char*>(srcv);
   unsigned char* dst = static_cast<unsigned char*>(dstv);
 
   const char* encode = kDefaultEncode;
-  if (dst) {
-    size_t remainder = length % 3;
-    char unsigned const* const end = &src[length - remainder];
-    while (src < end) {
-      unsigned a = *src++;
-      unsigned b = *src++;
-      unsigned c = *src++;
-      int d = c & 0x3F;
-      c = (c >> 6 | b << 2) & 0x3F;
-      b = (b >> 4 | a << 4) & 0x3F;
-      a = a >> 2;
-      *dst++ = encode[a];
-      *dst++ = encode[b];
-      *dst++ = encode[c];
-      *dst++ = encode[d];
-    }
-    if (remainder > 0) {
-      int k1 = 0;
-      int k2 = EncodePad;
-      int a = (uint8_t)*src++;
-      if (remainder == 2) {
-        int b = *src++;
-        k1 = b >> 4;
-        k2 = (b << 2) & 0x3F;
-      }
-      *dst++ = encode[a >> 2];
-      *dst++ = encode[(k1 | a << 4) & 0x3F];
-      *dst++ = encode[k2];
-      *dst++ = encode[EncodePad];
-    }
+  size_t remainder = length % 3;
+  char unsigned const* const end = &src[length - remainder];
+  while (src < end) {
+    unsigned a = *src++;
+    unsigned b = *src++;
+    unsigned c = *src++;
+    int d = c & 0x3F;
+    c = (c >> 6 | b << 2) & 0x3F;
+    b = (b >> 4 | a << 4) & 0x3F;
+    a = a >> 2;
+    *dst++ = encode[a];
+    *dst++ = encode[b];
+    *dst++ = encode[c];
+    *dst++ = encode[d];
   }
-  return (length + 2) / 3 * 4;
+  if (remainder > 0) {
+    int k1 = 0;
+    int k2 = EncodePad;
+    int a = (uint8_t)*src++;
+    if (remainder == 2) {
+      int b = *src++;
+      k1 = b >> 4;
+      k2 = (b << 2) & 0x3F;
+    }
+    *dst++ = encode[a >> 2];
+    *dst++ = encode[(k1 | a << 4) & 0x3F];
+    *dst++ = encode[k2];
+    *dst++ = encode[EncodePad];
+  }
+  return EncodedSize(length);
 }
 
 }  // namespace flutter
