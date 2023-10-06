@@ -777,6 +777,65 @@ void main() {
     verifyTreeIsClean();
   });
 
+  group('Adding/removing overlay child causes repaint', () {
+    // Regression test for https://github.com/flutter/flutter/issues/134656.
+    const Key childKey = Key('child');
+    final OverlayEntry overlayEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return RepaintBoundary(
+          child: OverlayPortal(
+            controller: controller1,
+            overlayChildBuilder: (BuildContext context) => const SizedBox(),
+            child: const SizedBox(key: childKey),
+          ),
+        );
+      },
+    );
+    final Widget widget = Directionality(
+      key: GlobalKey(debugLabel: 'key'),
+      textDirection: TextDirection.ltr,
+      child: Overlay(initialEntries: <OverlayEntry>[overlayEntry]),
+    );
+    tearDown(overlayEntry.remove);
+    tearDownAll(overlayEntry.dispose);
+
+    testWidgetsWithLeakTracking('Adding child', (WidgetTester tester) async {
+      controller1.hide();
+      await tester.pumpWidget(widget);
+
+      final RenderBox renderTheater = tester.renderObject<RenderBox>(find.byType(Overlay));
+      final RenderBox renderChild = tester.renderObject<RenderBox>(find.byKey(childKey));
+      assert(!renderTheater.debugNeedsPaint);
+      assert(!renderChild.debugNeedsPaint);
+
+      controller1.show();
+      await tester.pump(null, EnginePhase.layout);
+      expect(renderTheater.debugNeedsPaint, isTrue);
+      expect(renderChild.debugNeedsPaint, isFalse);
+
+      // Discard the dirty render tree.
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgetsWithLeakTracking('Removing child', (WidgetTester tester) async {
+      controller1.show();
+      await tester.pumpWidget(widget);
+
+      final RenderBox renderTheater = tester.renderObject<RenderBox>(find.byType(Overlay));
+      final RenderBox renderChild = tester.renderObject<RenderBox>(find.byKey(childKey));
+      assert(!renderTheater.debugNeedsPaint);
+      assert(!renderChild.debugNeedsPaint);
+
+      controller1.hide();
+      await tester.pump(null, EnginePhase.layout);
+      expect(renderTheater.debugNeedsPaint, isTrue);
+      expect(renderChild.debugNeedsPaint, isFalse);
+
+      // Discard the dirty render tree.
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
   testWidgetsWithLeakTracking('Adding/Removing OverlayPortal in LayoutBuilder during layout', (WidgetTester tester) async {
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
     final GlobalKey overlayKey = GlobalKey(debugLabel: 'overlay');
