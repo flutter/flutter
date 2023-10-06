@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -27,7 +28,7 @@ import 'visual_studio.dart';
 const String _kBadCharacters = r"'#!$^&*=|,;<>?";
 
 /// Builds the Windows project using msbuild.
-Future<FileSystemEntity> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String? target,
   VisualStudio? visualStudioOverride,
   SizeAnalyzer? sizeAnalyzer,
@@ -107,6 +108,21 @@ Future<FileSystemEntity> buildWindows(WindowsProject windowsProject, BuildInfo b
     status.stop();
   }
 
+  final String? binaryName = getCmakeExecutableName(windowsProject);
+  final File binaryFile = buildDirectory
+    .childDirectory('runner')
+    .childDirectory(sentenceCase(buildModeName))
+    .childFile('$binaryName.exe');
+  final FileSystemEntity buildOutput =  binaryFile.existsSync() ? binaryFile : binaryFile.parent;
+  // We don't print a size because the output directory can contain
+  // optional files not needed by the user and because the binary is not
+  // self-contained.
+  globals.logger.printStatus(
+    '${globals.logger.terminal.successMark} '
+    'Built ${globals.fs.path.relative(buildOutput.path)}',
+    color: TerminalColor.green,
+  );
+
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -143,16 +159,6 @@ Future<FileSystemEntity> buildWindows(WindowsProject windowsProject, BuildInfo b
       'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
-
-  final String? binaryName = getCmakeExecutableName(windowsProject);
-  final File appFile = buildDirectory
-    .childDirectory('runner')
-    .childDirectory(sentenceCase(buildModeName))
-    .childFile('$binaryName.exe');
-  if (!appFile.existsSync()) {
-    return appFile.parent;
-  }
-  return appFile;
 }
 
 Future<void> _runCmakeGeneration({

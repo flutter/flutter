@@ -6,8 +6,6 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -55,7 +53,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
     displayNullSafetyMode(buildInfo);
-    final FileSystemEntity output = await buildWindows(
+    await buildWindows(
       flutterProject.windows,
       buildInfo,
       target: targetFile,
@@ -66,15 +64,6 @@ class BuildWindowsCommand extends BuildSubCommand {
         appFilenamePattern: 'app.so',
         flutterUsage: globals.flutterUsage,
       ),
-    );
-
-    // We don't print a size because the output directory can contain
-    // optional files not needed by the user and because the binary is not
-    // self-contained.
-    globals.logger.printStatus(
-      '${globals.logger.terminal.successMark} '
-      'Built ${globals.fs.path.relative(output.path)}',
-      color: TerminalColor.green,
     );
 
     return FlutterCommandResult.success();
