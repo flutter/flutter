@@ -36,14 +36,7 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
   '--packages=.dart_tool/package_config.json',
   '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-  '--multi-root-scheme',
-  'org-dartlang-sdk',
-  '--multi-root',
-  'HostArtifact.flutterWebSdk',
-  '--multi-root',
-  _kDartSdkRoot,
-  '--libraries-spec',
-  'HostArtifact.flutterWebLibrariesJson',
+  '--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
 ];
 
 const List<String> _kWasmOptLinuxArgrs = <String> [
@@ -57,10 +50,6 @@ const List<String> _kWasmOptLinuxArgrs = <String> [
   '-O3',
   '--type-merging',
 ];
-
-/// The result of calling `.parent` on a Memory directory pointing to
-/// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
-const String _kDartSdkRoot = '.';
 
 void main() {
   late Testbed testbed;
