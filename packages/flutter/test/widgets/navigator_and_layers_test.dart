@@ -51,7 +51,7 @@ void main() {
               ),
             ),
           ),
-          '/second': (BuildContext context) => Container(),
+          '/second': (BuildContext context) => const Container(),
         },
       ),
     );

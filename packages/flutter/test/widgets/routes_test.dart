@@ -33,7 +33,7 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   void install() {
     log('install');
     final OverlayEntry entry = OverlayEntry(
-      builder: (BuildContext context) => Container(),
+      builder: (BuildContext context) => const Container(),
       opaque: true,
     );
     _entries.add(entry);
@@ -212,7 +212,7 @@ void main() {
         'two: dispose',
       ],
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(results, equals(<String>['initial: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
@@ -327,7 +327,7 @@ void main() {
         'four: dispose',
       ],
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(results, equals(<String>['second: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
@@ -404,7 +404,7 @@ void main() {
         'C: dispose',
       ],
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(results, equals(<String>['b: dispose', 'A: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
@@ -451,7 +451,7 @@ void main() {
       <String>[
       ],
     );
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(routes.isEmpty, isTrue);
     results.clear();
   });

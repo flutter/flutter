@@ -105,7 +105,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             capturedContext = context;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -122,7 +122,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             capturedContextM3 = context;
-            return Container();
+            return const Container();
           },
         ),
       ),

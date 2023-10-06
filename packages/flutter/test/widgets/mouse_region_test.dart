@@ -125,8 +125,8 @@ void main() {
               opaque: false,
               hitTestBehavior: HitTestBehavior.deferToChild,
               onEnter: (_) => onEnterRegion2 = true,
-              child: Container(
-                color: const Color.fromARGB(0xff, 0xff, 0x10, 0x19),
+              child: const Container(
+                color: Color.fromARGB(0xff, 0xff, 0x10, 0x19),
                 width: 50.0,
                 height: 50.0,
               ),
@@ -183,8 +183,8 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
-          color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+        child: const Container(
+          color: Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
@@ -219,8 +219,8 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
-          color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+        child: const Container(
+          color: Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
@@ -251,8 +251,8 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
-          color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+        child: const Container(
+          color: Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
@@ -499,8 +499,8 @@ void main() {
     PointerExitEvent? exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
-          color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+        child: const Container(
+          color: Color.fromARGB(0xff, 0xff, 0x00, 0x00),
           width: 100.0,
           height: 100.0,
         ),
@@ -541,7 +541,7 @@ void main() {
       exit2.clear();
     }
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.moveTo(const Offset(400.0, 0.0));
     await tester.pump();
@@ -563,7 +563,7 @@ void main() {
                 onEnter: (PointerEnterEvent details) => enter2.add(details),
                 onHover: (PointerHoverEvent details) => move2.add(details),
                 onExit: (PointerExitEvent details) => exit2.add(details),
-                child: Container(),
+                child: const Container(),
               ),
             ),
           ),
@@ -616,7 +616,7 @@ void main() {
       exit2.clear();
     }
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.moveTo(const Offset(400.0, 0.0));
     await tester.pump();
@@ -682,7 +682,7 @@ void main() {
     expect(exit2, isNotEmpty);
     expect(exit2.last.position, equals(const Offset(400.0, 450.0)));
     clearLists();
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(move1, isEmpty);
     expect(enter1, isEmpty);
     expect(exit1, isEmpty);
@@ -725,8 +725,8 @@ void main() {
           onEnter: onEnter,
           onHover: onHover,
           onExit: onExit,
-          child: Container(
-            color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+          child: const Container(
+            color: Color.fromARGB(0xff, 0xff, 0x00, 0x00),
             width: 100.0,
             height: 100.0,
           ),
@@ -921,7 +921,7 @@ void main() {
     expect(find.text('HOVERING'), findsOneWidget);
 
     await tester.pumpWidget(
-      Container(),
+      const Container(),
     );
     await tester.pump();
     expect(numEntrances, equals(1));
@@ -977,7 +977,7 @@ void main() {
     expect(numEntrances, equals(1));
     expect(numExits, equals(0));
     await tester.pumpWidget(
-      Container(),
+      const Container(),
     );
     await tester.pump();
     expect(numEntrances, equals(1));
@@ -1841,8 +1841,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Center(
         child: Draggable<int>(
-          feedback: Container(width: 20, height: 20, color: Colors.blue),
-          childWhenDragging: Container(width: 20, height: 20, color: Colors.yellow),
+          feedback: const Container(width: 20, height: 20, color: Colors.blue),
+          childWhenDragging: const Container(width: 20, height: 20, color: Colors.yellow),
           child: ElevatedButton(child: const Text('Drag me'), onPressed: (){}),
         ),
       ),

@@ -123,8 +123,8 @@ class OverflowWidgetTextEditingController extends TextEditingController {
   }) {
     return TextSpan(
       style: style,
-      children: <InlineSpan>[
-        const TextSpan(text: 'Hi'),
+      children: const <InlineSpan>[
+        TextSpan(text: 'Hi'),
         WidgetSpan(
           child: Container(
             color: Colors.redAccent,

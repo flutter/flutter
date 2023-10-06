@@ -233,7 +233,7 @@ void main() {
                   ],
                   onDestinationSelected: (int i) {},
                 ),
-            body: Container(),
+            body: const Container(),
           ),
         ),
       ),
@@ -349,7 +349,7 @@ void main() {
             ],
             onDestinationSelected: (int i) { },
           ),
-          body: Container(),
+          body: const Container(),
         ),
       );
     }
@@ -454,7 +454,7 @@ Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { bool? 
     home: Scaffold(
       key: scaffoldKey,
       drawer: child,
-      body: Container(),
+      body: const Container(),
     ),
   );
 }

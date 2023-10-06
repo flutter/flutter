@@ -62,7 +62,7 @@ class StatefulCreationCounterState extends State<StatefulCreationCounter> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }
 
 void main() {
@@ -89,12 +89,12 @@ void main() {
       builder: (BuildContext context, StateSetter setState) {
         keyedSetState = setState;
         MediaQuery.of(context);
-        return Container();
+        return const Container();
       },
     );
 
     Widget layoutBuilderChild = keyedWidget;
-    Widget deepChild = Container();
+    Widget deepChild = const Container();
 
     await tester.pumpWidget(MediaQuery(
       data: MediaQueryData.fromView(tester.view),
@@ -149,7 +149,7 @@ void main() {
     layoutBuilderSetState(() {
       // The layout builder will build in a separate build scope. This delays
       // the removal of the keyed child until this build scope.
-      layoutBuilderChild = Container();
+      layoutBuilderChild = const Container();
     });
 
     // The essential part of this test is that this call to pump doesn't throw.

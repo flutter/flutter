@@ -30,7 +30,7 @@ class _InnerWidgetState extends State<_InnerWidget> {
     widget.controller.stream.listen((bool val) => widget.onValueChanged(val));
   }
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }
 
 class _MyWidget extends StatefulWidget {

@@ -301,10 +301,10 @@ void main() {
                 child: CupertinoTextSelectionToolbar(
                   anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, anchorBelowY),
-                  children: <Widget>[
-                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
-                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
-                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                  children: const <Widget>[
+                    Container(color: Color(0xffff0000), width: 50.0, height: height),
+                    Container(color: Color(0xff00ff00), width: 50.0, height: height),
+                    Container(color: Color(0xff0000ff), width: 50.0, height: height),
                   ],
                 ),
               );
@@ -460,10 +460,10 @@ void main() {
                 child: CupertinoTextSelectionToolbar(
                   anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, 500.0),
-                  children: <Widget>[
-                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
-                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
-                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                  children: const <Widget>[
+                    Container(color: Color(0xffff0000), width: 50.0, height: height),
+                    Container(color: Color(0xff00ff00), width: 50.0, height: height),
+                    Container(color: Color(0xff0000ff), width: 50.0, height: height),
                   ],
                 ),
               );

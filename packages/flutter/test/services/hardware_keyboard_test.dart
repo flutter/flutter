@@ -106,7 +106,7 @@ void main() {
       KeyboardListener(
         autofocus: true,
         focusNode: focusNode,
-        child: Container(),
+        child: const Container(),
         onKeyEvent: (KeyEvent event) {
           logs.add(1);
         },
@@ -212,7 +212,7 @@ void main() {
       KeyboardListener(
         autofocus: true,
         focusNode: focusNode,
-        child: Container(),
+        child: const Container(),
         onKeyEvent: (KeyEvent event) {
           events.add(event);
         },
@@ -256,7 +256,7 @@ void main() {
       KeyboardListener(
         autofocus: true,
         focusNode: focusNode,
-        child: Container(),
+        child: const Container(),
         onKeyEvent: (KeyEvent event) {
           logs.add(1);
         },
@@ -296,7 +296,7 @@ void main() {
         child: KeyboardListener(
           autofocus: true,
           focusNode: keyboardListenerFocusNode,
-          child: Container(),
+          child: const Container(),
           onKeyEvent: (KeyEvent event) {
             logs.add('${event.runtimeType}');
           },

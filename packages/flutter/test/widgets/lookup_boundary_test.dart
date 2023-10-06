@@ -921,11 +921,11 @@ void main() {
         children: <Widget>[
           LookupBoundary(
             key: child1,
-            child: Container(),
+            child: const Container(),
           ),
           Container(
             key: child2,
-            child: LookupBoundary(
+            child: const LookupBoundary(
               child: Container(),
             ),
           ),
@@ -971,7 +971,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -991,7 +991,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
-                return Container();
+                return const Container();
               },
             ),
           ),
@@ -1008,7 +1008,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
-            return Container();
+            return const Container();
           },
         ),
       ));
@@ -1020,7 +1020,7 @@ void main() {
       await tester.pumpWidget(Builder(
         builder: (BuildContext context) {
           isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
-          return Container();
+          return const Container();
         },
       ));
       expect(isHidden, isFalse);
@@ -1035,7 +1035,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -1051,7 +1051,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
-                return Container();
+                return const Container();
               },
             ),
           ),
@@ -1066,7 +1066,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
-            return Container();
+            return const Container();
           },
         ),
       ));
@@ -1078,7 +1078,7 @@ void main() {
       await tester.pumpWidget(Builder(
         builder: (BuildContext context) {
           isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
-          return Container();
+          return const Container();
         },
       ));
       expect(isHidden, isFalse);
@@ -1094,7 +1094,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -1112,7 +1112,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
-                return Container();
+                return const Container();
               },
             ),
           ),
@@ -1128,7 +1128,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
-            return Container();
+            return const Container();
           },
         ),
       ));
@@ -1140,7 +1140,7 @@ void main() {
       await tester.pumpWidget(Builder(
         builder: (BuildContext context) {
           isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
-          return Container();
+          return const Container();
         },
       ));
       expect(isHidden, isFalse);
@@ -1201,7 +1201,7 @@ class _DidChangeDependencySpyState extends State<DidChangeDependencySpy> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }
 

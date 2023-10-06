@@ -11,7 +11,7 @@ void main() {
     final AnimatedPositioned positioned = AnimatedPositioned.fromRect(
       rect: const Rect.fromLTWH(7.0, 5.0, 12.0, 16.0),
       duration: const Duration(milliseconds: 200),
-      child: Container(),
+      child: const Container(),
     );
 
     expect(positioned.left, equals(7.0));

@@ -32,11 +32,11 @@ void main() {
                       sigmaX: 5.0,
                       sigmaY: 5.0,
                     ),
-                    child: Container(
+                    child: const Container(
                       alignment: Alignment.center,
                       width: 200.0,
                       height: 200.0,
-                      child: const Text('Hello World'),
+                      child: Text('Hello World'),
                     ),
                   ),
                 ),
@@ -70,11 +70,11 @@ void main() {
                       sigmaX: 5.0,
                       sigmaY: 5.0,
                     ),
-                    child: Container(
+                    child: const Container(
                       alignment: Alignment.center,
                       width: 200.0,
                       height: 200.0,
-                      child: const Text('Hello World'),
+                      child: Text('Hello World'),
                     ),
                   ),
                 ),

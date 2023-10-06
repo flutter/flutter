@@ -147,10 +147,10 @@ void main() {
       ),
       '/settings': (_) => Scaffold(
         key: containerKey2,
-        body: Container(
-          padding: const EdgeInsets.all(100.0),
-          color: const Color(0xffff00ff),
-          child: const Hero(
+        body: const Container(
+          padding: EdgeInsets.all(100.0),
+          color: Color(0xffff00ff),
+          child: Hero(
             tag: kHeroTag,
             child: Text('Settings'),
           ),

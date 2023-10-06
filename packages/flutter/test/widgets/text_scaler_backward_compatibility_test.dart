@@ -84,7 +84,7 @@ void main() {
                 builder: (BuildContext context) {
                   insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
                   insideTextScaler = MediaQuery.textScalerOf(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );
@@ -121,7 +121,7 @@ void main() {
                 builder: (BuildContext context) {
                   insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
                   insideTextScaler = MediaQuery.textScalerOf(context);
-                  return Container();
+                  return const Container();
                 },
               ),
             );

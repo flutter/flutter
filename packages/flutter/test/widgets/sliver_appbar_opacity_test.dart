@@ -244,8 +244,8 @@ class _TestWidget extends StatelessWidget {
             expandedHeight: 120.0,
             collapsedHeight: collapsedHeight,
             title: const Text('Hallo Welt!!1'),
-            bottom: !bottom ? null :  PreferredSize(
-              preferredSize: const Size.fromHeight(35.0),
+            bottom: !bottom ? null :  const PreferredSize(
+              preferredSize: Size.fromHeight(35.0),
               child: Container(),
             ),
           ),

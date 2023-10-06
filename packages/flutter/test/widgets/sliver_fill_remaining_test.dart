@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
 
   // Helpers
-  final Widget sliverBox = SliverToBoxAdapter(
+  const Widget sliverBox = SliverToBoxAdapter(
     child: Container(
       color: Colors.amber,
       height: 150.0,
@@ -48,7 +48,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: CustomScrollView(
               controller: controller,
-              slivers: <Widget>[
+              slivers: const <Widget>[
                 SliverFillRemaining(child: Container()),
               ],
             ),
@@ -89,8 +89,8 @@ void main() {
             textDirection: TextDirection.ltr,
             child: CustomScrollView(
               controller: controller,
-              slivers: <Widget>[
-                const SliverToBoxAdapter(child: SizedBox(height: 100.0)),
+              slivers: const <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 100.0)),
                 SliverFillRemaining(child: Container()),
               ],
             ),
@@ -128,7 +128,7 @@ void main() {
         addTearDown(controller.dispose);
         final List<Widget> slivers = <Widget>[
           sliverBox,
-          SliverFillRemaining(
+          const SliverFillRemaining(
             child: Container(color: Colors.white),
           ),
         ];
@@ -148,7 +148,7 @@ void main() {
         addTearDown(controller.dispose);
         final List<Widget> slivers = <Widget>[
           sliverBox,
-          SliverFillRemaining(
+          const SliverFillRemaining(
             hasScrollBody: false,
             child: Container(color: Colors.white),
           ),
@@ -166,7 +166,7 @@ void main() {
       testWidgetsWithLeakTracking('child without size is sized by extent', (WidgetTester tester) async {
         final List<Widget> slivers = <Widget>[
           sliverBox,
-          SliverFillRemaining(
+          const SliverFillRemaining(
             hasScrollBody: false,
             child: Container(color: Colors.blue),
           ),
@@ -228,7 +228,7 @@ void main() {
       testWidgetsWithLeakTracking('extent is overridden by child with larger size', (WidgetTester tester) async {
         final List<Widget> slivers = <Widget>[
           sliverBox,
-          SliverFillRemaining(
+          const SliverFillRemaining(
             hasScrollBody: false,
             child: Container(
               color: Colors.blue,
@@ -255,7 +255,7 @@ void main() {
           SliverFixedExtentList(
             itemExtent: 150,
             delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Container(color: Colors.amber),
+                (BuildContext context, int index) => const Container(color: Colors.amber),
               childCount: 5,
             ),
           ),
@@ -362,7 +362,7 @@ void main() {
         testWidgetsWithLeakTracking('child without size is sized by extent and overscroll', (WidgetTester tester) async {
           final List<Widget> slivers = <Widget>[
             sliverBox,
-            SliverFillRemaining(
+            const SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
               child: Container(color: Colors.blue),
@@ -442,7 +442,7 @@ void main() {
               itemExtent: 150,
               delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) =>
-                  Container(color: Colors.amber),
+                  const Container(color: Colors.amber),
                 childCount: 5,
               ),
             ),
@@ -507,7 +507,7 @@ void main() {
               itemExtent: 150,
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
-                  return Semantics(label: index.toString(), child: Container(color: Colors.amber));
+                  return Semantics(label: index.toString(), child: const Container(color: Colors.amber));
                 },
                 childCount: 5,
               ),
@@ -658,7 +658,7 @@ void main() {
         testWidgetsWithLeakTracking('child without size is sized by extent', (WidgetTester tester) async {
           final List<Widget> slivers = <Widget>[
             sliverBox,
-            SliverFillRemaining(
+            const SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
               child: Container(color: Colors.blue),
@@ -722,7 +722,7 @@ void main() {
               itemExtent: 150,
               delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) =>
-                  Container(color: Colors.amber),
+                  const Container(color: Colors.amber),
                 childCount: 5,
               ),
             ),
@@ -780,7 +780,7 @@ void main() {
               itemExtent: 150,
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
-                  return Semantics(label: index.toString(), child: Container(color: Colors.amber));
+                  return Semantics(label: index.toString(), child: const Container(color: Colors.amber));
                 },
                 childCount: 5,
               ),

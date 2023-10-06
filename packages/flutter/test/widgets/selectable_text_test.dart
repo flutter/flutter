@@ -5221,11 +5221,11 @@ void main() {
               headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) {
                   return <Widget>[
-                    SliverToBoxAdapter(
+                    const SliverToBoxAdapter(
                       child: Container(
                         height: 200,
                         color: Colors.black12,
-                        child: const Center(child: Text('Sliver 1')),
+                        child: Center(child: Text('Sliver 1')),
                       ),
                     ),
                     const SliverToBoxAdapter(

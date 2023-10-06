@@ -183,7 +183,7 @@ void main() {
     );
 
     // Test compact visual density (-2, -2)
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildMenu(visualDensity: VisualDensity.compact));
     await tester.pump();
 
@@ -211,7 +211,7 @@ void main() {
       equals(const Rect.fromLTRB(265.0, 40.0, 467.0, 160.0)),
     );
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildMenu(visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0)));
     await tester.pump();
 

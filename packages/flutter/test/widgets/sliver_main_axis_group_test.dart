@@ -651,30 +651,30 @@ void main() {
         slivers: <Widget>[
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
+            child: const Container(
               height: 1000,
-              decoration: const BoxDecoration(color: Colors.amber),
+              decoration: BoxDecoration(color: Colors.amber),
             ),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
+            child: const Container(
               height: 400,
-              decoration: const BoxDecoration(color: Colors.amber)
+              decoration: BoxDecoration(color: Colors.amber)
             ),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
+            child: const Container(
               height: 500,
-              decoration: const BoxDecoration(color: Colors.amber)
+              decoration: BoxDecoration(color: Colors.amber)
             ),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
+            child: const Container(
               height: 300,
-              decoration: const BoxDecoration(color: Colors.amber)
+              decoration: BoxDecoration(color: Colors.amber)
             ),
           ),
         ],

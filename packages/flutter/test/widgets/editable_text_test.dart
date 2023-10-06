@@ -302,7 +302,7 @@ void main() {
                 children: List<Widget>.generate(
                   5,
                   (_) {
-                    return Container(
+                    return const Container(
                       height: 1200.0,
                       color: Colors.black12,
                     );
@@ -3026,7 +3026,7 @@ void main() {
               cursorColor: cursorColor,
               selectionControls: materialTextSelectionControls,
             ),
-            Positioned(
+            const Positioned(
               left: 0,
               top: 0,
               right: 0,
@@ -9738,7 +9738,7 @@ void main() {
       state.beginBatchEdit();
       expect(tester.takeException(), isNull);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       expect(tester.takeException(), isAssertionError);
     });
   });
@@ -16874,7 +16874,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    return Container();
+    return const Container();
   }
 
   @override

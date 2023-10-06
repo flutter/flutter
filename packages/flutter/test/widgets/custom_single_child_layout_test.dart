@@ -88,7 +88,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
   return Center(
     child: CustomSingleChildLayout(
       delegate: delegate,
-      child: Container(),
+      child: const Container(),
     ),
   );
 }

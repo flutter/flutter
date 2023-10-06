@@ -367,7 +367,7 @@ void main() {
           ],
         );
       },
-      '/second': (BuildContext context) => Container(),
+      '/second': (BuildContext context) => const Container(),
     };
     await tester.pumpWidget(MaterialApp(routes: routes));
     expect(log, isEmpty);
@@ -417,7 +417,7 @@ void main() {
           ],
         );
       },
-      '/second': (BuildContext context) => Container(),
+      '/second': (BuildContext context) => const Container(),
     };
     await tester.pumpWidget(MaterialApp(routes: routes));
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
@@ -1727,10 +1727,10 @@ void main() {
         navigatorKey: keyNav,
         initialRoute: '/A/B/C',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => Container(key: keyRoot),
-          '/A': (BuildContext context) => Container(key: keyA),
+          '/': (BuildContext context) => const Container(key: keyRoot),
+          '/A': (BuildContext context) => const Container(key: keyA),
           // The route /A/B is intentionally left out.
-          '/A/B/C': (BuildContext context) => Container(key: keyABC),
+          '/A/B/C': (BuildContext context) => const Container(key: keyABC),
         },
       ),
     );
@@ -1758,9 +1758,9 @@ void main() {
         navigatorKey: keyNav,
         initialRoute: '/A/B/C',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => Container(key: keyRoot),
-          '/A': (BuildContext context) => Container(key: keyA),
-          '/A/B': (BuildContext context) => Container(key: keyAB),
+          '/': (BuildContext context) => const Container(key: keyRoot),
+          '/A': (BuildContext context) => const Container(key: keyA),
+          '/A/B': (BuildContext context) => const Container(key: keyAB),
           // The route /A/B/C is intentionally left out.
         },
       ),
@@ -1953,7 +1953,7 @@ void main() {
       tester.element(find.byKey(const ValueKey<String>('/A'), skipOffstage: false)),
     )!;
     final Route<void> newRoute = NoAnimationPageRoute(
-      pageBuilder: (_) => Container(key: const ValueKey<String>('/C')),
+      pageBuilder: (_) => const Container(key: ValueKey<String>('/C')),
     );
 
     navigator.currentState!.replace<void>(oldRoute: oldRoute, newRoute: newRoute);
@@ -4029,7 +4029,7 @@ void main() {
             return PageRouteBuilder<void>(
               settings: settings,
               pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
-                return Container();
+                return const Container();
               },
             );
           },
@@ -4043,7 +4043,7 @@ void main() {
     expect(observer.navigator, tester.state<NavigatorState>(find.byType(Navigator)));
 
     // Clear the tree
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(observer.navigator, isNull);
 
     // Test with reinsertion
@@ -4066,7 +4066,7 @@ void main() {
 
     await tester.pumpWidget(Column(
       children: <Widget>[
-        FocusScope(node: focusNode, child: Container()),
+        FocusScope(node: focusNode, child: const Container()),
         Expanded(
           child: MaterialApp(
             home: Navigator(
@@ -4143,7 +4143,7 @@ void main() {
 
     await tester.pumpWidget(Column(
       children: <Widget>[
-        FocusScope(node: focusNode, child: Container()),
+        FocusScope(node: focusNode, child: const Container()),
         Expanded(
           child: MaterialApp(
             home: Navigator(
@@ -4207,7 +4207,7 @@ void main() {
             return PageRouteBuilder<void>(
               settings: settings,
               pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
-                return Container();
+                return const Container();
               },
             );
           },
@@ -4219,7 +4219,7 @@ void main() {
     observer._checkInvocations(<Symbol>[#navigator, #didPush]);
     await tester.pumpWidget(Container(child: build()));
     observer._checkInvocations(<Symbol>[#navigator, #didPush, #navigator]);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     observer._checkInvocations(<Symbol>[#navigator]);
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(build(key));
@@ -5059,7 +5059,7 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 
   @override
@@ -5169,7 +5169,7 @@ class StatefulTestState extends State<StatefulTestWidget> {
   @override
   Widget build(BuildContext context) {
     rebuildCount += 1;
-    return Container();
+    return const Container();
   }
 }
 

@@ -283,11 +283,11 @@ void main() {
           alignment: Alignment.topLeft,
           child: Badge(
             // Default largeSize = 16, badge with label is "large".
-            label: Container(width: 8, height: 8, color: Colors.blue),
+            label: const Container(width: 8, height: 8, color: Colors.blue),
             alignment: alignment,
             offset: offset,
-            child: Container(
-              color: const Color(0xFF00FF00),
+            child: const Container(
+              color: Color(0xFF00FF00),
               width: 200,
               height: 200,
             ),
@@ -360,8 +360,8 @@ void main() {
             // Default smallSize = 6, badge without label is "small".
             alignment: alignment,
             offset: offset, // Not used for smallSize badges.
-            child: Container(
-              color: const Color(0xFF00FF00),
+            child: const Container(
+              color: Color(0xFF00FF00),
               width: 200,
               height: 200,
             ),

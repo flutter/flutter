@@ -245,8 +245,8 @@ void main() {
 
   testWidgetsWithLeakTracking('RenderObject not visiting children provides helpful error message', (WidgetTester tester) async {
     await tester.pumpWidget(
-      TestNonVisitingWidget(
-        child: Container(color: const Color(0xFFED1D7F)),
+      const TestNonVisitingWidget(
+        child: Container(color: Color(0xFFED1D7F)),
       ),
     );
 

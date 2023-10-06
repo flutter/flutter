@@ -307,9 +307,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 
   Widget _buildActions() {
-    Widget actionSection = Container(
-      height: 0.0,
-    );
+    Widget actionSection = const Container(height: 0.0);
     if (widget.actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
@@ -594,9 +592,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   Widget _buildActions() {
     if (widget.actions == null || widget.actions!.isEmpty) {
-      return Container(
-        height: 0.0,
-      );
+      return const Container(height: 0.0);
     }
     return _CupertinoAlertActionSection(
       scrollController: _effectiveActionScrollController,

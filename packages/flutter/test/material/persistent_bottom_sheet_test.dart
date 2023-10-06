@@ -111,7 +111,7 @@ void main() {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
-          return Container(height: 200.0);
+          return const Container(height: 200.0);
         },
       );
     });
@@ -478,7 +478,7 @@ void main() {
         return Builder(
           builder: (BuildContext context) {
             buildCount += 1;
-            return Container(height: 200.0);
+            return const Container(height: 200.0);
           },
         );
       },
@@ -501,7 +501,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               scaffoldContext = context;
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -514,7 +514,7 @@ void main() {
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
-        return Container();
+        return const Container();
       },
     );
 
@@ -660,7 +660,7 @@ void main() {
     final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
-          return Container(height: 200.0);
+          return const Container(height: 200.0);
         },
       );
     });

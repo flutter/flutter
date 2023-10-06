@@ -176,7 +176,7 @@ void main() {
         tester: tester,
         widget: MaterialApp(
           navigatorKey: key,
-          home: Container(),
+          home: const Container(),
           onGenerateRoute: (_) => null,
         ),
         errorMessage:
@@ -204,7 +204,7 @@ void main() {
         tester: tester,
         widget: MaterialApp(
           navigatorKey: key,
-          home: Container(),
+          home: const Container(),
           onGenerateRoute: (_) => null,
           onUnknownRoute: (_) => null,
         ),

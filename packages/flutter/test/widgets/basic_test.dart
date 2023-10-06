@@ -129,12 +129,12 @@ void main() {
 
     testWidgetsWithLeakTracking('hit test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        PhysicalShape(
-          clipper: const ShapeBorderClipper(shape: CircleBorder()),
+        const PhysicalShape(
+          clipper: ShapeBorderClipper(shape: CircleBorder()),
           elevation: 2.0,
-          color: const Color(0xFF0000FF),
-          shadowColor: const Color(0xFF00FF00),
-          child: Container(color: const Color(0xFF0000FF)),
+          color: Color(0xFF0000FF),
+          shadowColor: Color(0xFF00FF00),
+          child: Container(color: Color(0xFF0000FF)),
         ),
       );
 
@@ -173,8 +173,8 @@ void main() {
                 key: key1,
                 width: 100.0,
                 height: 100.0,
-                child: Container(
-                  color: const Color(0xFF0000FF),
+                child: const Container(
+                  color: Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -202,8 +202,8 @@ void main() {
                 key: key1,
                 width: 100.0,
                 height: 100.0,
-                child: Container(
-                  color: const Color(0xFF0000FF),
+                child: const Container(
+                  color: Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -231,8 +231,8 @@ void main() {
                 key: key1,
                 width: 100.0,
                 height: 100.0,
-                child: Container(
-                  color: const Color(0xFF0000FF),
+                child: const Container(
+                  color: Color(0xFF0000FF),
                 ),
               ),
             ),
@@ -746,9 +746,9 @@ void main() {
   testWidgetsWithLeakTracking('Inconsequential golden test', (WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
-    await tester.pumpWidget(RepaintBoundary(
+    await tester.pumpWidget(const RepaintBoundary(
       child: Container(
-        color: const Color(0xABCDABCD),
+        color: Color(0xABCDABCD),
       ),
     ));
 

@@ -72,7 +72,7 @@ void main() {
               padding: EdgeInsets.only(left: paddingLeft),
               child: CompositedTransformTarget(
                 link: link,
-                child: RepaintBoundary(child: ClipRect(child: Container(color: const Color(0x00ff0000)))),
+                child: const RepaintBoundary(child: ClipRect(child: Container(color: Color(0x00ff0000)))),
               ),
             ),
             Positioned.fill(child: RepaintBoundary(child: ColoredBox(color: siblingColor))),

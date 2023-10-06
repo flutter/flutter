@@ -19,7 +19,7 @@ void main() {
         builder: (BuildContext context) {
           viewOf = View.of(context);
           viewMaybeOf = View.maybeOf(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -39,7 +39,7 @@ void main() {
         builder: (BuildContext context) {
           view = View.of(context);
           viewMaybeOf = View.maybeOf(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -52,7 +52,7 @@ void main() {
 
   testWidgetsWithLeakTracking('cannot find View behind a LookupBoundary', (WidgetTester tester) async {
     await tester.pumpWidget(
-      LookupBoundary(
+      const LookupBoundary(
         child: Container(),
       ),
     );

@@ -331,7 +331,7 @@ void main() {
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
             ),
-            child: Container(width: 100.0),
+            child: const Container(width: 100.0),
           ),
         ],
       ),
@@ -348,7 +348,7 @@ void main() {
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
             ),
-            child: Container(width: 100.0),
+            child: const Container(width: 100.0),
           ),
           MediaQuery(
             key: mediaQueryKey1,
@@ -456,7 +456,7 @@ void main() {
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
             ),
-            child: Container(width: 100.0),
+            child: const Container(width: 100.0),
           ),
         ],
       ),
@@ -473,7 +473,7 @@ void main() {
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
             ),
-            child: Container(width: 100.0),
+            child: const Container(width: 100.0),
           ),
           MediaQuery(
             key: mediaQueryKey1,
@@ -505,7 +505,7 @@ void main() {
     imageProvider.complete(image100x100);
     await tester.pump();
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 1 listener, 0 ephemeralErrorListeners), pixels: $imageString @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 0 listeners, 0 ephemeralErrorListeners), pixels: null, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
   });
 
@@ -530,7 +530,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           configuration = createLocalImageConfiguration(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -575,7 +575,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           configuration = createLocalImageConfiguration(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -623,7 +623,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           configuration = createLocalImageConfiguration(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -667,7 +667,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           configuration = createLocalImageConfiguration(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -713,7 +713,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           configuration = createLocalImageConfiguration(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -755,7 +755,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           configuration = createLocalImageConfiguration(context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -809,7 +809,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -832,7 +832,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precacheImage(provider, context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -867,7 +867,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precache = precacheImage(imageProvider, context, onError: errorListener);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -1419,7 +1419,7 @@ void main() {
         key: key,
         child: Image(
           image: imageProvider1,
-          errorBuilder: (_,__,___) => Container(),
+          errorBuilder: (_,__,___) => const Container(),
         ),
       ),
     );
@@ -1555,7 +1555,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -1605,7 +1605,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           precache = precacheImage(provider, context);
-          return Container();
+          return const Container();
         },
       ),
     );

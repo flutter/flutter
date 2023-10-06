@@ -65,10 +65,10 @@ void main() {
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
             ).createShader(bounds),
-            child: Container(
+            child: const Container(
               width: 100,
               height: 100,
-              color: const Color(0xFFFFFFFF),
+              color: Color(0xFFFFFFFF),
             ),
           ),
         ),
@@ -94,10 +94,10 @@ void main() {
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
             ).createShader(bounds),
-            child: Container(
+            child: const Container(
               width: 100,
               height: 100,
-              color: const Color(0xFFFFFFFF),
+              color: Color(0xFFFFFFFF),
             ),
           ),
         ),

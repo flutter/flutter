@@ -217,7 +217,7 @@ void main() {
               FocusScope(
                 debugLabel: 'Child Scope',
                 node: childFocusScope,
-                child: Container(),
+                child: const Container(),
               ),
             ],
           ),
@@ -731,7 +731,7 @@ void main() {
       expect(keyB.currentState!.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       expect(FocusManager.instance.rootScope.children, isEmpty);
     });
@@ -1083,7 +1083,7 @@ void main() {
       await tester.pumpWidget(
         Focus(
           key: key1,
-          child: Container(),
+          child: const Container(),
         ),
       );
 
@@ -1103,7 +1103,7 @@ void main() {
       await tester.pumpWidget(
         Focus(
           focusNode: focusNode,
-          child: Container(),
+          child: const Container(),
         ),
       );
 
@@ -1114,7 +1114,7 @@ void main() {
         Focus(
           autofocus: true,
           focusNode: focusNode,
-          child: Container(),
+          child: const Container(),
         ),
       );
 
@@ -1133,7 +1133,7 @@ void main() {
             Focus(
               focusNode: focusNodeA,
               autofocus: true,
-              child: Container(),
+              child: const Container(),
             ),
           ],
         ),
@@ -1147,12 +1147,12 @@ void main() {
           children: <Widget>[
             Focus(
               focusNode: focusNodeA,
-              child: Container(),
+              child: const Container(),
             ),
             Focus(
               focusNode: focusNodeB,
               autofocus: true,
-              child: Container(),
+              child: const Container(),
             ),
           ],
         ),
@@ -1301,14 +1301,14 @@ void main() {
                 key: key2,
                 child: Focus(
                   key: key3,
-                  child: Container(),
+                  child: const Container(),
                 ),
               ),
               Focus(
                 key: key4,
                 child: Focus(
                   key: key5,
-                  child: Container(),
+                  child: const Container(),
                 ),
               ),
               Focus(
@@ -1317,11 +1317,11 @@ void main() {
                   children: <Widget>[
                     Focus(
                       key: key7,
-                      child: Container(),
+                      child: const Container(),
                     ),
                     Focus(
                       key: key8,
-                      child: Container(),
+                      child: const Container(),
                     ),
                   ],
                 ),
@@ -1492,7 +1492,7 @@ void main() {
       expect(gotFocus, isTrue);
       expect(node.hasFocus, isTrue);
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       expect(FocusManager.instance.rootScope.descendants, isEmpty);
     });
@@ -1681,7 +1681,7 @@ void main() {
                 child: Focus(
                   focusNode: focus2,
                   skipTraversal: traverseFocus2,
-                  child: Container(),
+                  child: const Container(),
                 ),
               ),
             ),
@@ -1767,14 +1767,14 @@ void main() {
             children: <Widget>[
               Focus(
                 focusNode: node1,
-                child: Container(),
+                child: const Container(),
               ),
               Focus(
                 focusNode: node2,
                 descendantsAreTraversable: false,
                 child: Focus(
                   focusNode: node3,
-                  child: Container(),
+                  child: const Container(),
                 )
               ),
             ],
@@ -1789,7 +1789,7 @@ void main() {
 
     testWidgetsWithLeakTracking("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
+      await tester.pumpWidget(const Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
       semantics.dispose();
@@ -1967,7 +1967,7 @@ void main() {
 
     testWidgetsWithLeakTracking('Focus passes changes in attribute values to its focus node', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Focus(
+        const Focus(
           child: Container(),
         ),
       );
@@ -2032,11 +2032,11 @@ void main() {
                 Focus(
                   autofocus: true,
                   focusNode: focusNode1,
-                  child: Container(),
+                  child: const Container(),
                 ),
                 Focus(
                   focusNode: focusNode2,
-                  child: Container(),
+                  child: const Container(),
                 ),
               ],
             ),
@@ -2068,11 +2068,11 @@ void main() {
                 Focus(
                   autofocus: true,
                   focusNode: focusNode1,
-                  child: Container(),
+                  child: const Container(),
                 ),
                 Focus(
                   focusNode: focusNode2,
-                  child: Container(),
+                  child: const Container(),
                 ),
               ],
             ),
@@ -2089,7 +2089,7 @@ void main() {
 
     testWidgetsWithLeakTracking("ExcludeFocus doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(ExcludeFocus(child: Container()));
+      await tester.pumpWidget(const ExcludeFocus(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
       semantics.dispose();
@@ -2107,7 +2107,7 @@ void main() {
             children: <Widget>[
               Focus(
                 focusNode: childFocusNode,
-                child: Container(),
+                child: const Container(),
               ),
             ],
           ),

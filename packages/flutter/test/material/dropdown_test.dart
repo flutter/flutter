@@ -741,7 +741,7 @@ void main() {
       // should have the same size and location.
       checkSelectedItemTextGeometry(tester, 'two');
 
-      await tester.pumpWidget(Container()); // reset test
+      await tester.pumpWidget(const Container()); // reset test
     });
   }
 
@@ -2039,7 +2039,7 @@ void main() {
       border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0)),
     );
 
-    final Widget customUnderline = Container(height: 4.0, decoration: decoration);
+    const Widget customUnderline = Container(height: 4.0, decoration: decoration);
     final Key buttonKey = UniqueKey();
 
     final Finder decoratedBox = find.descendant(
@@ -2358,7 +2358,7 @@ void main() {
                       onChanged: (String? value) {
                         setState(() { selectedItem = value; });
                       },
-                      icon: Container(),
+                      icon: const Container(),
                       items: itemValues.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -3386,7 +3386,7 @@ void main() {
           child: DropdownButton<String>(
             value: 'One',
             enableFeedback: enableFeedback,
-            underline: Container(
+            underline: const Container(
               height: 2,
               color: Colors.deepPurpleAccent,
             ),

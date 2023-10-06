@@ -26,6 +26,6 @@ class BucketSpyState extends State<BucketSpy> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.child ?? Container();
+    return widget.child ?? const Container();
   }
 }

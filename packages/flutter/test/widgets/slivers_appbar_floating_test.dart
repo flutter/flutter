@@ -438,10 +438,10 @@ void main() {
 class HeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
+    return const Container(
       height: 56,
       color: Colors.red,
-      child: const Text('Test Title'),
+      child: Text('Test Title'),
     );
   }
 

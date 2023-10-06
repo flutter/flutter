@@ -81,16 +81,16 @@ void main() {
           children: <Widget>[
             GestureDetector(
               onTap: () { first += 1; },
-              child: Container(
+              child: const Container(
                 height: 350.0, // more than half the height of the test area
-                color: const Color(0xFF00FF00),
+                color: Color(0xFF00FF00),
               ),
             ),
             GestureDetector(
               onTap: () { second += 1; },
-              child: Container(
+              child: const Container(
                 height: 350.0, // more than half the height of the test area
-                color: const Color(0xFF0000FF),
+                color: Color(0xFF0000FF),
               ),
             ),
           ],
@@ -131,11 +131,11 @@ void main() {
 
   testWidgetsWithLeakTracking('SliverBlockChildListDelegate.estimateMaxScrollOffset hits end', (WidgetTester tester) async {
     final SliverChildListDelegate delegate = SliverChildListDelegate(<Widget>[
-      Container(),
-      Container(),
-      Container(),
-      Container(),
-      Container(),
+      const Container(),
+      const Container(),
+      const Container(),
+      const Container(),
+      const Container(),
     ]);
 
     await tester.pumpWidget(

@@ -585,7 +585,7 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
-                  child: remove ? Container() : TextFormField(
+                  child: remove ? const Container() : TextFormField(
                     autofocus: true,
                     onSaved: (String? value) { fieldValue = value; },
                     validator: (String? value) { return (value == null || value.isEmpty) ? null : 'yes'; },
@@ -643,7 +643,7 @@ void main() {
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
-                    return Container();
+                    return const Container();
                   },
                   validator: errorText,
                 ),
@@ -679,7 +679,7 @@ void main() {
                   autovalidateMode: AutovalidateMode.always,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
-                    return Container();
+                    return const Container();
                   },
                   validator: errorText,
                 ),

@@ -16,7 +16,7 @@ void main() {
             data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
             child: Builder(builder: (BuildContext context) {
               formattedValue = const TimeOfDay(hour: 7, minute: 0).format(context);
-              return Container();
+              return const Container();
             }),
           ),
         ));

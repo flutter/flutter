@@ -1424,7 +1424,7 @@ void main() {
       reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
     );
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildRadio(focused: true));
     await tester.pumpAndSettle();
 
@@ -1466,7 +1466,7 @@ void main() {
         theme: theme,
         home: Material(
           child: Center(
-            child: show ? Radio<bool>(key: key, value: true, groupValue: false, onChanged: (_) { }) : Container(),
+            child: show ? Radio<bool>(key: key, value: true, groupValue: false, onChanged: (_) { }) : const Container(),
           ),
         ),
       );
@@ -1564,7 +1564,7 @@ void main() {
         ..circle(color: const Color(0xFF2196F3))..restore(), // Inner circle - primary value
     );
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildRadio(selected: false));
     await tester.pumpAndSettle();
 
@@ -1576,7 +1576,7 @@ void main() {
         ..restore(),
     );
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildRadio(enabled: false));
     await tester.pumpAndSettle();
 
@@ -1611,7 +1611,7 @@ void main() {
         ..circle(color: theme.colorScheme.primary)..restore(), // Inner circle - primary value
     );
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildRadio(selected: false));
     await tester.pumpAndSettle();
 
@@ -1623,7 +1623,7 @@ void main() {
         ..restore(),
     );
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildRadio(enabled: false));
     await tester.pumpAndSettle();
 
@@ -1686,7 +1686,7 @@ void main() {
     );
 
     // selected radio in focused state
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildRadio(focused: true));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -1697,7 +1697,7 @@ void main() {
     );
 
     // unselected radio in focused state
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildRadio(focused: true, selected: false));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -1708,7 +1708,7 @@ void main() {
     );
 
     // selected radio in hovered state
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildRadio());
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -1774,7 +1774,7 @@ void main() {
     );
 
     // selected radio in focused state
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildRadio(focused: true));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -1785,7 +1785,7 @@ void main() {
     );
 
     // unselected radio in focused state
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildRadio(focused: true, selected: false));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -1796,7 +1796,7 @@ void main() {
     );
 
     // selected radio in hovered state
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildRadio());
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();

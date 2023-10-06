@@ -793,7 +793,7 @@ void main() {
                             onPressed: () => setState(() => ++s),
                             child: const Text('Switch to 2'),
                           ),
-                          Container(
+                          const Container(
                             height: 400,
                             color: Colors.blue,
                           ),
@@ -806,7 +806,7 @@ void main() {
                               onPressed: () => setState(() => ++s),
                               child: const Text('Switch to 1'),
                             ),
-                            Container(
+                            const Container(
                               height: 400,
                               color: Colors.blue,
                             ),
@@ -1540,8 +1540,8 @@ void main() {
               return ListView(
                 physics: physics,
                 controller: scrollController,
-                children: <Widget>[
-                  const Text('Drag me!'),
+                children: const <Widget>[
+                  Text('Drag me!'),
                   Container(
                     height: 10000.0,
                     color: Colors.blue,
@@ -1592,7 +1592,7 @@ void main() {
                     onPressed: () => setState(() {}),
                     child: const Text('Rebuild'),
                   ),
-                  Container(
+                  const Container(
                     height: 10000,
                     color: Colors.blue,
                   ),
@@ -1645,7 +1645,7 @@ void main() {
                     }),
                     child: const Text('Switch controller'),
                   ),
-                  Container(
+                  const Container(
                     height: 10000,
                     color: Colors.blue,
                   ),
@@ -1704,7 +1704,7 @@ void main() {
                     }),
                     child: const Text('Switch controller'),
                   ),
-                  Container(
+                  const Container(
                     height: 10000,
                     color: Colors.blue,
                   ),

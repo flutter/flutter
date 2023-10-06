@@ -349,7 +349,7 @@ FlutterError
           physics: const PageScrollPhysics(),
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
+              const SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
             ];
           },
           body: ListView.builder(

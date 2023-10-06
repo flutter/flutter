@@ -15,7 +15,7 @@ void main() {
   const double kOpenScale = 1.15;
 
   Widget getChild() {
-    return Container(
+    return const Container(
       width: 300.0,
       height: 100.0,
       color: CupertinoColors.activeOrange,
@@ -837,11 +837,11 @@ void main() {
             ],
             child: GestureDetector(
               onTap: () => insideTapTriggered = true,
-              child: Container(
+              child: const Container(
                 width: 200,
                 height: 200,
-                key: const Key('container'),
-                color: const Color(0xFF00FF00),
+                key: Key('container'),
+                color: Color(0xFF00FF00),
               ),
             ),
           ),

@@ -426,7 +426,7 @@ void main() {
             ),
           ),
         )
-          : Container();
+          : const Container();
       }
       await tester.pumpWidget(
         MaterialApp(
@@ -1333,7 +1333,7 @@ void main() {
           slivers: <Widget>[
             SliverGrid.builder(
               itemCount: 0,
-              itemBuilder: (_, __) => Container(),
+              itemBuilder: (_, __) => const Container(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 1,
                 mainAxisSpacing: 10,
@@ -1356,7 +1356,7 @@ void main() {
           slivers: <Widget>[
             SliverGrid.builder(
               itemCount: 0,
-              itemBuilder: (_, __) => Container(),
+              itemBuilder: (_, __) => const Container(),
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 30,
               ),

@@ -34,7 +34,7 @@ void main() {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: Container(height: 10000.0)),
+              const SliverToBoxAdapter(child: Container(height: 10000.0)),
             ],
           ),
         ),
@@ -59,14 +59,14 @@ void main() {
           body: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             key: blockKey,
-            slivers: <Widget>[
+            slivers: const <Widget>[
               SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
                 stretch: true,
                 flexibleSpace: RepaintBoundary(
                   child: FlexibleSpaceBar(
-                    stretchModes: const <StretchMode>[StretchMode.blurBackground],
+                    stretchModes: <StretchMode>[StretchMode.blurBackground],
                     background: Row(
                       children: <Widget>[
                         Expanded(child: Container(color: Colors.red)),
@@ -111,7 +111,7 @@ void main() {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: Container(height: 10000.0)),
+              const SliverToBoxAdapter(child: Container(height: 10000.0)),
             ],
           ),
         ),
@@ -154,7 +154,7 @@ void main() {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: Container(height: 10000.0)),
+              const SliverToBoxAdapter(child: Container(height: 10000.0)),
             ],
           ),
         ),

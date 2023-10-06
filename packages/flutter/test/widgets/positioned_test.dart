@@ -11,8 +11,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('Positioned constructors', (WidgetTester tester) async {
-    final Widget child = Container();
-    final Positioned a = Positioned(
+    const Widget child = Container();
+    const Positioned a = Positioned(
       left: 101.0,
       right: 201.0,
       top: 301.0,

@@ -32,7 +32,7 @@ void main() {
       Semantics(
         label: 'test1',
         textDirection: TextDirection.ltr,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -67,12 +67,12 @@ void main() {
         Directionality(
             textDirection: TextDirection.ltr,
             child: ListView(
-              children: <Widget>[
+              children: const <Widget>[
                 SingleChildScrollView(
                   child: Column(
                     children: <Widget>[
-                      Container(padding: const EdgeInsets.only(top: 20.0)),
-                      const Text('label'),
+                      Container(padding: EdgeInsets.only(top: 20.0)),
+                      Text('label'),
                     ],
                   ),
                 ),
@@ -136,7 +136,7 @@ void main() {
           key: key,
           container: true,
           label: 'test2a',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     ));
@@ -170,7 +170,7 @@ void main() {
             key: key,
             container: true,
             label: 'test2b',
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ),
@@ -210,7 +210,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: Semantics(
           label: 'test1',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -227,7 +227,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           label: 'test1',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -254,7 +254,7 @@ void main() {
         child: Semantics(
           label: 'test1',
           textDirection: TextDirection.ltr,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -281,7 +281,7 @@ void main() {
         child: Semantics(
           label: 'test1',
           textDirection: TextDirection.rtl,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -300,7 +300,7 @@ void main() {
           label: 'label',
           hint: 'hint',
           value: 'value',
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );

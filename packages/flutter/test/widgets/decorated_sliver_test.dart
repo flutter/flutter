@@ -128,12 +128,12 @@ void main() {
       home: Scaffold(
         body: RepaintBoundary(
           key: backgroundKey,
-          child: CustomScrollView(
+          child: const CustomScrollView(
             slivers: <Widget>[
               DecoratedSliver(
                 decoration: decoration,
                 sliver: SliverPadding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate.fixed(<Widget>[
                       Container(
@@ -165,13 +165,13 @@ void main() {
       home: Scaffold(
         body: RepaintBoundary(
           key: foregroundKey,
-          child: CustomScrollView(
+          child: const CustomScrollView(
             slivers: <Widget>[
               DecoratedSliver(
                 decoration: decoration,
                 position: DecorationPosition.foreground,
                 sliver: SliverPadding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate.fixed(<Widget>[
                       Container(

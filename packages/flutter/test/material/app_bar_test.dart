@@ -307,7 +307,7 @@ void main() {
     // between the leading and actions widgets.
 
     final Key titleKey = UniqueKey();
-    Widget leading = Container();
+    Widget leading = const Container();
     List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
@@ -356,7 +356,7 @@ void main() {
       - 200.0,
     )); // Actions' width.
 
-    leading = Container(); // AppBar will constrain the width to 24.0
+    leading = const Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
@@ -370,7 +370,7 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget? leading = Container();
+    Widget? leading = const Container();
     List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
@@ -422,7 +422,7 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget? leading = Container();
+    Widget? leading = const Container();
     List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
@@ -762,7 +762,7 @@ void main() {
         theme: themeData,
         home: Scaffold(
           appBar: AppBar(
-            leading: Container(),
+            leading: const Container(),
             title: const Text('X'),
           ),
         ),
@@ -820,7 +820,7 @@ void main() {
         theme: themeData,
         home: Scaffold(
           appBar: AppBar(
-            leading: Container(),
+            leading: const Container(),
             title: const Text('X'),
           ),
         ),
@@ -1760,8 +1760,8 @@ void main() {
             child: Scaffold(
               primary: false,
               appBar: AppBar(
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(200.0),
+                bottom: const PreferredSize(
+                  preferredSize: Size.fromHeight(200.0),
                   child: Container(),
                 ),
               ),
@@ -1786,8 +1786,8 @@ void main() {
             data: topPadding100,
             child: Scaffold(
               appBar: AppBar(
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(200.0),
+                bottom: const PreferredSize(
+                  preferredSize: Size.fromHeight(200.0),
                   child: Container(),
                 ),
               ),
@@ -2174,12 +2174,12 @@ void main() {
                 ),
               ),
             ),
-            bottom: PreferredSize(
-              preferredSize: const Size(0.0, kToolbarHeight),
+            bottom: const PreferredSize(
+              preferredSize: Size(0.0, kToolbarHeight),
               child: Container(
                 height: 50.0,
-                padding: const EdgeInsets.all(4.0),
-                child: const Placeholder(
+                padding: EdgeInsets.all(4.0),
+                child: Placeholder(
                   color: Color(0xFFFFFFFF),
                 ),
               ),
@@ -2205,12 +2205,12 @@ void main() {
               Placeholder(fallbackWidth: 10.0),
               Placeholder(fallbackWidth: 10.0),
             ],
-            bottom: PreferredSize(
-              preferredSize: const Size(0.0, kToolbarHeight),
+            bottom: const PreferredSize(
+              preferredSize: Size(0.0, kToolbarHeight),
               child: Container(
                 height: 50.0,
-                padding: const EdgeInsets.all(4.0),
-                child: const Placeholder(
+                padding: EdgeInsets.all(4.0),
+                child: Placeholder(
                   color: Color(0xFFFFFFFF),
                 ),
               ),
@@ -2980,7 +2980,7 @@ void main() {
                         },
                       ),
                     ],
-                    flexibleSpace: FlexibleSpaceBar(
+                    flexibleSpace: const FlexibleSpaceBar(
                       background: Container(
                         height: appBarHeight,
                         color: Colors.orange,
@@ -2990,7 +2990,7 @@ void main() {
                   SliverList(
                     delegate: SliverChildListDelegate(
                       <Widget>[
-                        Container(height: 1200.0, color: Colors.teal),
+                        const Container(height: 1200.0, color: Colors.teal),
                       ],
                     ),
                   ),
@@ -3263,7 +3263,7 @@ void main() {
             title: const Text('Title'),
             toolbarHeight: 48,
           ),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -4130,7 +4130,7 @@ void main() {
                   return notification.depth <= 1;
                 },
               ),
-              body: SingleChildScrollView(
+              body: const SingleChildScrollView(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Container(
@@ -4294,7 +4294,7 @@ void main() {
                 controller: controller,
                 child: ListView(
                   controller: controller,
-                  children: <Widget>[
+                  children: const <Widget>[
                     Container(height: 1200.0, color: Colors.teal),
                   ],
                 ),
@@ -4323,7 +4323,7 @@ void main() {
               ),
               body: ListView(
                 scrollDirection: Axis.horizontal,
-                children: <Widget>[
+                children: const <Widget>[
                   Container(height: 600.0, width: 1200.0, color: Colors.teal),
                 ],
               ),

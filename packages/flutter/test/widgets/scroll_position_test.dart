@@ -184,7 +184,7 @@ void main() {
             return Focus(
               key: ValueKey<int>(item),
               focusNode: nodes[item],
-              child: Container(height: 110),
+              child: const Container(height: 110),
             );
           }).toList(),
         ),

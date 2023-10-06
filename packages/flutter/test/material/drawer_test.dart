@@ -19,14 +19,14 @@ void main() {
         home: Scaffold(
           drawer: Drawer(
             child: ListView(
-              children: <Widget>[
+              children: const <Widget>[
                 DrawerHeader(
                   child: Container(
                     key: containerKey,
-                    child: const Text('header'),
+                    child: Text('header'),
                   ),
                 ),
-                const ListTile(
+                ListTile(
                   leading: Icon(Icons.archive),
                   title: Text('Archive'),
                 ),
@@ -67,14 +67,14 @@ void main() {
         home: Scaffold(
           drawer: Drawer(
             child: ListView(
-              children: <Widget>[
+              children: const <Widget>[
                 DrawerHeader(
                   child: Container(
                     key: containerKey,
-                    child: const Text('header'),
+                    child: Text('header'),
                   ),
                 ),
-                const ListTile(
+                ListTile(
                   leading: Icon(Icons.archive),
                   title: Text('Archive'),
                 ),
@@ -269,7 +269,7 @@ void main() {
         home: Scaffold(
           key: scaffoldKey,
           drawer: const Text('drawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -292,7 +292,7 @@ void main() {
         home: Scaffold(
           key: scaffoldKey,
           drawer: const Text('endDrawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -316,7 +316,7 @@ void main() {
           key: scaffoldKey,
           restorationId: 'scaffold',
           drawer: const Text('drawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -347,7 +347,7 @@ void main() {
           key: scaffoldKey,
           restorationId: 'scaffold',
           endDrawer: const Text('endDrawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -379,7 +379,7 @@ void main() {
           key: scaffoldKey,
           drawer: const Text('drawer'),
           endDrawer: const Text('endDrawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -437,7 +437,7 @@ void main() {
         home: Scaffold(
           key: scaffoldKey,
           drawer: const Text('Drawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -460,7 +460,7 @@ void main() {
         home: Scaffold(
           key: scaffoldKey,
           drawer: const Text('Drawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );
@@ -483,14 +483,14 @@ void main() {
           builder: (BuildContext context, Orientation orientation) {
             switch (orientation) {
               case Orientation.portrait:
-                return Scaffold(
-                  drawer: const Text('drawer'),
+                return const Scaffold(
+                  drawer: Text('drawer'),
                   body: Container(),
                 );
               case Orientation.landscape:
                 return Scaffold(
                   appBar: AppBar(),
-                  body: Container(),
+                  body: const Container(),
                 );
             }
           },
@@ -524,14 +524,14 @@ void main() {
           builder: (BuildContext context, Orientation orientation) {
             switch (orientation) {
               case Orientation.portrait:
-                return Scaffold(
-                  endDrawer: const Text('endDrawer'),
+                return const Scaffold(
+                  endDrawer: Text('endDrawer'),
                   body: Container(),
                 );
               case Orientation.landscape:
                 return Scaffold(
                   appBar: AppBar(),
-                  body: Container(),
+                  body: const Container(),
                 );
             }
           },
@@ -561,7 +561,7 @@ void main() {
         home: Scaffold(
           key: scaffoldKey,
           endDrawer: const Text('endDrawer'),
-          body: Container(),
+          body: const Container(),
         ),
       ),
     );

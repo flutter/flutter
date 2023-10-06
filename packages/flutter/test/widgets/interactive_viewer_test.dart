@@ -1185,7 +1185,7 @@ void main() {
             body: Center(
               child: InteractiveViewer(
                 transformationController: transformationController,
-                child: Container(),
+                child: const Container(),
               ),
             ),
           ),
@@ -1639,7 +1639,7 @@ void main() {
         home: Scaffold(
           body: InteractiveViewer(
             alignment: alignment,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       ));

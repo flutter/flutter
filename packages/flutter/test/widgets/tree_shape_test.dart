@@ -55,7 +55,7 @@ void main() {
     await tester.pumpWidget(Center(
       child: View(
         view: FakeView(tester.view),
-        child: Container(),
+        child: const Container(),
       ),
     ));
 
@@ -71,7 +71,7 @@ void main() {
       ViewAnchor(
         child: View(
           view: FakeView(tester.view),
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -113,8 +113,8 @@ void main() {
 
   testWidgetsWithLeakTracking('The view property of a ViewAnchor cannot be a render object widget', (WidgetTester tester) async {
     await tester.pumpWidget(
-      ViewAnchor(
-        view: const ColoredBox(color: Colors.red),
+      const ViewAnchor(
+        view: ColoredBox(color: Colors.red),
         child: Container(),
       ),
     );
@@ -200,7 +200,7 @@ void main() {
       tester: tester,
       widget: View(
         view: tester.view,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -243,7 +243,7 @@ void main() {
         views: <Widget>[
           View(
             view: tester.view,
-            child: Container(),
+            child: const Container(),
           ),
         ],
       ),
@@ -258,7 +258,7 @@ void main() {
         views: <Widget>[
           View(
             view: FakeView(tester.view),
-            child: Container(),
+            child: const Container(),
           ),
         ],
       ),
@@ -278,11 +278,11 @@ void main() {
           views: <Widget>[
             View(
               view: FakeView(tester.view),
-              child: Container(),
+              child: const Container(),
             )
           ],
         ),
-        child: Container(),
+        child: const Container(),
       ),
     );
 

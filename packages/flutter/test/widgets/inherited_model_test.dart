@@ -197,7 +197,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           inheritedModel = InheritedModel.inheritFrom(context);
-          return Container();
+          return const Container();
         },
       ),
     );

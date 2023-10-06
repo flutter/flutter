@@ -1409,7 +1409,7 @@ void main() {
           action: SemanticsAction.decrease,
           finalValue: '12',
         );
-        await tester.pumpWidget(Container()); // clear old boilerplate
+        await tester.pumpWidget(const Container()); // clear old boilerplate
 
         // 24-hour format
         await mediaQueryBoilerplate(

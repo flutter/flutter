@@ -1160,7 +1160,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Theme(data: theme, child: progressTheme),
     ));
-    final Widget wrappedTheme = progressTheme.wrap(builderContext, Container());
+    final Widget wrappedTheme = progressTheme.wrap(builderContext, const Container());
 
     // Make sure the returned widget is a new ProgressIndicatorTheme instance
     // with the same theme data as the original.

@@ -143,20 +143,20 @@ void main() {
           data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
           child: Material(
             child: ListView(
-              children: <Widget>[
-                const TextField(
+              children: const <Widget>[
+                TextField(
                   decoration: InputDecoration(
                     labelText: 'label1',
                   ),
                 ),
-                const TextField(
+                TextField(
                   decoration: InputDecoration(
                     labelText: 'label2',
                   ),
                 ),
                 Container(
                   height: 1000.0,
-                  color: const Color(0xFF00FF00),
+                  color: Color(0xFF00FF00),
                 ),
               ],
             ),

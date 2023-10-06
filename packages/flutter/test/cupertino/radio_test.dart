@@ -413,7 +413,7 @@ void main() {
     Widget buildRadio(bool show) {
       return CupertinoApp(
         home: Center(
-          child: show ? CupertinoRadio<bool>(key: key, value: true, groupValue: false, onChanged: (_) { }) : Container(),
+          child: show ? CupertinoRadio<bool>(key: key, value: true, groupValue: false, onChanged: (_) { }) : const Container(),
         ),
       );
     }

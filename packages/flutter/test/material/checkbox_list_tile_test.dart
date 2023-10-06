@@ -839,7 +839,7 @@ void main() {
     );
 
     // Start hovering
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
 
@@ -963,7 +963,7 @@ void main() {
     );
 
     // Start hovering
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
 
@@ -1063,7 +1063,7 @@ void main() {
     }
 
     // Default color
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(

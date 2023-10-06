@@ -531,8 +531,8 @@ void main() {
     (WidgetTester tester) async {
       final Map<int, Widget> children = <int, Widget>{};
       children[0] = const Text('Child 1');
-      children[1] = Container(
-        constraints: const BoxConstraints.tightFor(width: 50.0, height: 50.0),
+      children[1] = const Container(
+        constraints: BoxConstraints.tightFor(width: 50.0, height: 50.0),
       );
       children[2] = const Placeholder();
 
@@ -628,14 +628,14 @@ void main() {
 
   testWidgetsWithLeakTracking('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
-    children[0] = Container(
-      constraints: const BoxConstraints.tightFor(height: 100.0),
+    children[0] = const Container(
+      constraints: BoxConstraints.tightFor(height: 100.0),
     );
-    children[1] = Container(
-      constraints: const BoxConstraints.tightFor(height: 400.0),
+    children[1] = const Container(
+      constraints: BoxConstraints.tightFor(height: 400.0),
     );
-    children[2] = Container(
-      constraints: const BoxConstraints.tightFor(height: 200.0),
+    children[2] = const Container(
+      constraints: BoxConstraints.tightFor(height: 200.0),
     );
 
     await tester.pumpWidget(
@@ -659,14 +659,14 @@ void main() {
 
   testWidgetsWithLeakTracking('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
-    children[0] = Container(
-      constraints: const BoxConstraints.tightFor(width: 50.0),
+    children[0] = const Container(
+      constraints: BoxConstraints.tightFor(width: 50.0),
     );
-    children[1] = Container(
-      constraints: const BoxConstraints.tightFor(width: 100.0),
+    children[1] = const Container(
+      constraints: BoxConstraints.tightFor(width: 100.0),
     );
-    children[2] = Container(
-      constraints: const BoxConstraints.tightFor(width: 200.0),
+    children[2] = const Container(
+      constraints: BoxConstraints.tightFor(width: 200.0),
     );
 
     await tester.pumpWidget(
@@ -1512,9 +1512,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Golden Test Placeholder Widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
-    children[0] = Container();
+    children[0] = const Container();
     children[1] = const Placeholder();
-    children[2] = Container();
+    children[2] = const Container();
 
     const int currentValue = 0;
 

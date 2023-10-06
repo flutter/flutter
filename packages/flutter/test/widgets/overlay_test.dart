@@ -29,11 +29,11 @@ void main() {
                 didBuild = true;
                 final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>()!;
                 expect(overlay.key, equals(overlayKey));
-                return Container();
+                return const Container();
               },
             ),
             overlayEntry2 = OverlayEntry(
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => const Container(),
             ),
           ],
         ),
@@ -104,17 +104,17 @@ void main() {
             overlayEntry1 = OverlayEntry(
               opaque: true,
               maintainState: true,
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => const Container(),
             ),
             overlayEntry2 = OverlayEntry(
               opaque: true,
               maintainState: true,
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => const Container(),
             ),
             overlayEntry3 = OverlayEntry(
               opaque: true,
               maintainState: true,
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => const Container(),
             ),
           ],
         ),
@@ -191,7 +191,7 @@ void main() {
             baseEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Base');
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -209,7 +209,7 @@ void main() {
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New');
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -233,7 +233,7 @@ void main() {
             baseEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Base');
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -251,7 +251,7 @@ void main() {
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New');
-          return Container();
+          return const Container();
         },
       ),
       below: baseEntry,
@@ -278,13 +278,13 @@ void main() {
             baseEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Base');
-                return Container();
+                return const Container();
               },
             ),
             topEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Top');
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -302,7 +302,7 @@ void main() {
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New');
-          return Container();
+          return const Container();
         },
       ),
       above: baseEntry,
@@ -327,7 +327,7 @@ void main() {
             baseEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Base');
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -341,13 +341,13 @@ void main() {
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New1');
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New2');
-          return Container();
+          return const Container();
         },
       ),
     ];
@@ -380,7 +380,7 @@ void main() {
             baseEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Base');
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -394,13 +394,13 @@ void main() {
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New1');
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New2');
-          return Container();
+          return const Container();
         },
       ),
     ];
@@ -435,13 +435,13 @@ void main() {
             baseEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Base');
-                return Container();
+                return const Container();
               },
             ),
             topEntry = OverlayEntry(
               builder: (BuildContext context) {
                 buildOrder.add('Top');
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -455,13 +455,13 @@ void main() {
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New1');
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add('New2');
-          return Container();
+          return const Container();
         },
       ),
     ];
@@ -486,25 +486,25 @@ void main() {
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(0);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(1);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(2);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(3);
-          return Container();
+          return const Container();
         },
       ),
     ];
@@ -533,7 +533,7 @@ void main() {
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(4);
-          return Container();
+          return const Container();
         },
       ),
       initialEntries[2],
@@ -557,25 +557,25 @@ void main() {
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(0);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(1);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(2);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(3);
-          return Container();
+          return const Container();
         },
       ),
     ];
@@ -604,7 +604,7 @@ void main() {
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(4);
-          return Container();
+          return const Container();
         },
       ),
       initialEntries[2],
@@ -627,25 +627,25 @@ void main() {
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(0);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(1);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(2);
-          return Container();
+          return const Container();
         },
       ),
       OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(3);
-          return Container();
+          return const Container();
         },
       ),
     ];
@@ -674,7 +674,7 @@ void main() {
       newEntry = OverlayEntry(
         builder: (BuildContext context) {
           buildOrder.add(4);
-          return Container();
+          return const Container();
         },
       ),
       initialEntries[2],
@@ -702,7 +702,7 @@ void main() {
           initialEntries: <OverlayEntry>[
             base = OverlayEntry(
               builder: (BuildContext context) {
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -715,16 +715,16 @@ void main() {
     try {
       overlay.insert(
         OverlayEntry(builder: (BuildContext context) {
-          return Container();
+          return const Container();
         }),
         above: OverlayEntry(
           builder: (BuildContext context) {
-            return Container();
+            return const Container();
           },
         ),
         below: OverlayEntry(
           builder: (BuildContext context) {
-            return Container();
+            return const Container();
           },
         ),
       );
@@ -734,7 +734,7 @@ void main() {
 
     expect(() => overlay.insert(
       OverlayEntry(builder: (BuildContext context) {
-        return Container();
+        return const Container();
       }),
       above: base,
     ), isNot(throwsAssertionError));
@@ -742,11 +742,11 @@ void main() {
     try {
       overlay.insert(
         OverlayEntry(builder: (BuildContext context) {
-          return Container();
+          return const Container();
         }),
         above: OverlayEntry(
           builder: (BuildContext context) {
-            return Container();
+            return const Container();
           },
         ),
       );
@@ -757,7 +757,7 @@ void main() {
     try {
       overlay.rearrange(<OverlayEntry>[base], above: OverlayEntry(
         builder: (BuildContext context) {
-          return Container();
+          return const Container();
         },
       ));
 
@@ -775,7 +775,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             late FlutterError error;
-            final Widget debugRequiredFor = Container();
+            const Widget debugRequiredFor = Container();
             try {
               Overlay.of(context, debugRequiredFor: debugRequiredFor);
             } on FlutterError catch (e) {
@@ -807,7 +807,7 @@ void main() {
                 '     Builder\n'
               ));
             }
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -829,7 +829,7 @@ void main() {
             baseEntry = OverlayEntry(
               builder: (BuildContext context) {
                 foundState = Overlay.maybeOf(context);
-                return Container();
+                return const Container();
               },
             ),
           ],
@@ -1063,7 +1063,7 @@ void main() {
         maintainState: true,
         opaque: true,
         builder: (BuildContext context) {
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -1172,7 +1172,7 @@ void main() {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) => Positioned(left: 2000, right: 2500, child: Container()),
+              builder: (BuildContext context) => const Positioned(left: 2000, right: 2500, child: Container()),
             ),
           ],
         ),
@@ -1191,7 +1191,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) => Container(),
+                builder: (BuildContext context) => const Container(),
               ),
             ],
             clipBehavior: clip,
@@ -1230,7 +1230,7 @@ void main() {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             baseEntry = OverlayEntry(
-              builder: (BuildContext context) => Positioned(left: 10, right: 10, child: Container()),
+              builder: (BuildContext context) => const Positioned(left: 10, right: 10, child: Container()),
             ),
           ],
         ),
@@ -1324,7 +1324,7 @@ void main() {
       final OverlayState overlay = overlayKey.currentState! as OverlayState;
       final List<bool> mountedLog = <bool>[];
       final OverlayEntry entry = OverlayEntry(
-        builder: (BuildContext context) => Container(),
+        builder: (BuildContext context) => const Container(),
       );
       addTearDown(entry.dispose);
 
@@ -1357,7 +1357,7 @@ void main() {
       await tester.pumpWidget(emptyOverlay);
       final OverlayState overlay = overlayKey.currentState! as OverlayState;
       final OverlayEntry entry = OverlayEntry(
-        builder: (BuildContext context) => Container(),
+        builder: (BuildContext context) => const Container(),
       );
       addTearDown(() => entry..remove()..dispose());
 
@@ -1374,7 +1374,7 @@ void main() {
 
     test('dispose works', () {
       final OverlayEntry entry = OverlayEntry(
-        builder: (BuildContext context) => Container(),
+        builder: (BuildContext context) => const Container(),
       );
 
       entry.dispose();
@@ -1393,7 +1393,7 @@ void main() {
       final OverlayState overlay = overlayKey.currentState! as OverlayState;
       final List<bool> mountedLog = <bool>[];
       final OverlayEntry entry = OverlayEntry(
-        builder: (BuildContext context) => Container(),
+        builder: (BuildContext context) => const Container(),
       );
       entry.addListener(() {
         mountedLog.add(entry.mounted);
@@ -1440,7 +1440,7 @@ void main() {
                     child: Builder(
                       builder: (BuildContext context) {
                         overlay = Overlay.maybeOf(context);
-                        return Container();
+                        return const Container();
                       },
                     ),
                   );
@@ -1469,7 +1469,7 @@ void main() {
                     child: Builder(
                       builder: (BuildContext context) {
                         Overlay.of(context);
-                        return Container();
+                        return const Container();
                       },
                     ),
                   );
@@ -1515,7 +1515,7 @@ void main() {
                     child: Builder(
                       builder: (BuildContext context) {
                         debugCheckHasOverlay(context);
-                        return Container();
+                        return const Container();
                       },
                     ),
                   );
@@ -1564,6 +1564,6 @@ class StatefulTestState extends State<StatefulTestWidget> {
   @override
   Widget build(BuildContext context) {
     rebuildCount += 1;
-    return Container();
+    return const Container();
   }
 }

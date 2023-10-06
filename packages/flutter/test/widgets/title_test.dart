@@ -12,7 +12,7 @@ void main() {
     final Widget widget = Title(
       color: const Color(0xFF00FF00),
       title: 'Awesome app',
-      child: Container(),
+      child: const Container(),
     );
     expect(widget.toString, isNot(throwsException));
   });
@@ -20,7 +20,7 @@ void main() {
   testWidgetsWithLeakTracking('should handle having no title', (WidgetTester tester) async {
     final Title widget = Title(
       color: const Color(0xFF00FF00),
-      child: Container(),
+      child: const Container(),
     );
     expect(widget.toString, isNot(throwsException));
     expect(widget.title, equals(''));
@@ -30,7 +30,7 @@ void main() {
   testWidgetsWithLeakTracking('should not allow non-opaque color', (WidgetTester tester) async {
     expect(() => Title(
       color: const Color(0x00000000),
-      child: Container(),
+      child: const Container(),
     ), throwsAssertionError);
   });
 
@@ -44,7 +44,7 @@ void main() {
 
     await tester.pumpWidget(Title(
       color: const Color(0xFF00FF00),
-      child: Container(),
+      child: const Container(),
     ));
 
     expect(log, hasLength(1));

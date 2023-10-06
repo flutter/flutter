@@ -386,7 +386,7 @@ void main() {
                   largeTitle: Text('Large Title', key: titleKey),
                   trailing: Placeholder(key: trailingKey),
                 ),
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: Container(
                     height: 1200.0,
                   ),
@@ -415,8 +415,8 @@ void main() {
         home: CupertinoPageScaffold(
           child: CustomScrollView(
             controller: scrollController,
-            slivers: <Widget>[
-              const CupertinoSliverNavigationBar(
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
                 largeTitle: Text('Title'),
               ),
               SliverToBoxAdapter(
@@ -513,7 +513,7 @@ void main() {
                 ),
                 largeTitle: const Text('Title'),
               ),
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Container(
                   height: 1200.0,
                 ),
@@ -601,8 +601,8 @@ void main() {
         home: CupertinoPageScaffold(
           child: CustomScrollView(
             controller: scrollController,
-            slivers: <Widget>[
-              const CupertinoSliverNavigationBar(
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
                 middle: Text('Different title'),
                 largeTitle: Text('Title'),
               ),
@@ -909,9 +909,9 @@ void main() {
   testWidgetsWithLeakTracking('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(CupertinoApp(
+    await tester.pumpWidget(const CupertinoApp(
       home: CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
+        navigationBar: CupertinoNavigationBar(
           middle: Text('Fixed Title'),
         ),
         child: Container(),
@@ -992,12 +992,12 @@ void main() {
     'Large title golden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        CupertinoApp(
+        const CupertinoApp(
           home: RepaintBoundary(
             child: CupertinoPageScaffold(
               child: CustomScrollView(
                 slivers: <Widget>[
-                  const CupertinoSliverNavigationBar(
+                  CupertinoSliverNavigationBar(
                     largeTitle: Text('Bling bling'),
                   ),
                   SliverToBoxAdapter(
@@ -1280,11 +1280,11 @@ void main() {
       const Text titleText = Text('Large Title');
 
       await tester.pumpWidget(
-        CupertinoApp(
+        const CupertinoApp(
           home: CupertinoPageScaffold(
             child: CustomScrollView(
               slivers: <Widget>[
-                const CupertinoSliverNavigationBar(
+                CupertinoSliverNavigationBar(
                   trailing: trailingText,
                   largeTitle: titleText,
                   stretch: true,
@@ -1335,11 +1335,11 @@ void main() {
       const Text titleText = Text('Large Title');
 
       await tester.pumpWidget(
-        CupertinoApp(
+        const CupertinoApp(
           home: CupertinoPageScaffold(
             child: CustomScrollView(
               slivers: <Widget>[
-                const CupertinoSliverNavigationBar(
+                CupertinoSliverNavigationBar(
                   trailing: trailingText,
                   largeTitle: titleText,
                 ),
@@ -1428,11 +1428,11 @@ void main() {
       const Text titleText = Text('Large Title');
 
       await tester.pumpWidget(
-        CupertinoApp(
+        const CupertinoApp(
           home: CupertinoPageScaffold(
             child: CustomScrollView(
               slivers: <Widget>[
-                const CupertinoSliverNavigationBar(
+                CupertinoSliverNavigationBar(
                   largeTitle: titleText,
                   stretch: true,
                 ),
@@ -1486,11 +1486,11 @@ void main() {
       const Text titleText = Text('Very very very long large title');
 
       await tester.pumpWidget(
-        CupertinoApp(
+        const CupertinoApp(
           home: CupertinoPageScaffold(
             child: CustomScrollView(
               slivers: <Widget>[
-                const CupertinoSliverNavigationBar(
+                CupertinoSliverNavigationBar(
                   largeTitle: titleText,
                   stretch: true,
                 ),
@@ -1538,8 +1538,8 @@ void main() {
           home: CupertinoPageScaffold(
             child: CustomScrollView(
               controller: scrollController,
-              slivers: <Widget>[
-                const CupertinoSliverNavigationBar(
+              slivers: const <Widget>[
+                CupertinoSliverNavigationBar(
                   largeTitle: Text('Large title'),
                   stretch: true,
                 ),
@@ -1585,6 +1585,6 @@ class _ExpectStyles extends StatelessWidget {
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);
     count += index;
-    return Container();
+    return const Container();
   }
 }

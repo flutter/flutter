@@ -609,7 +609,7 @@ void main() {
             opacity: 1.0,
             duration: const Duration(seconds: 1),
             curve: c,
-            child: Container(color: Colors.green)),
+            child: const Container(color: Colors.green)),
       ),
     ));
 

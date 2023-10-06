@@ -1188,7 +1188,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(Radio<bool>)));
     await tester.pumpAndSettle();
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildRadio());
     await tester.pumpAndSettle();
 
@@ -1430,7 +1430,7 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(Radio<bool>)));
       await tester.pumpAndSettle();
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pumpWidget(buildRadio());
       await tester.pumpAndSettle();
 

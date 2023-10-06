@@ -46,7 +46,7 @@ void main() {
               value.value = newValue;
             },
             focusNode: _focusNode,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -140,7 +140,7 @@ void main() {
             focusNode: _focusNode,
             child: Focus(
               focusNode: _focusNode,
-              child: Container(),
+              child: const Container(),
             ),
           ),
         ),
@@ -233,7 +233,7 @@ void main() {
               value.value = newValue;
             },
             focusNode: _focusNode,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -289,7 +289,7 @@ void main() {
               value.value = valueToUse(newValue);
             },
             focusNode: _focusNode,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -347,7 +347,7 @@ void main() {
             focusNode: focusNode,
             child: Focus(
               focusNode: focusNode,
-              child: Container(),
+              child: const Container(),
             ),
           ),
         ),
@@ -412,7 +412,7 @@ void main() {
             focusNode: _focusNode,
             child: Focus(
               focusNode: _focusNode,
-              child: Container(),
+              child: const Container(),
             ),
           ),
         ),

@@ -15,7 +15,7 @@ class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
 
 class TestUniqueWidgetState extends State<TestUniqueWidget> {
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }
 
 void main() {

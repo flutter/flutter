@@ -572,10 +572,10 @@ void main() {
                   ),
                 ),
               ),
-              Opacity(
+              const Opacity(
                 opacity: 0.5,
                 child: Container(
-                  color: const Color(0xD0FF0000),
+                  color: Color(0xD0FF0000),
                   height: 100,
                 ),
               ),
@@ -630,10 +630,10 @@ void main() {
                     ),
                   ),
                 ),
-                Opacity(
+                const Opacity(
                   opacity: 0.5,
                   child: Container(
-                    color: const Color(0xD0FF0000),
+                    color: Color(0xD0FF0000),
                     height: 100,
                   ),
                 ),
@@ -692,10 +692,10 @@ void main() {
                     ),
                   ),
                 ),
-                Opacity(
+                const Opacity(
                   opacity: 0.5,
                   child: Container(
-                    color: const Color(0xD0FF0000),
+                    color: Color(0xD0FF0000),
                     height: 100,
                   ),
                 ),

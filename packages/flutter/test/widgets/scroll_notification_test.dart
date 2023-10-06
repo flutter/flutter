@@ -126,9 +126,9 @@ void main() {
               depth0Values.add(value.depth);
               return false;
             },
-            child: Container(
-              padding: const EdgeInsets.all(50.0),
-              child: const SingleChildScrollView(
+            child: const Container(
+              padding: EdgeInsets.all(50.0),
+              child: SingleChildScrollView(
                 dragStartBehavior: DragStartBehavior.down,
                 child: SizedBox(height: 1200.0),
               ),
@@ -169,15 +169,15 @@ void main() {
             notificationTypes.add(value.runtimeType);
             return false;
           },
-          child: Scaffold(
+          child: const Scaffold(
             body: SizedBox.expand(
               child: SingleChildScrollView(
                 dragStartBehavior: DragStartBehavior.down,
                 child: SizedBox(
                   height: 1200.0,
                   child: Container(
-                    padding: const EdgeInsets.all(50.0),
-                    child: const SingleChildScrollView(
+                    padding: EdgeInsets.all(50.0),
+                    child: SingleChildScrollView(
                       dragStartBehavior: DragStartBehavior.down,
                       child: SizedBox(height: 1200.0),
                     ),

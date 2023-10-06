@@ -26,8 +26,8 @@ void main() {
       onVerticalDragEnd: (DragEndDetails details) {
         didEndDrag = true;
       },
-      child: Container(
-        color: const Color(0xFF00FF00),
+      child: const Container(
+        color: Color(0xFF00FF00),
       ),
     );
 
@@ -56,7 +56,7 @@ void main() {
     expect(didEndDrag, isTrue);
     didEndDrag = false;
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgetsWithLeakTracking('Match two scroll gestures in succession', (WidgetTester tester) async {
@@ -72,8 +72,8 @@ void main() {
       onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
       onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
       onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
-      child: Container(
-        color: const Color(0xFF00FF00),
+      child: const Container(
+        color: Color(0xFF00FF00),
       ),
     );
     await tester.pumpWidget(widget);
@@ -89,7 +89,7 @@ void main() {
     expect(gestureCount, 2);
     expect(dragDistance, 40.0 * 2.0); // delta between down and up, twice
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgetsWithLeakTracking("Pan doesn't crash", (WidgetTester tester) async {
@@ -108,8 +108,8 @@ void main() {
         onPanEnd: (DragEndDetails details) {
           didEndPan = true;
         },
-        child: Container(
-          color: const Color(0xFF00FF00),
+        child: const Container(
+          color: Color(0xFF00FF00),
         ),
       ),
     );
@@ -150,10 +150,10 @@ void main() {
                   onPointerDown: (_) {
                     didReceivePointerDown = true;
                   },
-                  child: Container(
+                  child: const Container(
                     width: 100.0,
                     height: 100.0,
-                    color: const Color(0xFF00FF00),
+                    color: Color(0xFF00FF00),
                   ),
                 ),
                 SizedBox(
@@ -243,7 +243,7 @@ void main() {
             onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) {
               didTap = true;
             } : null,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -261,7 +261,7 @@ void main() {
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
             onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -274,7 +274,7 @@ void main() {
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
             onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
-            child: Container(),
+            child: const Container(),
           ),
         ),
       );
@@ -746,7 +746,7 @@ void main() {
           ),
         },
         semantics: _EmptySemanticsGestureDelegate(),
-        child: Container(),
+        child: const Container(),
       ));
       key.currentState!.debugFillProperties(builder);
 
@@ -769,7 +769,7 @@ void main() {
         key: key,
         semantics: _EmptySemanticsGestureDelegate(),
         excludeFromSemantics: true,
-        child: Container(),
+        child: const Container(),
       ));
       key.currentState!.debugFillProperties(builder);
 
@@ -894,8 +894,8 @@ void main() {
           didEndPan = true;
         },
         supportedDevices: supportedDevices,
-        child: Container(
-          color: const Color(0xFF00FF00),
+        child: const Container(
+          color: Color(0xFF00FF00),
         )
       );
     }
@@ -964,8 +964,8 @@ void main() {
           didEndPan = true;
         },
         supportedDevices: const <PointerDeviceKind>{PointerDeviceKind.mouse},
-        child: Container(
-          color: const Color(0xFF00FF00),
+        child: const Container(
+          color: Color(0xFF00FF00),
         )
       ),
     );
@@ -1002,10 +1002,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: GestureDetector(
             onDoubleTap: () => log.add('double-tap'),
-            child: Container(
+            child: const Container(
               width: 100.0,
               height: 100.0,
-              color: const Color(0xFF00FF00),
+              color: Color(0xFF00FF00),
             ),
           ),
         ),
@@ -1025,10 +1025,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: GestureDetector(
             onDoubleTapDown: (_) => log.add('double-tap-down'),
-            child: Container(
+            child: const Container(
               width: 100.0,
               height: 100.0,
-              color: const Color(0xFF00FF00),
+              color: Color(0xFF00FF00),
             ),
           ),
         ),

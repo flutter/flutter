@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   testWidgetsWithLeakTracking('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
     await tester.pumpWidget(
-      SemanticsDebugger(
+      const SemanticsDebugger(
         child: Container(),
       ),
     );

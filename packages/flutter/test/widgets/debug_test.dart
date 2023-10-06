@@ -13,8 +13,8 @@ void main() {
   test('debugChildrenHaveDuplicateKeys control test', () {
     const Key key = Key('key');
     final List<Widget> children = <Widget>[
-      Container(key: key),
-      Container(key: key),
+      const Container(key: key),
+      const Container(key: key),
     ];
     final Widget widget = Flex(
       direction: Axis.vertical,
@@ -45,8 +45,8 @@ void main() {
   test('debugItemsHaveDuplicateKeys control test', () {
     const Key key = Key('key');
     final List<Widget> items = <Widget>[
-      Container(key: key),
-      Container(key: key),
+      const Container(key: key),
+      const Container(key: key),
     ];
     late FlutterError error;
     try {
@@ -90,7 +90,7 @@ void main() {
               ),
             );
           }
-          return Container();
+          return const Container();
         },
       ),
     );
@@ -155,7 +155,7 @@ void main() {
   });
 
   test('debugWidgetBuilderValue control test', () {
-    final Widget widget = Container();
+    const Widget widget = Container();
     FlutterError? error;
     try {
       debugWidgetBuilderValue(widget, null);

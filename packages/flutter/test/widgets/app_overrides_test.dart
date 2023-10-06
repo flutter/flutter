@@ -34,7 +34,7 @@ Future<void> pumpApp(WidgetTester tester) async {
     WidgetsApp(
       color: const Color(0xFF333333),
       onGenerateRoute: (RouteSettings settings) {
-        return TestRoute<void>(settings: settings, child: Container());
+        return TestRoute<void>(settings: settings, child: const Container());
       },
     ),
   );

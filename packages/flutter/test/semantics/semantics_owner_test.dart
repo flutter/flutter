@@ -28,7 +28,7 @@ void main() {
     final int nodeId = tester.semantics.find(find.bySemanticsLabel('Hello World')).id;
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Container(),
       ),

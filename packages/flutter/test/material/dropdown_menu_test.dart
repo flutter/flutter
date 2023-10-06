@@ -235,7 +235,7 @@ void main() {
     expect(buttonSize.width, customBigWidth);
 
     // reset test
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     const double customSmallWidth = 100.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customSmallWidth));
     box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
@@ -304,7 +304,7 @@ void main() {
     expect(buttonSize.width, 136.0);
 
     // If expandedInsets is EdgeInsets.zero, the width should be the same as its parent.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildMenuAnchor(expandedInsets: EdgeInsets.zero));
     box = tester.firstRenderObject(find.byType(TextField));
     expect(box.size.width, parentWidth);
@@ -318,7 +318,7 @@ void main() {
     // If expandedInsets is not zero, the width of the text field should be adjusted
     // based on the EdgeInsets.left and EdgeInsets.right. The top and bottom values
     // will be ignored.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
     box = tester.firstRenderObject(find.byType(TextField));
     expect(box.size.width, parentWidth - 35.0 - 20.0);
@@ -359,7 +359,7 @@ void main() {
     expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
     // Constrains the menu height.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildTest(themeData, menuChildren, menuHeight: 100));
     await tester.pumpAndSettle();
 
@@ -401,7 +401,7 @@ void main() {
   expect(menuViewSize.height, equals(304.0)); // 304 = 288 + vertical padding(2 * 8)
 
   // Constrains the menu height.
-  await tester.pumpWidget(Container());
+  await tester.pumpWidget(const Container());
   await tester.pumpWidget(buildTest(themeData, menuChildren, menuHeight: 100));
   await tester.pumpAndSettle();
 
@@ -435,7 +435,7 @@ void main() {
     expect(labelTopLeft.dx, equals(itemTextTopLeft.dx));
 
     // Test when the text field has a leading icon.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildTest(themeData, menuChildren,
       leadingIcon: const Icon(Icons.search),
       label: const Text('label'),
@@ -456,7 +456,7 @@ void main() {
     expect(updatedLabelTopLeft.dx, equals(iconWidth));
 
     // Test when then leading icon is a widget with a bigger size.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildTest(themeData, menuChildren,
       leadingIcon: const SizedBox(
         width: 75.0,
@@ -507,7 +507,7 @@ void main() {
     expect(labelTopRight.dx, equals(itemTextTopRight.dx));
 
     // Test when the text field has a leading icon.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
@@ -539,7 +539,7 @@ void main() {
     expect(updatedLabelTopRight.dx, equals(dropdownMenuTopRight.dx - iconWidth));
 
     // Test when then leading icon is a widget with a bigger size.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
@@ -1293,7 +1293,7 @@ void main() {
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
 
     // Set requestFocusOnTap to false.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
     await tester.pumpAndSettle();
 
@@ -1360,7 +1360,7 @@ void main() {
     final Rect menu = tester.getRect(findMenu);
     expect(textInput.width, menu.width);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: ListView(

@@ -20,7 +20,7 @@ class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidg
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }
 

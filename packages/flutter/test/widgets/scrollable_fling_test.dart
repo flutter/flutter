@@ -12,7 +12,7 @@ const TextStyle testFont = TextStyle(
 );
 
 Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
-  await tester.pumpWidget(Container());
+  await tester.pumpWidget(const Container());
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
       platform: platform,

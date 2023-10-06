@@ -62,7 +62,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 capturedContext = context;
-                return Container();
+                return const Container();
               }
             )
           );
@@ -88,7 +88,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 capturedContext = context;
-                return Container();
+                return const Container();
               }
             )
           );
@@ -204,7 +204,7 @@ void main() {
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
-          child: Container(),
+          child: const Container(),
         ),
       );
       manager.doSerialization();
@@ -352,7 +352,7 @@ void main() {
           child: Row(
             textDirection: TextDirection.ltr,
             children: <Widget>[
-              RestorationScope(
+              const RestorationScope(
                 restorationId: 'fixed',
                 child: Container(),
               ),

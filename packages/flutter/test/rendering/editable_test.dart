@@ -1333,10 +1333,10 @@ void main() {
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
-        text: TextSpan(
-          style: const TextStyle(height: 1.0, fontSize: 10.0),
+        text: const TextSpan(
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
-            const TextSpan(text: 'test'),
+            TextSpan(text: 'test'),
             WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
           ],
         ),
@@ -1373,10 +1373,10 @@ void main() {
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
-        text: TextSpan(
-          style: const TextStyle(height: 1.0, fontSize: 10.0),
+        text: const TextSpan(
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
-            const TextSpan(text: 'test'),
+            TextSpan(text: 'test'),
             WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
             WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
             WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
@@ -1575,10 +1575,10 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         maxLines: null,
-        text: TextSpan(
-          style: const TextStyle(height: 1.0, fontSize: 10.0),
+        text: const TextSpan(
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
-            const TextSpan(text: 'test'),
+            TextSpan(text: 'test'),
             WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
           ],
         ),

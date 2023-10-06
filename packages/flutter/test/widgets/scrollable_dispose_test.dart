@@ -15,7 +15,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView(children: List<Widget>.generate(250, (int i) => Text('$i'))),
-          right: Container(),
+          right: const Container(),
         ),
       ),
     );
@@ -81,7 +81,7 @@ void main() {
 
     // Dispose the scrollables while the finger is still down, this should not crash.
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Container(),
       ),
     );

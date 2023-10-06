@@ -467,14 +467,14 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             capturedContext = context;
-            return Container(height: 1000.0);
+            return const Container(height: 1000.0);
           },
         ),
       ),
     ));
 
     const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
-    final Widget child = Container();
+    const Widget child = Container();
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

@@ -15,17 +15,17 @@ const Color yellow = Color(0xFFFFFF00);
 void main() {
   testWidgetsWithLeakTracking('SlottedRenderObjectWidget test', (WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
-      topLeft: Container(
+      topLeft: const Container(
         height: 100,
         width: 80,
         color: yellow,
-        child: const Text('topLeft'),
+        child: Text('topLeft'),
       ),
-      bottomRight: Container(
+      bottomRight: const Container(
         height: 120,
         width: 110,
         color: green,
-        child: const Text('bottomRight'),
+        child: Text('bottomRight'),
       ),
     ));
 
@@ -44,17 +44,17 @@ void main() {
     );
 
     await tester.pumpWidget(buildWidget(
-      topLeft: Container(
+      topLeft: const Container(
         height: 200,
         width: 100,
         color: yellow,
-        child: const Text('topLeft'),
+        child: Text('topLeft'),
       ),
-      bottomRight: Container(
+      bottomRight: const Container(
         height: 220,
         width: 210,
         color: green,
-        child: const Text('bottomRight'),
+        child: Text('bottomRight'),
       ),
     ));
 
@@ -73,11 +73,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildWidget(
-      topLeft: Container(
+      topLeft: const Container(
         height: 200,
         width: 100,
         color: yellow,
-        child: const Text('topLeft'),
+        child: Text('topLeft'),
       ),
       bottomRight: Container(
         key: UniqueKey(),
@@ -103,11 +103,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildWidget(
-      topLeft: Container(
+      topLeft: const Container(
         height: 200,
         width: 100,
         color: yellow,
-        child: const Text('topLeft'),
+        child: Text('topLeft'),
       ),
     ));
 
@@ -127,7 +127,7 @@ void main() {
     expect(tester.getSize(find.byType(_Diagonal)), Size.zero);
     expect(find.byType(_Diagonal), paintsNothing);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(find.byType(_Diagonal), findsNothing);
   });
 

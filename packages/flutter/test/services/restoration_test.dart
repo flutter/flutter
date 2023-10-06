@@ -299,7 +299,7 @@ void main() {
 
   test('debugIsSerializableForRestoration', () {
     expect(debugIsSerializableForRestoration(Object()), isFalse);
-    expect(debugIsSerializableForRestoration(Container()), isFalse);
+    expect(debugIsSerializableForRestoration(const Container()), isFalse);
 
     expect(debugIsSerializableForRestoration(null), isTrue);
     expect(debugIsSerializableForRestoration(147823), isTrue);

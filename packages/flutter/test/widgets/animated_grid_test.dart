@@ -551,7 +551,7 @@ void main() {
 
       // delete one item
       listKey.currentState?.removeItem(0, (BuildContext context, Animation<double> animation) {
-        return Container();
+        return const Container();
       });
 
       // delete from list

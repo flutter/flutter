@@ -42,7 +42,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               childContext = context;
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -85,7 +85,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 childContext = context;
-                return Container();
+                return const Container();
               },
             ),
           ),
@@ -104,12 +104,12 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Contents padding from viewInsets', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(
+          navigationBar: CupertinoNavigationBar(
             middle: Text('Opaque'),
             backgroundColor: Color(0xFFF8F8F8),
           ),
@@ -132,7 +132,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               childContext = context;
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -144,12 +144,12 @@ void main() {
     // the scaffold.
     expect(MediaQuery.of(childContext).viewInsets.bottom, 0);
 
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(
+          navigationBar: CupertinoNavigationBar(
             middle: Text('Title'),
           ),
           resizeToAvoidBottomInset: false,

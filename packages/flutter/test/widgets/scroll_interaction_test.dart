@@ -12,7 +12,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: <Widget>[
+          children: const <Widget>[
             Container(height: 100000.0),
           ],
         ),

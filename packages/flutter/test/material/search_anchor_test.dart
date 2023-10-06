@@ -939,7 +939,7 @@ void main() {
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia ]) {
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -949,7 +949,7 @@ void main() {
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.linux, TargetPlatform.windows ]) {
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -985,7 +985,7 @@ void main() {
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.linux, TargetPlatform.windows ]) {
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pumpWidget(buildSearchAnchor(platform));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -1055,7 +1055,7 @@ void main() {
     // Default is a ListView.
     expect(find.byType(ListView), findsOneWidget);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
       => GridView.count(crossAxisCount: 5, children: suggestions.toList(),)
     ));
@@ -1090,7 +1090,7 @@ void main() {
     // Default is a icon button with arrow_back.
     expect(find.widgetWithIcon(IconButton, Icons.arrow_back), findsOneWidget);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildAnchor(viewLeading: const Icon(Icons.history)));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1123,7 +1123,7 @@ void main() {
     // Default is a icon button with close icon.
     expect(find.widgetWithIcon(IconButton, Icons.close), findsOneWidget);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildAnchor(viewTrailing: <Widget>[const Icon(Icons.history)]));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1720,7 +1720,7 @@ void main() {
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
 
     // Test RTL text direction.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildSearchAnchor(textDirection: TextDirection.rtl));
 
     final Finder findIconButtonRTL = find.widgetWithIcon(IconButton, Icons.search);

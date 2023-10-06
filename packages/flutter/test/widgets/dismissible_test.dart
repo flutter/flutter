@@ -984,10 +984,10 @@ void main() {
               onPointerDown: (_) {
                 didReceivePointerDown = true;
               },
-              child: Container(
+              child: const Container(
                 width: 100.0,
                 height: 100.0,
-                color: const Color(0xFF00FF00),
+                color: Color(0xFF00FF00),
               ),
             ),
             child,

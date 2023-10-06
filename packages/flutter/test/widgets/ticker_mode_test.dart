@@ -247,7 +247,7 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
   @override
   Widget build(BuildContext context) {
     buildCount += 1;
-    return Container();
+    return const Container();
   }
 
   @override
@@ -278,7 +278,7 @@ class _MultiTickingWidgetState extends State<_MultiTickingWidget> with TickerPro
   @override
   Widget build(BuildContext context) {
     buildCount += 1;
-    return Container();
+    return const Container();
   }
 
   @override

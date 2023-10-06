@@ -417,7 +417,7 @@ void main() {
             child: Focus(
               key: key1,
               focusNode: testNode1,
-              child: Container(),
+              child: const Container(),
             ),
           ),
         ),
@@ -615,7 +615,7 @@ void main() {
                   canRequestFocus: canRequestFocus,
                   child: Focus(
                     focusNode: node2,
-                    child: Container(),
+                    child: const Container(),
                   ),
                 ),
               ),
@@ -950,7 +950,7 @@ void main() {
               child: Focus(
                 key: key1,
                 focusNode: testNode1,
-                child: Container(),
+                child: const Container(),
               ),
             ),
           ),
@@ -1388,7 +1388,7 @@ void main() {
               child: Focus(
                 key: key1,
                 focusNode: testNode1,
-                child: Container(),
+                child: const Container(),
               ),
             ),
           ),
@@ -2277,19 +2277,19 @@ void main() {
         MaterialApp(
           home: Column(
             children: <Widget>[
-              Focus(focusNode: topNode, child: Container(height: 100)),
+              Focus(focusNode: topNode, child: const Container(height: 100)),
               Expanded(
                 child: ListView(
                   controller: controller,
                   children: items.map<Widget>((int item) {
                     return Focus(
                       focusNode: nodes[item],
-                      child: Container(height: 100),
+                      child: const Container(height: 100),
                     );
                   }).toList(),
                 ),
               ),
-              Focus(focusNode: bottomNode, child: Container(height: 100)),
+              Focus(focusNode: bottomNode, child: const Container(height: 100)),
             ],
           ),
         ),
@@ -2383,7 +2383,7 @@ void main() {
         MaterialApp(
           home: Row(
             children: <Widget>[
-              Focus(focusNode: leftNode, child: Container(width: 100)),
+              Focus(focusNode: leftNode, child: const Container(width: 100)),
               Expanded(
                 child: ListView(
                   scrollDirection: Axis.horizontal,
@@ -2391,12 +2391,12 @@ void main() {
                   children: items.map<Widget>((int item) {
                     return Focus(
                       focusNode: nodes[item],
-                      child: Container(width: 100),
+                      child: const Container(width: 100),
                     );
                   }).toList(),
                 ),
               ),
-              Focus(focusNode: rightNode, child: Container(width: 100)),
+              Focus(focusNode: rightNode, child: const Container(width: 100)),
             ],
           ),
         ),
@@ -2605,7 +2605,7 @@ void main() {
     testWidgetsWithLeakTracking('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
       final List<Object> events = <Object>[];
 
-      await tester.pumpWidget(MaterialApp(home: Container()));
+      await tester.pumpWidget(const MaterialApp(home: Container()));
 
       RawKeyboard.instance.addListener((RawKeyEvent event) {
         events.add(event);
@@ -2673,7 +2673,7 @@ void main() {
             child: Focus(
               key: key1,
               focusNode: testNode1,
-              child: Container(),
+              child: const Container(),
             ),
           ),
         ),
@@ -2711,7 +2711,7 @@ void main() {
   group(FocusTraversalGroup, () {
     testWidgetsWithLeakTracking("Focus traversal group doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(FocusTraversalGroup(child: Container()));
+      await tester.pumpWidget(FocusTraversalGroup(child: const Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
       semantics.dispose();
@@ -2816,11 +2816,11 @@ void main() {
             children: <Widget>[
               Focus(
                 focusNode: node1,
-                child: Container(),
+                child: const Container(),
               ),
               Focus(
                 focusNode: node2,
-                child: Container(),
+                child: const Container(),
               ),
             ],
           ),
@@ -2853,12 +2853,12 @@ void main() {
               Focus(
                 skipTraversal: true,
                 focusNode: node1,
-                child: Container(),
+                child: const Container(),
               ),
               Focus(
                 skipTraversal: true,
                 focusNode: node2,
-                child: Container(),
+                child: const Container(),
               ),
             ],
           ),
@@ -2889,7 +2889,7 @@ void main() {
         FocusTraversalGroup(
           child: Column(
             children: <Widget>[
-              Focus(
+              const Focus(
                 autofocus: true,
                 child: Container(),
               ),
@@ -2946,7 +2946,7 @@ void main() {
                 Focus(
                   focusNode: focusNode,
                   autofocus: true,
-                  child: Container(),
+                  child: const Container(),
                 ),
               ],
             ),
@@ -2970,7 +2970,7 @@ void main() {
       await tester.pumpWidget(
         RawKeyboardListener(
           focusNode: focusNode,
-          child: Container(),
+          child: const Container(),
         ),
       );
       final TestSemantics expectedSemantics = TestSemantics.root(
@@ -3000,7 +3000,7 @@ void main() {
         RawKeyboardListener(
           focusNode: focusNode,
           includeSemantics: false,
-          child: Container(),
+          child: const Container(),
         ),
       );
       final TestSemantics expectedSemantics = TestSemantics.root();
@@ -3027,20 +3027,20 @@ void main() {
               Focus(
                 autofocus: true,
                 focusNode: node1,
-                child: Container(),
+                child: const Container(),
               ),
               ExcludeFocusTraversal(
                 child: Focus(
                   focusNode: node2,
                   child: Focus(
                     focusNode: node3,
-                    child: Container(),
+                    child: const Container(),
                   ),
                 ),
               ),
               Focus(
                 focusNode: node4,
-                child: Container(),
+                child: const Container(),
               ),
             ],
           ),
@@ -3064,7 +3064,7 @@ void main() {
 
     testWidgetsWithLeakTracking("Doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(ExcludeFocusTraversal(child: Container()));
+      await tester.pumpWidget(const ExcludeFocusTraversal(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
       semantics.dispose();

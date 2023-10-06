@@ -485,9 +485,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
-      0: Container(constraints: const BoxConstraints.tightFor(height: 100.0)),
-      1: Container(constraints: const BoxConstraints.tightFor(height: 400.0)),
-      2: Container(constraints: const BoxConstraints.tightFor(height: 200.0)),
+      0: const Container(constraints: BoxConstraints.tightFor(height: 100.0)),
+      1: const Container(constraints: BoxConstraints.tightFor(height: 400.0)),
+      2: const Container(constraints: BoxConstraints.tightFor(height: 200.0)),
     };
 
     await tester.pumpWidget(
@@ -515,9 +515,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
-      0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
-      1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
-      2: Container(constraints: const BoxConstraints.tightFor(width: 200.0)),
+      0: const Container(constraints: BoxConstraints.tightFor(width: 50.0)),
+      1: const Container(constraints: BoxConstraints.tightFor(width: 100.0)),
+      2: const Container(constraints: BoxConstraints.tightFor(width: 200.0)),
     };
 
     await tester.pumpWidget(

@@ -253,7 +253,7 @@ void main() {
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
-        return Container();
+        return const Container();
       },
     );
     expect(built, 0);
@@ -277,7 +277,7 @@ void main() {
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
         MediaQuery.of(context);
-        return Container();
+        return const Container();
       },
     );
     expect(built, 0);
@@ -304,7 +304,7 @@ void main() {
           SliverLayoutBuilder(
             builder: (BuildContext context, SliverConstraints constraint) {
               built++;
-              return SliverToBoxAdapter(child: Container());
+              return const SliverToBoxAdapter(child: Container());
             },
           ),
         ],
@@ -338,7 +338,7 @@ void main() {
               builder: (BuildContext context, SliverConstraints constraint) {
                 built++;
                 MediaQuery.of(context);
-                return SliverToBoxAdapter(child: Container());
+                return const SliverToBoxAdapter(child: Container());
               },
             ),
           ],

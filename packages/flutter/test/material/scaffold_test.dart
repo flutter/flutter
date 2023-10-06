@@ -59,19 +59,19 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        drawer: Container(
+        drawer: const Container(
           color: Colors.blue,
         ),
         onDrawerChanged: (bool isOpen) {
           isDrawerOpen = isOpen;
         },
-        endDrawer: Container(
+        endDrawer: const Container(
           color: Colors.green,
         ),
         onEndDrawerChanged: (bool isOpen) {
           isEndDrawerOpen = isOpen;
         },
-        body: Container(),
+        body: const Container(),
       ),
     ));
 
@@ -99,19 +99,19 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        drawer: Container(
+        drawer: const Container(
           color: Colors.blue,
         ),
         onDrawerChanged: (bool isOpen) {
           onDrawerChangedCalled = true;
         },
-        endDrawer: Container(
+        endDrawer: const Container(
           color: Colors.green,
         ),
         onEndDrawerChanged: (bool isOpen) {
           onEndDrawerChangedCalled = true;
         },
-        body: Container(),
+        body: const Container(),
       ),
     ));
 
@@ -253,7 +253,7 @@ void main() {
     )));
 
     expect(tester.binding.transientCallbackCount, greaterThan(0));
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(const MaterialApp(home: Scaffold()));
@@ -380,18 +380,18 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Floating Action Button bottom padding not consumed by viewInsets', (WidgetTester tester) async {
-    final Widget child = Directionality(
+    const Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(),
-        floatingActionButton: const Placeholder(),
+        floatingActionButton: Placeholder(),
       ),
     );
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
@@ -405,8 +405,8 @@ void main() {
 
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -423,12 +423,12 @@ void main() {
         data: MediaQueryData(
           viewPadding: viewPadding,
         ),
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: Container(),
-            floatingActionButton: const Placeholder(),
+            floatingActionButton: Placeholder(),
           ),
         ),
       );
@@ -624,18 +624,18 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
-    final Widget child = Directionality(
+    const Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(),
-        bottomSheet: const Placeholder(),
+        bottomSheet: Placeholder(),
       ),
     );
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
@@ -644,8 +644,8 @@ void main() {
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -799,18 +799,18 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
-    final Widget child = Directionality(
+    const Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(),
-        persistentFooterButtons: const <Widget>[Placeholder()],
+        persistentFooterButtons: <Widget>[Placeholder()],
       ),
     );
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
@@ -819,8 +819,8 @@ void main() {
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
+      const MediaQuery(
+        data: MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: 20),
           viewInsets: EdgeInsets.only(bottom: 300),
         ),
@@ -1386,7 +1386,7 @@ void main() {
     testWidgetsWithLeakTracking('bottomNavigationBar', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
+            body: const Container(),
             bottomNavigationBar: ConstrainedBox(
               key: key,
               constraints: const BoxConstraints.expand(height: 80.0),
@@ -1488,7 +1488,7 @@ void main() {
     testWidgetsWithLeakTracking('floatingActionButton', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
+            body: const Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
               child: const _GeometryListener(),
@@ -1535,7 +1535,7 @@ void main() {
       )));
 
       await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
+            body: const Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
               child: const _GeometryListener(),
@@ -1603,7 +1603,7 @@ void main() {
       numNotificationsAtLastFrame = listenerState.numNotifications;
 
       await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
+            body: const Container(),
             floatingActionButton: FloatingActionButton(
               key: key,
               child: const _GeometryListener(),
@@ -2164,7 +2164,7 @@ void main() {
           MaterialApp(
             home: Scaffold(
               key: key,
-              body: Center(
+              body: const Center(
                 child: Container(),
               ),
               bottomSheet: const Text('Bottom sheet'),
@@ -2220,7 +2220,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Scaffold(
                   key: key,
-                  body: Container(),
+                  body: const Container(),
                   floatingActionButton: FloatingActionButton(
                     key: buttonKey,
                     onPressed: () {
@@ -2234,7 +2234,7 @@ void main() {
             ),
           ),
         );
-        key.currentState!.showBottomSheet<void>((_) => Container());
+        key.currentState!.showBottomSheet<void>((_) => const Container());
         await tester.tap(find.byKey(buttonKey));
         await tester.pump();
         expect(errors, isNotEmpty);
@@ -2267,9 +2267,9 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
-                return Container();
+                return const Container();
               });
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -2341,7 +2341,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               geometry = Scaffold.geometryOf(context);
-              return Container();
+              return const Container();
             },
           ),
         ),
@@ -2602,19 +2602,19 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        drawer: Container(
+        drawer: const Container(
           color: Colors.blue,
         ),
         onDrawerChanged: (bool isOpen) {
           isDrawerOpen = isOpen;
         },
-        endDrawer: Container(
+        endDrawer: const Container(
           color: Colors.green,
         ),
         onEndDrawerChanged: (bool isOpen) {
           isEndDrawerOpen = isOpen;
         },
-        body: Container(),
+        body: const Container(),
       ),
     ));
 

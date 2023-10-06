@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(buildCupertinoActivityIndicator(false));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     await tester.pumpWidget(buildCupertinoActivityIndicator(false));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));

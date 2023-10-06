@@ -117,7 +117,7 @@ void main() {
       Center(
         child: SizedBox(
           key: patient,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -128,7 +128,7 @@ void main() {
         child: SizedBox(
           key: patient,
           height: 0.0,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -138,7 +138,7 @@ void main() {
       Center(
         child: SizedBox.shrink(
           key: patient,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -150,7 +150,7 @@ void main() {
           key: patient,
           width: 100.0,
           height: 100.0,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -162,7 +162,7 @@ void main() {
           key: patient,
           width: 1000.0,
           height: 1000.0,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -172,7 +172,7 @@ void main() {
       Center(
         child: SizedBox.expand(
           key: patient,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );
@@ -182,7 +182,7 @@ void main() {
       Center(
         child: SizedBox.shrink(
           key: patient,
-          child: Container(),
+          child: const Container(),
         ),
       ),
     );

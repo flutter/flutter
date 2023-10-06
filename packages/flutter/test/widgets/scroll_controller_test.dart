@@ -189,7 +189,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: <Widget>[ Container(height: 200000.0) ],
+          children: const <Widget>[ Container(height: 200000.0) ],
         ),
       ),
     );
@@ -199,7 +199,7 @@ void main() {
     await tester.pump(); // Start the animation.
 
     // We will now change the tree on the same frame as the animation ends.
-    await tester.pumpWidget(Container(), const Duration(seconds: 2));
+    await tester.pumpWidget(const Container(), const Duration(seconds: 2));
   });
 
   testWidgetsWithLeakTracking('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {

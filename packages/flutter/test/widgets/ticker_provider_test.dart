@@ -62,7 +62,7 @@ void main() {
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     // the test is that this doesn't crash, like it used to...
   });
 
@@ -236,7 +236,7 @@ class BoringTickerTest extends StatefulWidget {
 
 class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 }
 
 class _SingleTickerTest extends StatefulWidget {
@@ -260,7 +260,7 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 
   int toStringCount = 0;
@@ -292,7 +292,7 @@ class _MultipleTickerTestState extends State<_MultipleTickerTest> with TickerPro
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 
   int toStringCount = 0;
@@ -327,6 +327,6 @@ class _SingleTickerCreateMultipleTickerState extends State<_SingleTickerCreateMu
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }

@@ -89,7 +89,7 @@ void main() {
             const _DecuplePixels(Duration(seconds: 1)),
             Align(
               alignment: Alignment.topLeft,
-              child: builder.record(Container()),
+              child: builder.record(const Container()),
             ),
           ],
         ),

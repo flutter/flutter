@@ -81,8 +81,8 @@ Widget _buildSliverConstrainedCrossAxis({
               maxExtent: maxExtent,
               sliver: SliverToBoxAdapter(
                 child: scrollDirection == Axis.vertical
-                  ? Container(height: 100)
-                  : Container(width: 100),
+                  ? const Container(height: 100)
+                  : const Container(width: 100),
               ),
             ),
           ],

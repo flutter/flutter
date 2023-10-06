@@ -473,11 +473,11 @@ void main() {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
+        return const Container(
           width: 100.0,
           height: 100.0,
           alignment: Alignment.center,
-          child: const Text('Dialog1'),
+          child: Text('Dialog1'),
         );
       },
     );
@@ -495,11 +495,11 @@ void main() {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return Container(
+        return const Container(
           width: 100.0,
           height: 100.0,
           alignment: Alignment.center,
-          child: const Text('Dialog2'),
+          child: Text('Dialog2'),
         );
       },
     );
@@ -1584,7 +1584,7 @@ void main() {
             return PageRouteBuilder<void>(
               pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                 outerContext = context;
-                return Container();
+                return const Container();
               },
             );
           },
@@ -2751,11 +2751,11 @@ void main() {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
+        return const Container(
           width: 100.0,
           height: 100.0,
           alignment: Alignment.center,
-          child: const Text('Dialog1'),
+          child: Text('Dialog1'),
         );
       },
     );
@@ -2772,11 +2772,11 @@ void main() {
     showAdaptiveDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
+        return const Container(
           width: 100.0,
           height: 100.0,
           alignment: Alignment.center,
-          child: const Text('Dialog2'),
+          child: Text('Dialog2'),
         );
       },
     );

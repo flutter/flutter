@@ -45,18 +45,18 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Container padding/margin RTL', (WidgetTester tester) async {
-    final Widget child = Container(
-      padding: const EdgeInsetsDirectional.only(start: 6.0),
-      margin: const EdgeInsetsDirectional.only(end: 20.0, start: 4.0),
-      child: const Placeholder(),
+    const Widget child = Container(
+      padding: EdgeInsetsDirectional.only(start: 6.0),
+      margin: EdgeInsetsDirectional.only(end: 20.0, start: 4.0),
+      child: Placeholder(),
     );
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: child,
     ));
     expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(10.0, 0.0));
     expect(tester.getTopRight(find.byType(Placeholder)), const Offset(780.0, 0.0));
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: child,
     ));
@@ -65,18 +65,18 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Container padding/margin mixed RTL/absolute', (WidgetTester tester) async {
-    final Widget child = Container(
-      padding: const EdgeInsets.only(left: 6.0),
-      margin: const EdgeInsetsDirectional.only(end: 20.0, start: 4.0),
-      child: const Placeholder(),
+    const Widget child = Container(
+      padding: EdgeInsets.only(left: 6.0),
+      margin: EdgeInsetsDirectional.only(end: 20.0, start: 4.0),
+      child: Placeholder(),
     );
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: child,
     ));
     expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(10.0, 0.0));
     expect(tester.getTopRight(find.byType(Placeholder)), const Offset(780.0, 0.0));
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: child,
     ));

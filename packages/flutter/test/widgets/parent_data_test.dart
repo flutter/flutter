@@ -152,7 +152,7 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
@@ -173,7 +173,7 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
@@ -181,7 +181,7 @@ void main() {
             right: 10.0,
             child: Container(child: kDecoratedBoxB),
           ),
-          const DummyWidget(
+          DummyWidget(
             child: Positioned(
               top: 8.0,
               child: kDecoratedBoxC,
@@ -485,7 +485,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Parent data invalid ancestor', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
         children: <Widget>[
@@ -521,7 +521,7 @@ void main() {
 
   testWidgetsWithLeakTracking('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      OneAncestorWidget(
+      const OneAncestorWidget(
         child: Container(),
       ),
     );
@@ -529,7 +529,7 @@ void main() {
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
-      OneAncestorWidget(
+      const OneAncestorWidget(
         child: TestParentDataWidget(
           string: 'Foo',
           child: Container(),
@@ -540,7 +540,7 @@ void main() {
     expect(parentData.string, 'Foo');
 
     await tester.pumpWidget(
-      AnotherAncestorWidget(
+      const AnotherAncestorWidget(
         child: TestParentDataWidget(
           string: 'Bar',
           child: Container(),

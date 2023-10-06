@@ -983,12 +983,12 @@ void main() {
         restorationScopeId: 'material_app',
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => Container(),
+          '/': (BuildContext context) => const Container(),
         },
         onGenerateInitialRoutes: (String initialRoute) {
           return <MaterialPageRoute<void>>[
             MaterialPageRoute<void>(
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => const Container(),
             ),
           ];
         },

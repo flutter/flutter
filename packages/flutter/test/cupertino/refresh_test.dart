@@ -1582,7 +1582,7 @@ class FakeBuilder {
   Completer<void> refreshCompleter = Completer<void>.sync();
   final List<MockHelperInvocation> invocations = <MockHelperInvocation>[];
 
-  Widget refreshIndicator = Container();
+  Widget refreshIndicator = const Container();
 
   Widget builder(
     BuildContext context,

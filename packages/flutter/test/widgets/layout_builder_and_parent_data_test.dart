@@ -50,7 +50,7 @@ void main() {
         return Column(children: <Widget>[
           Expanded(
             flex: frame, // this is different after the next pump, so that the parentData has to be applied again
-            child: Container(height: 100.0),
+            child: const Container(height: 100.0),
           ),
         ]);
       }),

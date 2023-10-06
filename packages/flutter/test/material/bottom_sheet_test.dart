@@ -33,10 +33,10 @@ void main() {
       MaterialApp(
         home: BottomSheet(
           onClosing: () {},
-          builder: (_) => Container(
+          builder: (_) => const Container(
             height: 200,
             color: Colors.red,
-            child: const Text('BottomSheet'),
+            child: Text('BottomSheet'),
           ),
         ),
       ),
@@ -62,7 +62,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             savedContext = context;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -88,7 +88,7 @@ void main() {
     await tester.pump();
 
     // Dispose app by replacing it with a container. This shouldn't crash.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgetsWithLeakTracking('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
@@ -244,7 +244,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -276,7 +276,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             savedContext = context;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -311,7 +311,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -345,7 +345,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -379,7 +379,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -438,7 +438,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             savedContext = context;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -474,7 +474,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -509,7 +509,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -545,7 +545,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -580,7 +580,7 @@ void main() {
       home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return Container();
+          return const Container();
         },
       ),
     ));
@@ -619,9 +619,9 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return Container(
-        margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet'),
+      return const Container(
+        margin: EdgeInsets.all(40.0),
+        child: Text('BottomSheet'),
       );
     }).closed.whenComplete(() {
       showBottomSheetThenCalled = true;
@@ -673,9 +673,9 @@ void main() {
     ));
 
     scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return Container(
-        margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet'),
+      return const Container(
+        margin: EdgeInsets.all(40.0),
+        child: Text('BottomSheet'),
       );
     });
 
@@ -713,7 +713,7 @@ void main() {
               return PageRouteBuilder<void>(
                 pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                   outerContext = context;
-                  return Container();
+                  return const Container();
                 },
               );
             },
@@ -726,7 +726,7 @@ void main() {
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;
-        return Container();
+        return const Container();
       },
     );
     await tester.pump();
@@ -764,7 +764,7 @@ void main() {
               return PageRouteBuilder<void>(
                 pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                   outerContext = context;
-                  return Container();
+                  return const Container();
                 },
               );
             },
@@ -778,7 +778,7 @@ void main() {
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;
-        return Container();
+        return const Container();
       },
     );
     await tester.pump();
@@ -794,7 +794,7 @@ void main() {
       useSafeArea: true,
       builder: (BuildContext context) {
         innerContext = context;
-        return Container();
+        return const Container();
       },
     );
     await tester.pump();
@@ -932,7 +932,7 @@ void main() {
         body: BottomSheet(
           onClosing: () {},
           builder: (BuildContext context) {
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -960,7 +960,7 @@ void main() {
         body: BottomSheet(
           onClosing: () {},
           builder: (BuildContext context) {
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -1460,7 +1460,7 @@ void main() {
     scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
-          return Container(height: 200.0);
+          return const Container(height: 200.0);
         },
       );
     });
@@ -1474,7 +1474,7 @@ void main() {
     scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
-          return Container(height: 200.0);
+          return const Container(height: 200.0);
         },
       );
     });
@@ -1508,7 +1508,7 @@ void main() {
     scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
-          return Container(height: 200.0);
+          return const Container(height: 200.0);
         },
       );
     });
@@ -1521,7 +1521,7 @@ void main() {
     sheetController = scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
-          return Container(height: 200.0);
+          return const Container(height: 200.0);
         },
       );
     });
@@ -1651,7 +1651,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             savedContext = context;
-            return Container();
+            return const Container();
           },
         ),
       ),
@@ -1665,7 +1665,7 @@ void main() {
     navigator.push(
       ModalBottomSheetRoute<void>(
         isScrollControlled: false,
-        builder: (BuildContext context) => Container(),
+        builder: (BuildContext context) => const Container(),
       ),
     );
     await tester.pumpAndSettle();

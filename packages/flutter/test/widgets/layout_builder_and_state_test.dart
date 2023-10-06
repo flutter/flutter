@@ -55,7 +55,7 @@ void main() {
     final Widget inner = Wrapper(
       child: StatefulWrapper(
         key: GlobalKey(),
-        child: Container(),
+        child: const Container(),
       ),
     );
     await tester.pumpWidget(FlipWidget(

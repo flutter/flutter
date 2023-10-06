@@ -175,12 +175,12 @@ Future<void> main() async {
     await tester.pumpWidget(
       Column(
         children: <Widget>[
-          Container(
+          const Container(
             // There's not currently a way to verify that this paints the same size as the others,
             // so the pattern below just asserts that there's four paths but doesn't check the geometry.
             width: 100.0,
             height: 100.0,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
                   width: 10.0,

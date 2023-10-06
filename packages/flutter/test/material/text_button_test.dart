@@ -470,7 +470,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: TextButton(
-          child: Container(),
+          child: const Container(),
           onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
@@ -496,7 +496,7 @@ void main() {
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
-          child: Container(),
+          child: const Container(),
           onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
@@ -947,7 +947,7 @@ void main() {
                 onPressed: () {},
                 child: useText
                   ? const Text('Text', key: childKey)
-                  : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+                  : const Container(key: childKey, width: 100, height: 100, color: Color(0xffff0000)),
               ),
             ),
           ),
@@ -1514,7 +1514,7 @@ void main() {
                     maximumSize: const Size.fromWidth(104),
                   ),
                   onPressed: () {},
-                  icon: Container(color: Colors.red, width: 32, height: 32),
+                  icon: const Container(color: Colors.red, width: 32, height: 32),
                   label: const Text('A B C D E F G H I J K L M N O P'),
                 ),
               ],

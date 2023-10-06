@@ -346,7 +346,7 @@ void main() {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             contentsSetState = setState;
-            return contentsEmpty ? Container() : SampleForm(key: UniqueKey(), callback: () async => false);
+            return contentsEmpty ? const Container() : SampleForm(key: UniqueKey(), callback: () async => false);
           },
         );
       },

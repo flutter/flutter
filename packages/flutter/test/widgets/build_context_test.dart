@@ -15,7 +15,7 @@ void main() {
         }
     ));
     expect(capturedContext.mounted, isTrue);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(capturedContext.mounted, isFalse);
   });
 
@@ -27,7 +27,7 @@ void main() {
       }
     ));
     expect(capturedContext.mounted, isTrue);
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(capturedContext.mounted, isFalse);
   });
 }
@@ -42,7 +42,7 @@ class TestStatelessWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     onBuild(context);
-    return Container();
+    return const Container();
   }
 }
 
@@ -59,6 +59,6 @@ class _TestStatefulWidgetState extends State<TestStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     widget.onBuild(context);
-    return Container();
+    return const Container();
   }
 }

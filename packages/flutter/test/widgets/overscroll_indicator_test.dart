@@ -298,11 +298,11 @@ void main() {
       child: PageView(
         children: <Widget>[
           ListView(
-            children: <Widget>[
+            children: const <Widget>[
               Container(
                 width: 2000.0,
                 height: 2000.0,
-                color: const Color(0xFF00FF00),
+                color: Color(0xFF00FF00),
               ),
             ],
           ),

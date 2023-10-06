@@ -17,15 +17,15 @@ Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController })
     key: UniqueKey(),
     physics: physics,
     controller: scrollController,
-    child: SizedBox(
+    child: const SizedBox(
       height: 650.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          const SizedBox(height: 100.0, child: Text('top', textDirection: TextDirection.ltr)),
+          SizedBox(height: 100.0, child: Text('top', textDirection: TextDirection.ltr)),
           Expanded(child: Container()),
-          const SizedBox(height: 100.0, child: Text('bottom', textDirection: TextDirection.ltr)),
+          SizedBox(height: 100.0, child: Text('bottom', textDirection: TextDirection.ltr)),
         ],
       ),
     ),

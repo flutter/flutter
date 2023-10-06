@@ -2659,7 +2659,7 @@ void main() {
         theme: theme,
         home: Material(
           child: Center(
-            child: show ? Switch(value: true, onChanged: (_) { }) : Container(),
+            child: show ? Switch(value: true, onChanged: (_) { }) : const Container(),
           ),
         ),
       );
@@ -2806,7 +2806,7 @@ void main() {
       expect(find.byType(Switch), findsOneWidget);
 
       // Dispose the switch by taking down the tree.
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       expect(find.byType(Switch), findsNothing);
 
       imageProvider.complete();
@@ -2841,7 +2841,7 @@ void main() {
       expect(find.byType(Switch), findsOneWidget);
 
       // Dispose the switch by taking down the tree.
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       expect(find.byType(Switch), findsNothing);
 
       // Completing the replaced ImageProvider shouldn't crash.
@@ -3025,7 +3025,7 @@ void main() {
         )..rrect(color: colors.primaryContainer, rrect: RRect.fromLTRBR(26.0, 10.0, 54.0, 38.0, const Radius.circular(14.0))),
       );
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pumpWidget(buildApp(value: false));
       await tester.press(find.byType(Switch));
       await tester.pumpAndSettle();
@@ -3040,7 +3040,7 @@ void main() {
         )..rrect(color: colors.onSurfaceVariant),
       );
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pumpWidget(buildApp(enabled: false));
       await tester.press(find.byType(Switch));
       await tester.pumpAndSettle();
@@ -3055,7 +3055,7 @@ void main() {
         )..rrect(color: colors.surface.withOpacity(1.0)),
       );
 
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
       await tester.pumpWidget(buildApp(enabled: false, value: false));
       await tester.press(find.byType(Switch));
       await tester.pumpAndSettle();

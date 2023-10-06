@@ -13,22 +13,22 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('Container control tests:', () {
-    final Container container = Container(
+    const Container container = Container(
       alignment: Alignment.bottomRight,
-      padding: const EdgeInsets.all(7.0),
+      padding: EdgeInsets.all(7.0),
       // uses color, not decoration:
-      color: const Color(0xFF00FF00),
-      foregroundDecoration: const BoxDecoration(color: Color(0x7F0000FF)),
+      color: Color(0xFF00FF00),
+      foregroundDecoration: BoxDecoration(color: Color(0x7F0000FF)),
       width: 53.0,
       height: 76.0,
-      constraints: const BoxConstraints(
+      constraints: BoxConstraints(
         minWidth: 50.0,
         maxWidth: 55.0,
         minHeight: 78.0,
         maxHeight: 82.0,
       ),
-      margin: const EdgeInsets.all(5.0),
-      child: const SizedBox(
+      margin: EdgeInsets.all(5.0),
+      child: SizedBox(
         width: 25.0,
         height: 33.0,
         child: DecoratedBox(
@@ -39,7 +39,7 @@ void main() {
     );
 
     testWidgetsWithLeakTracking('paints as expected', (WidgetTester tester) async {
-      await tester.pumpWidget(Align(
+      await tester.pumpWidget(const Align(
         alignment: Alignment.topLeft,
         child: container,
       ));
@@ -56,7 +56,7 @@ void main() {
 
     group('diagnostics', () {
       testWidgetsWithLeakTracking('has reasonable default diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(
+        await tester.pumpWidget(const Align(
           alignment: Alignment.topLeft,
           child: container,
         ));
@@ -68,7 +68,7 @@ void main() {
       });
 
       testWidgetsWithLeakTracking('has expected info diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(
+        await tester.pumpWidget(const Align(
           alignment: Alignment.topLeft,
           child: container,
         ));
@@ -140,7 +140,7 @@ void main() {
       });
 
       testWidgetsWithLeakTracking('has expected debug diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(
+        await tester.pumpWidget(const Align(
           alignment: Alignment.topLeft,
           child: container,
         ));
@@ -245,7 +245,7 @@ void main() {
       });
 
       testWidgetsWithLeakTracking('has expected fine diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(
+        await tester.pumpWidget(const Align(
           alignment: Alignment.topLeft,
           child: container,
         ));
@@ -378,7 +378,7 @@ void main() {
       });
 
       testWidgetsWithLeakTracking('has expected hidden diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(
+        await tester.pumpWidget(const Align(
           alignment: Alignment.topLeft,
           child: container,
         ));
@@ -535,7 +535,7 @@ void main() {
       });
 
       testWidgetsWithLeakTracking('painting error has expected diagnostics', (WidgetTester tester) async {
-        await tester.pumpWidget(Align(
+        await tester.pumpWidget(const Align(
           alignment: Alignment.topLeft,
           child: container,
         ));
@@ -569,7 +569,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: <Widget>[Container()]),
+        child: ListView(children: const <Widget>[Container()]),
       ),
     );
   });
@@ -582,13 +582,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            Positioned(
+            const Positioned(
               top: 100.0,
               left: 100.0,
               child: Container(
                 width: 100.0,
                 height: 100.0,
-                color: const Color(0xFF0000FF),
+                color: Color(0xFF0000FF),
               ),
             ),
             Positioned(
@@ -600,8 +600,8 @@ void main() {
                 key: key,
                 transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                 transformAlignment: Alignment.centerRight,
-                child: Container(
-                  color: const Color(0xFF00FFFF),
+                child: const Container(
+                  color: Color(0xFF00FFFF),
                 ),
               ),
             ),
@@ -623,11 +623,11 @@ void main() {
 
   testWidgetsWithLeakTracking('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Container(
-        decoration: const BoxDecoration(
+      const Container(
+        decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
-      child: const SizedBox(),
+      child: SizedBox(),
     ));
 
     expect(
@@ -637,12 +637,12 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
-    final Container container = Container(
+    const Container container = Container(
       clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
-      child: const SizedBox(),
+      child: SizedBox(),
     );
 
     await tester.pumpWidget(container);
@@ -687,8 +687,8 @@ void main() {
     bool tapped = false;
     await tester.pumpWidget(GestureDetector(
       onTap: () { tapped = true; },
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.black),
+      child: const Container(
+        decoration: BoxDecoration(color: Colors.black),
       ),
     ));
 
@@ -698,8 +698,8 @@ void main() {
 
     await tester.pumpWidget(GestureDetector(
       onTap: () { tapped = true; },
-      child: Container(
-        foregroundDecoration: const BoxDecoration(color: Colors.black),
+      child: const Container(
+        foregroundDecoration: BoxDecoration(color: Colors.black),
       ),
     ));
 
@@ -709,7 +709,7 @@ void main() {
 
     await tester.pumpWidget(GestureDetector(
       onTap: () { tapped = true; },
-      child: Container(
+      child: const Container(
         color: Colors.black,
       ),
     ));
@@ -739,8 +739,8 @@ void main() {
 
   testWidgetsWithLeakTracking('Container discards alignment when the child parameter is null and constraints is not Tight', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Container(
-        decoration: const BoxDecoration(
+      const Container(
+        decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
       alignment: Alignment.centerLeft
@@ -753,9 +753,9 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
-    final Container container = Container(
+    const Container container = Container(
       clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(30)),
         color: Colors.red,
         boxShadow: <BoxShadow>[
@@ -766,13 +766,13 @@ void main() {
           ),
         ],
       ),
-      child: const SizedBox(width: 50, height: 50),
+      child: SizedBox(width: 50, height: 50),
     );
 
     await tester.pumpWidget(
-      RepaintBoundary(
+      const RepaintBoundary(
         child: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: EdgeInsets.all(30.0),
           child: container,
         ),
       ),

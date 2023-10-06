@@ -285,11 +285,11 @@ void main() {
                     child: Center(
                       child: Transform(
                         transform: Matrix4.rotationZ(math.pi),
-                        child: Container(
-                          key: const ValueKey<int>(0),
+                        child: const Container(
+                          key: ValueKey<int>(0),
                           width: 100.0,
                           height: 100.0,
-                          color: const Color(0xFFFFFFFF),
+                          color: Color(0xFFFFFFFF),
                         ),
                       ),
                     ),
@@ -701,11 +701,11 @@ void main() {
                   child: Center(
                     child: Transform(
                       transform: Matrix4.rotationZ(math.pi),
-                      child: Container(
-                        key: const ValueKey<int>(0),
+                      child: const Container(
+                        key: ValueKey<int>(0),
                         width: 100.0,
                         height: 100.0,
-                        color: const Color(0xFFFFFFFF),
+                        color: Color(0xFFFFFFFF),
                       ),
                     ),
                   ),

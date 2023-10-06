@@ -1074,7 +1074,7 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
@@ -1386,7 +1386,7 @@ void main() {
       reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
     );
 
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildCheckbox(focused: true));
     await tester.pumpAndSettle();
 
@@ -1397,7 +1397,7 @@ void main() {
       reason: 'Focused Checkbox should use default focused overlay color',
     );
 
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildCheckbox());
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -1452,7 +1452,7 @@ void main() {
       reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
     );
 
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildCheckbox(focused: true));
     await tester.pumpAndSettle();
 
@@ -1463,7 +1463,7 @@ void main() {
       reason: 'Focused Checkbox should use default focused overlay color',
     );
 
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildCheckbox());
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -1582,7 +1582,7 @@ void main() {
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
 
-    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(const Container()); // reset test
     await tester.pumpWidget(buildCheckbox(focused: true));
     await tester.pumpAndSettle();
 
@@ -1727,7 +1727,7 @@ void main() {
         theme: theme,
         home: Material(
           child: Center(
-            child: show ? Checkbox(value: true, onChanged: (_) { }) : Container(),
+            child: show ? Checkbox(value: true, onChanged: (_) { }) : const Container(),
           ),
         ),
       );
@@ -2009,7 +2009,7 @@ void main() {
     );
 
     // Default color
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildApp(autoFocus: false));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
@@ -2103,7 +2103,7 @@ void main() {
     expectBorder();
 
     // Default color
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpWidget(buildApp(autoFocus: false));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);

@@ -45,14 +45,14 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             capturedContext = context;
-            return Container(height: 1000.0);
+            return const Container(height: 1000.0);
           },
         ),
       ),
     ));
 
     const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
-    final Widget child = Container();
+    const Widget child = Container();
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -94,7 +94,7 @@ void main() {
         builder: (BuildContext context) {
           behavior = ScrollConfiguration.of(context) as TestScrollBehavior;
           position = Scrollable.of(context).position as ScrollPositionWithSingleContext;
-          return Container(height: 1000.0);
+          return const Container(height: 1000.0);
         },
       ),
     );
@@ -204,7 +204,7 @@ void main() {
                     child: Builder(
                       builder: (BuildContext context) {
                         twiceCopiedPhysics = ScrollConfiguration.of(context).getScrollPhysics(context);
-                        return SingleChildScrollView(child: Container(height: 1000));
+                        return const SingleChildScrollView(child: Container(height: 1000));
                       }
                     )
                   );
@@ -246,7 +246,7 @@ void main() {
                             child: Builder(
                                 builder: (BuildContext context) {
                                   twiceCopiedPlatform = ScrollConfiguration.of(context).getPlatform(context);
-                                  return SingleChildScrollView(child: Container(height: 1000));
+                                  return const SingleChildScrollView(child: Container(height: 1000));
                                 }
                             )
                         );
@@ -270,7 +270,7 @@ void main() {
             child: ScrollConfiguration(
                 behavior: behavior,
                 child: Builder(
-                    builder: (BuildContext context) => SingleChildScrollView(child: Container(height: 1000))
+                    builder: (BuildContext context) => const SingleChildScrollView(child: Container(height: 1000))
                 )
             ),
           )

@@ -25,10 +25,10 @@ void main() {
                   anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, anchorBelowY),
                 ),
-                child: Container(
+                child: const Container(
                   width: 200.0,
                   height: height,
-                  color: const Color(0xffff0000),
+                  color: Color(0xffff0000),
                 ),
               );
             },

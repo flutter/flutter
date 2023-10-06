@@ -502,7 +502,7 @@ void main() {
               const Text('top', textDirection: TextDirection.ltr),
               Builder(builder: (BuildContext context) {
                 innerMediaQueryPadding = MediaQuery.paddingOf(context);
-                return Container();
+                return const Container();
               }),
             ],
           ),
@@ -526,7 +526,7 @@ void main() {
             height: 200.0,
             child: ListView(
               cacheExtent: 500.0,
-              children: <Widget>[
+              children: const <Widget>[
                 Container(
                   height: 90.0,
                 ),
@@ -701,7 +701,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: <Widget>[Container(height: 2000.0)],
+          children: const <Widget>[Container(height: 2000.0)],
         ),
       ),
     );
@@ -721,7 +721,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           clipBehavior: Clip.antiAlias,
-          children: <Widget>[Container(height: 2000.0)],
+          children: const <Widget>[Container(height: 2000.0)],
         ),
       ),
     );
@@ -743,7 +743,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView.builder(
           itemCount: 10,
-          itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+          itemBuilder: (BuildContext _, int __) => const Container(height: 2000.0),
           clipBehavior: Clip.antiAlias,
         ),
       ),
@@ -758,7 +758,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView.custom(
           childrenDelegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => Container(height: 2000.0),
+            (BuildContext context, int index) => const Container(height: 2000.0),
             childCount: 1,
           ),
           clipBehavior: Clip.antiAlias,
@@ -775,7 +775,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView.separated(
           itemCount: 10,
-          itemBuilder: (BuildContext _, int __) => Container(height: 2000.0),
+          itemBuilder: (BuildContext _, int __) => const Container(height: 2000.0),
           separatorBuilder: (BuildContext _, int __) => const Divider(),
           clipBehavior: Clip.antiAlias,
         ),
@@ -943,7 +943,7 @@ void main() {
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
             return 100.0;
           },
-          prototypeItem: Container(),
+          prototypeItem: const Container(),
           itemBuilder: (BuildContext context, int index) {
             return Text('Item $index');
           },
@@ -959,7 +959,7 @@ void main() {
       await tester.pumpWidget(
         ListView.builder(
           itemExtent: 100.0,
-          prototypeItem: Container(),
+          prototypeItem: const Container(),
           itemBuilder: (BuildContext context, int index) {
             return Text('Item $index');
           },

@@ -51,7 +51,7 @@ void main() {
 
   testWidgetsWithLeakTracking('no change', (WidgetTester tester) async {
     await tester.pumpWidget(
-      ColoredBox(
+      const ColoredBox(
         color: Colors.blue,
         child: ColoredBox(
           color: Colors.blue,
@@ -70,7 +70,7 @@ void main() {
     expect(state.updates, equals(0));
 
     await tester.pumpWidget(
-      ColoredBox(
+      const ColoredBox(
         color: Colors.blue,
         child: ColoredBox(
           color: Colors.blue,
@@ -86,12 +86,12 @@ void main() {
     expect(state.persistentState, equals(1));
     expect(state.updates, equals(1));
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgetsWithLeakTracking('remove one', (WidgetTester tester) async {
     await tester.pumpWidget(
-      ColoredBox(
+      const ColoredBox(
         color: Colors.blue,
         child: ColoredBox(
           color: Colors.blue,
@@ -110,7 +110,7 @@ void main() {
     expect(state.updates, equals(0));
 
     await tester.pumpWidget(
-      ColoredBox(
+      const ColoredBox(
         color: Colors.green,
         child: TestWidget(
           persistentState: 11,
@@ -125,7 +125,7 @@ void main() {
     expect(state.persistentState, equals(11));
     expect(state.updates, equals(0));
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgetsWithLeakTracking('swap instances around', (WidgetTester tester) async {

@@ -24,7 +24,7 @@ class InnerWidgetState extends State<InnerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Container();
   }
 }
 

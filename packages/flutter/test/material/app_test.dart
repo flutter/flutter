@@ -27,7 +27,7 @@ class StateMarkerState extends State<StateMarker> {
     if (widget.child != null) {
       return widget.child!;
     }
-    return Container();
+    return const Container();
   }
 }
 
@@ -389,7 +389,7 @@ void main() {
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
 
     // Work-around for https://github.com/flutter/flutter/issues/65655.
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     expect(tester.takeException(), isAssertionError);
   });
 
@@ -421,7 +421,7 @@ void main() {
             builder: (BuildContext context) {
               dependentBuildCount++;
               MediaQuery.of(context);
-              return Container();
+              return const Container();
             },
           );
         });
@@ -469,7 +469,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
         textScaler = MediaQuery.textScalerOf(context);
-        return Container();
+        return const Container();
       }),
     ));
     expect(textScaler, TextScaler.noScaling);
@@ -1248,7 +1248,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       builder: (BuildContext context, Widget? child) {
         builderChild = child;
-        return Container();
+        return const Container();
       },
     ));
     expect(builderChild, isNull);
@@ -1380,10 +1380,10 @@ void main() {
                 },
               ),
             ),
-            Opacity(
+            const Opacity(
               opacity: 0.5,
               child: Container(
-                color: const Color(0xD0FF0000),
+                color: Color(0xD0FF0000),
                 height: 100,
               ),
             ),
@@ -1469,7 +1469,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               capturedContext = context;
-              return Container(height: 1000.0);
+              return const Container(height: 1000.0);
             },
           ),
         ),
@@ -1479,7 +1479,7 @@ void main() {
     const ScrollableDetails details = ScrollableDetails(
       direction: AxisDirection.down,
     );
-    final Widget child = Container();
+    const Widget child = Container();
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -1515,7 +1515,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               capturedContext = context;
-              return Container(height: 1000.0);
+              return const Container(height: 1000.0);
             },
           ),
         ),
@@ -1525,7 +1525,7 @@ void main() {
     const ScrollableDetails details = ScrollableDetails(
       direction: AxisDirection.left,
     );
-    final Widget child = Container();
+    const Widget child = Container();
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

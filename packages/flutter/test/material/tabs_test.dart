@@ -48,7 +48,7 @@ class StateMarkerState extends State<StateMarker> {
     if (widget.child != null) {
       return widget.child!;
     }
-    return Container();
+    return const Container();
   }
 }
 
@@ -94,7 +94,7 @@ class _NestedTabBarContainer extends StatelessWidget {
           Expanded(
             child: TabBarView(
               controller: tabController,
-              children: <Widget>[
+              children: const <Widget>[
                 Container(color: Colors.yellow),
                 Container(color: Colors.grey),
               ],
@@ -2346,10 +2346,10 @@ void main() {
           body: TabBarView(
             controller: mainTabController,
             children: <Widget>[
-              Container(color: Colors.red),
+              const Container(color: Colors.red),
               _NestedTabBarContainer(tabController: nestedTabController),
-              Container(color: Colors.green),
-              Container(color: Colors.indigo),
+              const Container(color: Colors.green),
+              const Container(color: Colors.indigo),
             ],
           ),
         ),
@@ -3978,8 +3978,8 @@ void main() {
 
   test('illegal constructor combinations', () {
     expect(() => Tab(icon: nonconst(null)), throwsAssertionError);
-    expect(() => Tab(icon: Container(), text: 'foo', child: Container()), throwsAssertionError);
-    expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
+    expect(() => Tab(icon: const Container(), text: 'foo', child: const Container()), throwsAssertionError);
+    expect(() => Tab(text: 'foo', child: const Container()), throwsAssertionError);
   });
 
   testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
@@ -5784,7 +5784,7 @@ void main() {
           length: 1,
           child: Scaffold(
             appBar: AppBar(
-              bottom: TabBar(
+              bottom: const TabBar(
                 tabs: <Widget>[
                   Container(width: 100, height: 100, color: Colors.green),
                 ],
@@ -5808,7 +5808,7 @@ void main() {
               bottom: TabBar(
                 splashFactory: splashFactory,
                 overlayColor: overlayColor,
-                tabs: <Widget>[
+                tabs: const <Widget>[
                   Container(width: 100, height: 100, color: Colors.green),
                 ],
               ),
@@ -5949,7 +5949,7 @@ void main() {
           length: 2,
           child: Scaffold(
             appBar: AppBar(
-              bottom: TabBar(
+              bottom: const TabBar(
                 tabs: <Widget>[
                   Container(width: 100, height: 100, color: Colors.green),
                 ],
@@ -5970,7 +5970,7 @@ void main() {
           length: 1,
           child: Scaffold(
             appBar: AppBar(
-              bottom: TabBar(
+              bottom: const TabBar(
                 tabs: <Widget>[
                   Container(width: 100, height: 100, color: Colors.green),
                 ],

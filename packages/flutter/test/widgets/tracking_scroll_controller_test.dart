@@ -93,7 +93,7 @@ void main() {
     expect(attach, 1);
     expect(detach, 0);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
     await tester.pumpAndSettle();
 
     expect(attach, 1);

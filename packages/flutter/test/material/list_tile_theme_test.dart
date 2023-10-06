@@ -761,7 +761,7 @@ void main() {
         drawer: const Drawer(
           child: ListTile(),
         ),
-        body: Container(),
+        body: const Container(),
       ),
     ));
     await tester.pumpAndSettle();

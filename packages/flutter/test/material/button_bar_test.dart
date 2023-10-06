@@ -249,7 +249,7 @@ void main() {
             children: <Widget>[
               Builder(builder: (BuildContext context) {
                 capturedContext = context;
-                return Container();
+                return const Container();
               }),
             ],
           ),
@@ -281,7 +281,7 @@ void main() {
               children: <Widget>[
                 Builder(builder: (BuildContext context) {
                   capturedContext = context;
-                  return Container();
+                  return const Container();
                 }),
               ],
             ),
@@ -320,7 +320,7 @@ void main() {
               children: <Widget>[
                 Builder(builder: (BuildContext context) {
                   capturedContext = context;
-                  return Container();
+                  return const Container();
                 }),
               ],
             ),

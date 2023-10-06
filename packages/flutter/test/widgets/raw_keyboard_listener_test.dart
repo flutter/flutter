@@ -11,9 +11,9 @@ void main() {
   testWidgetsWithLeakTracking('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: const Container()));
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: const Container()));
+    await tester.pumpWidget(const Container());
   });
 
   testWidgetsWithLeakTracking('Fuchsia key event', (WidgetTester tester) async {
@@ -26,7 +26,7 @@ void main() {
       RawKeyboardListener(
         focusNode: focusNode,
         onKey: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -45,7 +45,7 @@ void main() {
     expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
     expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
   testWidgetsWithLeakTracking('Web key event', (WidgetTester tester) async {
@@ -58,7 +58,7 @@ void main() {
       RawKeyboardListener(
         focusNode: focusNode,
         onKey: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -76,7 +76,7 @@ void main() {
     expect(typedData.metaState, RawKeyEventDataWeb.modifierMeta);
     expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 
   testWidgetsWithLeakTracking('Defunct listeners do not receive events', (WidgetTester tester) async {
@@ -89,7 +89,7 @@ void main() {
       RawKeyboardListener(
         focusNode: focusNode,
         onKey: events.add,
-        child: Container(),
+        child: const Container(),
       ),
     );
 
@@ -102,7 +102,7 @@ void main() {
     expect(events.length, 2);
     events.clear();
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
 
     await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
 
@@ -110,6 +110,6 @@ void main() {
 
     expect(events.length, 0);
 
-    await tester.pumpWidget(Container());
+    await tester.pumpWidget(const Container());
   });
 }

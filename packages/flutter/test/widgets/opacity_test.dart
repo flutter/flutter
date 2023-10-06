@@ -164,10 +164,10 @@ void main() {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: List<Widget>.generate(10, (int index) {
-                  return Opacity(
+                  return const Opacity(
                     opacity: 0.5,
                     child: Padding(
-                      padding: const EdgeInsets.all(5.0),
+                      padding: EdgeInsets.all(5.0),
                       child: Container(
                           color: Colors.blue,
                           height: 50,
@@ -189,7 +189,7 @@ void main() {
 
   testWidgetsWithLeakTracking('empty opacity does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(child: Opacity(opacity: 0.5, child: Container())),
+      const RepaintBoundary(child: Opacity(opacity: 0.5, child: Container())),
     );
     final Element element = find.byType(RepaintBoundary).first.evaluate().single;
     // The following line will send the layer to engine and cause crash if an
@@ -205,7 +205,7 @@ void main() {
     await tester.pumpWidget(
       RepaintBoundary(
         key: key,
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[

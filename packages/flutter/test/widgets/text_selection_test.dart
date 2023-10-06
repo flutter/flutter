@@ -69,7 +69,7 @@ void main() {
         onDragSelectionStart: handleDragSelectionStart,
         onDragSelectionUpdate: handleDragSelectionUpdate,
         onDragSelectionEnd: handleDragSelectionEnd,
-        child: Container(),
+        child: const Container(),
       ),
     );
   }

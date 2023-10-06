@@ -268,7 +268,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: AnimatedCrossFade(
         firstChild: const _TickerWatchingWidget(),
-        secondChild: Container(),
+        secondChild: const Container(),
         crossFadeState: towardsSecond ? CrossFadeState.showSecond : CrossFadeState.showFirst,
         duration: const Duration(milliseconds: 50),
       ),
@@ -476,7 +476,7 @@ class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with Singl
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => const Container();
 
   @override
   void dispose() {

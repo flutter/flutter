@@ -33,7 +33,7 @@ void main() {
       builder: (BuildContext context) {
         expect(didBuild, isFalse);
         didBuild = true;
-        return Container();
+        return const Container();
       },
     ));
 
@@ -70,7 +70,7 @@ void main() {
       builder: (BuildContext context) {
         expect(didBuild, isFalse);
         didBuild = true;
-        return Container();
+        return const Container();
       },
     ));
 

@@ -50,7 +50,7 @@ void main() {
   testWidgets('SingleChildScrollView overflow and clipRect test', (WidgetTester tester) async {
     // the test widowSize is Size(800.0, 600.0)
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           child: Container(height: 600.0),
@@ -69,7 +69,7 @@ void main() {
 
     // 3rd, height overflow test: check that the painting context call pushClipRect.
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           child: Container(height: 600.1),
@@ -83,7 +83,7 @@ void main() {
     context = TestClipPaintingContext();
     expect(context.clipBehavior, equals(Clip.none)); // initial value
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -96,7 +96,7 @@ void main() {
 
     // 5th, width overflow test: check that the painting context call pushClipRect.
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -109,7 +109,7 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
-    await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
+    await tester.pumpWidget(const SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
     final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
@@ -129,7 +129,7 @@ void main() {
     );
 
     // 4th, pump a new widget to check that the render object can update its clip behavior.
-    await tester.pumpWidget(SingleChildScrollView(clipBehavior: Clip.antiAlias, child: Container(height: 2000.0)));
+    await tester.pumpWidget(const SingleChildScrollView(clipBehavior: Clip.antiAlias, child: Container(height: 2000.0)));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias)); // ignore: avoid_dynamic_calls
 
     // 5th, check that a non-default clip behavior can be sent to the painting context.
@@ -146,10 +146,10 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('SingleChildScrollView control test', (WidgetTester tester) async {
-    await tester.pumpWidget(SingleChildScrollView(
+    await tester.pumpWidget(const SingleChildScrollView(
       child: Container(
         height: 2000.0,
-        color: const Color(0xFF00FF00),
+        color: Color(0xFF00FF00),
       ),
     ));
 
@@ -165,18 +165,18 @@ void main() {
     final TestScrollController controller = TestScrollController();
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(SingleChildScrollView(
+    await tester.pumpWidget(const SingleChildScrollView(
       child: Container(
         height: 2000.0,
-        color: const Color(0xFF00FF00),
+        color: Color(0xFF00FF00),
       ),
     ));
 
     await tester.pumpWidget(SingleChildScrollView(
       controller: controller,
-      child: Container(
+      child: const Container(
         height: 2000.0,
-        color: const Color(0xFF00FF00),
+        color: Color(0xFF00FF00),
       ),
     ));
 
@@ -189,11 +189,11 @@ void main() {
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(PrimaryScrollController(
       controller: primaryScrollController,
-      child: SingleChildScrollView(
+      child: const SingleChildScrollView(
         primary: true,
         child: Container(
           height: 2000.0,
-          color: const Color(0xFF00FF00),
+          color: Color(0xFF00FF00),
         ),
       ),
     ));
@@ -212,10 +212,10 @@ void main() {
         width: 750.0,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            return SingleChildScrollView(
+            return const SingleChildScrollView(
               child: Container(
                 height: 2000.0,
-                color: const Color(0xFF00FF00),
+                color: Color(0xFF00FF00),
               ),
             );
           },
@@ -230,9 +230,9 @@ void main() {
           builder: (BuildContext context, BoxConstraints constraints) {
             return SingleChildScrollView(
               controller: controller,
-              child: Container(
+              child: const Container(
                 height: 2000.0,
-                color: const Color(0xFF00FF00),
+                color: Color(0xFF00FF00),
               ),
             );
           },

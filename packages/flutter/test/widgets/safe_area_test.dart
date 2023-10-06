@@ -87,7 +87,7 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('SafeArea - properties', (WidgetTester tester) async {
-      final SafeArea child = SafeArea(
+      const SafeArea child = SafeArea(
         right: false,
         bottom: false,
         child: Container(),

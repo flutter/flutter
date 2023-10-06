@@ -91,7 +91,7 @@ Widget _buildTestWidget({
     home: Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(
+          const Expanded(
             child: Container(),
           ),
           SizedBox(
@@ -110,7 +110,7 @@ Widget _buildTestWidget({
               )),
             ),
           ),
-          Expanded(
+          const Expanded(
             child: Container(),
           ),
         ],
