@@ -675,7 +675,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       switch (fit) {
         case OverflowBoxFit.max:
-          break;
+          assert(sizedByParent);
         case OverflowBoxFit.deferToChild:
           size = constraints.constrain(child!.size);
       }
@@ -683,7 +683,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     } else {
       switch (fit) {
         case OverflowBoxFit.max:
-          break;
+          assert(sizedByParent);
         case OverflowBoxFit.deferToChild:
           size = constraints.smallest;
       }
