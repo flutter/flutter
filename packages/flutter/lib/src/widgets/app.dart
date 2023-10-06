@@ -31,6 +31,7 @@ import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
+import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
@@ -1188,6 +1189,8 @@ class WidgetsApp extends StatefulWidget {
   static bool showPerformanceOverlayOverride = false;
 
   /// If true, forces the widget inspector to be visible.
+  ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
   ///
   /// Used by the `debugShowWidgetInspector` debugging extension.
   ///
