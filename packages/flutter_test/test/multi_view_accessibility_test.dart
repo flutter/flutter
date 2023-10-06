@@ -72,20 +72,20 @@ void main() {
     await pumpViews(
       tester: tester,
       viewContents: <Widget>[
-        Container(
+        const Container(
           width: 200.0,
           height: 200.0,
           color: Colors.yellow,
-          child: const Text(
+          child: Text(
             'this is a test',
             style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
           ),
         ),
-        Container(
+        const Container(
           width: 200.0,
           height: 200.0,
           color: Colors.yellow,
-          child: const Text(
+          child: Text(
             'this is a test',
             style: TextStyle(fontSize: 25.0, color: Colors.yellowAccent),
           ),

@@ -95,7 +95,7 @@ void main() {
         // a flutter widget build works
         expect(timerCalled, false);
 
-        return Container();
+        return const Container();
       }));
 
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));

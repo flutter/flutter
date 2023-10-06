@@ -840,7 +840,7 @@ void main() {
                   child: Semantics(
                     key: key,
                     label: 'C',
-                    child: Container(),
+                    child: const Container(),
                   ),
                 ),
               ),
@@ -866,7 +866,7 @@ void main() {
                     container: true,
                     key: key,
                     label: 'B',
-                    child: Container(),
+                    child: const Container(),
                   ),
                 ),
               ),

@@ -512,7 +512,7 @@ void main() {
       });
 
       testWidgets('if finder finds no widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(Container()));
+        await tester.pumpWidget(boilerplate(const Container()));
         final Finder finder = find.byType(Text);
         await expectLater(
           () => expectLater(finder, matchesGoldenFile('foo.png')),

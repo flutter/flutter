@@ -134,7 +134,7 @@ void main() {
   });
   group('pageBack', () {
     testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
-      await tester.pumpWidget(Container());
+      await tester.pumpWidget(const Container());
 
       expect(
         expectAsync0(tester.pageBack),
@@ -191,8 +191,8 @@ void main() {
                   onPressed: () {
                     Navigator.push<void>(context, CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
-                        return CupertinoPageScaffold(
-                          navigationBar: const CupertinoNavigationBar(
+                        return const CupertinoPageScaffold(
+                          navigationBar: CupertinoNavigationBar(
                             middle: Text('Page 2'),
                           ),
                           child: Container(),

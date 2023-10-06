@@ -84,11 +84,11 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          Container(
+          const Container(
             width: 200.0,
             height: 200.0,
             color: Colors.black,
-            child: const Text(
+            child: Text(
               'this is a test',
               style: TextStyle(fontSize: 14.0, color: Colors.white),
             ),
@@ -104,11 +104,11 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       _boilerplate(
-        Container(
+        const Container(
           width: 200.0,
           height: 300.0,
           color: Colors.white,
-          child: const Column(
+          child: Column(
             children: <Widget>[
               Text(
                 'this is a white text',
@@ -191,11 +191,11 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          Container(
+          const Container(
             width: 200.0,
             height: 200.0,
             color: Colors.black,
-            child: const Text(
+            child: Text(
               'this is a test',
               style: TextStyle(fontSize: 14.0, color: Colors.white),
             ),
@@ -238,11 +238,11 @@ void main() {
                 padding: const EdgeInsets.only(left: 100),
                 child: Semantics(
                   container: true,
-                  child: Container(
+                  child: const Container(
                     width: 100.0,
                     height: 200.0,
                     color: Colors.amberAccent,
-                    child: const Text(
+                    child: Text(
                       'this',
                       style: TextStyle(color: Colors.amber),
                     ),
@@ -281,11 +281,11 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           useMaterial3: false,
-          Container(
+          const Container(
             width: 200.0,
             height: 200.0,
             color: Colors.yellow,
-            child: const Text(
+            child: Text(
               'this is a test',
               style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
             ),
@@ -313,11 +313,11 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           useMaterial3: true,
-          Container(
+          const Container(
             width: 200.0,
             height: 200.0,
             color: Colors.yellow,
-            child: const Text(
+            child: Text(
               'this is a test',
               style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
             ),
@@ -365,7 +365,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          Stack(
+          const Stack(
             children: <Widget>[
               Positioned(
                 left: -300.0,
@@ -373,7 +373,7 @@ void main() {
                   width: 200.0,
                   height: 200.0,
                   color: Colors.yellow,
-                  child: const Text(
+                  child: Text(
                     'this is a test',
                     style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
                   ),
@@ -395,13 +395,13 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          ElevatedButton(
+          const ElevatedButton(
             onPressed: null,
             child: Container(
               width: 200.0,
               height: 200.0,
               color: Colors.yellow,
-              child: const Text(
+              child: Text(
                 'this is a test',
                 style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
               ),
@@ -867,7 +867,7 @@ void main() {
                         height: 100,
                         child: Semantics(container: true, onTap: () {}, child: const Text('hello'))),
                     ),
-                    Container(
+                    const Container(
                       height: 1000,
                       color: Colors.red,
                     ),
