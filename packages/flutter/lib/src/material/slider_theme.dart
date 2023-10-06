@@ -425,7 +425,7 @@ class SliderThemeData with Diagnosticable {
   /// The color given to the [valueIndicatorShape] to draw itself with.
   final Color? valueIndicatorColor;
 
-  /// The color given to the [valueIndicatorShape] to draw itself with stroke.
+  /// The color given to the [valueIndicatorShape] stroke.
   final Color? valueIndicatorStrokeColor;
 
   /// The shape that will be used to draw the [Slider]'s overlay.
