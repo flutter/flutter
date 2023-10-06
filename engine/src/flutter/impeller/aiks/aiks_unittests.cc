@@ -3619,15 +3619,46 @@ TEST_P(AiksTest, MatrixImageFilterMagnify) {
   canvas.Translate({600, -200});
   canvas.SaveLayer({
       .image_filter = std::make_shared<MatrixImageFilter>(
-          Matrix{
-              2, 0, 0, 0,  //
-              0, 2, 0, 0,  //
-              0, 0, 2, 0,  //
-              0, 0, 0, 1   //
-          },
+          Matrix::MakeScale({2, 2, 2}), SamplerDescriptor{}),
+  });
+  canvas.DrawImage(image, {0, 0},
+                   Paint{.color = Color::White().WithAlpha(0.5)});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+// Render a white circle at the top left corner of the screen.
+TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  canvas.Translate({100, 100});
+  // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
+  // +300 translation applied by a SaveLayer image filter.
+  canvas.SaveLayer({
+      .image_filter = std::make_shared<MatrixImageFilter>(
+          Matrix::MakeTranslation({300, 0}), SamplerDescriptor{}),
+  });
+  canvas.DrawCircle({-300, 0}, 100, {.color = Color::Green()});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+// Render a white circle at the top left corner of the screen.
+TEST_P(AiksTest,
+       MatrixImageFilterDoesntCullWhenScaledAndTranslatedFromOffscreen) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  canvas.Translate({100, 100});
+  // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
+  // +300 translation applied by a SaveLayer image filter.
+  canvas.SaveLayer({
+      .image_filter = std::make_shared<MatrixImageFilter>(
+          Matrix::MakeTranslation({300, 0}) * Matrix::MakeScale({2, 2, 2}),
           SamplerDescriptor{}),
   });
-  canvas.DrawImage(image, {0, 0}, Paint{.color = Color(1.0, 1.0, 1.0, 0.5)});
+  canvas.DrawCircle({-150, 0}, 50, {.color = Color::Green()});
   canvas.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
