@@ -234,30 +234,12 @@ class FlutterManifest {
         _logger.printError('Expected deferred component manifest to be a map.');
         continue;
       }
-      List<Uri> assetsUri = <Uri>[];
-      final List<Object?>? assets = component['assets'] as List<Object?>?;
-      if (assets == null) {
-        assetsUri = const <Uri>[];
-      } else {
-
-        for (final Object? asset in assets) {
-          if (asset is! String || asset == '') {
-            _logger.printError('Deferred component asset manifest contains a null or empty uri.');
-            continue;
-          }
-          try {
-            assetsUri.add(Uri.parse(asset));
-          } on FormatException {
-            _logger.printError('Asset manifest contains invalid uri: $asset.');
-          }
-        }
-      }
       components.add(
         DeferredComponent(
           name: component['name'] as String,
           libraries: component['libraries'] == null ?
               <String>[] : (component['libraries'] as List<dynamic>).cast<String>(),
-          assets: assetsUri,
+          assets: _computeAssets(component['assets']),
         )
       );
     }
