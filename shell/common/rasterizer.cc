@@ -910,9 +910,7 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
   }
 
   if (base64_encode) {
-    // TODO(kjlubick) We shouldn't need to call Encode once to pre-flight the
-    // encode length. It should be ceil(4/3 * sksl.value->size()).
-    size_t b64_size = Base64::Encode(data->data(), data->size(), nullptr);
+    size_t b64_size = Base64::EncodedSize(data->size());
     auto b64_data = SkData::MakeUninitialized(b64_size);
     Base64::Encode(data->data(), data->size(), b64_data->writable_data());
     return Rasterizer::Screenshot{b64_data, layer_tree->frame_size(), format};

@@ -1840,10 +1840,7 @@ bool Shell::OnServiceProtocolGetSkSLs(
   PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
   std::vector<PersistentCache::SkSLCache> sksls = persistent_cache->LoadSkSLs();
   for (const auto& sksl : sksls) {
-    // TODO(kjlubick) We shouldn't need to call Encode once to pre-flight the
-    // encode length. It should be ceil(4/3 * sksl.value->size()).
-    size_t b64_size =
-        Base64::Encode(sksl.value->data(), sksl.value->size(), nullptr);
+    size_t b64_size = Base64::EncodedSize(sksl.value->size());
     sk_sp<SkData> b64_data = SkData::MakeUninitialized(b64_size + 1);
     char* b64_char = static_cast<char*>(b64_data->writable_data());
     Base64::Encode(sksl.value->data(), sksl.value->size(), b64_char);
