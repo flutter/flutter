@@ -252,6 +252,7 @@ void Canvas::DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint) {
   auto path = PathBuilder{}
                   .SetConvexity(Convexity::kConvex)
                   .AddRoundedRect(rect, corner_radius)
+                  .SetBounds(rect)
                   .TakePath();
   if (paint.style == Paint::Style::kFill) {
     Entity entity;
@@ -273,10 +274,13 @@ void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
                               paint)) {
     return;
   }
-  auto circle_path = PathBuilder{}
-                         .AddCircle(center, radius)
-                         .SetConvexity(Convexity::kConvex)
-                         .TakePath();
+  auto circle_path =
+      PathBuilder{}
+          .AddCircle(center, radius)
+          .SetConvexity(Convexity::kConvex)
+          .SetBounds(Rect::MakeLTRB(center.x - radius, center.y - radius,
+                                    center.x + radius, center.y + radius))
+          .TakePath();
   DrawPath(circle_path, paint);
 }
 
@@ -317,6 +321,7 @@ void Canvas::ClipRRect(const Rect& rect,
   auto path = PathBuilder{}
                   .SetConvexity(Convexity::kConvex)
                   .AddRoundedRect(rect, corner_radius)
+                  .SetBounds(rect)
                   .TakePath();
 
   std::optional<Rect> inner_rect = (corner_radius * 2 < rect.size.width &&
