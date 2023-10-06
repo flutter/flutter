@@ -321,7 +321,7 @@ class Container extends StatelessWidget {
 
   /// Constraints for the [child]'s width, in logical pixels.
   final double? width;
-  
+
   /// Constraints for the [child]'s height, in logical pixels.
   final double? height;
 
@@ -358,10 +358,11 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   BoxConstraints? get _constraints =>
-      (width != null || height != null)
-        ? constraints?.tighten(width: width, height: height)
-          ?? BoxConstraints.tightFor(width: width, height: height)
-        : constraints;
+      switch ((width, height, constraints)) {
+        (null, null, _) => constraints,
+        (_, _, null) => BoxConstraints.tightFor(width: width, height: height),
+        _ => constraints!.tighten(width: width, height: height),
+      };
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration =>
       switch ((decoration?.padding, padding)) {
@@ -421,7 +422,6 @@ class Container extends StatelessWidget {
     assert(constraints == null || constraints!.debugAssertIsValid());
     final BoxConstraints? effectiveConstraints = _constraints;
     if (effectiveConstraints != null) {
-
       current = ConstrainedBox(constraints: effectiveConstraints, child: current);
     }
 
