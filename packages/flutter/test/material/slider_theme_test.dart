@@ -2084,6 +2084,49 @@ void main() {
     }
   });
 
+  testWidgets('RectangularSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: RectangularSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor),
+    );
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
