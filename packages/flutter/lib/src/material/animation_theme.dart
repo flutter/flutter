@@ -92,7 +92,6 @@ class AnimationThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two [AnimationTheme].
-  /// TODO: work on lerp
   static AnimationThemeData lerp(
     AnimationThemeData? a,
     AnimationThemeData? b,
@@ -102,14 +101,14 @@ class AnimationThemeData with Diagnosticable {
       return a;
     }
     return AnimationThemeData(
-      animationCurve: a?.animationCurve,
-      animationDuration: a?.animationDuration,
-      reverseAnimationDuration: a?.reverseAnimationDuration,
-      sizeCurve: a?.sizeCurve,
-      crossFadeFirstCurve: a?.crossFadeFirstCurve,
-      crossFadeSecondCurve: a?.crossFadeSecondCurve,
-      switchInCurve: a?.switchInCurve,
-      switchOutCurve: a?.switchOutCurve,
+      animationCurve: t < 0.5 ? a?.animationCurve : b?.animationCurve,
+      animationDuration: t < 0.5 ? a?.animationDuration : b?.animationDuration,
+      reverseAnimationDuration: t < 0.5 ? a?.reverseAnimationDuration : b?.reverseAnimationDuration,
+      sizeCurve: t < 0.5 ? a?.sizeCurve : b?.sizeCurve,
+      crossFadeFirstCurve: t < 0.5 ? a?.crossFadeFirstCurve : b?.crossFadeFirstCurve,
+      crossFadeSecondCurve: t < 0.5 ? a?.crossFadeSecondCurve : b?.crossFadeSecondCurve,
+      switchInCurve: t < 0.5 ? a?.switchInCurve : b?.switchInCurve,
+      switchOutCurve: t < 0.5 ? a?.switchOutCurve : b?.switchOutCurve,
     );
   }
 
@@ -126,7 +125,7 @@ class AnimationThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator == (Object other) {
     if (identical(this, other)) {
       return true;
     }
