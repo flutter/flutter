@@ -1032,6 +1032,10 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
     adoptChild(child);
+    // The Overlay still needs repainting when a deferred child is added. Usually
+    // `markNeedsLayout` implies `markNeedsPaint`, but here `markNeedsLayout` is
+    // skipped when the `_skipMarkNeedsLayout` flag is set.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
 
     // After adding `child` to the render tree, we want to make sure it will be
@@ -1045,6 +1049,9 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
     dropChild(child);
+    // The Overlay still needs repainting when a deferred child is dropped. See
+    // the comment in `_addDeferredChild`.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
   }
 
