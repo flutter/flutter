@@ -2643,6 +2643,65 @@ void main() {
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
   });
 
+  testWidgets('Value indicator appears with stroke color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
+      showValueIndicator: ShowValueIndicator.always,
+      valueIndicatorColor: const Color(0xff000001),
+      valueIndicatorStrokeColor: const Color(0xff000002),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Theme(
+                    data: theme,
+                    child: SliderTheme(
+                      data: sliderTheme,
+                      child: Slider(
+                        value: value,
+                        label: '$value',
+                        onChanged: (double newValue) {},
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..paragraph(),
+    );
+
+    await gesture.up();
+  });
+
   testWidgetsWithLeakTracking("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
