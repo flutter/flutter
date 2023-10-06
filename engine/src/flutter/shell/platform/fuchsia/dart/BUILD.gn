@@ -62,7 +62,7 @@ dart_library("async_helper") {
   package_root = "//third_party/dart/pkg/async_helper"
   package_name = "async_helper"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = []
 
@@ -76,7 +76,7 @@ dart_library("meta") {
   package_root = "//third_party/dart/pkg/meta"
   package_name = "meta"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = []
 
@@ -91,7 +91,7 @@ dart_library("expect") {
   package_root = "//third_party/dart/pkg/expect"
   package_name = "expect"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = [ ":meta" ]
 
@@ -106,7 +106,7 @@ dart_library("litetest") {
   package_root = "//flutter/testing/litetest"
   package_name = "litetest"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   source_dir = "lib"
 
@@ -128,7 +128,7 @@ dart_library("args") {
   package_root = "//third_party/dart/third_party/pkg/args"
   package_name = "args"
 
-  language_version = "2.18"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = []
 
@@ -152,7 +152,7 @@ dart_library("collection") {
   package_root = "//third_party/dart/third_party/pkg/collection"
   package_name = "collection"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = []
 
@@ -192,7 +192,7 @@ dart_library("logging") {
   package_root = "//third_party/dart/third_party/pkg/logging"
   package_name = "logging"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = []
 
@@ -208,7 +208,7 @@ dart_library("path") {
   package_root = "//third_party/dart/third_party/pkg/path"
   package_name = "path"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = []
 
@@ -233,7 +233,7 @@ dart_library("stack_trace") {
   package_root = "//third_party/dart/third_party/pkg/stack_trace"
   package_name = "stack_trace"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = [ ":path" ]
 
@@ -255,7 +255,7 @@ dart_library("matcher") {
   package_root = "//third_party/dart/third_party/pkg/matcher"
   package_name = "matcher"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = [ ":stack_trace" ]
 
@@ -299,8 +299,7 @@ dart_library("quiver") {
   package_root = "//third_party/pkg/quiver"
   package_name = "quiver"
 
-  # The current version of this library is not null safe
-  language_version = "2.17"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = [
     ":matcher",
@@ -368,7 +367,7 @@ dart_library("vector_math") {
   package_root = "//third_party/pkg/vector_math"
   package_name = "vector_math"
 
-  language_version = "2.12"
+  pubspec = "$package_root/pubspec.yaml"
 
   deps = []
 
