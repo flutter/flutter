@@ -1062,13 +1062,14 @@ void main() {
     element.createChild(0, after: null);
   });
 
-  testWidgets('GlobalKey - re-attach child to new parents, and the old parent is deactivated(unmounted)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GlobalKey - re-attach child to new parents, and the old parent is deactivated(unmounted)', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/62055
     const Key key1 = GlobalObjectKey('key1');
     const Key key2 = GlobalObjectKey('key2');
     late StateSetter setState;
     int tabBarViewCnt = 2;
     TabController tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
+    addTearDown(tabController.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1101,6 +1102,7 @@ void main() {
     setState(() {
       tabBarViewCnt = 1;
       tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
+      addTearDown(tabController.dispose);
     });
 
     await tester.pump(const Duration(seconds: 1)); // finish the animation
