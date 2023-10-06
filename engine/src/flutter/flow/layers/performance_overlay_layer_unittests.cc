@@ -111,10 +111,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
     wstream.write(snapshot_data->data(), snapshot_data->size());
     wstream.flush();
 
-    // TODO(kjlubick) We shouldn't need to call Encode once to pre-flight the
-    // encode length. It should be ceil(4/3 * sksl.value->size()).
-    size_t b64_size =
-        Base64::Encode(snapshot_data->data(), snapshot_data->size(), nullptr);
+    size_t b64_size = Base64::EncodedSize(snapshot_data->size());
     sk_sp<SkData> b64_data = SkData::MakeUninitialized(b64_size + 1);
     char* b64_char = static_cast<char*>(b64_data->writable_data());
     Base64::Encode(snapshot_data->data(), snapshot_data->size(), b64_char);

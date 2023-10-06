@@ -17,6 +17,7 @@ TEST(Base64, EncodeStrings) {
     char buffer[256];
     size_t len = Base64::Encode(input.c_str(), input.length(), &buffer);
     FML_CHECK(len <= 256);
+    ASSERT_EQ(len, Base64::EncodedSize(input.length()));
     std::string actual(buffer, len);
     ASSERT_STREQ(actual.c_str(), output.c_str());
   };
@@ -34,6 +35,7 @@ TEST(Base64, EncodeBytes) {
     char buffer[512];
     size_t len = Base64::Encode(input, num, &buffer);
     FML_CHECK(len <= 512);
+    ASSERT_EQ(len, Base64::EncodedSize(num));
     std::string actual(buffer, len);
     ASSERT_STREQ(actual.c_str(), output.c_str());
   };
