@@ -81,13 +81,15 @@ enum _MediaQueryAspect {
 /// For example, the [MediaQueryData.size] property contains the width and
 /// height of the current window.
 ///
-/// To obtain the current [MediaQueryData] for a given [BuildContext], use the
-/// [MediaQuery.of] function. For example, to obtain the size of the current
-/// window, use `MediaQuery.of(context).size`.
+/// To obtain individual attributes in a [MediaQueryData], prefer to use the
+/// attribute-specific functions of [MediaQuery] over obtaining the entire
+/// [MediaQueryData] and accessing its members.
+/// {@macro flutter.widgets.media_query.MediaQuery.useSpecific}
 ///
-/// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
-/// exception. Alternatively, [MediaQuery.maybeOf] may be used, which returns
-/// null instead of throwing if no [MediaQuery] is in scope.
+/// To obtain the entire current [MediaQueryData] for a given [BuildContext],
+/// use the [MediaQuery.of] function. This can be useful if you are going to use
+/// [copyWith] to replace the [MediaQueryData] with one with an updated
+/// property.
 ///
 /// ## Insets and Padding
 ///
@@ -219,9 +221,10 @@ class MediaQueryData {
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
   ///
-  /// In general, [MediaQuery.of] is the appropriate way to obtain
-  /// [MediaQueryData] from a widget. This `fromView` constructor is primarily
-  /// for use in the implementation of the framework itself.
+  /// In general, [MediaQuery.of], and its associated "...Of" methods, are the
+  /// appropriate way to obtain [MediaQueryData] from a widget. This `fromView`
+  /// constructor is primarily for use in the implementation of the framework
+  /// itself.
   ///
   /// See also:
   ///
@@ -254,12 +257,7 @@ class MediaQueryData {
     return scaleFactor == 1.0 ? TextScaler.noScaling : TextScaler.linear(scaleFactor);
   }
 
-  /// The size of the media in logical pixels (e.g, the size of the screen) of a
-  /// previously rendered frame.
-  ///
-  /// Because the information is delivered asynchronously, it is not
-  /// deterministic which previous frame supplied the size returned by [size].
-  /// The initial size is the size of the created [FlutterView].
+  /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
   /// Logical pixels are roughly the same visual size across devices. Physical
   /// pixels are the size of the actual hardware pixels on the device. The
@@ -867,14 +865,15 @@ class MediaQueryData {
 
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
-/// For example, to learn the size of a recent frame on the current view (e.g.,
-/// the [FlutterView] containing your app), you can use [MediaQuery.sizeOf] :
+/// For example, to learn the size of the current view (e.g.,
+/// the [FlutterView] containing your app), you can use [MediaQuery.sizeOf]:
 /// `MediaQuery.sizeOf(context)`.
 ///
 /// Querying the current media using specific methods (for example,
-/// [MediaQuery.sizeOf] and [MediaQuery.paddingOf]) will cause your widget to
+/// [MediaQuery.sizeOf] or [MediaQuery.paddingOf]) will cause your widget to
 /// rebuild automatically whenever that specific property changes.
 ///
+/// {@template flutter.widgets.media_query.MediaQuery.useSpecific}
 /// Querying using [MediaQuery.of] will cause your widget to rebuild
 /// automatically whenever _any_ field of the [MediaQueryData] changes (e.g., if
 /// the user rotates their device). Therefore, unless you are concerned with the
@@ -882,11 +881,12 @@ class MediaQueryData {
 /// (for example: [MediaQuery.sizeOf] and [MediaQuery.paddingOf]), as it will
 /// rebuild more efficiently.
 ///
-/// If no [MediaQuery] is in scope then the "Of" methods similar to
-/// [MediaQuery.of] and [MediaQuery.sizeOf] will throw an exception.
-/// Alternatively, the "maybe-" variant methods (such as [MediaQuery.maybeOf]
-/// and [MediaQuery.maybeSizeOf]) can be used, which return null, instead of
+/// If no [MediaQuery] is in scope then [MediaQuery.of] and the "...Of" methods
+/// similar to [MediaQuery.sizeOf] will throw an exception. Alternatively, the
+/// "maybe-" variant methods (such as [MediaQuery.maybeOf] and
+/// [MediaQuery.maybeSizeOf]) can be used, which return null, instead of
 /// throwing, when no [MediaQuery] is in scope.
+/// {@endtemplate}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
 ///
@@ -1232,26 +1232,29 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Returns [MediaQueryData.size] from the nearest [MediaQuery] ancestor or
   /// throws an exception, if no such ancestor exists.
   ///
-  /// {@template flutter.widgets.media_query.sizeOf.asyncNote}
-  /// This returns the size of the media in logical pixels (e.g, the size of the
-  /// screen) of a previously rendered frame.
-  ///
-  /// Because the information is delivered asynchronously, it is not
-  /// deterministic which previous frame supplied the size returned by [size].
-  /// The initial size is the size of the created [FlutterView].
-  /// {@endtemplate}
-  ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.size] property of the ancestor [MediaQuery] changes.
+  ///
+  /// {@template flutter.widgets.media_query.MediaQuery.dontUseOf}
+  /// Prefer using this function over getting the attribute directly from the
+  /// [MediaQueryData] returned from [of], because using this function will only
+  /// rebuild the `context` when this specific attribute changes, not when _any_
+  /// attribute changes.
+  /// {@endtemplate}
   static Size sizeOf(BuildContext context) => _of(context, _MediaQueryAspect.size).size;
 
   /// Returns [MediaQueryData.size] from the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
   ///
-  /// {@macro flutter.widgets.media_query.sizeOf.asyncNote}
-  ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.size] property of the ancestor [MediaQuery] changes.
+  ///
+  /// {@template flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  /// Prefer using this function over getting the attribute directly from the
+  /// [MediaQueryData] returned from [maybeOf], because using this function will
+  /// only rebuild the `context` when this specific attribute changes, not when
+  /// _any_ attribute changes.
+  /// {@endtemplate}
   static Size? maybeSizeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.size)?.size;
 
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
@@ -1259,6 +1262,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.orientation] property of the ancestor [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static Orientation orientationOf(BuildContext context) => _of(context, _MediaQueryAspect.orientation).orientation;
 
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
@@ -1266,6 +1271,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.orientation] property of the ancestor [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static Orientation? maybeOrientationOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.orientation)?.orientation;
 
   /// Returns [MediaQueryData.devicePixelRatio] for the nearest [MediaQuery] ancestor or
@@ -1273,6 +1280,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static double devicePixelRatioOf(BuildContext context) => _of(context, _MediaQueryAspect.devicePixelRatio).devicePixelRatio;
 
   /// Returns [MediaQueryData.devicePixelRatio] for the nearest [MediaQuery] ancestor or
@@ -1280,6 +1289,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static double? maybeDevicePixelRatioOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
@@ -1290,6 +1301,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   @Deprecated(
     'Use textScalerOf instead. '
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -1306,6 +1319,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   @Deprecated(
     'Use maybeTextScalerOf instead. '
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -1319,6 +1334,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static TextScaler textScalerOf(BuildContext context) => maybeTextScalerOf(context) ?? TextScaler.noScaling;
 
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
@@ -1327,6 +1344,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static TextScaler? maybeTextScalerOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaler)?.textScaler;
 
   /// Returns [MediaQueryData.platformBrightness] for the nearest [MediaQuery]
@@ -1335,6 +1354,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.platformBrightness] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static Brightness platformBrightnessOf(BuildContext context) => maybePlatformBrightnessOf(context) ?? Brightness.light;
 
   /// Returns [MediaQueryData.platformBrightness] for the nearest [MediaQuery]
@@ -1343,6 +1364,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.platformBrightness] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static Brightness? maybePlatformBrightnessOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.platformBrightness)?.platformBrightness;
 
   /// Returns [MediaQueryData.padding] for the nearest [MediaQuery] ancestor or
@@ -1351,6 +1374,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.padding] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static EdgeInsets paddingOf(BuildContext context) => _of(context, _MediaQueryAspect.padding).padding;
 
   /// Returns [MediaQueryData.padding] for the nearest [MediaQuery] ancestor
@@ -1359,6 +1384,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.padding] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static EdgeInsets? maybePaddingOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.padding)?.padding;
 
   /// Returns [MediaQueryData.viewInsets] for the nearest [MediaQuery] ancestor
@@ -1367,6 +1394,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.viewInsets] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static EdgeInsets viewInsetsOf(BuildContext context) => _of(context, _MediaQueryAspect.viewInsets).viewInsets;
 
   /// Returns [MediaQueryData.viewInsets] for the nearest [MediaQuery] ancestor
@@ -1375,6 +1404,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.viewInsets] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static EdgeInsets? maybeViewInsetsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.viewInsets)?.viewInsets;
 
   /// Returns [MediaQueryData.systemGestureInsets] for the nearest [MediaQuery]
@@ -1383,6 +1414,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.systemGestureInsets] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static EdgeInsets systemGestureInsetsOf(BuildContext context) => _of(context, _MediaQueryAspect.systemGestureInsets).systemGestureInsets;
 
   /// Returns [MediaQueryData.systemGestureInsets] for the nearest [MediaQuery]
@@ -1391,6 +1424,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.systemGestureInsets] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static EdgeInsets? maybeSystemGestureInsetsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.systemGestureInsets)?.systemGestureInsets;
 
   /// Returns [MediaQueryData.viewPadding] for the nearest [MediaQuery] ancestor
@@ -1399,6 +1434,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.viewPadding] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static EdgeInsets viewPaddingOf(BuildContext context) => _of(context, _MediaQueryAspect.viewPadding).viewPadding;
 
   /// Returns [MediaQueryData.viewPadding] for the nearest [MediaQuery] ancestor
@@ -1407,6 +1444,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.viewPadding] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static EdgeInsets? maybeViewPaddingOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.viewPadding)?.viewPadding;
 
   /// Returns [MediaQueryData.alwaysUse24HourFormat] for the nearest
@@ -1415,6 +1454,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.alwaysUse24HourFormat] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool alwaysUse24HourFormatOf(BuildContext context) => _of(context, _MediaQueryAspect.alwaysUse24HourFormat).alwaysUse24HourFormat;
 
   /// Returns [MediaQueryData.alwaysUse24HourFormat] for the nearest
@@ -1423,6 +1464,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.alwaysUse24HourFormat] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static bool? maybeAlwaysUse24HourFormatOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.alwaysUse24HourFormat)?.alwaysUse24HourFormat;
 
   /// Returns [MediaQueryData.accessibleNavigation] for the nearest [MediaQuery]
@@ -1431,6 +1474,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.accessibleNavigation] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool accessibleNavigationOf(BuildContext context) => _of(context, _MediaQueryAspect.accessibleNavigation).accessibleNavigation;
 
   /// Returns [MediaQueryData.accessibleNavigation] for the nearest [MediaQuery]
@@ -1439,6 +1484,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.accessibleNavigation] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static bool? maybeAccessibleNavigationOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.accessibleNavigation)?.accessibleNavigation;
 
   /// Returns [MediaQueryData.invertColors] for the nearest [MediaQuery]
@@ -1447,6 +1494,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.invertColors] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool invertColorsOf(BuildContext context) => _of(context, _MediaQueryAspect.invertColors).invertColors;
 
   /// Returns [MediaQueryData.invertColors] for the nearest [MediaQuery]
@@ -1455,6 +1504,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.invertColors] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static bool? maybeInvertColorsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.invertColors)?.invertColors;
 
   /// Returns [MediaQueryData.highContrast] for the nearest [MediaQuery]
@@ -1463,6 +1514,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.highContrast] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool highContrastOf(BuildContext context) => maybeHighContrastOf(context) ?? false;
 
   /// Returns [MediaQueryData.highContrast] for the nearest [MediaQuery]
@@ -1471,6 +1524,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.highContrast] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static bool? maybeHighContrastOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast;
 
   /// Returns [MediaQueryData.onOffSwitchLabels] for the nearest [MediaQuery]
@@ -1479,6 +1534,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool onOffSwitchLabelsOf(BuildContext context) => maybeOnOffSwitchLabelsOf(context) ?? false;
 
   /// Returns [MediaQueryData.onOffSwitchLabels] for the nearest [MediaQuery]
@@ -1487,6 +1544,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static bool? maybeOnOffSwitchLabelsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
 
   /// Returns [MediaQueryData.disableAnimations] for the nearest [MediaQuery]
@@ -1495,6 +1554,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.disableAnimations] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool disableAnimationsOf(BuildContext context) => _of(context, _MediaQueryAspect.disableAnimations).disableAnimations;
 
   /// Returns [MediaQueryData.disableAnimations] for the nearest [MediaQuery]
@@ -1503,6 +1564,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.disableAnimations] property of the ancestor
   /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static bool? maybeDisableAnimationsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.disableAnimations)?.disableAnimations;
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
@@ -1511,6 +1574,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool boldTextOf(BuildContext context) => maybeBoldTextOf(context) ?? false;
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
@@ -1533,6 +1598,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static bool? maybeBoldTextOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
 
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
@@ -1541,6 +1608,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.navigationMode] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static NavigationMode navigationModeOf(BuildContext context) => _of(context, _MediaQueryAspect.navigationMode).navigationMode;
 
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
@@ -1549,6 +1618,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.navigationMode] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static NavigationMode? maybeNavigationModeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.navigationMode)?.navigationMode;
 
   /// Returns [MediaQueryData.gestureSettings] for the nearest [MediaQuery]
@@ -1557,6 +1628,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.gestureSettings] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static DeviceGestureSettings gestureSettingsOf(BuildContext context) => _of(context, _MediaQueryAspect.gestureSettings).gestureSettings;
 
   /// Returns [MediaQueryData.gestureSettings] for the nearest [MediaQuery]
@@ -1565,6 +1638,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.gestureSettings] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static DeviceGestureSettings? maybeGestureSettingsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.gestureSettings)?.gestureSettings;
 
   /// Returns [MediaQueryData.displayFeatures] for the nearest [MediaQuery]
@@ -1573,6 +1648,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.displayFeatures] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static List<ui.DisplayFeature> displayFeaturesOf(BuildContext context) => _of(context, _MediaQueryAspect.displayFeatures).displayFeatures;
 
   /// Returns [MediaQueryData.displayFeatures] for the nearest [MediaQuery]
@@ -1581,6 +1658,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.displayFeatures] property of the ancestor [MediaQuery]
   /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static List<ui.DisplayFeature>? maybeDisplayFeaturesOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.displayFeatures)?.displayFeatures;
 
   @override
