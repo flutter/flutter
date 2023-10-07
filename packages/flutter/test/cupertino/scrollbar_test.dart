@@ -1114,18 +1114,13 @@ void main() {
     };
 
     // long press the thumb
-    final TestGesture gesture = await tester.startGesture(const Offset(796.0, 50.0));
+    await tester.startGesture(const Offset(796.0, 50.0));
     await tester.pump(kLongPressDuration);
 
     expect(error, isNotNull);
 
     scrollController.attach(position);
     FlutterError.onError = handler;
-
-    // Finish gesture to release resources.
-    await tester.pumpAndSettle();
-    await gesture.up();
-    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
