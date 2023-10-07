@@ -322,6 +322,7 @@ bool ProcTableGLES::SetDebugLabel(DebugResourceType type,
 }
 
 void ProcTableGLES::PushDebugGroup(const std::string& label) const {
+#ifdef IMPELLER_DEBUG
   if (debug_label_max_length_ <= 0) {
     return;
   }
@@ -334,14 +335,17 @@ void ProcTableGLES::PushDebugGroup(const std::string& label) const {
                     label_length,                     // length
                     label.data()                      // message
   );
+#endif  // IMPELLER_DEBUG
 }
 
 void ProcTableGLES::PopDebugGroup() const {
+#ifdef IMPELLER_DEBUG
   if (debug_label_max_length_ <= 0) {
     return;
   }
 
   PopDebugGroupKHR();
+#endif  // IMPELLER_DEBUG
 }
 
 std::string ProcTableGLES::GetProgramInfoLogString(GLuint program) const {
