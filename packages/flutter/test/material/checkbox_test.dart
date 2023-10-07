@@ -1417,7 +1417,6 @@ void main() {
     // Finish gestures to release resources.
     await gesture1.up();
     await gesture2.up();
-    await gesture3.up();
     await tester.pumpAndSettle();
   });
 
@@ -1489,7 +1488,6 @@ void main() {
     // Finish gestures to release resources.
     await gesture1.up();
     await gesture2.up();
-    await gesture3.up();
     await tester.pumpAndSettle();
   });
 
@@ -1629,12 +1627,11 @@ void main() {
       reason: 'Hovered Checkbox should use overlay color $hoverOverlayColor over $hoverColor',
     );
 
-    // Finish gesture to release resources.
+    // Finish gestures to release resources.
     await gesture1.up();
     await gesture2.up();
     await gesture3.up();
     await gesture4.up();
-    await gesture5.up();
     await tester.pumpAndSettle();
   });
 

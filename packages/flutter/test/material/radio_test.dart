@@ -1725,7 +1725,6 @@ void main() {
     // Finish gesture to release resources.
     await gesture1.up();
     await gesture2.up();
-    await gesture3.up();
     await tester.pumpAndSettle();
   });
 
@@ -1819,7 +1818,6 @@ void main() {
     // Finish gesture to release resources.
     await gesture1.up();
     await gesture2.up();
-    await gesture3.up();
     await tester.pumpAndSettle();
   });
 

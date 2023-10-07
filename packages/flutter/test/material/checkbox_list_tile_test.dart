@@ -863,7 +863,6 @@ void main() {
     await gesture2.up();
     await gesture3.up();
     await gesture4.up();
-    await gesture5.up();
     await tester.pumpAndSettle();
   });
 
@@ -994,7 +993,6 @@ void main() {
     await gesture2.up();
     await gesture3.up();
     await gesture4.up();
-    await gesture5.up();
     await tester.pumpAndSettle();
   });
 
