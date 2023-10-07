@@ -835,7 +835,7 @@ void main() {
     final Offset checkboxTopLeftGlobal = tester.getTopLeft(find.byType(Checkbox));
     final Offset checkboxCenterGlobal = tester.getCenter(find.byType(Checkbox));
     final Offset checkboxCenterLocal = checkboxCenterGlobal - checkboxTopLeftGlobal;
-    final TestGesture gesture       = await tester.startGesture(checkboxTopLeftGlobal);
+    final TestGesture gesture = await tester.startGesture(checkboxTopLeftGlobal);
     await tester.pump();
     // Wait for the splash to be drawn, but not long enough for it to animate towards the center, since
     // we want to catch it in its starting position.
@@ -844,6 +844,10 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints..circle(x: checkboxCenterLocal.dx, y: checkboxCenterLocal.dy),
     );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Material2 - Checkbox can be hovered and has correct hover color', (WidgetTester tester) async {

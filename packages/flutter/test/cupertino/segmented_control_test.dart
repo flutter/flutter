@@ -627,11 +627,15 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
 
     final Offset center = tester.getCenter(find.text('Child 1'));
-    final TestGesture gesture       = await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
@@ -1586,13 +1590,17 @@ void main() {
     );
 
     final Offset center = tester.getCenter(find.text('B'));
-    final TestGesture gesture       = await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.png'),
     );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Hovering over Cupertino segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
