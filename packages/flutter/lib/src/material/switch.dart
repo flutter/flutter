@@ -1345,7 +1345,11 @@ class _SwitchPainter extends ToggleablePainter {
       TextDirection.rtl => 1.0 - currentValue,
       TextDirection.ltr => currentValue,
     };
-    _stopPressAnimation = reaction.status == AnimationStatus.reverse && !_stopPressAnimation;
+    if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
+      _stopPressAnimation = true;
+    } else {
+      _stopPressAnimation = false;
+    }
 
     // To get the thumb radius when the press ends, the value can be any number
     // between activeThumbRadius/inactiveThumbRadius and pressedThumbRadius.

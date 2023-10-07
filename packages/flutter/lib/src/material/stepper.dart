@@ -418,9 +418,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
     final Widget? icon = widget.stepIconBuilder?.call(index, state);
-    if (icon != null) {
-      return icon;
-    }
     return icon ?? switch (state) {
       StepState.indexed || StepState.disabled => Text(
           '${index + 1}',

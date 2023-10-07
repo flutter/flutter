@@ -588,7 +588,7 @@ abstract class BindingBase {
             debugBrightnessOverride = switch (parameters['value']) {
               'Brightness.light' => ui.Brightness.light,
               'Brightness.dark' => ui.Brightness.dark,
-              _ => debugBrightnessOverride = null,
+              _ => null,
             };
             _postExtensionStateChangedEvent(
               FoundationServiceExtensions.brightnessOverride.name,
