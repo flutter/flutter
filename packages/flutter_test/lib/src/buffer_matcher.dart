@@ -4,9 +4,9 @@
 
 import 'dart:typed_data';
 
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' show Description, TestFailure;
+import 'package:matcher/expect.dart' show Description;
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/hooks.dart' show TestFailure;
 
 import 'goldens.dart';
 
@@ -60,11 +60,11 @@ class _BufferGoldenMatcher extends AsyncMatcher {
 /// golden files. This parameter is optional.
 ///
 /// {@tool snippet}
-/// Sample invocations of [matchesGoldenFile].
+/// Sample invocations of [bufferMatchesGoldenFile].
 ///
 /// ```dart
 /// await expectLater(
-///   const <int>[],
+///   const <int>[ /* bytes... */ ],
 ///   bufferMatchesGoldenFile('sample.png'),
 /// );
 /// ```

@@ -21,10 +21,13 @@ import 'theme_data.dart';
 /// Concrete subclasses must override [defaultStyleOf] and [themeStyleOf].
 ///
 /// See also:
-///
-///  * [TextButton], a simple ButtonStyleButton without a shadow.
-///  * [ElevatedButton], a filled ButtonStyleButton whose material elevates when pressed.
-///  * [OutlinedButton], similar to [TextButton], but with an outline.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
+///  * <https://m3.material.io/components/buttons/overview>, an overview of each of
+///    the Material Design button types and how they should be used in designs.
 abstract class ButtonStyleButton extends StatefulWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -39,9 +42,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.autofocus,
     required this.clipBehavior,
     this.statesController,
+    this.isSemanticButton = true,
     required this.child,
-  }) : assert(autofocus != null),
-       assert(clipBehavior != null);
+  });
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -98,7 +101,18 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// {@macro flutter.material.inkwell.statesController}
   final MaterialStatesController? statesController;
 
+  /// Determine whether this subtree represents a button.
+  ///
+  /// If this is null, the screen reader will not announce "button" when this
+  /// is focused. This is useful for [MenuItemButton] and [SubmenuButton] when we
+  /// traverse the menu system.
+  ///
+  /// Defaults to true.
+  final bool? isSemanticButton;
+
   /// Typically the button's label.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
@@ -170,10 +184,6 @@ abstract class ButtonStyleButton extends StatefulWidget {
     EdgeInsetsGeometry geometry3x,
     double textScaleFactor,
   ) {
-    assert(geometry1x != null);
-    assert(geometry2x != null);
-    assert(geometry3x != null);
-    assert(textScaleFactor != null);
 
     if (textScaleFactor <= 1) {
       return geometry1x;
@@ -191,9 +201,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
 /// See also:
 ///
 ///  * [ButtonStyleButton], the [StatefulWidget] subclass for which this class is the [State].
-///  * [TextButton], a simple button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [FilledButton], a filled ButtonStyleButton that doesn't elevate when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
+///  * [TextButton], a simple button without a shadow.
 class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStateMixin {
   AnimationController? controller;
   double? elevation;
@@ -254,7 +265,6 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final ButtonStyle? widgetStyle = widget.style;
     final ButtonStyle? themeStyle = widget.themeStyleOf(context);
     final ButtonStyle defaultStyle = widget.defaultStyleOf(context);
-    assert(defaultStyle != null);
 
     T? effectiveValue<T>(T? Function(ButtonStyle? style) getProperty) {
       final T? widgetValue  = getProperty(widgetStyle);
@@ -281,6 +291,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
     final Size? resolvedMaximumSize = resolve<Size?>((ButtonStyle? style) => style?.maximumSize);
+    final Color? resolvedIconColor = resolve<Color?>((ButtonStyle? style) => style?.iconColor);
+    final double? resolvedIconSize = resolve<double?>((ButtonStyle? style) => style?.iconSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -393,7 +405,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           customBorder: resolvedShape.copyWith(side: resolvedSide),
           statesController: statesController,
           child: IconTheme.merge(
-            data: IconThemeData(color: resolvedForegroundColor),
+            data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
             child: Padding(
               padding: padding,
               child: Align(
@@ -417,15 +429,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-        break;
     }
 
     return Semantics(
       container: true,
-      button: true,
+      button: widget.isSemanticButton,
       enabled: widget.enabled,
       child: _InputPadding(
         minSize: minSize,

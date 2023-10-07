@@ -2,21 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ToggleButtons
-
 import 'package:flutter/material.dart';
 
-const List<Widget> fruits = <Widget>[
-  Text('Apple'),
-  Text('Banana'),
-  Text('Orange')
-];
+/// Flutter code sample for [ToggleButtons].
 
-const List<Widget> vegetables = <Widget>[
-  Text('Tomatoes'),
-  Text('Potatoes'),
-  Text('Carrots')
-];
+const List<Widget> fruits = <Widget>[Text('Apple'), Text('Banana'), Text('Orange')];
+
+const List<Widget> vegetables = <Widget>[Text('Tomatoes'), Text('Potatoes'), Text('Carrots')];
 
 const List<Widget> icons = <Widget>[
   Icon(Icons.sunny),
@@ -24,18 +16,16 @@ const List<Widget> icons = <Widget>[
   Icon(Icons.ac_unit),
 ];
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ToggleButtonsExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'ToggleButtons Sample';
+class ToggleButtonsExampleApp extends StatelessWidget {
+  const ToggleButtonsExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: ToggleButtonsSample(title: _title),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const ToggleButtonsSample(title: 'ToggleButtons Sample'),
     );
   }
 }
@@ -68,7 +58,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               // ToggleButtons with a single selection.
-              Text('Single-select', style: theme.textTheme.subtitle2),
+              Text('Single-select', style: theme.textTheme.titleSmall),
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
@@ -94,15 +84,14 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
               ),
               const SizedBox(height: 20),
               // ToggleButtons with a multiple selection.
-              Text('Multi-select', style: theme.textTheme.subtitle2),
+              Text('Multi-select', style: theme.textTheme.titleSmall),
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedVegetables[index] =
-                        !_selectedVegetables[index];
+                    _selectedVegetables[index] = !_selectedVegetables[index];
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -119,7 +108,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
               ),
               const SizedBox(height: 20),
               // ToggleButtons with icons only.
-              Text('Icon-only', style: theme.textTheme.subtitle2),
+              Text('Icon-only', style: theme.textTheme.titleSmall),
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,

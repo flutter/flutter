@@ -32,7 +32,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
       );
 
@@ -45,12 +45,12 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -66,7 +66,7 @@ void main() {
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -77,12 +77,12 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: false),
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -93,12 +93,12 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
       );
       expect(discoverer.supportsPlatform, isTrue);
 
-      List<Device> devices = await discoverer.devices;
+      List<Device> devices = await discoverer.devices();
       expect(devices, hasLength(1));
 
       final Device device = devices.single;
@@ -116,7 +116,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm),
+      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
     );
     expect(device.id, 'designed-for-ipad');
     expect(await device.isLocalEmulator, isFalse);
@@ -141,8 +141,8 @@ void main() {
       ),
       throwsA(isA<UnimplementedError>()),
     );
-    await expectLater(() => device.buildForDevice(FakeIOSApp(), buildInfo: BuildInfo.debug), throwsA(isA<UnimplementedError>()));
-    expect(device.executablePathForDevice(FakeIOSApp(), BuildMode.debug), null);
+    await expectLater(() => device.buildForDevice(buildInfo: BuildInfo.debug), throwsA(isA<UnimplementedError>()));
+    expect(device.executablePathForDevice(FakeIOSApp(), BuildInfo.debug), null);
   });
 }
 

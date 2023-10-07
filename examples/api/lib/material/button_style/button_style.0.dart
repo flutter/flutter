@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ElevatedButton
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ElevatedButton].
 
 void main() {
   runApp(const ButtonApp());
@@ -30,10 +30,10 @@ class ButtonTypesExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
+    return const Padding(
+      padding: EdgeInsets.all(4.0),
       child: Row(
-        children: const <Widget>[
+        children: <Widget>[
           Spacer(),
           ButtonTypesGroup(enabled: true),
           ButtonTypesGroup(enabled: false),
@@ -45,7 +45,7 @@ class ButtonTypesExample extends StatelessWidget {
 }
 
 class ButtonTypesGroup extends StatelessWidget {
-  const ButtonTypesGroup({ super.key, required this.enabled });
+  const ButtonTypesGroup({super.key, required this.enabled});
 
   final bool enabled;
 
@@ -58,31 +58,9 @@ class ButtonTypesGroup extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           ElevatedButton(onPressed: onPressed, child: const Text('Elevated')),
-
-          // Use an ElevatedButton with specific style to implement the
-          // 'Filled' type.
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
-            onPressed: onPressed,
-            child: const Text('Filled'),
-          ),
-
-          // Use an ElevatedButton with specific style to implement the
-          // 'Filled Tonal' type.
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-            ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
-            onPressed: onPressed,
-            child: const Text('Filled Tonal'),
-          ),
-
+          FilledButton(onPressed: onPressed, child: const Text('Filled')),
+          FilledButton.tonal(onPressed: onPressed, child: const Text('Filled Tonal')),
           OutlinedButton(onPressed: onPressed, child: const Text('Outlined')),
-
           TextButton(onPressed: onPressed, child: const Text('Text')),
         ],
       ),

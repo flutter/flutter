@@ -173,7 +173,7 @@ void main() {
                 TestSemantics(
                   actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                  scrollIndex: 10,
+                  scrollIndex: 11,
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'Tile 7',
@@ -193,6 +193,7 @@ void main() {
                     TestSemantics(
                       label: 'Tile 10',
                       textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                     ),
                     TestSemantics(
                       label: 'Tile 11',
@@ -237,40 +238,31 @@ void main() {
       ],
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
   });
 
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'us'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: CustomScrollView(
-              controller: controller,
-              slivers: <Widget>[
-                const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
-                const SliverAppBar(primary: false, pinned: true, title: Text('B')),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    const <Widget>[
-                      Text('C'),
-                      Text('D'),
-                      SizedBox(height: 500.0),
-                      Text('E'),
-                      SizedBox(height: 500.0),
-                    ],
-                  ),
-                ),
-              ],
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
+            const SliverAppBar(primary: false, pinned: true, title: Text('B')),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                const <Widget>[
+                  Text('C'),
+                  Text('D'),
+                  SizedBox(height: 500.0),
+                  Text('E'),
+                  SizedBox(height: 500.0),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -459,7 +459,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData.light(useMaterial3: false).copyWith(
           focusColor: highlightColor,
         ),
         home: Scaffold(

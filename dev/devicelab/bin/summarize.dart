@@ -44,7 +44,7 @@ Future<void> main(List<String> rawArgs) async {
       test = ABTest.fromJsonMap(
           const JsonDecoder().convert(await file.readAsString()) as Map<String, dynamic>
       );
-    } catch(error) {
+    } catch (error) {
       _usage('Could not parse json file "$filename"');
       return;
     }

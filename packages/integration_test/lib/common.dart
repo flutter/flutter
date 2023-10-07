@@ -7,20 +7,26 @@ import 'dart:convert';
 
 /// A callback to use with [integrationDriver].
 ///
-/// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)` and
-/// a PNG byte buffer.
+/// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)`,
+/// a PNG byte buffer representing the screenshot, and an optional `Map` of arguments.
 ///
 /// The callback returns `true` if the test passes or `false` otherwise.
 ///
 /// You can use this callback to store the bytes locally in a file or upload them to a service
 /// that compares the image against a gold or baseline version.
 ///
+/// The optional `Map` of arguments can be passed from the
+/// `binding.takeScreenshot(<name>, <args>)` callsite in the integration test,
+/// and then the arguments can be used in the `onScreenshot` handler that is defined by
+/// the Flutter driver. This `Map` should only contain values that can be serialized
+/// to JSON.
+///
 /// Since the function is executed on the host driving the test, you can access any environment
 /// variable from it.
-typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image);
+typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image, [Map<String, Object?>? args]);
 
 /// Classes shared between `integration_test.dart` and `flutter drive` based
-/// adoptor (ex: `integration_test_driver.dart`).
+/// adaptor (ex: `integration_test_driver.dart`).
 
 /// An object sent from integration_test back to the Flutter Driver in response to
 /// `request_data` command.
@@ -247,9 +253,12 @@ class WebDriverCommand {
         values = <String, dynamic>{};
 
   /// Constructor for [WebDriverCommandType.noop] screenshot.
-  WebDriverCommand.screenshot(String screenshotName)
+  WebDriverCommand.screenshot(String screenshotName, [Map<String, Object?>? args])
       : type = WebDriverCommandType.screenshot,
-        values = <String, dynamic>{'screenshot_name': screenshotName};
+        values = <String, dynamic>{
+          'screenshot_name': screenshotName,
+          if (args != null) 'args': args,
+        };
 
   /// Type of the [WebDriverCommand].
   ///
@@ -286,7 +295,7 @@ abstract class CallbackManager {
 
   /// Takes a screenshot of the application.
   /// Returns the data that is sent back to the host.
-   Future<Map<String, dynamic>> takeScreenshot(String screenshot);
+   Future<Map<String, dynamic>> takeScreenshot(String screenshot, [Map<String, Object?>? args]);
 
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();

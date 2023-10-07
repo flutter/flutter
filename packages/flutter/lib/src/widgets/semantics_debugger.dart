@@ -12,6 +12,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'view.dart';
 
 /// A widget that visualizes the semantics for the child.
 ///
@@ -31,8 +32,7 @@ class SemanticsDebugger extends StatefulWidget {
       fontSize: 10.0,
       height: 0.8,
     ),
-  }) : assert(child != null),
-       assert(labelStyle != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -96,7 +96,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   Offset? _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * View.of(context).devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -159,7 +159,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _pipelineOwner,
         _client.generation,
         _lastPointerDownLocation, // in physical pixels
-        WidgetsBinding.instance.window.devicePixelRatio,
+        View.of(context).devicePixelRatio,
         widget.labelStyle,
       ),
       child: GestureDetector(
@@ -171,8 +171,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
-          child: IgnorePointer(
-            ignoringSemantics: false,
+          child: _IgnorePointerWithSemantics(
             child: widget.child,
           ),
         ),
@@ -286,12 +285,15 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       annotations.add('adjustable');
     }
 
-    assert(data.attributedLabel != null);
     final String message;
+    // Android will avoid pronouncing duplicating tooltip and label.
+    // Therefore, having two identical strings is the same as having a single
+    // string.
+    final bool shouldIgnoreDuplicatedLabel = defaultTargetPlatform == TargetPlatform.android && data.attributedLabel.string == data.tooltip;
     final String tooltipAndLabel = <String>[
       if (data.tooltip.isNotEmpty)
         data.tooltip,
-      if (data.attributedLabel.string.isNotEmpty)
+      if (data.attributedLabel.string.isNotEmpty && !shouldIgnoreDuplicatedLabel)
         data.attributedLabel.string,
     ].join('\n');
     if (tooltipAndLabel.isEmpty) {
@@ -305,10 +307,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         switch (data.textDirection!) {
           case TextDirection.rtl:
             effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}';
-            break;
           case TextDirection.ltr:
             effectivelabel = tooltipAndLabel;
-            break;
         }
       }
       if (annotations.isEmpty) {
@@ -339,6 +339,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       ..layout(maxWidth: rect.width);
 
     textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
+    textPainter.dispose();
     canvas.restore();
   }
 
@@ -390,4 +391,23 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     canvas.restore();
   }
+}
+
+/// A widget ignores pointer event but still keeps semantics actions.
+class _IgnorePointerWithSemantics extends SingleChildRenderObjectWidget {
+  const _IgnorePointerWithSemantics({
+    super.child,
+  });
+
+  @override
+  _RenderIgnorePointerWithSemantics createRenderObject(BuildContext context) {
+    return _RenderIgnorePointerWithSemantics();
+  }
+}
+
+class _RenderIgnorePointerWithSemantics extends RenderProxyBox {
+  _RenderIgnorePointerWithSemantics();
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) => false;
 }

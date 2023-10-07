@@ -44,10 +44,13 @@ class WebCallbackManager implements CallbackManager {
   ///
   /// See: https://www.w3.org/TR/webdriver/#screen-capture.
   @override
-  Future<Map<String, dynamic>> takeScreenshot(String screenshotName) async {
-    await _sendWebDriverCommand(WebDriverCommand.screenshot(screenshotName));
-    // Flutter Web doesn't provide the bytes.
-    return const <String, dynamic>{'bytes': <int>[]};
+  Future<Map<String, dynamic>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
+    await _sendWebDriverCommand(WebDriverCommand.screenshot(screenshotName, args));
+    return <String, dynamic>{
+      'screenshotName': screenshotName,
+      // Flutter Web doesn't provide the bytes.
+      'bytes': <int>[]
+    };
   }
 
   @override
@@ -88,7 +91,6 @@ class WebCallbackManager implements CallbackManager {
             : _requestDataWithMessage(params['message']!, testRunner);
       case 'get_health':
         response = <String, String>{'status': 'ok'};
-        break;
       default:
         throw UnimplementedError('$command is not implemented');
     }
@@ -116,14 +118,12 @@ class WebCallbackManager implements CallbackManager {
           response = <String, String>{
             'message': Response.webDriverCommand(data: data).toJson(),
           };
-          break;
         case WebDriverCommandType.noop:
           final Map<String, dynamic> data = <String, dynamic>{};
           data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.noop));
           response = <String, String>{
             'message': Response.webDriverCommand(data: data).toJson(),
           };
-          break;
         case WebDriverCommandType.ack:
           throw UnimplementedError('${command.type} is not implemented');
       }

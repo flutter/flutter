@@ -275,7 +275,7 @@ void main() {
       await tester.pumpWidget(_boilerplate(
         Semantics(
           container: true,
-          child: Row(children: const <Widget>[
+          child: const Row(children: <Widget>[
             Text('Hello'),
             Text('World'),
           ]),
@@ -318,8 +318,9 @@ void main() {
           ],
         )),
       );
-      expect(find.byType(GestureDetector), findsNWidgets(2));
-      final Finder hitTestable = find.byType(GestureDetector).hitTestable();
+      expect(find.byType(GestureDetector), findsOneWidget);
+      expect(find.byType(GestureDetector, skipOffstage: false), findsNWidgets(2));
+      final Finder hitTestable = find.byType(GestureDetector, skipOffstage: false).hitTestable();
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
@@ -359,14 +360,14 @@ void main() {
   testWidgets('finds multiple subtypes', (WidgetTester tester) async {
     await tester.pumpWidget(_boilerplate(
       Row(children: <Widget>[
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           Text('Hello'),
           Text('World'),
         ]),
         Column(children: <Widget>[
           Image(image: FileImage(File('test'))),
         ]),
-        Column(children: const <Widget>[
+        const Column(children: <Widget>[
           SimpleGenericWidget<int>(child: Text('one')),
           SimpleGenericWidget<double>(child: Text('pi')),
           SimpleGenericWidget<String>(child: Text('two')),

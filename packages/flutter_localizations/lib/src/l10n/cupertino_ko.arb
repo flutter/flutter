@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "전체 선택",
   "tabSemanticsLabel": "탭 $tabCount개 중 $tabIndex번째",
   "modalBarrierDismissLabel": "닫기",
-  "searchTextFieldPlaceholderLabel": "검색"
+  "searchTextFieldPlaceholderLabel": "검색",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

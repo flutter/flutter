@@ -147,7 +147,7 @@ class _UntilNextFrame {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        _UntilNextFrame._completer!.complete(null);
+        _UntilNextFrame._completer!.complete();
         _UntilNextFrame._completer = null;
       });
     }
@@ -181,8 +181,7 @@ class _Tester {
     final Stopwatch stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
     stopwatch.stop();
-    if (onDataPoint != null)
-      onDataPoint(stopwatch.elapsed);
+    onDataPoint(stopwatch.elapsed);
     await _UntilNextFrame.wait();
   }
 

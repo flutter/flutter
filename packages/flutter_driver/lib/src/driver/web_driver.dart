@@ -136,7 +136,7 @@ class WebFlutterDriver extends FlutterDriver {
       }
 
       _logCommunication('<<< $response');
-    } on DriverError catch(_) {
+    } on DriverError catch (_) {
       rethrow;
     } catch (error, stackTrace) {
       throw DriverError(
@@ -174,7 +174,6 @@ class WebFlutterDriver extends FlutterDriver {
       driverLog('WebFlutterDriver', message);
     }
     if (_logCommunicationToFile) {
-      assert(_logFilePathName != null);
       final File file = fs.file(_logFilePathName);
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: FileMode.append, flush: true);
@@ -274,11 +273,12 @@ class FlutterWebConnection {
     final String sessionId = settings['session-id'].toString();
     final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
     final async_io.WebDriver driver = async_io.WebDriver(
-        sessionUri,
-        sessionId,
-        json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
-        async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
-        _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+      sessionUri,
+      sessionId,
+      json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
+      async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
+      async_io.WebDriverSpec.W3c,
+    );
     if (settings['android-chrome-on-emulator'] == true) {
       final Uri localUri = Uri.parse(url);
       // Converts to Android Emulator Uri.
@@ -294,6 +294,29 @@ class FlutterWebConnection {
 
   /// Sends command via WebDriver to Flutter web application.
   Future<dynamic> sendCommand(String script, Duration? duration) async {
+    // This code should not be reachable before the VM service extension is
+    // initialized. The VM service extension is expected to initialize both
+    // `$flutterDriverResult` and `$flutterDriver` variables before attempting
+    // to send commands. This part checks that `$flutterDriverResult` is present.
+    // `$flutterDriver` is not checked because it is covered by the `script`
+    // that's executed next.
+    try {
+      await _driver.execute(r'return $flutterDriverResult', <String>[]);
+    } catch (error, stackTrace) {
+      throw DriverError(
+        'Driver extension has not been initialized correctly.\n'
+        'If the test uses a custom VM service extension, make sure it conforms '
+        'to the protocol used by package:integration_test and '
+        'package:flutter_driver.\n'
+        'If the test uses VM service extensions provided by the Flutter SDK, '
+        'then this error is likely caused by a bug in Flutter. Please report it '
+        'by filing a bug on GitHub:\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+        error,
+        stackTrace,
+      );
+    }
+
     String phase = 'executing';
     try {
       // Execute the script, which should leave the result in the `$flutterDriverResult` global variable.
@@ -338,15 +361,4 @@ Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration? ti
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
-}
-
-async_io.WebDriverSpec _convertToSpec(String specString) {
-  switch (specString.toLowerCase()) {
-    case 'webdriverspec.w3c':
-      return async_io.WebDriverSpec.W3c;
-    case 'webdriverspec.jsonwire':
-      return async_io.WebDriverSpec.JsonWire;
-    default:
-      return async_io.WebDriverSpec.Auto;
-  }
 }

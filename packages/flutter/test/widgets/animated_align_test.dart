@@ -59,11 +59,11 @@ void main() {
 
   testWidgets('AnimatedAlign widthFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const <Widget>[
+          children: <Widget>[
             AnimatedAlign(
               alignment: Alignment.center,
               curve: Curves.ease,
@@ -84,10 +84,10 @@ void main() {
 
   testWidgets('AnimatedAlign heightFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             AnimatedAlign(
               alignment: Alignment.center,
               curve: Curves.ease,
@@ -108,11 +108,11 @@ void main() {
 
   testWidgets('AnimatedAlign null height factor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             AnimatedAlign(
               alignment: Alignment.center,
               curve: Curves.ease,
@@ -132,13 +132,13 @@ void main() {
 
   testWidgets('AnimatedAlign null widthFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: SizedBox.shrink(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
                AnimatedAlign(
                 alignment: Alignment.center,
                 curve: Curves.ease,

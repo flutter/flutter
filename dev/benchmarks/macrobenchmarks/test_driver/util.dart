@@ -23,7 +23,7 @@ Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) as
   expect(scrollable, isNotNull);
   final SerializableFinder button = find.byValueKey(routeName);
   expect(button, isNotNull);
-  await driver.scrollUntilVisible(scrollable, button, dyScroll: -50.0);
+  await driver.scrollUntilVisible(scrollable, button, dyScroll: -100.0);
   await driver.tap(button);
 
   await body(driver);
@@ -52,10 +52,10 @@ void macroPerfTest(
       }
 
       timeline = await driver.traceAction(() async {
-      final Future<void> durationFuture = Future<void>.delayed(duration);
-      if (driverOps != null) {
-        await driverOps(driver);
-      }
+        final Future<void> durationFuture = Future<void>.delayed(duration);
+        if (driverOps != null) {
+          await driverOps(driver);
+        }
         await durationFuture;
       });
     });

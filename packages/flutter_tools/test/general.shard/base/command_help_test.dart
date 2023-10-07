@@ -60,6 +60,7 @@ void _testMessageLength({
   expect(commandHelp.b.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.c.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.d.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.f.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.g.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.hWithDetails.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.hWithoutDetails.toString().length, lessThanOrEqualTo(expectedWidth));
@@ -137,6 +138,7 @@ void main() {
         expect(commandHelp.U.toString(), endsWith('\x1B[90m(debugDumpSemantics)\x1B[39m\x1B[22m'));
         expect(commandHelp.a.toString(), endsWith('\x1B[90m(debugProfileWidgetBuilds)\x1B[39m\x1B[22m'));
         expect(commandHelp.b.toString(), endsWith('\x1B[90m(debugBrightnessOverride)\x1B[39m\x1B[22m'));
+        expect(commandHelp.f.toString(), endsWith('\x1B[90m(debugDumpFocusTree)\x1B[39m\x1B[22m'));
         expect(commandHelp.i.toString(), endsWith('\x1B[90m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1B[22m'));
         expect(commandHelp.o.toString(), endsWith('\x1B[90m(defaultTargetPlatform)\x1B[39m\x1B[22m'));
         expect(commandHelp.p.toString(), endsWith('\x1B[90m(debugPaintSizeEnabled)\x1B[39m\x1B[22m'));
@@ -193,6 +195,7 @@ void main() {
         expect(commandHelp.b.toString(), equals('\x1B[1mb\x1B[22m Toggle platform brightness (dark and light mode).        \x1B[90m(debugBrightnessOverride)\x1B[39m\x1B[22m'));
         expect(commandHelp.c.toString(), equals('\x1B[1mc\x1B[22m Clear the screen'));
         expect(commandHelp.d.toString(), equals('\x1B[1md\x1B[22m Detach (terminate "flutter run" but leave application running).'));
+        expect(commandHelp.f.toString(), equals('\x1B[1mf\x1B[22m Dump focus tree to the console.                               \x1B[90m(debugDumpFocusTree)\x1B[39m\x1B[22m'));
         expect(commandHelp.g.toString(), equals('\x1B[1mg\x1B[22m Run source code generators.'));
         expect(commandHelp.hWithDetails.toString(), equals('\x1B[1mh\x1B[22m Repeat this help message.'));
         expect(commandHelp.hWithoutDetails.toString(), equals('\x1B[1mh\x1B[22m List all available interactive commands.'));

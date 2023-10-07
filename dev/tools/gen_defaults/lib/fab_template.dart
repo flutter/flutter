@@ -21,19 +21,19 @@ class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
         highlightElevation: ${elevation("md.comp.fab.primary.pressed.container")},
         enableFeedback: true,
         sizeConstraints: const BoxConstraints.tightFor(
-          width: ${tokens["md.comp.fab.primary.container.width"]},
-          height: ${tokens["md.comp.fab.primary.container.height"]},
+          width: ${getToken("md.comp.fab.primary.container.width")},
+          height: ${getToken("md.comp.fab.primary.container.height")},
         ),
         smallSizeConstraints: const BoxConstraints.tightFor(
-          width: ${tokens["md.comp.fab.primary.small.container.width"]},
-          height: ${tokens["md.comp.fab.primary.small.container.height"]},
+          width: ${getToken("md.comp.fab.primary.small.container.width")},
+          height: ${getToken("md.comp.fab.primary.small.container.height")},
         ),
         largeSizeConstraints: const BoxConstraints.tightFor(
-          width: ${tokens["md.comp.fab.primary.large.container.width"]},
-          height: ${tokens["md.comp.fab.primary.large.container.height"]},
+          width: ${getToken("md.comp.fab.primary.large.container.width")},
+          height: ${getToken("md.comp.fab.primary.large.container.height")},
         ),
         extendedSizeConstraints: const BoxConstraints.tightFor(
-          height: ${tokens["md.comp.extended-fab.primary.container.height"]},
+          height: ${getToken("md.comp.extended-fab.primary.container.height")},
         ),
         extendedIconLabelSpacing: 8.0,
       );
@@ -69,10 +69,10 @@ class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
   @override
   double? get iconSize {
     switch (type) {
-      case _FloatingActionButtonType.regular: return ${tokens["md.comp.fab.primary.icon.size"]};
-      case _FloatingActionButtonType.small: return  ${tokens["md.comp.fab.primary.small.icon.size"]};
-      case _FloatingActionButtonType.large: return ${tokens["md.comp.fab.primary.large.icon.size"]};
-      case _FloatingActionButtonType.extended: return ${tokens["md.comp.extended-fab.primary.icon.size"]};
+      case _FloatingActionButtonType.regular: return ${getToken("md.comp.fab.primary.icon.size")};
+      case _FloatingActionButtonType.small: return  ${getToken("md.comp.fab.primary.small.icon.size")};
+      case _FloatingActionButtonType.large: return ${getToken("md.comp.fab.primary.large.icon.size")};
+      case _FloatingActionButtonType.extended: return ${getToken("md.comp.extended-fab.primary.icon.size")};
     }
   }
 

@@ -130,16 +130,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
     this.excludeBottomFocus = true,
-  }) : assert(firstChild != null),
-       assert(secondChild != null),
-       assert(firstCurve != null),
-       assert(secondCurve != null),
-       assert(sizeCurve != null),
-       assert(alignment != null),
-       assert(crossFadeState != null),
-       assert(duration != null),
-       assert(layoutBuilder != null),
-       assert(excludeBottomFocus != null);
+  });
 
   /// The child that is visible when [crossFadeState] is
   /// [CrossFadeState.showFirst]. It fades out when transitioning
@@ -315,10 +306,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       switch (widget.crossFadeState) {
         case CrossFadeState.showFirst:
           _controller.reverse();
-          break;
         case CrossFadeState.showSecond:
           _controller.forward();
-          break;
       }
     }
   }

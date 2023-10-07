@@ -10,6 +10,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
@@ -162,6 +163,21 @@ void main() {
       signalUnderTest = ProcessSignal(fakeSignal);
     });
 
+    testWithoutContext('runs shutdown hooks', () async {
+      final Signals signals = Signals.test();
+      final LocalFileSystem localFileSystem = LocalFileSystem.test(
+        signals: signals,
+      );
+      final Directory temp = localFileSystem.systemTempDirectory;
+
+      expect(temp.existsSync(), isTrue);
+      expect(localFileSystem.shutdownHooks.registeredHooks, hasLength(1));
+      final BufferLogger logger = BufferLogger.test();
+      await localFileSystem.shutdownHooks.runShutdownHooks(logger);
+      expect(temp.existsSync(), isFalse);
+      expect(logger.traceText, contains('Running 1 shutdown hook'));
+    });
+
     testWithoutContext('deletes system temp entry on a fatal signal', () async {
       final Completer<void> completer = Completer<void>();
       final Signals signals = Signals.test();
@@ -192,7 +208,7 @@ void main() {
       try {
         localFileSystem.systemTempDirectory;
         fail('expected tool exit');
-      } on ToolExit catch(e) {
+      } on ToolExit catch (e) {
         expect(e.message, 'Your system temp directory (/does_not_exist) does not exist. '
             'Did you set an invalid override in your environment? '
             'See issue https://github.com/flutter/flutter/issues/74042 for more context.'

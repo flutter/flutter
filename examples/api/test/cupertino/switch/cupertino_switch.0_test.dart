@@ -14,19 +14,11 @@ void main() {
 
     final Finder switchFinder = find.byType(CupertinoSwitch);
     CupertinoSwitch cupertinoSwitch = tester.widget<CupertinoSwitch>(switchFinder);
-    final Finder wifiOnIcon = find.byIcon(CupertinoIcons.wifi);
-    final Finder wifiOffIcon = find.byIcon(CupertinoIcons.wifi_slash);
     expect(cupertinoSwitch.value, true);
-    // When the switch is on, wifi icon should be visible.
-    expect(wifiOnIcon, findsOneWidget);
-    expect(wifiOffIcon, findsNothing);
 
     await tester.tap(switchFinder);
     await tester.pumpAndSettle();
     cupertinoSwitch = tester.widget<CupertinoSwitch>(switchFinder);
     expect(cupertinoSwitch.value, false);
-    // When the switch is off, wifi slash icon should be visible.
-    expect(wifiOnIcon, findsNothing);
-    expect(wifiOffIcon, findsOneWidget);
   });
 }

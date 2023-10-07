@@ -10,6 +10,7 @@ void main() {
     final List<String> log = <String>[];
     final Widget app = MaterialApp(
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: Colors.green,
       ),
       home: const Placeholder(),
@@ -17,7 +18,7 @@ void main() {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
-        expect(child, isA<Navigator>());
+        expect(child, isA<FocusScope>());
         return const Placeholder();
       },
     );
@@ -42,6 +43,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           primarySwatch: Colors.yellow,
         ),
         home: Builder(

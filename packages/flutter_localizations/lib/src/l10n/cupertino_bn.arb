@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "সব বেছে নিন",
   "tabSemanticsLabel": "$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব",
   "modalBarrierDismissLabel": "খারিজ করুন",
-  "searchTextFieldPlaceholderLabel": "সার্চ করুন"
+  "searchTextFieldPlaceholderLabel": "সার্চ করুন",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

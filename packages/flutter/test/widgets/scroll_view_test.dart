@@ -143,6 +143,82 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
+  testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 42,
+        ),
+        itemCount: 42,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 5) {
+            return null;
+          }
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(5));
+  });
+
+  testWidgets('ListView.builder supports null items', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView.builder(
+        itemCount: 42,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 5) {
+            return null;
+          }
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(5));
+  });
+
+  testWidgets('PageView supports null items in itemBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: PageView.builder(
+        itemCount: 5,
+        controller: PageController(viewportFraction: 1/5),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 2) {
+            return null;
+          }
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(2));
+  });
+
+  testWidgets('ListView.separated supports null items in itemBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView.separated(
+        itemCount: 42,
+        separatorBuilder: (BuildContext context, int index) {
+          return const Text('separator');
+        },
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 5) {
+            return null;
+          }
+
+          return const Text('item');
+        },
+      ),
+    ));
+
+    expect(find.text('item'), findsNWidgets(5));
+    expect(find.text('separator'), findsNWidgets(5));
+  });
+
   testWidgets('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
@@ -1402,7 +1478,7 @@ void main() {
     );
     final ScrollController controller = PrimaryScrollController.of(
       tester.element(find.byType(CustomScrollView)),
-    )!;
+    );
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(

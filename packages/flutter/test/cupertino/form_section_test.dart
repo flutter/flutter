@@ -153,7 +153,7 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgets('Not setting clipBehavior does not clip children section', (WidgetTester tester) async {
+  testWidgets('Not setting clipBehavior does not produce a RenderClipRRect object', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -164,7 +164,7 @@ void main() {
       ),
     );
 
-    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-    expect(renderClip.clipBehavior, equals(Clip.none));
+    final Iterable<RenderClipRRect> renderClips = tester.allRenderObjects.whereType<RenderClipRRect>();
+    expect(renderClips, isEmpty);
   });
 }

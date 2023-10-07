@@ -6,6 +6,7 @@
 // flutter_ignore_for_file: golden_tag (see analyze.dart)
 
 @Tags(<String>['some-other-tag'])
+library;
 
 import 'package:test/test.dart';
 

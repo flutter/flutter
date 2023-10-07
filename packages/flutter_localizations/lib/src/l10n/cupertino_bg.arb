@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Избиране на всички",
   "tabSemanticsLabel": "Раздел $tabIndex от $tabCount",
   "modalBarrierDismissLabel": "Отхвърляне",
-  "searchTextFieldPlaceholderLabel": "Търсене"
+  "searchTextFieldPlaceholderLabel": "Търсене",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

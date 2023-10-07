@@ -14,7 +14,7 @@ void main() {
       fileSystem.file('templates/template_manifest.json').readAsStringSync(),
     ) as Map<String, Object?>;
     final Set<Uri> declaredFileList = Set<Uri>.from(
-      (manifest['files'] as List<Object?>?)!.cast<String>().map<Uri>(fileSystem.path.toUri));
+      (manifest['files']! as List<Object?>).cast<String>().map<Uri>(fileSystem.path.toUri));
 
     final Set<Uri> activeTemplateList = fileSystem.directory('templates')
       .listSync(recursive: true)

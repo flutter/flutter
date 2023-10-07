@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Piliin Lahat",
   "tabSemanticsLabel": "Tab $tabIndex ng $tabCount",
   "modalBarrierDismissLabel": "I-dismiss",
-  "searchTextFieldPlaceholderLabel": "Hanapin"
+  "searchTextFieldPlaceholderLabel": "Hanapin",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

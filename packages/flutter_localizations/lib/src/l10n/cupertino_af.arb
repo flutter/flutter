@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Kies alles",
   "tabSemanticsLabel": "Oortjie $tabIndex van $tabCount",
   "modalBarrierDismissLabel": "Maak toe",
-  "searchTextFieldPlaceholderLabel": "Soek"
+  "searchTextFieldPlaceholderLabel": "Soek",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

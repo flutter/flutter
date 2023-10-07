@@ -17,7 +17,7 @@ immediately discover the port
 will search for an already running Flutter app or module if available.
 Otherwise, the tool will wait for the next Flutter app or module to launch
 before attaching.
-1. If the app or module is already running and the specific observatory port is
+1. If the app or module is already running and the specific VM Service port is
 known, it can be explicitly provided to attach via the command-line, e.g.
 `$ flutter attach --debug-port 12345`
 

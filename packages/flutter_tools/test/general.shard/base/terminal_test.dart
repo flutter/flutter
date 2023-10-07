@@ -34,7 +34,7 @@ void main() {
     });
   });
 
-  group('ANSI coloring and bold', () {
+  group('ANSI coloring, bold, and clearing', () {
     late AnsiTerminal terminal;
 
     setUp(() {
@@ -101,6 +101,39 @@ void main() {
       expect(
         terminal.bolden('bold ${terminal.bolden('output')} still bold'),
         equals('${AnsiTerminal.bold}bold output still bold${AnsiTerminal.resetBold}'),
+      );
+    });
+
+    testWithoutContext('clearing lines works', () {
+      expect(
+        terminal.clearLines(3),
+        equals(
+            '${AnsiTerminal.cursorBeginningOfLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+            '${AnsiTerminal.cursorUpLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+            '${AnsiTerminal.cursorUpLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+        ),
+      );
+
+      expect(
+        terminal.clearLines(1),
+        equals(
+            '${AnsiTerminal.cursorBeginningOfLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+        ),
+      );
+    });
+
+    testWithoutContext('clearing lines when color is not supported does not work', () {
+      terminal = AnsiTerminal(
+        stdio: Stdio(), // Danger, using real stdio.
+        platform: FakePlatform()..stdoutSupportsAnsi = false,
+      );
+      expect(
+        terminal.clearLines(3),
+        equals(''),
       );
     });
   });

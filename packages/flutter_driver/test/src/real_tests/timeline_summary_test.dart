@@ -159,7 +159,12 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
+          throwsA(
+            isA<StateError>()
+              .having((StateError e) => e.message,
+              'message',
+              contains('The TimelineSummary had no events to summarize.'),
+            )),
         );
       });
 
@@ -223,7 +228,12 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
+          throwsA(
+            isA<StateError>()
+              .having((StateError e) => e.message,
+              'message',
+              contains('The TimelineSummary had no events to summarize.'),
+            )),
         );
       });
 
@@ -282,7 +292,12 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
+          throwsA(
+            isA<StateError>()
+              .having((StateError e) => e.message,
+              'message',
+              contains('The TimelineSummary had no events to summarize.'),
+            )),
         );
       });
 
@@ -321,7 +336,12 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
+          throwsA(
+            isA<StateError>()
+              .having((StateError e) => e.message,
+              'message',
+              contains('The TimelineSummary had no events to summarize.'),
+            )),
         );
       });
 
@@ -368,7 +388,12 @@ void main() {
       test('throws when there is no data', () {
         expect(
           () => summarize(<Map<String, dynamic>>[]).computePercentileFrameRasterizerTimeMillis(90.0),
-          throwsA(predicate<ArgumentError>((ArgumentError e) => e.message == 'durations is empty!')),
+          throwsA(
+            isA<StateError>()
+              .having((StateError e) => e.message,
+              'message',
+              contains('The TimelineSummary had no events to summarize.'),
+            )),
         );
       });
 

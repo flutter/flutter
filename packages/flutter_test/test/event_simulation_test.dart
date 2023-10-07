@@ -340,7 +340,7 @@ void main() {
     // A (physical keyA, logical keyB) is released.
     //
     // Since this event is transmitted to HardwareKeyboard as-is, it will be rejected due to
-    // inconsistent logical key. This does not indicate behaviral difference,
+    // inconsistent logical key. This does not indicate behavioral difference,
     // since KeyData is will never send malformed data sequence in real applications.
     await _shouldThrow<AssertionError>(() =>
       simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA));

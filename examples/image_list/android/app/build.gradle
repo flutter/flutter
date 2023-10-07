@@ -29,6 +29,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace "com.example.image_list"
     compileSdkVersion flutter.compileSdkVersion
 
     compileOptions {

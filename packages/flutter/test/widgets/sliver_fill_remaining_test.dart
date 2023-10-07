@@ -24,6 +24,7 @@ void main() {
     }) {
     return MaterialApp(
       theme:  ThemeData(
+        useMaterial3: false,
         materialTapTargetSize: MaterialTapTargetSize.padded,
       ),
       home: Scaffold(
@@ -184,7 +185,7 @@ void main() {
           sliverBox,
           SliverFillRemaining(
             hasScrollBody: false,
-            child: Container(
+            child: ColoredBox(
               key: key,
               color: Colors.blue,
               child: Align(
@@ -387,7 +388,7 @@ void main() {
             SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
-              child: Container(
+              child: ColoredBox(
                 key: key,
                 color: Colors.blue,
                 child: Align(
@@ -673,7 +674,7 @@ void main() {
             SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
-              child: Container(
+              child: ColoredBox(
                 key: key,
                 color: Colors.blue,
                 child: Align(

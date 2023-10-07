@@ -129,7 +129,7 @@ Future<SendPort> _helperIsolateSendPort = () async {
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
       });
 
-    // Send the the port to the main isolate on which we can receive requests.
+    // Send the port to the main isolate on which we can receive requests.
     sendPort.send(helperReceivePort.sendPort);
   }, receivePort.sendPort);
 

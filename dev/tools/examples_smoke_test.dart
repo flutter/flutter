@@ -9,7 +9,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show stdout, stderr, exitCode, Process, ProcessException;
+import 'dart:io' show Process, ProcessException, exitCode, stderr, stdout;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -17,7 +17,6 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-const bool kIsWeb = identical(0, 0.0);
 FileSystem filesystem = const LocalFileSystem();
 ProcessManager processManager = const LocalProcessManager();
 Platform platform = const LocalPlatform();
@@ -82,13 +81,12 @@ Future<void> runSmokeTests({
 // A class to hold information related to an example, used to generate names
 // from for the tests.
 class ExampleInfo {
-  ExampleInfo(this.file, Directory examplesLibDir)
+  ExampleInfo(File file, Directory examplesLibDir)
       : importPath = _getImportPath(file, examplesLibDir),
         importName = '' {
     importName = importPath.replaceAll(RegExp(r'\.dart$'), '').replaceAll(RegExp(r'\W'), '_');
   }
 
-  final File file;
   final String importPath;
   String importName;
 
@@ -120,6 +118,7 @@ Future<File> generateTest(Directory apiDir) async {
   // Collect the examples, and import them all as separate symbols.
   final List<String> imports = <String>[];
   imports.add('''import 'package:flutter/widgets.dart';''');
+  imports.add('''import 'package:flutter/scheduler.dart';''');
   imports.add('''import 'package:flutter_test/flutter_test.dart';''');
   imports.add('''import 'package:integration_test/integration_test.dart';''');
   final List<ExampleInfo> infoList = <ExampleInfo>[];
@@ -166,6 +165,7 @@ void main() {
         expect(find.byType(WidgetsApp), findsOneWidget);
       } finally {
         ErrorWidget.builder = originalBuilder;
+        timeDilation = 1.0;
       }
     },
   );

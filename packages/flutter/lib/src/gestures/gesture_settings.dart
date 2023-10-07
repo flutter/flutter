@@ -24,11 +24,11 @@ class DeviceGestureSettings {
     this.touchSlop,
   });
 
-  /// Create a new [DeviceGestureSettings] from the provided [window].
-  factory DeviceGestureSettings.fromWindow(ui.FlutterView window) {
-    final double? physicalTouchSlop = window.viewConfiguration.gestureSettings.physicalTouchSlop;
+  /// Create a new [DeviceGestureSettings] from the provided [view].
+  factory DeviceGestureSettings.fromView(ui.FlutterView view) {
+    final double? physicalTouchSlop = view.gestureSettings.physicalTouchSlop;
     return DeviceGestureSettings(
-      touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / window.devicePixelRatio
+      touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / view.devicePixelRatio
     );
   }
 

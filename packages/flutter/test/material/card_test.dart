@@ -22,9 +22,9 @@ void main() {
                 children: <Widget>[
                   const Text('I am text!'),
                   const Text('Moar text!!1'),
-                  MaterialButton(
-                    child: const Text('Button'),
+                  ElevatedButton(
                     onPressed: () { },
+                    child: const Text('Button'),
                   ),
                 ],
               ),
@@ -82,13 +82,13 @@ void main() {
     debugResetSemanticsIdCounter();
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: Card(
               child: Column(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('First child'),
                   Text('Second child'),
                 ],

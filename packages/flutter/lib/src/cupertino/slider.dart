@@ -71,12 +71,8 @@ class CupertinoSlider extends StatefulWidget {
     this.divisions,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
-  }) : assert(value != null),
-       assert(min != null),
-       assert(max != null),
-       assert(value >= min && value <= max),
-       assert(divisions == null || divisions > 0),
-       assert(thumbColor != null);
+  }) : assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0);
 
   /// The currently selected value for this slider.
   ///
@@ -337,9 +333,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     required TickerProvider vsync,
     required TextDirection textDirection,
     MouseCursor cursor = MouseCursor.defer,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
-       assert(textDirection != null),
-       assert(cursor != null),
+  }) : assert(value >= 0.0 && value <= 1.0),
        _cursor = cursor,
        _value = value,
        _divisions = divisions,
@@ -363,7 +357,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   double get value => _value;
   double _value;
   set value(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
+    assert(newValue >= 0.0 && newValue <= 1.0);
     if (newValue == _value) {
       return;
     }
@@ -435,7 +429,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -463,10 +456,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _value;
-        break;
       case TextDirection.ltr:
         visualPosition = _value;
-        break;
     }
     return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
@@ -482,10 +473,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
       switch (textDirection) {
         case TextDirection.rtl:
           _currentDragValue -= valueDelta;
-          break;
         case TextDirection.ltr:
           _currentDragValue += valueDelta;
-          break;
       }
       onChanged!(_discretizedCurrentDragValue);
     }
@@ -529,12 +518,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
         visualPosition = 1.0 - _position.value;
         leftColor = _activeColor;
         rightColor = trackColor;
-        break;
       case TextDirection.ltr:
         visualPosition = _position.value;
         leftColor = trackColor;
         rightColor = _activeColor;
-        break;
     }
 
     final double trackCenter = offset.dy + size.height / 2.0;

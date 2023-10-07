@@ -1107,12 +1107,10 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
           expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-          break;
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-          break;
       }
     }, variant: TargetPlatformVariant.all());
 
@@ -1228,7 +1226,9 @@ void main() {
         equalsIgnoringHashCodes(
           'FocusManager#00000\n'
           ' │ primaryFocus: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
-          ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
+          ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← MediaQuery ←\n'
+          ' │   _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
+          ' │   TestFlutterView#00000] ← [root]\n'
           ' │\n'
           ' └─rootScope: FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           '   │ IN FOCUS PATH\n'
@@ -1265,7 +1265,6 @@ void main() {
       );
     });
   });
-
 
   group('Autofocus', () {
     testWidgets(
@@ -1695,9 +1694,65 @@ void main() {
       debugPrint = oldDebugPrint;
     }
     final String messagesStr = messages.toString();
-    expect(messagesStr.split('\n').length, equals(58));
     expect(messagesStr, contains(RegExp(r'   └─Child 1: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')));
     expect(messagesStr, contains('FOCUS: Notified 2 dirty nodes'));
     expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
+
+  testWidgets("doesn't call toString on a focus node when debugFocusChanges is false", (WidgetTester tester) async {
+    final bool oldDebugFocusChanges = debugFocusChanges;
+    final DebugPrintCallback oldDebugPrint = debugPrint;
+    final StringBuffer messages = StringBuffer();
+    debugPrint = (String? message, {int? wrapWidth}) {
+      messages.writeln(message ?? '');
+    };
+    Future<void> testDebugFocusChanges() async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode child1 = debugFocusChanges ? FocusNode(debugLabel: 'child1') : _LoggingTestFocusNode(debugLabel: 'child1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      child1Attachment.reparent(parent: parent1);
+
+      child1.requestFocus();
+      await tester.pump();
+      child1.dispose();
+      parent1.dispose();
+      await tester.pump();
+    }
+    try {
+      debugFocusChanges = false;
+      await testDebugFocusChanges();
+      expect(messages, isEmpty);
+      expect(tester.takeException(), isNull);
+      debugFocusChanges = true;
+      await testDebugFocusChanges();
+      expect(messages.toString(), contains('FOCUS: Notified 3 dirty nodes:'));
+      expect(tester.takeException(), isNull);
+    } finally {
+      debugFocusChanges = oldDebugFocusChanges;
+      debugPrint = oldDebugPrint;
+    }
+  });
+}
+
+class _LoggingTestFocusNode extends FocusNode {
+  _LoggingTestFocusNode({super.debugLabel});
+
+  @override
+  String toString({
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
+  }) {
+    throw StateError("Shouldn't call toString here");
+  }
+
+  @override
+  String toStringDeep({
+    String prefixLineOne = '',
+    String? prefixOtherLines,
+    DiagnosticLevel minLevel = DiagnosticLevel.debug,
+  }) {
+    throw StateError("Shouldn't call toStringDeep here");
+  }
 }

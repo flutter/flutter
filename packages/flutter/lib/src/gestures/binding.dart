@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
@@ -83,8 +82,6 @@ class _Resampler {
   // Add `event` for resampling or dispatch it directly if
   // not a touch event.
   void addOrDispatch(PointerEvent event) {
-    final SchedulerBinding scheduler = SchedulerBinding.instance;
-    assert(scheduler != null);
     // Add touch event to resampler or dispatch pointer event directly.
     if (event.kind == PointerDeviceKind.touch) {
       // Save last event time for debugPrint of resampling margin.
@@ -108,7 +105,6 @@ class _Resampler {
   // The `samplingClock` is the clock used to determine frame time age.
   void sample(Duration samplingOffset, SamplingClock clock) {
     final SchedulerBinding scheduler = SchedulerBinding.instance;
-    assert(scheduler != null);
 
     // Initialize `_frameTime` if needed. This will be used for periodic
     // sampling when frame callbacks are not received.
@@ -290,10 +286,23 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
-    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
-    if (!locked) {
-      _flushPointerEventQueue();
+    try {
+      _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, _devicePixelRatioForView));
+      if (!locked) {
+        _flushPointerEventQueue();
+      }
+    } catch (error, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'gestures library',
+        context: ErrorDescription('while handling a pointer data packet'),
+      ));
     }
+  }
+
+  double? _devicePixelRatioForView(int viewId) {
+    return platformDispatcher.view(id: viewId)?.devicePixelRatio;
   }
 
   /// Dispatch a [PointerCancelEvent] for the given pointer soon.
@@ -328,8 +337,18 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// State for all pointers which are currently down.
   ///
-  /// The state of hovering pointers is not tracked because that would require
-  /// hit-testing on every frame.
+  /// This map caches the hit test result done when the pointer goes down
+  /// ([PointerDownEvent] and [PointerPanZoomStartEvent]). This hit test result
+  /// will be used throughout the entire pointer interaction; that is, the
+  /// pointer is seen as pointing to the same place even if it has moved away
+  /// until pointer goes up ([PointerUpEvent] and [PointerPanZoomEndEvent]).
+  /// This matches the expected gesture interaction with a button, and allows
+  /// devices that don't support hovering to perform as few hit tests as
+  /// possible.
+  ///
+  /// On the other hand, hovering requires hit testing on almost every frame.
+  /// This is handled in [RendererBinding] and [MouseTracker], and will ignore
+  /// the results cached here.
   final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
   /// Dispatch an event to the targets found by a hit test on its position.
@@ -360,15 +379,15 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
-      assert(!_hitTests.containsKey(event.pointer));
+      assert(!_hitTests.containsKey(event.pointer), 'Pointer of ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
-      hitTest(hitTestResult, event.position);
+      hitTestInView(hitTestResult, event.position, event.viewId);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
         _hitTests[event.pointer] = hitTestResult;
       }
       assert(() {
         if (debugPrintHitTestResults) {
-          debugPrint('$event: $hitTestResult');
+          debugPrint('${event.toString(minLevel: DiagnosticLevel.debug)}: $hitTestResult');
         }
         return true;
       }());
@@ -391,15 +410,24 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     if (hitTestResult != null ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
-      assert(event.position != null);
       dispatchEvent(event, hitTestResult);
     }
   }
 
-  /// Determine which [HitTestTarget] objects are located at a given position.
+  /// Determine which [HitTestTarget] objects are located at a given position in
+  /// the specified view.
   @override // from HitTestable
-  void hitTest(HitTestResult result, Offset position) {
+  void hitTestInView(HitTestResult result, Offset position, int viewId) {
     result.add(HitTestEntry(this));
+  }
+
+  @override // from HitTestable
+  @Deprecated(
+    'Use hitTestInView and specify the view to hit test. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
+  void hitTest(HitTestResult result, Offset position) {
+    hitTestInView(result, position, platformDispatcher.implicitView!.viewId);
   }
 
   /// Dispatch an event to [pointerRouter] and the path of a hit test result.

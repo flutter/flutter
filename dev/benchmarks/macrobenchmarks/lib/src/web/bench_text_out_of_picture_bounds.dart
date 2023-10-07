@@ -37,14 +37,14 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
       paragraphCount: 500,
       minWordCountPerParagraph: 2,
       maxWordCountPerParagraph: 4,
-      widthConstraint: window.physicalSize.width / 2,
+      widthConstraint: view.physicalSize.width / 2,
       color: red,
     );
     multiLineParagraphs = generateLaidOutParagraphs(
       paragraphCount: 50,
       minWordCountPerParagraph: 30,
       maxWordCountPerParagraph: 49,
-      widthConstraint: window.physicalSize.width / 2,
+      widthConstraint: view.physicalSize.width / 2,
       color: green,
     );
   }
@@ -61,19 +61,19 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
   void onDrawFrame(SceneBuilder sceneBuilder) {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
-    final Size screenSize = window.physicalSize;
+    final Size viewSize = view.physicalSize;
     const double padding = 10.0;
 
     // Fills a single cell with random text.
     void fillCellWithText(List<Paragraph> textSource) {
       canvas.save();
       double topOffset = 0;
-      while (topOffset < screenSize.height) {
+      while (topOffset < viewSize.height) {
         final Paragraph paragraph =
             textSource[_random.nextInt(textSource.length)];
 
         // Give it enough space to make sure it ends up being a single-line paragraph.
-        paragraph.layout(ParagraphConstraints(width: screenSize.width / 2));
+        paragraph.layout(ParagraphConstraints(width: viewSize.width / 2));
 
         canvas.drawParagraph(paragraph, Offset.zero);
         canvas.translate(0, paragraph.height + padding);
@@ -83,12 +83,12 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
     }
 
     // Starting with the top-left cell, fill every cell with text.
-    canvas.translate(-screenSize.width, -screenSize.height);
+    canvas.translate(-viewSize.width, -viewSize.height);
     for (int row = 0; row < 3; row++) {
       canvas.save();
       for (int col = 0; col < 3; col++) {
         canvas.drawRect(
-          Offset.zero & screenSize,
+          Offset.zero & viewSize,
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 2.0,
@@ -98,19 +98,19 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
 
         // Fill multi-line text.
         canvas.save();
-        canvas.translate(screenSize.width / 2, 0);
+        canvas.translate(viewSize.width / 2, 0);
         fillCellWithText(multiLineParagraphs);
         canvas.restore();
 
         // Shift to next column.
-        canvas.translate(screenSize.width, 0);
+        canvas.translate(viewSize.width, 0);
       }
 
       // Undo horizontal shift.
       canvas.restore();
 
       // Shift to next row.
-      canvas.translate(0, screenSize.height);
+      canvas.translate(0, viewSize.height);
     }
 
     final Picture picture = pictureRecorder.endRecording();

@@ -7,13 +7,20 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 
+import '_background_isolate_binary_messenger_io.dart'
+  if (dart.library.js_util) '_background_isolate_binary_messenger_web.dart';
+
 import 'binary_messenger.dart';
 import 'binding.dart';
 import 'debug.dart' show debugProfilePlatformChannels;
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
+export '_background_isolate_binary_messenger_io.dart'
+  if (dart.library.js_util) '_background_isolate_binary_messenger_web.dart';
+
 export 'binary_messenger.dart' show BinaryMessenger;
+export 'binding.dart' show RootIsolateToken;
 export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 
 bool _debugProfilePlatformChannelsIsRunning = false;
@@ -123,6 +130,12 @@ void _debugRecordDownStream(String channelTypeName, String name,
   _debugLaunchProfilePlatformChannels();
 }
 
+BinaryMessenger _findBinaryMessenger() {
+  return !kIsWeb && ServicesBinding.rootIsolateToken == null
+      ? BackgroundIsolateBinaryMessenger.instance
+      : ServicesBinding.instance.defaultBinaryMessenger;
+}
+
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
 ///
@@ -150,9 +163,7 @@ class BasicMessageChannel<T> {
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
   const BasicMessageChannel(this.name, this.codec, { BinaryMessenger? binaryMessenger })
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -160,10 +171,14 @@ class BasicMessageChannel<T> {
   /// The message codec used by this channel, not null.
   final MessageCodec<T> codec;
 
-  /// The messenger which sends the bytes for this channel, not null.
+  /// The messenger which sends the bytes for this channel.
+  ///
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result =
-        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return !kReleaseMode && debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
@@ -236,9 +251,7 @@ class MethodChannel {
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
   const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger ])
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -246,12 +259,14 @@ class MethodChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages.
+  /// The messenger which sends the bytes for this channel.
   ///
-  /// The messenger may not be null.
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result =
-        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return !kReleaseMode && debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
@@ -268,10 +283,10 @@ class MethodChannel {
   /// [binaryMessenger]'s [BinaryMessenger.send] method.
   ///
   /// If the result is null and `missingOk` is true, this returns null. (This is
-  /// the behaviour of [OptionalMethodChannel.invokeMethod].)
+  /// the behavior of [OptionalMethodChannel.invokeMethod].)
   ///
   /// If the result is null and `missingOk` is false, this throws a
-  /// [MissingPluginException]. (This is the behaviour of
+  /// [MissingPluginException]. (This is the behavior of
   /// [MethodChannel.invokeMethod].)
   ///
   /// Otherwise, the result is decoded using the [codec]'s
@@ -281,7 +296,6 @@ class MethodChannel {
   /// nullable.
   @optionalTypeArgs
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
-    assert(method != null);
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
       !kReleaseMode && debugProfilePlatformChannels ?
@@ -326,10 +340,7 @@ class MethodChannel {
   /// <https://flutter.dev/developing-packages/>:
   ///
   /// ```dart
-  /// class Music {
-  ///   // Class cannot be instantiated.
-  ///   const Music._();
-  ///
+  /// abstract final class Music {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
@@ -516,7 +527,7 @@ class MethodChannel {
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     assert(
-      _binaryMessenger != null || ServicesBinding.instance != null,
+      _binaryMessenger != null || BindingBase.debugBindingType() != null,
       'Cannot set the method call handler before the binary messenger has been initialized. '
       'This happens when you call setMethodCallHandler() before the WidgetsFlutterBinding '
       'has been initialized. You can fix this by either calling WidgetsFlutterBinding.ensureInitialized() '
@@ -572,7 +583,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// Stream setup requests are encoded into binary before being sent,
 /// and binary events and errors received are decoded into Dart values.
 /// The [MethodCodec] used must be compatible with the one used by the platform
-/// plugin. This can be achieved by creating an `EventChannel` counterpart of
+/// plugin. This can be achieved by creating an [EventChannel] counterpart of
 /// this channel on the platform side. The Dart type of events sent and received
 /// is `dynamic`, but only values supported by the specified [MethodCodec] can
 /// be used.
@@ -590,9 +601,7 @@ class EventChannel {
   /// Neither [name] nor [codec] may be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
   const EventChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -600,8 +609,14 @@ class EventChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  /// The messenger which sends the bytes for this channel.
+  ///
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
+  BinaryMessenger get binaryMessenger =>
+      _binaryMessenger ?? _findBinaryMessenger();
   final BinaryMessenger? _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.

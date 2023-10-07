@@ -41,18 +41,57 @@ import 'restoration_properties.dart';
 class RouteInformation {
   /// Creates a route information object.
   ///
-  /// The arguments may be null.
-  const RouteInformation({this.location, this.state});
+  /// Either location or uri must not be null.
+  const RouteInformation({
+    @Deprecated(
+      'Pass Uri.parse(location) to uri parameter instead. '
+      'This feature was deprecated after v3.8.0-3.0.pre.'
+    )
+    String? location,
+    Uri? uri,
+    this.state,
+  }) : _location = location,
+       _uri = uri,
+       assert((location != null) != (uri != null));
 
   /// The location of the application.
   ///
   /// The string is usually in the format of multiple string identifiers with
   /// slashes in between. ex: `/`, `/path`, `/path/to/the/app`.
-  ///
-  /// It is equivalent to the URL in a web application.
-  final String? location;
+  @Deprecated(
+    'Use uri instead. '
+    'This feature was deprecated after v3.8.0-3.0.pre.'
+  )
+  String get location {
+    if (_location != null) {
+      return _location!;
+    }
+    return Uri.decodeComponent(
+      Uri(
+        path: uri.path.isEmpty ? '/' : uri.path,
+        queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+        fragment: uri.fragment.isEmpty ? null : uri.fragment,
+      ).toString(),
+    );
+  }
+  final String? _location;
 
-  /// The state of the application in the [location].
+  /// The uri location of the application.
+  ///
+  /// The host and scheme will not be empty if this object is created from a
+  /// deep link request. They represents the website that redirect the deep
+  /// link.
+  ///
+  /// In web platform, the host and scheme are always empty.
+  Uri get uri {
+    if (_uri != null){
+      return _uri!;
+    }
+    return Uri.parse(_location!);
+  }
+  final Uri? _uri;
+
+  /// The state of the application in the [uri].
   ///
   /// The app can have different states even in the same location. For example,
   /// the text inside a [TextField] or the scroll position in a [ScrollView].
@@ -61,11 +100,11 @@ class RouteInformation {
   /// On the web, this information is stored in the browser history when the
   /// [Router] reports this route information back to the web engine
   /// through the [PlatformRouteInformationProvider]. The information
-  /// is then passed back, along with the [location], when the user
+  /// is then passed back, along with the [uri], when the user
   /// clicks the back or forward buttons.
   ///
   /// This information is also serialized and persisted alongside the
-  /// [location] for state restoration purposes. During state restoration,
+  /// [uri] for state restoration purposes. During state restoration,
   /// the information is made available again to the [Router] so it can restore
   /// its configuration to the previous state.
   ///
@@ -252,7 +291,7 @@ class RouterConfig<T> {
 ///
 /// One can force the [Router] to report new route information as navigation
 /// event to the [routeInformationProvider] (and thus the browser) even if the
-/// [RouteInformation.location] has not changed by calling the [Router.navigate]
+/// [RouteInformation.uri] has not changed by calling the [Router.navigate]
 /// method with a callback that performs the state change. This causes [Router]
 /// to call the [RouteInformationProvider.routerReportsNewRouteInformation] with
 /// [RouteInformationReportingType.navigate], and thus causes
@@ -329,8 +368,7 @@ class Router<T> extends StatefulWidget {
   }) : assert(
          routeInformationProvider == null || routeInformationParser != null,
          'A routeInformationParser must be provided when a routeInformationProvider is specified.',
-       ),
-       assert(routerDelegate != null);
+       );
 
   /// Creates a router with a [RouterConfig].
   ///
@@ -472,7 +510,7 @@ class Router<T> extends StatefulWidget {
   ///
   /// The web application relies on the [Router] to report new route information
   /// in order to create browser history entry. The [Router] will only report
-  /// them if it detects the [RouteInformation.location] changes. Use this
+  /// them if it detects the [RouteInformation.uri] changes. Use this
   /// method if you want the [Router] to report the route information even if
   /// the location does not change. This can be useful when you want to
   /// support the browser backward and forward button without changing the URL.
@@ -503,7 +541,7 @@ class Router<T> extends StatefulWidget {
   ///
   /// The web application relies on the [Router] to report new route information
   /// in order to create browser history entry. The [Router] will report them
-  /// automatically if it detects the [RouteInformation.location] changes.
+  /// automatically if it detects the [RouteInformation.uri] changes.
   ///
   /// Creating a new route history entry makes users feel they have visited a
   /// new page, and the browser back button brings them back to previous history
@@ -620,7 +658,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     RouteInformationReportingType status,
     VoidCallback fn,
   ) {
-    assert(status != null);
     assert(status.index >= RouteInformationReportingType.neglect.index);
     assert(() {
       if (_currentIntentionToReport != null &&
@@ -721,7 +758,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   }
 
   void _handleRouteInformationProviderNotification() {
-    assert(widget.routeInformationProvider!.value != null);
     _routeParsePending = true;
     _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
   }
@@ -786,9 +822,7 @@ class _RouterScope extends InheritedWidget {
     required this.routerDelegate,
     required this.routerState,
     required super.child,
-  })  : assert(routeInformationProvider == null || routeInformationParser != null),
-        assert(routerDelegate != null),
-        assert(routerState != null);
+  })  : assert(routeInformationProvider == null || routeInformationParser != null);
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
@@ -818,7 +852,7 @@ class _RouterScope extends InheritedWidget {
 /// See also:
 ///
 ///  * [Listenable] and its subclasses, which provide a similar mechanism for
-///    one-way signalling.
+///    one-way signaling.
 class _CallbackHookProvider<T> {
   final ObserverList<ValueGetter<T>> _callbacks = ObserverList<ValueGetter<T>>();
 
@@ -1050,7 +1084,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   /// Creates a back button dispatcher that acts as the child of another.
   ///
   /// The [parent] must not be null.
-  ChildBackButtonDispatcher(this.parent) : assert(parent != null);
+  ChildBackButtonDispatcher(this.parent);
 
   /// The back button dispatcher that this object will attempt to take priority
   /// over when [takePriority] is called.
@@ -1060,7 +1094,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   final BackButtonDispatcher parent;
 
   /// The parent of this child back button dispatcher decide to let this
-  /// child to handle the invoke the  callback request in
+  /// child to handle the invoke the callback request in
   /// [BackButtonDispatcher.invokeCallback].
   ///
   /// Return a boolean future with true if this child will handle the request;
@@ -1203,7 +1237,7 @@ abstract class RouteInformationParser<T> {
   ///
   /// The input [BuildContext] can be used for looking up [InheritedWidget]s
   /// If one uses [BuildContext.dependOnInheritedWidgetOfExactType], a
-  /// dependency will be created. The [Router] will reparse the
+  /// dependency will be created. The [Router] will re-parse the
   /// [RouteInformation] from its [RouteInformationProvider] if the dependency
   /// notifies its listeners.
   ///
@@ -1437,10 +1471,10 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&
-       _valueInEngine.location == routeInformation.location);
+       _valueInEngine.uri == routeInformation.uri);
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
-      location: routeInformation.location!,
+      uri: routeInformation.uri,
       state: routeInformation.state,
       replace: replace,
     );
@@ -1452,7 +1486,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   RouteInformation get value => _value;
   RouteInformation _value;
 
-  RouteInformation _valueInEngine = RouteInformation(location: WidgetsBinding.instance.platformDispatcher.defaultRouteName);
+  RouteInformation _valueInEngine = RouteInformation(uri: Uri.parse(WidgetsBinding.instance.platformDispatcher.defaultRouteName));
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
     if (_value == routeInformation) {
@@ -1495,13 +1529,6 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
     assert(hasListeners);
     _platformReportsNewRouteInformation(routeInformation);
-    return true;
-  }
-
-  @override
-  Future<bool> didPushRoute(String route) async {
-    assert(hasListeners);
-    _platformReportsNewRouteInformation(RouteInformation(location: route));
     return true;
   }
 }
@@ -1547,11 +1574,15 @@ class _RestorableRouteInformation extends RestorableValue<RouteInformation?> {
     }
     assert(data is List<Object?> && data.length == 2);
     final List<Object?> castedData = data as List<Object?>;
-    return RouteInformation(location: castedData.first as String?, state: castedData.last);
+    final String? uri = castedData.first as String?;
+    if (uri == null) {
+      return null;
+    }
+    return RouteInformation(uri: Uri.parse(uri), state: castedData.last);
   }
 
   @override
   Object? toPrimitives() {
-    return value == null ? null : <Object?>[value!.location, value!.state];
+    return value == null ? null : <Object?>[value!.uri.toString(), value!.state];
   }
 }

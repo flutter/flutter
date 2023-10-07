@@ -32,10 +32,12 @@ void main() {
     watch.start();
     for (int i = 0; i < _kNumIters; i += 1) {
       for (final PointerEvent event in velocityEventData) {
-        if (event is PointerDownEvent || event is PointerMoveEvent)
+        if (event is PointerDownEvent || event is PointerMoveEvent) {
           tracker.addPosition(event.timeStamp, event.position);
-        if (event is PointerUpEvent)
+        }
+        if (event is PointerUpEvent) {
           tracker.getVelocity();
+        }
       }
     }
     watch.stop();

@@ -203,6 +203,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 
   @override
   Future<void> setUpAll() async {
+    super.setUpAll();
     registerEngineBenchmarkValueListener('text_layout', (num value) {
       _textLayoutMicros += value;
     });
@@ -340,9 +341,7 @@ class ColorItem extends StatelessWidget {
     required this.index,
     required this.color,
     this.prefix = '',
-  })  : assert(index != null),
-        assert(color != null),
-        assert(prefix != null);
+  });
 
   final int index;
   final Color color;
@@ -401,9 +400,9 @@ class PaletteTabView extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle =
-        textTheme.bodyText2!.copyWith(color: Colors.white);
+        textTheme.bodyMedium!.copyWith(color: Colors.white);
     final TextStyle blackTextStyle =
-        textTheme.bodyText2!.copyWith(color: Colors.black);
+        textTheme.bodyMedium!.copyWith(color: Colors.black);
     return Scrollbar(
       child: ListView(
         itemExtent: kColorItemHeight,

@@ -8,12 +8,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 
-enum IOSDeviceConnectionInterface {
-  none,
-  usb,
-  network,
-}
-
 /// Wraps iproxy command line tool port forwarding.
 ///
 /// See https://github.com/libimobiledevice/libusbmuxd.

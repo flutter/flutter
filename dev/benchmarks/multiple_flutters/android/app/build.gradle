@@ -13,6 +13,7 @@ android {
         }
     }
 
+    namespace "dev.flutter.multipleflutters"
     compileSdkVersion 31
 
     compileOptions {

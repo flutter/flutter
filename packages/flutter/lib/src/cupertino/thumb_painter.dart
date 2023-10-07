@@ -47,7 +47,7 @@ class CupertinoThumbPainter {
   const CupertinoThumbPainter({
     this.color = CupertinoColors.white,
     this.shadows = _kSliderBoxShadows,
-  }) : assert(shadows != null);
+  });
 
   /// Creates an object that paints an iOS-style switch thumb.
   const CupertinoThumbPainter.switchThumb({

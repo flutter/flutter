@@ -136,6 +136,29 @@ void main() {
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
+
+  test('File image throws error when given a real but non-image file', () async {
+    final Completer<Exception> error = Completer<Exception>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error.complete(details.exception as Exception);
+    };
+    final FileImage provider = FileImage(File('pubspec.yaml'));
+
+    expect(imageCache.statusForKey(provider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+
+    provider.resolve(ImageConfiguration.empty);
+
+    expect(imageCache.statusForKey(provider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
+
+    expect(await error.future, isException
+      .having((Exception exception) => exception.toString(), 'toString', contains('Invalid image data')));
+
+    // Invalid images are marked as pending so that we do not attempt to reload them.
+    expect(imageCache.statusForKey(provider).untracked, false);
+    expect(imageCache.pendingImageCount, 1);
+  }, skip: kIsWeb); // [intended] The web cannot load files.
 }
 
 class FakeCodec implements Codec {

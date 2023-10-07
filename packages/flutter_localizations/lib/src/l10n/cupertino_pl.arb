@@ -28,8 +28,9 @@
   "cutButtonLabel": "Wytnij",
   "copyButtonLabel": "Kopiuj",
   "pasteButtonLabel": "Wklej",
-  "selectAllButtonLabel": "Wybierz wszystkie",
+  "selectAllButtonLabel": "Zaznacz wszystko",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zamknij",
-  "searchTextFieldPlaceholderLabel": "Szukaj"
+  "searchTextFieldPlaceholderLabel": "Szukaj",
+  "noSpellCheckReplacementsLabel": "Nie znaleziono zastąpień"
 }

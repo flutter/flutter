@@ -22,8 +22,6 @@ class Fingerprinter {
     required FileSystem fileSystem,
     required Logger logger,
   }) : _paths = paths.toList(),
-       assert(fingerprintPath != null),
-       assert(paths != null && paths.every((String path) => path != null)),
        _logger = logger,
        _fileSystem = fileSystem;
 
@@ -62,7 +60,9 @@ class Fingerprinter {
   void writeFingerprint() {
     try {
       final Fingerprint fingerprint = buildFingerprint();
-      _fileSystem.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
+      final File fingerprintFile = _fileSystem.file(fingerprintPath);
+      fingerprintFile.createSync(recursive: true);
+      fingerprintFile.writeAsStringSync(fingerprint.toJson());
     } on Exception catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
       _logger.printTrace('Fingerprint write error: $e');

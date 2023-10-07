@@ -48,8 +48,6 @@ class Memento extends Object with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('name', name));
-    properties.add(FlagProperty('undo', value: undo != null, ifTrue: 'undo'));
-    properties.add(FlagProperty('redo', value: redo != null, ifTrue: 'redo'));
   }
 }
 
@@ -58,14 +56,6 @@ class Memento extends Object with Diagnosticable {
 /// An [ActionDispatcher] subclass that manages the invocation of undoable
 /// actions.
 class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
-  /// Constructs a new [UndoableActionDispatcher].
-  ///
-  /// The [maxUndoLevels] argument must not be null.
-  UndoableActionDispatcher({
-    int maxUndoLevels = _defaultMaxUndoLevels,
-  })  : assert(maxUndoLevels != null),
-        _maxUndoLevels = maxUndoLevels;
-
   // A stack of actions that have been performed. The most recent action
   // performed is at the end of the list.
   final DoubleLinkedQueue<Memento> _completedActions = DoubleLinkedQueue<Memento>();
@@ -73,19 +63,12 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   // at the end of the list.
   final List<Memento> _undoneActions = <Memento>[];
 
-  static const int _defaultMaxUndoLevels = 1000;
-
   /// The maximum number of undo levels allowed.
   ///
   /// If this value is set to a value smaller than the number of completed
   /// actions, then the stack of completed actions is truncated to only include
   /// the last [maxUndoLevels] actions.
-  int get maxUndoLevels => _maxUndoLevels;
-  int _maxUndoLevels;
-  set maxUndoLevels(int value) {
-    _maxUndoLevels = value;
-    _pruneActions();
-  }
+  int get maxUndoLevels => 1000;
 
   final Set<VoidCallback> _listeners = <VoidCallback>{};
 
@@ -124,7 +107,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
 
   // Enforces undo level limit.
   void _pruneActions() {
-    while (_completedActions.length > _maxUndoLevels) {
+    while (_completedActions.length > maxUndoLevels) {
       _completedActions.removeFirst();
     }
   }
@@ -240,26 +223,12 @@ class RedoAction extends Action<RedoIntent> {
 }
 
 /// An action that can be undone.
-abstract class UndoableAction<T extends Intent> extends Action<T> {
-  /// The [Intent] this action was originally invoked with.
-  Intent? get invocationIntent => _invocationTag;
-  Intent? _invocationTag;
-
-  @protected
-  set invocationIntent(Intent? value) => _invocationTag = value;
-
-  @override
-  @mustCallSuper
-  void invoke(T intent) {
-    invocationIntent = intent;
-  }
-}
+abstract class UndoableAction<T extends Intent> extends Action<T> { }
 
 class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
   @override
   @mustCallSuper
   Memento invoke(T intent) {
-    super.invoke(intent);
     final FocusNode? previousFocus = primaryFocus;
     return Memento(name: previousFocus!.debugLabel!, undo: () {
       previousFocus.requestFocus();
@@ -298,8 +267,6 @@ class UndoablePreviousFocusAction extends UndoableFocusActionBase<PreviousFocusI
 }
 
 class UndoableDirectionalFocusAction extends UndoableFocusActionBase<DirectionalFocusIntent> {
-  TraversalDirection? direction;
-
   @override
   Memento invoke(DirectionalFocusIntent intent) {
     final Memento memento = super.invoke(intent);
@@ -340,12 +307,14 @@ class _DemoButtonState extends State<DemoButton> {
     return TextButton(
       focusNode: _focusNode,
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+        foregroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
         overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused))
+          if (states.contains(MaterialState.focused)) {
             return Colors.red;
-          if (states.contains(MaterialState.hovered))
+          }
+          if (states.contains(MaterialState.hovered)) {
             return Colors.blue;
+          }
           return Colors.transparent;
         }),
       ),
@@ -423,7 +392,7 @@ class _FocusDemoState extends State<FocusDemo> {
             debugLabel: 'Scope',
             autofocus: true,
             child: DefaultTextStyle(
-              style: textTheme.headline4!,
+              style: textTheme.headlineMedium!,
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Actions Demo'),
@@ -433,25 +402,25 @@ class _FocusDemoState extends State<FocusDemo> {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'One'),
                             DemoButton(name: 'Two'),
                             DemoButton(name: 'Three'),
                           ],
                         ),
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'Four'),
                             DemoButton(name: 'Five'),
                             DemoButton(name: 'Six'),
                           ],
                         ),
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'Seven'),
                             DemoButton(name: 'Eight'),
                             DemoButton(name: 'Nine'),

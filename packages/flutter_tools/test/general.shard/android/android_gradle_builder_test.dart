@@ -5,6 +5,9 @@
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -13,6 +16,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -22,6 +27,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('gradle build', () {
@@ -40,6 +46,7 @@ void main() {
 
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -47,6 +54,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -91,6 +99,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -124,10 +133,13 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Verbose mode for APKs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: BufferLogger.test(verbose: true),
         processManager: processManager,
         fileSystem: fileSystem,
@@ -135,6 +147,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -184,13 +197,17 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[],
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -198,6 +215,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
 
       const FakeCommand fakeCmd = FakeCommand(
@@ -251,6 +269,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -288,10 +307,13 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -299,6 +321,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -343,6 +366,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -376,10 +400,13 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -387,6 +414,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -432,14 +460,18 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsProcessException());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('logs success event after a successful retry', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -447,6 +479,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -509,6 +542,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[
           GradleHandledError(
             test: (String line) {
@@ -535,10 +569,13 @@ void main() {
         ),
       ));
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('performs code size analysis and sends analytics', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -550,6 +587,7 @@ void main() {
             'HOME': '/home',
           },
         ),
+        androidStudio: FakeAndroidStudio(),
       );
        processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -623,6 +661,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[],
       );
 
@@ -632,10 +671,13 @@ void main() {
           'apk',
         ),
       ));
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -643,6 +685,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -689,6 +732,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: const <GradleHandledError>[],
       );
 
@@ -697,10 +741,71 @@ void main() {
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
-    testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
+    testUsingContext('Uses namespace attribute if manifest lacks a package attribute', () async {
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      final AndroidSdk sdk = FakeAndroidSdk();
+
+      fileSystem.directory(project.android.hostAppGradleRoot)
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory(project.android.hostAppGradleRoot)
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+'''
+apply from: irrelevant/flutter.gradle
+
+android {
+    namespace 'com.example.foo'
+}
+''');
+
+      fileSystem.directory(project.android.hostAppGradleRoot)
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="namespacetest"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+''');
+
+      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+        project.android,
+        androidSdk: sdk,
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        userMessages: UserMessages(),
+        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+      );
+
+      expect(androidApk?.id, 'com.example.foo');
+    });
+
+    testUsingContext('can call custom gradle task getBuildOptions and parse the result', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -708,6 +813,200 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stdout: '''
+BuildVariant: freeDebug
+BuildVariant: paidDebug
+BuildVariant: freeRelease
+BuildVariant: paidRelease
+BuildVariant: freeProfile
+BuildVariant: paidProfile
+        ''',
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, <String>['freeDebug', 'paidDebug', 'freeRelease', 'paidRelease', 'freeProfile', 'paidProfile']);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stderr: '''
+Gradle Crashed
+        ''',
+        exitCode: 1,
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, const <String>[]);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getApplicationIdForVariant and parse the result', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugApplicationId',
+        ],
+        stdout: '''
+ApplicationId: com.example.id
+        ''',
+      ));
+      final String actual = await builder.getApplicationIdForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, 'com.example.id');
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getApplicationIdForVariant with unknown crash', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugApplicationId',
+        ],
+        stdout: '''
+unknown crash
+        ''',
+      ));
+      final String actual = await builder.getApplicationIdForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, '');
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getAppLinkDomainsForVariant and parse the result', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugAppLinkDomains',
+        ],
+        stdout: '''
+Domain: example.com
+Domain: example2.com
+        ''',
+      ));
+      final List<String> actual = await builder.getAppLinkDomainsForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, <String>['example.com', 'example2.com']);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getAppLinkDomainsForVariant with unknown crash', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugAppLinkDomains',
+        ],
+        stdout: '''
+unknown crash
+        ''',
+      ));
+      final List<String> actual = await builder.getAppLinkDomainsForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual.isEmpty, isTrue);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -759,10 +1058,13 @@ void main() {
         isFalse,
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('Verbose mode for AARs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: BufferLogger.test(verbose: true),
         processManager: processManager,
         fileSystem: fileSystem,
@@ -770,6 +1072,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -814,10 +1117,13 @@ void main() {
         buildNumber: '1.0',
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -825,6 +1131,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -870,10 +1177,13 @@ void main() {
           buildNumber: '1.0',
         ), throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -881,6 +1191,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -940,14 +1251,18 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -955,6 +1270,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1014,14 +1330,18 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1029,6 +1349,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1088,14 +1409,18 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1103,6 +1428,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1163,14 +1489,18 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1178,6 +1508,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(
         const FakeCommand(command: <String>[
@@ -1219,14 +1550,18 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1234,6 +1569,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1307,10 +1643,13 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1318,6 +1657,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1391,10 +1731,13 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1402,6 +1745,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1475,10 +1819,13 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1486,6 +1833,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1559,6 +1907,8 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
     });
   });
 }
@@ -1568,4 +1918,9 @@ class FakeGradleUtils extends Fake implements GradleUtils {
   String getExecutable(FlutterProject project) {
     return 'gradlew';
   }
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => '/android-studio/jbr';
 }

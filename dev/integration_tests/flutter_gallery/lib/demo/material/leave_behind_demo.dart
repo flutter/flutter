@@ -68,19 +68,14 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       switch (action) {
         case LeaveBehindDemoAction.reset:
           initListItems();
-          break;
         case LeaveBehindDemoAction.horizontalSwipe:
           _dismissDirection = DismissDirection.horizontal;
-          break;
         case LeaveBehindDemoAction.leftSwipe:
           _dismissDirection = DismissDirection.endToStart;
-          break;
         case LeaveBehindDemoAction.rightSwipe:
           _dismissDirection = DismissDirection.startToEnd;
-          break;
         case LeaveBehindDemoAction.confirmDismiss:
           _confirmDismiss = !_confirmDismiss;
-          break;
       }
     });
   }
@@ -222,13 +217,14 @@ class _LeaveBehindListItem extends StatelessWidget {
         key: ObjectKey(item),
         direction: dismissDirection,
         onDismissed: (DismissDirection direction) {
-          if (direction == DismissDirection.endToStart)
+          if (direction == DismissDirection.endToStart) {
             _handleArchive();
-          else
+          } else {
             _handleDelete();
+          }
         },
         confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
-          switch(dismissDirection) {
+          switch (dismissDirection) {
             case DismissDirection.endToStart:
               return await _showConfirmationDialog(context, 'archive') ?? false;
             case DismissDirection.startToEnd:
@@ -242,7 +238,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           }
           return false;
         },
-        background: Container(
+        background: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(
@@ -250,7 +246,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             ),
           ),
         ),
-        secondaryBackground: Container(
+        secondaryBackground: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(

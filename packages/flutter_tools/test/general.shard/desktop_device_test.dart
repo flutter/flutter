@@ -86,7 +86,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
-      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildMode.debug);
+      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildInfo.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
       final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
@@ -96,7 +96,7 @@ void main() {
       );
 
       expect(result.started, true);
-      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
+      expect(result.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
@@ -300,6 +300,66 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('Desktop devices that support impeller pass through the enable-impeller flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+      supportsImpeller: true,
+    );
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
+
+  testWithoutContext('Desktop devices that do not support impeller ignore the enable-impeller flag', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['debug'],
+        exitCode: -1,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '3'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
@@ -308,6 +368,7 @@ FakeDesktopDevice setUpDesktopDevice({
   ProcessManager? processManager,
   OperatingSystemUtils? operatingSystemUtils,
   bool nullExecutablePathForDevice = false,
+  bool supportsImpeller = false,
 }) {
   return FakeDesktopDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -315,6 +376,7 @@ FakeDesktopDevice setUpDesktopDevice({
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
+    supportsImpeller: supportsImpeller,
   );
 }
 
@@ -326,6 +388,7 @@ class FakeDesktopDevice extends DesktopDevice {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
     this.nullExecutablePathForDevice = false,
+    this.supportsImpeller = false,
   }) : super(
       'dummy',
       platformType: PlatformType.linux,
@@ -345,6 +408,9 @@ class FakeDesktopDevice extends DesktopDevice {
   final bool nullExecutablePathForDevice;
 
   @override
+  final bool supportsImpeller;
+
+  @override
   String get name => 'dummy';
 
   @override
@@ -357,8 +423,7 @@ class FakeDesktopDevice extends DesktopDevice {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  Future<void> buildForDevice(
-    ApplicationPackage package, {
+  Future<void> buildForDevice({
     String? mainPath,
     BuildInfo? buildInfo,
   }) async {
@@ -368,11 +433,11 @@ class FakeDesktopDevice extends DesktopDevice {
 
   // Dummy implementation that just returns the build mode name.
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return buildMode == null ? 'null' : getNameForBuildMode(buildMode);
+    return buildInfo.mode.cliName;
   }
 }
 

@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
   "tabSemanticsLabel": "$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ",
   "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ",
-  "searchTextFieldPlaceholderLabel": "ਖੋਜੋ"
+  "searchTextFieldPlaceholderLabel": "ਖੋਜੋ",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

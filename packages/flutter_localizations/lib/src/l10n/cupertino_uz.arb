@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Barchasini tanlash",
   "tabSemanticsLabel": "$tabCount varaqdan $tabIndex",
   "modalBarrierDismissLabel": "Yopish",
-  "searchTextFieldPlaceholderLabel": "Qidiruv"
+  "searchTextFieldPlaceholderLabel": "Qidiruv",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }
