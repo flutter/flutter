@@ -476,7 +476,7 @@ void main() {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     final Offset center = tester.getCenter(find.text('Child 1'));
-    await tester.startGesture(center);
+    final TestGesture gesture       = await tester.startGesture(center);
     await tester.pump();
     await tester.pumpAndSettle();
 

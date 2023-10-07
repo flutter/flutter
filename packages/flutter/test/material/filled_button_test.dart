@@ -52,7 +52,7 @@ void main() {
     expect(align.alignment, Alignment.center);
 
     final Offset center = tester.getCenter(find.byType(FilledButton));
-    await tester.startGesture(center);
+    final TestGesture gesture       = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
 
@@ -165,7 +165,7 @@ void main() {
     expect(align.alignment, Alignment.center);
 
     final Offset center = tester.getCenter(find.byType(FilledButton));
-    await tester.startGesture(center);
+    final TestGesture gesture       = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
 

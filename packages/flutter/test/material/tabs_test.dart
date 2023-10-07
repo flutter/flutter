@@ -5202,7 +5202,7 @@ void main() {
 
     // Touch TabBarView while ballistic scrolling is happening and
     // check if tabController's animation value properly follows page value.
-    await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    final TestGesture gesture       = await tester.startGesture(tester.getCenter(find.byType(PageView)));
     await tester.pump();
     expect(tabController.animation!.value, pageController.page);
   });

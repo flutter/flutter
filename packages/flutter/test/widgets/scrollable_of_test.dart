@@ -178,7 +178,7 @@ void main() {
       ),
     ));
 
-    await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture       = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
     final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;

@@ -1605,7 +1605,7 @@ void main() {
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
     final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1663,7 +1663,7 @@ void main() {
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
     final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1688,7 +1688,7 @@ void main() {
 
     // Drag and drop the Draggable onto the Target a second time.
     final TestGesture secondGesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -2424,7 +2424,7 @@ void main() {
       ),
     );
 
-    await tester.startGesture(const Offset(10.0, 10.0));
+    final TestGesture gesture       = await tester.startGesture(const Offset(10.0, 10.0));
     expect(didTap, isFalse);
 
     // This tears down the draggable without terminating the gesture sequence,
@@ -2815,7 +2815,7 @@ void main() {
     expect(onDragStartedCalled, isFalse);
 
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture       = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Source'), findsOneWidget);
@@ -2846,7 +2846,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(onDragStartedCalled, isFalse);
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture       = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
@@ -2879,7 +2879,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(onDragStartedCalled, isFalse);
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture       = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
@@ -3280,7 +3280,7 @@ void main() {
     ));
 
     final Offset location = tester.getCenter(find.text('Source'));
-    await tester.startGesture(location, pointer: 7);
+    final TestGesture gesture       = await tester.startGesture(location, pointer: 7);
 
     expect(dragAnchorStrategyCalled, true);
   });
@@ -3505,7 +3505,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   expect(onDragStartedCalled, isFalse);
 
   final Offset firstLocation = tester.getCenter(find.text('Source'));
-  await tester.startGesture(firstLocation, pointer: 7);
+  final TestGesture gesture       = await tester.startGesture(firstLocation, pointer: 7);
   await tester.pump();
 
   expect(find.text('Source'), findsOneWidget);

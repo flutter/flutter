@@ -1382,7 +1382,7 @@ void main() {
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
     // Tap center and wait for animation.
     final Offset center = tester.getCenter(find.byType(Slider));
-    await tester.startGesture(center);
+    final TestGesture gesture       = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
@@ -1883,7 +1883,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final Offset center = tester.getCenter(find.byType(Slider));
-    await tester.startGesture(center);
+    final TestGesture gesture       = await tester.startGesture(center);
     expect(
       find.byType(Slider),
       paints
@@ -2060,7 +2060,7 @@ void main() {
       final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
       final Offset center = tester.getCenter(find.byType(Slider));
-      await tester.startGesture(center);
+      final TestGesture gesture       = await tester.startGesture(center);
       // Wait for value indicator animation to finish.
       await tester.pumpAndSettle();
       expect(
@@ -2273,7 +2273,7 @@ void main() {
         final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
         final Offset center = tester.getCenter(find.byType(Slider));
-        await tester.startGesture(center);
+        final TestGesture gesture       = await tester.startGesture(center);
         // Wait for value indicator animation to finish.
         await tester.pumpAndSettle();
         expect(

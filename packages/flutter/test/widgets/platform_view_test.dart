@@ -332,7 +332,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture       = await tester.startGesture(const Offset(50.0, 50.0));
 
       expect(
         viewsController.motionEvents[currentViewId + 1],
@@ -377,7 +377,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture       = await tester.startGesture(const Offset(50.0, 50.0));
 
       expect(
         viewsController.motionEvents[currentViewId + 1],
@@ -423,7 +423,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture       = await tester.startGesture(const Offset(50.0, 50.0));
 
       expect(
         viewsController.motionEvents[currentViewId + 1],
@@ -851,7 +851,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture       = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
@@ -1935,7 +1935,7 @@ void main() {
       // is not yet in the tree.
       await tester.pump();
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture       = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
@@ -2856,7 +2856,7 @@ void main() {
       // is not yet in the tree.
       await tester.pump();
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture       = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
@@ -3338,7 +3338,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture       = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
