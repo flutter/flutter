@@ -1105,6 +1105,81 @@ void main() {
     expect(find.text(updatedText), findsOneWidget);
   });
 
+  testWidgetsWithLeakTracking('SearchAnchor attaches and detaches controllers property', (WidgetTester tester) async {
+    Widget builder(BuildContext context, SearchController controller)  {
+      return const Icon(Icons.search);
+    }
+    List<Widget> suggestionsBuilder(BuildContext context, SearchController controller) {
+      return const <Widget>[];
+    }
+
+    final SearchController controller1 = SearchController();
+    addTearDown(controller1.dispose);
+
+    expect(controller1.isAttached, isFalse);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            searchController: controller1,
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isFalse);
+
+    final SearchController controller2 = SearchController();
+    addTearDown(controller2.dispose);
+
+    expect(controller2.isAttached, isFalse);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            searchController: controller2,
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isFalse);
+    expect(controller2.isAttached, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isFalse);
+    expect(controller2.isAttached, isFalse);
+  });
+
   testWidgetsWithLeakTracking('SearchAnchor respects viewBuilder property', (WidgetTester tester) async {
     Widget buildAnchor({ViewBuilder? viewBuilder}) {
       return MaterialApp(
