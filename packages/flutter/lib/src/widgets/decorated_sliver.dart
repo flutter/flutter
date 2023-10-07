@@ -76,13 +76,10 @@ class DecoratedSliver extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final String label;
-    switch (position) {
-      case DecorationPosition.background:
-        label = 'bg';
-      case DecorationPosition.foreground:
-        label = 'fg';
-    }
+    final String label = switch (position) {
+      DecorationPosition.background => 'bg',
+      DecorationPosition.foreground => 'fg',
+    };
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }

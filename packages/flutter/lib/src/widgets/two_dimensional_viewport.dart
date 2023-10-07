@@ -988,16 +988,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       Axis.vertical => verticalOffset.pixels - targetOffset,
       Axis.horizontal => horizontalOffset.pixels - targetOffset,
     };
-    switch (axisDirection) {
-      case AxisDirection.down:
-        targetRect = targetRect.translate(0.0, offsetDifference);
-      case AxisDirection.right:
-        targetRect = targetRect.translate(offsetDifference, 0.0);
-      case AxisDirection.up:
-        targetRect = targetRect.translate(0.0, -offsetDifference);
-      case AxisDirection.left:
-        targetRect = targetRect.translate(-offsetDifference, 0.0);
-    }
+    targetRect = switch (axisDirection) {
+      AxisDirection.down => targetRect.translate(0.0, offsetDifference),
+      AxisDirection.right => targetRect.translate(offsetDifference, 0.0),
+      AxisDirection.up => targetRect.translate(0.0, -offsetDifference),
+      AxisDirection.left => targetRect.translate(-offsetDifference, 0.0),
+    };
 
     final RevealedOffset revealedOffset = RevealedOffset(
       offset: targetOffset,
@@ -1565,24 +1561,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     assert(child.hasSize);
     final double xOffset;
     final double yOffset;
-    switch (verticalAxisDirection) {
-      case AxisDirection.up:
-        yOffset = viewportDimension.height - (layoutOffset.dy + child.size.height);
-      case AxisDirection.down:
-        yOffset = layoutOffset.dy;
-      case AxisDirection.right:
-      case AxisDirection.left:
-        throw Exception('This should not happen');
-    }
-    switch (horizontalAxisDirection) {
-      case AxisDirection.right:
-        xOffset = layoutOffset.dx;
-      case AxisDirection.left:
-        xOffset = viewportDimension.width - (layoutOffset.dx + child.size.width);
-      case AxisDirection.up:
-      case AxisDirection.down:
-        throw Exception('This should not happen');
-    }
+    yOffset = switch (verticalAxisDirection) {
+      AxisDirection.up => viewportDimension.height - (layoutOffset.dy + child.size.height),
+      AxisDirection.down => layoutOffset.dy,
+      AxisDirection.right || AxisDirection.left => throw Exception('This should not happen'),
+    };
+    xOffset = switch (horizontalAxisDirection) {
+      AxisDirection.right => layoutOffset.dx,
+      AxisDirection.left => viewportDimension.width - (layoutOffset.dx + child.size.width),
+      AxisDirection.up || AxisDirection.down => throw Exception('This should not happen'),
+    };
     return Offset(xOffset, yOffset);
   }
 

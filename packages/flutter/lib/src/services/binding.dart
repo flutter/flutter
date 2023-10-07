@@ -356,19 +356,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.hidden':
-        return AppLifecycleState.hidden;
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
-    }
-    return null;
+    return switch (message) {
+      'AppLifecycleState.resumed' => AppLifecycleState.resumed,
+      'AppLifecycleState.inactive' => AppLifecycleState.inactive,
+      'AppLifecycleState.hidden' => AppLifecycleState.hidden,
+      'AppLifecycleState.paused' => AppLifecycleState.paused,
+      'AppLifecycleState.detached' => AppLifecycleState.detached,
+      _ => null,
+    };
   }
 
   /// Handles any requests for application exit that may be received on the

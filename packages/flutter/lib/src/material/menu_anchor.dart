@@ -3135,12 +3135,10 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       Offset desiredPosition = alignment.resolve(textDirection).withinRect(anchorRect);
       final Offset directionalOffset;
       if (alignment is AlignmentDirectional) {
-        switch (textDirection) {
-          case TextDirection.rtl:
-            directionalOffset = Offset(-alignmentOffset.dx, alignmentOffset.dy);
-          case TextDirection.ltr:
-            directionalOffset = alignmentOffset;
-        }
+        directionalOffset = switch (textDirection) {
+          TextDirection.rtl => Offset(-alignmentOffset.dx, alignmentOffset.dy),
+          TextDirection.ltr => alignmentOffset,
+        };
       } else {
         directionalOffset = alignmentOffset;
       }
@@ -3408,12 +3406,10 @@ class _MenuPanelState extends State<_MenuPanel> {
   }
 
   Widget _intrinsicCrossSize({required Widget child}) {
-    switch (widget.orientation) {
-      case Axis.horizontal:
-        return IntrinsicHeight(child: child);
-      case Axis.vertical:
-        return IntrinsicWidth(child: child);
-    }
+    return switch (widget.orientation) {
+      Axis.horizontal => IntrinsicHeight(child: child),
+      Axis.vertical => IntrinsicWidth(child: child),
+    };
   }
 }
 

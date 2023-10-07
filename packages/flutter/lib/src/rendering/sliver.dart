@@ -147,12 +147,10 @@ enum GrowthDirection {
 /// [AxisDirection] and a [GrowthDirection] and wish to compute the
 /// [AxisDirection] in which growth will occur.
 AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, GrowthDirection growthDirection) {
-  switch (growthDirection) {
-    case GrowthDirection.forward:
-      return axisDirection;
-    case GrowthDirection.reverse:
-      return flipAxisDirection(axisDirection);
-  }
+  return switch (growthDirection) {
+    GrowthDirection.forward => axisDirection,
+    GrowthDirection.reverse => flipAxisDirection(axisDirection),
+  };
 }
 
 /// Flips the [ScrollDirection] if the [GrowthDirection] is
@@ -166,12 +164,10 @@ AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, G
 /// [ScrollDirection] and a [GrowthDirection] and wish to compute the
 /// [ScrollDirection] in which growth will occur.
 ScrollDirection applyGrowthDirectionToScrollDirection(ScrollDirection scrollDirection, GrowthDirection growthDirection) {
-  switch (growthDirection) {
-    case GrowthDirection.forward:
-      return scrollDirection;
-    case GrowthDirection.reverse:
-      return flipScrollDirection(scrollDirection);
-  }
+  return switch (growthDirection) {
+    GrowthDirection.forward => scrollDirection,
+    GrowthDirection.reverse => flipScrollDirection(scrollDirection),
+  };
 }
 
 /// Immutable layout constraints for [RenderSliver] layout.
@@ -445,12 +441,10 @@ class SliverConstraints extends Constraints {
         return growthDirection;
       case AxisDirection.up:
       case AxisDirection.left:
-        switch (growthDirection) {
-          case GrowthDirection.forward:
-            return GrowthDirection.reverse;
-          case GrowthDirection.reverse:
-            return GrowthDirection.forward;
-        }
+        return switch (growthDirection) {
+          GrowthDirection.forward => GrowthDirection.reverse,
+          GrowthDirection.reverse => GrowthDirection.forward,
+        };
     }
   }
 
@@ -1579,16 +1573,12 @@ abstract class RenderSliver extends RenderObject {
   Size getAbsoluteSizeRelativeToOrigin() {
     assert(geometry != null);
     assert(!debugNeedsLayout);
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        return Size(constraints.crossAxisExtent, -geometry!.paintExtent);
-      case AxisDirection.right:
-        return Size(geometry!.paintExtent, constraints.crossAxisExtent);
-      case AxisDirection.down:
-        return Size(constraints.crossAxisExtent, geometry!.paintExtent);
-      case AxisDirection.left:
-        return Size(-geometry!.paintExtent, constraints.crossAxisExtent);
-    }
+    return switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      AxisDirection.up => Size(constraints.crossAxisExtent, -geometry!.paintExtent),
+      AxisDirection.right => Size(geometry!.paintExtent, constraints.crossAxisExtent),
+      AxisDirection.down => Size(constraints.crossAxisExtent, geometry!.paintExtent),
+      AxisDirection.left => Size(-geometry!.paintExtent, constraints.crossAxisExtent),
+    };
   }
 
   /// This returns the absolute [Size] of the sliver.
@@ -1604,14 +1594,10 @@ abstract class RenderSliver extends RenderObject {
   Size getAbsoluteSize() {
     assert(geometry != null);
     assert(!debugNeedsLayout);
-    switch (constraints.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
-        return Size(constraints.crossAxisExtent, geometry!.paintExtent);
-      case AxisDirection.right:
-      case AxisDirection.left:
-        return Size(geometry!.paintExtent, constraints.crossAxisExtent);
-    }
+    return switch (constraints.axisDirection) {
+      AxisDirection.up || AxisDirection.down => Size(constraints.crossAxisExtent, geometry!.paintExtent),
+      AxisDirection.right || AxisDirection.left => Size(geometry!.paintExtent, constraints.crossAxisExtent),
+    };
   }
 
   void _debugDrawArrow(Canvas canvas, Paint paint, Offset p0, Offset p1, GrowthDirection direction) {
@@ -1730,14 +1716,10 @@ abstract class RenderSliver extends RenderObject {
 mixin RenderSliverHelpers implements RenderSliver {
   bool _getRightWayUp(SliverConstraints constraints) {
     bool rightWayUp;
-    switch (constraints.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.left:
-        rightWayUp = false;
-      case AxisDirection.down:
-      case AxisDirection.right:
-        rightWayUp = true;
-    }
+    rightWayUp = switch (constraints.axisDirection) {
+      AxisDirection.up || AxisDirection.left => false,
+      AxisDirection.down || AxisDirection.right => true,
+    };
     switch (constraints.growthDirection) {
       case GrowthDirection.forward:
         break;
@@ -1851,16 +1833,12 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
   @protected
   void setChildParentData(RenderObject child, SliverConstraints constraints, SliverGeometry geometry) {
     final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        childParentData.paintOffset = Offset(0.0, -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)));
-      case AxisDirection.right:
-        childParentData.paintOffset = Offset(-constraints.scrollOffset, 0.0);
-      case AxisDirection.down:
-        childParentData.paintOffset = Offset(0.0, -constraints.scrollOffset);
-      case AxisDirection.left:
-        childParentData.paintOffset = Offset(-(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)), 0.0);
-    }
+    childParentData.paintOffset = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      AxisDirection.up => Offset(0.0, -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset))),
+      AxisDirection.right => Offset(-constraints.scrollOffset, 0.0),
+      AxisDirection.down => Offset(0.0, -constraints.scrollOffset),
+      AxisDirection.left => Offset(-(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)), 0.0),
+    };
   }
 
   @override
@@ -1920,12 +1898,10 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     final SliverConstraints constraints = this.constraints;
     child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     final double childExtent;
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        childExtent = child!.size.width;
-      case Axis.vertical:
-        childExtent = child!.size.height;
-    }
+    childExtent = switch (constraints.axis) {
+      Axis.horizontal => child!.size.width,
+      Axis.vertical => child!.size.height,
+    };
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
     final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: childExtent);
 

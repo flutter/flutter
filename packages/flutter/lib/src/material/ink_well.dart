@@ -986,14 +986,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (resolvedOverlayColor == null) {
           // Use the backwards compatible defaults
           final ThemeData theme = Theme.of(context);
-          switch (type) {
-            case _HighlightType.pressed:
-              resolvedOverlayColor = widget.highlightColor ?? theme.highlightColor;
-            case _HighlightType.focus:
-              resolvedOverlayColor = widget.focusColor ?? theme.focusColor;
-            case _HighlightType.hover:
-              resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
-          }
+          resolvedOverlayColor = switch (type) {
+            _HighlightType.pressed => widget.highlightColor ?? theme.highlightColor,
+            _HighlightType.focus => widget.focusColor ?? theme.focusColor,
+            _HighlightType.hover => widget.hoverColor ?? theme.hoverColor,
+          };
         }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
@@ -1095,23 +1092,20 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   bool get _shouldShowFocus {
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return enabled && _hasFocus;
-      case NavigationMode.directional:
-        return _hasFocus;
-    }
+    return switch (mode) {
+      NavigationMode.traditional => enabled && _hasFocus,
+      NavigationMode.directional => _hasFocus,
+    };
   }
 
   void updateFocusHighlights() {
-    final bool showFocus;
-    switch (FocusManager.instance.highlightMode) {
-      case FocusHighlightMode.touch:
-        showFocus = false;
-      case FocusHighlightMode.traditional:
-        showFocus = _shouldShowFocus;
-    }
-    updateHighlight(_HighlightType.focus, value: showFocus);
+    updateHighlight(
+      _HighlightType.focus,
+      value: switch (FocusManager.instance.highlightMode) {
+        FocusHighlightMode.touch => false,
+        FocusHighlightMode.traditional => _shouldShowFocus,
+      },
+    );
   }
 
   bool _hasFocus = false;
@@ -1284,12 +1278,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   bool get _canRequestFocus {
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return enabled && widget.canRequestFocus;
-      case NavigationMode.directional:
-        return true;
-    }
+    return switch (mode) {
+      NavigationMode.traditional => enabled && widget.canRequestFocus,
+      NavigationMode.directional => true,
+    };
   }
 
   @override

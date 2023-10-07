@@ -3016,12 +3016,13 @@ void main() {
           buildTest(bodyLength: bodyLength),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
       }
     }, variant: TargetPlatformVariant.all());
 
@@ -3039,12 +3040,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
 
         // SliverPersistentHeader pinned
         await tester.pumpWidget(
@@ -3057,12 +3059,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
 
         // SliverPersistentHeader floating
         await tester.pumpWidget(
@@ -3075,12 +3078,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
 
         // SliverPersistentHeader pinned+floating
         await tester.pumpWidget(
@@ -3094,12 +3098,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
 
         // SliverPersistentHeader w/ overlap
         await tester.pumpWidget(
@@ -3112,12 +3117,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
 
         // SliverPersistentHeader pinned w/ overlap
         await tester.pumpWidget(
@@ -3131,12 +3137,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
 
         // SliverPersistentHeader floating w/ overlap
         await tester.pumpWidget(
@@ -3150,12 +3157,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
 
         // SliverPersistentHeader pinned+floating w/ overlap
         await tester.pumpWidget(
@@ -3170,12 +3178,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
       }
     }, variant: TargetPlatformVariant.all());
 
@@ -3201,12 +3210,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        switch (bodyLength) {
-          case _BodyLength.short:
-            expect(await canDrag(tester), isFalse);
-          case _BodyLength.long:
-            expect(await canDrag(tester), isTrue);
-        }
+        expect(
+          await canDrag(tester),
+          switch (bodyLength) {
+            _BodyLength.short => isFalse,
+            _BodyLength.long => isTrue,
+          },
+        );
       }
     });
   });

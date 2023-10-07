@@ -1428,14 +1428,11 @@ class _ChipRenderWidget extends SlottedMultiChildRenderObjectWidget<_ChipSlot, R
 
   @override
   Widget? childForSlot(_ChipSlot slot) {
-    switch (slot) {
-      case _ChipSlot.label:
-        return theme.label;
-      case _ChipSlot.avatar:
-        return theme.avatar;
-      case _ChipSlot.deleteIcon:
-        return theme.deleteIcon;
-    }
+    return switch (slot) {
+      _ChipSlot.label => theme.label,
+      _ChipSlot.avatar => theme.avatar,
+      _ChipSlot.deleteIcon => theme.deleteIcon,
+    };
   }
 
   @override

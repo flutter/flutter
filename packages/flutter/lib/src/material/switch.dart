@@ -565,12 +565,10 @@ class Switch extends StatelessWidget {
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        return Size(switchConfig.switchWidth, switchConfig.switchHeight);
-      case MaterialTapTargetSize.shrinkWrap:
-        return Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed);
-    }
+    return switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded => Size(switchConfig.switchWidth, switchConfig.switchHeight),
+      MaterialTapTargetSize.shrinkWrap => Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed),
+    };
   }
 
   Widget _buildCupertinoSwitch(BuildContext context) {
@@ -1343,18 +1341,11 @@ class _SwitchPainter extends ToggleablePainter {
   void paint(Canvas canvas, Size size) {
     final double currentValue = position.value;
 
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - currentValue;
-      case TextDirection.ltr:
-        visualPosition = currentValue;
-    }
-    if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
-      _stopPressAnimation = true;
-    } else {
-      _stopPressAnimation = false;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - currentValue,
+      TextDirection.ltr => currentValue,
+    };
+    _stopPressAnimation = reaction.status == AnimationStatus.reverse && !_stopPressAnimation;
 
     // To get the thumb radius when the press ends, the value can be any number
     // between activeThumbRadius/inactiveThumbRadius and pressedThumbRadius.

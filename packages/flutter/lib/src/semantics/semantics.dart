@@ -2932,12 +2932,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
       return const <SemanticsNode>[];
     }
 
-    switch (childOrder) {
-      case DebugSemanticsDumpOrder.inverseHitTest:
-        return _children!;
-      case DebugSemanticsDumpOrder.traversalOrder:
-        return _childrenInTraversalOrder();
-    }
+    return switch (childOrder) {
+      DebugSemanticsDumpOrder.inverseHitTest => _children!,
+      DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
+    };
   }
 }
 
@@ -4886,12 +4884,10 @@ AttributedString _concatAttributedString({
     return thisAttributedString;
   }
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
-    switch (otherTextDirection) {
-      case TextDirection.rtl:
-        otherAttributedString = AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF);
-      case TextDirection.ltr:
-        otherAttributedString = AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF);
-    }
+    otherAttributedString = switch (otherTextDirection) {
+      TextDirection.rtl => AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF),
+      TextDirection.ltr => AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF),
+    };
   }
   if (thisAttributedString.string.isEmpty) {
     return otherAttributedString;

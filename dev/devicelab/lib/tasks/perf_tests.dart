@@ -1981,14 +1981,11 @@ enum ReportedDurationTestFlavor {
 }
 
 String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
-  switch (flavor) {
-    case ReportedDurationTestFlavor.debug:
-      return 'debug';
-    case ReportedDurationTestFlavor.profile:
-      return 'profile';
-    case ReportedDurationTestFlavor.release:
-      return 'release';
-  }
+  return switch (flavor) {
+    ReportedDurationTestFlavor.debug => 'debug',
+    ReportedDurationTestFlavor.profile => 'profile',
+    ReportedDurationTestFlavor.release => 'release',
+  };
 }
 
 class ReportedDurationTest {

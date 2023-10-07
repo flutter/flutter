@@ -2305,14 +2305,11 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
         return CupertinoPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) {
-            switch (settings.name) {
-              case 'home':
-                return _buildHome(context);
-              case 'sub':
-                return _buildSub(context);
-              default:
-                throw UnimplementedError();
-            }
+            return switch (settings.name) {
+              'home' => _buildHome(context),
+              'sub' => _buildSub(context),
+              _ => throw UnimplementedError(),
+            };
           },
         );
       },

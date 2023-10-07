@@ -404,12 +404,10 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   double get _viewportExtent {
     assert(hasSize);
-    switch (axis) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
+    return switch (axis) {
+      Axis.horizontal => size.width,
+      Axis.vertical => size.height,
+    };
   }
 
   double get _minScrollExtent {
@@ -422,21 +420,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (child == null) {
       return 0.0;
     }
-    switch (axis) {
-      case Axis.horizontal:
-        return math.max(0.0, child!.size.width - size.width);
-      case Axis.vertical:
-        return math.max(0.0, child!.size.height - size.height);
-    }
+    return switch (axis) {
+      Axis.horizontal => math.max(0.0, child!.size.width - size.width),
+      Axis.vertical => math.max(0.0, child!.size.height - size.height),
+    };
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    switch (axis) {
-      case Axis.horizontal:
-        return constraints.heightConstraints();
-      case Axis.vertical:
-        return constraints.widthConstraints();
-    }
+    return switch (axis) {
+      Axis.horizontal => constraints.heightConstraints(),
+      Axis.vertical => constraints.widthConstraints(),
+    };
   }
 
   @override
@@ -502,16 +496,12 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
 
   Offset _paintOffsetForPosition(double position) {
-    switch (axisDirection) {
-      case AxisDirection.up:
-        return Offset(0.0, position - child!.size.height + size.height);
-      case AxisDirection.down:
-        return Offset(0.0, -position);
-      case AxisDirection.left:
-        return Offset(position - child!.size.width + size.width, 0.0);
-      case AxisDirection.right:
-        return Offset(-position, 0.0);
-    }
+    return switch (axisDirection) {
+      AxisDirection.up => Offset(0.0, position - child!.size.height + size.height),
+      AxisDirection.down => Offset(0.0, -position),
+      AxisDirection.left => Offset(position - child!.size.width + size.width, 0.0),
+      AxisDirection.right => Offset(-position, 0.0),
+    };
   }
 
   bool _shouldClipAtPaintOffset(Offset paintOffset) {

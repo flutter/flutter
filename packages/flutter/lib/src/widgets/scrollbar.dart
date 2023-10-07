@@ -384,14 +384,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
   double get _leadingTrackMainAxisOffset {
-    switch (_resolvedOrientation) {
-      case ScrollbarOrientation.left:
-      case ScrollbarOrientation.right:
-        return padding.top;
-      case ScrollbarOrientation.top:
-      case ScrollbarOrientation.bottom:
-        return padding.left;
-    }
+    return switch (_resolvedOrientation) {
+      ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
+      ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
+    };
   }
 
   Rect? _thumbRect;
@@ -402,14 +398,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Thumb Offsets
   // The thumb is offset by padding and margins.
   double get _leadingThumbMainAxisOffset {
-    switch (_resolvedOrientation) {
-      case ScrollbarOrientation.left:
-      case ScrollbarOrientation.right:
-        return padding.top + mainAxisMargin;
-      case ScrollbarOrientation.top:
-      case ScrollbarOrientation.bottom:
-        return padding.left + mainAxisMargin;
-    }
+    return switch (_resolvedOrientation) {
+      ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top + mainAxisMargin,
+      ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left + mainAxisMargin,
+    };
   }
   void _setThumbExtent() {
     // Thumb extent reflects fraction of content visible, as long as this

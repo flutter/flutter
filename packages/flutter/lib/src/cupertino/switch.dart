@@ -674,13 +674,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final double currentValue = _state.position.value;
     final double currentReactionValue = _state._reaction.value;
 
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - currentValue;
-      case TextDirection.ltr:
-        visualPosition = currentValue;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - currentValue,
+      TextDirection.ltr => currentValue,
+    };
 
     final Paint paint = Paint()
       ..color = Color.lerp(trackColor, activeColor, currentValue)!;

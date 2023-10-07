@@ -557,12 +557,10 @@ class _BottomNavigationTile extends StatelessWidget {
       ).evaluate(animation);
     }
 
-    switch (type) {
-      case BottomNavigationBarType.fixed:
-        size = 1;
-      case BottomNavigationBarType.shifting:
-        size = (flex! * 1000.0).round();
-    }
+    size = switch (type) {
+      BottomNavigationBarType.fixed => 1,
+      BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
+    };
 
     Widget result = InkResponse(
       onTap: onTap,
@@ -850,12 +848,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // Unselected labels are shown by default for [BottomNavigationBarType.fixed],
   // and hidden by default for [BottomNavigationBarType.shifting].
   bool get _defaultShowUnselected {
-    switch (_effectiveType) {
-      case BottomNavigationBarType.shifting:
-        return false;
-      case BottomNavigationBarType.fixed:
-        return true;
-    }
+    return switch (_effectiveType) {
+      BottomNavigationBarType.shifting => false,
+      BottomNavigationBarType.fixed => true,
+    };
   }
 
   @override

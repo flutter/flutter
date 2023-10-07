@@ -197,12 +197,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       return Alignment.bottomCenter;
     }
     final TextDirection textDirection = Directionality.of(context);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return Alignment.bottomRight;
-      case TextDirection.ltr:
-        return Alignment.bottomLeft;
-    }
+    return switch (textDirection) {
+      TextDirection.rtl => Alignment.bottomRight,
+      TextDirection.ltr => Alignment.bottomLeft,
+    };
   }
 
   double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {

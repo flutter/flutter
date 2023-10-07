@@ -163,61 +163,41 @@ class BannerPainter extends CustomPainter {
   double _translationX(double width) {
     switch (layoutDirection) {
       case TextDirection.rtl:
-        switch (location) {
-          case BannerLocation.bottomEnd:
-            return _kBottomOffset;
-          case BannerLocation.topEnd:
-            return 0.0;
-          case BannerLocation.bottomStart:
-            return width - _kBottomOffset;
-          case BannerLocation.topStart:
-            return width;
-        }
+        return switch (location) {
+          BannerLocation.bottomEnd => _kBottomOffset,
+          BannerLocation.topEnd => 0.0,
+          BannerLocation.bottomStart => width - _kBottomOffset,
+          BannerLocation.topStart => width,
+        };
       case TextDirection.ltr:
-        switch (location) {
-          case BannerLocation.bottomEnd:
-            return width - _kBottomOffset;
-          case BannerLocation.topEnd:
-            return width;
-          case BannerLocation.bottomStart:
-            return _kBottomOffset;
-          case BannerLocation.topStart:
-            return 0.0;
-        }
+        return switch (location) {
+          BannerLocation.bottomEnd => width - _kBottomOffset,
+          BannerLocation.topEnd => width,
+          BannerLocation.bottomStart => _kBottomOffset,
+          BannerLocation.topStart => 0.0,
+        };
     }
   }
 
   double _translationY(double height) {
-    switch (location) {
-      case BannerLocation.bottomStart:
-      case BannerLocation.bottomEnd:
-        return height - _kBottomOffset;
-      case BannerLocation.topStart:
-      case BannerLocation.topEnd:
-        return 0.0;
-    }
+    return switch (location) {
+      BannerLocation.bottomStart || BannerLocation.bottomEnd => height - _kBottomOffset,
+      BannerLocation.topStart || BannerLocation.topEnd => 0.0,
+    };
   }
 
   double get _rotation {
     switch (layoutDirection) {
       case TextDirection.rtl:
-        switch (location) {
-          case BannerLocation.bottomStart:
-          case BannerLocation.topEnd:
-            return -math.pi / 4.0;
-          case BannerLocation.bottomEnd:
-          case BannerLocation.topStart:
-            return math.pi / 4.0;
-        }
+        return switch (location) {
+          BannerLocation.bottomStart || BannerLocation.topEnd => -math.pi / 4.0,
+          BannerLocation.bottomEnd || BannerLocation.topStart => math.pi / 4.0,
+        };
       case TextDirection.ltr:
-        switch (location) {
-          case BannerLocation.bottomStart:
-          case BannerLocation.topEnd:
-            return math.pi / 4.0;
-          case BannerLocation.bottomEnd:
-          case BannerLocation.topStart:
-            return -math.pi / 4.0;
-        }
+        return switch (location) {
+          BannerLocation.bottomStart || BannerLocation.topEnd => math.pi / 4.0,
+          BannerLocation.bottomEnd || BannerLocation.topStart => -math.pi / 4.0,
+        };
     }
   }
 }

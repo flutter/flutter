@@ -876,12 +876,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
 
     final Map<ShortcutActivator, Intent> shortcutMap;
-    switch (MediaQuery.navigationModeOf(context)) {
-      case NavigationMode.directional:
-        shortcutMap = _directionalNavShortcutMap;
-      case NavigationMode.traditional:
-        shortcutMap = _traditionalNavShortcutMap;
-    }
+    shortcutMap = switch (MediaQuery.navigationModeOf(context)) {
+      NavigationMode.directional => _directionalNavShortcutMap,
+      NavigationMode.traditional => _traditionalNavShortcutMap,
+    };
 
     final double textScaleFactor = theme.useMaterial3
       // TODO(tahatesser): This is an eye-balled value.
@@ -1384,16 +1382,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   bool get showValueIndicator {
-    switch (_sliderTheme.showValueIndicator!) {
-      case ShowValueIndicator.onlyForDiscrete:
-        return isDiscrete;
-      case ShowValueIndicator.onlyForContinuous:
-        return !isDiscrete;
-      case ShowValueIndicator.always:
-        return true;
-      case ShowValueIndicator.never:
-        return false;
-    }
+    return switch (_sliderTheme.showValueIndicator!) {
+      ShowValueIndicator.onlyForDiscrete => isDiscrete,
+      ShowValueIndicator.onlyForContinuous => !isDiscrete,
+      ShowValueIndicator.always => true,
+      ShowValueIndicator.never => false,
+    };
   }
 
   double get _adjustmentUnit {
@@ -1462,12 +1456,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double _getValueFromVisualPosition(double visualPosition) {
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return 1.0 - visualPosition;
-      case TextDirection.ltr:
-        return visualPosition;
-    }
+    return switch (textDirection) {
+      TextDirection.rtl => 1.0 - visualPosition,
+      TextDirection.ltr => visualPosition,
+    };
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {

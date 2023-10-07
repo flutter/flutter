@@ -421,28 +421,23 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     if (icon != null) {
       return icon;
     }
-    switch (state) {
-      case StepState.indexed:
-      case StepState.disabled:
-        return Text(
+    return icon ?? switch (state) {
+      StepState.indexed || StepState.disabled => Text(
           '${index + 1}',
           style: isDarkActive ? _kStepStyle.copyWith(color: Colors.black87) : _kStepStyle,
-        );
-      case StepState.editing:
-        return Icon(
+        ),
+      StepState.editing => Icon(
           Icons.edit,
           color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
           size: 18.0,
-        );
-      case StepState.complete:
-        return Icon(
+        ),
+      StepState.complete => Icon(
           Icons.check,
           color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
           size: 18.0,
-        );
-      case StepState.error:
-        return const Text('!', style: _kStepStyle);
-    }
+        ),
+      StepState.error => const Text('!', style: _kStepStyle),
+    };
   }
 
   Color _circleColor(int index) {
@@ -537,13 +532,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       );
     }
 
-    final Color cancelColor;
-    switch (Theme.of(context).brightness) {
-      case Brightness.light:
-        cancelColor = Colors.black54;
-      case Brightness.dark:
-        cancelColor = Colors.white70;
-    }
+    final Color cancelColor = switch (Theme.of(context).brightness) {
+      Brightness.light => Colors.black54,
+      Brightness.dark => Colors.white70,
+    };
 
     final ThemeData themeData = Theme.of(context);
     final ColorScheme colorScheme = themeData.colorScheme;
@@ -895,12 +887,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       }
       return true;
     }());
-    switch (widget.type) {
-      case StepperType.vertical:
-        return _buildVertical();
-      case StepperType.horizontal:
-        return _buildHorizontal();
-    }
+    return switch (widget.type) {
+      StepperType.vertical => _buildVertical(),
+      StepperType.horizontal => _buildHorizontal(),
+    };
   }
 }
 

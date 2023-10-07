@@ -184,21 +184,17 @@ class EdgeDraggingAutoScroller {
   bool _scrolling = false;
 
   double _offsetExtent(Offset offset, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return offset.dx;
-      case Axis.vertical:
-        return offset.dy;
-    }
+    return switch (scrollDirection) {
+      Axis.horizontal => offset.dx,
+      Axis.vertical => offset.dy,
+    };
   }
 
   double _sizeExtent(Size size, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
+    return switch (scrollDirection) {
+      Axis.horizontal => size.width,
+      Axis.vertical => size.height,
+    };
   }
 
   AxisDirection get _axisDirection => scrollable.axisDirection;
@@ -415,12 +411,10 @@ class ScrollAction extends ContextAction<ScrollIntent> {
         ),
       );
     }
-    switch (type) {
-      case ScrollIncrementType.line:
-        return 50.0;
-      case ScrollIncrementType.page:
-        return 0.8 * state.position.viewportDimension;
-    }
+    return switch (type) {
+      ScrollIncrementType.line => 50.0,
+      ScrollIncrementType.page => 0.8 * state.position.viewportDimension,
+    };
   }
 
   /// Find out how much of an increment to move by, taking the different
@@ -429,45 +423,29 @@ class ScrollAction extends ContextAction<ScrollIntent> {
     final double increment = _calculateScrollIncrement(state, type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return -increment;
-          case AxisDirection.down:
-            return increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
+        return switch (state.axisDirection) {
+          AxisDirection.up => -increment,
+          AxisDirection.down => increment,
+          AxisDirection.right || AxisDirection.left => 0.0,
+        };
       case AxisDirection.up:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return increment;
-          case AxisDirection.down:
-            return -increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
+        return switch (state.axisDirection) {
+          AxisDirection.up => increment,
+          AxisDirection.down => -increment,
+          AxisDirection.right || AxisDirection.left => 0.0,
+        };
       case AxisDirection.left:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return -increment;
-          case AxisDirection.left:
-            return increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
+        return switch (state.axisDirection) {
+          AxisDirection.right => -increment,
+          AxisDirection.left => increment,
+          AxisDirection.up || AxisDirection.down => 0.0,
+        };
       case AxisDirection.right:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return increment;
-          case AxisDirection.left:
-            return -increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
+        return switch (state.axisDirection) {
+          AxisDirection.right => increment,
+          AxisDirection.left => -increment,
+          AxisDirection.up || AxisDirection.down => 0.0,
+        };
     }
   }
 

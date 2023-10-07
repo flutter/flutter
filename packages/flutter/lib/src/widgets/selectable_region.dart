@@ -416,15 +416,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _updateSelectionStatus() {
-    final TextSelection selection;
     final SelectionGeometry geometry = _selectionDelegate.value;
-    switch (geometry.status) {
-      case SelectionStatus.uncollapsed:
-      case SelectionStatus.collapsed:
-        selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-      case SelectionStatus.none:
-        selection = const TextSelection.collapsed(offset: 1);
-    }
+    final TextSelection selection = switch (geometry.status) {
+      SelectionStatus.uncollapsed || SelectionStatus.collapsed => const TextSelection(baseOffset: 0, extentOffset: 1),
+      SelectionStatus.none => const TextSelection.collapsed(offset: 1),
+    };
     textEditingValue = TextEditingValue(text: '__', selection: selection);
     if (_hasSelectionOverlayGeometry) {
       _updateSelectionOverlay();
@@ -526,12 +522,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
-    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
-      case 1:
-        _selectEndTo(offset: details.globalPosition, continuous: true);
-      case 2:
-        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-    }
+    _selectEndTo(
+      offset: details.globalPosition,
+      continuous: true,
+      textGranularity: switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
+        1 => null,
+        2 => TextGranularity.word,
+      },
+    );
     _updateSelectedContentIfNeeded();
   }
 

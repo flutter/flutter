@@ -442,17 +442,16 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       // paddings so its leading icon will be aligned with the leading icon of
       // the text field.
       final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
-      final ButtonStyle defaultStyle;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          defaultStyle = MenuItemButton.styleFrom(
+      final ButtonStyle defaultStyle = switch (textDirection) {
+        TextDirection.rtl =>
+          MenuItemButton.styleFrom(
             padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
-          );
-        case TextDirection.ltr:
-          defaultStyle = MenuItemButton.styleFrom(
+          ),
+        TextDirection.ltr =>
+          MenuItemButton.styleFrom(
             padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
-          );
-      }
+          ),
+      };
 
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})

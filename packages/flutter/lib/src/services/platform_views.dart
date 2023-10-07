@@ -660,21 +660,16 @@ class _AndroidMotionEventConverter {
   }
 
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
-    int toolType = AndroidPointerProperties.kToolTypeUnknown;
-    switch (event.kind) {
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.trackpad:
-        toolType = AndroidPointerProperties.kToolTypeFinger;
-      case PointerDeviceKind.mouse:
-        toolType = AndroidPointerProperties.kToolTypeMouse;
-      case PointerDeviceKind.stylus:
-        toolType = AndroidPointerProperties.kToolTypeStylus;
-      case PointerDeviceKind.invertedStylus:
-        toolType = AndroidPointerProperties.kToolTypeEraser;
-      case PointerDeviceKind.unknown:
-        toolType = AndroidPointerProperties.kToolTypeUnknown;
-    }
-    return AndroidPointerProperties(id: pointerId, toolType: toolType);
+    return AndroidPointerProperties(
+      id: pointerId,
+      toolType: switch (event.kind) {
+        PointerDeviceKind.touch || PointerDeviceKind.trackpad => AndroidPointerProperties.kToolTypeFinger,
+        PointerDeviceKind.mouse => AndroidPointerProperties.kToolTypeMouse,
+        PointerDeviceKind.stylus => AndroidPointerProperties.kToolTypeStylus,
+        PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
+        PointerDeviceKind.unknown || _ => AndroidPointerProperties.kToolTypeUnknown,
+      },
+    );
   }
 
   bool isSinglePointerAction(PointerEvent event) =>
@@ -759,12 +754,10 @@ abstract class AndroidViewController extends PlatformViewController {
       <PlatformViewCreatedCallback>[];
 
   static int _getAndroidDirection(TextDirection direction) {
-    switch (direction) {
-      case TextDirection.ltr:
-        return kAndroidLayoutDirectionLtr;
-      case TextDirection.rtl:
-        return kAndroidLayoutDirectionRtl;
-    }
+    return switch (direction) {
+      TextDirection.ltr => kAndroidLayoutDirectionLtr,
+      TextDirection.rtl => kAndroidLayoutDirectionRtl,
+    };
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.

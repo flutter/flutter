@@ -101,16 +101,12 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     // supplies just the "either" modifier flag, but not the left/right flag.
     // (e.g. modifierShift but not modifierLeftShift).
     final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0 || anyOnly;
-      case KeyboardSide.left:
-        return modifiers & leftMask != 0 || anyOnly;
-      case KeyboardSide.right:
-        return modifiers & rightMask != 0 || anyOnly;
-    }
+    return switch (side) {
+      KeyboardSide.any => true,
+      KeyboardSide.all => modifiers & leftMask != 0 && modifiers & rightMask != 0 || anyOnly,
+      KeyboardSide.left => modifiers & leftMask != 0 || anyOnly,
+      KeyboardSide.right => modifiers & rightMask != 0 || anyOnly,
+    };
   }
 
   @override

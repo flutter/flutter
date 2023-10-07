@@ -192,12 +192,10 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       }
 
       final double left;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          left = size.width - width - x;
-        case TextDirection.ltr:
-          left = x;
-      }
+      left = switch (textDirection) {
+        TextDirection.rtl => size.width - width - x,
+        TextDirection.ltr => x,
+      };
 
       final Rect rect = Offset(left, 0.0) & Size(width, size.height);
       if (indicatorBorderRadius != BorderRadius.zero) {

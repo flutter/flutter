@@ -450,13 +450,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   double get _trackLeft => _kPadding;
   double get _trackRight => size.width - _kPadding;
   double get _thumbCenter {
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - _value;
-      case TextDirection.ltr:
-        visualPosition = _value;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - _value,
+      TextDirection.ltr => _value,
+    };
     return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
 

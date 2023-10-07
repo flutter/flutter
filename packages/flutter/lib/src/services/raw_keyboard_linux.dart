@@ -271,27 +271,15 @@ class GLFWKeyHelper implements KeyHelper {
     // a key down, then we need to add the correct modifier bits, and if it's a
     // key up, we need to remove them.
 
-    int modifierChange = 0;
-    switch (keyCode) {
-      case shiftLeftKeyCode:
-      case shiftRightKeyCode:
-        modifierChange = modifierShift;
-      case controlLeftKeyCode:
-      case controlRightKeyCode:
-        modifierChange = modifierControl;
-      case altLeftKeyCode:
-      case altRightKeyCode:
-        modifierChange = modifierAlt;
-      case metaLeftKeyCode:
-      case metaRightKeyCode:
-        modifierChange = modifierMeta;
-      case capsLockKeyCode:
-        modifierChange = modifierCapsLock;
-      case numLockKeyCode:
-        modifierChange = modifierNumericPad;
-      default:
-        break;
-    }
+    final int modifierChange = switch (keyCode) {
+      shiftLeftKeyCode || shiftRightKeyCode => modifierShift,
+      controlLeftKeyCode || controlRightKeyCode => modifierControl,
+      altLeftKeyCode || altRightKeyCode => modifierAlt,
+      metaLeftKeyCode || metaRightKeyCode => modifierMeta,
+      capsLockKeyCode => modifierCapsLock,
+      numLockKeyCode => modifierNumericPad,
+      _ => 0,
+    };
 
     return isDown ? modifiers | modifierChange : modifiers & ~modifierChange;
   }
@@ -408,28 +396,15 @@ class GtkKeyHelper implements KeyHelper {
     // a key down, then we need to add the correct modifier bits, and if it's a
     // key up, we need to remove them.
 
-    int modifierChange = 0;
-    switch (keyCode) {
-      case shiftLeftKeyCode:
-      case shiftRightKeyCode:
-        modifierChange = modifierShift;
-      case controlLeftKeyCode:
-      case controlRightKeyCode:
-        modifierChange = modifierControl;
-      case altLeftKeyCode:
-      case altRightKeyCode:
-        modifierChange = modifierMod1;
-      case metaLeftKeyCode:
-      case metaRightKeyCode:
-        modifierChange = modifierMeta;
-      case capsLockKeyCode:
-      case shiftLockKeyCode:
-        modifierChange = modifierCapsLock;
-      case numLockKeyCode:
-        modifierChange = modifierMod2;
-      default:
-        break;
-    }
+    final int modifierChange = switch (keyCode) {
+      shiftLeftKeyCode || shiftRightKeyCode => modifierShift,
+      controlLeftKeyCode || controlRightKeyCode => modifierControl,
+      altLeftKeyCode || altRightKeyCode => modifierMod1,
+      metaLeftKeyCode || metaRightKeyCode => modifierMeta,
+      capsLockKeyCode || shiftLockKeyCode => modifierCapsLock,
+      numLockKeyCode => modifierMod2,
+      _ => 0,
+    };
 
     return isDown ? modifiers | modifierChange : modifiers & ~modifierChange;
   }
