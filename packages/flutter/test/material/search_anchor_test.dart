@@ -60,6 +60,8 @@ void main() {
 
   testWidgetsWithLeakTracking('SearchBar respects focusNode property', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -79,6 +81,73 @@ void main() {
     node.unfocus();
     await tester.pump();
     expect(node.hasFocus, false);
+  });
+
+  testWidgetsWithLeakTracking('SearchBar focusNode is hot swappable', (WidgetTester tester) async {
+    final FocusNode node1 = FocusNode();
+    addTearDown(node1.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchBar(
+            focusNode: node1,
+          ),
+        ),
+      ),
+    );
+
+    expect(node1.hasFocus, isFalse);
+
+    node1.requestFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isTrue);
+
+    node1.unfocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+
+    final FocusNode node2 = FocusNode();
+    addTearDown(node2.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchBar(
+            focusNode: node2,
+          ),
+        ),
+      ),
+    );
+
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    node2.requestFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isTrue);
+
+    node2.unfocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SearchBar(),
+        ),
+      ),
+    );
+
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    await tester.tap(find.byType(SearchBar));
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
   });
 
   testWidgetsWithLeakTracking('SearchBar has correct default layout and padding LTR', (WidgetTester tester) async {
@@ -486,6 +555,8 @@ void main() {
 
   testWidgetsWithLeakTracking('SearchBar respects overlayColor property', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

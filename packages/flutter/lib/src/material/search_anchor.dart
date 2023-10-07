@@ -702,6 +702,12 @@ class _ViewContentState extends State<_ViewContent> {
     unawaited(updateSuggestions());
   }
 
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   Widget viewBuilder(Iterable<Widget> suggestions) {
     if (widget.viewBuilder == null) {
       return MediaQuery.removePadding(
@@ -1159,7 +1165,8 @@ class SearchBar extends StatefulWidget {
 
 class _SearchBarState extends State<SearchBar> {
   late final MaterialStatesController _internalStatesController;
-  late final FocusNode _focusNode;
+  FocusNode? _internalFocusNode;
+  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -1168,15 +1175,12 @@ class _SearchBarState extends State<SearchBar> {
     _internalStatesController.addListener(() {
       setState(() {});
     });
-    _focusNode = widget.focusNode ?? FocusNode();
   }
 
   @override
   void dispose() {
     _internalStatesController.dispose();
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
+    _internalFocusNode?.dispose();
     super.dispose();
   }
 
