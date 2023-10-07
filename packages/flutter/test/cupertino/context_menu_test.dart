@@ -318,7 +318,11 @@ void main() {
       final Container decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final BoxDecoration? decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
       expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
-    });
+    },
+    // TODO(polina-c): remove after fixing flakiness
+    // https://github.com/flutter/flutter/issues/136132
+    leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String, int?>{'ValueNotifier<_OverlayEntryWidgetState?>' : 1}),
+    );
 
     testWidgetsWithLeakTracking('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {
       final Widget child  = getChild();
