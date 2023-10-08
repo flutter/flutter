@@ -991,7 +991,28 @@ void main() {
     expect(find.text('HomeBody'), findsOneWidget);
     expect(find.text('HomeTitle'), findsOneWidget);
     expect(find.text('Suggestions'), findsNothing);
+
     expect(selectedResults, <String>['Result']);
+  });
+
+  testWidgets('Leading width size is 16', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // Open the search page with check leading width smaller than 16.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(16, 16));
+    expect(find.text('Suggestions'), findsOneWidget);
+    await tester.tapAt(const Offset(8, 16));
+    await tester.pumpAndSettle();
+    expect(find.text('Suggestions'), findsNothing);
+    expect(find.text('HomeBody'), findsOneWidget);
   });
 
   testWidgets('showSearch with useRootNavigator', (WidgetTester tester) async {
@@ -1047,6 +1068,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
+
+    // showSearch without back button
+    await tester.tap(find.text('showSearchRootNavigator'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Back'), findsNothing);
     expect(rootObserver.pushCount, 1);
     expect(localObserver.pushCount, 1);
   });
@@ -1165,6 +1191,9 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   static const Color hintTextColor = Colors.green;
 
   @override
+  double? get leadingWidth => 16;
+
+  @override
   ThemeData appBarTheme(BuildContext context) {
     if (defaultAppBarTheme) {
       return super.appBarTheme(context);
@@ -1232,6 +1261,9 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 }
 
 class _TestEmptySearchDelegate extends SearchDelegate<String> {
+  @override
+  bool? get automaticallyImplyLeading => false;
+
   @override
   Widget? buildLeading(BuildContext context) => null;
 
