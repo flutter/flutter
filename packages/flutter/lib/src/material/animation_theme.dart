@@ -195,7 +195,7 @@ class AnimationTheme extends InheritedTheme {
   });
 
 
-  /// Override for descendant [Animation] widgets.
+  /// The properties used for all descendant [AnimationTheme] widgets.
   final AnimationThemeData data;
 
   /// The closest instance of this class that encloses the given context.
