@@ -370,9 +370,9 @@ Future<void> _pressStartThumb(WidgetTester tester) async {
   final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
 
-    // Finish gesture to release resources.
-    await gesture.up();
-    await tester.pumpAndSettle();
+  // Finish gesture to release resources.
+  await gesture.up();
+  await tester.pumpAndSettle();
 }
 
 Future<void> _pressMiddleThumb(WidgetTester tester) async {
@@ -388,9 +388,9 @@ Future<void> _pressEndThumb(WidgetTester tester) async {
   final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
 
-    // Finish gesture to release resources.
-    await gesture.up();
-    await tester.pumpAndSettle();
+  // Finish gesture to release resources.
+  await gesture.up();
+  await tester.pumpAndSettle();
 }
 
 Future<void> _buildValueIndicatorStaticSlider(

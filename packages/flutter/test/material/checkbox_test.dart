@@ -1442,7 +1442,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildCheckbox());
-    final TestGesture gesture1       = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1452,7 +1452,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox(active: true));
-    final TestGesture gesture2       = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
