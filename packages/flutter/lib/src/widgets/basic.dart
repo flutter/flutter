@@ -5539,6 +5539,29 @@ class Wrap extends MultiChildRenderObjectWidget {
   }
 }
 
+class TightWrap extends ParentDataWidget<WrapParentData>{
+  const TightWrap({
+    super.key,
+    required super.child,
+  });
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert (renderObject.parentData is WrapParentData);
+    final WrapParentData parentData = renderObject.parentData! as WrapParentData;
+    if(!parentData.tightConstraints){
+      parentData.tightConstraints = true;
+      final RenderObject? targetParent = renderObject.parent;
+      if (targetParent is RenderObject) {
+        targetParent.markNeedsLayout();
+      }
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Wrap;
+}
+
 /// A widget that sizes and positions children efficiently, according to the
 /// logic in a [FlowDelegate].
 ///
