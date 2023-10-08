@@ -188,6 +188,44 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.leading], the intended use for the return value of this method.
   Widget? buildLeading(BuildContext context);
 
+  /// A flag to automatically control the visibility of the leading widget in the [AppBar].
+  ///
+  /// When set to `true`, the [AppBar] will automatically imply a leading widget. This is typically
+  /// a [BackButton] when there's a previous route in the navigation stack, or an [IconButton]
+  /// with a hamburger menu icon when there's not.
+  ///
+  /// When set to `false`, the [AppBar] will not imply a leading widget. In this case, the space
+  /// reserved for the leading widget will be empty, unless [buildLeading] is overridden
+  /// to provide a custom leading widget.
+  ///
+  /// When set to `null`, the [AppBar] will defer to the platform's default behavior.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.automaticallyImplyLeading], which is controlled by this property.
+  bool? automaticallyImplyLeading;
+
+  /// The width of the leading widget in the [AppBar].
+  ///
+  /// This property defines the width of the area in the [AppBar] reserved for the
+  /// leading widget, which is typically set using [buildLeading].
+  ///
+  /// When this property is set to a non-null value, it overrides the default
+  /// width of the leading widget area, allowing for a custom width. This can be
+  /// useful when the leading widget needs more or less space than the default
+  /// provided by the [AppBar].
+  ///
+  /// When this property is set to `null`, the [AppBar] will use the default
+  /// width for the leading widget area.
+  ///
+  /// The value of this property must be non-negative, and is used only when
+  /// [buildLeading] returns a non-null widget.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.leadingWidth], which is controlled by this property.
+  double? leadingWidth;
+
   /// Widgets to display after the search query in the [AppBar].
   ///
   /// If the [query] is not empty, this should typically contain a button to
@@ -592,6 +630,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         data: theme,
         child: Scaffold(
           appBar: AppBar(
+            leadingWidth: widget.delegate.leadingWidth,
+            automaticallyImplyLeading: widget.delegate.automaticallyImplyLeading ?? true,
             leading: widget.delegate.buildLeading(context),
             title: TextField(
               controller: widget.delegate._queryTextController,
