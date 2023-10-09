@@ -13,35 +13,31 @@ void main() {
 class CardExamplesApp extends StatelessWidget {
   const CardExamplesApp({super.key});
 
+  Widget buildContent(String cardName) {
+    return SizedBox(
+      width: 300,
+      height: 100,
+      child: Center(child: Text(cardName)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Card Examples')),
-        body: const Center(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Card(
-                child: SizedBox(
-                  width: 300,
-                  height: 100,
-                  child: Center(child: Text('Elevated Card')),
-                ),
+                child: buildContent('Elevated Card'),
               ),
               Card.filled(
-                child: SizedBox(
-                  width: 300,
-                  height: 100,
-                  child: Center(child: Text('Filled Card')),
-                ),
+                child: buildContent('Filled Card'),
               ),
               Card.outlined(
-                child: SizedBox(
-                  width: 300,
-                  height: 100,
-                  child: Center(child: Text('Outlined Card')),
-                ),
+                child: buildContent('Outlined Card'),
               ),
             ],
           ),
