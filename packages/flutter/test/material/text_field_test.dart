@@ -16919,7 +16919,7 @@ void main() {
       expect(focusNodeB.hasPrimaryFocus, isTrue);
 
       await click(find.text('Outside'));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(timesTriggered, 0);
 
@@ -16927,7 +16927,7 @@ void main() {
       await tester.pump();
 
       await click(find.text('Outside'));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(timesTriggered, 1);
       }, variant: TargetPlatformVariant.all());
