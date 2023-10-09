@@ -69,6 +69,10 @@ source_set("display_list_surface_provider") {
     "//flutter/testing:testing_lib",
   ]
 
+  if (is_mac) {
+    deps += [ "//flutter/impeller/golden_tests:metal_screenshot" ]
+  }
+
   public_configs = [ ":surface_provider_config" ]
 
   if (is_android) {
@@ -99,6 +103,9 @@ source_set("display_list_surface_provider") {
       "dl_test_surface_metal.cc",
       "dl_test_surface_metal.h",
     ]
-    deps += [ "//flutter/testing:metal" ]
+    deps += [
+      "//flutter/impeller/display_list",
+      "//flutter/testing:metal",
+    ]
   }
 }

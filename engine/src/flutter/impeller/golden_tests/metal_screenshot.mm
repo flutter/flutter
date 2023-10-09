@@ -29,6 +29,10 @@ size_t MetalScreenshot::GetWidth() const {
   return CGImageGetWidth(cg_image_);
 }
 
+size_t MetalScreenshot::GetBytesPerRow() const {
+  return CGImageGetBytesPerRow(cg_image_);
+}
+
 bool MetalScreenshot::WriteToPNG(const std::string& path) const {
   bool result = false;
   NSURL* output_url =

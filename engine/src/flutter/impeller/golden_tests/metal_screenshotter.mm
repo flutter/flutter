@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/golden_tests/metal_screenshoter.h"
+#include "flutter/impeller/golden_tests/metal_screenshotter.h"
 
 #include <CoreImage/CoreImage.h>
 #include "impeller/renderer/backend/metal/context_mtl.h"
@@ -13,17 +13,19 @@
 namespace impeller {
 namespace testing {
 
-MetalScreenshoter::MetalScreenshoter() {
+MetalScreenshotter::MetalScreenshotter() {
   FML_CHECK(::glfwInit() == GLFW_TRUE);
   playground_ =
       PlaygroundImpl::Create(PlaygroundBackend::kMetal, PlaygroundSwitches{});
 }
 
-std::unique_ptr<MetalScreenshot> MetalScreenshoter::MakeScreenshot(
+std::unique_ptr<MetalScreenshot> MetalScreenshotter::MakeScreenshot(
     AiksContext& aiks_context,
     const Picture& picture,
-    const ISize& size) {
-  Vector2 content_scale = playground_->GetContentScale();
+    const ISize& size,
+    bool scale_content) {
+  Vector2 content_scale =
+      scale_content ? playground_->GetContentScale() : Vector2{1, 1};
   std::shared_ptr<Image> image = picture.ToImage(
       aiks_context,
       ISize(size.width * content_scale.x, size.height * content_scale.y));

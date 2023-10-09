@@ -12,15 +12,17 @@
 namespace impeller {
 namespace testing {
 
-/// Converts `Picture`s to `MetalScreenshot`s with the playground backend.
-class MetalScreenshoter {
+/// Converts `Picture`s and `DisplayList`s to `MetalScreenshot`s with the
+/// playground backend.
+class MetalScreenshotter {
  public:
-  MetalScreenshoter();
+  MetalScreenshotter();
 
   std::unique_ptr<MetalScreenshot> MakeScreenshot(AiksContext& aiks_context,
                                                   const Picture& picture,
                                                   const ISize& size = {300,
-                                                                       300});
+                                                                       300},
+                                                  bool scale_content = true);
 
   const PlaygroundImpl& GetPlayground() const { return *playground_; }
 
