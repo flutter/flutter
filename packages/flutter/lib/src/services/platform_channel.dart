@@ -32,6 +32,29 @@ export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 /// The statistics include the total bytes transmitted and the average number of
 /// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
+bool get profilePlatformChannels => kProfilePlatformChannels || (!kReleaseMode && debugProfilePlatformChannels);
+
+/// Controls whether platform channel usage can be debugged in release mode.
+/// 
+/// See also:
+///
+/// * [profilePlatformChannels], which checks both [kProfilePlatformChannels]
+///   and [debugProfilePlatformChannels] for the current run mode.
+/// * [debugProfilePlatformChannels], which determines whether platform
+///   channel usage can be debugged in non-release mode.
+const bool kProfilePlatformChannels = false;
+
+/// Controls whether platform channel usage can be debugged in non-release mode.
+/// 
+/// This value is modified by calls to the
+/// [ServicesServiceExtensions.profilePlatformChannels] service extension.
+/// 
+/// See also:
+///
+/// * [profilePlatformChannels], which checks both [kProfilePlatformChannels]
+///   and [debugProfilePlatformChannels] for the current run mode.
+/// * [kProfilePlatformChannels], which determines whether platform channel
+///   usage can be debugged in release mode.
 bool debugProfilePlatformChannels = false;
 
 bool _profilePlatformChannelsIsRunning = false;
@@ -190,7 +213,7 @@ class BasicMessageChannel<T> {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return debugProfilePlatformChannels
+    return profilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -279,7 +302,7 @@ class MethodChannel {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return debugProfilePlatformChannels
+    return profilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -310,7 +333,7 @@ class MethodChannel {
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
-      debugProfilePlatformChannels ?
+      profilePlatformChannels ?
         await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
         await binaryMessenger.send(name, input);
     if (result == null) {

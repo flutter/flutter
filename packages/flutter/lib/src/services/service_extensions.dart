@@ -18,7 +18,7 @@ enum ServicesServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [kProfilePlatformChannels], which is the flag that this service
+  /// * [debugProfilePlatformChannels], which is the flag that this service
   ///   extension exposes.
   /// * [ServicesBinding.initServiceExtensions], where the service extension is
   ///   registered.
