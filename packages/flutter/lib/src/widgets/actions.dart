@@ -872,18 +872,16 @@ class Actions extends StatefulWidget {
       '"intent" argument is passed.',
     );
 
-    if (context.mounted) {
-      _visitActionsAncestors(context, (InheritedElement element) {
-        final _ActionsScope actions = element.widget as _ActionsScope;
-        final Action<T>? result = _castAction(actions, intent: intent);
-        if (result != null) {
-          context.dependOnInheritedElement(element);
-          action = result;
-          return true;
-        }
-        return false;
-      });
-    }
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final _ActionsScope actions = element.widget as _ActionsScope;
+      final Action<T>? result = _castAction(actions, intent: intent);
+      if (result != null) {
+        context.dependOnInheritedElement(element);
+        action = result;
+        return true;
+      }
+      return false;
+    });
 
     return action;
   }
