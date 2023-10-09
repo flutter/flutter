@@ -520,7 +520,7 @@ enum OverflowBoxFit {
   /// The widget will follow the child's size.
   ///
   /// More specifically, the render object will size itself to match the size of
-  /// its child within the constraints of its parent or be as small as the
+  /// its child within the constraints of its parent, or as small as the
   /// parent allows if no child is set.
   deferToChild,
 }
