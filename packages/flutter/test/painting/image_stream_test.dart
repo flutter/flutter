@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import 'fake_codec.dart';
@@ -84,7 +85,7 @@ void main() {
     image200x100 = await createTestImage(width: 200, height: 100);
   });
 
-  testWidgets('Codec future fails', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Codec future fails', (WidgetTester tester) async {
     final Completer<Codec> completer = Completer<Codec>();
     MultiFrameImageStreamCompleter(
       codec: completer.future,
@@ -95,7 +96,7 @@ void main() {
     expect(tester.takeException(), 'failure message');
   });
 
-  testWidgets('Decoding starts when a listener is added after codec is ready', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Decoding starts when a listener is added after codec is ready', (WidgetTester tester) async {
     final Completer<Codec> completer = Completer<Codec>();
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
@@ -114,7 +115,7 @@ void main() {
     expect(mockCodec.numFramesAsked, 1);
   });
 
-  testWidgets('Decoding starts when a codec is ready after a listener is added', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Decoding starts when a codec is ready after a listener is added', (WidgetTester tester) async {
     final Completer<Codec> completer = Completer<Codec>();
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
@@ -133,7 +134,7 @@ void main() {
     expect(mockCodec.numFramesAsked, 1);
   });
 
-  testWidgets('Decoding does not crash when disposed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Decoding does not crash when disposed', (WidgetTester tester) async {
     final Completer<Codec> completer = Completer<Codec>();
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
@@ -158,7 +159,7 @@ void main() {
     await tester.idle();
   });
 
-  testWidgets('Chunk events of base ImageStreamCompleter are delivered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chunk events of base ImageStreamCompleter are delivered', (WidgetTester tester) async {
     final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
     final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
     final ImageStreamCompleter imageStream = FakeEventReportingImageStreamCompleter(
@@ -182,7 +183,7 @@ void main() {
     expect(chunkEvents[1].expectedTotalBytes, 3);
   });
 
-  testWidgets('Chunk events of base ImageStreamCompleter are not buffered before listener registration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chunk events of base ImageStreamCompleter are not buffered before listener registration', (WidgetTester tester) async {
     final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
     final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
     final ImageStreamCompleter imageStream = FakeEventReportingImageStreamCompleter(
@@ -205,7 +206,7 @@ void main() {
     expect(chunkEvents[0].expectedTotalBytes, 3);
   });
 
-  testWidgets('Chunk events of MultiFrameImageStreamCompleter are delivered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chunk events of MultiFrameImageStreamCompleter are delivered', (WidgetTester tester) async {
     final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
     final Completer<Codec> completer = Completer<Codec>();
     final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
@@ -232,7 +233,7 @@ void main() {
     expect(chunkEvents[1].expectedTotalBytes, 3);
   });
 
-  testWidgets('Chunk events of MultiFrameImageStreamCompleter are not buffered before listener registration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chunk events of MultiFrameImageStreamCompleter are not buffered before listener registration', (WidgetTester tester) async {
     final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
     final Completer<Codec> completer = Completer<Codec>();
     final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
@@ -258,7 +259,7 @@ void main() {
     expect(chunkEvents[0].expectedTotalBytes, 3);
   });
 
-  testWidgets('Chunk errors are reported', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chunk errors are reported', (WidgetTester tester) async {
     final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
     final Completer<Codec> completer = Completer<Codec>();
     final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
@@ -284,7 +285,7 @@ void main() {
     expect(chunkEvents[0].expectedTotalBytes, 3);
   });
 
-  testWidgets('getNextFrame future fails', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('getNextFrame future fails', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
     final Completer<Codec> codecCompleter = Completer<Codec>();
@@ -309,7 +310,7 @@ void main() {
     expect(tester.takeException(), 'frame completion error');
   });
 
-  testWidgets('ImageStream emits frame (static image)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ImageStream emits frame (static image)', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
     final Completer<Codec> codecCompleter = Completer<Codec>();
@@ -334,7 +335,7 @@ void main() {
     expect(emittedImages.every((ImageInfo info) => info.image.isCloneOf(frame.image)), true);
   });
 
-  testWidgets('ImageStream emits frames (animated images)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ImageStream emits frames (animated images)', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -380,7 +381,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   });
 
-  testWidgets('animation wraps back', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('animation wraps back', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -421,7 +422,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
   });
 
-  testWidgets("animation doesn't repeat more than specified", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("animation doesn't repeat more than specified", (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = 0;
@@ -459,7 +460,7 @@ void main() {
     expect(emittedImages[1].image.isCloneOf(frame2.image), true);
   });
 
-  testWidgets('frames are only decoded when there are listeners', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('frames are only decoded when there are listeners', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -499,7 +500,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('multiple stream listeners', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('multiple stream listeners', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -546,7 +547,7 @@ void main() {
 
   });
 
-  testWidgets('timer is canceled when listeners are removed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('timer is canceled when listeners are removed', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -579,7 +580,7 @@ void main() {
     // point.
   });
 
-  testWidgets('timeDilation affects animation frame timers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('timeDilation affects animation frame timers', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
@@ -616,7 +617,7 @@ void main() {
     timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
-  testWidgets('error handlers can intercept errors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('error handlers can intercept errors', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
     final Completer<Codec> codecCompleter = Completer<Codec>();
@@ -651,7 +652,7 @@ void main() {
     expect(capturedException, 'frame completion error');
   });
 
-  testWidgets('remove and add listener ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('remove and add listener ', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 3;
     mockCodec.repetitionCount = 0;
@@ -682,7 +683,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
   });
 
-  testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ImageStreamListener hashCode and equals', (WidgetTester tester) async {
     void handleImage(ImageInfo image, bool synchronousCall) { }
     void handleImageDifferently(ImageInfo image, bool synchronousCall) { }
     void handleError(dynamic error, StackTrace? stackTrace) { }
@@ -714,7 +715,7 @@ void main() {
     compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onError2: handleError, areEqual: false);
   });
 
-  testWidgets('Keep alive handles do not drive frames or prevent last listener callbacks', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Keep alive handles do not drive frames or prevent last listener callbacks', (WidgetTester tester) async {
     final Image image10x10 = (await tester.runAsync(() => createTestImage(width: 10, height: 10)))!;
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
