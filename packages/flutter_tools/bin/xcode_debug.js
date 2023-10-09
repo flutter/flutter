@@ -61,6 +61,11 @@ class CommandArguments {
 
     this.xcodePath = this.validatedStringArgument('--xcode-path', parsedArguments['--xcode-path']);
     this.projectPath = this.validatedStringArgument('--project-path', parsedArguments['--project-path']);
+    this.projectName = this.validatedStringArgument('--project-name', parsedArguments['--project-name']);
+    this.expectedConfigurationBuildDir = this.validatedStringArgument(
+      '--expected-configuration-build-dir',
+      parsedArguments['--expected-configuration-build-dir'],
+    );
     this.workspacePath = this.validatedStringArgument('--workspace-path', parsedArguments['--workspace-path']);
     this.targetDestinationId = this.validatedStringArgument('--device-id', parsedArguments['--device-id']);
     this.targetSchemeName = this.validatedStringArgument('--scheme', parsedArguments['--scheme']);
@@ -92,6 +97,45 @@ class CommandArguments {
   }
 
   /**
+   * Returns map of commands to map of allowed arguments. For each command, if
+   * an argument flag is a key, than that flag is allowed for that command. If
+   * the value for the key is true, then it is required for the command.
+   *
+   * @returns {!string} Map of commands to allowed and optionally required
+   *     arguments.
+   */
+  argumentSettings() {
+    return {
+      'check-workspace-opened': {
+        '--xcode-path': true,
+        '--project-path': true,
+        '--workspace-path': true,
+        '--verbose': false,
+      },
+      'debug': {
+        '--xcode-path': true,
+        '--project-path': true,
+        '--workspace-path': true,
+        '--project-name': true,
+        '--expected-configuration-build-dir': false,
+        '--device-id': true,
+        '--scheme': true,
+        '--skip-building': true,
+        '--launch-args': true,
+        '--verbose': false,
+      },
+      'stop': {
+        '--xcode-path': true,
+        '--project-path': true,
+        '--workspace-path': true,
+        '--close-window': true,
+        '--prompt-to-save': true,
+        '--verbose': false,
+      },
+    };
+  }
+
+  /**
    * Validates the flag is allowed for the current command.
    *
    * @param {!string} flag
@@ -101,31 +145,26 @@ class CommandArguments {
    *     command and the value is not null, undefined, or empty.
    */
   isArgumentAllowed(flag, value) {
-    const allowedArguments = {
-      'common': {
-        '--xcode-path': true,
-        '--project-path': true,
-        '--workspace-path': true,
-        '--verbose': true,
-      },
-      'check-workspace-opened': {},
-      'debug': {
-        '--device-id': true,
-        '--scheme': true,
-        '--skip-building': true,
-        '--launch-args': true,
-      },
-      'stop': {
-        '--close-window': true,
-        '--prompt-to-save': true,
-      },
-    }
-
-    const isAllowed = allowedArguments['common'][flag] === true || allowedArguments[this.command][flag] === true;
+    const isAllowed = this.argumentSettings()[this.command].hasOwnProperty(flag);
     if (isAllowed === false && (value != null && value !== '')) {
       throw `The flag ${flag} is not allowed for the command ${this.command}.`;
     }
     return isAllowed;
+  }
+
+  /**
+   * Validates required flag has a value.
+   *
+   * @param {!string} flag
+   * @param {?string} value
+   * @throws Will throw an error if the flag is required for the current
+   *     command and the value is not null, undefined, or empty.
+   */
+  validateRequiredArgument(flag, value) {
+    const isRequired = this.argumentSettings()[this.command][flag] === true;
+    if (isRequired === true && (value == null || value === '')) {
+      throw `Missing value for ${flag}`;
+    }
   }
 
   /**
@@ -182,9 +221,7 @@ class CommandArguments {
     if (this.isArgumentAllowed(flag, value) === false) {
       return null;
     }
-    if (value == null || value === '') {
-      throw `Missing value for ${flag}`;
-    }
+    this.validateRequiredArgument(flag, value);
     return value;
   }
 
@@ -226,9 +263,7 @@ class CommandArguments {
     if (this.isArgumentAllowed(flag, value) === false) {
       return null;
     }
-    if (value == null || value === '') {
-      throw `Missing value for ${flag}`;
-    }
+    this.validateRequiredArgument(flag, value);
     try {
       return JSON.parse(value);
     } catch (e) {
@@ -345,6 +380,15 @@ function debugApp(xcode, args) {
   );
   if (destinationResult.error != null) {
     return new FunctionResult(null, destinationResult.error)
+  }
+
+  // If expectedConfigurationBuildDir is available, ensure that it matches the
+  // build settings.
+  if (args.expectedConfigurationBuildDir != null && args.expectedConfigurationBuildDir !== '') {
+    const updateResult = waitForConfigurationBuildDirToUpdate(targetWorkspace, args);
+    if (updateResult.error != null) {
+      return new FunctionResult(null, updateResult.error);
+    }
   }
 
   try {
@@ -527,4 +571,93 @@ function stopApp(xcode, args) {
     return new FunctionResult(null, `Failed to stop app: ${e}`);
   }
   return new FunctionResult(null, null);
+}
+
+/**
+ * Gets resolved build setting for CONFIGURATION_BUILD_DIR and waits until its
+ * value matches the `--expected-configuration-build-dir` argument. Waits up to
+ * 2 minutes.
+ *
+ * @param {!WorkspaceDocument} targetWorkspace A `WorkspaceDocument` (Xcode Mac
+ *     Scripting class).
+ * @param {!CommandArguments} args
+ * @returns {!FunctionResult} Always returns null as the `result`.
+ */
+function waitForConfigurationBuildDirToUpdate(targetWorkspace, args) {
+  // Get the project
+  let project;
+  try {
+    project = targetWorkspace.projects().find(x => x.name() == args.projectName);
+  } catch (e) {
+    return new FunctionResult(null, `Failed to find project ${args.projectName}: ${e}`);
+  }
+  if (project == null) {
+    return new FunctionResult(null, `Failed to find project ${args.projectName}.`);
+  }
+
+  // Get the target
+  let target;
+  try {
+    // The target is probably named the same as the project, but if not, just use the first.
+    const targets = project.targets();
+    target = targets.find(x => x.name() == args.projectName);
+    if (target == null && targets.length > 0) {
+      target = targets[0];
+      if (args.verbose) {
+        console.log(`Failed to find target named ${args.projectName}, picking first target: ${target.name()}.`);
+      }
+    }
+  } catch (e) {
+    return new FunctionResult(null, `Failed to find target: ${e}`);
+  }
+  if (target == null) {
+    return new FunctionResult(null, `Failed to find target.`);
+  }
+
+  try {
+    // Use the first build configuration (Debug). Any should do since they all
+    // include Generated.xcconfig.
+    const buildConfig = target.buildConfigurations()[0];
+    const buildSettings = buildConfig.resolvedBuildSettings().reverse();
+
+    // CONFIGURATION_BUILD_DIR is often at (reverse) index 225 for Xcode
+    // projects, so check there first. If it's not there, search the build
+    // settings (which can be a little slow).
+    const defaultIndex = 225;
+    let configurationBuildDirSettings;
+    if (buildSettings[defaultIndex] != null && buildSettings[defaultIndex].name() === 'CONFIGURATION_BUILD_DIR') {
+      configurationBuildDirSettings = buildSettings[defaultIndex];
+    } else {
+      configurationBuildDirSettings = buildSettings.find(x => x.name() === 'CONFIGURATION_BUILD_DIR');
+    }
+
+    if (configurationBuildDirSettings == null) {
+      // This should not happen, even if it's not set by Flutter, there should
+      // always be a resolved build setting for CONFIGURATION_BUILD_DIR.
+      return new FunctionResult(null, `Unable to find CONFIGURATION_BUILD_DIR.`);
+    }
+
+    // Wait up to 2 minutes for the CONFIGURATION_BUILD_DIR to update to the
+    // expected value.
+    const checkFrequencyInSeconds = 0.5;
+    const maxWaitInSeconds = 2 * 60; // 2 minutes
+    const verboseLogInterval = 10 * (1 / checkFrequencyInSeconds);
+    const iterations = maxWaitInSeconds * (1 / checkFrequencyInSeconds);
+    for (let i = 0; i < iterations; i++) {
+      const verbose = args.verbose && i % verboseLogInterval === 0;
+
+      const configurationBuildDir = configurationBuildDirSettings.value();
+      if (configurationBuildDir === args.expectedConfigurationBuildDir) {
+        console.log(`CONFIGURATION_BUILD_DIR: ${configurationBuildDir}`);
+        return new FunctionResult(null, null);
+      }
+      if (verbose) {
+        console.log(`Current CONFIGURATION_BUILD_DIR: ${configurationBuildDir} while expecting ${args.expectedConfigurationBuildDir}`);
+      }
+      delay(checkFrequencyInSeconds);
+    }
+    return new FunctionResult(null, 'Timed out waiting for CONFIGURATION_BUILD_DIR to update.');
+  } catch (e) {
+    return new FunctionResult(null, `Failed to get CONFIGURATION_BUILD_DIR: ${e}`);
+  }
 }
