@@ -63,7 +63,7 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
       // we need to early return before looking up the path of [Artifact.flutterPreviewDevice].
       return const <Device>[];
     }
-    final previewBinary = _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
+    final File previewBinary = _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
     if (!previewBinary.existsSync()) {
       return const <Device>[];
     }
