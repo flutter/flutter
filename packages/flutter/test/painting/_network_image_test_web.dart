@@ -6,11 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
 import '_test_http_request.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
