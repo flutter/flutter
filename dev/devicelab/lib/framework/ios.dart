@@ -56,14 +56,13 @@ Future<void> testWithNewIOSSimulator(
   SimulatorFunction testFunction, {
   String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
 }) async {
-  // Xcode 11.4 simctl create makes the runtime argument optional, and defaults to latest.
-  // TODO(jmagman): Remove runtime parsing when devicelab upgrades to Xcode 11.4 https://github.com/flutter/flutter/issues/54889
-  final String availableRuntimes = await eval(
+  final String runtimeForSelectedXcode = await eval(
     'xcrun',
     <String>[
       'simctl',
-      'list',
-      'runtimes',
+      'runtime',
+      'match',
+      'list'
     ],
     workingDirectory: flutterDirectory.path,
   );
@@ -72,17 +71,18 @@ Future<void> testWithNewIOSSimulator(
 
   final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
 
-  for (final String runtime in LineSplitter.split(availableRuntimes)) {
-    // These seem to be in order, so allow matching multiple lines so it grabs
-    // the last (hopefully latest) one.
-    final RegExpMatch? iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
-    if (iOSRuntimeMatch != null) {
-      iOSSimRuntime = iOSRuntimeMatch.group(1)!.trim();
-      continue;
+  // Use the preferred runtime version for the currently selected version of Xcode.
+  for (final String info in LineSplitter.split(runtimeForSelectedXcode)) {
+    if (info.contains('Chosen Runtime')) {
+      final RegExpMatch? iOSRuntimeMatch = iOSRuntimePattern.firstMatch(info);
+      if (iOSRuntimeMatch != null) {
+        iOSSimRuntime = iOSRuntimeMatch.group(1)!.trim();
+        continue;
+      }
     }
   }
   if (iOSSimRuntime == null) {
-    throw 'No iOS simulator runtime found. Available runtimes:\n$availableRuntimes';
+    throw 'No iOS simulator runtime found. Runtime rules for selected Xcode:\n$runtimeForSelectedXcode';
   }
 
   final String deviceId = await eval(
