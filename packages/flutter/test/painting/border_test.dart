@@ -66,7 +66,7 @@ void main() {
       const Border(),
     );
     expect(
-          () => Border.merge(
+      () => Border.merge(
         const Border(left: magenta3),
         const Border(left: yellow2),
       ),
