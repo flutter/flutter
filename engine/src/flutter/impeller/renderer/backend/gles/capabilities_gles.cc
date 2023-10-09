@@ -86,6 +86,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     gl.GetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &value);
     num_shader_binary_formats = value;
   }
+
+  if (gl.GetDescription()->HasExtension("GL_EXT_texture_border_clamp") ||
+      gl.GetDescription()->HasExtension("GL_NV_texture_border_clamp") ||
+      gl.GetDescription()->HasExtension("GL_OES_texture_border_clamp")) {
+    supports_decal_sampler_address_mode_ = true;
+  }
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
@@ -140,7 +146,7 @@ bool CapabilitiesGLES::SupportsReadFromResolve() const {
 }
 
 bool CapabilitiesGLES::SupportsDecalSamplerAddressMode() const {
-  return false;
+  return supports_decal_sampler_address_mode_;
 }
 
 bool CapabilitiesGLES::SupportsDeviceTransientTextures() const {
