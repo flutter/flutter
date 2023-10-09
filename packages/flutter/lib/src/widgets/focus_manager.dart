@@ -1890,7 +1890,10 @@ class _HighlightModeManager {
     // return early.
     if (_earlyKeyEventHandlers.isNotEmpty) {
       final List<KeyEventResult> results = <KeyEventResult>[];
-      for (final OnKeyEventCallback callback in _earlyKeyEventHandlers) {
+      // Copy the list before iteration to prevent problems if the list gets
+      // modified during iteration.
+      final List<OnKeyEventCallback> iterationList = _earlyKeyEventHandlers.toList();
+      for (final OnKeyEventCallback callback in iterationList) {
         for (final KeyEvent event in message.events) {
           results.add(callback(event));
         }
@@ -1947,7 +1950,10 @@ class _HighlightModeManager {
     // Check to see if any late key event handlers want to handle the event.
     if (!handled && _lateKeyEventHandlers.isNotEmpty) {
       final List<KeyEventResult> results = <KeyEventResult>[];
-      for (final OnKeyEventCallback callback in _lateKeyEventHandlers) {
+      // Copy the list before iteration to prevent problems if the list gets
+      // modified during iteration.
+      final List<OnKeyEventCallback> iterationList = _lateKeyEventHandlers.toList();
+      for (final OnKeyEventCallback callback in iterationList) {
         for (final KeyEvent event in message.events) {
           results.add(callback(event));
         }
@@ -1965,7 +1971,7 @@ class _HighlightModeManager {
       }
     }
     if (!handled) {
-      assert(_focusDebug(() => 'Key event not handled by anyone: $message.'));
+      assert(_focusDebug(() => 'Key event not handled by focus system: $message.'));
     }
     return handled;
   }
