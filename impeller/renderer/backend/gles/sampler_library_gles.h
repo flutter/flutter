@@ -12,6 +12,7 @@ namespace impeller {
 
 class SamplerLibraryGLES final : public SamplerLibrary {
  public:
+  explicit SamplerLibraryGLES(bool supports_decal_sampler_address_mode);
   // |SamplerLibrary|
   ~SamplerLibraryGLES() override;
 
@@ -25,6 +26,8 @@ class SamplerLibraryGLES final : public SamplerLibrary {
   // |SamplerLibrary|
   std::shared_ptr<const Sampler> GetSampler(
       SamplerDescriptor descriptor) override;
+
+  bool supports_decal_sampler_address_mode_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SamplerLibraryGLES);
 };
