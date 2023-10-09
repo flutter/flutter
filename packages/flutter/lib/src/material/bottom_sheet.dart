@@ -1071,7 +1071,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
           return _ModalBottomSheet<T>(
             route: this,
             backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor ?? defaults.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? defaults.modalElevation ?? sheetTheme.elevation,
+            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation ?? defaults.modalElevation,
             shape: shape,
             clipBehavior: clipBehavior,
             constraints: constraints,
