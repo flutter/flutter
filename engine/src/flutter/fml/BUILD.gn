@@ -337,7 +337,6 @@ if (enable_unittests) {
       "memory/ref_counted_unittest.cc",
       "memory/task_runner_checker_unittest.cc",
       "memory/weak_ptr_unittest.cc",
-      "message_loop_impl_unittests.cc",
       "message_loop_task_queues_merge_unmerge_unittests.cc",
       "message_loop_task_queues_unittests.cc",
       "message_loop_unittests.cc",

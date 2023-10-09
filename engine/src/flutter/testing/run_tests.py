@@ -41,7 +41,6 @@ FONTS_DIR = os.path.join(
 ROBOTO_FONT_PATH = os.path.join(FONTS_DIR, 'Roboto-Regular.ttf')
 FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font-subset')
 
-FML_UNITTESTS_FILTER = '--gtest_filter=-*TimeSensitiveTest*'
 ENCODING = 'UTF-8'
 
 logger = logging.getLogger(__name__)
@@ -402,7 +401,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
       make_test('embedder_a11y_unittests'),
       make_test('embedder_proctable_unittests'),
       make_test('embedder_unittests'),
-      make_test('fml_unittests', flags=[FML_UNITTESTS_FILTER] + repeat_flags),
+      make_test('fml_unittests'),
       make_test('no_dart_plugin_registrant_unittests'),
       make_test('runtime_unittests'),
       make_test('testing_unittests'),

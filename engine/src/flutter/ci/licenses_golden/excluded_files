@@ -97,7 +97,6 @@
 ../../../flutter/fml/memory/ref_counted_unittest.cc
 ../../../flutter/fml/memory/task_runner_checker_unittest.cc
 ../../../flutter/fml/memory/weak_ptr_unittest.cc
-../../../flutter/fml/message_loop_impl_unittests.cc
 ../../../flutter/fml/message_loop_task_queues_merge_unmerge_unittests.cc
 ../../../flutter/fml/message_loop_task_queues_unittests.cc
 ../../../flutter/fml/message_loop_unittests.cc
