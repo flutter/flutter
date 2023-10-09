@@ -30,7 +30,7 @@ class _${blockName}DefaultsM3 extends CardTheme {
   _${blockName}DefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
-        elevation: ${elevation("$tokenGroup.container")},
+        elevation: ${elevation('$tokenGroup.container')},
         margin: const EdgeInsets.all(4.0),
       );
 
@@ -38,13 +38,13 @@ class _${blockName}DefaultsM3 extends CardTheme {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => ${componentColor("$tokenGroup.container")};
+  Color? get color => ${componentColor('$tokenGroup.container')};
 
   @override
-  Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
+  Color? get shadowColor => ${colorOrTransparent('$tokenGroup.container.shadow-color')};
 
   @override
-  Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent('$tokenGroup.container.surface-tint-layer.color')};
   
   @override
   ShapeBorder? get shape =>${_shape()};
