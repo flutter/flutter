@@ -7,6 +7,8 @@
 
 #include <utility>
 
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
 
@@ -14,6 +16,16 @@
 
 namespace flutter {
 namespace testing {
+
+class DlPixelData : public SkRefCnt {
+ public:
+  virtual ~DlPixelData() = default;
+
+  virtual const uint32_t* addr32(int x, int y) const = 0;
+  virtual size_t width() const = 0;
+  virtual size_t height() const = 0;
+  virtual void write(const std::string& path) const = 0;
+};
 
 class DlSurfaceInstance {
  public:
@@ -53,12 +65,14 @@ class DlSurfaceProvider {
     FML_DCHECK(false);
   }
 
+  static std::string BackendName(BackendType type);
   static std::unique_ptr<DlSurfaceProvider> Create(BackendType backend_type);
 
   virtual ~DlSurfaceProvider() = default;
   virtual const std::string backend_name() const = 0;
   virtual BackendType backend_type() const = 0;
   virtual bool supports(PixelFormat format) const = 0;
+  virtual bool supports_impeller() const { return false; }
   virtual bool InitializeSurface(
       size_t width,
       size_t height,
@@ -70,6 +84,16 @@ class DlSurfaceProvider {
       PixelFormat format = kN32PremulPixelFormat) const = 0;
 
   virtual bool Snapshot(std::string& filename) const;
+  virtual sk_sp<DlPixelData> ImpellerSnapshot(const sk_sp<DisplayList>& list,
+                                              int width,
+                                              int height) const {
+    return nullptr;
+  }
+  virtual sk_sp<DlImage> MakeImpellerImage(const sk_sp<DisplayList>& list,
+                                           int width,
+                                           int height) const {
+    return nullptr;
+  }
 
  protected:
   DlSurfaceProvider() = default;
