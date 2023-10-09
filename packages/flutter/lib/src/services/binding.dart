@@ -229,9 +229,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (!kReleaseMode) {
       registerBoolServiceExtension(
         name: ServicesServiceExtensions.profilePlatformChannels.name,
-        getter: () async => kProfilePlatformChannels,
+        getter: () async => debugProfilePlatformChannels,
         setter: (bool value) async {
-          kProfilePlatformChannels = value;
+          debugProfilePlatformChannels = value;
         },
       );
     }
