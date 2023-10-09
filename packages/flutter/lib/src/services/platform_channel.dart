@@ -36,7 +36,7 @@ export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 bool get shouldProfilePlatformChannels => kProfilePlatformChannels || (!kReleaseMode && debugProfilePlatformChannels);
 
 /// Controls whether platform channel usage can be debugged in release mode.
-/// 
+///
 /// See also:
 ///
 /// * [shouldProfilePlatformChannels], which checks both
