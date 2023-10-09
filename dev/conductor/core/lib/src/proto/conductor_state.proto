@@ -13,7 +13,7 @@ enum ReleasePhase {
   APPLY_ENGINE_CHERRYPICKS = 0;
 
   // Verify engine CI is green before opening framework PR.
-  CODESIGN_ENGINE_BINARIES = 1;
+  VERIFY_ENGINE_CI = 1;
 
   APPLY_FRAMEWORK_CHERRYPICKS = 2;
 

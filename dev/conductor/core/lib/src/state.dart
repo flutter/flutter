@@ -177,7 +177,7 @@ String phaseInstructions(pb.ConductorState state) {
           '\t${cherrypick.trunkRevision}',
         'See ${globals.kReleaseDocumentationUrl} for more information.',
       ].join('\n');
-    case ReleasePhase.CODESIGN_ENGINE_BINARIES:
+    case ReleasePhase.VERIFY_ENGINE_CI:
       if (!requiresEnginePR(state)) {
         return 'You must verify engine CI has passed: '
             '${luciConsoleLink(state.releaseChannel, 'engine')}';
@@ -288,17 +288,16 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
     case ReleasePhase.PUBLISH_VERSION:
       return ReleasePhase.VERIFY_RELEASE;
     case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
-    case ReleasePhase.CODESIGN_ENGINE_BINARIES:
+    case ReleasePhase.VERIFY_ENGINE_CI:
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
     case ReleasePhase.VERIFY_RELEASE:
     case ReleasePhase.RELEASE_COMPLETED:
-     final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
+      final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
       if (nextPhase != null) {
         return nextPhase;
       }
   }
-    throw globals.ConductorException('There is no next ReleasePhase!');
-
+  throw globals.ConductorException('There is no next ReleasePhase!');
 }
 
 // Indent two spaces.

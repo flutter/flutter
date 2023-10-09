@@ -80,7 +80,7 @@ void main() {
       );
     });
 
-    group('APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES', () {
+    group('APPLY_ENGINE_CHERRYPICKS to VERIFY_ENGINE_CI', () {
       test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
         stdio.stdin.add('n');
         final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
@@ -220,12 +220,12 @@ void main() {
           contains('You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:cherrypicks-flutter-1.2-candidate.3?expand=1'));
         expect(stdio.stdout, contains(
                 'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
-        expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
+        expect(finalState.currentPhase, ReleasePhase.VERIFY_ENGINE_CI);
         expect(stdio.error, isEmpty);
       });
     });
 
-    group('CODESIGN_ENGINE_BINARIES to APPLY_FRAMEWORK_CHERRYPICKS', () {
+    group('VERIFY_ENGINE_CI to APPLY_FRAMEWORK_CHERRYPICKS', () {
       late pb.ConductorState state;
       late FakeProcessManager processManager;
       late FakePlatform platform;
@@ -240,7 +240,7 @@ void main() {
                 ..state = pb.CherrypickState.PENDING
               )
           )
-          ..currentPhase = ReleasePhase.CODESIGN_ENGINE_BINARIES
+          ..currentPhase = ReleasePhase.VERIFY_ENGINE_CI
         );
 
         processManager = FakeProcessManager.empty();
@@ -281,7 +281,7 @@ void main() {
 
         expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Has CI passed for the engine PR?'));
-        expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
+        expect(finalState.currentPhase, ReleasePhase.VERIFY_ENGINE_CI);
         expect(stdio.error.contains('Aborting command.'), true);
       });
 

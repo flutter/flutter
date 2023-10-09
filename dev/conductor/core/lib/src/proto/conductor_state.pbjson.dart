@@ -22,7 +22,7 @@ const ReleasePhase$json = {
   '1': 'ReleasePhase',
   '2': [
     {'1': 'APPLY_ENGINE_CHERRYPICKS', '2': 0},
-    {'1': 'CODESIGN_ENGINE_BINARIES', '2': 1},
+    {'1': 'VERIFY_ENGINE_CI', '2': 1},
     {'1': 'APPLY_FRAMEWORK_CHERRYPICKS', '2': 2},
     {'1': 'PUBLISH_VERSION', '2': 3},
     {'1': 'VERIFY_RELEASE', '2': 5},
@@ -35,10 +35,10 @@ const ReleasePhase$json = {
 
 /// Descriptor for `ReleasePhase`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List releasePhaseDescriptor =
-    $convert.base64Decode('CgxSZWxlYXNlUGhhc2USHAoYQVBQTFlfRU5HSU5FX0NIRVJSWVBJQ0tTEAASHAoYQ09ERVNJR0'
-        '5fRU5HSU5FX0JJTkFSSUVTEAESHwobQVBQTFlfRlJBTUVXT1JLX0NIRVJSWVBJQ0tTEAISEwoP'
-        'UFVCTElTSF9WRVJTSU9OEAMSEgoOVkVSSUZZX1JFTEVBU0UQBRIVChFSRUxFQVNFX0NPTVBMRV'
-        'RFRBAGIgQIBBAE');
+    $convert.base64Decode('CgxSZWxlYXNlUGhhc2USHAoYQVBQTFlfRU5HSU5FX0NIRVJSWVBJQ0tTEAASFAoQVkVSSUZZX0'
+        'VOR0lORV9DSRABEh8KG0FQUExZX0ZSQU1FV09SS19DSEVSUllQSUNLUxACEhMKD1BVQkxJU0hf'
+        'VkVSU0lPThADEhIKDlZFUklGWV9SRUxFQVNFEAUSFQoRUkVMRUFTRV9DT01QTEVURUQQBiIECA'
+        'QQBA==');
 
 @$core.Deprecated('Use cherrypickStateDescriptor instead')
 const CherrypickState$json = {

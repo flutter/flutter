@@ -141,7 +141,7 @@ class NextContext extends Context {
         }
 
         await pushWorkingBranch(engine, state.engine);
-      case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
+      case pb.ReleasePhase.VERIFY_ENGINE_CI:
         stdio.printStatus('You must validate post-submit CI for your engine PR and merge it');
         if (!autoAccept) {
           final bool response = await prompt(
