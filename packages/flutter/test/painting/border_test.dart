@@ -489,3 +489,4 @@ class ShapeWithoutInterior extends ShapeBorder {
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
 }
+
