@@ -139,7 +139,6 @@ void main() {
     );
 
     await tester.tap(find.text('ANNULER'));
-
   });
 
   testWidgets('Material3 - locale parameter overrides ambient locale', (WidgetTester tester) async {
