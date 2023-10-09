@@ -103,6 +103,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
+    this.rowsPerPageTitle,
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -259,6 +260,10 @@ class PaginatedDataTable extends StatefulWidget {
   /// If this is null, then the value given by [rowsPerPage] will be used
   /// and no affordance will be provided to change the value.
   final ValueChanged<int?>? onRowsPerPageChanged;
+
+  /// Used as a string replacement for Rows Per Title text in Pagination Footer Section
+  /// Defaults to [localizations.this.rowsPerPageTitle,]
+  final String? rowsPerPageTitle;
 
   /// The data source which provides data to show in each row.
   ///
@@ -476,7 +481,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         .toList();
       footerWidgets.addAll(<Widget>[
         Container(width: 14.0), // to match trailing padding in case we overflow and end up scrolling
-        Text(localizations.rowsPerPageTitle),
+        Text(widget.rowsPerPageTitle ?? localizations.rowsPerPageTitle),
         ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 64.0), // 40.0 for the text, 24.0 for the icon
           child: Align(
