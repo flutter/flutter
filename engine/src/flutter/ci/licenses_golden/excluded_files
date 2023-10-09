@@ -2860,6 +2860,7 @@
 ../../../third_party/skia/src/gpu/mtl/BUILD.bazel
 ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
 ../../../third_party/skia/src/gpu/vk/BUILD.bazel
+../../../third_party/skia/src/gpu/vk/vulkanmemoryallocator/BUILD.bazel
 ../../../third_party/skia/src/image/BUILD.bazel
 ../../../third_party/skia/src/lazy/BUILD.bazel
 ../../../third_party/skia/src/opts/BUILD.bazel
