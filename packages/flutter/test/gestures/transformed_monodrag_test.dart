@@ -11,8 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('Horizontal', () {
-    testWidgetsWithLeakTracking('gets local coordinates',
-        (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('gets local coordinates', (WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -67,9 +66,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking(
-        'kTouchSlop is evaluated in the global coordinate space when scaled up',
-        (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('kTouchSlop is evaluated in the global coordinate space when scaled up', (WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
