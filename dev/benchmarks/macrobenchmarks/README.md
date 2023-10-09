@@ -9,7 +9,7 @@ Performance benchmarks use either flutter drive or the web benchmark harness.
 To run the cull opacity benchmark on a device:
 
 ```
-flutter drive --profile test_driver/cull_opacity_perf.dart
+flutter drive --profile -t test_driver/run_app.dart --driver test_driver/cull_opacity_perf_test.dart
 ```
 
 Results should be in the file `build/cull_opacity_perf.timeline_summary.json`.
@@ -21,7 +21,7 @@ More detailed logs should be in `build/cull_opacity_perf.timeline.json`.
 To run the cubic-bezier benchmark on a device:
 
 ```
-flutter drive --profile test_driver/cubic_bezier_perf.dart
+flutter drive --profile -t test_driver/run_app.dart --driver test_driver/cubic_bezier_perf_test.dart
 ```
 
 Results should be in the file `build/cubic_bezier_perf.timeline_summary.json`.
