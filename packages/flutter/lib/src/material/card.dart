@@ -77,7 +77,10 @@ class Card extends StatelessWidget {
   }) : assert(elevation == null || elevation >= 0.0),
        _variant = _CardVariant.elevated;
 
+  /// Create a filled variant of Card.
   ///
+  /// Filled cards provide subtle separation from the background. This has less
+  /// emphasis than elevated(default) or outlined cards.
   const Card.filled({
     super.key,
     this.color,
@@ -93,7 +96,10 @@ class Card extends StatelessWidget {
   }) : assert(elevation == null || elevation >= 0.0),
        _variant = _CardVariant.filled;
 
+  /// Create an outlined variant of Card.
   ///
+  /// Outlined cards have a visual boundary around the container. This can
+  /// provide greater emphasis than the other types.
   const Card.outlined({
     super.key,
     this.color,
