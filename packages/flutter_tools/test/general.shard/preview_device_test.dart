@@ -147,7 +147,9 @@ void main() {
       expect(devices, isEmpty);
     });
 
-    testWithoutContext('PreviewDeviceDiscovery on Windows', () async {
+    testWithoutContext('PreviewDeviceDiscovery on Windows returns preview when binary exists', () async {
+      // ensure Flutter preview binary exists in cache.
+      fs.file(artifacts.getArtifactPath(Artifact.flutterPreviewDevice)).writeAsBytesSync(<int>[1, 0, 0, 1]);
       final PreviewDeviceDiscovery discovery = PreviewDeviceDiscovery(
         artifacts: artifacts,
         fileSystem: fs,
@@ -162,6 +164,21 @@ void main() {
       expect(devices, hasLength(1));
       final Device previewDevice = devices.first;
       expect(previewDevice, isA<PreviewDevice>());
+    });
+
+    testWithoutContext('PreviewDeviceDiscovery on Windows returns nothing when binary does not exist', () async {
+      final PreviewDeviceDiscovery discovery = PreviewDeviceDiscovery(
+        artifacts: artifacts,
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+        platform: windowsPlatform,
+        featureFlags: featureFlags,
+      );
+
+      final List<Device> devices = await discovery.devices();
+
+      expect(devices, isEmpty);
     });
   });
 }
