@@ -16923,12 +16923,12 @@ void main() {
 
       expect(timesTriggered, 0);
 
-      focusNodeA..requestFocus();
+      focusNodeA.requestFocus();
       await tester.pump();
 
       await click(find.text('Outside'));
       await tester.pumpAndSettle();
-          
+
       expect(timesTriggered, 1);
       }, variant: TargetPlatformVariant.all());
     }}
