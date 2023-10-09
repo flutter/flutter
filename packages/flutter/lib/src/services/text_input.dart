@@ -1262,7 +1262,6 @@ class SelectionRect {
 /// An interface to receive granular information from [TextInput].
 /// 
 /// This class is susceptible to non-essential breaking changes when not mixed
-/// with a class that does not already mixin [TextInputClient]. In that case this
 /// class throws a missing concrete implementation error. [TextInputClient]
 /// provides empty implementations for members that are non-essential for core
 /// text input. Mixin [TextInputClient] along with this class to inherit these
