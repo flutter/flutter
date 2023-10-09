@@ -11,7 +11,9 @@
 
 namespace impeller {
 
-SamplerLibraryGLES::SamplerLibraryGLES() = default;
+SamplerLibraryGLES::SamplerLibraryGLES(bool supports_decal_sampler_address_mode)
+    : supports_decal_sampler_address_mode_(
+          supports_decal_sampler_address_mode) {}
 
 // |SamplerLibrary|
 SamplerLibraryGLES::~SamplerLibraryGLES() = default;
@@ -19,14 +21,12 @@ SamplerLibraryGLES::~SamplerLibraryGLES() = default;
 // |SamplerLibrary|
 std::shared_ptr<const Sampler> SamplerLibraryGLES::GetSampler(
     SamplerDescriptor descriptor) {
-  // TODO(bdero): Change this validation once optional support for kDecal is
-  //              added to the OpenGLES backend:
-  //              https://github.com/flutter/flutter/issues/129358
-  if (descriptor.width_address_mode == SamplerAddressMode::kDecal ||
-      descriptor.height_address_mode == SamplerAddressMode::kDecal ||
-      descriptor.depth_address_mode == SamplerAddressMode::kDecal) {
+  if (!supports_decal_sampler_address_mode_ &&
+      (descriptor.width_address_mode == SamplerAddressMode::kDecal ||
+       descriptor.height_address_mode == SamplerAddressMode::kDecal ||
+       descriptor.depth_address_mode == SamplerAddressMode::kDecal)) {
     VALIDATION_LOG << "SamplerAddressMode::kDecal is not supported by the "
-                      "OpenGLES backend.";
+                      "current OpenGLES backend.";
     return nullptr;
   }
 

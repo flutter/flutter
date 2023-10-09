@@ -12,6 +12,7 @@ uniform BlendInfo {
   float16_t src_input_alpha;
   float16_t color_factor;
   f16vec4 color;  // This color input is expected to be unpremultiplied.
+  float supports_decal_sampler_address_mode;
 }
 blend_info;
 
@@ -24,9 +25,12 @@ in vec2 v_src_texture_coords;
 out f16vec4 frag_color;
 
 f16vec4 Sample(f16sampler2D texture_sampler, vec2 texture_coords) {
-// gles 2.0 is the only backend without native decal support.
 #ifdef IMPELLER_TARGET_OPENGLES
-  return IPSampleDecal(texture_sampler, texture_coords);
+  if (blend_info.supports_decal_sampler_address_mode > 0.0) {
+    return texture(texture_sampler, texture_coords);
+  } else {
+    return IPHalfSampleDecal(texture_sampler, texture_coords);
+  }
 #else
   return texture(texture_sampler, texture_coords);
 #endif

@@ -19,6 +19,8 @@ static std::mutex g_test_lock;
 
 static std::weak_ptr<MockGLES> g_mock_gles;
 
+static std::vector<const unsigned char*> g_extensions;
+
 // Has friend visibility into MockGLES to record calls.
 void RecordGLCall(const char* name) {
   if (auto mock_gles = g_mock_gles.lock()) {
@@ -37,7 +39,7 @@ void doNothing() {}
 
 auto const kMockVendor = (unsigned char*)"MockGLES";
 auto const kMockVersion = (unsigned char*)"3.0";
-auto const kExtensions = std::vector<unsigned char*>{
+auto const kExtensions = std::vector<const unsigned char*>{
     (unsigned char*)"GL_KHR_debug"  //
 };
 
@@ -60,7 +62,7 @@ static_assert(CheckSameSignature<decltype(mockGetString),  //
 const unsigned char* mockGetStringi(GLenum name, GLuint index) {
   switch (name) {
     case GL_EXTENSIONS:
-      return kExtensions[index];
+      return g_extensions[index];
     default:
       return (unsigned char*)"";
   }
@@ -72,7 +74,7 @@ static_assert(CheckSameSignature<decltype(mockGetStringi),  //
 void mockGetIntegerv(GLenum name, int* value) {
   switch (name) {
     case GL_NUM_EXTENSIONS: {
-      *value = kExtensions.size();
+      *value = g_extensions.size();
     } break;
     case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
       *value = 8;
@@ -110,10 +112,12 @@ void mockPushDebugGroupKHR(GLenum source,
 static_assert(CheckSameSignature<decltype(mockPushDebugGroupKHR),  //
                                  decltype(glPushDebugGroupKHR)>::value);
 
-std::shared_ptr<MockGLES> MockGLES::Init() {
+std::shared_ptr<MockGLES> MockGLES::Init(
+    const std::optional<std::vector<const unsigned char*>>& extensions) {
   // If we cannot obtain a lock, MockGLES is already being used elsewhere.
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
+  g_extensions = extensions.value_or(kExtensions);
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES());
   g_mock_gles = mock_gles;
   return mock_gles;

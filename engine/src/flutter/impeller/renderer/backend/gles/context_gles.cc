@@ -53,13 +53,15 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
     }
   }
 
+  device_capabilities_ = reactor_->GetProcTable().GetCapabilities();
+
   // Create the sampler library.
   {
     sampler_library_ =
-        std::shared_ptr<SamplerLibraryGLES>(new SamplerLibraryGLES());
+        std::shared_ptr<SamplerLibraryGLES>(new SamplerLibraryGLES(
+            device_capabilities_->SupportsDecalSamplerAddressMode()));
   }
 
-  device_capabilities_ = reactor_->GetProcTable().GetCapabilities();
   is_valid_ = true;
 }
 

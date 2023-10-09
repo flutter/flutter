@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <optional>
 #include "fml/macros.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -24,7 +25,9 @@ class MockGLES final {
   /// This method overwrites mocked global GLES function pointers to record
   /// invocations on this instance of |MockGLES|. As such, it should only be
   /// called once per test.
-  static std::shared_ptr<MockGLES> Init();
+  static std::shared_ptr<MockGLES> Init(
+      const std::optional<std::vector<const unsigned char*>>& extensions =
+          std::nullopt);
 
   /// @brief      Returns a configured |ProcTableGLES| instance.
   const ProcTableGLES& GetProcTable() const { return proc_table_; }
