@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/testing/dl_test_surface_metal.h"
+#include "flutter/impeller/display_list/dl_dispatcher.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
+#include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -52,6 +55,72 @@ std::shared_ptr<DlSurfaceInstance> DlMetalSurfaceProvider::MakeOffscreenSurface(
       TestMetalSurface::Create(*metal_context_, SkISize::Make(width, height));
   surface->GetSurface()->getCanvas()->clear(SK_ColorTRANSPARENT);
   return std::make_shared<DlMetalSurfaceInstance>(std::move(surface));
+}
+
+class DlMetalPixelData : public DlPixelData {
+  using MetalScreenshot = impeller::testing::MetalScreenshot;
+
+ public:
+  explicit DlMetalPixelData(std::unique_ptr<MetalScreenshot> screenshot)
+      : screenshot_(std::move(screenshot)),
+        addr_(reinterpret_cast<const uint32_t*>(screenshot_->GetBytes())),
+        ints_per_row_(screenshot_->GetBytesPerRow() / 4) {
+    FML_DCHECK(screenshot_->GetBytesPerRow() == ints_per_row_ * 4);
+  }
+  ~DlMetalPixelData() override = default;
+
+  const uint32_t* addr32(int x, int y) const override {
+    return addr_ + (y * ints_per_row_) + x;
+  }
+  size_t width() const override { return screenshot_->GetWidth(); }
+  size_t height() const override { return screenshot_->GetHeight(); }
+  void write(const std::string& path) const override {
+    screenshot_->WriteToPNG(path);
+  }
+
+ private:
+  std::unique_ptr<MetalScreenshot> screenshot_;
+  const uint32_t* addr_;
+  const uint32_t ints_per_row_;
+};
+
+sk_sp<DlPixelData> DlMetalSurfaceProvider::ImpellerSnapshot(
+    const sk_sp<DisplayList>& list,
+    int width,
+    int height) const {
+  InitScreenShotter();
+  impeller::DlDispatcher dispatcher;
+  dispatcher.drawColor(flutter::DlColor::kTransparent(),
+                       flutter::DlBlendMode::kSrc);
+  list->Dispatch(dispatcher);
+  auto picture = dispatcher.EndRecordingAsPicture();
+  return sk_make_sp<DlMetalPixelData>(snapshotter_->MakeScreenshot(
+      *aiks_context_, picture, {width, height}, false));
+}
+
+sk_sp<DlImage> DlMetalSurfaceProvider::MakeImpellerImage(
+    const sk_sp<DisplayList>& list,
+    int width,
+    int height) const {
+  InitScreenShotter();
+  impeller::DlDispatcher dispatcher;
+  dispatcher.drawColor(flutter::DlColor::kTransparent(),
+                       flutter::DlBlendMode::kSrc);
+  list->Dispatch(dispatcher);
+  auto picture = dispatcher.EndRecordingAsPicture();
+  std::shared_ptr<impeller::Image> image =
+      picture.ToImage(*aiks_context_, {width, height});
+  std::shared_ptr<impeller::Texture> texture = image->GetTexture();
+  return impeller::DlImageImpeller::Make(texture);
+}
+
+void DlMetalSurfaceProvider::InitScreenShotter() const {
+  if (!snapshotter_) {
+    snapshotter_.reset(new MetalScreenshotter());
+    auto typographer = impeller::TypographerContextSkia::Make();
+    aiks_context_.reset(new impeller::AiksContext(
+        snapshotter_->GetPlayground().GetContext(), typographer));
+  }
 }
 
 }  // namespace testing

@@ -13,7 +13,7 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/golden_tests/golden_digest.h"
 #include "impeller/golden_tests/metal_screenshot.h"
-#include "impeller/golden_tests/metal_screenshoter.h"
+#include "impeller/golden_tests/metal_screenshotter.h"
 #include "impeller/golden_tests/working_directory.h"
 
 namespace impeller {
@@ -50,14 +50,14 @@ bool SaveScreenshot(std::unique_ptr<MetalScreenshot> screenshot) {
 
 class GoldenTests : public ::testing::Test {
  public:
-  GoldenTests() : screenshoter_(new MetalScreenshoter()) {}
+  GoldenTests() : screenshotter_(new MetalScreenshotter()) {}
 
-  MetalScreenshoter& Screenshoter() { return *screenshoter_; }
+  MetalScreenshotter& Screenshotter() { return *screenshotter_; }
 
   void SetUp() override {
     testing::GoldenDigest::Instance()->AddDimension(
         "gpu_string",
-        Screenshoter().GetPlayground().GetContext()->DescribeGpuModel());
+        Screenshotter().GetPlayground().GetContext()->DescribeGpuModel());
   }
 
  private:
@@ -65,7 +65,7 @@ class GoldenTests : public ::testing::Test {
   // autorelease pool.
   fml::ScopedNSAutoreleasePool autorelease_pool_;
 
-  std::unique_ptr<MetalScreenshoter> screenshoter_;
+  std::unique_ptr<MetalScreenshotter> screenshotter_;
 };
 
 TEST_F(GoldenTests, ConicalGradient) {
@@ -82,8 +82,8 @@ TEST_F(GoldenTests, ConicalGradient) {
   Picture picture = canvas.EndRecordingAsPicture();
 
   auto aiks_context =
-      AiksContext(Screenshoter().GetPlayground().GetContext(), nullptr);
-  auto screenshot = Screenshoter().MakeScreenshot(aiks_context, picture);
+      AiksContext(Screenshotter().GetPlayground().GetContext(), nullptr);
+  auto screenshot = Screenshotter().MakeScreenshot(aiks_context, picture);
   ASSERT_TRUE(SaveScreenshot(std::move(screenshot)));
 }
 }  // namespace testing

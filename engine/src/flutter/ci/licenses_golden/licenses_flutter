@@ -1417,8 +1417,8 @@ ORIGIN: ../../../flutter/impeller/golden_tests/golden_tests.cc + ../../../flutte
 ORIGIN: ../../../flutter/impeller/golden_tests/main.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/metal_screenshot.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/metal_screenshot.mm + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/golden_tests/metal_screenshoter.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/golden_tests/metal_screenshoter.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/golden_tests/metal_screenshotter.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/golden_tests/metal_screenshotter.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/working_directory.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/working_directory.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests_harvester/bin/golden_tests_harvester.dart + ../../../flutter/LICENSE
@@ -4176,8 +4176,8 @@ FILE: ../../../flutter/impeller/golden_tests/golden_tests.cc
 FILE: ../../../flutter/impeller/golden_tests/main.cc
 FILE: ../../../flutter/impeller/golden_tests/metal_screenshot.h
 FILE: ../../../flutter/impeller/golden_tests/metal_screenshot.mm
-FILE: ../../../flutter/impeller/golden_tests/metal_screenshoter.h
-FILE: ../../../flutter/impeller/golden_tests/metal_screenshoter.mm
+FILE: ../../../flutter/impeller/golden_tests/metal_screenshotter.h
+FILE: ../../../flutter/impeller/golden_tests/metal_screenshotter.mm
 FILE: ../../../flutter/impeller/golden_tests/working_directory.cc
 FILE: ../../../flutter/impeller/golden_tests/working_directory.h
 FILE: ../../../flutter/impeller/golden_tests_harvester/bin/golden_tests_harvester.dart

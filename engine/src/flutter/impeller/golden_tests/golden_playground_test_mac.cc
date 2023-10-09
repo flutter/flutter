@@ -10,7 +10,7 @@
 
 #include "flutter/impeller/aiks/picture.h"
 #include "flutter/impeller/golden_tests/golden_digest.h"
-#include "flutter/impeller/golden_tests/metal_screenshoter.h"
+#include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
 
@@ -85,8 +85,9 @@ bool SaveScreenshot(std::unique_ptr<testing::MetalScreenshot> screenshot) {
 }  // namespace
 
 struct GoldenPlaygroundTest::GoldenPlaygroundTestImpl {
-  GoldenPlaygroundTestImpl() : screenshoter(new testing::MetalScreenshoter()) {}
-  std::unique_ptr<testing::MetalScreenshoter> screenshoter;
+  GoldenPlaygroundTestImpl()
+      : screenshotter(new testing::MetalScreenshotter()) {}
+  std::unique_ptr<testing::MetalScreenshotter> screenshotter;
   ISize window_size = ISize{1024, 768};
 };
 
@@ -140,8 +141,8 @@ PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
 bool GoldenPlaygroundTest::OpenPlaygroundHere(Picture picture) {
   AiksContext renderer(GetContext(), typographer_context_);
 
-  auto screenshot = pimpl_->screenshoter->MakeScreenshot(renderer, picture,
-                                                         pimpl_->window_size);
+  auto screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, picture,
+                                                          pimpl_->window_size);
   return SaveScreenshot(std::move(screenshot));
 }
 
@@ -178,11 +179,11 @@ std::shared_ptr<RuntimeStage> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
-  return pimpl_->screenshoter->GetPlayground().GetContext();
+  return pimpl_->screenshotter->GetPlayground().GetContext();
 }
 
 Point GoldenPlaygroundTest::GetContentScale() const {
-  return pimpl_->screenshoter->GetPlayground().GetContentScale();
+  return pimpl_->screenshotter->GetPlayground().GetContentScale();
 }
 
 Scalar GoldenPlaygroundTest::GetSecondsElapsed() const {
