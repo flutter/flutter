@@ -63,10 +63,6 @@ void main() {
       await expectScriptResult(<String>['smoke_test_failure'], 1);
     });
 
-    test('exits with code 1 when fails to connect', () async {
-      await expectScriptResult(<String>['smoke_test_setup_failure'], 1);
-    }, skip: true); // https://github.com/flutter/flutter/issues/53707
-
     test('exits with code 1 when results are mixed', () async {
       await expectScriptResult(
         <String>[
