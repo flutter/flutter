@@ -324,13 +324,13 @@ void PlatformViewAndroid::RegisterImageTexture(
   if (android_context_->RenderingApi() == AndroidRenderingAPI::kOpenGLES) {
     if (android_context_->GetImpellerContext()) {
       // Impeller GLES.
-      RegisterTexture(std::make_shared<HardwareBufferExternalTextureImpellerGL>(
+      RegisterTexture(std::make_shared<HardwareBufferExternalTextureGLImpeller>(
           std::static_pointer_cast<impeller::ContextGLES>(
               android_context_->GetImpellerContext()),
           texture_id, image_texture_entry, jni_facade_));
     } else {
       // Legacy GL.
-      RegisterTexture(std::make_shared<HardwareBufferExternalTextureGL>(
+      RegisterTexture(std::make_shared<HardwareBufferExternalTextureGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
           texture_id, image_texture_entry, jni_facade_));
     }

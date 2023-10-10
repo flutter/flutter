@@ -19,7 +19,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.embedding.engine.renderer.FlutterRenderer.ImageTextureRegistryEntry;
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.ImageTextureEntry;
 import java.io.IOException;
@@ -372,18 +371,22 @@ public class FlutterRenderer implements TextureRegistry {
     @Override
     @TargetApi(19)
     public void pushImage(Image image) {
+      if (released) {
+        return;
+      }
       Image toClose;
       synchronized (this) {
         toClose = this.image;
         this.image = image;
-        if (image != null) {
-          // Mark that we have a new frame available.
-          markTextureFrameAvailable(id);
-        }
       }
       // Close the previously pushed buffer.
       if (toClose != null) {
+        Log.e(TAG, "Dropping PlatformView Frame");
         toClose.close();
+      }
+      if (image != null) {
+        // Mark that we have a new frame available.
+        markTextureFrameAvailable(id);
       }
     }
 
@@ -398,12 +401,14 @@ public class FlutterRenderer implements TextureRegistry {
       if (r != null) {
         try {
           SyncFence fence = r.getFence();
-          boolean signaled = fence.awaitForever();
-          if (!signaled) {
-            Log.e(TAG, "acquireLatestImage failed to wait on image fence.");
+          if (fence.getSignalTime() == SyncFence.SIGNAL_TIME_PENDING) {
+            boolean signaled = fence.awaitForever();
+            if (!signaled) {
+              Log.e(TAG, "acquireLatestImage image's fence was never signalled.");
+            }
           }
         } catch (IOException e) {
-          Log.e(TAG, "acquireLatestImage failed calling Image.getFence: " + e);
+          // Drop.
         }
       }
       return r;

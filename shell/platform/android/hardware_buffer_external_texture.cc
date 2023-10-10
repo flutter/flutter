@@ -3,6 +3,8 @@
 
 #include <android/hardware_buffer_jni.h>
 #include <android/sensor.h>
+
+#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/ndk_helpers.h"
 
 namespace flutter {
@@ -23,6 +25,7 @@ void HardwareBufferExternalTexture::Paint(PaintContext& context,
   if (state_ == AttachmentState::kDetached) {
     return;
   }
+  Attach(context);
   const bool should_process_frame =
       (!freeze && new_frame_ready_) || dl_image_ == nullptr;
   if (should_process_frame) {
@@ -39,7 +42,7 @@ void HardwareBufferExternalTexture::Paint(PaintContext& context,
         flutter::DlCanvas::SrcRectConstraint::kStrict  // enforce edges
     );
   } else {
-    FML_LOG(WARNING)
+    FML_LOG(ERROR)
         << "No DlImage available for HardwareBufferExternalTexture to paint.";
   }
 }
@@ -57,46 +60,6 @@ void HardwareBufferExternalTexture::OnGrContextCreated() {
   state_ = AttachmentState::kUninitialized;
 }
 
-AHardwareBuffer* HardwareBufferExternalTexture::GetLatestHardwareBuffer() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  FML_CHECK(env != nullptr);
-
-  // ImageTextureEntry.acquireLatestImage.
-  JavaLocalRef image_java = jni_facade_->ImageTextureEntryAcquireLatestImage(
-      JavaLocalRef(image_texture_entry_));
-  if (image_java.obj() == nullptr) {
-    return nullptr;
-  }
-
-  // Image.getHardwareBuffer.
-  JavaLocalRef hardware_buffer_java =
-      jni_facade_->ImageGetHardwareBuffer(image_java);
-  if (hardware_buffer_java.obj() == nullptr) {
-    jni_facade_->ImageClose(image_java);
-    return nullptr;
-  }
-
-  // Convert into NDK HardwareBuffer.
-  AHardwareBuffer* latest_hardware_buffer =
-      NDKHelpers::AHardwareBuffer_fromHardwareBuffer(
-          env, hardware_buffer_java.obj());
-  if (latest_hardware_buffer == nullptr) {
-    jni_facade_->HardwareBufferClose(hardware_buffer_java);
-    jni_facade_->ImageClose(image_java);
-    return nullptr;
-  }
-
-  // Keep hardware buffer alive.
-  NDKHelpers::AHardwareBuffer_acquire(latest_hardware_buffer);
-
-  // Now that we have referenced the native hardware buffer, close the Java
-  // Image and HardwareBuffer objects.
-  jni_facade_->HardwareBufferClose(hardware_buffer_java);
-  jni_facade_->ImageClose(image_java);
-
-  return latest_hardware_buffer;
-}
-
 // Implementing flutter::ContextListener.
 void HardwareBufferExternalTexture::OnGrContextDestroyed() {
   if (state_ == AttachmentState::kAttached) {
@@ -104,6 +67,49 @@ void HardwareBufferExternalTexture::OnGrContextDestroyed() {
     Detach();
   }
   state_ = AttachmentState::kDetached;
+}
+
+JavaLocalRef HardwareBufferExternalTexture::AcquireLatestImage() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  FML_CHECK(env != nullptr);
+
+  // ImageTextureEntry.acquireLatestImage.
+  JavaLocalRef image_java = jni_facade_->ImageTextureEntryAcquireLatestImage(
+      JavaLocalRef(image_texture_entry_));
+  return image_java;
+}
+
+void HardwareBufferExternalTexture::CloseImage(
+    const fml::jni::JavaRef<jobject>& image) {
+  if (image.obj() == nullptr) {
+    return;
+  }
+  jni_facade_->ImageClose(JavaLocalRef(image));
+}
+
+void HardwareBufferExternalTexture::CloseHardwareBuffer(
+    const fml::jni::JavaRef<jobject>& hardware_buffer) {
+  if (hardware_buffer.obj() == nullptr) {
+    return;
+  }
+  jni_facade_->HardwareBufferClose(JavaLocalRef(hardware_buffer));
+}
+
+JavaLocalRef HardwareBufferExternalTexture::HardwareBufferFor(
+    const fml::jni::JavaRef<jobject>& image) {
+  if (image.obj() == nullptr) {
+    return JavaLocalRef();
+  }
+  // Image.getHardwareBuffer.
+  return jni_facade_->ImageGetHardwareBuffer(JavaLocalRef(image));
+}
+
+AHardwareBuffer* HardwareBufferExternalTexture::AHardwareBufferFor(
+    const fml::jni::JavaRef<jobject>& hardware_buffer) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  FML_CHECK(env != nullptr);
+  return NDKHelpers::AHardwareBuffer_fromHardwareBuffer(env,
+                                                        hardware_buffer.obj());
 }
 
 }  // namespace flutter
