@@ -213,7 +213,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     // filters rely on having the glyph coverage, whereas regular text is
     // drawn as rectangular texture samples.
     return ((paint.getColorSource() && !paint.getColorSource()->asColor()) ||
-            paint.getDrawStyle() == DlDrawStyle::kStroke);
+            paint.getDrawStyle() != DlDrawStyle::kFill);
   }
 
   DlPaint toDlPaint(const DecorationStyle& decor_style,
