@@ -81,15 +81,15 @@ class AnimationThemeData with Diagnosticable {
     Curve? switchOutCurve,
   }) {
     return AnimationThemeData(
-      animationCurve: animationCurve ?? this.animationCurve,
-      animationDuration: animationDuration ?? this.animationDuration,
-      reverseAnimationDuration: reverseAnimationDuration ?? this.reverseAnimationDuration,
-      sizeCurve: sizeCurve ?? this.sizeCurve,
-      crossFadeFirstCurve: crossFadeFirstCurve ?? this.crossFadeFirstCurve,
-      crossFadeSecondCurve: crossFadeSecondCurve ?? this.crossFadeSecondCurve,
-      switchInCurve: switchInCurve ?? this.switchInCurve,
-      switchOutCurve: switchOutCurve ?? this.switchOutCurve
-    );
+        animationCurve: animationCurve ?? this.animationCurve,
+        animationDuration: animationDuration ?? this.animationDuration,
+        reverseAnimationDuration:
+            reverseAnimationDuration ?? this.reverseAnimationDuration,
+        sizeCurve: sizeCurve ?? this.sizeCurve,
+        crossFadeFirstCurve: crossFadeFirstCurve ?? this.crossFadeFirstCurve,
+        crossFadeSecondCurve: crossFadeSecondCurve ?? this.crossFadeSecondCurve,
+        switchInCurve: switchInCurve ?? this.switchInCurve,
+        switchOutCurve: switchOutCurve ?? this.switchOutCurve);
   }
 
   /// Linearly interpolate between two [AnimationTheme].
@@ -104,10 +104,13 @@ class AnimationThemeData with Diagnosticable {
     return AnimationThemeData(
       animationCurve: t < 0.5 ? a?.animationCurve : b?.animationCurve,
       animationDuration: t < 0.5 ? a?.animationDuration : b?.animationDuration,
-      reverseAnimationDuration: t < 0.5 ? a?.reverseAnimationDuration : b?.reverseAnimationDuration,
+      reverseAnimationDuration:
+          t < 0.5 ? a?.reverseAnimationDuration : b?.reverseAnimationDuration,
       sizeCurve: t < 0.5 ? a?.sizeCurve : b?.sizeCurve,
-      crossFadeFirstCurve: t < 0.5 ? a?.crossFadeFirstCurve : b?.crossFadeFirstCurve,
-      crossFadeSecondCurve: t < 0.5 ? a?.crossFadeSecondCurve : b?.crossFadeSecondCurve,
+      crossFadeFirstCurve:
+          t < 0.5 ? a?.crossFadeFirstCurve : b?.crossFadeFirstCurve,
+      crossFadeSecondCurve:
+          t < 0.5 ? a?.crossFadeSecondCurve : b?.crossFadeSecondCurve,
       switchInCurve: t < 0.5 ? a?.switchInCurve : b?.switchInCurve,
       switchOutCurve: t < 0.5 ? a?.switchOutCurve : b?.switchOutCurve,
     );
@@ -115,18 +118,18 @@ class AnimationThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    animationCurve,
-    animationDuration,
-    reverseAnimationDuration,
-    sizeCurve,
-    crossFadeFirstCurve,
-    crossFadeSecondCurve,
-    switchInCurve,
-    switchOutCurve,
-  );
+        animationCurve,
+        animationDuration,
+        reverseAnimationDuration,
+        sizeCurve,
+        crossFadeFirstCurve,
+        crossFadeSecondCurve,
+        switchInCurve,
+        switchOutCurve,
+      );
 
   @override
-  bool operator == (Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -194,7 +197,6 @@ class AnimationTheme extends InheritedTheme {
     required this.data,
     required super.child,
   });
-
 
   /// The properties used for all descendant [AnimationTheme] widgets.
   final AnimationThemeData data;

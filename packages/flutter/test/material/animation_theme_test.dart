@@ -10,7 +10,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   test('AnimationThemeData copyWith, ==, hashCode basics', () {
     expect(const AnimationThemeData(), const AnimationThemeData().copyWith());
-    expect(const AnimationThemeData().hashCode, const AnimationThemeData().copyWith().hashCode);
+    expect(const AnimationThemeData().hashCode,
+        const AnimationThemeData().copyWith().hashCode);
   });
 
   test('AnimationThemeData lerp special cases', () {
@@ -31,7 +32,8 @@ void main() {
     expect(themeData.switchOutCurve, null);
   });
 
-  testWidgetsWithLeakTracking('Default AnimationThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default AnimationThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AnimationThemeData().debugFillProperties(builder);
 
@@ -52,7 +54,9 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('AnimationThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimationThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AnimationThemeData(
       animationCurve: Curves.linear,
@@ -81,5 +85,4 @@ void main() {
       'switchOutCurve: ElasticOutCurve(0.4)'
     ]);
   });
-
 }
