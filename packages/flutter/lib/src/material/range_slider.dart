@@ -558,7 +558,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // thumb selection is determined by the direction of the dx. The left thumb
     // is chosen for negative dx, and the right thumb is chosen for positive dx.
     if (inStartTouchTarget && inEndTouchTarget) {
-      final bool (towardsStart, towardsEnd) = switch (textDirection) {
+      final (bool towardsStart, bool towardsEnd) = switch (textDirection) {
         TextDirection.ltr => (dx < 0, dx > 0),
         TextDirection.rtl => (dx > 0, dx < 0),
       };
