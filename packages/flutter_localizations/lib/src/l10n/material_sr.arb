@@ -146,6 +146,7 @@
   "expandedHint": "Скупљено је",
   "collapsedHint": "Проширено је",
   "menuDismissLabel": "Одбаците мени",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Поглед нагоре",
+  "searchWebButtonLabel": "Претражи веб",
+  "shareButtonLabel": "Дели…"
 }

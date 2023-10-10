@@ -143,6 +143,7 @@
   "expandedHint": "Samengevouwen",
   "collapsedHint": "Uitgevouwen",
   "menuDismissLabel": "Menu sluiten",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Opzoeken",
+  "searchWebButtonLabel": "Op internet zoeken",
+  "shareButtonLabel": "Delen..."
 }

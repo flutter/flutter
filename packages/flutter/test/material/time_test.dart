@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('TimeOfDay.format', () {
@@ -59,7 +58,9 @@ void main() {
 
   group('RestorableTimeOfDay tests', () {
     testWidgetsWithLeakTracking('value is not accessible when not registered', (WidgetTester tester) async {
-      expect(() => RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4)).value, throwsAssertionError);
+      final RestorableTimeOfDay property = RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4));
+      addTearDown(property.dispose);
+      expect(() => property.value, throwsAssertionError);
     });
 
     testWidgetsWithLeakTracking('work when not in restoration scope', (WidgetTester tester) async {
@@ -79,7 +80,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 2, minute: 2));
     });
 
-    testWidgets('restart and restore', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('restart and restore', (WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),
@@ -195,4 +196,10 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   String get restorationId => 'widget';
+
+  @override
+  void dispose() {
+    timeOfDay.dispose();
+    super.dispose();
+  }
 }

@@ -146,6 +146,7 @@
   "expandedHint": "Suženo",
   "collapsedHint": "Prošireno",
   "menuDismissLabel": "Odbacivanje menija",
-  "lookUpButtonLabel": "Pogled prema gore",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Pogled nagore",
+  "searchWebButtonLabel": "Pretraži Web",
+  "shareButtonLabel": "Dijeli..."
 }

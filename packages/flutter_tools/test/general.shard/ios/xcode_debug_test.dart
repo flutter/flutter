@@ -56,10 +56,11 @@ void main() {
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
         );
       });
 
-      testWithoutContext('succeeds in opening and debugging with launch options and verbose logging', () async {
+      testWithoutContext('succeeds in opening and debugging with launch options, expectedConfigurationBuildDir, and verbose logging', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
@@ -88,6 +89,7 @@ void main() {
               pathToXcodeApp,
               '-g',
               '-j',
+              '-F',
               xcworkspace.path
             ],
           ),
@@ -105,6 +107,10 @@ void main() {
               project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
+              '--project-name',
+              project.hostAppProjectName,
+              '--expected-configuration-build-dir',
+              '/build/ios/iphoneos',
               '--device-id',
               deviceId,
               '--scheme',
@@ -131,6 +137,8 @@ void main() {
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
+          expectedConfigurationBuildDir: '/build/ios/iphoneos',
           verboseLogging: true,
         );
 
@@ -150,7 +158,7 @@ void main() {
         expect(status, true);
       });
 
-      testWithoutContext('succeeds in opening and debugging without launch options and verbose logging', () async {
+      testWithoutContext('succeeds in opening and debugging without launch options, expectedConfigurationBuildDir, and verbose logging', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
@@ -178,6 +186,7 @@ void main() {
               pathToXcodeApp,
               '-g',
               '-j',
+              '-F',
               xcworkspace.path
             ],
           ),
@@ -195,6 +204,8 @@ void main() {
               project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
+              '--project-name',
+              project.hostAppProjectName,
               '--device-id',
               deviceId,
               '--scheme',
@@ -257,6 +268,7 @@ void main() {
               pathToXcodeApp,
               '-g',
               '-j',
+              '-F',
               xcworkspace.path
             ],
             exception: ProcessException(
@@ -266,6 +278,7 @@ void main() {
                 '/non_existant_path',
                 '-g',
                 '-j',
+                '-F',
                 xcworkspace.path,
               ],
               'The application /non_existant_path cannot be opened for an unexpected reason',
@@ -332,6 +345,8 @@ void main() {
               project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
+              '--project-name',
+              project.hostAppProjectName,
               '--device-id',
               deviceId,
               '--scheme',
@@ -401,6 +416,8 @@ void main() {
               project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
+              '--project-name',
+              project.hostAppProjectName,
               '--device-id',
               deviceId,
               '--scheme',
@@ -474,6 +491,8 @@ void main() {
               project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
+              '--project-name',
+              project.hostAppProjectName,
               '--device-id',
               deviceId,
               '--scheme',
@@ -547,6 +566,8 @@ void main() {
               project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
+              '--project-name',
+              project.hostAppProjectName,
               '--device-id',
               deviceId,
               '--scheme',
@@ -674,6 +695,7 @@ void main() {
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
         );
         final XcodeDebug xcodeDebug = XcodeDebug(
           logger: logger,
@@ -731,6 +753,7 @@ void main() {
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
           isTemporaryProject: true,
         );
 
@@ -784,6 +807,70 @@ void main() {
         expect(status, isTrue);
       });
 
+      testWithoutContext('prints error message when deleting temporary directory that is nonexistant', () async {
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+        final XcodeDebugProject project = XcodeDebugProject(
+          scheme: 'Runner',
+          xcodeProject: xcodeproj,
+          xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
+          isTemporaryProject: true,
+        );
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'osascript',
+              '-l',
+              'JavaScript',
+              pathToXcodeAutomationScript,
+              'stop',
+              '--xcode-path',
+              pathToXcodeApp,
+              '--project-path',
+              project.xcodeProject.path,
+              '--workspace-path',
+              project.xcodeWorkspace.path,
+              '--close-window'
+            ],
+            stdout: '''
+  {"status":true,"errorMessage":null,"debugResult":null}
+  ''',
+          ),
+        ]);
+
+        xcodeDebug.startDebugActionProcess = FakeProcess();
+        xcodeDebug.currentDebuggingProject = project;
+
+        expect(xcodeDebug.startDebugActionProcess, isNotNull);
+        expect(xcodeDebug.currentDebuggingProject, isNotNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+
+        final bool status = await xcodeDebug.exit(skipDelay: true);
+
+        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
+        expect(xcodeDebug.currentDebuggingProject, isNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+        expect(logger.errorText, contains('Failed to delete temporary Xcode project'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(status, isTrue);
+      });
+
       testWithoutContext('kill Xcode when force exit', () async {
         final Xcode xcode = setupXcode(
           fakeProcessManager: FakeProcessManager.any(),
@@ -794,6 +881,7 @@ void main() {
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
         );
         final XcodeDebug xcodeDebug = XcodeDebug(
           logger: logger,
@@ -825,6 +913,47 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(exitStatus, isTrue);
       });
+
+      testWithoutContext('does not crash when deleting temporary directory that is nonexistant when force exiting', () async {
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+        final XcodeDebugProject project = XcodeDebugProject(
+          scheme: 'Runner',
+          xcodeProject: xcodeproj,
+          xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
+          isTemporaryProject: true,
+        );
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager:FakeProcessManager.any(),
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        xcodeDebug.startDebugActionProcess = FakeProcess();
+        xcodeDebug.currentDebuggingProject = project;
+
+        expect(xcodeDebug.startDebugActionProcess, isNotNull);
+        expect(xcodeDebug.currentDebuggingProject, isNotNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+
+        final bool status = await xcodeDebug.exit(force: true);
+
+        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
+        expect(xcodeDebug.currentDebuggingProject, isNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+        expect(logger.errorText, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(status, isTrue);
+      });
     });
 
     group('stop app', () {
@@ -847,6 +976,7 @@ void main() {
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
+          hostAppProjectName: 'Runner',
         );
       });
 

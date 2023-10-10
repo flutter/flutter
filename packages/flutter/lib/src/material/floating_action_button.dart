@@ -67,6 +67,13 @@ enum _FloatingActionButtonType {
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows [FloatingActionButton] with additional color mappings as
+/// described in: https://m3.material.io/components/floating-action-button/overview.
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
@@ -76,9 +83,8 @@ enum _FloatingActionButtonType {
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [mini] and [clipBehavior] arguments must not be null. Additionally,
-  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
-  /// must be non-negative.
+  /// The [elevation], [highlightElevation], and [disabledElevation] parameters,
+  /// if specified, must be non-negative.
   const FloatingActionButton({
     super.key,
     this.child,
@@ -120,10 +126,8 @@ class FloatingActionButton extends StatelessWidget {
   /// This constructor overrides the default size constraints of the floating
   /// action button.
   ///
-  /// The [clipBehavior] and [autofocus] arguments must not be null.
-  /// Additionally, [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], and [disabledElevation] (if specified) must be
-  /// non-negative.
+  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
+  /// and [disabledElevation] parameters, if specified, must be non-negative.
   const FloatingActionButton.small({
     super.key,
     this.child,
@@ -165,10 +169,8 @@ class FloatingActionButton extends StatelessWidget {
   /// This constructor overrides the default size constraints of the floating
   /// action button.
   ///
-  /// The [clipBehavior] and [autofocus] arguments must not be null.
-  /// Additionally, [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], and [disabledElevation] (if specified) must be
-  /// non-negative.
+  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
+  /// and [disabledElevation] parameters, if specified, must be non-negative.
   const FloatingActionButton.large({
     super.key,
     this.child,
@@ -208,9 +210,8 @@ class FloatingActionButton extends StatelessWidget {
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
-  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
-  /// (if specified) must be non-negative.
+  /// The [elevation], [highlightElevation], and [disabledElevation] parameters,
+  /// if specified, must be non-negative.
   ///
   /// See also:
   ///  * <https://m3.material.io/components/extended-fab>
@@ -411,7 +412,7 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// True if this is an "extended" floating action button.

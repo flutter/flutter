@@ -39,11 +39,10 @@ const double _kDefaultHorizontalPadding = 12.0;
 /// * [DropdownMenu]
 class DropdownMenuEntry<T> {
   /// Creates an entry that is used with [DropdownMenu.dropdownMenuEntries].
-  ///
-  /// [label] must be non-null.
   const DropdownMenuEntry({
     required this.value,
     required this.label,
+    this.labelWidget,
     this.leadingIcon,
     this.trailingIcon,
     this.enabled = true,
@@ -57,6 +56,17 @@ class DropdownMenuEntry<T> {
 
   /// The label displayed in the center of the menu item.
   final String label;
+
+  /// Overrides the default label widget which is `Text(label)`.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to override the default label [Text]
+  /// widget with one that forces the menu entry to appear on one line
+  /// by specifying [Text.maxLines] and [Text.overflow].
+  ///
+  /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu_entry_label_widget.0.dart **
+  /// {@end-tool}
+  final Widget? labelWidget;
 
   /// An optional icon to display before the label.
   final Widget? leadingIcon;
@@ -229,7 +239,7 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
-  /// Defaults to the overall theme's [TextTheme.labelLarge]
+  /// Defaults to the overall theme's [TextTheme.bodyLarge]
   /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
 
@@ -422,24 +432,40 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
     final List<Widget> result = <Widget>[];
-    final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
-    final ButtonStyle defaultStyle;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
-        );
-      case TextDirection.ltr:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
-        );
-    }
-
     for (int i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
+
+      // By default, when the text field has a leading icon but a menu entry doesn't
+      // have one, the label of the entry should have extra padding to be aligned
+      // with the text in the text input field. When both the text field and the
+      // menu entry have leading icons, the menu entry should remove the extra
+      // paddings so its leading icon will be aligned with the leading icon of
+      // the text field.
+      final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
+      final ButtonStyle defaultStyle;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
+          );
+        case TextDirection.ltr:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
+          );
+      }
+
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;
+
+      Widget label = entry.labelWidget ?? Text(entry.label);
+      if (widget.width != null) {
+        final double horizontalPadding = padding + _kDefaultHorizontalPadding;
+        label = ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: widget.width! - horizontalPadding),
+          child: label,
+        );
+      }
 
       // Simulate the focused state because the text field should always be focused
       // during traversal. If the menu item has a custom foreground color, the "focused"
@@ -450,7 +476,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           )
         : effectiveStyle;
 
-      final MenuItemButton menuItemButton = MenuItemButton(
+      final Widget  menuItemButton = MenuItemButton(
         key: enableScrollToHighlight ? buttonItemKeys[i] : null,
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
@@ -465,7 +491,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             }
           : null,
         requestFocusOnHover: false,
-        child: Text(entry.label),
+        child: label,
       );
       result.add(menuItemButton);
     }
@@ -520,6 +546,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   @override
   void dispose() {
+    if (widget.controller == null) {
+      _textEditingController.dispose();
+    }
     super.dispose();
   }
 
@@ -916,7 +945,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
   late final ThemeData _theme = Theme.of(context);
 
   @override
-  TextStyle? get textStyle => _theme.textTheme.labelLarge;
+  TextStyle? get textStyle => _theme.textTheme.bodyLarge;
 
   @override
   MenuStyle get menuStyle {

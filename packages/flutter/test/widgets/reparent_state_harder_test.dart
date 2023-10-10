@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // This is a regression test for https://github.com/flutter/flutter/issues/5588.
 
@@ -92,7 +93,7 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
 }
 
 void main() {
-  testWidgets('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
 
     // This is a bit of a weird test so let's try to explain it a bit.
     //

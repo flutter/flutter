@@ -24,6 +24,7 @@
   "searchTextFieldPlaceholderLabel": "جستجو",
   "noSpellCheckReplacementsLabel": "جایگزینی پیدا نشد",
   "menuDismissLabel": "بستن منو",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "جستجو",
+  "searchWebButtonLabel": "جستجو در وب",
+  "shareButtonLabel": "هم‌رسانی…"
 }

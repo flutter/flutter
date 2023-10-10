@@ -149,6 +149,7 @@
   "expandedHint": "Sbaleno",
   "collapsedHint": "Rozbaleno",
   "menuDismissLabel": "Zavřít nabídku",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Vyhledat",
+  "searchWebButtonLabel": "Vyhledávat na webu",
+  "shareButtonLabel": "Sdílet…"
 }

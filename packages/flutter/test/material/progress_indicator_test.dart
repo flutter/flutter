@@ -17,8 +17,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final ThemeData theme = ThemeData();
@@ -719,8 +718,9 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
-  testWidgets('Material2 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
+    addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(animationSheet.record(
       Theme(
@@ -730,13 +730,14 @@ void main() {
     ), const Duration(seconds: 3));
 
     await expectLater(
-      await animationSheet.collate(20),
+      animationSheet.collate(20),
       matchesGoldenFile('m2_material.refresh_progress_indicator.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
+    addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(animationSheet.record(
       Theme(
@@ -746,7 +747,7 @@ void main() {
     ), const Duration(seconds: 3));
 
     await expectLater(
-      await animationSheet.collate(20),
+      animationSheet.collate(20),
       matchesGoldenFile('m3_material.refresh_progress_indicator.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
@@ -1016,8 +1017,9 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
+    addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(animationSheet.record(
       Theme(
@@ -1033,13 +1035,14 @@ void main() {
     ), const Duration(seconds: 2));
 
     await expectLater(
-      await animationSheet.collate(20),
+      animationSheet.collate(20),
       matchesGoldenFile('m2_material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
+    addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(animationSheet.record(
       Theme(
@@ -1055,7 +1058,7 @@ void main() {
     ), const Duration(seconds: 2));
 
     await expectLater(
-      await animationSheet.collate(20),
+      animationSheet.collate(20),
       matchesGoldenFile('m3_material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
@@ -1179,6 +1182,75 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
+  });
+
+  testWidgetsWithLeakTracking('RefreshProgressIndicator using fields correctly', (WidgetTester tester) async {
+    Future<void> pumpIndicator(RefreshProgressIndicator indicator) {
+      return tester.pumpWidget(Theme(data: theme, child: indicator));
+    }
+
+    // With default values.
+    await pumpIndicator(const RefreshProgressIndicator());
+    Material material = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material),
+      ),
+    );
+    Container container = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Container),
+      ),
+    );
+    Padding padding = tester.widget(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(material.elevation, 2.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(padding.padding, const EdgeInsets.all(12.0));
+
+    // With values provided.
+    const double testElevation = 1.0;
+    const EdgeInsetsGeometry testIndicatorMargin = EdgeInsets.all(6.0);
+    const EdgeInsetsGeometry testIndicatorPadding = EdgeInsets.all(10.0);
+    await pumpIndicator(
+      const RefreshProgressIndicator(
+        elevation: testElevation,
+        indicatorMargin: testIndicatorMargin,
+        indicatorPadding: testIndicatorPadding,
+      ),
+    );
+    material = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material),
+      ),
+    );
+    container = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Container),
+      ),
+    );
+    padding = tester.widget(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(material.elevation, testElevation);
+    expect(container.margin, testIndicatorMargin);
+    expect(padding.padding, testIndicatorPadding);
   });
 }
 

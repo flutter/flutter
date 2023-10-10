@@ -112,6 +112,7 @@ class FlutterCommandResult {
 
 /// Common flutter command line options.
 abstract final class FlutterOptions {
+  static const String kFrontendServerStarterPath = 'frontend-server-starter-path';
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
@@ -486,7 +487,7 @@ abstract class FlutterCommand extends Command<void> {
       }
       ddsEnabled = !boolArg('disable-dds');
       // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
-      if (false) { // ignore: dead_code
+      if (false) { // ignore: dead_code, literal_only_boolean_expressions
         if (ddsEnabled) {
           globals.printWarning('${globals.logger.terminal
               .warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.');
@@ -846,6 +847,18 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help: 'This flag is deprecated as only null-safe code is supported.',
       hide: true,
+    );
+  }
+
+  void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
+    argParser.addOption(
+      FlutterOptions.kFrontendServerStarterPath,
+      help: 'When this value is provided, the frontend server will be started '
+            'in JIT mode from the specified file, instead of from the AOT '
+            'snapshot shipped with the Dart SDK. The specified file can either '
+            'be a Dart source file, or an AppJIT snapshot. This option does '
+            'not affect web builds.',
+      hide: !verboseHelp,
     );
   }
 
@@ -1234,11 +1247,25 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    final String? flavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    if (flavor != null) {
+      if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
+        throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.');
+      }
+      if (dartDefines.any((String define) => define.startsWith('FLUTTER_APP_FLAVOR'))) {
+        throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be '
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}');
+      }
+      dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
+    }
+
     return BuildInfo(buildMode,
-      argParser.options.containsKey('flavor')
-        ? stringArg('flavor')
-        : null,
+      flavor,
       trackWidgetCreation: trackWidgetCreation,
+      frontendServerStarterPath: argParser.options
+              .containsKey(FlutterOptions.kFrontendServerStarterPath)
+          ? stringArg(FlutterOptions.kFrontendServerStarterPath)
+          : null,
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty
         ? extraFrontEndOptions
         : null,

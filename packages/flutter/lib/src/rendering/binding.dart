@@ -385,7 +385,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [MediaQuery] directly. Preferred.
+  /// Querying [MediaQuery.platformBrightnessOf] directly. Preferred.
   ///
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
@@ -397,15 +397,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
-  /// Querying [MediaQueryData].
-  ///
-  /// ```dart
-  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
-  /// final Brightness brightness = mediaQueryData.platformBrightness;
   /// ```
   /// {@end-tool}
   ///
@@ -603,18 +594,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   Future<void> performReassemble() async {
     await super.performReassemble();
-    if (BindingBase.debugReassembleConfig?.widgetName == null) {
-      if (!kReleaseMode) {
-        FlutterTimeline.startSync('Preparing Hot Reload (layout)');
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Preparing Hot Reload (layout)');
+    }
+    try {
+      for (final RenderView renderView in renderViews) {
+        renderView.reassemble();
       }
-      try {
-        for (final RenderView renderView in renderViews) {
-          renderView.reassemble();
-        }
-      } finally {
-        if (!kReleaseMode) {
-          FlutterTimeline.finishSync();
-        }
+    } finally {
+      if (!kReleaseMode) {
+        FlutterTimeline.finishSync();
       }
     }
     scheduleWarmUpFrame();

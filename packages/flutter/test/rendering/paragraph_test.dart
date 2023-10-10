@@ -436,15 +436,15 @@ void main() {
     expect(paragraph.size.width, 78.0);
     expect(paragraph.size.height, 26.0);
 
+    final int length = testSpan.toPlainText().length;
     // Test the sizes of nested spans.
-    final String text = testSpan.toStringDeep();
     final List<ui.TextBox> boxes = <ui.TextBox>[
-      for (int i = 0; i < text.length; ++i)
+      for (int i = 0; i < length; ++i)
         ...paragraph.getBoxesForSelection(
           TextSelection(baseOffset: i, extentOffset: i + 1),
         ),
     ];
-    expect(boxes.length, equals(4));
+    expect(boxes, hasLength(4));
 
     expect(boxes[0].toRect().width, 13.0);
     expect(boxes[0].toRect().height, 13.0);
@@ -978,7 +978,8 @@ void main() {
           granularity: TextGranularity.word,
         ),
       );
-      expect(paragraph.selections.length, 0); // how []are you
+      expect(paragraph.selections.length, 1); // how []are you
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 4));
 
       // Equivalent to sending shift + alt + arrow-left.
       registrar.selectables[0].dispatchSelectionEvent(

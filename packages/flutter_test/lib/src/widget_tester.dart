@@ -13,7 +13,6 @@ import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' as test_package;
 
-import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
@@ -23,6 +22,7 @@ import 'test_async_utils.dart';
 import 'test_compat.dart';
 import 'test_pointer.dart';
 import 'test_text_input.dart';
+import 'tree_traversal.dart';
 
 // Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
@@ -81,6 +81,9 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
   return null;
 }
 
+// Examples can assume:
+// typedef MyWidget = Placeholder;
+
 /// Runs the [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
@@ -117,7 +120,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(MyWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
@@ -319,12 +322,13 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
 /// }
 ///
 /// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
-///   <TestScenario>{value1, value2},
+///   <TestScenario>{TestScenario.value1, TestScenario.value2},
 /// );
-///
-/// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
-///   expect(variants.currentValue, equals(value1));
-/// }, variant: variants);
+/// void main() {
+///   testWidgets('Test handling of TestScenario', (WidgetTester tester) async {
+///     expect(variants.currentValue, equals(TestScenario.value1));
+///   }, variant: variants);
+/// }
 /// ```
 /// {@end-tool}
 class ValueVariant<T> extends TestVariant<T> {
@@ -507,7 +511,7 @@ Future<void> expectLater(
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(MyWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   await tester.pump(); // allow the application to handle
 ///   await tester.pump(const Duration(seconds: 1)); // skip past the animation
@@ -555,7 +559,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// {@tool snippet}
   /// ```dart
   /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
-  ///   await tester.pumpWidget(MyWidget(-1));
+  ///   await tester.pumpWidget(const MyWidget());
   ///   expect(tester.takeException(), isAssertionError); // or isNull, as appropriate.
   /// });
   /// ```
@@ -1085,12 +1089,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Tests that just need to add text to widgets like [TextField]
   /// or [TextFormField] only need to call [enterText].
-  Future<void> showKeyboard(Finder finder) async {
+  Future<void> showKeyboard(FinderBase<Element> finder) async {
+    bool skipOffstage = true;
+    if (finder is Finder) {
+      skipOffstage = finder.skipOffstage;
+    }
     return TestAsyncUtils.guard<void>(() async {
       final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
-          matching: find.byType(EditableText, skipOffstage: finder.skipOffstage),
+          matching: find.byType(EditableText, skipOffstage: skipOffstage),
           matchRoot: true,
         ),
       );
@@ -1120,7 +1128,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// that widget has an open connection (e.g. by using [tap] to focus it),
   /// then call `testTextInput.enterText` directly (see
   /// [TestTextInput.enterText]).
-  Future<void> enterText(Finder finder, String text) async {
+  Future<void> enterText(FinderBase<Element> finder, String text) async {
     return TestAsyncUtils.guard<void>(() async {
       await showKeyboard(finder);
       testTextInput.enterText(text);

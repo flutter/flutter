@@ -168,13 +168,6 @@ abstract class BindingBase {
   static Type? _debugInitializedType;
   static bool _debugServiceExtensionsRegistered = false;
 
-  /// Additional configuration used by the framework during hot reload.
-  ///
-  /// See also:
-  ///
-  ///  * [DebugReassembleConfig], which describes the configuration.
-  static DebugReassembleConfig? debugReassembleConfig;
-
   /// Deprecated. Will be removed in a future version of Flutter.
   ///
   /// This property has been deprecated to prepare for Flutter's upcoming
@@ -568,33 +561,22 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.platformOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
-            switch (parameters['value']) {
-              case 'android':
-                debugDefaultTargetPlatformOverride = TargetPlatform.android;
-              case 'fuchsia':
-                debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-              case 'iOS':
-                debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-              case 'linux':
-                debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-              case 'macOS':
-                debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-              case 'windows':
-                debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-              case 'default':
-              default:
-                debugDefaultTargetPlatformOverride = null;
+            final String value = parameters['value']!;
+            debugDefaultTargetPlatformOverride = null;
+            for (final TargetPlatform candidate in TargetPlatform.values) {
+              if (candidate.name == value) {
+                debugDefaultTargetPlatformOverride = candidate;
+                break;
+              }
             }
             _postExtensionStateChangedEvent(
               FoundationServiceExtensions.platformOverride.name,
-              defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
+              defaultTargetPlatform.name,
             );
             await reassembleApplication();
           }
           return <String, dynamic>{
-            'value': defaultTargetPlatform
-                     .toString()
-                     .substring('$TargetPlatform.'.length),
+            'value': defaultTargetPlatform.name,
           };
         },
       );
@@ -988,24 +970,4 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
-}
-
-/// Additional configuration used for hot reload reassemble optimizations.
-///
-/// Do not extend, implement, or mixin this class. This may only be instantiated
-/// in debug mode.
-class DebugReassembleConfig {
-  /// Create a new [DebugReassembleConfig].
-  ///
-  /// Throws a [FlutterError] if this is called in profile or release mode.
-  DebugReassembleConfig({
-    this.widgetName,
-  }) {
-    if (!kDebugMode) {
-      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
-    }
-  }
-
-  /// The name of the widget that was modified, or `null` if the change was elsewhere.
-  final String? widgetName;
 }

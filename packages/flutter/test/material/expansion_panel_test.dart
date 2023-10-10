@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
@@ -876,7 +875,7 @@ void main() {
     },
   );
 
-  testWidgets('No duplicate global keys at layout/build time', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('No duplicate global keys at layout/build time', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13780
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1587,7 +1586,7 @@ void main() {
     expect(expandIcon.color, expandIconColor);
   });
 
-  testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
     const double elevation = 8;
 
     // Test for ExpansionPanelList.

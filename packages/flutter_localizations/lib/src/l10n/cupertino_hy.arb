@@ -24,6 +24,7 @@
   "searchTextFieldPlaceholderLabel": "Որոնում",
   "noSpellCheckReplacementsLabel": "Փոխարինումներ չեն գտնվել",
   "menuDismissLabel": "Փակել ընտրացանկը",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Փնտրել",
+  "searchWebButtonLabel": "Որոնել համացանցում",
+  "shareButtonLabel": "Կիսվել..."
 }

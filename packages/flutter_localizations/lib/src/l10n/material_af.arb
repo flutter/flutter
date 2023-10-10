@@ -142,6 +142,7 @@
   "expandedHint": "Ingevou",
   "collapsedHint": "Uitgevou",
   "menuDismissLabel": "Maak kieslys toe",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Kyk op",
+  "searchWebButtonLabel": "Deursoek web",
+  "shareButtonLabel": "Deel …"
 }

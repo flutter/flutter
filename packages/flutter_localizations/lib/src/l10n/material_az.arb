@@ -142,6 +142,7 @@
   "expandedHint": "Yığcamlaşdırıldı",
   "collapsedHint": "Genişləndirildi",
   "menuDismissLabel": "Menyunu qapadın",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Axtarın",
+  "searchWebButtonLabel": "Vebdə axtarın",
+  "shareButtonLabel": "Paylaşın..."
 }

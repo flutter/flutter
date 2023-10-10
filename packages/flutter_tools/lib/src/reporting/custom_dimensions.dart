@@ -58,7 +58,6 @@ class CustomDimensions {
     this.commandRunAndroidEmbeddingVersion,
     this.commandPackagesAndroidEmbeddingVersion,
     this.nullSafety,
-    this.fastReassemble,
     this.nullSafeMigratedLibraries,
     this.nullSafeTotalLibraries,
     this.hotEventCompileTimeInMs,
@@ -118,17 +117,17 @@ class CustomDimensions {
   final String? commandRunAndroidEmbeddingVersion;  // cd45
   final String? commandPackagesAndroidEmbeddingVersion;  // cd46
   final bool? nullSafety;  // cd47
-  final bool? fastReassemble;  // cd48
+  // cd48 was fastReassemble but that feature was removed
   final int? nullSafeMigratedLibraries;  // cd49
   final int? nullSafeTotalLibraries;  // cd50
-  final int? hotEventCompileTimeInMs;  // cd 51
-  final int? hotEventFindInvalidatedTimeInMs;  // cd 52
-  final int? hotEventScannedSourcesCount;  // cd 53
-  final int? hotEventReassembleTimeInMs;  // cd 54
-  final int? hotEventReloadVMTimeInMs;  // cd 55
-  final bool? commandRunEnableImpeller;  // cd 56
-  final String? commandRunIOSInterfaceType; // cd 57
-  final bool? commandRunIsTest; // cd 58
+  final int? hotEventCompileTimeInMs;  // cd51
+  final int? hotEventFindInvalidatedTimeInMs;  // cd52
+  final int? hotEventScannedSourcesCount;  // cd53
+  final int? hotEventReassembleTimeInMs;  // cd54
+  final int? hotEventReloadVMTimeInMs;  // cd55
+  final bool? commandRunEnableImpeller;  // cd56
+  final String? commandRunIOSInterfaceType; // cd57
+  final bool? commandRunIsTest; // cd58
 
   /// Convert to a map that will be used to upload to the analytics backend.
   Map<String, String> toMap() => <String, String>{
@@ -179,7 +178,6 @@ class CustomDimensions {
       if (commandRunAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandRunAndroidEmbeddingVersion.cdKey: commandRunAndroidEmbeddingVersion.toString(),
       if (commandPackagesAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion.cdKey: commandPackagesAndroidEmbeddingVersion.toString(),
       if (nullSafety != null) CustomDimensionsEnum.nullSafety.cdKey: nullSafety.toString(),
-      if (fastReassemble != null) CustomDimensionsEnum.fastReassemble.cdKey: fastReassemble.toString(),
       if (nullSafeMigratedLibraries != null) CustomDimensionsEnum.nullSafeMigratedLibraries.cdKey: nullSafeMigratedLibraries.toString(),
       if (nullSafeTotalLibraries != null) CustomDimensionsEnum.nullSafeTotalLibraries.cdKey: nullSafeTotalLibraries.toString(),
       if (hotEventCompileTimeInMs != null) CustomDimensionsEnum.hotEventCompileTimeInMs.cdKey: hotEventCompileTimeInMs.toString(),
@@ -247,7 +245,6 @@ class CustomDimensions {
       commandRunAndroidEmbeddingVersion: other.commandRunAndroidEmbeddingVersion ?? commandRunAndroidEmbeddingVersion,
       commandPackagesAndroidEmbeddingVersion: other.commandPackagesAndroidEmbeddingVersion ?? commandPackagesAndroidEmbeddingVersion,
       nullSafety: other.nullSafety ?? nullSafety,
-      fastReassemble: other.fastReassemble ?? fastReassemble,
       nullSafeMigratedLibraries: other.nullSafeMigratedLibraries ?? nullSafeMigratedLibraries,
       nullSafeTotalLibraries: other.nullSafeTotalLibraries ?? nullSafeTotalLibraries,
       hotEventCompileTimeInMs: other.hotEventCompileTimeInMs ?? hotEventCompileTimeInMs,
@@ -309,7 +306,6 @@ class CustomDimensions {
       commandRunAndroidEmbeddingVersion: _extractString(map, CustomDimensionsEnum.commandRunAndroidEmbeddingVersion),
       commandPackagesAndroidEmbeddingVersion: _extractString(map, CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion),
       nullSafety: _extractBool(map, CustomDimensionsEnum.nullSafety),
-      fastReassemble: _extractBool(map, CustomDimensionsEnum.fastReassemble),
       nullSafeMigratedLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeMigratedLibraries),
       nullSafeTotalLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeTotalLibraries),
       hotEventCompileTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventCompileTimeInMs),
@@ -397,7 +393,7 @@ enum CustomDimensionsEnum {
   commandRunAndroidEmbeddingVersion,  // cd45
   commandPackagesAndroidEmbeddingVersion,  // cd46
   nullSafety,  // cd47
-  fastReassemble,  // cd48
+  obsolete1,  // cd48 (was fastReassemble)
   nullSafeMigratedLibraries,  // cd49
   nullSafeTotalLibraries,  // cd50
   hotEventCompileTimeInMs,  // cd51

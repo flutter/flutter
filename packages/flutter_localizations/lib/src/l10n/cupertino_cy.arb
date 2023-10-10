@@ -44,6 +44,7 @@
   "modalBarrierDismissLabel": "Diystyru",
   "noSpellCheckReplacementsLabel": "Dim Ailosodiadau wedi'u Canfod",
   "menuDismissLabel": "Diystyru'r ddewislen",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Chwilio",
+  "searchWebButtonLabel": "Chwilio'r We",
+  "shareButtonLabel": "Rhannu..."
 }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -84,6 +85,13 @@ class XcodeDebug {
           project.xcodeProject.path,
           '--workspace-path',
           project.xcodeWorkspace.path,
+          '--project-name',
+          project.hostAppProjectName,
+          if (project.expectedConfigurationBuildDir != null)
+            ...<String>[
+              '--expected-configuration-build-dir',
+              project.expectedConfigurationBuildDir!,
+            ],
           '--device-id',
           deviceId,
           '--scheme',
@@ -186,7 +194,12 @@ class XcodeDebug {
       if (currentDebuggingProject != null) {
         final XcodeDebugProject project = currentDebuggingProject!;
         if (project.isTemporaryProject) {
-          project.xcodeProject.parent.deleteSync(recursive: true);
+          // Only delete if it exists. This is to prevent crashes when racing
+          // with shutdown hooks to delete temporary files.
+          ErrorHandlingFileSystem.deleteIfExists(
+            project.xcodeProject.parent,
+            recursive: true,
+          );
         }
         currentDebuggingProject = null;
       }
@@ -304,6 +317,7 @@ class XcodeDebug {
           _xcode.xcodeAppPath,
           '-g', // Do not bring the application to the foreground.
           '-j', // Launches the app hidden.
+          '-F', // Open "fresh", without restoring windows.
           xcodeWorkspace.path
         ],
         throwOnError: true,
@@ -390,6 +404,7 @@ class XcodeDebug {
 
     return XcodeDebugProject(
       scheme: 'Runner',
+      hostAppProjectName: 'Runner',
       xcodeProject: tempXcodeProject.childDirectory('Runner.xcodeproj'),
       xcodeWorkspace: tempXcodeProject.childDirectory('Runner.xcworkspace'),
       isTemporaryProject: true,
@@ -464,6 +479,8 @@ class XcodeDebugProject {
     required this.scheme,
     required this.xcodeWorkspace,
     required this.xcodeProject,
+    required this.hostAppProjectName,
+    this.expectedConfigurationBuildDir,
     this.isTemporaryProject = false,
     this.verboseLogging = false,
   });
@@ -471,6 +488,8 @@ class XcodeDebugProject {
   final String scheme;
   final Directory xcodeWorkspace;
   final Directory xcodeProject;
+  final String hostAppProjectName;
+  final String? expectedConfigurationBuildDir;
   final bool isTemporaryProject;
 
   /// When [verboseLogging] is true, the xcode_debug.js script will log

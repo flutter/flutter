@@ -24,6 +24,7 @@
   "searchTextFieldPlaceholderLabel": "ຊອກຫາ",
   "noSpellCheckReplacementsLabel": "ບໍ່ພົບການແທນທີ່",
   "menuDismissLabel": "ປິດເມນູ",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "ຊອກຫາຂໍ້ມູນ",
+  "searchWebButtonLabel": "ຊອກຫາຢູ່ອິນເຕີເນັດ",
+  "shareButtonLabel": "ແບ່ງປັນ..."
 }

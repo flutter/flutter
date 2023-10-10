@@ -45,8 +45,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// Creates a [ScrollAwareImageProvider].
   ///
   /// The [context] object is the [BuildContext] of the [State] using this
-  /// provider. It is used to determine scrolling velocity during [resolve]. It
-  /// must not be null.
+  /// provider. It is used to determine scrolling velocity during [resolve].
   ///
   /// The [imageProvider] is used to create a key and load the image. It must
   /// not be null, and is assumed to interact with the cache in the normal way
@@ -63,7 +62,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// been resolved.
   final DisposableBuildContext context;
 
-  /// The wrapped image provider to delegate [obtainKey] and [load] to.
+  /// The wrapped image provider to delegate [obtainKey] and [loadImage] to.
   final ImageProvider<T> imageProvider;
 
   @override
@@ -104,9 +103,6 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // have our image, and no one has otherwise completed the stream. Go.
     imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
   }
-
-  @override
-  ImageStreamCompleter load(T key, DecoderCallback decode) => imageProvider.load(key, decode);
 
   @override
   ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);

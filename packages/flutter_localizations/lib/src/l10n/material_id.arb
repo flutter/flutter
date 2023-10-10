@@ -143,6 +143,7 @@
   "expandedHint": "Diciutkan",
   "collapsedHint": "Diluaskan",
   "menuDismissLabel": "Tutup menu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Cari",
+  "searchWebButtonLabel": "Telusuri di Web",
+  "shareButtonLabel": "Bagikan..."
 }

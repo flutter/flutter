@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('MaterialBanner properties are respected', (WidgetTester tester) async {
@@ -600,7 +599,7 @@ void main() {
 
     final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
-    expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
+    expect(actionsTopLeft.dx - 8, moreOrLessEquals(bannerTopLeft.dx)); // actions OverflowBar is padded by 8
   });
 
   testWidgetsWithLeakTracking('Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger - RTL', (WidgetTester tester) async {
@@ -640,7 +639,7 @@ void main() {
 
     final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
-    expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
+    expect(actionsTopLeft.dx - 8, moreOrLessEquals(bannerTopLeft.dx)); // actions OverflowBar is padded by 8
   });
 
   testWidgetsWithLeakTracking('Actions laid out below content if forced override', (WidgetTester tester) async {

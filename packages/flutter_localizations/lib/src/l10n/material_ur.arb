@@ -143,6 +143,7 @@
   "expandedHint": "سکڑا ہوا",
   "collapsedHint": "پھیلا ہوا",
   "menuDismissLabel": "مینو برخاست کریں",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "تفصیل دیکھیں",
+  "searchWebButtonLabel": "ویب تلاش کریں",
+  "shareButtonLabel": "اشتراک کریں..."
 }

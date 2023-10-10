@@ -1509,9 +1509,6 @@ void main() {
   });
 
   test('TextPainter line breaking does not round to integers', () {
-    if (!ui.ParagraphBuilder.shouldDisableRoundingHack) {
-      return;
-    }
     const double fontSize = 1.25;
     const String text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);

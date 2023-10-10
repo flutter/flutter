@@ -45,6 +45,7 @@ export 'package:flutter/rendering.dart' show RenderBox, RenderObject, debugDumpL
 // late Object? _myState, newValue;
 // int _counter = 0;
 // Future<Directory> getApplicationDocumentsDirectory() async => Directory('');
+// late AnimationController animation;
 
 // An annotation used by test_analysis package to verify patterns are followed
 // that allow for tree-shaking of both fields and their initializers. This
@@ -1092,9 +1093,73 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// }
   /// ```
   ///
+  /// Sometimes, the changed state is in some other object not owned by the
+  /// widget [State], but the widget nonetheless needs to be updated to react to
+  /// the new state. This is especially common with [Listenable]s, such as
+  /// [AnimationController]s.
+  ///
+  /// In such cases, it is good practice to leave a comment in the callback
+  /// passed to [setState] that explains what state changed:
+  ///
+  /// ```dart
+  /// void _update() {
+  ///   setState(() { /* The animation changed. */ });
+  /// }
+  /// //...
+  /// animation.addListener(_update);
+  /// ```
+  ///
   /// It is an error to call this method after the framework calls [dispose].
   /// You can determine whether it is legal to call this method by checking
-  /// whether the [mounted] property is true.
+  /// whether the [mounted] property is true. That said, it is better practice
+  /// to cancel whatever work might trigger the [setState] rather than merely
+  /// checking for [mounted] before calling [setState], as otherwise CPU cycles
+  /// will be wasted.
+  ///
+  /// ## Design discussion
+  ///
+  /// The original version of this API was a method called `markNeedsBuild`, for
+  /// consistency with [RenderObject.markNeedsLayout],
+  /// [RenderObject.markNeedsPaint], _et al_.
+  ///
+  /// However, early user testing of the Flutter framework revealed that people
+  /// would call `markNeedsBuild()` much more often than necessary. Essentially,
+  /// people used it like a good luck charm, any time they weren't sure if they
+  /// needed to call it, they would call it, just in case.
+  ///
+  /// Naturally, this led to performance issues in applications.
+  ///
+  /// When the API was changed to take a callback instead, this practice was
+  /// greatly reduced. One hypothesis is that prompting developers to actually
+  /// update their state in a callback caused developers to think more carefully
+  /// about what exactly was being updated, and thus improved their understanding
+  /// of the appropriate times to call the method.
+  ///
+  /// In practice, the [setState] method's implementation is trivial: it calls
+  /// the provided callback synchronously, then calls [Element.markNeedsBuild].
+  ///
+  /// ## Performance considerations
+  ///
+  /// There is minimal _direct_ overhead to calling this function, and as it is
+  /// expected to be called at most once per frame, the overhead is irrelevant
+  /// anyway. Nonetheless, it is best to avoid calling this function redundantly
+  /// (e.g. in a tight loop), as it does involve creating a closure and calling
+  /// it. The method is idempotent, there is no benefit to calling it more than
+  /// once per [State] per frame.
+  ///
+  /// The _indirect_ cost of causing this function, however, is high: it causes
+  /// the widget to rebuild, possibly triggering rebuilds for the entire subtree
+  /// rooted at this widget, and further triggering a relayout and repaint of
+  /// the entire corresponding [RenderObject] subtree.
+  ///
+  /// For this reason, this method should only be called when the [build] method
+  /// will, as a result of whatever state change was detected, change its result
+  /// meaningfully.
+  ///
+  /// See also:
+  ///
+  ///  * [StatefulWidget], the API documentation for which has a section on
+  ///    performance considerations that are relevant here.
   @protected
   void setState(VoidCallback fn) {
     assert(() {
@@ -1251,6 +1316,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// To artificially cause the entire widget tree to be disposed, consider
   /// calling [runApp] with a widget such as [SizedBox.shrink].
+  ///
+  /// To listen for platform shutdown messages (and other lifecycle changes),
+  /// consider the [AppLifecycleListener] API.
   ///
   /// See also:
   ///
@@ -1524,15 +1592,19 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
     return renderObject.parentData is T;
   }
 
-  /// The [RenderObjectWidget] that is typically used to set up the [ParentData]
-  /// that [applyParentData] will write to.
+  /// Describes the [RenderObjectWidget] that is typically used to set up the
+  /// [ParentData] that [applyParentData] will write to.
   ///
   /// This is only used in error messages to tell users what widget typically
-  /// wraps this [ParentDataWidget].
+  /// wraps this [ParentDataWidget] through
+  /// [debugTypicalAncestorWidgetDescription].
   ///
   /// ## Implementations
   ///
-  /// The returned type should be a subclass of `RenderObjectWidget`.
+  /// The returned Type should describe a subclass of `RenderObjectWidget`. If
+  /// more than one Type is supported, use
+  /// [debugTypicalAncestorWidgetDescription], which typically inserts this
+  /// value but can be overridden to describe more than one Type.
   ///
   /// ```dart
   ///   @override
@@ -1543,6 +1615,16 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// a typical type argument (e.g. `Foo<int>` if `int` is typically how the
   /// type is specialized), or specifying the upper bound (e.g. `Foo<Object?>`).
   Type get debugTypicalAncestorWidgetClass;
+
+  /// Describes the [RenderObjectWidget] that is typically used to set up the
+  /// [ParentData] that [applyParentData] will write to.
+  ///
+  /// This is only used in error messages to tell users what widget typically
+  /// wraps this [ParentDataWidget].
+  ///
+  /// Returns [debugTypicalAncestorWidgetClass] by default as a String. This can
+  /// be overridden to describe more than one Type of valid parent.
+  String get debugTypicalAncestorWidgetDescription => '$debugTypicalAncestorWidgetClass';
 
   Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({
     required ParentData? parentData,
@@ -1564,7 +1646,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
         ),
       ErrorHint(
         'Usually, this means that the $runtimeType widget has the wrong ancestor RenderObjectWidget. '
-        'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetClass widgets.',
+        'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetDescription widgets.',
       ),
       if (parentDataCreator != null)
         ErrorHint(
@@ -1778,16 +1860,20 @@ abstract class InheritedWidget extends ProxyWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
 }
 
-/// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
+/// [RenderObjectWidget]s provide the configuration for [RenderObjectElement]s,
 /// which wrap [RenderObject]s, which provide the actual rendering of the
 /// application.
 ///
-/// See also:
+/// Usually, rather than subclassing [RenderObjectWidget] directly, render
+/// object widgets subclass one of:
 ///
-///  * [MultiChildRenderObjectWidget], which configures a [RenderObject] with
-///    a single list of children.
-///  * [SlottedMultiChildRenderObjectWidget], which configures a
-///    [RenderObject] that organizes its children in different named slots.
+///  * [LeafRenderObjectWidget], if the widget has no children.
+///  * [SingleChildRenderObjectElement], if the widget has exactly one child.
+///  * [MultiChildRenderObjectWidget], if the widget takes a list of children.
+///  * [SlottedMultiChildRenderObjectWidget], if the widget organizes its
+///    children in different named slots.
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 abstract class RenderObjectWidget extends Widget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1830,8 +1916,10 @@ abstract class RenderObjectWidget extends Widget {
   void didUnmountRenderObject(covariant RenderObject renderObject) { }
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have no children.
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1842,13 +1930,14 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 }
 
 /// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
-/// that have a single child slot. (This superclass only provides the storage
-/// for that child, it doesn't actually provide the updating logic.)
+/// that have a single child slot.
 ///
-/// Typically, the render object assigned to this widget will make use of
+/// The render object assigned to this widget should make use of
 /// [RenderObjectWithChildMixin] to implement a single-child model. The mixin
-/// exposes a [RenderObjectWithChildMixin.child] property that allows
-/// retrieving the render object belonging to the [child] widget.
+/// exposes a [RenderObjectWithChildMixin.child] property that allows retrieving
+/// the render object belonging to the [child] widget.
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1868,12 +1957,14 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
 ///
-/// Subclasses must return a [RenderObject] that mixes in
+/// Subclasses must use a [RenderObject] that mixes in
 /// [ContainerRenderObjectMixin], which provides the necessary functionality to
 /// visit the children of the container render object (the render object
-/// belonging to the [children] widgets). Typically, subclasses will return a
+/// belonging to the [children] widgets). Typically, subclasses will use a
 /// [RenderBox] that mixes in both [ContainerRenderObjectMixin] and
 /// [RenderBoxContainerDefaultsMixin].
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 ///
 /// See also:
 ///
@@ -1885,9 +1976,6 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 ///    its children in named slots.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
-  ///
-  /// The [children] argument must not be null and must not contain any null
-  /// objects.
   const MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] });
 
   /// The widgets below this widget in the tree.
@@ -3033,7 +3121,7 @@ class BuildOwner {
           assert(_globalKeyRegistry.containsKey(key));
           duplicates ??= <GlobalKey, Set<Element>>{};
           // Uses ordered set to produce consistent error message.
-          final Set<Element> elements = duplicates.putIfAbsent(key, () => LinkedHashSet<Element>());
+          final Set<Element> elements = duplicates.putIfAbsent(key, () => <Element>{});
           elements.add(element);
           elements.add(_globalKeyRegistry[key]!);
         }
@@ -3178,14 +3266,13 @@ class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
-  void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
+  void reassemble(Element root) {
     if (!kReleaseMode) {
       FlutterTimeline.startSync('Preparing Hot Reload (widgets)');
     }
     try {
       assert(root._parent == null);
       assert(root.owner == this);
-      root._debugReassembleConfig = reassembleConfig;
       root.reassemble();
     } finally {
       if (!kReleaseMode) {
@@ -3300,7 +3387,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   Element? _parent;
-  DebugReassembleConfig? _debugReassembleConfig;
   _NotificationNode? _notificationTree;
 
   /// Compare two widgets for equality.
@@ -3452,15 +3538,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
-      markNeedsBuild();
-      _debugReassembleConfig = null;
-    }
+    markNeedsBuild();
     visitChildren((Element child) {
-      child._debugReassembleConfig = _debugReassembleConfig;
       child.reassemble();
     });
-    _debugReassembleConfig = null;
   }
 
   bool _debugIsInScope(Element target) {
@@ -5275,7 +5356,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
     if (_flutterError == null) {
       properties.add(StringProperty('message', message, quoted: false));
     } else {
-      properties.add(_flutterError!.toDiagnosticsNode(style: DiagnosticsTreeStyle.whitespace));
+      properties.add(_flutterError.toDiagnosticsNode(style: DiagnosticsTreeStyle.whitespace));
     }
   }
 }
@@ -5511,9 +5592,7 @@ class StatefulElement extends ComponentElement {
 
   @override
   void reassemble() {
-    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
-      state.reassemble();
-    }
+    state.reassemble();
     super.reassemble();
   }
 
@@ -5745,12 +5824,28 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> super.widget);
 
+  /// Returns the [Type] of [ParentData] that this element has been configured
+  /// for.
+  ///
+  /// This is only available in debug mode. It will throw in profile and
+  /// release modes.
+  Type get debugParentDataType {
+    Type? type;
+    assert(() {
+      type = T;
+      return true;
+    }());
+    if (type != null) {
+      return type!;
+    }
+    throw UnsupportedError('debugParentDataType is only supported in debug builds');
+  }
+
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
       if (child is RenderObjectElement) {
         child._updateParentData(widget);
       } else {
-        assert(child is! ParentDataElement<ParentData>);
         child.visitChildren(applyParentDataToChild);
       }
     }
@@ -6199,48 +6294,122 @@ abstract class RenderObjectElement extends Element {
     return ancestor as RenderObjectElement?;
   }
 
-  ParentDataElement<ParentData>? _findAncestorParentDataElement() {
-    Element? ancestor = _parent;
-    ParentDataElement<ParentData>? result;
-    while (ancestor != null && ancestor is! RenderObjectElement) {
-      if (ancestor is ParentDataElement<ParentData>) {
-        result = ancestor;
-        break;
-      }
-      ancestor = ancestor._parent;
-    }
+  void _debugCheckCompetingAncestors(
+    List<ParentDataElement<ParentData>> result,
+    Set<Type> debugAncestorTypes,
+    Set<Type> debugParentDataTypes,
+    List<Type> debugAncestorCulprits,
+  ) {
     assert(() {
-      if (result == null || ancestor == null) {
-        return true;
-      }
-      // Check that no other ParentDataWidgets want to provide parent data.
-      final List<ParentDataElement<ParentData>> badAncestors = <ParentDataElement<ParentData>>[];
-      ancestor = ancestor!._parent;
-      while (ancestor != null && ancestor is! RenderObjectElement) {
-        if (ancestor is ParentDataElement<ParentData>) {
-          badAncestors.add(ancestor! as ParentDataElement<ParentData>);
-        }
-        ancestor = ancestor!._parent;
-      }
-      if (badAncestors.isNotEmpty) {
-        badAncestors.insert(0, result);
+      // Check that no other ParentDataWidgets of the same
+      // type want to provide parent data.
+      if (debugAncestorTypes.length != result.length || debugParentDataTypes.length != result.length) {
+        // This can only occur if the Sets of ancestors and parent data types was
+        // provided a dupe and did not add it.
+        assert(debugAncestorTypes.length < result.length || debugParentDataTypes.length < result.length);
         try {
           // We explicitly throw here (even though we immediately redirect the
           // exception elsewhere) so that debuggers will notice it when they
           // have "break on exception" enabled.
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Incorrect use of ParentDataWidget.'),
-            ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
-            for (final ParentDataElement<ParentData> ancestor in badAncestors)
-              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
-            ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
-            ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
-            ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
+            ErrorDescription(
+              'Competing ParentDataWidgets are providing parent data to the '
+              'same RenderObject:'
+            ),
+            for (final ParentDataElement<ParentData> ancestor in result.where((ParentDataElement<ParentData> ancestor) {
+              return debugAncestorCulprits.contains(ancestor.runtimeType);
+            }))
+              ErrorDescription(
+                '- ${ancestor.widget}, which writes ParentData of type '
+                '${ancestor.debugParentDataType}, (typically placed directly '
+                'inside a '
+                '${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} '
+                'widget)'
+              ),
+            ErrorDescription(
+              'A RenderObject can receive parent data from multiple '
+              'ParentDataWidgets, but the Type of ParentData must be unique to '
+              'prevent one overwriting another.'
+            ),
+            ErrorHint(
+              'Usually, this indicates that one or more of the offending '
+              "ParentDataWidgets listed above isn't placed inside a dedicated "
+              "compatible ancestor widget that it isn't sharing with another "
+              'ParentDataWidget of the same type.'
+            ),
+            ErrorHint(
+              'Otherwise, separating aspects of ParentData to prevent '
+              'conflicts can be done using mixins, mixing them all in on the '
+              'full ParentData Object, such as KeepAlive does with '
+              'KeepAliveParentDataMixin.'
+            ),
+            ErrorDescription(
+              'The ownership chain for the RenderObject that received the '
+              'parent data was:\n  ${debugGetCreatorChain(10)}'
+            ),
           ]);
-        } on FlutterError catch (e) {
-          _reportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
+        } on FlutterError catch (error) {
+          _reportException(
+            ErrorSummary('while looking for parent data.'),
+            error,
+            error.stackTrace,
+          );
         }
       }
+      return true;
+    }());
+  }
+
+  List<ParentDataElement<ParentData>> _findAncestorParentDataElements() {
+    Element? ancestor = _parent;
+    final List<ParentDataElement<ParentData>> result = <ParentDataElement<ParentData>>[];
+    final Set<Type> debugAncestorTypes = <Type>{};
+    final Set<Type> debugParentDataTypes = <Type>{};
+    final List<Type> debugAncestorCulprits = <Type>[];
+
+    // More than one ParentDataWidget can contribute ParentData, but there are
+    // some constraints.
+    // 1. ParentData can only be written by unique ParentDataWidget types.
+    //    For example, two KeepAlive ParentDataWidgets trying to write to the
+    //    same child is not allowed.
+    // 2. Each contributing ParentDataWidget must contribute to a unique
+    //    ParentData type, less ParentData be overwritten.
+    //    For example, there cannot be two ParentDataWidgets that both write
+    //    ParentData of type KeepAliveParentDataMixin, if the first check was
+    //    subverted by a subclassing of the KeepAlive ParentDataWidget.
+    // 3. The ParentData itself must be compatible with all ParentDataWidgets
+    //    writing to it.
+    //    For example, TwoDimensionalViewportParentData uses the
+    //    KeepAliveParentDataMixin, so it could be compatible with both
+    //    KeepAlive, and another ParentDataWidget with ParentData type
+    //    TwoDimensionalViewportParentData or a subclass thereof.
+    // The first and second cases are verified here. The third is verified in
+    // debugIsValidRenderObject.
+
+    while (ancestor != null && ancestor is! RenderObjectElement) {
+      if (ancestor is ParentDataElement<ParentData>) {
+        assert((ParentDataElement<ParentData> ancestor) {
+          if (!debugAncestorTypes.add(ancestor.runtimeType) || !debugParentDataTypes.add(ancestor.debugParentDataType)) {
+            debugAncestorCulprits.add(ancestor.runtimeType);
+          }
+          return true;
+        }(ancestor));
+        result.add(ancestor);
+      }
+      ancestor = ancestor._parent;
+    }
+    assert(() {
+      if (result.isEmpty || ancestor == null) {
+        return true;
+      }
+      // Validate points 1 and 2 from above.
+      _debugCheckCompetingAncestors(
+        result,
+        debugAncestorTypes,
+        debugParentDataTypes,
+        debugAncestorCulprits,
+      );
       return true;
     }());
     return result;
@@ -6398,8 +6567,8 @@ abstract class RenderObjectElement extends Element {
       return true;
     }());
     _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
-    final ParentDataElement<ParentData>? parentDataElement = _findAncestorParentDataElement();
-    if (parentDataElement != null) {
+    final List<ParentDataElement<ParentData>> parentDataElements = _findAncestorParentDataElements();
+    for (final ParentDataElement<ParentData> parentDataElement in parentDataElements) {
       _updateParentData(parentDataElement.widget as ParentDataWidget<ParentData>);
     }
   }
@@ -6538,8 +6707,8 @@ class LeafRenderObjectElement extends RenderObjectElement {
 ///
 /// The child is optional.
 ///
-/// This element subclass can be used for RenderObjectWidgets whose
-/// RenderObjects use the [RenderObjectWithChildMixin] mixin. Such widgets are
+/// This element subclass can be used for [RenderObjectWidget]s whose
+/// [RenderObject]s use the [RenderObjectWithChildMixin] mixin. Such widgets are
 /// expected to inherit from [SingleChildRenderObjectWidget].
 class SingleChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
@@ -6600,8 +6769,8 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
 /// An [Element] that uses a [MultiChildRenderObjectWidget] as its configuration.
 ///
-/// This element subclass can be used for RenderObjectWidgets whose
-/// RenderObjects use the [ContainerRenderObjectMixin] mixin with a parent data
+/// This element subclass can be used for [RenderObjectWidget]s whose
+/// [RenderObject]s use the [ContainerRenderObjectMixin] mixin with a parent data
 /// type that implements [ContainerParentDataMixin<RenderObject>]. Such widgets
 /// are expected to inherit from [MultiChildRenderObjectWidget].
 ///
@@ -6877,10 +7046,4 @@ class _NullWidget extends Widget {
 
   @override
   Element createElement() => throw UnimplementedError();
-}
-
-// Whether a [DebugReassembleConfig] indicates that an element holding [widget] can skip
-// a reassemble.
-bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
-  return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }

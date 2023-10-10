@@ -143,6 +143,7 @@
   "expandedHint": "Tiivistetty",
   "collapsedHint": "Laajennettu",
   "menuDismissLabel": "Hylkää valikko",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Hae",
+  "searchWebButtonLabel": "Hae verkosta",
+  "shareButtonLabel": "Jaa…"
 }

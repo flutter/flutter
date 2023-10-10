@@ -8,8 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../foundation/leak_tracking.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -70,12 +70,72 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/111370
+  testWidgetsWithLeakTracking('Handle is correctly transformed when the text is inside of a FittedBox ',(WidgetTester tester) async {
+      final Key textKey = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          color: const Color(0xFF2196F3),
+          home: Scaffold(
+            body: SelectionArea(
+              child: SizedBox(
+                height: 100,
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text('test', key: textKey),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture longpress = await tester.startGesture(const Offset(10, 10));
+      addTearDown(longpress.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await longpress.up();
+
+      // Text box is scaled by 5.
+      final RenderBox textBox = tester.firstRenderObject(find.byKey(textKey));
+      expect(textBox.size.height, 20.0);
+      final Offset textPoint = textBox.localToGlobal(const Offset(0, 20));
+      expect(textPoint, equals(const Offset(0, 100)));
+
+      // Find handles and verify their sizes.
+      expect(find.byType(Overlay), findsOneWidget);
+      expect(find.descendant(of: find.byType(Overlay),matching: find.byType(CustomPaint),),findsNWidgets(2));
+      final Iterable<RenderBox> handles = tester.renderObjectList(find.descendant(
+        of: find.byType(Overlay),
+        matching: find.byType(CustomPaint),
+      ));
+
+      // The handle height is determined by the formula:
+      // textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap .
+      // The text line height will be the value of the fontSize.
+      // The constant _kSelectionHandleRadius has the value of 6.
+      // The constant _kSelectionHandleOverlap has the value of 1.5.
+      // The handle height before scaling is 20.0 + 6 * 2 - 1.5 = 30.5.
+
+      final double handleHeightBeforeScaling = handles.first.size.height;
+      expect(handleHeightBeforeScaling, 30.5);
+
+      final Offset handleHeightAfterScaling = handles.first.localToGlobal(const Offset(0, 30.5)) - handles.first.localToGlobal(Offset.zero);
+
+      // The handle height after scaling is  30.5 * 5 = 152.5
+      expect(handleHeightAfterScaling, equals(const Offset(0.0, 152.5)));
+    },
+    skip: isBrowser, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
 
   testWidgetsWithLeakTracking('builds the default context menu by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           child: const Text('How are you?'),
         ),
       ),
@@ -91,6 +151,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
@@ -100,10 +162,13 @@ void main() {
 
   testWidgetsWithLeakTracking('builds a custom context menu if provided', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           contextMenuBuilder: (
             BuildContext context,
             SelectableRegionState selectableRegionState,
@@ -126,6 +191,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
@@ -157,7 +224,14 @@ void main() {
 
     // Backwards selection.
     await gesture.down(textOffsetToPosition(paragraph, 3));
-    expect(content, isNull);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+
+    await gesture.down(textOffsetToPosition(paragraph, 3));
+    await tester.pump();
     await gesture.moveTo(textOffsetToPosition(paragraph, 0));
     await gesture.up();
     await tester.pump();
@@ -165,7 +239,10 @@ void main() {
     expect(content!.plainText, 'How');
   });
 
-  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(
@@ -177,7 +254,7 @@ void main() {
               children: <Widget>[
                 const Text('How are you?'),
                 SelectionArea(
-                  focusNode: FocusNode(),
+                  focusNode: focusNode,
                   child: const Text('Good, and you?'),
                 ),
                 const Text('Fine, thank you.'),
@@ -195,6 +272,7 @@ void main() {
     await gesture.up();
     final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
     expect(boxes.length, 1);
+    await tester.pumpAndSettle();
     // There is a selection now.
     // We check the presence of the copy button to make sure the selection toolbar
     // is showing.

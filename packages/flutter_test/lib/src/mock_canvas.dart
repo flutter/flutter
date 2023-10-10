@@ -12,6 +12,10 @@ import 'finders.dart';
 import 'recording_canvas.dart';
 import 'test_async_utils.dart';
 
+// Examples can assume:
+// late RenderObject myRenderObject;
+// late Symbol methodName;
+
 /// Matches objects or functions that paint a display list that matches the
 /// canvas calls described by the pattern.
 ///
@@ -20,8 +24,8 @@ import 'test_async_utils.dart';
 /// following signatures:
 ///
 /// ```dart
-/// void function(PaintingContext context, Offset offset);
-/// void function(Canvas canvas);
+/// void exampleOne(PaintingContext context, Offset offset) { }
+/// void exampleTwo(Canvas canvas) { }
 /// ```
 ///
 /// In the case of functions that take a [PaintingContext] and an [Offset], the
@@ -65,7 +69,9 @@ Matcher paintsExactlyCountTimes(Symbol methodName, int count) {
 /// literal syntax, for example:
 ///
 /// ```dart
-/// if (methodName == #drawCircle) { ... }
+/// if (methodName == #drawCircle) {
+///   // ...
+/// }
 /// ```
 typedef PaintPatternPredicate = bool Function(Symbol methodName, List<dynamic> arguments);
 

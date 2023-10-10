@@ -143,6 +143,7 @@
   "expandedHint": "S'ha replegat",
   "collapsedHint": "S'ha desplegat",
   "menuDismissLabel": "Ignora el menú",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Mira amunt",
+  "searchWebButtonLabel": "Cerca al web",
+  "shareButtonLabel": "Comparteix..."
 }

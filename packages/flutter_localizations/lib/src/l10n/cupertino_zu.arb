@@ -24,6 +24,7 @@
   "searchTextFieldPlaceholderLabel": "Sesha",
   "noSpellCheckReplacementsLabel": "Akukho Okuzofakwa Esikhundleni Okutholakele",
   "menuDismissLabel": "Chitha imenyu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Bheka Phezulu",
+  "searchWebButtonLabel": "Sesha Iwebhu",
+  "shareButtonLabel": "Yabelana..."
 }

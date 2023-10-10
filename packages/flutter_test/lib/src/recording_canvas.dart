@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 /// An [Invocation] and the [stack] trace that led to it.
@@ -34,6 +35,9 @@ class RecordedInvocation {
     ).join('\n$indent');
   }
 }
+
+// Examples can assume:
+// late WidgetTester tester;
 
 /// A [Canvas] for tests that records its method calls.
 ///
@@ -92,6 +96,8 @@ class TestRecordingCanvas implements Canvas {
 class TestRecordingPaintingContext extends ClipContext implements PaintingContext {
   /// Creates a [PaintingContext] for tests that use [TestRecordingCanvas].
   TestRecordingPaintingContext(this.canvas);
+
+  final List<OpacityLayer> _createdLayers = <OpacityLayer>[];
 
   @override
   final Canvas canvas;
@@ -167,7 +173,18 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     canvas.saveLayer(null, Paint()); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
-    return OpacityLayer();
+    final OpacityLayer layer = OpacityLayer();
+    _createdLayers.add(layer);
+    return layer;
+  }
+
+  /// Releases allocated resources.
+  @mustCallSuper
+  void dispose() {
+    for (final OpacityLayer layer in _createdLayers) {
+      layer.dispose();
+    }
+    _createdLayers.clear();
   }
 
   @override

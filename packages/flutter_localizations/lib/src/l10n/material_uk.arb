@@ -149,6 +149,7 @@
   "expandedHint": "Згорнуто",
   "collapsedHint": "Розгорнуто",
   "menuDismissLabel": "Закрити меню",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "lookUpButtonLabel": "Шукати",
+  "searchWebButtonLabel": "Пошук в Інтернеті",
+  "shareButtonLabel": "Поділитися…"
 }
