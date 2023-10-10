@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('gets local coordinates', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('gets local coordinates', (WidgetTester tester) async {
     final List<ScaleStartDetails> startDetails = <ScaleStartDetails>[];
     final List<ScaleUpdateDetails> updateDetails = <ScaleUpdateDetails>[];
 
@@ -43,8 +44,10 @@ void main() {
     expect(startDetails.last.localFocalPoint, const Offset(50, 50));
     expect(startDetails.last.focalPoint, const Offset(400, 300));
 
-    // Finish gesture to release resources.
-    await gesture.up();
     await tester.pumpAndSettle();
+    await gesture.up();
+    await pointer2.up();
+    await tester.pumpAndSettle();
+
   });
 }
