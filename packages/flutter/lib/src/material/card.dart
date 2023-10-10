@@ -295,7 +295,7 @@ class _CardDefaultsM3 extends CardTheme {
 
   @override
   Color? get surfaceTintColor => _colors.surfaceTint;
-  
+
   @override
   ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
@@ -328,7 +328,7 @@ class _FilledCardDefaultsM3 extends CardTheme {
 
   @override
   Color? get surfaceTintColor => Colors.transparent;
-  
+
   @override
   ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
@@ -361,7 +361,7 @@ class _OutlinedCardDefaultsM3 extends CardTheme {
 
   @override
   Color? get surfaceTintColor => _colors.surfaceTint;
-  
+
   @override
   ShapeBorder? get shape =>
     const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))).copyWith(

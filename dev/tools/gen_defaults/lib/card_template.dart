@@ -45,7 +45,7 @@ class _${blockName}DefaultsM3 extends CardTheme {
 
   @override
   Color? get surfaceTintColor => ${colorOrTransparent('$tokenGroup.container.surface-tint-layer.color')};
-  
+
   @override
   ShapeBorder? get shape =>${_shape()};
 }
