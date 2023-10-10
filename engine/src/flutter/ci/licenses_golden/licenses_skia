@@ -1,4 +1,4 @@
-Signature: d22c58a2a6558945585bfc81d7517149
+Signature: 7b9cb92153281c1533ce0578c796f09c
 
 ====================================================================================================
 LIBRARY: etc1
@@ -6392,8 +6392,6 @@ ORIGIN: ../../../third_party/skia/gm/exoticformats.cpp + ../../../third_party/sk
 ORIGIN: ../../../third_party/skia/gm/rsxtext.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/skbug_9819.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/strokerect_anisotropic.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/verifiers/gmverifier.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/verifiers/gmverifier.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/widebuttcaps.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkM44.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkSamplingOptions.h + ../../../third_party/skia/LICENSE
@@ -6525,8 +6523,6 @@ FILE: ../../../third_party/skia/gm/exoticformats.cpp
 FILE: ../../../third_party/skia/gm/rsxtext.cpp
 FILE: ../../../third_party/skia/gm/skbug_9819.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
-FILE: ../../../third_party/skia/gm/verifiers/gmverifier.cpp
-FILE: ../../../third_party/skia/gm/verifiers/gmverifier.h
 FILE: ../../../third_party/skia/gm/widebuttcaps.cpp
 FILE: ../../../third_party/skia/include/core/SkM44.h
 FILE: ../../../third_party/skia/include/core/SkSamplingOptions.h
