@@ -107,7 +107,7 @@ class BuildPreviewCommand extends BuildSubCommand {
       allowReentrantFlutter: true,
     );
     if (result.exitCode != 0) {
-      final StringBuffer buffer = StringBuffer('${args.join(' ')} exited with code ${result.exitCode}');
+      final StringBuffer buffer = StringBuffer('${args.join(' ')} exited with code ${result.exitCode}\n');
       buffer.writeln('stdout:\n${result.stdout}\n');
       buffer.writeln('stderr:\n${result.stderr}');
       throw ProcessException(args.first, args.sublist(1), buffer.toString(), result.exitCode);
