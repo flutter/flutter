@@ -694,7 +694,7 @@ void main() {
     expect(find.text('5 of 10'), findsOneWidget);
   });
 
-  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('readonly text form field will hide cursor by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

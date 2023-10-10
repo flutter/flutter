@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -339,7 +340,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
 }
 
 void main() {
-  testWidgets('Default dropdown golden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
@@ -351,7 +352,7 @@ void main() {
     );
   });
 
-  testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
@@ -363,7 +364,7 @@ void main() {
     );
   });
 
-  testWidgets('Dropdown button control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button control test', (WidgetTester tester) async {
     String? value = 'one';
     void didChangeValue(String? newValue) {
       value = newValue;
@@ -402,7 +403,7 @@ void main() {
     expect(value, equals('two'));
   });
 
-  testWidgets('Dropdown button with no app', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button with no app', (WidgetTester tester) async {
     String? value = 'one';
     void didChangeValue(String? newValue) {
       value = newValue;
@@ -461,7 +462,7 @@ void main() {
     expect(value, equals('two'));
   });
 
-  testWidgets('DropdownButton does not allow duplicate item values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton does not allow duplicate item values', (WidgetTester tester) async {
     final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'c']
       .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -490,7 +491,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownButton value should only appear in one menu item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton value should only appear in one menu item', (WidgetTester tester) async {
     final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
       .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -519,7 +520,7 @@ void main() {
     );
   });
 
-  testWidgets('Dropdown form field uses form field state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown form field uses form field state', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? value;
@@ -576,7 +577,7 @@ void main() {
     expect(value, equals('three'));
   });
 
-  testWidgets('Dropdown in ListView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
     // forcing it to be sized down to the viewport width
@@ -611,7 +612,7 @@ void main() {
     expect(itemBoxes[1].size.width, equals(800.0 - 16.0 * 2));
   });
 
-  testWidgets('Dropdown menu can position correctly inside a nested navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menu can position correctly inside a nested navigator', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66870
     await tester.pumpWidget(
       MaterialApp(
@@ -657,7 +658,7 @@ void main() {
     expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
   });
 
-  testWidgets('Dropdown screen edges', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown screen edges', (WidgetTester tester) async {
     int? value = 4;
     final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[
       for (int i = 0; i < 20; ++i) DropdownMenuItem<int>(value: i, child: Text('$i')),
@@ -701,7 +702,7 @@ void main() {
   });
 
   for (final TextDirection textDirection in TextDirection.values) {
-    testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
       Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged, useMaterial3: false);
@@ -745,7 +746,7 @@ void main() {
     });
   }
 
-  testWidgets('Arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged);
@@ -764,7 +765,7 @@ void main() {
     );
   });
 
-  testWidgets('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
     final Widget customWidget = Container(
       decoration: ShapeDecoration(
         shape: CircleBorder(
@@ -793,7 +794,7 @@ void main() {
     expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
   });
 
-  testWidgets('Dropdown button icon should have default size and colors when not defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button icon should have default size and colors when not defined', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
@@ -819,7 +820,7 @@ void main() {
     expect(disabledRichText.text.style!.color, Colors.grey.shade400);
   });
 
-  testWidgets('Dropdown button icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
@@ -851,7 +852,7 @@ void main() {
     expect(disabledRichText.text.style!.color, Colors.orange);
   });
 
-  testWidgets('Dropdown button should use its own size and color properties over those defined by the theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button should use its own size and color properties over those defined by the theme', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
 
     final Icon customIcon = Icon(
@@ -889,7 +890,7 @@ void main() {
     expect(disabledRichText.text.style!.color, Colors.yellow);
   });
 
-  testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build() => buildFrame(buttonKey: buttonKey, isDense: true, onChanged: onChanged);
@@ -925,7 +926,7 @@ void main() {
     checkSelectedItemTextGeometry(tester, 'two');
   });
 
-  testWidgets('Dropdown button can have a text style with no fontSize specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button can have a text style with no fontSize specified', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/33425
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
@@ -952,7 +953,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
     // Open the dropdown menu
     final Key buttonKey = UniqueKey();
     await tester.pumpWidget(buildFrame(
@@ -981,7 +982,7 @@ void main() {
     );
   });
 
-  testWidgets('Dropdown menu aligns selected item with button in long lists', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menu aligns selected item with button in long lists', (WidgetTester tester) async {
     // Open the dropdown menu
     final Key buttonKey = UniqueKey();
     await tester.pumpWidget(buildFrame(
@@ -1006,7 +1007,7 @@ void main() {
     );
   });
 
-  testWidgets('Dropdown menu scrolls to last item in long lists', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menu scrolls to last item in long lists', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
@@ -1042,7 +1043,7 @@ void main() {
     );
   });
 
-  testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Size of DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String? value;
 
@@ -1063,7 +1064,7 @@ void main() {
     expect(buttonBox.size, equals(buttonBoxNullValue.size));
   });
 
-  testWidgets('Size of DropdownButton with no items', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Size of DropdownButton with no items', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/26419
     final Key buttonKey = UniqueKey();
     List<String>? items;
@@ -1090,7 +1091,7 @@ void main() {
     expect(buttonBox.size, equals(buttonBoxNullItems.size));
   });
 
-  testWidgets('Layout of a DropdownButton with null value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Layout of a DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String? value;
 
@@ -1118,7 +1119,7 @@ void main() {
     expect(value, equals('one'));
   });
 
-  testWidgets('Size of DropdownButton with null value and a hint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Size of DropdownButton with null value and a hint', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String? value;
 
@@ -1141,7 +1142,7 @@ void main() {
     expect(buttonBox.size, equals(buttonBoxHintValue.size));
   });
 
-  testWidgets('Dropdown menus must fit within the screen', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menus must fit within the screen', (WidgetTester tester) async {
 
     // The dropdown menu isn't readily accessible. To find it we're assuming that it
     // contains a ListView and that it's an instance of _DropdownMenu.
@@ -1248,7 +1249,7 @@ void main() {
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));
   });
 
-  testWidgets('Dropdown menus are dismissed on screen orientation changes, but not on keyboard hide', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menus are dismissed on screen orientation changes, but not on keyboard hide', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(onChanged: onChanged, mediaSize: const Size(800, 600)));
     await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
@@ -1270,7 +1271,7 @@ void main() {
     expect(find.byType(ListView, skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Semantics Tree contains only selected element', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics Tree contains only selected element', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(buildFrame(onChanged: onChanged));
 
@@ -1282,7 +1283,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dropdown button includes semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button includes semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const Key key = Key('test');
     await tester.pumpWidget(buildFrame(
@@ -1317,7 +1318,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Dropdown menu includes semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menu includes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const Key key = Key('test');
     await tester.pumpWidget(buildFrame(
@@ -1393,7 +1394,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('disabledHint displays on empty items or onChanged', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('disabledHint displays on empty items or onChanged', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String>? items, ValueChanged<String?>? onChanged }) => buildFrame(
@@ -1432,7 +1433,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/70177
-  testWidgets('disabledHint behavior test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('disabledHint behavior test', (WidgetTester tester) async {
     Widget build({ List<String>? items, ValueChanged<String?>? onChanged, String? value, Widget? hint, Widget? disabledHint }) => buildFrame(
       items: items,
       onChanged: onChanged,
@@ -1489,7 +1490,7 @@ void main() {
     expect(getIndex(), null);
   });
 
-  testWidgets('DropdownButton selected item color test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton selected item color test', (WidgetTester tester) async {
     Widget build({ ValueChanged<String?>? onChanged, String? value, Widget? hint, Widget? disabledHint }) {
       return MaterialApp(
         theme: ThemeData(
@@ -1543,7 +1544,7 @@ void main() {
     expect(textColor('two'), Colors.pink);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'DropdownButton hint displays when the items list is empty, '
     'items is null, and disabledHint is null',
     (WidgetTester tester) async {
@@ -1567,7 +1568,7 @@ void main() {
     },
   );
 
-  testWidgets('DropdownButton disabledHint is null by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String>? items }) {
@@ -1587,7 +1588,7 @@ void main() {
     expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
-  testWidgets('Size of largest widget is used DropdownButton when selectedItemBuilder is non-null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Size of largest widget is used DropdownButton when selectedItemBuilder is non-null', (WidgetTester tester) async {
     final List<String> items = <String>['25', '50', '100'];
     const String selectedItem = '25';
 
@@ -1619,7 +1620,7 @@ void main() {
     expect(dropdownButtonRenderBox.size.width, 100 + 24.0);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Enabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
     'is non-null and hint is defined, but smaller than largest selected item widget',
     (WidgetTester tester) async {
@@ -1657,7 +1658,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Enabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
     'is non-null and hint is defined, but larger than largest selected item widget',
     (WidgetTester tester) async {
@@ -1699,7 +1700,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
     'is non-null, and hint is defined, but smaller than largest selected item widget',
     (WidgetTester tester) async {
@@ -1736,7 +1737,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
     'is non-null and hint is defined, but larger than largest selected item widget',
     (WidgetTester tester) async {
@@ -1773,7 +1774,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
     'is non-null, and disabledHint is defined, but smaller than largest selected item widget',
     (WidgetTester tester) async {
@@ -1810,7 +1811,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Disabled button - Size of largest widget is used DropdownButton when selectedItemBuilder '
     'is non-null and disabledHint is defined, but larger than largest selected item widget',
     (WidgetTester tester) async {
@@ -1847,7 +1848,7 @@ void main() {
     },
   );
 
-  testWidgets('Dropdown in middle showing middle item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown in middle showing middle item', (WidgetTester tester) async {
     final List<DropdownMenuItem<int>> items = List<DropdownMenuItem<int>>.generate(
       100,
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
@@ -1881,7 +1882,7 @@ void main() {
     expect(getMenuScroll(), 2180.0);
   });
 
-  testWidgets('Dropdown in top showing bottom item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown in top showing bottom item', (WidgetTester tester) async {
     final List<DropdownMenuItem<int>> items = List<DropdownMenuItem<int>>.generate(
       100,
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
@@ -1916,7 +1917,7 @@ void main() {
     expect(getMenuScroll(), 4312.0);
   });
 
-  testWidgets('Dropdown in bottom showing top item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown in bottom showing top item', (WidgetTester tester) async {
     final List<DropdownMenuItem<int>> items = List<DropdownMenuItem<int>>.generate(
       100,
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
@@ -1951,7 +1952,7 @@ void main() {
     expect(getMenuScroll(), 0.0);
   });
 
-  testWidgets('Dropdown in center showing bottom item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown in center showing bottom item', (WidgetTester tester) async {
     final List<DropdownMenuItem<int>> items = List<DropdownMenuItem<int>>.generate(
       100,
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
@@ -1985,7 +1986,7 @@ void main() {
     expect(getMenuScroll(), 4312.0);
   });
 
-  testWidgets('Dropdown menu respects parent size limits', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menu respects parent size limits', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/24417
     int? selectedIndex;
     await tester.pumpWidget(
@@ -2031,7 +2032,7 @@ void main() {
     expect(selectedIndex, 13);
   });
 
-  testWidgets('Dropdown button will accept widgets as its underline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown button will accept widgets as its underline', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(
       border: Border(bottom: BorderSide(color: Color(0xFFCCBB00), width: 4.0)),
     );
@@ -2058,7 +2059,7 @@ void main() {
     expect(tester.widgetList<DecoratedBox>(decoratedBox).last.decoration, defaultDecoration);
   });
 
-  testWidgets('DropdownButton selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
     const List<String> items = <String>[
       'One',
       'Two',
@@ -2104,19 +2105,19 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton uses default color when expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton uses default color when expanded', (WidgetTester tester) async {
     await checkDropdownColor(tester);
   });
 
-  testWidgets('DropdownButton uses dropdownColor when expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton uses dropdownColor when expanded', (WidgetTester tester) async {
     await checkDropdownColor(tester, color: const Color.fromRGBO(120, 220, 70, 0.8));
   });
 
-  testWidgets('DropdownButtonFormField uses dropdownColor when expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField uses dropdownColor when expanded', (WidgetTester tester) async {
     await checkDropdownColor(tester, color: const Color.fromRGBO(120, 220, 70, 0.8), isFormField: true);
   });
 
-  testWidgets('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/42340
     final List<String> items = <String>['1', '2', '3'];
     String? selectedItem;
@@ -2162,7 +2163,7 @@ void main() {
     expect(find.text('You have selected: 1'), findsOneWidget);
   });
 
-  testWidgets('Variable size and oversized menu items', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Variable size and oversized menu items', (WidgetTester tester) async {
     final List<double> itemHeights = <double>[30, 40, 50, 60];
     double? dropdownValue = itemHeights[0];
 
@@ -2261,7 +2262,7 @@ void main() {
     expect(tester.getCenter(item40.first).dy, tester.getCenter(item40.last).dy);
   });
 
-  testWidgets('DropdownButton menu items do not resize when its route is popped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton menu items do not resize when its route is popped', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44877.
     const List<String> items = <String>[
       'one',
@@ -2317,7 +2318,7 @@ void main() {
     expect(find.text('two'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton hint is selected item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton hint is selected item', (WidgetTester tester) async {
     const double hintPaddingOffset = 8;
     const List<String> itemValues = <String>['item0', 'item1', 'item2', 'item3'];
     String? selectedItem = 'item0';
@@ -2385,10 +2386,12 @@ void main() {
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
   });
 
-  testWidgets('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true, useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -2399,10 +2402,12 @@ void main() {
     expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f00ff00)));
   });
 
-  testWidgets('DropdownButtonFormField can be focused, and has focusColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField can be focused, and has focusColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -2413,17 +2418,20 @@ void main() {
     expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f00ff00)));
   });
 
-  testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, focusNode: focusNode, autofocus: true, focusColor: const Color(0xff00ff00)));
     await tester.pump(); // Pump a frame for autofocus to take effect (although it shouldn't).
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(find.byKey(buttonKey), isNot(paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0xff00ff00))));
   });
 
-  testWidgets('DropdownButton is activated with the enter key', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton is activated with the enter key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -2478,7 +2486,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/77655.
-  testWidgets('DropdownButton selecting a null valued item should be selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton selecting a null valued item should be selected', (WidgetTester tester) async {
     final List<MapEntry<String?, String>> items = <MapEntry<String?, String>>[
       const MapEntry<String?, String>(null, 'None'),
       const MapEntry<String?, String>('one', 'One'),
@@ -2518,8 +2526,9 @@ void main() {
     expect(find.text('None'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton is activated with the space key', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton is activated with the space key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -2573,8 +2582,9 @@ void main() {
     expect(value, equals('two'));
   });
 
-  testWidgets('Selected element is focused when dropdown is opened', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selected element is focused when dropdown is opened', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2633,8 +2643,9 @@ void main() {
     expect(node.hasFocus, isTrue);
   });
 
-  testWidgets('Selected element is correctly focused with dropdown that more items than fit on the screen', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selected element is correctly focused with dropdown that more items than fit on the screen', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(50, (int index) => index);
 
@@ -2696,8 +2707,9 @@ void main() {
     expect(node.hasFocus, isTrue);
   });
 
-  testWidgets("Having a focused element doesn't interrupt scroll when flung by touch", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Having a focused element doesn't interrupt scroll when flung by touch", (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
 
@@ -2771,8 +2783,9 @@ void main() {
     expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91), skipOffstage: false).last)).hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton')..addListener(() { });
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
 
@@ -2819,8 +2832,9 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('DropdownButton changes selected item with arrow keys', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton changes selected item with arrow keys', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -2878,7 +2892,7 @@ void main() {
     expect(value, equals('two'));
   });
 
-  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String? value = 'one';
 
@@ -2923,7 +2937,7 @@ void main() {
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 
-  testWidgets('DropdownMenuItem onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownMenuItem onTap callback is called when defined', (WidgetTester tester) async {
     String? value = 'one';
     final List<int> menuItemTapCounters = <int>[0, 0, 0, 0];
     void onChanged(String? newValue) { value = newValue; }
@@ -3008,7 +3022,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
   });
 
-  testWidgets('Does not crash when option is selected without waiting for opening animation to complete', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not crash when option is selected without waiting for opening animation to complete', (WidgetTester tester) async {
     // Regression test for b/171846624.
 
     final List<String> options = <String>['first', 'second', 'third'];
@@ -3056,7 +3070,7 @@ void main() {
     expect(find.text('second').hitTestable(), findsNothing);
   });
 
-  testWidgets('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(
       value: '0',
       // menu is short enough to fit onto the screen.
@@ -3088,7 +3102,7 @@ void main() {
     expect(find.byType(Scrollbar), paints..rect());
   });
 
-  testWidgets("Dropdown menu's maximum height should be influenced by DropdownButton.menuMaxHeight.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Dropdown menu's maximum height should be influenced by DropdownButton.menuMaxHeight.", (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(
       value: '0',
       items: List<String>.generate(/*length=*/64, (int index) => index.toString()),
@@ -3142,7 +3156,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/89029
-  testWidgets('menu position test with `menuMaxHeight`', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('menu position test with `menuMaxHeight`', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     await tester.pumpWidget(buildFrame(
       buttonKey: buttonKey,
@@ -3165,7 +3179,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/76614
-  testWidgets('Do not crash if used in very short screen', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not crash if used in very short screen', (WidgetTester tester) async {
     // The default item height is 48.0 pixels and needs two items padding since
     // the menu requires empty space surrounding the menu. Finally, the constraint height
     // is 47.0 pixels for the menu rendering.
@@ -3221,7 +3235,7 @@ void main() {
     );
   });
 
-  testWidgets('Tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
     String? value = 'first';
 
     await tester.pumpWidget(
@@ -3267,7 +3281,7 @@ void main() {
     expect(find.text('second').hitTestable(), findsOneWidget);
   });
 
-  testWidgets('Disabled item should not be focusable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled item should not be focusable', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3298,7 +3312,7 @@ void main() {
     expect(Focus.maybeOf(disabledItem), null, reason: 'Disabled menu item should not be able to request focus');
   });
 
-  testWidgets('alignment test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('alignment test', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     Widget buildFrame({AlignmentGeometry? buttonAlignment, AlignmentGeometry? menuAlignment}) {
       return MaterialApp(
@@ -3402,7 +3416,7 @@ void main() {
       );
     }
 
-    testWidgets('Dropdown with enabled feedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dropdown with enabled feedback', (WidgetTester tester) async {
       const bool enableFeedback = true;
 
       await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
@@ -3415,7 +3429,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('Dropdown with disabled feedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dropdown with disabled feedback', (WidgetTester tester) async {
       const bool enableFeedback = false;
 
       await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
@@ -3428,7 +3442,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('Dropdown with enabled feedback by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dropdown with enabled feedback by default', (WidgetTester tester) async {
       await tester.pumpWidget(feedbackBoilerplate());
 
       await tester.tap(find.text('One'));
@@ -3440,7 +3454,7 @@ void main() {
     });
   });
 
-  testWidgets('DropdownButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton changes mouse cursor when hovered', (WidgetTester tester) async {
     const Key key = Key('testDropdownButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -3498,7 +3512,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to Dropdown', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Conflicting scrollbars are not applied by ScrollBehavior to Dropdown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     // Open the dropdown menu
     final Key buttonKey = UniqueKey();
@@ -3521,7 +3535,7 @@ void main() {
 
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('borderRadius property works properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('borderRadius property works properly', (WidgetTester tester) async {
     const double radius = 20.0;
 
     await tester.pumpWidget(
@@ -3564,7 +3578,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/88574
-  testWidgets("specifying itemHeight affects popup menu items' height", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("specifying itemHeight affects popup menu items' height", (WidgetTester tester) async {
     const String value = 'One';
     const double itemHeight = 80;
     final List<DropdownMenuItem<String>> menuItems = <String>[
@@ -3605,7 +3619,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/92438
-  testWidgets('Do not throw due to the double precision', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not throw due to the double precision', (WidgetTester tester) async {
     const String value = 'One';
     const double itemHeight = 77.701;
     final List<DropdownMenuItem<String>> menuItems = <String>[
@@ -3639,7 +3653,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('BorderRadius property works properly for DropdownButtonFormField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BorderRadius property works properly for DropdownButtonFormField', (WidgetTester tester) async {
     const double radius = 20.0;
 
     await tester.pumpWidget(
@@ -3680,7 +3694,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownButton hint alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton hint alignment', (WidgetTester tester) async {
     const String hintText = 'hint';
 
     // AlignmentDirectional.centerStart (default)
@@ -3785,7 +3799,7 @@ void main() {
     expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dy, 350.0);
   });
 
-  testWidgets('DropdownButton hint alignment with selectedItemBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton hint alignment with selectedItemBuilder', (WidgetTester tester) async {
     const String hintText = 'hint';
 
     // AlignmentDirectional.centerStart (default)
@@ -3904,7 +3918,7 @@ void main() {
     expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dy, 350.0);
   });
 
-  testWidgets('BorderRadius property clips dropdown button and dropdown menu', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BorderRadius property clips dropdown button and dropdown menu', (WidgetTester tester) async {
     const double radius = 20.0;
 
     await tester.pumpWidget(
@@ -3943,7 +3957,7 @@ void main() {
     expect(renderClip.borderRadius, BorderRadius.circular(radius));
   });
 
-  testWidgets('Size of DropdownButton with padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Size of DropdownButton with padding', (WidgetTester tester) async {
     const double padVertical = 5;
     const double padHorizontal = 10;
     final Key buttonKey = UniqueKey();

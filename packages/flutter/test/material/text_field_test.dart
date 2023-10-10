@@ -787,7 +787,7 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
-  testWidgets('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -2484,7 +2484,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
-  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2527,6 +2527,11 @@ void main() {
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -2576,7 +2581,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2620,11 +2625,16 @@ void main() {
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/122519
     final TextEditingController controller = _textEditingController();
@@ -2697,6 +2707,11 @@ void main() {
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -12361,7 +12376,7 @@ void main() {
      skip: isBrowser, // [intended] Browser handles arrow keys differently.
   );
 
-  testWidgets('long press drag can edge scroll vertically', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long press drag can edge scroll vertically', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12438,6 +12453,11 @@ void main() {
       textOffsetToPosition(tester, 0).dy,
       moreOrLessEquals(firstCharY - lineHeight, epsilon: 1),
     );
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgetsWithLeakTracking('keyboard selection change scrolls the field vertically', (WidgetTester tester) async {
@@ -14283,7 +14303,7 @@ void main() {
       });
     });
   });
-  testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Arrow keys don't move input focus", (WidgetTester tester) async {
     final TextEditingController controller1 = _textEditingController();
     final TextEditingController controller2 = _textEditingController();
     final TextEditingController controller3 = _textEditingController();
@@ -14446,7 +14466,7 @@ void main() {
     expect(textFieldSize1, equals(textFieldSize2));
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'The selection menu displays in an Overlay without error',
     (WidgetTester tester) async {
       // This is a regression test for
@@ -14454,6 +14474,9 @@ void main() {
       final TextEditingController controller = _textEditingController(
         text: 'This is a test that shows some odd behavior with Text Selection!',
       );
+
+      late final OverlayEntry overlayEntry;
+      addTearDown(() => overlayEntry..remove()..dispose());
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -14466,7 +14489,7 @@ void main() {
                 height: 600,
                 child: Overlay(
                   initialEntries: <OverlayEntry>[
-                    OverlayEntry(
+                    overlayEntry = OverlayEntry(
                       builder: (BuildContext context) => Center(
                         child: TextField(
                           controller: controller,
@@ -16271,7 +16294,7 @@ void main() {
   });
 
   group('magnifier builder', () {
-    testWidgets('should build custom magnifier if given',
+    testWidgetsWithLeakTracking('should build custom magnifier if given',
         (WidgetTester tester) async {
       final Widget customMagnifier = Container(
         key: UniqueKey(),
@@ -16286,14 +16309,15 @@ void main() {
         home: Placeholder(),
       ));
 
-      final BuildContext context =
-          tester.firstElement(find.byType(Placeholder));
+      final BuildContext context = tester.firstElement(find.byType(Placeholder));
+      final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierInfo.dispose);
 
       expect(
           textField.magnifierConfiguration!.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+              magnifierInfo,
             ),
           isA<Widget>().having(
               (Widget widget) => widget.key,
@@ -16302,24 +16326,26 @@ void main() {
     });
 
     group('defaults', () {
-      testWidgets('should build Magnifier on Android', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should build Magnifier on Android', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
         );
 
         final BuildContext context = tester.firstElement(find.byType(TextField));
         final EditableText editableText = tester.widget(find.byType(EditableText));
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        addTearDown(magnifierInfo.dispose);
 
         expect(
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+                magnifierInfo,
               ),
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-      testWidgets('should build CupertinoMagnifier on iOS',
+      testWidgetsWithLeakTracking('should build CupertinoMagnifier on iOS',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
@@ -16327,17 +16353,19 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(TextField));
         final EditableText editableText = tester.widget(find.byType(EditableText));
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        addTearDown(magnifierInfo.dispose);
 
         expect(
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+                magnifierInfo,
               ),
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-      testWidgets('should build nothing on Android and iOS',
+      testWidgetsWithLeakTracking('should build nothing on Android and iOS',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
@@ -16345,12 +16373,14 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(TextField));
         final EditableText editableText = tester.widget(find.byType(EditableText));
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        addTearDown(magnifierInfo.dispose);
 
         expect(
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+                magnifierInfo,
               ),
             isNull);
       },

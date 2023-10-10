@@ -929,7 +929,7 @@ void main() {
     );
   });
 
-  testWidgets("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
     Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
       return MaterialApp(
         theme: ThemeData(
