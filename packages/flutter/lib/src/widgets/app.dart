@@ -1205,8 +1205,7 @@ class WidgetsApp extends StatefulWidget {
     _debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier =
-      ValueNotifier<bool>(false);
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1755,10 +1754,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       result = ValueListenableBuilder<bool>(
         valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
-        builder: (BuildContext context, bool debugShowWidgetInspectorOverride,
-            Widget? child) {
-          if (widget.debugShowWidgetInspector ||
-              debugShowWidgetInspectorOverride) {
+        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
+          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(
               selectButtonBuilder: widget.inspectorSelectButtonBuilder,
               child: child!,
@@ -1768,8 +1765,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         },
         child: result,
       );
-      if (widget.debugShowCheckedModeBanner &&
-          WidgetsApp.debugAllowBannerOverride) {
+      if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = CheckedModeBanner(
           child: result,
         );
