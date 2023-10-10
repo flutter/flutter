@@ -1058,7 +1058,6 @@ class _ZoomPageTransitionNoCache extends StatelessWidget {
     this.child,
   });
 
-
   /// The animation that drives the [child]'s entrance and exit.
   ///
   /// See also:
@@ -1146,7 +1145,6 @@ class _ZoomEnterTransitionNoCache extends StatelessWidget {
   final Animation<double> animation;
   final Widget? child;
   final bool reverse;
-
 
   @override
   Widget build(BuildContext context) {
