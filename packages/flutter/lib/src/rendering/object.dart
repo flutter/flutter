@@ -1697,7 +1697,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _layerHandle.layer = null;
-    _offsetLayerHandler.layer = null;
     assert(() {
       // TODO(dnfield): Enable this assert once clients have had a chance to
       // migrate.
@@ -2716,8 +2715,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   late bool _wasRepaintBoundary;
 
-  final LayerHandle<OffsetLayer> _offsetLayerHandler = LayerHandle<OffsetLayer>();
-
   /// Update the composited layer owned by this render object.
   ///
   /// This method is called by the framework when [isRepaintBoundary] is true.
@@ -2741,11 +2738,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // constraint that the instance/type of layer cannot be changed at runtime.
   OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
     assert(isRepaintBoundary);
-    if (oldLayer != null) {
-      _offsetLayerHandler.layer = null;
-      return oldLayer;
-    }
-    return _offsetLayerHandler.layer = OffsetLayer();
+    return oldLayer ?? OffsetLayer();
   }
 
   /// The compositing layer that this render object uses to repaint.
