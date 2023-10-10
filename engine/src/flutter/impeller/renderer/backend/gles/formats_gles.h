@@ -194,4 +194,6 @@ constexpr std::optional<GLenum> ToTextureTarget(TextureType type) {
   FML_UNREACHABLE();
 }
 
+std::string DebugToFramebufferError(int status);
+
 }  // namespace impeller
