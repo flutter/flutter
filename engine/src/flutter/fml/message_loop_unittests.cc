@@ -17,12 +17,6 @@
 #include "flutter/fml/time/chrono_timestamp_provider.h"
 #include "gtest/gtest.h"
 
-#if FML_OS_WIN
-#define PLATFORM_SPECIFIC_CAPTURE(...) [ __VA_ARGS__, count ]
-#else
-#define PLATFORM_SPECIFIC_CAPTURE(...) [__VA_ARGS__]
-#endif
-
 TEST(MessageLoop, GetCurrent) {
   std::thread thread([]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -88,15 +82,14 @@ TEST(MessageLoop, NonDelayedTasksAreRunInOrder) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t current = 0;
     for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTask(
-          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
-            ASSERT_EQ(current, i);
-            current++;
-            if (count == i + 1) {
-              fml::MessageLoop::GetCurrent().Terminate();
-              terminated = true;
-            }
-          });
+      loop.GetTaskRunner()->PostTask([&terminated, i, &current]() {
+        ASSERT_EQ(current, i);
+        current++;
+        if (count == i + 1) {
+          fml::MessageLoop::GetCurrent().Terminate();
+          terminated = true;
+        }
+      });
     }
     loop.Run();
     ASSERT_EQ(current, count);
@@ -119,7 +112,7 @@ TEST(MessageLoop, DelayedTasksAtSameTimeAreRunInOrder) {
         fml::ChronoTicksSinceEpoch() + fml::TimeDelta::FromMilliseconds(2);
     for (size_t i = 0; i < count; i++) {
       loop.GetTaskRunner()->PostTaskForTime(
-          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
+          [&terminated, i, &current]() {
             ASSERT_EQ(current, i);
             current++;
             if (count == i + 1) {
@@ -163,19 +156,16 @@ TEST(MessageLoop, TaskObserverFire) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t task_count = 0;
     size_t obs_count = 0;
-    auto obs = PLATFORM_SPECIFIC_CAPTURE(&obs_count)() {
-      obs_count++;
-    };
+    auto obs = [&obs_count]() { obs_count++; };
     for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTask(
-          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &task_count)() {
-            ASSERT_EQ(task_count, i);
-            task_count++;
-            if (count == i + 1) {
-              fml::MessageLoop::GetCurrent().Terminate();
-              terminated = true;
-            }
-          });
+      loop.GetTaskRunner()->PostTask([&terminated, i, &task_count]() {
+        ASSERT_EQ(task_count, i);
+        task_count++;
+        if (count == i + 1) {
+          fml::MessageLoop::GetCurrent().Terminate();
+          terminated = true;
+        }
+      });
     }
     loop.AddTaskObserver(0, obs);
     loop.Run();
