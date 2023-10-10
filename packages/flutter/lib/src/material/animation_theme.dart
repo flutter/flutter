@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/src/material/theme.dart';
+import '../../widgets.dart';
+import '../foundation/diagnostics.dart';
 
 /// Overrides the default properties values for descendant [Badge] widgets.
 ///
