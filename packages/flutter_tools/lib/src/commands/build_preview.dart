@@ -62,27 +62,35 @@ class BuildPreviewCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
-    final FlutterProject flutterProject = await _createProject(targetDir);
-    if (!globals.platform.isWindows) {
-      throwToolExit('"build _preview" is currently only supported on Windows hosts.');
-    }
-    await buildWindows(
-      flutterProject.windows,
-      buildInfo,
-    );
+    try {
+      final FlutterProject flutterProject = await _createProject(targetDir);
+      if (!globals.platform.isWindows) {
+        throwToolExit('"build _preview" is currently only supported on Windows hosts.');
+      }
+      await buildWindows(
+        flutterProject.windows,
+        buildInfo,
+      );
 
-    final File previewDevice = targetDir
-        .childDirectory(getWindowsBuildDirectory(TargetPlatform.windows_x64))
-        .childDirectory('runner')
-        .childDirectory('Debug')
-        .childFile('$appName.exe');
-    if (!previewDevice.existsSync()) {
-      throw StateError('Preview device not found at ${previewDevice.absolute.path}');
+      final File previewDevice = targetDir
+          .childDirectory(getWindowsBuildDirectory(TargetPlatform.windows_x64))
+          .childDirectory('runner')
+          .childDirectory('Debug')
+          .childFile('$appName.exe');
+      if (!previewDevice.existsSync()) {
+        throw StateError('Preview device not found at ${previewDevice.absolute.path}');
+      }
+      final String newPath = artifacts.getArtifactPath(Artifact.flutterPreviewDevice);
+      fs.file(newPath).parent.createSync(recursive: true);
+      previewDevice.copySync(newPath);
+      return FlutterCommandResult.success();
+    } finally {
+      try {
+        targetDir.deleteSync();
+      } on FileSystemException catch (exception) {
+        logger.printError('Failed to delete ${targetDir.path}\n\n$exception');
+      }
     }
-    final String newPath = artifacts.getArtifactPath(Artifact.flutterPreviewDevice);
-    fs.file(newPath).parent.createSync(recursive: true);
-    previewDevice.copySync(newPath);
-    return FlutterCommandResult.success();
   }
 
   Future<FlutterProject> _createProject(Directory targetDir) async {
