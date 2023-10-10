@@ -2742,6 +2742,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
     assert(isRepaintBoundary);
     if (oldLayer != null) {
+      _offsetLayerHandler.layer = null;
       return oldLayer;
     }
     return _offsetLayerHandler.layer = OffsetLayer();

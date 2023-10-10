@@ -664,9 +664,8 @@ void main() {
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
-  },
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  );
+    context.dispose();
+  });
 
   testWidgetsWithLeakTracking('GridView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
