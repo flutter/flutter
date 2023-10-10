@@ -287,6 +287,17 @@ static std::ostream& operator<<(std::ostream& os, const SkTextBlob* blob) {
   return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
 }
 
+static std::ostream& operator<<(std::ostream& os,
+                                const impeller::TextFrame* frame) {
+  if (frame == nullptr) {
+    return os << "no text";
+  }
+  auto bounds = frame->GetBounds();
+  return os << "&TextFrame("
+            << bounds.GetLeft() << ", " << bounds.GetTop() << " => "
+            << bounds.GetRight() << ", " << bounds.GetBottom() << ")";
+}
+
 std::ostream& operator<<(std::ostream& os, const DlVertexMode& mode) {
   switch (mode) {
     case DlVertexMode::kTriangles:     return os << "VertexMode::kTriangles";
@@ -860,12 +871,13 @@ void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
            << x << ", " << y << ");" << std::endl;
 }
 
-void DisplayListStreamDispatcher::drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) {
-    startl() << "drawTextFrame("
-      << text_frame.get() << ", "
-      << x << ", " << y << ");" << std::endl;
+void DisplayListStreamDispatcher::drawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y) {
+  startl() << "drawTextFrame("
+    << text_frame.get() << ", "
+    << x << ", " << y << ");" << std::endl;
 }
 
 void DisplayListStreamDispatcher::drawShadow(const SkPath& path,

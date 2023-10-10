@@ -16,6 +16,9 @@
 #include "flutter/fml/math.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 #include "third_party/skia/include/core/SkBBHFactory.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -592,16 +595,11 @@ class RenderEnvironment {
     return RenderEnvironment(provider, PixelFormat::kN32PremulPixelFormat);
   }
 
-  void init_ref(SkRenderer& sk_renderer,
-                DlRenderer& dl_renderer,
-                DlColor bg = DlColor::kTransparent()) {
-    init_ref(kEmptySkSetup, sk_renderer, kEmptyDlSetup, dl_renderer, bg);
-  }
-
   void init_ref(SkSetup& sk_setup,
                 SkRenderer& sk_renderer,
                 DlSetup& dl_setup,
                 DlRenderer& dl_renderer,
+                DlRenderer& imp_renderer,
                 DlColor bg = DlColor::kTransparent()) {
     SkJobRenderer sk_job(sk_setup, sk_renderer, kEmptySkRenderer, kTestSkImage);
     RenderJobInfo info = {
@@ -617,7 +615,7 @@ class RenderEnvironment {
     ASSERT_EQ(sk_job.setup_clip_bounds(), ref_clip_bounds_);
     if (provider_->supports_impeller()) {
       test_impeller_image_ = makeTestImpellerImage(provider_);
-      DlJobRenderer imp_job(dl_setup, dl_renderer, kEmptyDlRenderer,
+      DlJobRenderer imp_job(dl_setup, imp_renderer, kEmptyDlRenderer,
                             test_impeller_image_);
       ref_impeller_result_ = getImpellerResult(info, imp_job);
     }
@@ -818,10 +816,33 @@ class TestParameters {
   TestParameters(const SkRenderer& sk_renderer,
                  const DlRenderer& dl_renderer,
                  const DisplayListAttributeFlags& flags)
-      : sk_renderer_(sk_renderer), dl_renderer_(dl_renderer), flags_(flags) {}
+      : TestParameters(sk_renderer, dl_renderer, dl_renderer, flags) {}
+
+  TestParameters(const SkRenderer& sk_renderer,
+                 const DlRenderer& dl_renderer,
+                 const DlRenderer& imp_renderer,
+                 const DisplayListAttributeFlags& flags)
+      : sk_renderer_(sk_renderer),
+        dl_renderer_(dl_renderer),
+        imp_renderer_(imp_renderer),
+        flags_(flags) {}
 
   bool uses_paint() const { return !flags_.ignores_paint(); }
   bool uses_gradient() const { return flags_.applies_shader(); }
+
+  bool impeller_compatible(const DlPaint& paint) const {
+    if (is_draw_text_blob()) {
+      // Non-color text is rendered as paths
+      if (paint.getColorSourcePtr() && !paint.getColorSourcePtr()->asColor()) {
+        return false;
+      }
+      // Non-filled text (stroke or stroke and fill) is rendered as paths
+      if (paint.getDrawStyle() != DlDrawStyle::kFill) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   bool should_match(const RenderEnvironment& env,
                     const CaseParameters& caseP,
@@ -1015,6 +1036,7 @@ class TestParameters {
 
   const SkRenderer& sk_renderer() const { return sk_renderer_; }
   const DlRenderer& dl_renderer() const { return dl_renderer_; }
+  const DlRenderer& imp_renderer() const { return imp_renderer_; }
 
   // Tests that call drawTextBlob with an sk_ref paint attribute will cause
   // those attributes to be stored in an internal Skia cache so we need
@@ -1065,6 +1087,7 @@ class TestParameters {
  private:
   const SkRenderer sk_renderer_;
   const DlRenderer dl_renderer_;
+  const DlRenderer imp_renderer_;
   const DisplayListAttributeFlags flags_;
 
   bool is_draw_text_blob_ = false;
@@ -1110,7 +1133,8 @@ class CanvasCompareTester {
     for (auto& back_end : kTestBackends) {
       auto provider = GetProvider(back_end);
       RenderEnvironment env = RenderEnvironment::MakeN32(provider.get());
-      env.init_ref(params.sk_renderer(), params.dl_renderer());
+      env.init_ref(kEmptySkSetup, params.sk_renderer(),  //
+                   kEmptyDlSetup, params.dl_renderer(), params.imp_renderer());
       quickCompareToReference(env, "default");
       if (env.supports_impeller()) {
         auto impeller_result = env.ref_impeller_result();
@@ -1279,7 +1303,8 @@ class CanvasCompareTester {
         ctx.paint.setAlpha(ctx.paint.getAlpha() / 2);
       };
       backdrop_env.init_ref(sk_backdrop_setup, testP.sk_renderer(),
-                            dl_backdrop_setup, testP.dl_renderer());
+                            dl_backdrop_setup, testP.dl_renderer(),
+                            testP.imp_renderer());
       quickCompareToReference(backdrop_env, "backdrop");
 
       DlBlurImageFilter dl_backdrop(5, 5, DlTileMode::kDecal);
@@ -1463,7 +1488,7 @@ class CanvasCompareTester {
           [=](const SkSetupContext& ctx) { sk_aa_setup(ctx, false); },
           testP.sk_renderer(),
           [=](const DlSetupContext& ctx) { dl_aa_setup(ctx, false); },
-          testP.dl_renderer());
+          testP.dl_renderer(), testP.imp_renderer());
       quickCompareToReference(aa_env, "AntiAlias");
       RenderWith(
           testP, aa_env, aa_tolerance,
@@ -1547,7 +1572,8 @@ class CanvasCompareTester {
         ctx.paint.setStrokeWidth(5.0);
       };
       blur_env.init_ref(sk_blur_setup, testP.sk_renderer(),  //
-                        dl_blur_setup, testP.dl_renderer());
+                        dl_blur_setup, testP.dl_renderer(),
+                        testP.imp_renderer());
       quickCompareToReference(blur_env, "blur");
       DlBlurImageFilter dl_filter_decal_5(5.0, 5.0, DlTileMode::kDecal);
       auto sk_filter_decal_5 =
@@ -1598,7 +1624,8 @@ class CanvasCompareTester {
         ctx.paint.setStrokeWidth(5.0);
       };
       dilate_env.init_ref(sk_dilate_setup, testP.sk_renderer(),  //
-                          dl_dilate_setup, testP.dl_renderer());
+                          dl_dilate_setup, testP.dl_renderer(),
+                          testP.imp_renderer());
       quickCompareToReference(dilate_env, "dilate");
       DlDilateImageFilter dl_dilate_filter_5(5.0, 5.0);
       auto sk_dilate_filter_5 = SkImageFilters::Dilate(5.0, 5.0, nullptr);
@@ -1629,7 +1656,8 @@ class CanvasCompareTester {
         ctx.paint.setStrokeWidth(6.0);
       };
       erode_env.init_ref(sk_erode_setup, testP.sk_renderer(),  //
-                         dl_erode_setup, testP.dl_renderer());
+                         dl_erode_setup, testP.dl_renderer(),
+                         testP.imp_renderer());
       quickCompareToReference(erode_env, "erode");
       // do not erode too much, because some tests assert there are enough
       // pixels that are changed.
@@ -1779,7 +1807,8 @@ class CanvasCompareTester {
             ctx.paint.setStrokeWidth(5.0);
           };
           dither_env.init_ref(sk_dither_setup, testP.sk_renderer(),
-                              dl_dither_setup, testP.dl_renderer(), dither_bg);
+                              dl_dither_setup, testP.dl_renderer(),
+                              testP.imp_renderer(), dither_bg);
           quickCompareToReference(dither_env, "dither");
           RenderWith(testP, dither_env, tolerance,
                      CaseParameters(
@@ -1875,7 +1904,8 @@ class CanvasCompareTester {
       ctx.paint.setStrokeWidth(5.0);
     };
     stroke_base_env.init_ref(sk_stroke_setup, testP.sk_renderer(),
-                             dl_stroke_setup, testP.dl_renderer());
+                             dl_stroke_setup, testP.dl_renderer(),
+                             testP.imp_renderer());
     quickCompareToReference(stroke_base_env, "stroke");
 
     RenderWith(testP, stroke_base_env, tolerance,
@@ -2296,10 +2326,16 @@ class CanvasCompareTester {
                               info + " (attribute should affect rendering)");
     }
 
-    if (env.supports_impeller()) {
-      DlJobRenderer imp_job(caseP.dl_setup(),     //
-                            testP.dl_renderer(),  //
-                            caseP.dl_restore(),   //
+    // If either the reference setup or the test setup contain attributes
+    // that Impeller doesn't support, we skip the Impeller testing. This
+    // is mostly stroked or patterned text which is vectored through drawPath
+    // for Impeller.
+    if (env.supports_impeller() &&
+        testP.impeller_compatible(dl_job.setup_paint()) &&
+        testP.impeller_compatible(env.ref_dl_paint())) {
+      DlJobRenderer imp_job(caseP.dl_setup(),      //
+                            testP.imp_renderer(),  //
+                            caseP.dl_restore(),    //
                             env.impeller_image());
       auto imp_result = env.getImpellerResult(base_info, imp_job);
       std::string imp_info = info + " (Impeller)";
@@ -2317,7 +2353,8 @@ class CanvasCompareTester {
                       imp_info + " (attribute should affect rendering)");
       }
       if (!success) {
-        FML_LOG(ERROR) << "Impeller issue encountered for: " << *display_list;
+        FML_LOG(ERROR) << "Impeller issue encountered for: "
+                       << *imp_job.MakeDisplayList(base_info);
         std::string filename = to_png_filename(info + " (Impeller Output)");
         imp_result->write(filename);
         FML_LOG(ERROR) << "output saved in: " << filename;
@@ -3621,6 +3658,9 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
 #else
   sk_sp<SkTextBlob> blob =
       CanvasCompareTester::MakeTextBlob("Testing", kRenderHeight * 0.33f);
+#ifdef IMPELLER_SUPPORTS_RENDERING
+  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+#endif  // IMPELLER_SUPPORTS_RENDERING
   SkScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;
   SkScalar render_y_2_3 = kRenderTop + kRenderHeight * 0.6;
   CanvasCompareTester::RenderAll(  //
@@ -3637,6 +3677,14 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
             ctx.canvas->DrawTextBlob(blob, kRenderLeft, render_y_2_3, paint);
             ctx.canvas->DrawTextBlob(blob, kRenderLeft, kRenderBottom, paint);
           },
+#ifdef IMPELLER_SUPPORTS_RENDERING
+          [=](const DlRenderContext& ctx) {
+            auto paint = ctx.paint;
+            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_1_3, paint);
+            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_2_3, paint);
+            ctx.canvas->DrawTextFrame(frame, kRenderLeft, kRenderBottom, paint);
+          },
+#endif  // IMPELLER_SUPPORTS_RENDERING
           kDrawTextBlobFlags)
           .set_draw_text_blob(),
       // From examining the bounds differential for the "Default" case, the
@@ -3766,7 +3814,9 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
   for (auto& back_end : CanvasCompareTester::kTestBackends) {
     auto provider = CanvasCompareTester::GetProvider(back_end);
     RenderEnvironment env = RenderEnvironment::MakeN32(provider.get());
-    env.init_ref(test_params.sk_renderer(), test_params.dl_renderer());
+    env.init_ref(kEmptySkSetup, test_params.sk_renderer(),  //
+                 kEmptyDlSetup, test_params.dl_renderer(),
+                 test_params.imp_renderer());
     CanvasCompareTester::quickCompareToReference(env, "default");
     CanvasCompareTester::RenderWith(test_params, env, tolerance, case_params);
   }
