@@ -522,14 +522,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
-    _selectEndTo(
-      offset: details.globalPosition,
-      continuous: true,
-      textGranularity: switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
-        1 => null,
-        2 => TextGranularity.word,
-      },
-    );
+    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
+      case 1:
+        _selectEndTo(offset: details.globalPosition, continuous: true);
+      case 2:
+        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+    }
     _updateSelectedContentIfNeeded();
   }
 

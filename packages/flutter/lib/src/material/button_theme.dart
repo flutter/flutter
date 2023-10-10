@@ -267,11 +267,11 @@ class ButtonThemeData with Diagnosticable {
       ButtonTextTheme.normal || ButtonTextTheme.accent =>
         const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(2.0)),
-        );
+        ),
       ButtonTextTheme.primary =>
         const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        );
+        ),
     };
   }
   final ShapeBorder? _shape;
