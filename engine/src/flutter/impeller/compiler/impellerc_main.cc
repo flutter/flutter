@@ -76,6 +76,7 @@ bool Main(const fml::CommandLine& command_line) {
   options.gles_language_version = switches.gles_language_version;
   options.metal_version = switches.metal_version;
   options.use_half_textures = switches.use_half_textures;
+  options.require_framebuffer_fetch = switches.require_framebuffer_fetch;
 
   Reflector::Options reflector_options;
   reflector_options.target_platform = switches.target_platform;

@@ -37,12 +37,13 @@ struct Switches {
   std::string metal_version = "";
   std::string entry_point = "";
   bool use_half_textures = false;
+  bool require_framebuffer_fetch = false;
 
   Switches();
 
   ~Switches();
 
-  Switches(const fml::CommandLine& command_line);
+  explicit Switches(const fml::CommandLine& command_line);
 
   bool AreValid(std::ostream& explain) const;
 

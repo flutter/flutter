@@ -23,7 +23,7 @@ class PipelineLibraryGLES final : public PipelineLibrary {
   ReactorGLES::Ref reactor_;
   PipelineMap pipelines_;
 
-  PipelineLibraryGLES(ReactorGLES::Ref reactor);
+  explicit PipelineLibraryGLES(ReactorGLES::Ref reactor);
 
   // |PipelineLibrary|
   bool IsValid() const override;

@@ -44,5 +44,16 @@ TEST(CapabilitiesGLES, SupportsDecalSamplerAddressMode) {
   EXPECT_TRUE(capabilities->SupportsDecalSamplerAddressMode());
 }
 
+TEST(CapabilitiesGLES, SupportsFramebufferFetch) {
+  auto const extensions = std::vector<const unsigned char*>{
+      reinterpret_cast<const unsigned char*>("GL_KHR_debug"),  //
+      reinterpret_cast<const unsigned char*>(
+          "GL_EXT_shader_framebuffer_fetch"),  //
+  };
+  auto mock_gles = MockGLES::Init(extensions);
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsFramebufferFetch());
+}
+
 }  // namespace testing
 }  // namespace impeller

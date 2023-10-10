@@ -132,12 +132,10 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   FS::FragInfo frag_info;
 
   auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
-  if (!renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-    // No known devices that support framebuffer fetch but not decal tile mode.
-    return false;
+  if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
+    src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
+    src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
   }
-  src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-  src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
   auto src_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
       src_sampler_descriptor);
   FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, src_sampler);
