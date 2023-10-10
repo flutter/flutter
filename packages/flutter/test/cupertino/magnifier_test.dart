@@ -8,6 +8,7 @@ library;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final Offset basicOffset = Offset(CupertinoMagnifier.kDefaultSize.width / 2,
@@ -48,7 +49,7 @@ void main() {
             animatedPositioned.left ?? 0, animatedPositioned.top ?? 0);
       }
 
-      testWidgets('should be at gesture position if does not violate any positioning rules', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should be at gesture position if does not violate any positioning rules', (WidgetTester tester) async {
         final Key fakeTextFieldKey = UniqueKey();
         final Key outerKey = UniqueKey();
 
@@ -87,6 +88,7 @@ void main() {
             globalGesturePosition: fakeTextFieldRect.center,
           ),
         );
+        addTearDown(magnifier.dispose);
 
         await showCupertinoMagnifier(context, tester, magnifier);
 
@@ -98,7 +100,7 @@ void main() {
         );
       });
 
-      testWidgets('should never horizontally be outside of Screen Padding', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should never horizontally be outside of Screen Padding', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -108,19 +110,21 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
+            currentLineBoundaries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is far out of the right side of the app.
+            globalGesturePosition:
+            Offset(MediaQuery.sizeOf(context).width + 100, 0),
+          ),
+        );
+        addTearDown(magnifierInfo.dispose);
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
-            MagnifierInfo(
-              currentLineBoundaries: reasonableTextField,
-              fieldBounds: reasonableTextField,
-              caretRect: reasonableTextField,
-              // The tap position is far out of the right side of the app.
-              globalGesturePosition:
-                  Offset(MediaQuery.sizeOf(context).width + 100, 0),
-            ),
-          ),
+          magnifierInfo,
         );
 
         // Should be less than the right edge, since we have padding.
@@ -128,7 +132,7 @@ void main() {
             lessThan(MediaQuery.sizeOf(context).width));
       });
 
-      testWidgets('should have some vertical drag', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should have some vertical drag', (WidgetTester tester) async {
         final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
@@ -141,20 +145,23 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        final ValueNotifier<MagnifierInfo> magnifierInfo =
+            ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
+            currentLineBoundaries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is dragBelow units below the text field.
+            globalGesturePosition: Offset(
+                MediaQuery.sizeOf(context).width / 2,
+                dragPositionBelowTextField),
+          ),
+        );
+        addTearDown(magnifierInfo.dispose);
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
-            MagnifierInfo(
-              currentLineBoundaries: reasonableTextField,
-              fieldBounds: reasonableTextField,
-              caretRect: reasonableTextField,
-              // The tap position is dragBelow units below the text field.
-              globalGesturePosition: Offset(
-                  MediaQuery.sizeOf(context).width / 2,
-                  dragPositionBelowTextField),
-            ),
-          ),
+          magnifierInfo,
         );
 
         // The magnifier Y should be greater than the text field, since we "dragged" it down.
@@ -166,7 +173,7 @@ void main() {
     });
 
     group('status', () {
-      testWidgets('should hide if gesture is far below the text field', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should hide if gesture is far below the text field', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -177,7 +184,7 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierinfo =
+        final ValueNotifier<MagnifierInfo> magnifierInfo =
             ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
@@ -188,16 +195,17 @@ void main() {
                 MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
+        addTearDown(magnifierInfo.dispose);
 
         // Show the magnifier initially, so that we get it in a not hidden state.
-        await showCupertinoMagnifier(context, tester, magnifierinfo);
+        await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.
-        magnifierinfo.value = MagnifierInfo(
+        magnifierInfo.value = MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition: magnifierinfo.value.globalGesturePosition + const Offset(0, 100),
+            globalGesturePosition: magnifierInfo.value.globalGesturePosition + const Offset(0, 100),
         );
         await tester.pumpAndSettle();
 
@@ -205,7 +213,7 @@ void main() {
         expect(magnifierController.overlayEntry, isNotNull);
       });
 
-      testWidgets('should re-show if gesture moves back up',
+      testWidgetsWithLeakTracking('should re-show if gesture moves back up',
           (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
@@ -227,6 +235,7 @@ void main() {
             globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
+        addTearDown(magnifierInfo.dispose);
 
         // Show the magnifier initially, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierInfo);

@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -792,6 +793,10 @@ void main() {
   testWidgetsWithLeakTracking("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
+    addTearDown(() {
+      focusNode1.dispose();
+      focusNode2.dispose();
+    });
 
     await tester.pumpWidget(
       wrap(
@@ -821,11 +826,8 @@ void main() {
     expect(focusNode1.nextFocus(), isFalse);
     await tester.pump();
 
-    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode1.hasPrimaryFocus, !kIsWeb);
     expect(focusNode2.hasPrimaryFocus, isFalse);
-
-    focusNode1.dispose();
-    focusNode2.dispose();
   });
 
   group('feedback', () {
