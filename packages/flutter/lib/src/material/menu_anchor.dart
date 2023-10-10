@@ -469,8 +469,16 @@ class _MenuAnchorState extends State<MenuAnchor> {
     // Don't just close it on *any* scroll, since we want to be able to scroll
     // menus themselves if they're too big for the view.
     if (_isRoot) {
-      _root._close();
+      _close();
     }
+  }
+
+  KeyEventResult _checkForEscape(KeyEvent event) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      _close();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   /// Open the menu, optionally at a position relative to the [MenuAnchor].
@@ -538,6 +546,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     });
 
+    if (_isRoot) {
+      FocusManager.instance.addEarlyKeyEventHandler(_checkForEscape);
+    }
     Overlay.of(context).insert(_overlayEntry!);
     widget.onOpen?.call();
   }
@@ -550,6 +561,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Closing $this'));
     if (!_isOpen) {
       return;
+    }
+    if (_isRoot) {
+      FocusManager.instance.removeEarlyKeyEventHandler(_checkForEscape);
     }
     _closeChildren(inDispose: inDispose);
     _overlayEntry?.remove();
