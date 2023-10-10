@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -27,7 +28,7 @@ import '../migrations/cmake_native_assets_migration.dart';
 final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
 
 /// Builds the Linux project through the Makefile.
-Future<FileSystemEntity> buildLinux(
+Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
   String? target,
@@ -80,6 +81,21 @@ Future<FileSystemEntity> buildLinux(
   } finally {
     status.cancel();
   }
+
+  final String? binaryName = getCmakeExecutableName(linuxProject);
+  final File binaryFile = buildDirectory
+    .childDirectory('bundle')
+    .childFile('$binaryName');
+  final FileSystemEntity buildOutput =  binaryFile.existsSync() ? binaryFile : binaryFile.parent;
+  // We don't print a size because the output directory can contain
+  // optional files not needed by the user and because the binary is not
+  // self-contained.
+  globals.printStatus(
+    '${globals.terminal.successMark} '
+    'Built ${globals.fs.path.relative(buildOutput.path)}',
+    color: TerminalColor.green,
+  );
+
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(targetPlatform);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -112,15 +128,6 @@ Future<FileSystemEntity> buildLinux(
       'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
-
-  final String? binaryName = getCmakeExecutableName(linuxProject);
-  final File appFile = buildDirectory
-    .childDirectory('bundle')
-    .childFile('$binaryName');
-  if (!appFile.existsSync()) {
-    return appFile.parent;
-  }
-  return appFile;
 }
 
 Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,

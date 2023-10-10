@@ -5,10 +5,8 @@
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -88,7 +86,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     }
     displayNullSafetyMode(buildInfo);
     final Logger logger = globals.logger;
-    final FileSystemEntity output = await buildLinux(
+    await buildLinux(
       flutterProject.linux,
       buildInfo,
       target: targetFile,
@@ -102,16 +100,6 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetSysroot: stringArg('target-sysroot')!,
       logger: logger,
     );
-
-    // We don't print a size because the output directory can contain
-    // optional files not needed by the user and because the binary is not
-    // self-contained.
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(output.path)}',
-      color: TerminalColor.green,
-    );
-
     return FlutterCommandResult.success();
   }
 }
