@@ -1,12 +1,12 @@
 
 #include "flutter/shell/platform/android/hardware_buffer_external_texture_vk.h"
 
+#include "flutter/impeller/core/formats.h"
+#include "flutter/impeller/core/texture_descriptor.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/android_hardware_buffer_texture_source_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
 #include "flutter/shell/platform/android/ndk_helpers.h"
-#include "impeller/core/formats.h"
-#include "impeller/core/texture_descriptor.h"
-#include "impeller/display_list/dl_image_impeller.h"
 
 namespace flutter {
 
@@ -20,18 +20,25 @@ HardwareBufferExternalTextureVK::HardwareBufferExternalTextureVK(
 
 HardwareBufferExternalTextureVK::~HardwareBufferExternalTextureVK() {}
 
-void HardwareBufferExternalTextureVK::ProcessFrame(PaintContext& context,
-                                                   const SkRect& bounds) {
+void HardwareBufferExternalTextureVK::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
     // First processed frame we are attached.
     state_ = AttachmentState::kAttached;
   }
+}
 
-  AHardwareBuffer* latest_hardware_buffer = GetLatestHardwareBuffer();
-  if (latest_hardware_buffer == nullptr) {
-    FML_LOG(WARNING) << "GetLatestHardwareBuffer returned null.";
+void HardwareBufferExternalTextureVK::Detach() {}
+
+void HardwareBufferExternalTextureVK::ProcessFrame(PaintContext& context,
+                                                   const SkRect& bounds) {
+  JavaLocalRef image = AcquireLatestImage();
+  if (image.is_null()) {
     return;
   }
+  JavaLocalRef old_android_image(android_image_);
+  android_image_.Reset(image);
+  JavaLocalRef hardware_buffer = HardwareBufferFor(android_image_);
+  AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
 
   AHardwareBuffer_Desc hb_desc = {};
   flutter::NDKHelpers::AHardwareBuffer_describe(latest_hardware_buffer,
@@ -54,11 +61,10 @@ void HardwareBufferExternalTextureVK::ProcessFrame(PaintContext& context,
       std::make_shared<impeller::TextureVK>(impeller_context_, texture_source);
 
   dl_image_ = impeller::DlImageImpeller::Make(texture);
-
-  // GetLatestHardwareBuffer keeps a reference on the hardware buffer, drop it.
-  NDKHelpers::AHardwareBuffer_release(latest_hardware_buffer);
+  CloseHardwareBuffer(hardware_buffer);
+  // IMPORTANT: We only close the old image after texture stops referencing
+  // it.
+  CloseImage(old_android_image);
 }
-
-void HardwareBufferExternalTextureVK::Detach() {}
 
 }  // namespace flutter

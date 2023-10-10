@@ -7,6 +7,7 @@
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
 
 #include <android/hardware_buffer.h>
@@ -20,9 +21,10 @@ class HardwareBufferExternalTexture : public flutter::Texture {
  public:
   explicit HardwareBufferExternalTexture(
       int64_t id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>&
-          hardware_buffer_texture_entry,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+
+  virtual ~HardwareBufferExternalTexture() = default;
 
   // |flutter::Texture|.
   void Paint(PaintContext& context,
@@ -43,10 +45,16 @@ class HardwareBufferExternalTexture : public flutter::Texture {
   void OnGrContextDestroyed() override;
 
  protected:
-  virtual void ProcessFrame(PaintContext& context, const SkRect& bounds) = 0;
+  virtual void Attach(PaintContext& context) = 0;
   virtual void Detach() = 0;
+  virtual void ProcessFrame(PaintContext& context, const SkRect& bounds) = 0;
 
-  AHardwareBuffer* GetLatestHardwareBuffer();
+  JavaLocalRef AcquireLatestImage();
+  void CloseImage(const fml::jni::JavaRef<jobject>& image);
+  JavaLocalRef HardwareBufferFor(const fml::jni::JavaRef<jobject>& image);
+  void CloseHardwareBuffer(const fml::jni::JavaRef<jobject>& hardware_buffer);
+  AHardwareBuffer* AHardwareBufferFor(
+      const fml::jni::JavaRef<jobject>& hardware_buffer);
 
   fml::jni::ScopedJavaGlobalRef<jobject> image_texture_entry_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

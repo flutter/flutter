@@ -26,10 +26,13 @@ class HardwareBufferExternalTextureVK : public HardwareBufferExternalTexture {
   ~HardwareBufferExternalTextureVK() override;
 
  private:
+  void Attach(PaintContext& context) override;
   void ProcessFrame(PaintContext& context, const SkRect& bounds) override;
   void Detach() override;
 
   const std::shared_ptr<impeller::ContextVK> impeller_context_;
+
+  fml::jni::ScopedJavaGlobalRef<jobject> android_image_;
 };
 
 }  // namespace flutter
