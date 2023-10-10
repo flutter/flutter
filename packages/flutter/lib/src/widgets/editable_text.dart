@@ -1422,7 +1422,7 @@ class EditableText extends StatefulWidget {
   /// notification. It is possible that the event may occur outside of the
   /// immediate bounding box defined by the text field, although it will be
   /// within the bounding box of a [TextFieldTapRegion] member.
-  /// Called for each tap that occurs outside of the [TextFieldTapRegion] group 
+  /// Called for each tap that occurs outside of the [TextFieldTapRegion] group
   /// when [onTapOutsideRequiresFocus] is set to false.
   /// When [onTapOutsideRequiresFocus] is set to true, this method will be called only
   /// when the text field is focused.
