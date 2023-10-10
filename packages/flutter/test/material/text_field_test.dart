@@ -2531,8 +2531,7 @@ void main() {
     // End gesture and skip the magnifier hide animation, so it can release
     // resources.
     await gesture.up();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -2630,8 +2629,7 @@ void main() {
     // End gesture and skip the magnifier hide animation, so it can release
     // resources.
     await gesture.up();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -2713,8 +2711,7 @@ void main() {
     // End gesture and skip the magnifier hide animation, so it can release
     // resources.
     await gesture.up();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -12460,8 +12457,7 @@ void main() {
     // End gesture and skip the magnifier hide animation, so it can release
     // resources.
     await gesture.up();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pumpAndSettle();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgetsWithLeakTracking('keyboard selection change scrolls the field vertically', (WidgetTester tester) async {
