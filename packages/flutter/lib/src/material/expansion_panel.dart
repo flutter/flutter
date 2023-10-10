@@ -424,8 +424,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.elevation = 2,
     this.expandIconColor,
     this.materialGapSize = 16.0,
-  })  : _allowOnlyOnePanelOpen = false,
-        initialOpenPanelValue = null;
+  })  : _allowOnlyOnePanelOpen = false, initialOpenPanelValue = null;
 
   /// Creates a radio expansion panel list widget.
   ///
