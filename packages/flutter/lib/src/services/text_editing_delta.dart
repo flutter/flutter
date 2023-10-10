@@ -17,7 +17,7 @@ export 'text_input.dart' show TextEditingValue;
 TextAffinity? _toTextAffinity(String? affinity) {
   return switch (affinity) {
     'TextAffinity.downstream' => TextAffinity.downstream,
-    'TextAffinity.upstream' => TextAffinity.upstream,
+    'TextAffinity.upstream'   => TextAffinity.upstream,
     _ => null,
   };
 }

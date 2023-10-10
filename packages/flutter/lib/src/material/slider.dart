@@ -1383,10 +1383,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   bool get showValueIndicator {
     return switch (_sliderTheme.showValueIndicator!) {
-      ShowValueIndicator.onlyForDiscrete => isDiscrete,
+      ShowValueIndicator.onlyForDiscrete   => isDiscrete,
       ShowValueIndicator.onlyForContinuous => !isDiscrete,
       ShowValueIndicator.always => true,
-      ShowValueIndicator.never => false,
+      ShowValueIndicator.never  => false,
     };
   }
 
@@ -1554,12 +1554,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case SliderInteraction.slideThumb:
         if (_active && isInteractive) {
           final double valueDelta = details.primaryDelta! / _trackRect.width;
-          switch (textDirection) {
-            case TextDirection.rtl:
-              _currentDragValue -= valueDelta;
-            case TextDirection.ltr:
-              _currentDragValue += valueDelta;
-          }
+          _currentDragValue += switch (textDirection) {
+            TextDirection.rtl => -valueDelta,
+            TextDirection.ltr => valueDelta,
+          };
           onChanged!(_discretize(_currentDragValue));
         }
       case SliderInteraction.tapOnly:

@@ -2307,7 +2307,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
           builder: (BuildContext context) {
             return switch (settings.name) {
               'home' => _buildHome(context),
-              'sub' => _buildSub(context),
+              'sub'  => _buildSub(context),
               _ => throw UnimplementedError(),
             };
           },

@@ -66,7 +66,7 @@ abstract class EdgeInsetsGeometry {
   double along(Axis axis) {
     return switch (axis) {
       Axis.horizontal => horizontal,
-      Axis.vertical => vertical,
+      Axis.vertical   => vertical,
     };
   }
 

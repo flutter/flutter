@@ -465,12 +465,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     if (isInteractive) {
       final double extent = math.max(_kPadding, size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
       final double valueDelta = details.primaryDelta! / extent;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          _currentDragValue -= valueDelta;
-        case TextDirection.ltr:
-          _currentDragValue += valueDelta;
-      }
+      _currentDragValue += switch (textDirection) {
+        TextDirection.rtl => -valueDelta,
+        TextDirection.ltr =>  valueDelta,
+      };
       onChanged!(_discretizedCurrentDragValue);
     }
   }

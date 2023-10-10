@@ -353,7 +353,7 @@ class _TextPainterLayoutCacheWithOffset {
   static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
     return switch (widthBasis) {
       TextWidthBasis.longestLine => clampDouble(layout.longestLine, minWidth, maxWidth),
-      TextWidthBasis.parent => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),
+      TextWidthBasis.parent      => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),
     };
   }
 
@@ -1351,15 +1351,15 @@ class TextPainter {
 
   static double _computePaintOffsetFraction(TextAlign textAlign, TextDirection textDirection) {
     return switch ((textAlign, textDirection)) {
-      (TextAlign.left, _) => 0.0,
-      (TextAlign.right, _) => 1.0,
-      (TextAlign.center, _) => 0.5,
-      (TextAlign.start, TextDirection.ltr) => 0.0,
-      (TextAlign.start, TextDirection.rtl) => 1.0,
+      (TextAlign.left,    _)                 => 0.0,
+      (TextAlign.right,   _)                 => 1.0,
+      (TextAlign.center,  _)                 => 0.5,
+      (TextAlign.start,   TextDirection.ltr) => 0.0,
+      (TextAlign.start,   TextDirection.rtl) => 1.0,
       (TextAlign.justify, TextDirection.ltr) => 0.0,
       (TextAlign.justify, TextDirection.rtl) => 1.0,
-      (TextAlign.end, TextDirection.ltr) => 1.0,
-      (TextAlign.end, TextDirection.rtl) => 0.0,
+      (TextAlign.end,     TextDirection.ltr) => 1.0,
+      (TextAlign.end,     TextDirection.rtl) => 0.0,
     };
   }
 
@@ -1431,7 +1431,7 @@ class TextPainter {
     }
     final int offset = position.offset;
     final _CaretMetrics? metrics = switch (position.affinity) {
-      TextAffinity.upstream => _getMetricsFromUpstream(offset) ?? _getMetricsFromDownstream(offset),
+      TextAffinity.upstream   => _getMetricsFromUpstream(offset) ?? _getMetricsFromDownstream(offset),
       TextAffinity.downstream => _getMetricsFromDownstream(offset) ?? _getMetricsFromUpstream(offset),
     };
     // Cache the input parameters to prevent repeat work later.

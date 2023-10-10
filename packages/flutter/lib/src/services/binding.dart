@@ -357,10 +357,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     return switch (message) {
-      'AppLifecycleState.resumed' => AppLifecycleState.resumed,
+      'AppLifecycleState.resumed'  => AppLifecycleState.resumed,
       'AppLifecycleState.inactive' => AppLifecycleState.inactive,
-      'AppLifecycleState.hidden' => AppLifecycleState.hidden,
-      'AppLifecycleState.paused' => AppLifecycleState.paused,
+      'AppLifecycleState.hidden'   => AppLifecycleState.hidden,
+      'AppLifecycleState.paused'   => AppLifecycleState.paused,
       'AppLifecycleState.detached' => AppLifecycleState.detached,
       _ => null,
     };

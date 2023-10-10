@@ -399,7 +399,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The thumb is offset by padding and margins.
   double get _leadingThumbMainAxisOffset {
     return switch (_resolvedOrientation) {
-      ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top + mainAxisMargin,
+      ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top  + mainAxisMargin,
       ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left + mainAxisMargin,
     };
   }
@@ -1560,22 +1560,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     assert(_startDragThumbOffset != null);
 
     final ScrollPosition position = _cachedController!.position;
-    late double primaryDeltaFromDragStart;
-    late double primaryDeltaFromLastDragUpdate;
-    switch (position.axisDirection) {
-      case AxisDirection.up:
-        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dy - updatedOffset.dy;
-        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dy - updatedOffset.dy;
-      case AxisDirection.right:
-        primaryDeltaFromDragStart = updatedOffset.dx -_startDragScrollbarAxisOffset!.dx;
-        primaryDeltaFromLastDragUpdate = updatedOffset.dx -_lastDragUpdateOffset!.dx;
-      case AxisDirection.down:
-        primaryDeltaFromDragStart = updatedOffset.dy -_startDragScrollbarAxisOffset!.dy;
-        primaryDeltaFromLastDragUpdate = updatedOffset.dy -_lastDragUpdateOffset!.dy;
-      case AxisDirection.left:
-        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dx - updatedOffset.dx;
-        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - updatedOffset.dx;
-    }
+    late double primaryDeltaFromDragStart, primaryDeltaFromLastDragUpdate;
+    (primaryDeltaFromDragStart, primaryDeltaFromLastDragUpdate) = switch (position.axisDirection) {
+      AxisDirection.up    => (_startDragScrollbarAxisOffset!.dy - updatedOffset.dy, _lastDragUpdateOffset!.dy - updatedOffset.dy),
+      AxisDirection.left  => (_startDragScrollbarAxisOffset!.dx - updatedOffset.dx, _lastDragUpdateOffset!.dx - updatedOffset.dx),
+      AxisDirection.right => (updatedOffset.dx -_startDragScrollbarAxisOffset!.dx, updatedOffset.dx -_lastDragUpdateOffset!.dx),
+      AxisDirection.down  => (updatedOffset.dy -_startDragScrollbarAxisOffset!.dy, updatedOffset.dy -_lastDragUpdateOffset!.dy),
+    };
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time when drag started or last updated, into the coordinate space of the scroll

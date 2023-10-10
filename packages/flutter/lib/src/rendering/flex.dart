@@ -631,14 +631,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _getCrossSize(Size size) {
     return switch (_direction) {
       Axis.horizontal => size.height,
-      Axis.vertical => size.width,
+      Axis.vertical   => size.width,
     };
   }
 
   double _getMainSize(Size size) {
     return switch (_direction) {
       Axis.horizontal => size.width,
-      Axis.vertical => size.height,
+      Axis.vertical   => size.height,
     };
   }
 
@@ -670,7 +670,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
     return switch (_direction) {
       Axis.horizontal => constraints.constrain(Size(sizes.mainSize, sizes.crossSize)),
-      Axis.vertical => constraints.constrain(Size(sizes.crossSize, sizes.mainSize)),
+      Axis.vertical   => constraints.constrain(Size(sizes.crossSize, sizes.mainSize)),
     };
   }
 
@@ -781,12 +781,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
           innerConstraints = switch (_direction) {
             Axis.horizontal => BoxConstraints.tightFor(height: constraints.maxHeight),
-            Axis.vertical => BoxConstraints.tightFor(width: constraints.maxWidth),
+            Axis.vertical   => BoxConstraints.tightFor(width: constraints.maxWidth),
           };
         } else {
           innerConstraints = switch (_direction) {
             Axis.horizontal => BoxConstraints(maxHeight: constraints.maxHeight),
-            Axis.vertical => BoxConstraints(maxWidth: constraints.maxWidth),
+            Axis.vertical   => BoxConstraints(maxWidth: constraints.maxWidth),
           };
         }
         final Size childSize = layoutChild(child, innerConstraints);
@@ -1000,7 +1000,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
       childParentData.offset = switch (_direction) {
         Axis.horizontal => Offset(childMainPosition, childCrossPosition),
-        Axis.vertical => Offset(childCrossPosition, childMainPosition),
+        Axis.vertical   => Offset(childCrossPosition, childMainPosition),
       };
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
@@ -1066,7 +1066,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // location and amount.
       final Rect overflowChildRect = switch (_direction) {
         Axis.horizontal => Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0),
-        Axis.vertical => Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow),
+        Axis.vertical   => Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow),
       };
       paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
       return true;

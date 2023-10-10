@@ -189,13 +189,13 @@ class FakeAndroidPlatformViewsController {
 
   Future<dynamic> _onMethodCall(MethodCall call) {
     return switch (call.method) {
-      'create' => _create(call),
-      'dispose' => _dispose(call),
-      'resize' => _resize(call),
-      'touch' => _touch(call),
+      'create'       => _create(call),
+      'dispose'      => _dispose(call),
+      'resize'       => _resize(call),
+      'touch'        => _touch(call),
       'setDirection' => _setDirection(call),
-      'clearFocus' => _clearFocus(call),
-      'offset' => _offset(call),
+      'clearFocus'   => _clearFocus(call),
+      'offset'       => _offset(call),
       _ => Future<dynamic>.sync(() => null),
     };
   }
@@ -394,8 +394,8 @@ class FakeIosPlatformViewsController {
 
   Future<dynamic> _onMethodCall(MethodCall call) {
     return switch (call.method) {
-      'create' => _create(call),
-      'dispose' => _dispose(call),
+      'create'        => _create(call),
+      'dispose'       => _dispose(call),
       'acceptGesture' => _acceptGesture(call),
       'rejectGesture' => _rejectGesture(call),
       _ => Future<dynamic>.sync(() => null),
@@ -493,8 +493,8 @@ class FakeMacosPlatformViewsController {
 
   Future<dynamic> _onMethodCall(MethodCall call) {
     return switch (call.method) {
-      'create' => _create(call),
-      'dispose' => _dispose(call),
+      'create'        => _create(call),
+      'dispose'       => _dispose(call),
       'acceptGesture' => _acceptGesture(call),
       'rejectGesture' => _rejectGesture(call),
       _ => Future<dynamic>.sync(() => null),

@@ -544,7 +544,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     assert(child.hasSize);
     return switch (constraints.axis) {
       Axis.horizontal => child.size.width,
-      Axis.vertical => child.size.height,
+      Axis.vertical   => child.size.height,
     };
   }
 

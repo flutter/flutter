@@ -1285,14 +1285,13 @@ class CheckboxMenuButton extends StatelessWidget {
     return MenuItemButton(
       key: key,
       onPressed: onChanged == null ? null : () {
-        switch (value) {
-          case false:
-            onChanged!.call(true);
-          case true:
-            onChanged!.call(tristate ? null : false);
-          case null:
-            onChanged!.call(false);
-        }
+        onChanged!(
+          switch (value) {
+            false => true,
+            true => tristate ? null : false,
+            null => false,
+          },
+        );
       },
       onHover: onHover,
       onFocusChange: onFocusChange,
@@ -1842,12 +1841,10 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     // the first menu item aligns with the submenu button that opens it.
     switch (_anchor?._orientation ?? Axis.vertical) {
       case Axis.horizontal:
-        switch (Directionality.of(context)) {
-          case TextDirection.rtl:
-            menuPaddingOffset += Offset(menuPadding.right, 0);
-          case TextDirection.ltr:
-            menuPaddingOffset += Offset(-menuPadding.left, 0);
-        }
+        menuPaddingOffset += switch (Directionality.of(context)) {
+          TextDirection.rtl => Offset(menuPadding.right, 0),
+          TextDirection.ltr => Offset(-menuPadding.left, 0),
+        };
       case Axis.vertical:
         menuPaddingOffset += Offset(0, -menuPadding.top);
     }
@@ -3408,7 +3405,7 @@ class _MenuPanelState extends State<_MenuPanel> {
   Widget _intrinsicCrossSize({required Widget child}) {
     return switch (widget.orientation) {
       Axis.horizontal => IntrinsicHeight(child: child),
-      Axis.vertical => IntrinsicWidth(child: child),
+      Axis.vertical   => IntrinsicWidth(child: child),
     };
   }
 }

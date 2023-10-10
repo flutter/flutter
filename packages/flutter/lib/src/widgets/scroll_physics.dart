@@ -688,7 +688,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// `overscrollFraction` which starts at 0 when there is no overscroll).
   double frictionFactor(double overscrollFraction) {
     return switch (decelerationRate) {
-      ScrollDecelerationRate.fast => 0.26 * math.pow(1 - overscrollFraction, 2),
+      ScrollDecelerationRate.fast   => 0.26 * math.pow(1 - overscrollFraction, 2),
       ScrollDecelerationRate.normal => 0.52 * math.pow(1 - overscrollFraction, 2),
     };
   }
@@ -742,7 +742,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
     final Tolerance tolerance = toleranceFor(position);
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       final double constantDeceleration = switch (decelerationRate) {
-        ScrollDecelerationRate.fast => 1400,
+        ScrollDecelerationRate.fast   => 1400,
         ScrollDecelerationRate.normal => 0,
       };
       return BouncingScrollSimulation(
@@ -791,7 +791,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   @override
   double get maxFlingVelocity {
     return switch (decelerationRate) {
-      ScrollDecelerationRate.fast => kMaxFlingVelocity * 8.0,
+      ScrollDecelerationRate.fast   => kMaxFlingVelocity * 8.0,
       ScrollDecelerationRate.normal => super.maxFlingVelocity,
     };
   }

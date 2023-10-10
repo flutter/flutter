@@ -1005,8 +1005,8 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
   @override
   Widget? childForSlot(_ListTileSlot slot) {
     return switch (slot) {
-      _ListTileSlot.leading => leading,
-      _ListTileSlot.title => title,
+      _ListTileSlot.leading  => leading,
+      _ListTileSlot.title    => title,
       _ListTileSlot.subtitle => subtitle,
       _ListTileSlot.trailing => trailing,
     };
@@ -1521,7 +1521,7 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
   TextStyle? get titleTextStyle {
     return switch (style!) {
       ListTileStyle.drawer => _textTheme.bodyLarge,
-      ListTileStyle.list => _textTheme.titleMedium,
+      ListTileStyle.list   => _textTheme.titleMedium,
     };
   }
 

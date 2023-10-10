@@ -1655,7 +1655,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   Offset get _paintOffset {
     return switch (_viewportAxis) {
       Axis.horizontal => Offset(-offset.pixels, 0.0),
-      Axis.vertical => Offset(0.0, -offset.pixels),
+      Axis.vertical   => Offset(0.0, -offset.pixels),
     };
   }
 
@@ -1663,15 +1663,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(hasSize);
     return switch (_viewportAxis) {
       Axis.horizontal => size.width,
-      Axis.vertical => size.height,
+      Axis.vertical   => size.height,
     };
   }
 
   double _getMaxScrollExtent(Size contentSize) {
     assert(hasSize);
     return switch (_viewportAxis) {
-      Axis.horizontal => math.max(0.0, contentSize.width - size.width),
-      Axis.vertical => math.max(0.0, contentSize.height - size.height),
+      Axis.horizontal => math.max(0.0, contentSize.width  - size.width),
+      Axis.vertical   => math.max(0.0, contentSize.height - size.height),
     };
   }
 

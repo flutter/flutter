@@ -943,10 +943,10 @@ class _IconButtonM3 extends ButtonStyleButton {
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     return switch (variant) {
-      _IconButtonVariant.filled => _FilledIconButtonDefaultsM3(context, toggleable),
+      _IconButtonVariant.filled      => _FilledIconButtonDefaultsM3(context, toggleable),
       _IconButtonVariant.filledTonal => _FilledTonalIconButtonDefaultsM3(context, toggleable),
-      _IconButtonVariant.outlined => _OutlinedIconButtonDefaultsM3(context, toggleable),
-      _IconButtonVariant.standard => _IconButtonDefaultsM3(context, toggleable),
+      _IconButtonVariant.outlined    => _OutlinedIconButtonDefaultsM3(context, toggleable),
+      _IconButtonVariant.standard    => _IconButtonDefaultsM3(context, toggleable),
     };
   }
 

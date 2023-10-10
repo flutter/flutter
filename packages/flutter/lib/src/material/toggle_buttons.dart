@@ -1220,7 +1220,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     } else {
       childParentData.offset = switch (verticalDirection) {
         VerticalDirection.down => Offset(borderSide.width, leadingBorderSide.width),
-        VerticalDirection.up => Offset(borderSide.width, trailingBorderSide.width),
+        VerticalDirection.up   => Offset(borderSide.width, trailingBorderSide.width),
       };
     }
   }

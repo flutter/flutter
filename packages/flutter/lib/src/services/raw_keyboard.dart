@@ -399,7 +399,7 @@ abstract class RawKeyEvent with Diagnosticable {
     final String type = message['type']! as String;
     return switch (type) {
       'keydown' => RawKeyDownEvent(data: data, character: character, repeat: repeat),
-      'keyup' => RawKeyUpEvent(data: data),
+      'keyup'   => RawKeyUpEvent(data: data),
       _ => throw FlutterError('Unknown key event type: $type'),
     };
   }

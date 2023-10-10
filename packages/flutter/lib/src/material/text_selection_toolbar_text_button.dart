@@ -144,14 +144,14 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   static Color _getForegroundColor(ColorScheme colorScheme) {
     final bool isDefaultOnSurface = switch (colorScheme.brightness) {
       Brightness.light => identical(ThemeData().colorScheme.onSurface, colorScheme.onSurface),
-      Brightness.dark => identical(ThemeData.dark().colorScheme.onSurface, colorScheme.onSurface),
+      Brightness.dark  => identical(ThemeData.dark().colorScheme.onSurface, colorScheme.onSurface),
     };
     if (!isDefaultOnSurface) {
       return colorScheme.onSurface;
     }
     return switch (colorScheme.brightness) {
       Brightness.light => _defaultForegroundColorLight,
-      Brightness.dark => _defaultForegroundColorDark,
+      Brightness.dark  => _defaultForegroundColorDark,
     };
   }
 

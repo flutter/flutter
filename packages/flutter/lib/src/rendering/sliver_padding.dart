@@ -37,10 +37,10 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   double get beforePadding {
     assert(resolvedPadding != null);
     return switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up => resolvedPadding!.bottom,
+      AxisDirection.up    => resolvedPadding!.bottom,
       AxisDirection.right => resolvedPadding!.left,
-      AxisDirection.down => resolvedPadding!.top,
-      AxisDirection.left => resolvedPadding!.right,
+      AxisDirection.down  => resolvedPadding!.top,
+      AxisDirection.left  => resolvedPadding!.right,
     };
   }
 
@@ -51,10 +51,10 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   double get afterPadding {
     assert(resolvedPadding != null);
     return switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up => resolvedPadding!.top,
+      AxisDirection.up    => resolvedPadding!.top,
       AxisDirection.right => resolvedPadding!.right,
-      AxisDirection.down => resolvedPadding!.bottom,
-      AxisDirection.left => resolvedPadding!.left,
+      AxisDirection.down  => resolvedPadding!.bottom,
+      AxisDirection.left  => resolvedPadding!.left,
     };
   }
 
@@ -79,7 +79,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
     assert(resolvedPadding != null);
     return switch (constraints.axis) {
       Axis.horizontal => resolvedPadding!.vertical,
-      Axis.vertical => resolvedPadding!.horizontal,
+      Axis.vertical   => resolvedPadding!.horizontal,
     };
   }
 
@@ -181,16 +181,12 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
     );
 
     final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        childParentData.paintOffset = Offset(resolvedPadding!.left, calculatePaintOffset(constraints, from: resolvedPadding!.bottom + childLayoutGeometry.scrollExtent, to: resolvedPadding!.bottom + childLayoutGeometry.scrollExtent + resolvedPadding!.top));
-      case AxisDirection.right:
-        childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: 0.0, to: resolvedPadding!.left), resolvedPadding!.top);
-      case AxisDirection.down:
-        childParentData.paintOffset = Offset(resolvedPadding!.left, calculatePaintOffset(constraints, from: 0.0, to: resolvedPadding!.top));
-      case AxisDirection.left:
-        childParentData.paintOffset = Offset(calculatePaintOffset(constraints, from: resolvedPadding!.right + childLayoutGeometry.scrollExtent, to: resolvedPadding!.right + childLayoutGeometry.scrollExtent + resolvedPadding!.left), resolvedPadding!.top);
-    }
+    childParentData.paintOffset = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      AxisDirection.up    => Offset(resolvedPadding!.left, calculatePaintOffset(constraints, from: resolvedPadding!.bottom + childLayoutGeometry.scrollExtent, to: resolvedPadding!.bottom + childLayoutGeometry.scrollExtent + resolvedPadding!.top)),
+      AxisDirection.down  => Offset(resolvedPadding!.left, calculatePaintOffset(constraints, from: 0.0, to: resolvedPadding!.top)),
+      AxisDirection.left  => Offset(calculatePaintOffset(constraints, from: resolvedPadding!.right + childLayoutGeometry.scrollExtent, to: resolvedPadding!.right + childLayoutGeometry.scrollExtent + resolvedPadding!.left), resolvedPadding!.top),
+      AxisDirection.right => Offset(calculatePaintOffset(constraints, from: 0.0, to: resolvedPadding!.left), resolvedPadding!.top),
+    };
     assert(beforePadding == this.beforePadding);
     assert(afterPadding == this.afterPadding);
     assert(mainAxisPadding == this.mainAxisPadding);
@@ -224,7 +220,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
     assert(child == this.child);
     assert(resolvedPadding != null);
     return switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up || AxisDirection.down => resolvedPadding!.left,
+      AxisDirection.up   || AxisDirection.down  => resolvedPadding!.left,
       AxisDirection.left || AxisDirection.right => resolvedPadding!.top,
     };
   }

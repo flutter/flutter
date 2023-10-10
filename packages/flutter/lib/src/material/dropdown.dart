@@ -120,7 +120,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
   void _handleFocusChange(bool focused) {
     final bool inTraditionalMode = switch (FocusManager.instance.highlightMode) {
-      FocusHighlightMode.touch => false,
+      FocusHighlightMode.touch       => false,
       FocusHighlightMode.traditional => true,
     };
 
@@ -1377,13 +1377,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       return widget.iconEnabledColor
       ?? switch (Theme.of(context).brightness) {
         Brightness.light => Colors.grey.shade700,
-        Brightness.dark => Colors.white70,
+        Brightness.dark  => Colors.white70,
       };
     } else {
       return widget.iconDisabledColor
       ?? switch (Theme.of(context).brightness) {
         Brightness.light => Colors.grey.shade400,
-        Brightness.dark => Colors.white10,
+        Brightness.dark  => Colors.white10,
       };
     }
   }

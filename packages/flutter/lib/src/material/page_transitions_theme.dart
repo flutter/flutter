@@ -854,14 +854,10 @@ mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {
   }
 
   void onAnimationStatusChange(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        controller.allowSnapshotting = false;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        controller.allowSnapshotting = useSnapshot;
-    }
+    controller.allowSnapshotting = switch (status) {
+      AnimationStatus.dismissed || AnimationStatus.completed => false,
+      AnimationStatus.forward || AnimationStatus.reverse => useSnapshot,
+    };
   }
 
   @override
@@ -929,6 +925,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
         return painter(context, offset);
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
+        break;
     }
 
     _drawScrim(context, offset, size);

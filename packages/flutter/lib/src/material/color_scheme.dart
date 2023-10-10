@@ -195,7 +195,7 @@ class ColorScheme with Diagnosticable {
   }) {
     final Scheme scheme = switch (brightness) {
       Brightness.light => Scheme.light(seedColor.value),
-      Brightness.dark => Scheme.dark(seedColor.value),
+      Brightness.dark  => Scheme.dark(seedColor.value),
     };
     return ColorScheme(
       primary: primary ?? Color(scheme.primary),
@@ -973,7 +973,7 @@ class ColorScheme with Diagnosticable {
 
     final Scheme scheme = switch (brightness) {
       Brightness.light => Scheme.light(baseColor.value),
-      Brightness.dark => Scheme.dark(baseColor.value),
+      Brightness.dark  => Scheme.dark(baseColor.value),
     };
 
     return ColorScheme(primary: primary ?? Color(scheme.primary),

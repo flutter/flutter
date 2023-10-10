@@ -2207,12 +2207,12 @@ void main() {
     // How modifiers are interpreted depends upon the keyCode for GLFW.
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
       return switch (modifier) {
-        GLFWKeyHelper.modifierAlt => isLeft ? 342 : 346,
-        GLFWKeyHelper.modifierShift => isLeft ? 340 : 344,
+        GLFWKeyHelper.modifierAlt     => isLeft ? 342 : 346,
+        GLFWKeyHelper.modifierShift   => isLeft ? 340 : 344,
         GLFWKeyHelper.modifierControl => isLeft ? 341 : 345,
-        GLFWKeyHelper.modifierMeta => isLeft ? 343 : 347,
+        GLFWKeyHelper.modifierMeta    => isLeft ? 343 : 347,
         GLFWKeyHelper.modifierNumericPad => 282,
-        GLFWKeyHelper.modifierCapsLock => 280,
+        GLFWKeyHelper.modifierCapsLock   => 280,
         _ => 65, // keyA
       };
     }
@@ -2432,11 +2432,11 @@ void main() {
     // How modifiers are interpreted depends upon the keyCode for GTK.
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
       return switch (modifier) {
-        GtkKeyHelper.modifierMod1 => 65513,
-        GtkKeyHelper.modifierShift => isLeft ? 65505 : 65506,
-        GtkKeyHelper.modifierControl => isLeft ? 65507 : 65508,
-        GtkKeyHelper.modifierMeta => isLeft ? 65515 : 65516,
-        GtkKeyHelper.modifierMod2 => 65407,
+        GtkKeyHelper.modifierShift    => isLeft ? 65505 : 65506,
+        GtkKeyHelper.modifierControl  => isLeft ? 65507 : 65508,
+        GtkKeyHelper.modifierMeta     => isLeft ? 65515 : 65516,
+        GtkKeyHelper.modifierMod1     => 65513,
+        GtkKeyHelper.modifierMod2     => 65407,
         GtkKeyHelper.modifierCapsLock => 65509,
         _ => 65, // keyA
       };

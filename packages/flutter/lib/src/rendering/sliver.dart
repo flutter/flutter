@@ -1574,10 +1574,10 @@ abstract class RenderSliver extends RenderObject {
     assert(geometry != null);
     assert(!debugNeedsLayout);
     return switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up => Size(constraints.crossAxisExtent, -geometry!.paintExtent),
-      AxisDirection.right => Size(geometry!.paintExtent, constraints.crossAxisExtent),
-      AxisDirection.down => Size(constraints.crossAxisExtent, geometry!.paintExtent),
-      AxisDirection.left => Size(-geometry!.paintExtent, constraints.crossAxisExtent),
+      AxisDirection.up    => Size(constraints.crossAxisExtent, -geometry!.paintExtent),
+      AxisDirection.down  => Size(constraints.crossAxisExtent,  geometry!.paintExtent),
+      AxisDirection.right => Size( geometry!.paintExtent, constraints.crossAxisExtent),
+      AxisDirection.left  => Size(-geometry!.paintExtent, constraints.crossAxisExtent),
     };
   }
 
@@ -1595,7 +1595,7 @@ abstract class RenderSliver extends RenderObject {
     assert(geometry != null);
     assert(!debugNeedsLayout);
     return switch (constraints.axisDirection) {
-      AxisDirection.up || AxisDirection.down => Size(constraints.crossAxisExtent, geometry!.paintExtent),
+      AxisDirection.up    || AxisDirection.down => Size(constraints.crossAxisExtent, geometry!.paintExtent),
       AxisDirection.right || AxisDirection.left => Size(geometry!.paintExtent, constraints.crossAxisExtent),
     };
   }
@@ -1717,7 +1717,7 @@ mixin RenderSliverHelpers implements RenderSliver {
   bool _getRightWayUp(SliverConstraints constraints) {
     bool rightWayUp;
     rightWayUp = switch (constraints.axisDirection) {
-      AxisDirection.up || AxisDirection.left => false,
+      AxisDirection.up   || AxisDirection.left  => false,
       AxisDirection.down || AxisDirection.right => true,
     };
     switch (constraints.growthDirection) {
@@ -1834,10 +1834,10 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
   void setChildParentData(RenderObject child, SliverConstraints constraints, SliverGeometry geometry) {
     final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.paintOffset = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up => Offset(0.0, -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset))),
+      AxisDirection.up    => Offset(0.0, -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset))),
       AxisDirection.right => Offset(-constraints.scrollOffset, 0.0),
-      AxisDirection.down => Offset(0.0, -constraints.scrollOffset),
-      AxisDirection.left => Offset(-(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)), 0.0),
+      AxisDirection.down  => Offset(0.0, -constraints.scrollOffset),
+      AxisDirection.left  => Offset(-(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)), 0.0),
     };
   }
 
@@ -1900,7 +1900,7 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     final double childExtent;
     childExtent = switch (constraints.axis) {
       Axis.horizontal => child!.size.width,
-      Axis.vertical => child!.size.height,
+      Axis.vertical   => child!.size.height,
     };
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
     final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: childExtent);

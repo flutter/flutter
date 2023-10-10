@@ -387,7 +387,7 @@ class _RenderButtonBarRow extends RenderFlex {
       double currentHeight = 0.0;
       child = switch (verticalDirection) {
         VerticalDirection.down => firstChild,
-        VerticalDirection.up => lastChild,
+        VerticalDirection.up   => lastChild,
       };
 
       while (child != null) {

@@ -663,11 +663,12 @@ class _AndroidMotionEventConverter {
     return AndroidPointerProperties(
       id: pointerId,
       toolType: switch (event.kind) {
-        PointerDeviceKind.touch || PointerDeviceKind.trackpad => AndroidPointerProperties.kToolTypeFinger,
-        PointerDeviceKind.mouse => AndroidPointerProperties.kToolTypeMouse,
-        PointerDeviceKind.stylus => AndroidPointerProperties.kToolTypeStylus,
+        PointerDeviceKind.touch ||
+          PointerDeviceKind.trackpad     => AndroidPointerProperties.kToolTypeFinger,
+        PointerDeviceKind.mouse          => AndroidPointerProperties.kToolTypeMouse,
+        PointerDeviceKind.stylus         => AndroidPointerProperties.kToolTypeStylus,
         PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
-        PointerDeviceKind.unknown || _ => AndroidPointerProperties.kToolTypeUnknown,
+        PointerDeviceKind.unknown        => AndroidPointerProperties.kToolTypeUnknown,
       },
     );
   }

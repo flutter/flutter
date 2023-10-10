@@ -1242,7 +1242,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void _updateHighlightMode(FocusHighlightMode mode) {
     _mayTriggerCallback(
       task: () => _canShowHighlight = switch (FocusManager.instance.highlightMode) {
-        FocusHighlightMode.touch => false,
+        FocusHighlightMode.touch       => false,
         FocusHighlightMode.traditional => true,
       },
     );

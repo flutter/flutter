@@ -70,7 +70,7 @@ enum ScrollDirection {
 /// [ScrollDirection.idle].
 ScrollDirection flipScrollDirection(ScrollDirection direction) {
   return switch (direction) {
-    ScrollDirection.idle => ScrollDirection.idle,
+    ScrollDirection.idle    => ScrollDirection.idle,
     ScrollDirection.forward => ScrollDirection.reverse,
     ScrollDirection.reverse => ScrollDirection.forward,
   };

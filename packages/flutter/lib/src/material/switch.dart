@@ -566,7 +566,7 @@ class Switch extends StatelessWidget {
       ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
     return switch (effectiveMaterialTapTargetSize) {
-      MaterialTapTargetSize.padded => Size(switchConfig.switchWidth, switchConfig.switchHeight),
+      MaterialTapTargetSize.padded     => Size(switchConfig.switchWidth, switchConfig.switchHeight),
       MaterialTapTargetSize.shrinkWrap => Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed),
     };
   }
@@ -790,12 +790,10 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         ..curve = Curves.linear
         ..reverseCurve = null;
       final double delta = details.primaryDelta! / _trackInnerLength;
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          positionController.value -= delta;
-        case TextDirection.ltr:
-          positionController.value += delta;
-      }
+      positionController.value += switch (Directionality.of(context)) {
+        TextDirection.rtl => -delta,
+        TextDirection.ltr => delta,
+      };
     }
   }
 

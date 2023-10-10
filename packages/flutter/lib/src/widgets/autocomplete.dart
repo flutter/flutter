@@ -454,11 +454,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             link: _optionsLayerLink,
             showWhenUnlinked: false,
             targetAnchor: switch (widget.optionsViewOpenDirection) {
-              OptionsViewOpenDirection.up => Alignment.topLeft,
+              OptionsViewOpenDirection.up   => Alignment.topLeft,
               OptionsViewOpenDirection.down => Alignment.bottomLeft,
             },
             followerAnchor: switch (widget.optionsViewOpenDirection) {
-              OptionsViewOpenDirection.up => Alignment.bottomLeft,
+              OptionsViewOpenDirection.up   => Alignment.bottomLeft,
               OptionsViewOpenDirection.down => Alignment.topLeft,
             },
             child: TextFieldTapRegion(

@@ -244,7 +244,7 @@ void main() {
         // the theme's surface color.
         switch (colorScheme.brightness) {
           Brightness.light => const Color(0xffffffff),
-          Brightness.dark => const Color(0xff424242),
+          Brightness.dark  => const Color(0xff424242),
         },
       );
     });

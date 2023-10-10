@@ -815,9 +815,9 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   @override
   ShapeBorder? get shape {
     return switch (type) {
-      _FloatingActionButtonType.regular => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
-      _FloatingActionButtonType.small => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-      _FloatingActionButtonType.large => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+      _FloatingActionButtonType.regular  => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
+      _FloatingActionButtonType.small    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+      _FloatingActionButtonType.large    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
       _FloatingActionButtonType.extended => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
     };
   }
@@ -825,9 +825,9 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   @override
   double? get iconSize {
     return switch (type) {
-      _FloatingActionButtonType.regular => 24.0,
-      _FloatingActionButtonType.small => 24.0,
-      _FloatingActionButtonType.large => 36.0,
+      _FloatingActionButtonType.regular  => 24.0,
+      _FloatingActionButtonType.small    => 24.0,
+      _FloatingActionButtonType.large    => 36.0,
       _FloatingActionButtonType.extended => 24.0,
     };
   }

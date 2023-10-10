@@ -1376,7 +1376,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final double x = switch (textDirection) {
         TextDirection.rtl => 0.0,
         TextDirection.ltr => _boxSize(icon).width,
-       };
+      };
       _boxParentData(container).offset = Offset(x, 0.0);
     }
 
@@ -1668,17 +1668,17 @@ class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, Re
   @override
   Widget? childForSlot(_DecorationSlot slot) {
     return switch (slot) {
-      _DecorationSlot.icon => decoration.icon,
-      _DecorationSlot.input => decoration.input,
-      _DecorationSlot.label => decoration.label,
-      _DecorationSlot.hint => decoration.hint,
-      _DecorationSlot.prefix => decoration.prefix,
-      _DecorationSlot.suffix => decoration.suffix,
-      _DecorationSlot.prefixIcon => decoration.prefixIcon,
-      _DecorationSlot.suffixIcon => decoration.suffixIcon,
+      _DecorationSlot.icon        => decoration.icon,
+      _DecorationSlot.input       => decoration.input,
+      _DecorationSlot.label       => decoration.label,
+      _DecorationSlot.hint        => decoration.hint,
+      _DecorationSlot.prefix      => decoration.prefix,
+      _DecorationSlot.suffix      => decoration.suffix,
+      _DecorationSlot.prefixIcon  => decoration.prefixIcon,
+      _DecorationSlot.suffixIcon  => decoration.suffixIcon,
       _DecorationSlot.helperError => decoration.helperError,
-      _DecorationSlot.counter => decoration.counter,
-      _DecorationSlot.container => decoration.container,
+      _DecorationSlot.counter     => decoration.counter,
+      _DecorationSlot.container   => decoration.container,
     };
   }
 
@@ -4545,15 +4545,15 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       // dark theme: 5% white
       // light theme: 2% black
       return switch (Theme.of(context).brightness) {
-        Brightness.dark => const Color(0x0DFFFFFF),
+        Brightness.dark  => const Color(0x0DFFFFFF),
         Brightness.light => const Color(0x05000000),
       };
     }
     // dark theme: 10% white
     // light theme: 4% black
     return switch (Theme.of(context).brightness) {
-      Brightness.dark => const Color(0x1AFFFFFF);
-      Brightness.light => const Color(0x0A000000);
+      Brightness.dark  => const Color(0x1AFFFFFF),
+      Brightness.light => const Color(0x0A000000),
     };
   });
 
@@ -4566,7 +4566,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.of(context).brightness) {
-      Brightness.dark => Colors.white70,
+      Brightness.dark  => Colors.white70,
       Brightness.light => Colors.black45,
     };
   });
@@ -4580,7 +4580,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.of(context).brightness) {
-      Brightness.dark => Colors.white70,
+      Brightness.dark  => Colors.white70,
       Brightness.light => Colors.black45,
     };
   });
@@ -4594,7 +4594,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.of(context).brightness) {
-      Brightness.dark => Colors.white70,
+      Brightness.dark  => Colors.white70,
       Brightness.light => Colors.black45,
     };
   });

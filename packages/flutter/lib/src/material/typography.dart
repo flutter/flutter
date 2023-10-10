@@ -294,8 +294,8 @@ class Typography with Diagnosticable {
   TextTheme geometryThemeFor(ScriptCategory category) {
     return switch (category) {
       ScriptCategory.englishLike => englishLike,
-      ScriptCategory.dense => dense,
-      ScriptCategory.tall => tall,
+      ScriptCategory.dense       => dense,
+      ScriptCategory.tall        => tall,
     };
   }
 

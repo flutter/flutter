@@ -288,8 +288,8 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     );
 
     final EdgeInsetsGeometry? padding = widget.padding ?? switch (widget._type) {
-      _CupertinoListTileType.base => widget.subtitle == null ? _kPadding : _kPaddingWithSubtitle,
-      _CupertinoListTileType.notched => widget.leading == null ? _kNotchedPaddingWithoutLeading : _kNotchedPadding,
+      _CupertinoListTileType.base    => widget.subtitle == null ? _kPadding : _kPaddingWithSubtitle,
+      _CupertinoListTileType.notched => widget.leading  == null ? _kNotchedPaddingWithoutLeading : _kNotchedPadding,
     };
 
     Widget? subtitle;
@@ -321,7 +321,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     }
 
     final double minHeight = switch (widget._type) {
-      _CupertinoListTileType.base => subtitle == null ? _kMinHeight : _kMinHeightWithSubtitle,
+      _CupertinoListTileType.base    => subtitle       == null ? _kMinHeight : _kMinHeightWithSubtitle,
       _CupertinoListTileType.notched => widget.leading == null ? _kNotchedMinHeightWithoutLeading : _kNotchedMinHeight,
     };
 

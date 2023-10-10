@@ -175,9 +175,9 @@ class _OptionsState extends State<Options> {
 
   VisualDensity _profileToDensity(String? profile) {
     return switch (profile) {
-      'standard' => VisualDensity.standard,
+      'standard'    => VisualDensity.standard,
       'comfortable' => VisualDensity.comfortable,
-      'compact' => VisualDensity.compact,
+      'compact'     => VisualDensity.compact,
       'custom' || _ => widget.model.density,
     };
   }

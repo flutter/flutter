@@ -280,9 +280,9 @@ class MaterialRectArcTween extends RectTween {
 
   Offset _cornerFor(Rect rect, _CornerId id) {
     return switch (id) {
-      _CornerId.topLeft => rect.topLeft,
-      _CornerId.topRight => rect.topRight,
-      _CornerId.bottomLeft => rect.bottomLeft,
+      _CornerId.topLeft     => rect.topLeft,
+      _CornerId.topRight    => rect.topRight,
+      _CornerId.bottomLeft  => rect.bottomLeft,
       _CornerId.bottomRight => rect.bottomRight,
     };
   }

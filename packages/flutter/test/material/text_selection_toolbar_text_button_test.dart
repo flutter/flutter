@@ -89,7 +89,7 @@ void main() {
         textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
         switch (colorScheme.brightness) {
           Brightness.light => const Color(0xff000000),
-          Brightness.dark => const Color(0xffffffff),
+          Brightness.dark  => const Color(0xffffffff),
         },
       );
     });

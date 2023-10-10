@@ -979,7 +979,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     if (_dragInfo != null && index >= widget.itemCount) {
       return switch (_scrollDirection) {
         Axis.horizontal => SizedBox(width: _dragInfo!.itemExtent),
-        Axis.vertical => SizedBox(height: _dragInfo!.itemExtent),
+        Axis.vertical   => SizedBox(height: _dragInfo!.itemExtent),
       };
     }
     final Widget child = widget.itemBuilder(context, index);
@@ -1493,28 +1493,28 @@ class _DragItemProxy extends StatelessWidget {
 double _sizeExtent(Size size, Axis scrollDirection) {
   return switch (scrollDirection) {
     Axis.horizontal => size.width,
-    Axis.vertical => size.height,
+    Axis.vertical   => size.height,
   };
 }
 
 double _offsetExtent(Offset offset, Axis scrollDirection) {
   return switch (scrollDirection) {
     Axis.horizontal => offset.dx,
-    Axis.vertical => offset.dy,
+    Axis.vertical   => offset.dy,
   };
 }
 
 Offset _extentOffset(double extent, Axis scrollDirection) {
   return switch (scrollDirection) {
     Axis.horizontal => Offset(extent, 0.0),
-    Axis.vertical => Offset(0.0, extent),
+    Axis.vertical   => Offset(0.0, extent),
   };
 }
 
 Offset _restrictAxis(Offset offset, Axis scrollDirection) {
   return switch (scrollDirection) {
     Axis.horizontal => Offset(offset.dx, 0.0),
-    Axis.vertical => Offset(0.0, offset.dy),
+    Axis.vertical   => Offset(0.0, offset.dy),
   };
 }
 

@@ -232,14 +232,11 @@ class ByValueKey extends SerializableFinder {
   static ByValueKey deserialize(Map<String, String> json) {
     final String keyValueString = json['keyValueString']!;
     final String keyValueType = json['keyValueType']!;
-    switch (keyValueType) {
-      case 'int':
-        return ByValueKey(int.parse(keyValueString));
-      case 'String':
-        return ByValueKey(keyValueString);
-      default:
-        throw _createInvalidKeyValueTypeError(keyValueType);
-    }
+    return switch (keyValueType) {
+      'int'    => ByValueKey(int.parse(keyValueString)),
+      'String' => ByValueKey(keyValueString),
+      _ => throw _createInvalidKeyValueTypeError(keyValueType),
+    };
   }
 }
 

@@ -382,7 +382,7 @@ class FilledButton extends ButtonStyleButton {
   ButtonStyle defaultStyleOf(BuildContext context) {
     return switch (_variant) {
       _FilledButtonVariant.filled => _FilledButtonDefaultsM3(context),
-      _FilledButtonVariant.tonal => _FilledTonalButtonDefaultsM3(context),
+      _FilledButtonVariant.tonal  => _FilledTonalButtonDefaultsM3(context),
     };
   }
 

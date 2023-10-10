@@ -1966,7 +1966,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     final Rect rect = Offset.zero & size;
     return switch (_shape) {
       BoxShape.rectangle => (borderRadius ?? BorderRadius.zero).toRRect(rect),
-      BoxShape.circle => RRect.fromRectXY(rect, rect.width / 2, rect.height / 2),
+      BoxShape.circle    => RRect.fromRectXY(rect, rect.width / 2, rect.height / 2),
     };
   }
 

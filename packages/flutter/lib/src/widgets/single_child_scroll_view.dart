@@ -406,7 +406,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     assert(hasSize);
     return switch (axis) {
       Axis.horizontal => size.width,
-      Axis.vertical => size.height,
+      Axis.vertical   => size.height,
     };
   }
 
@@ -422,14 +422,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     }
     return switch (axis) {
       Axis.horizontal => math.max(0.0, child!.size.width - size.width),
-      Axis.vertical => math.max(0.0, child!.size.height - size.height),
+      Axis.vertical   => math.max(0.0, child!.size.height - size.height),
     };
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return switch (axis) {
       Axis.horizontal => constraints.heightConstraints(),
-      Axis.vertical => constraints.widthConstraints(),
+      Axis.vertical   => constraints.widthConstraints(),
     };
   }
 
@@ -497,9 +497,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   Offset _paintOffsetForPosition(double position) {
     return switch (axisDirection) {
-      AxisDirection.up => Offset(0.0, position - child!.size.height + size.height),
-      AxisDirection.down => Offset(0.0, -position),
-      AxisDirection.left => Offset(position - child!.size.width + size.width, 0.0),
+      AxisDirection.up    => Offset(0.0, position - child!.size.height + size.height),
+      AxisDirection.down  => Offset(0.0, -position),
+      AxisDirection.left  => Offset(position - child!.size.width + size.width, 0.0),
       AxisDirection.right => Offset(-position, 0.0),
     };
   }
@@ -602,28 +602,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child!.size;
 
-    final double leadingScrollOffset;
-    final double targetMainAxisExtent;
-    final double mainAxisExtent;
+    final double leadingScrollOffset, targetMainAxisExtent, mainAxisExtent;
 
-    switch (axisDirection) {
-      case AxisDirection.up:
-        mainAxisExtent = size.height;
-        leadingScrollOffset = contentSize.height - bounds.bottom;
-        targetMainAxisExtent = bounds.height;
-      case AxisDirection.right:
-        mainAxisExtent = size.width;
-        leadingScrollOffset = bounds.left;
-        targetMainAxisExtent = bounds.width;
-      case AxisDirection.down:
-        mainAxisExtent = size.height;
-        leadingScrollOffset = bounds.top;
-        targetMainAxisExtent = bounds.height;
-      case AxisDirection.left:
-        mainAxisExtent = size.width;
-        leadingScrollOffset = contentSize.width - bounds.right;
-        targetMainAxisExtent = bounds.width;
-    }
+    (leadingScrollOffset, targetMainAxisExtent, mainAxisExtent) = switch (axisDirection) {
+      AxisDirection.up    => (size.height, contentSize.height - bounds.bottom, bounds.height),
+      AxisDirection.left  => (size.width,  contentSize.width  - bounds.right,  bounds.width),
+      AxisDirection.right => (size.width,  bounds.left, bounds.width),
+      AxisDirection.down  => (size.height, bounds.top,  bounds.height),
+    };
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
     final Rect targetRect = bounds.shift(_paintOffsetForPosition(targetOffset));

@@ -296,9 +296,9 @@ class Version {
   @override
   String toString() {
     return switch (type) {
-      VersionType.stable => '$x.$y.$z',
+      VersionType.stable      => '$x.$y.$z',
       VersionType.development => '$x.$y.$z-$m.$n.pre',
-      VersionType.latest => '$x.$y.$z-$m.$n.pre.$commits',
+      VersionType.latest      => '$x.$y.$z-$m.$n.pre.$commits',
       VersionType.gitDescribe => '$x.$y.$z-$m.$n.pre.$commits',
     };
   }

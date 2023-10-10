@@ -1588,16 +1588,11 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-    }
+    final Paint leftTrackPaint, rightTrackPaint;
+    (leftTrackPaint, rightTrackPaint) = switch (textDirection) {
+      TextDirection.ltr => (activePaint, inactivePaint),
+      TextDirection.rtl => (inactivePaint, activePaint),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1699,16 +1694,11 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-    }
+    final Paint leftTrackPaint, rightTrackPaint;
+    (leftTrackPaint, rightTrackPaint) = switch (textDirection) {
+      TextDirection.ltr => (activePaint, inactivePaint),
+      TextDirection.rtl => (inactivePaint, activePaint),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1886,16 +1876,11 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    final Offset leftThumbOffset;
-    final Offset rightThumbOffset;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftThumbOffset = startThumbCenter;
-        rightThumbOffset = endThumbCenter;
-      case TextDirection.rtl:
-        leftThumbOffset = endThumbCenter;
-        rightThumbOffset = startThumbCenter;
-    }
+    final Offset leftThumbOffset, rightThumbOffset;
+    (leftThumbOffset, rightThumbOffset) = switch (textDirection) {
+      TextDirection.ltr => (startThumbCenter, endThumbCenter),
+      TextDirection.rtl => (endThumbCenter, startThumbCenter),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1992,16 +1977,11 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
     final Paint inactivePaint = Paint()
       ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    final Offset leftThumbOffset;
-    final Offset rightThumbOffset;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftThumbOffset = startThumbCenter;
-        rightThumbOffset = endThumbCenter;
-      case TextDirection.rtl:
-        leftThumbOffset = endThumbCenter;
-        rightThumbOffset = startThumbCenter;
-    }
+    final Offset leftThumbOffset, rightThumbOffset;
+    (leftThumbOffset, rightThumbOffset) = switch (textDirection) {
+      TextDirection.ltr => (startThumbCenter, endThumbCenter),
+      TextDirection.rtl => (endThumbCenter, startThumbCenter),
+    };
     final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
     final double thumbRadius = thumbSize.width / 2;
     assert(thumbRadius > 0);

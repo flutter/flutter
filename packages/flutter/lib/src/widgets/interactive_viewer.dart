@@ -603,9 +603,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset alignedTranslation = switch (widget.panAxis){
       _ when _currentAxis == null => translation,
       PanAxis.horizontal => _alignAxis(translation, Axis.horizontal),
-      PanAxis.vertical => _alignAxis(translation, Axis.vertical),
-      PanAxis.aligned => _alignAxis(translation, _currentAxis!),
-      PanAxis.free => translation,
+      PanAxis.vertical   => _alignAxis(translation, Axis.vertical),
+      PanAxis.aligned    => _alignAxis(translation, _currentAxis!),
+      PanAxis.free       => translation,
     };
 
     final Matrix4 nextMatrix = matrix.clone()..translate(
@@ -1435,7 +1435,7 @@ Offset _round(Offset offset) {
 Offset _alignAxis(Offset offset, Axis axis) {
   return switch (axis) {
     Axis.horizontal => Offset(offset.dx, 0.0),
-    Axis.vertical => Offset(0.0, offset.dy),
+    Axis.vertical   => Offset(0.0, offset.dy),
   };
 }
 

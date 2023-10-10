@@ -220,96 +220,67 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (_random.nextInt(10) > 0) {
       return value;
     }
-    switch (_random.nextInt(100)) {
-      case 10:
-        return TextDecoration.underline;
-      case 11:
-        return TextDecoration.underline;
-      case 12:
-        return TextDecoration.underline;
-      case 13:
-        return TextDecoration.underline;
-      case 20:
-        return TextDecoration.lineThrough;
-      case 30:
-        return TextDecoration.overline;
-      case 90:
-        return TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough]);
-      case 91:
-        return TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.overline]);
-      case 92:
-        return TextDecoration.combine(<TextDecoration>[TextDecoration.lineThrough, TextDecoration.overline]);
-      case 93:
-        return TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough, TextDecoration.overline]);
-    }
-    return null;
+    return switch (_random.nextInt(100)) {
+      10 => TextDecoration.underline,
+      11 => TextDecoration.underline,
+      12 => TextDecoration.underline,
+      13 => TextDecoration.underline,
+      20 => TextDecoration.lineThrough,
+      30 => TextDecoration.overline,
+      90 => TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough]),
+      91 => TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.overline]),
+      92 => TextDecoration.combine(<TextDecoration>[TextDecoration.lineThrough, TextDecoration.overline]),
+      93 => TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough, TextDecoration.overline]),
+      _ => null,
+    };
   }
 
   TextDecorationStyle? _fiddleWithDecorationStyle(TextDecorationStyle? value) {
-    switch (_random.nextInt(10)) {
-      case 0:
-        return null;
-      case 1:
-        return pickFromList<TextDecorationStyle>(_random, TextDecorationStyle.values);
-    }
-    return value;
+    return switch (_random.nextInt(10)) {
+      0 => null,
+      1 => pickFromList<TextDecorationStyle>(_random, TextDecorationStyle.values),
+      _ => value,
+    };
   }
 
   FontWeight? _fiddleWithFontWeight(FontWeight? value) {
-    switch (_random.nextInt(10)) {
-      case 0:
-        return null;
-      case 1:
-        return pickFromList<FontWeight>(_random, FontWeight.values);
-    }
-    return value;
+    return switch (_random.nextInt(10)) {
+      0 => null,
+      1 => pickFromList<FontWeight>(_random, FontWeight.values),
+      _ => value,
+    };
   }
 
   FontStyle? _fiddleWithFontStyle(FontStyle? value) {
-    switch (_random.nextInt(10)) {
-      case 0:
-        return null;
-      case 1:
-        return pickFromList<FontStyle>(_random, FontStyle.values);
-    }
-    return value;
+    return switch (_random.nextInt(10)) {
+      0 => null,
+      1 => pickFromList<FontStyle>(_random, FontStyle.values),
+      _ => value,
+    };
   }
 
   String? _fiddleWithFontFamily(String? value) {
-    switch (_random.nextInt(10)) {
-      case 0:
-        return null;
-      case 1:
-        return 'sans-serif';
-      case 2:
-        return 'sans-serif-condensed';
-      case 3:
-        return 'serif';
-      case 4:
-        return 'monospace';
-      case 5:
-        return 'serif-monospace';
-      case 6:
-        return 'casual';
-      case 7:
-        return 'cursive';
-      case 8:
-        return 'sans-serif-smallcaps';
-    }
-    return value;
+    return switch (_random.nextInt(10)) {
+      0 => null,
+      1 => 'sans-serif',
+      2 => 'sans-serif-condensed',
+      3 => 'serif',
+      4 => 'monospace',
+      5 => 'serif-monospace',
+      6 => 'casual',
+      7 => 'cursive',
+      8 => 'sans-serif-smallcaps',
+      _ => value,
+    };
   }
 
   double? _fiddleWithDouble(double? value, double defaultValue, double max) {
-    switch (_random.nextInt(10)) {
-      case 0:
-        if (value == null) {
-          return math.min(defaultValue * (0.95 + _random.nextDouble() * 0.1), max);
-        }
-        return math.min(value * (0.51 + _random.nextDouble()), max);
-      case 1:
-        return null;
-    }
-    return value;
+    return switch (_random.nextInt(10)) {
+      0 when value == null => math.min(defaultValue * (0.95 + _random.nextDouble() * 0.1), max),
+      0 => math.min(value * (0.51 + _random.nextDouble()), max),
+      1 => null,
+      _ => value,
+    };
   }
 
   List<TextSpan>? _fiddleWithChildren(List<TextSpan> children) {

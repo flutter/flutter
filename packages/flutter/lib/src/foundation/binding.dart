@@ -587,7 +587,7 @@ abstract class BindingBase {
           if (parameters.containsKey('value')) {
             debugBrightnessOverride = switch (parameters['value']) {
               'Brightness.light' => ui.Brightness.light,
-              'Brightness.dark' => ui.Brightness.dark,
+              'Brightness.dark'  => ui.Brightness.dark,
               _ => null,
             };
             _postExtensionStateChangedEvent(

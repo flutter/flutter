@@ -229,14 +229,13 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (!isInteractive) {
       return;
     }
-    switch (value) {
-      case false:
-        onChanged!(true);
-      case true:
-        onChanged!(tristate ? null : false);
-      case null:
-        onChanged!(false);
-    }
+    onChanged!(
+      switch (value) {
+        false => true,
+        true => tristate ? null : false,
+        null => false,
+      },
+    );
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
   }
 

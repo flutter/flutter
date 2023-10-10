@@ -120,21 +120,21 @@ Future<void> dismissElement(WidgetTester tester, Finder finder, { required AxisD
 }
 
 Future<void> dragElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, required double amount }) async {
-  Offset delta = switch (gestureDirection) {
-    AxisDirection.left => Offset(-amount, 0.0),
-    AxisDirection.right => Offset(amount, 0.0),
-    AxisDirection.up => Offset(0.0, -amount),
-    AxisDirection.down => Offset(0.0, amount),
+  final Offset delta = switch (gestureDirection) {
+    AxisDirection.left  => Offset(-amount, 0.0),
+    AxisDirection.right => Offset( amount, 0.0),
+    AxisDirection.up    => Offset(0.0, -amount),
+    AxisDirection.down  => Offset(0.0,  amount),
   };
   await tester.drag(finder, delta);
 }
 
 Future<void> flingElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
-  Offset delta = switch (gestureDirection) {
-    AxisDirection.left => const Offset(-300.0, 0.0),
-    AxisDirection.right => const Offset(300.0, 0.0),
-    AxisDirection.up => const Offset(0.0, -300.0),
-    AxisDirection.down => const Offset(0.0, 300.0),
+  final Offset delta = switch (gestureDirection) {
+    AxisDirection.left  => const Offset(-300.0, 0.0),
+    AxisDirection.right => const Offset( 300.0, 0.0),
+    AxisDirection.up    => const Offset(0.0, -300.0),
+    AxisDirection.down  => const Offset(0.0,  300.0),
   };
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
@@ -205,10 +205,10 @@ Future<void> checkFlingItemAfterMovement(
 
 Future<void> rollbackElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta = switch (gestureDirection) {
-    AxisDirection.left => const Offset(-30.0, 0.0),
-    AxisDirection.right => const Offset(30.0, 0.0),
-    AxisDirection.up => const Offset(0.0, -30.0),
-    AxisDirection.down => const Offset(0.0, 30.0),
+    AxisDirection.left  => const Offset(-30.0, 0.0),
+    AxisDirection.right => const Offset( 30.0, 0.0),
+    AxisDirection.up    => const Offset(0.0, -30.0),
+    AxisDirection.down  => const Offset(0.0,  30.0),
   };
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }

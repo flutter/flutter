@@ -480,8 +480,8 @@ class _TestMenusState extends State<_TestMenus> {
     setState(() {
       checkboxState = switch (checkboxState) {
         false => true,
-        true => null,
-        null => false,
+        true  => null,
+        null  => false,
       };
     });
   }

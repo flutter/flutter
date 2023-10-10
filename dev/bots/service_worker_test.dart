@@ -107,14 +107,14 @@ Future<void> _setAppVersion(int version) async {
 
 String _testTypeToIndexFile(ServiceWorkerTestType type) {
   return switch (type) {
-    ServiceWorkerTestType.blockedServiceWorkers => 'index_with_blocked_service_workers.html',
-    ServiceWorkerTestType.withFlutterJs => 'index_with_flutterjs.html',
-    ServiceWorkerTestType.withoutFlutterJs => 'index_without_flutterjs.html',
-    ServiceWorkerTestType.withFlutterJsShort => 'index_with_flutterjs_short.html',
-    ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent => 'index_with_flutterjs_entrypoint_loaded.html',
-    ServiceWorkerTestType.withFlutterJsTrustedTypesOn => 'index_with_flutterjs_el_tt_on.html',
+    ServiceWorkerTestType.blockedServiceWorkers                   => 'index_with_blocked_service_workers.html',
+    ServiceWorkerTestType.withFlutterJs                           => 'index_with_flutterjs.html',
+    ServiceWorkerTestType.withoutFlutterJs                        => 'index_without_flutterjs.html',
+    ServiceWorkerTestType.withFlutterJsShort                      => 'index_with_flutterjs_short.html',
+    ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent      => 'index_with_flutterjs_entrypoint_loaded.html',
+    ServiceWorkerTestType.withFlutterJsTrustedTypesOn             => 'index_with_flutterjs_el_tt_on.html',
     ServiceWorkerTestType.withFlutterJsCustomServiceWorkerVersion => 'index_with_flutterjs_custom_sw_version.html',
-    ServiceWorkerTestType.generatedEntrypoint => 'generated_entrypoint.html',
+    ServiceWorkerTestType.generatedEntrypoint                     => 'generated_entrypoint.html',
   };
 }
 

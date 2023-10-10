@@ -905,8 +905,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuLocation) {
     return switch (contextMenuLocation) {
       _ContextMenuLocation.center => AlignmentDirectional.topCenter,
-      _ContextMenuLocation.right => AlignmentDirectional.topEnd,
-      _ContextMenuLocation.left => AlignmentDirectional.topStart,
+      _ContextMenuLocation.right  => AlignmentDirectional.topEnd,
+      _ContextMenuLocation.left   => AlignmentDirectional.topStart,
     };
   }
 
@@ -1221,11 +1221,11 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
     return switch ((contextMenuLocation, orientation)) {
       (_ContextMenuLocation.center, Orientation.portrait) => Alignment.bottomCenter,
-      (_ContextMenuLocation.center, _) => Alignment.topRight,
-      (_ContextMenuLocation.right, Orientation.portrait) => Alignment.bottomCenter,
-      (_ContextMenuLocation.right, _) => Alignment.topLeft,
-      (_ContextMenuLocation.left, Orientation.portrait) => Alignment.bottomCenter,
-      (_ContextMenuLocation.left, _) => Alignment.topRight,
+      (_ContextMenuLocation.center, _)                    => Alignment.topRight,
+      (_ContextMenuLocation.right,  Orientation.portrait) => Alignment.bottomCenter,
+      (_ContextMenuLocation.right,  _)                    => Alignment.topLeft,
+      (_ContextMenuLocation.left,   Orientation.portrait) => Alignment.bottomCenter,
+      (_ContextMenuLocation.left,   _)                    => Alignment.topRight,
     };
   }
 
@@ -1298,10 +1298,10 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
 
     return switch (contextMenuLocation) {
-      _ContextMenuLocation.center => <Widget>[child, spacer, sheet],
       _ContextMenuLocation.right when orientation == Orientation.portrait => <Widget>[child, spacer, sheet],
-      _ContextMenuLocation.right => <Widget>[sheet, spacer, child],
-      _ContextMenuLocation.left => <Widget>[child, spacer, sheet],
+      _ContextMenuLocation.right  => <Widget>[sheet, spacer, child],
+      _ContextMenuLocation.center => <Widget>[child, spacer, sheet],
+      _ContextMenuLocation.left   => <Widget>[child, spacer, sheet],
     };
   }
 
@@ -1464,8 +1464,8 @@ class _ContextMenuSheet extends StatelessWidget {
     return switch (_contextMenuLocation) {
       _ContextMenuLocation.center when _orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
       _ContextMenuLocation.center => <Widget>[menu, const Spacer()],
-      _ContextMenuLocation.right => <Widget>[const Spacer(), menu],
-      _ContextMenuLocation.left => <Widget>[menu, const Spacer()],
+      _ContextMenuLocation.right  => <Widget>[const Spacer(), menu],
+      _ContextMenuLocation.left   => <Widget>[menu, const Spacer()],
     };
   }
 

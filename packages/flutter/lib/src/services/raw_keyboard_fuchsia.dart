@@ -90,10 +90,10 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
       return false;
     }
     return switch (side) {
-      KeyboardSide.any => true,
-      KeyboardSide.all => modifiers & leftMask != 0 && modifiers & rightMask != 0,
-      KeyboardSide.left => modifiers & leftMask != 0,
+      KeyboardSide.any   => true,
+      KeyboardSide.left  => modifiers & leftMask  != 0,
       KeyboardSide.right => modifiers & rightMask != 0,
+      KeyboardSide.all   => modifiers & rightMask != 0 && modifiers & leftMask != 0,
     };
   }
 

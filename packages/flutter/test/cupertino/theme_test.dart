@@ -231,7 +231,7 @@ void main() {
       componentColor,
       isSameColorAs(switch (currentBrightness) {
         Brightness.light => expectedDynamicColor.color,
-        Brightness.dark => expectedDynamicColor.darkColor,
+        Brightness.dark  => expectedDynamicColor.darkColor,
       }),
     );
   }

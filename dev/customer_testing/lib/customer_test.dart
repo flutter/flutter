@@ -148,11 +148,11 @@ enum _PlatformType {
   posix;
 
   bool get conditionMet => switch (this) {
-        _PlatformType.all => true,
+        _PlatformType.all     => true,
         _PlatformType.windows => Platform.isWindows,
-        _PlatformType.macos => Platform.isMacOS,
-        _PlatformType.linux => Platform.isLinux,
-        _PlatformType.posix => Platform.isLinux || Platform.isMacOS,
+        _PlatformType.macos   => Platform.isMacOS,
+        _PlatformType.linux   => Platform.isLinux,
+        _PlatformType.posix   => Platform.isLinux || Platform.isMacOS,
       };
 }
 

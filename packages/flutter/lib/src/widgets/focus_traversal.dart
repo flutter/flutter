@@ -741,16 +741,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Iterable<FocusNode> nodes,
   ) {
     assert(direction == TraversalDirection.left || direction == TraversalDirection.right);
-    final Iterable<FocusNode> filtered;
-    switch (direction) {
-      case TraversalDirection.left:
-        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left);
-      case TraversalDirection.right:
-        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right);
-      case TraversalDirection.up:
-      case TraversalDirection.down:
-        throw ArgumentError('Invalid direction $direction');
-    }
+    final Iterable<FocusNode> filtered = switch (direction) {
+      TraversalDirection.left  => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left),
+      TraversalDirection.right => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right),
+      TraversalDirection.up || TraversalDirection.down => throw ArgumentError('Invalid direction $direction'),
+    };
     final List<FocusNode> sorted = filtered.toList();
     // Sort all nodes from left to right.
     mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dx.compareTo(b.rect.center.dx));
@@ -766,16 +761,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Iterable<FocusNode> nodes,
   ) {
     assert(direction == TraversalDirection.up || direction == TraversalDirection.down);
-    final Iterable<FocusNode> filtered;
-    switch (direction) {
-      case TraversalDirection.up:
-        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top);
-      case TraversalDirection.down:
-        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom);
-      case TraversalDirection.left:
-      case TraversalDirection.right:
-        throw ArgumentError('Invalid direction $direction');
-    }
+    final Iterable<FocusNode> filtered = switch (direction) {
+      TraversalDirection.up => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top),
+      TraversalDirection.down => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom),
+      TraversalDirection.left || TraversalDirection.right => throw ArgumentError('Invalid direction $direction'),
+    };
     final List<FocusNode> sorted = filtered.toList();
     mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dy.compareTo(b.rect.center.dy));
     return sorted;
@@ -808,7 +798,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         requestFocusCallback(
           lastNode,
           alignmentPolicy: switch (direction) {
-            TraversalDirection.up || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+            TraversalDirection.up    || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
             TraversalDirection.right || TraversalDirection.down => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           },
         );
@@ -887,7 +877,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       requestFocusCallback(
         firstFocus,
         alignmentPolicy: switch (direction) {
-          TraversalDirection.up || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          TraversalDirection.up    || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           TraversalDirection.right || TraversalDirection.down => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
         },
       );
@@ -957,7 +947,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       requestFocusCallback(
         found,
         alignmentPolicy: switch (direction) {
-          TraversalDirection.up || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          TraversalDirection.up    || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           TraversalDirection.right || TraversalDirection.down => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
         },
       );

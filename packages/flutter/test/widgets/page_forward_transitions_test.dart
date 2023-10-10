@@ -202,7 +202,7 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           return switch (settings.name) {
-            '/' => TestRoute<void>(settings: settings, child: const Text('A')),
+            '/'  => TestRoute<void>(settings: settings, child: const Text('A')),
             '/1' => TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B')),
             _ => null,
           };

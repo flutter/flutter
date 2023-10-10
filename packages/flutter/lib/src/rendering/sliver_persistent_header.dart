@@ -153,7 +153,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     }
     assert(child!.hasSize);
     return switch (constraints.axis) {
-      Axis.vertical => child!.size.height,
+      Axis.vertical   => child!.size.height,
       Axis.horizontal => child!.size.width,
     };
   }
@@ -297,9 +297,9 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
       offset += switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-        AxisDirection.up => Offset(0.0, geometry!.paintExtent - childMainAxisPosition(child!) - childExtent),
-        AxisDirection.down => Offset(0.0, childMainAxisPosition(child!)),
-        AxisDirection.left => Offset(geometry!.paintExtent - childMainAxisPosition(child!) - childExtent, 0.0),
+        AxisDirection.up    => Offset(0.0, geometry!.paintExtent - childMainAxisPosition(child!) - childExtent),
+        AxisDirection.down  => Offset(0.0, childMainAxisPosition(child!)),
+        AxisDirection.left  => Offset(geometry!.paintExtent - childMainAxisPosition(child!) - childExtent, 0.0),
         AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
       };
       context.paintChild(child!, offset);
@@ -442,10 +442,10 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
 
     Rect? newRect;
     newRect = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up => _trim(localBounds, bottom: childExtent),
+      AxisDirection.up    => _trim(localBounds, bottom: childExtent),
       AxisDirection.right => _trim(localBounds, left: 0),
-      AxisDirection.down => _trim(localBounds, top: 0),
-      AxisDirection.left => _trim(localBounds, right: childExtent),
+      AxisDirection.down  => _trim(localBounds, top: 0),
+      AxisDirection.left  => _trim(localBounds, right: childExtent),
     };
 
     super.showOnScreen(
@@ -701,20 +701,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     double targetExtent;
     Rect? targetRect;
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        targetExtent = childExtent - (childBounds?.top ?? 0);
-        targetRect = _trim(childBounds, bottom: childExtent);
-      case AxisDirection.right:
-        targetExtent = childBounds?.right ?? childExtent;
-        targetRect = _trim(childBounds, left: 0);
-      case AxisDirection.down:
-        targetExtent = childBounds?.bottom ?? childExtent;
-        targetRect = _trim(childBounds, top: 0);
-      case AxisDirection.left:
-        targetExtent = childExtent - (childBounds?.left ?? 0);
-        targetRect = _trim(childBounds, right: childExtent);
-    }
+    (targetExtent, targetRect) = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      AxisDirection.up    => (childExtent - (childBounds?.top  ?? 0), _trim(childBounds, bottom: childExtent)),
+      AxisDirection.left  => (childExtent - (childBounds?.left ?? 0), _trim(childBounds, right:  childExtent)),
+      AxisDirection.right => (childBounds?.right  ?? childExtent,     _trim(childBounds, left: 0)),
+      AxisDirection.down  => (childBounds?.bottom ?? childExtent,     _trim(childBounds, top:  0)),
+    };
 
     // A stretch header can have a bigger childExtent than maxExtent.
     final double effectiveMaxExtent = math.max(childExtent, maxExtent);

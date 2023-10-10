@@ -475,9 +475,9 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => _androidShortcuts,
       TargetPlatform.fuchsia => _fuchsiaShortcuts,
-      TargetPlatform.iOS => _iOSShortcuts,
-      TargetPlatform.linux => _linuxShortcuts,
-      TargetPlatform.macOS => _macShortcuts,
+      TargetPlatform.iOS     => _iOSShortcuts,
+      TargetPlatform.linux   => _linuxShortcuts,
+      TargetPlatform.macOS   => _macShortcuts,
       TargetPlatform.windows => _windowsShortcuts,
     };
   }

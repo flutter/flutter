@@ -50,16 +50,16 @@ enum Channel { dev, beta, stable }
 
 String getChannelName(Channel channel) {
   return switch (channel) {
-    Channel.beta => 'beta',
-    Channel.dev => 'dev',
+    Channel.beta   => 'beta',
+    Channel.dev    => 'dev',
     Channel.stable => 'stable',
   };
 }
 
 Channel fromChannelName(String? name) {
   return switch (name) {
-    'beta' => Channel.beta,
-    'dev' => Channel.dev,
+    'beta'   => Channel.beta,
+    'dev'    => Channel.dev,
     'stable' => Channel.stable,
     _ => throw ArgumentError('Invalid channel name.'),
   };
@@ -69,16 +69,16 @@ enum PublishedPlatform { linux, macos, windows }
 
 String getPublishedPlatform(PublishedPlatform platform) {
   return switch (platform) {
-    PublishedPlatform.linux => 'linux',
-    PublishedPlatform.macos => 'macos',
+    PublishedPlatform.linux   => 'linux',
+    PublishedPlatform.macos   => 'macos',
     PublishedPlatform.windows => 'windows',
   };
 }
 
 PublishedPlatform fromPublishedPlatform(String name) {
   return switch (name) {
-    'linux' => PublishedPlatform.linux,
-    'macos' => PublishedPlatform.macos,
+    'linux'   => PublishedPlatform.linux,
+    'macos'   => PublishedPlatform.macos,
     'windows' => PublishedPlatform.windows,
     _ => throw ArgumentError('Invalid published platform name.'),
   };

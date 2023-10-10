@@ -454,29 +454,29 @@ class RenderWrap extends RenderBox
   double _getMainAxisExtent(Size childSize) {
     return switch (direction) {
       Axis.horizontal => childSize.width,
-      Axis.vertical => childSize.height,
+      Axis.vertical   => childSize.height,
     };
   }
 
   double _getCrossAxisExtent(Size childSize) {
     return switch (direction) {
       Axis.horizontal => childSize.height,
-      Axis.vertical => childSize.width,
+      Axis.vertical   => childSize.width,
     };
   }
 
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
     return switch (direction) {
       Axis.horizontal => Offset(mainAxisOffset, crossAxisOffset),
-      Axis.vertical => Offset(crossAxisOffset, mainAxisOffset),
+      Axis.vertical   => Offset(crossAxisOffset, mainAxisOffset),
     };
   }
 
   double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent, double childCrossAxisExtent) {
     final double freeSpace = runCrossAxisExtent - childCrossAxisExtent;
     return switch (crossAxisAlignment) {
-      WrapCrossAlignment.start => flipCrossAxis ? freeSpace : 0.0,
-      WrapCrossAlignment.end => flipCrossAxis ? 0.0 : freeSpace,
+      WrapCrossAlignment.start  => flipCrossAxis ? freeSpace : 0.0,
+      WrapCrossAlignment.end    => flipCrossAxis ? 0.0 : freeSpace,
       WrapCrossAlignment.center => freeSpace / 2.0,
     };
   }
@@ -489,16 +489,10 @@ class RenderWrap extends RenderBox
   }
 
   Size _computeDryLayout(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
-    final BoxConstraints childConstraints;
-    double mainAxisLimit = 0.0;
-    switch (direction) {
-      case Axis.horizontal:
-        childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-        mainAxisLimit = constraints.maxWidth;
-      case Axis.vertical:
-        childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
-        mainAxisLimit = constraints.maxHeight;
-    }
+    final (BoxConstraints childConstraints, double mainAxisLimit) = switch (direction) {
+      Axis.horizontal => (BoxConstraints(maxWidth:  constraints.maxWidth),  constraints.maxWidth),
+      Axis.vertical   => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
+    };
 
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;
@@ -531,7 +525,7 @@ class RenderWrap extends RenderBox
 
     return switch (direction) {
       Axis.horizontal => constraints.constrain(Size(mainAxisExtent, crossAxisExtent)),
-      Axis.vertical => constraints.constrain(Size(crossAxisExtent, mainAxisExtent)),
+      Axis.vertical   => constraints.constrain(Size(crossAxisExtent, mainAxisExtent)),
     };
   }
 

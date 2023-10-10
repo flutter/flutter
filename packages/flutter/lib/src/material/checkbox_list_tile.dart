@@ -459,14 +459,13 @@ class CheckboxListTile extends StatelessWidget {
 
   void _handleValueChange() {
     assert(onChanged != null);
-    switch (value) {
-      case false:
-        onChanged!(true);
-      case true:
-        onChanged!(tristate ? null : false);
-      case null:
-        onChanged!(false);
-    }
+    onChanged!(
+      switch (value) {
+        false => true,
+        true => tristate ? null : false,
+        null => false,
+      },
+    );
   }
 
   @override

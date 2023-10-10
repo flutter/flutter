@@ -489,9 +489,9 @@ class _RenderOverflowBar extends RenderBox
       while (child != null) {
         final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
         final double x = switch (overflowAlignment) {
-          OverflowBarAlignment.start => rtl ? constraints.maxWidth - child.size.width : 0,
           OverflowBarAlignment.center => (constraints.maxWidth - child.size.width) / 2,
-          OverflowBarAlignment.end => rtl ? 0 : constraints.maxWidth - child.size.width,
+          OverflowBarAlignment.start  => rtl ? constraints.maxWidth - child.size.width : 0,
+          OverflowBarAlignment.end    => rtl ? 0 : constraints.maxWidth - child.size.width,
         };
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;

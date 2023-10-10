@@ -203,8 +203,10 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+    if (metaState & anyMask == 0) {
+      return false;
+    }
     return switch (side) {
-      _ when metaState & anyMask == 0 => false,
       KeyboardSide.any => true,
       KeyboardSide.all => metaState & leftMask != 0 && metaState & rightMask != 0,
       KeyboardSide.left => metaState & leftMask != 0,
@@ -215,15 +217,15 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
     return switch (key) {
-      ModifierKey.controlModifier => _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl),
-      ModifierKey.shiftModifier => _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift),
-      ModifierKey.altModifier => _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt),
-      ModifierKey.metaModifier => _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta),
-      ModifierKey.capsLockModifier => metaState & modifierCapsLock != 0,
-      ModifierKey.numLockModifier => metaState & modifierNumLock != 0,
+      ModifierKey.controlModifier    => _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl),
+      ModifierKey.shiftModifier      => _isLeftRightModifierPressed(side, modifierShift,   modifierLeftShift,   modifierRightShift),
+      ModifierKey.altModifier        => _isLeftRightModifierPressed(side, modifierAlt,     modifierLeftAlt,     modifierRightAlt),
+      ModifierKey.metaModifier       => _isLeftRightModifierPressed(side, modifierMeta,    modifierLeftMeta,    modifierRightMeta),
+      ModifierKey.capsLockModifier   => metaState & modifierCapsLock   != 0,
+      ModifierKey.numLockModifier    => metaState & modifierNumLock    != 0,
       ModifierKey.scrollLockModifier => metaState & modifierScrollLock != 0,
-      ModifierKey.functionModifier => metaState & modifierFunction != 0,
-      ModifierKey.symbolModifier => metaState & modifierSym != 0,
+      ModifierKey.functionModifier   => metaState & modifierFunction   != 0,
+      ModifierKey.symbolModifier     => metaState & modifierSym        != 0,
     };
   }
 

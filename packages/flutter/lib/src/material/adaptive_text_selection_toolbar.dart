@@ -211,14 +211,14 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
         assert(debugCheckHasMaterialLocalizations(context));
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         return switch (buttonItem.type) {
-          ContextMenuButtonType.cut => localizations.cutButtonLabel,
-          ContextMenuButtonType.copy => localizations.copyButtonLabel,
-          ContextMenuButtonType.paste => localizations.pasteButtonLabel,
+          ContextMenuButtonType.cut       => localizations.cutButtonLabel,
+          ContextMenuButtonType.copy      => localizations.copyButtonLabel,
+          ContextMenuButtonType.paste     => localizations.pasteButtonLabel,
           ContextMenuButtonType.selectAll => localizations.selectAllButtonLabel,
-          ContextMenuButtonType.delete => localizations.deleteButtonTooltip.toUpperCase(),
-          ContextMenuButtonType.lookUp => localizations.lookUpButtonLabel,
+          ContextMenuButtonType.delete    => localizations.deleteButtonTooltip.toUpperCase(),
+          ContextMenuButtonType.lookUp    => localizations.lookUpButtonLabel,
           ContextMenuButtonType.searchWeb => localizations.searchWebButtonLabel,
-          ContextMenuButtonType.share => localizations.searchWebButtonLabel,
+          ContextMenuButtonType.share     => localizations.searchWebButtonLabel,
           ContextMenuButtonType.liveTextInput => localizations.scanTextButtonLabel,
           ContextMenuButtonType.custom => '',
         };

@@ -1982,7 +1982,7 @@ enum ReportedDurationTestFlavor {
 
 String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
   return switch (flavor) {
-    ReportedDurationTestFlavor.debug => 'debug',
+    ReportedDurationTestFlavor.debug   => 'debug',
     ReportedDurationTestFlavor.profile => 'profile',
     ReportedDurationTestFlavor.release => 'release',
   };

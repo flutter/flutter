@@ -1136,12 +1136,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   double _getThetaForTime(TimeOfDay time) {
     final int hoursFactor = switch (widget.hourDialType) {
-      _HourDialType.twentyFourHour => TimeOfDay.hoursPerDay,
+      _HourDialType.twentyFourHour           => TimeOfDay.hoursPerDay,
       _HourDialType.twentyFourHourDoubleRing => TimeOfDay.hoursPerPeriod,
-      _HourDialType.twelveHour => TimeOfDay.hoursPerPeriod,
+      _HourDialType.twelveHour               => TimeOfDay.hoursPerPeriod,
     };
     final double fraction = switch (widget.hourMinuteMode) {
-      _HourMinuteMode.hour => (time.hour / hoursFactor) % hoursFactor,
+      _HourMinuteMode.hour   => (time.hour / hoursFactor) % hoursFactor,
       _HourMinuteMode.minute => (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour,
     };
     return (math.pi / 2 - fraction * _kTwoPi) % _kTwoPi;
@@ -1271,12 +1271,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final TimeOfDay time;
 
     TimeOfDay getAmPmTime() {
-      switch (widget.selectedTime.period) {
-        case DayPeriod.am:
-          return TimeOfDay(hour: hour, minute: widget.selectedTime.minute);
-        case DayPeriod.pm:
-          return TimeOfDay(hour: hour + TimeOfDay.hoursPerPeriod, minute: widget.selectedTime.minute);
-      }
+      return switch (widget.selectedTime.period) {
+        DayPeriod.am => TimeOfDay(hour: hour, minute: widget.selectedTime.minute),
+        DayPeriod.pm => TimeOfDay(hour: hour + TimeOfDay.hoursPerPeriod, minute: widget.selectedTime.minute),
+      };
     }
 
     switch (widget.hourMinuteMode) {
@@ -2271,7 +2269,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       case TimePickerEntryMode.dial:
       case TimePickerEntryMode.dialOnly:
         return switch (orientation) {
-          Orientation.portrait => _kTimePickerMinPortraitSize,
+          Orientation.portrait  => _kTimePickerMinPortraitSize,
           Orientation.landscape => _kTimePickerMinLandscapeSize,
         };
       case TimePickerEntryMode.input:
@@ -2392,14 +2390,12 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       ),
     );
 
-    final Offset tapTargetSizeOffset;
-    switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        tapTargetSizeOffset = Offset.zero;
-      case MaterialTapTargetSize.shrinkWrap:
-        // _dialogSize returns "padded" sizes.
-        tapTargetSizeOffset = const Offset(0, -12);
-    }
+    final Offset tapTargetSizeOffset = switch (theme.materialTapTargetSize) {
+      MaterialTapTargetSize.padded => Offset.zero,
+
+      // _dialogSize returns "padded" sizes.
+      MaterialTapTargetSize.shrinkWrap => const Offset(0, -12),
+    };
     final Size dialogSize = _dialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     final Size minDialogSize = _minDialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     return Dialog(
@@ -2670,12 +2666,13 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
       return;
     }
 
-    switch (_hourMinuteMode.value) {
-      case _HourMinuteMode.hour:
-        _announceToAccessibility(context, localizations.timePickerHourModeAnnouncement);
-      case _HourMinuteMode.minute:
-        _announceToAccessibility(context, localizations.timePickerMinuteModeAnnouncement);
-    }
+    _announceToAccessibility(
+      context,
+      switch (_hourMinuteMode.value) {
+        _HourMinuteMode.hour => localizations.timePickerHourModeAnnouncement,
+        _HourMinuteMode.minute => localizations.timePickerMinuteModeAnnouncement,
+      },
+    );
     _lastModeAnnounced.value = _hourMinuteMode.value;
   }
 

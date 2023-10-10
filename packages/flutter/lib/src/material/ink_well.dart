@@ -988,8 +988,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           final ThemeData theme = Theme.of(context);
           resolvedOverlayColor = switch (type) {
             _HighlightType.pressed => widget.highlightColor ?? theme.highlightColor,
-            _HighlightType.focus => widget.focusColor ?? theme.focusColor,
-            _HighlightType.hover => widget.hoverColor ?? theme.hoverColor,
+            _HighlightType.focus   => widget.focusColor     ?? theme.focusColor,
+            _HighlightType.hover   => widget.hoverColor     ?? theme.hoverColor,
           };
         }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;

@@ -724,10 +724,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void _updateSemanticActions() {
     final SemanticsAction forward, backward;
     (forward, backward) = switch (axisDirection) {
-      AxisDirection.up => (SemanticsAction.scrollDown,  SemanticsAction.scrollUp),
+      AxisDirection.up    => (SemanticsAction.scrollDown,  SemanticsAction.scrollUp),
       AxisDirection.right => (SemanticsAction.scrollLeft,  SemanticsAction.scrollRight),
-      AxisDirection.down => (SemanticsAction.scrollUp,  SemanticsAction.scrollDown),
-      AxisDirection.left => (SemanticsAction.scrollRight,  SemanticsAction.scrollLeft),
+      AxisDirection.down  => (SemanticsAction.scrollUp,    SemanticsAction.scrollDown),
+      AxisDirection.left  => (SemanticsAction.scrollRight, SemanticsAction.scrollLeft),
     };
 
     final Set<SemanticsAction> actions = <SemanticsAction>{};
@@ -749,8 +749,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollPositionAlignmentPolicy _maybeFlipAlignment(ScrollPositionAlignmentPolicy alignmentPolicy) {
     return switch (alignmentPolicy) {
       // Don't flip when explicit.
-      ScrollPositionAlignmentPolicy.explicit => alignmentPolicy,
-      ScrollPositionAlignmentPolicy.keepVisibleAtEnd => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      ScrollPositionAlignmentPolicy.explicit           => alignmentPolicy,
+      ScrollPositionAlignmentPolicy.keepVisibleAtEnd   => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
       ScrollPositionAlignmentPolicy.keepVisibleAtStart => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
     };
   }
@@ -761,7 +761,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       // When focus is requested for example, it knows the directionality of the
       // keyboard keys initiating traversal, but not the direction of the
       // Scrollable.
-      AxisDirection.up || AxisDirection.left => _maybeFlipAlignment(alignmentPolicy),
+      AxisDirection.up   || AxisDirection.left  => _maybeFlipAlignment(alignmentPolicy),
       AxisDirection.down || AxisDirection.right => alignmentPolicy,
     };
   }

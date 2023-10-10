@@ -354,14 +354,11 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     addTearDown(controller.close);
 
     setMockMethodCallHandler(MethodChannel(channel.name, channel.codec), (MethodCall call) async {
-      switch (call.method) {
-        case 'listen':
-          return handler.onListen(call.arguments, MockStreamHandlerEventSink(controller.sink));
-        case 'cancel':
-          return handler.onCancel(call.arguments);
-        default:
-          throw UnimplementedError('Method ${call.method} not implemented');
-      }
+      return switch (call.method) {
+        'listen' => handler.onListen(call.arguments, MockStreamHandlerEventSink(controller.sink)),
+        'cancel' => handler.onCancel(call.arguments),
+        _ => throw UnimplementedError('Method ${call.method} not implemented'),
+      };
     });
 
     final StreamSubscription<Object?> sub = controller.stream.listen(

@@ -163,10 +163,10 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
     final TwoDimensionalScrollable scrollable = TwoDimensionalScrollable(
       horizontalDetails : switch (mainAxis) {
         Axis.horizontal => mainAxisDetails,
-        Axis.vertical => horizontalDetails,
+        Axis.vertical   => horizontalDetails,
       },
       verticalDetails: switch (mainAxis) {
-        Axis.vertical => mainAxisDetails,
+        Axis.vertical   => mainAxisDetails,
         Axis.horizontal => verticalDetails,
       },
       diagonalDragBehavior: diagonalDragBehavior,

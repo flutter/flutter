@@ -928,7 +928,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     axis ??= mainAxis;
 
     final (double offset, AxisDirection axisDirection) = switch (axis) {
-      Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
+      Axis.vertical   => (verticalOffset.pixels,   verticalAxisDirection),
       Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection),
     };
 
@@ -965,10 +965,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // The scroll offset in the viewport to `rect`.
     final TwoDimensionalViewportParentData childParentData = parentDataOf(box);
     leadingScrollOffset += switch (axisDirection) {
-      AxisDirection.down => childParentData.paintOffset!.dy,
-      AxisDirection.up => viewportDimension.height - childParentData.paintOffset!.dy - box.size.height,
+      AxisDirection.up    => viewportDimension.height - childParentData.paintOffset!.dy - box.size.height,
+      AxisDirection.left  => viewportDimension.width  - childParentData.paintOffset!.dx - box.size.width,
       AxisDirection.right => childParentData.paintOffset!.dx,
-      AxisDirection.left => viewportDimension.width - childParentData.paintOffset!.dx - box.size.width,
+      AxisDirection.down  => childParentData.paintOffset!.dy,
     };
 
     // This step assumes the viewport's layout is up-to-date, i.e., if
@@ -979,20 +979,20 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
     final double mainAxisExtent = switch (axisDirectionToAxis(axisDirection)) {
       Axis.horizontal => viewportDimension.width,
-      Axis.vertical => viewportDimension.height,
+      Axis.vertical   => viewportDimension.height,
     };
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
 
     final double offsetDifference = switch (axisDirectionToAxis(axisDirection)){
-      Axis.vertical => verticalOffset.pixels - targetOffset,
+      Axis.vertical   => verticalOffset.pixels   - targetOffset,
       Axis.horizontal => horizontalOffset.pixels - targetOffset,
     };
     targetRect = switch (axisDirection) {
-      AxisDirection.down => targetRect.translate(0.0, offsetDifference),
-      AxisDirection.right => targetRect.translate(offsetDifference, 0.0),
-      AxisDirection.up => targetRect.translate(0.0, -offsetDifference),
-      AxisDirection.left => targetRect.translate(-offsetDifference, 0.0),
+      AxisDirection.up    => targetRect.translate(0.0, -offsetDifference),
+      AxisDirection.down  => targetRect.translate(0.0,  offsetDifference),
+      AxisDirection.left  => targetRect.translate(-offsetDifference, 0.0),
+      AxisDirection.right => targetRect.translate( offsetDifference, 0.0),
     };
 
     final RevealedOffset revealedOffset = RevealedOffset(
@@ -1149,7 +1149,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     Curve curve = Curves.ease,
   }) {
     final ViewportOffset offset = switch (axis) {
-      Axis.vertical => viewport.verticalOffset,
+      Axis.vertical   => viewport.verticalOffset,
       Axis.horizontal => viewport.horizontalOffset,
     };
 

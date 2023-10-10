@@ -126,12 +126,12 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     KeyboardSide side = KeyboardSide.any,
   }) {
     return switch (key) {
-      ModifierKey.controlModifier => metaState & modifierControl != 0,
-      ModifierKey.shiftModifier => metaState & modifierShift != 0,
-      ModifierKey.altModifier => metaState & modifierAlt != 0,
-      ModifierKey.metaModifier => metaState & modifierMeta != 0,
-      ModifierKey.numLockModifier => metaState & modifierNumLock != 0,
-      ModifierKey.capsLockModifier => metaState & modifierCapsLock != 0,
+      ModifierKey.controlModifier    => metaState & modifierControl    != 0,
+      ModifierKey.shiftModifier      => metaState & modifierShift      != 0,
+      ModifierKey.altModifier        => metaState & modifierAlt        != 0,
+      ModifierKey.metaModifier       => metaState & modifierMeta       != 0,
+      ModifierKey.numLockModifier    => metaState & modifierNumLock    != 0,
+      ModifierKey.capsLockModifier   => metaState & modifierCapsLock   != 0,
       ModifierKey.scrollLockModifier => metaState & modifierScrollLock != 0,
 
       // On Web, the browser doesn't report the state of the FN and SYM modifiers.

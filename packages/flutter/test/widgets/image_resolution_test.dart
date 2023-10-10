@@ -40,8 +40,8 @@ class TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) {
     late ByteData data = switch (key) {
-      'AssetManifest.bin' => manifest,
-      'assets/image.png' => testByteData(1.0),
+      'AssetManifest.bin'     => manifest,
+      'assets/image.png'      => testByteData(1.0),
       'assets/1.0x/image.png' => testByteData(10.0), // see "...with a main asset and a 1.0x asset"
       'assets/1.5x/image.png' => testByteData(1.5),
       'assets/2.0x/image.png' => testByteData(2.0),

@@ -49,7 +49,7 @@ class Remote {
   String get name {
     return switch (_name) {
       RemoteName.upstream => 'upstream',
-      RemoteName.mirror => 'mirror',
+      RemoteName.mirror   => 'mirror',
     };
   }
 

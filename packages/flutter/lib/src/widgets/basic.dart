@@ -2815,8 +2815,8 @@ class UnconstrainedBox extends StatelessWidget {
   BoxConstraintsTransform _axisToTransform(Axis? constrainedAxis) {
     return switch (constrainedAxis) {
       Axis.horizontal => ConstraintsTransformBox.heightUnconstrained,
-      Axis.vertical => ConstraintsTransformBox.widthUnconstrained,
-      null => ConstraintsTransformBox.unconstrained,
+      Axis.vertical   => ConstraintsTransformBox.widthUnconstrained,
+      null            => ConstraintsTransformBox.unconstrained,
     };
   }
 

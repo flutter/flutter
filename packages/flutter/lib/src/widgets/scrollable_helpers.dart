@@ -186,14 +186,14 @@ class EdgeDraggingAutoScroller {
   double _offsetExtent(Offset offset, Axis scrollDirection) {
     return switch (scrollDirection) {
       Axis.horizontal => offset.dx,
-      Axis.vertical => offset.dy,
+      Axis.vertical   => offset.dy,
     };
   }
 
   double _sizeExtent(Size size, Axis scrollDirection) {
     return switch (scrollDirection) {
       Axis.horizontal => size.width,
-      Axis.vertical => size.height,
+      Axis.vertical   => size.height,
     };
   }
 

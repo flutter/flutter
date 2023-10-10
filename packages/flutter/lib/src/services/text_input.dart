@@ -714,7 +714,7 @@ class TextInputConfiguration {
 TextAffinity? _toTextAffinity(String? affinity) {
   return switch (affinity) {
     'TextAffinity.downstream' => TextAffinity.downstream,
-    'TextAffinity.upstream' => TextAffinity.upstream,
+    'TextAffinity.upstream'   => TextAffinity.upstream,
     _ => null,
   };
 }
@@ -1474,28 +1474,28 @@ class TextInputConnection {
 
 TextInputAction _toTextInputAction(String action) {
   return switch (action) {
-    'TextInputAction.none' => TextInputAction.none,
-    'TextInputAction.unspecified' => TextInputAction.unspecified,
-    'TextInputAction.go' => TextInputAction.go,
-    'TextInputAction.search' => TextInputAction.search,
-    'TextInputAction.send' => TextInputAction.send,
-    'TextInputAction.next' => TextInputAction.next,
-    'TextInputAction.previous' => TextInputAction.previous,
+    'TextInputAction.none'           => TextInputAction.none,
+    'TextInputAction.unspecified'    => TextInputAction.unspecified,
+    'TextInputAction.go'             => TextInputAction.go,
+    'TextInputAction.search'         => TextInputAction.search,
+    'TextInputAction.send'           => TextInputAction.send,
+    'TextInputAction.next'           => TextInputAction.next,
+    'TextInputAction.previous'       => TextInputAction.previous,
     'TextInputAction.continueAction' => TextInputAction.continueAction,
-    'TextInputAction.join' => TextInputAction.join,
-    'TextInputAction.route' => TextInputAction.route,
-    'TextInputAction.emergencyCall' => TextInputAction.emergencyCall,
-    'TextInputAction.done' => TextInputAction.done,
-    'TextInputAction.newline' => TextInputAction.newline,
+    'TextInputAction.join'           => TextInputAction.join,
+    'TextInputAction.route'          => TextInputAction.route,
+    'TextInputAction.emergencyCall'  => TextInputAction.emergencyCall,
+    'TextInputAction.done'           => TextInputAction.done,
+    'TextInputAction.newline'        => TextInputAction.newline,
     _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]),
   };
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {
   return switch (state) {
-    'FloatingCursorDragState.start' => FloatingCursorDragState.Start,
+    'FloatingCursorDragState.start'  => FloatingCursorDragState.Start,
     'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
-    'FloatingCursorDragState.end' => FloatingCursorDragState.End,
+    'FloatingCursorDragState.end'    => FloatingCursorDragState.End,
     _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]),
   };
 }

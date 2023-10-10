@@ -2430,13 +2430,13 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     final bool isCurrentEdgeWithinViewport = isEnd ? _selectionGeometry.endSelectionPoint != null : _selectionGeometry.startSelectionPoint != null;
     final bool isOppositeEdgeWithinViewport = isEnd ? _selectionGeometry.startSelectionPoint != null : _selectionGeometry.endSelectionPoint != null;
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
-      (true, true, true) => currentSelectionEndIndex,
-      (true, true, false) => currentSelectionEndIndex,
-      (true, false, true) => currentSelectionStartIndex,
-      (true, false, false) => 0,
-      (false, true, true) => currentSelectionStartIndex,
-      (false, true, false) => currentSelectionStartIndex,
-      (false, false, true) => currentSelectionEndIndex,
+      (true, true, true)    => currentSelectionEndIndex,
+      (true, true, false)   => currentSelectionEndIndex,
+      (true, false, true)   => currentSelectionStartIndex,
+      (true, false, false)  => 0,
+      (false, true, true)   => currentSelectionStartIndex,
+      (false, true, false)  => currentSelectionStartIndex,
+      (false, false, true)  => currentSelectionEndIndex,
       (false, false, false) => 0,
     };
     bool? forward;

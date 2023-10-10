@@ -558,7 +558,7 @@ class _BottomNavigationTile extends StatelessWidget {
     }
 
     size = switch (type) {
-      BottomNavigationBarType.fixed => 1,
+      BottomNavigationBarType.fixed    => 1,
       BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
     };
 
@@ -850,7 +850,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   bool get _defaultShowUnselected {
     return switch (_effectiveType) {
       BottomNavigationBarType.shifting => false,
-      BottomNavigationBarType.fixed => true,
+      BottomNavigationBarType.fixed    => true,
     };
   }
 
@@ -957,13 +957,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
-    final Color themeColor;
-    switch (themeData.brightness) {
-      case Brightness.light:
-        themeColor = themeData.colorScheme.primary;
-      case Brightness.dark:
-        themeColor = themeData.colorScheme.secondary;
-    }
+    final Color themeColor = switch (themeData.brightness) {
+      Brightness.light => themeData.colorScheme.primary,
+      Brightness.dark => themeData.colorScheme.secondary,
+    };
 
     final TextStyle effectiveSelectedLabelStyle =
       _effectiveTextStyle(
@@ -1125,13 +1122,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       ?? BottomNavigationBarLandscapeLayout.spread;
     final double additionalBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
-    Color? backgroundColor;
-    switch (_effectiveType) {
-      case BottomNavigationBarType.fixed:
-        backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
-      case BottomNavigationBarType.shifting:
-        backgroundColor = _backgroundColor;
-    }
+    final Color? backgroundColor = switch (_effectiveType) {
+      BottomNavigationBarType.fixed    => widget.backgroundColor ?? bottomTheme.backgroundColor,
+      BottomNavigationBarType.shifting => _backgroundColor,
+    };
 
     return Semantics(
       explicitChildNodes: true,
@@ -1296,13 +1290,10 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      final double leftFraction;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          leftFraction = 1.0 - circle.horizontalLeadingOffset;
-        case TextDirection.ltr:
-          leftFraction = circle.horizontalLeadingOffset;
-      }
+      final double leftFraction = switch (textDirection) {
+        TextDirection.rtl => 1.0 - circle.horizontalLeadingOffset,
+        TextDirection.ltr => circle.horizontalLeadingOffset,
+      };
       final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(
         begin: 0.0,

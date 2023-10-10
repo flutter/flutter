@@ -1214,7 +1214,7 @@ void main() {
       final RenderBox renderBox = renderObject as RenderBox;
       return switch (axis) {
         Axis.horizontal => renderBox.size.width,
-        Axis.vertical => renderBox.size.height,
+        Axis.vertical   => renderBox.size.height,
       };
     }
 
