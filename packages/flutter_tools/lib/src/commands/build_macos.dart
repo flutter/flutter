@@ -72,7 +72,6 @@ class BuildMacosCommand extends BuildSubCommand {
         flutterUsage: globals.flutterUsage,
       ),
     );
-
     return FlutterCommandResult.success();
   }
 }
