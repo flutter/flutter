@@ -31,7 +31,7 @@ void BackdropFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
     SkIRect filter_input_bounds;  // in screen coordinates
     filter_->get_input_device_bounds(
         filter_target_bounds, context->GetTransform3x3(), filter_input_bounds);
-    context->AddReadbackRegion(filter_input_bounds);
+    context->AddReadbackRegion(filter_target_bounds, filter_input_bounds);
   }
 
   DiffChildren(context, prev);
