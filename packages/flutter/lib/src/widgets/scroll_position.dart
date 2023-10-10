@@ -722,12 +722,22 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// scroll view dimensions both change) and therefore shouldn't do anything
   /// expensive.
   void _updateSemanticActions() {
-    final (SemanticsAction forward, SemanticsAction backward) = switch (axisDirection) {
-      AxisDirection.up    => (SemanticsAction.scrollDown,  SemanticsAction.scrollUp),
-      AxisDirection.right => (SemanticsAction.scrollLeft,  SemanticsAction.scrollRight),
-      AxisDirection.down  => (SemanticsAction.scrollUp,    SemanticsAction.scrollDown),
-      AxisDirection.left  => (SemanticsAction.scrollRight, SemanticsAction.scrollLeft),
-    };
+    final SemanticsAction forward;
+    final SemanticsAction backward;
+    switch (axisDirection) {
+      case AxisDirection.up:
+        forward = SemanticsAction.scrollDown;
+        backward = SemanticsAction.scrollUp;
+      case AxisDirection.right:
+        forward = SemanticsAction.scrollLeft;
+        backward = SemanticsAction.scrollRight;
+      case AxisDirection.down:
+        forward = SemanticsAction.scrollUp;
+        backward = SemanticsAction.scrollDown;
+      case AxisDirection.left:
+        forward = SemanticsAction.scrollRight;
+        backward = SemanticsAction.scrollLeft;
+    }
 
     final Set<SemanticsAction> actions = <SemanticsAction>{};
     if (pixels > minScrollExtent) {
@@ -748,8 +758,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollPositionAlignmentPolicy _maybeFlipAlignment(ScrollPositionAlignmentPolicy alignmentPolicy) {
     return switch (alignmentPolicy) {
       // Don't flip when explicit.
-      ScrollPositionAlignmentPolicy.explicit           => alignmentPolicy,
-      ScrollPositionAlignmentPolicy.keepVisibleAtEnd   => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      ScrollPositionAlignmentPolicy.explicit => alignmentPolicy,
+      ScrollPositionAlignmentPolicy.keepVisibleAtEnd => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
       ScrollPositionAlignmentPolicy.keepVisibleAtStart => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
     };
   }
@@ -760,7 +770,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       // When focus is requested for example, it knows the directionality of the
       // keyboard keys initiating traversal, but not the direction of the
       // Scrollable.
-      AxisDirection.up   || AxisDirection.left  => _maybeFlipAlignment(alignmentPolicy),
+      AxisDirection.up || AxisDirection.left => _maybeFlipAlignment(alignmentPolicy),
       AxisDirection.down || AxisDirection.right => alignmentPolicy,
     };
   }

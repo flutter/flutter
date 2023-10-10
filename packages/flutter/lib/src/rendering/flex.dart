@@ -202,17 +202,23 @@ bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDire
   // If the relevant value of textDirection or verticalDirection is null, this returns null too.
   switch (direction) {
     case Axis.horizontal:
-      return switch (textDirection) {
-        TextDirection.ltr => true,
-        TextDirection.rtl => false,
-        null => null,
-      };
+      switch (textDirection) {
+        case TextDirection.ltr:
+          return true;
+        case TextDirection.rtl:
+          return false;
+        case null:
+          return null;
+      }
     case Axis.vertical:
-      return switch (verticalDirection) {
-        VerticalDirection.down => true,
-        VerticalDirection.up => false,
-        null => null,
-      };
+      switch (verticalDirection) {
+        case VerticalDirection.down:
+          return true;
+        case VerticalDirection.up:
+          return false;
+        case null:
+          return null;
+      }
   }
 }
 
@@ -629,17 +635,21 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   double _getCrossSize(Size size) {
-    return switch (_direction) {
-      Axis.horizontal => size.height,
-      Axis.vertical   => size.width,
-    };
+    switch (_direction) {
+      case Axis.horizontal:
+        return size.height;
+      case Axis.vertical:
+        return size.width;
+    }
   }
 
   double _getMainSize(Size size) {
-    return switch (_direction) {
-      Axis.horizontal => size.width,
-      Axis.vertical   => size.height,
-    };
+    switch (_direction) {
+      case Axis.horizontal:
+        return size.width;
+      case Axis.vertical:
+        return size.height;
+    }
   }
 
   @override
@@ -668,10 +678,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       constraints: constraints,
     );
 
-    return switch (_direction) {
-      Axis.horizontal => constraints.constrain(Size(sizes.mainSize, sizes.crossSize)),
-      Axis.vertical   => constraints.constrain(Size(sizes.crossSize, sizes.mainSize)),
-    };
+    switch (_direction) {
+      case Axis.horizontal:
+        return constraints.constrain(Size(sizes.mainSize, sizes.crossSize));
+      case Axis.vertical:
+        return constraints.constrain(Size(sizes.crossSize, sizes.mainSize));
+    }
   }
 
   FlutterError? _debugCheckConstraints({required BoxConstraints constraints, required bool reportParentConstraints}) {
@@ -779,15 +791,19 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       } else {
         final BoxConstraints innerConstraints;
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-          innerConstraints = switch (_direction) {
-            Axis.horizontal => BoxConstraints.tightFor(height: constraints.maxHeight),
-            Axis.vertical   => BoxConstraints.tightFor(width: constraints.maxWidth),
-          };
+          switch (_direction) {
+            case Axis.horizontal:
+              innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+            case Axis.vertical:
+              innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+          }
         } else {
-          innerConstraints = switch (_direction) {
-            Axis.horizontal => BoxConstraints(maxHeight: constraints.maxHeight),
-            Axis.vertical   => BoxConstraints(maxWidth: constraints.maxWidth),
-          };
+          switch (_direction) {
+            case Axis.horizontal:
+              innerConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
+            case Axis.vertical:
+              innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+          }
         }
         final Size childSize = layoutChild(child, innerConstraints);
         allocatedSize += _getMainSize(childSize);
@@ -998,10 +1014,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       if (flipMainAxis) {
         childMainPosition -= _getMainSize(child.size);
       }
-      childParentData.offset = switch (_direction) {
-        Axis.horizontal => Offset(childMainPosition, childCrossPosition),
-        Axis.vertical   => Offset(childCrossPosition, childMainPosition),
-      };
+      switch (_direction) {
+        case Axis.horizontal:
+          childParentData.offset = Offset(childMainPosition, childCrossPosition);
+        case Axis.vertical:
+          childParentData.offset = Offset(childCrossPosition, childMainPosition);
+      }
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
       } else {
@@ -1064,10 +1082,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Simulate a child rect that overflows by the right amount. This child
       // rect is never used for drawing, just for determining the overflow
       // location and amount.
-      final Rect overflowChildRect = switch (_direction) {
-        Axis.horizontal => Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0),
-        Axis.vertical   => Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow),
-      };
+      final Rect overflowChildRect;
+      switch (_direction) {
+        case Axis.horizontal:
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
+        case Axis.vertical:
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
+      }
       paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
       return true;
     }());

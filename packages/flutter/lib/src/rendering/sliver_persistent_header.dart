@@ -152,10 +152,12 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       return 0.0;
     }
     assert(child!.hasSize);
-    return switch (constraints.axis) {
-      Axis.vertical   => child!.size.height,
-      Axis.horizontal => child!.size.width,
-    };
+    switch (constraints.axis) {
+      case Axis.vertical:
+        return child!.size.height;
+      case Axis.horizontal:
+        return child!.size.width;
+    }
   }
 
   bool _needsUpdateChild = true;
@@ -296,12 +298,16 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
-      offset += switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-        AxisDirection.up    => Offset(0.0, geometry!.paintExtent - childMainAxisPosition(child!) - childExtent),
-        AxisDirection.down  => Offset(0.0, childMainAxisPosition(child!)),
-        AxisDirection.left  => Offset(geometry!.paintExtent - childMainAxisPosition(child!) - childExtent, 0.0),
-        AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
-      };
+      switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+        case AxisDirection.up:
+          offset += Offset(0.0, geometry!.paintExtent - childMainAxisPosition(child!) - childExtent);
+        case AxisDirection.down:
+          offset += Offset(0.0, childMainAxisPosition(child!));
+        case AxisDirection.left:
+          offset += Offset(geometry!.paintExtent - childMainAxisPosition(child!) - childExtent, 0.0);
+        case AxisDirection.right:
+          offset += Offset(childMainAxisPosition(child!), 0.0);
+      }
       context.paintChild(child!, offset);
     }
   }
@@ -441,12 +447,16 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
       : rect;
 
     Rect? newRect;
-    newRect = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up    => _trim(localBounds, bottom: childExtent),
-      AxisDirection.right => _trim(localBounds, left: 0),
-      AxisDirection.down  => _trim(localBounds, top: 0),
-      AxisDirection.left  => _trim(localBounds, right: childExtent),
-    };
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+        newRect = _trim(localBounds, bottom: childExtent);
+      case AxisDirection.right:
+        newRect = _trim(localBounds, left: 0);
+      case AxisDirection.down:
+        newRect = _trim(localBounds, top: 0);
+      case AxisDirection.left:
+        newRect = _trim(localBounds, right: childExtent);
+    }
 
     super.showOnScreen(
       descendant: this,
@@ -701,12 +711,20 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     double targetExtent;
     Rect? targetRect;
-    (targetExtent, targetRect) = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      AxisDirection.up    => (childExtent - (childBounds?.top  ?? 0), _trim(childBounds, bottom: childExtent)),
-      AxisDirection.left  => (childExtent - (childBounds?.left ?? 0), _trim(childBounds, right:  childExtent)),
-      AxisDirection.right => (childBounds?.right  ?? childExtent,     _trim(childBounds, left: 0)),
-      AxisDirection.down  => (childBounds?.bottom ?? childExtent,     _trim(childBounds, top:  0)),
-    };
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+        targetExtent = childExtent - (childBounds?.top ?? 0);
+        targetRect = _trim(childBounds, bottom: childExtent);
+      case AxisDirection.right:
+        targetExtent = childBounds?.right ?? childExtent;
+        targetRect = _trim(childBounds, left: 0);
+      case AxisDirection.down:
+        targetExtent = childBounds?.bottom ?? childExtent;
+        targetRect = _trim(childBounds, top: 0);
+      case AxisDirection.left:
+        targetExtent = childExtent - (childBounds?.left ?? 0);
+        targetRect = _trim(childBounds, right: childExtent);
+    }
 
     // A stretch header can have a bigger childExtent than maxExtent.
     final double effectiveMaxExtent = math.max(childExtent, maxExtent);

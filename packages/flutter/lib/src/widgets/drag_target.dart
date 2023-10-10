@@ -370,11 +370,14 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// recognizing a drag.
   @protected
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return switch (affinity) {
-      Axis.horizontal => HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart,
-      Axis.vertical => VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart,
-      null => ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart,
-    };
+    switch (affinity) {
+      case Axis.horizontal:
+        return HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
+      case Axis.vertical:
+        return VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
+      case null:
+        return ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
+    }
   }
 
   @override

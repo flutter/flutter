@@ -37,13 +37,19 @@ class TestStepResult {
   });
 
   factory TestStepResult.fromSnapshot(AsyncSnapshot<TestStepResult> snapshot) {
-    return switch (snapshot.connectionState) {
-      ConnectionState.none    => const TestStepResult('Not started', nothing, TestStatus.ok),
-      ConnectionState.waiting => const TestStepResult('Executing', nothing, TestStatus.pending),
-      ConnectionState.done when snapshot.hasData => snapshot.data!,
-      ConnectionState.done => snapshot.error! as TestStepResult,
-      ConnectionState.active => throw 'Unsupported state ${snapshot.connectionState}',
-    };
+    switch (snapshot.connectionState) {
+      case ConnectionState.none:
+        return const TestStepResult('Not started', nothing, TestStatus.ok);
+      case ConnectionState.waiting:
+        return const TestStepResult('Executing', nothing, TestStatus.pending);
+      case ConnectionState.done:
+        if (snapshot.hasData) {
+          return snapshot.data!;
+        }
+        return snapshot.error! as TestStepResult;
+      case ConnectionState.active:
+        throw 'Unsupported state ${snapshot.connectionState}';
+    }
   }
 
   final String name;

@@ -576,10 +576,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case DrawerAlignment.end:
         delta = -delta;
     }
-    _controller.value += switch (Directionality.of(context)) {
-      TextDirection.rtl => -delta,
-      TextDirection.ltr => delta,
-    };
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _controller.value -= delta;
+      case TextDirection.ltr:
+        _controller.value += delta;
+    }
 
     final bool opened = _controller.value > 0.5;
     if (opened != _previouslyOpened && widget.drawerCallback != null) {
@@ -642,17 +644,21 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
-    return switch (widget.alignment) {
-      DrawerAlignment.start => AlignmentDirectional.centerStart,
-      DrawerAlignment.end   => AlignmentDirectional.centerEnd,
-    };
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerStart;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerEnd;
+    }
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
-    return switch (widget.alignment) {
-      DrawerAlignment.start => AlignmentDirectional.centerEnd,
-      DrawerAlignment.end   => AlignmentDirectional.centerStart,
-    };
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerEnd;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerStart;
+    }
   }
 
   Widget _buildDrawer(BuildContext context) {

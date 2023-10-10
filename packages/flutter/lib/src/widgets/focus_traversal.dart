@@ -845,11 +845,16 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Iterable<FocusNode> nodes,
   ) {
     assert(direction == TraversalDirection.left || direction == TraversalDirection.right);
-    final Iterable<FocusNode> filtered = switch (direction) {
-      TraversalDirection.left  => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left),
-      TraversalDirection.right => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right),
-      TraversalDirection.up || TraversalDirection.down => throw ArgumentError('Invalid direction $direction'),
-    };
+    final Iterable<FocusNode> filtered;
+    switch (direction) {
+      case TraversalDirection.left:
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left);
+      case TraversalDirection.right:
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right);
+      case TraversalDirection.up:
+      case TraversalDirection.down:
+        throw ArgumentError('Invalid direction $direction');
+    }
     final List<FocusNode> sorted = filtered.toList();
     // Sort all nodes from left to right.
     mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dx.compareTo(b.rect.center.dx));
@@ -865,11 +870,16 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Iterable<FocusNode> nodes,
   ) {
     assert(direction == TraversalDirection.up || direction == TraversalDirection.down);
-    final Iterable<FocusNode> filtered = switch (direction) {
-      TraversalDirection.up => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top),
-      TraversalDirection.down => nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom),
-      TraversalDirection.left || TraversalDirection.right => throw ArgumentError('Invalid direction $direction'),
-    };
+    final Iterable<FocusNode> filtered;
+    switch (direction) {
+      case TraversalDirection.up:
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top);
+      case TraversalDirection.down:
+        filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom);
+      case TraversalDirection.left:
+      case TraversalDirection.right:
+        throw ArgumentError('Invalid direction $direction');
+    }
     final List<FocusNode> sorted = filtered.toList();
     mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dy.compareTo(b.rect.center.dy));
     return sorted;
@@ -899,12 +909,18 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           invalidateScopeData(nearestScope);
           return false;
         }
+        final ScrollPositionAlignmentPolicy alignmentPolicy;
+        switch (direction) {
+          case TraversalDirection.up:
+          case TraversalDirection.left:
+            alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtStart;
+          case TraversalDirection.right:
+          case TraversalDirection.down:
+            alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
+        }
         requestFocusCallback(
           lastNode,
-          alignmentPolicy: switch (direction) {
-            TraversalDirection.up    || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-            TraversalDirection.right || TraversalDirection.down => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-          },
+          alignmentPolicy: alignmentPolicy,
         );
         return true;
       }
@@ -978,13 +994,20 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final FocusNode? focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
       final FocusNode firstFocus = findFirstFocusInDirection(currentNode, direction) ?? currentNode;
-      requestFocusCallback(
-        firstFocus,
-        alignmentPolicy: switch (direction) {
-          TraversalDirection.up    || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-          TraversalDirection.right || TraversalDirection.down => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-        },
-      );
+      switch (direction) {
+        case TraversalDirection.up:
+        case TraversalDirection.left:
+          requestFocusCallback(
+            firstFocus,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          );
+        case TraversalDirection.right:
+        case TraversalDirection.down:
+          requestFocusCallback(
+            firstFocus,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+          );
+      }
       return true;
     }
     if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild)) {
@@ -1048,13 +1071,20 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     }
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
-      requestFocusCallback(
-        found,
-        alignmentPolicy: switch (direction) {
-          TraversalDirection.up    || TraversalDirection.left => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-          TraversalDirection.right || TraversalDirection.down => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-        },
-      );
+      switch (direction) {
+        case TraversalDirection.up:
+        case TraversalDirection.left:
+          requestFocusCallback(
+            found,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          );
+        case TraversalDirection.down:
+        case TraversalDirection.right:
+          requestFocusCallback(
+            found,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+          );
+      }
       return true;
     }
     return false;
@@ -1134,10 +1164,12 @@ class _ReadingOrderSortData with Diagnosticable {
 
   static void sortWithDirectionality(List<_ReadingOrderSortData> list, TextDirection directionality) {
     mergeSort<_ReadingOrderSortData>(list, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) {
-      return switch (directionality) {
-        TextDirection.ltr => a.rect.left.compareTo(b.rect.left),
-        TextDirection.rtl => b.rect.right.compareTo(a.rect.right),
-      };
+      switch (directionality) {
+        case TextDirection.ltr:
+          return a.rect.left.compareTo(b.rect.left);
+        case TextDirection.rtl:
+          return b.rect.right.compareTo(a.rect.right);
+      }
     });
   }
 
@@ -1203,10 +1235,12 @@ class _ReadingOrderDirectionalGroupData with Diagnosticable {
 
   static void sortWithDirectionality(List<_ReadingOrderDirectionalGroupData> list, TextDirection directionality) {
     mergeSort<_ReadingOrderDirectionalGroupData>(list, compare: (_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
-      return switch (directionality) {
-        TextDirection.ltr => a.rect.left.compareTo(b.rect.left),
-        TextDirection.rtl => b.rect.right.compareTo(a.rect.right),
-      };
+      switch (directionality) {
+        case TextDirection.ltr:
+          return a.rect.left.compareTo(b.rect.left);
+        case TextDirection.rtl:
+          return b.rect.right.compareTo(a.rect.right);
+      }
     });
   }
 
