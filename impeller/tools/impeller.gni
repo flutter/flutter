@@ -321,6 +321,10 @@ template("impellerc") {
     if (defined(invoker.use_half_textures) && invoker.use_half_textures) {
       args += [ "--use-half-textures" ]
     }
+    if (defined(invoker.require_framebuffer_fetch) &&
+        invoker.require_framebuffer_fetch) {
+      args += [ "--require-framebuffer-fetch" ]
+    }
 
     if (json) {
       args += [ "--json" ]
@@ -506,6 +510,12 @@ template("_impeller_shaders_gles") {
   assert(defined(invoker.name), "Name of the shader library must be specified.")
   assert(defined(invoker.analyze), "Whether to analyze must be specified.")
 
+  require_framebuffer_fetch = false
+  if (defined(invoker.require_framebuffer_fetch) &&
+      invoker.require_framebuffer_fetch) {
+    require_framebuffer_fetch = invoker.require_framebuffer_fetch
+  }
+
   shaders_base_name = string_join("",
                                   [
                                     invoker.name,
@@ -515,6 +525,7 @@ template("_impeller_shaders_gles") {
   impellerc(impellerc_gles) {
     shaders = invoker.shaders
     sl_file_extension = "gles"
+    require_framebuffer_fetch = require_framebuffer_fetch
     if (defined(invoker.gles_language_version)) {
       gles_language_version = invoker.gles_language_version
     }
@@ -690,11 +701,14 @@ template("_impeller_shaders_vk") {
 #
 #    The SPIR-V version required by the shaders.
 #
-# @param[options] use_half_textures
+# @param[optional] use_half_textures
 #
 #    Whether the metal shader is using half-precision textures and requires
 #    openGL semantics when compilig SPIR-V.
 #
+# @param[optional] require_framebuffer_fetch
+#
+#    Whether to require the framebuffer fetch extension for GLES fragment shaders.
 template("impeller_shaders") {
   if (defined(invoker.metal_version)) {
     metal_version = invoker.metal_version
@@ -705,9 +719,16 @@ template("impeller_shaders") {
     use_half_textures = true
   }
 
+  require_framebuffer_fetch = false
+  if (defined(invoker.require_framebuffer_fetch) &&
+      invoker.require_framebuffer_fetch) {
+    require_framebuffer_fetch = true
+  }
+
   not_needed([
                "metal_version",
                "use_half_textures",
+               "require_framebuffer_fetch",
              ])
 
   enable_opengles = impeller_enable_opengles
@@ -737,6 +758,7 @@ template("impeller_shaders") {
     gles_shaders = "gles_$target_name"
     _impeller_shaders_gles(gles_shaders) {
       name = invoker.name
+      require_framebuffer_fetch = require_framebuffer_fetch
       if (defined(invoker.gles_language_version)) {
         gles_language_version = invoker.gles_language_version
       }
