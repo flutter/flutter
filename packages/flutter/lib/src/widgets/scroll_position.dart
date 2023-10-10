@@ -722,8 +722,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// scroll view dimensions both change) and therefore shouldn't do anything
   /// expensive.
   void _updateSemanticActions() {
-    final SemanticsAction forward, backward;
-    (forward, backward) = switch (axisDirection) {
+    final (SemanticsAction forward, SemanticsAction backward) = switch (axisDirection) {
       AxisDirection.up    => (SemanticsAction.scrollDown,  SemanticsAction.scrollUp),
       AxisDirection.right => (SemanticsAction.scrollLeft,  SemanticsAction.scrollRight),
       AxisDirection.down  => (SemanticsAction.scrollUp,    SemanticsAction.scrollDown),
