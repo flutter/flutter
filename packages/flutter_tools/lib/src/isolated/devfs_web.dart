@@ -189,6 +189,7 @@ class WebAssetServer implements AssetReader {
     bool enableDds,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler,
+    List<String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
@@ -216,6 +217,14 @@ class WebAssetServer implements AssetReader {
 
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
+    for (final String header in extraHeaders) {
+      final List<String> parts = header.split('=');
+      if (parts.length != 2) {
+        throwToolExit('Invalid header: $header');
+      }
+      httpServer.defaultResponseHeaders.add(parts[0], parts[1]);
+    }
 
     final PackageConfig packageConfig = buildInfo.packageConfig;
     final Map<String, String> digests = <String, String>{};
@@ -653,6 +662,7 @@ class WebDevFS implements DevFS {
     required this.enableDds,
     required this.entrypoint,
     required this.expressionCompiler,
+    required this.extraHeaders,
     required this.chromiumLauncher,
     required this.nullAssertions,
     required this.nativeNullAssertions,
@@ -670,6 +680,7 @@ class WebDevFS implements DevFS {
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool enableDds;
+  final List<String> extraHeaders;
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
@@ -772,6 +783,7 @@ class WebDevFS implements DevFS {
       enableDds,
       entrypoint,
       expressionCompiler,
+      extraHeaders,
       nullSafetyMode,
       testMode: testMode,
     );

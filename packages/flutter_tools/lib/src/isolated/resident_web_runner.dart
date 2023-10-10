@@ -296,6 +296,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           enableDwds: _enableDwds,
           enableDds: debuggingOptions.enableDds,
           entrypoint: _fileSystem.file(target).uri,
+          extraHeaders: debuggingOptions.webHeaders,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,

@@ -218,6 +218,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebOptions({ required bool verboseHelp }) {
+    argParser.addMultiOption('web-header',
+      help: 'Additional key-value pairs that will added by the web server '
+            'as headers to all responses. Multiple headers can be passed by '
+            'repeating "--web-header" multiple times.',
+      valueHelp: 'X-Custom-Header=header-value',
+      splitCommas: false,
+      hide: !verboseHelp,
+    );
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help:
@@ -1519,6 +1527,17 @@ abstract class FlutterCommand extends Command<void> {
     }
     dartDefinesSet.addAll(webRenderer.dartDefines);
     return dartDefinesSet.toList();
+  }
+
+
+  List<String> extractWebHeaders() {
+    final List<String> webHeaders = <String>[];
+
+    if (argParser.options.containsKey('web-header')) {
+      webHeaders.addAll(stringsArg('web-header'));
+    }
+
+    return webHeaders;
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
