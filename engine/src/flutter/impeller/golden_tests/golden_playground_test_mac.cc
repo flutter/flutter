@@ -194,4 +194,8 @@ ISize GoldenPlaygroundTest::GetWindowSize() const {
   return pimpl_->window_size;
 }
 
+void GoldenPlaygroundTest::GoldenPlaygroundTest::SetWindowSize(ISize size) {
+  pimpl_->window_size = size;
+}
+
 }  // namespace impeller

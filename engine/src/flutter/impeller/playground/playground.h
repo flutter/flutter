@@ -92,6 +92,8 @@ class Playground {
 
   virtual bool ShouldKeepRendering() const;
 
+  void SetWindowSize(ISize size);
+
  private:
   struct GLFWInitializer;
 
@@ -104,8 +106,6 @@ class Playground {
   ISize window_size_ = ISize{1024, 768};
 
   void SetCursorPosition(Point pos);
-
-  void SetWindowSize(ISize size);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Playground);
 };
