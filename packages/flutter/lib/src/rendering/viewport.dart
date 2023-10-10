@@ -1405,10 +1405,12 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   void performLayout() {
     // Ignore the return value of applyViewportDimension because we are
     // doing a layout regardless.
-    offset.applyViewportDimension(switch (axis) {
-      Axis.vertical   => size.height,
-      Axis.horizontal => size.width,
-    });
+    switch (axis) {
+      case Axis.vertical:
+        offset.applyViewportDimension(size.height);
+      case Axis.horizontal:
+        offset.applyViewportDimension(size.width);
+    }
 
     if (center == null) {
       assert(firstChild == null);
