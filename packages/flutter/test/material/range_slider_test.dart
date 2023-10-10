@@ -2541,7 +2541,7 @@ void main() {
     );
   });
 
-   testWidgetsWithLeakTracking('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/128433
 
     int startFired = 0;
@@ -2580,5 +2580,35 @@ void main() {
 
     expect(startFired, equals(1));
     expect(endFired, equals(1));
+  });
+
+  testWidgetsWithLeakTracking('RangeSlider in a ListView does not throw an exception', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126648
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: ListView(
+              children: <Widget>[
+                const SizedBox(
+                  height: 600,
+                  child: Placeholder(),
+                ),
+                RangeSlider(
+                  values: const RangeValues(40, 80),
+                  max: 100,
+                  onChanged: (RangeValues newValue) { },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // No exception should be thrown.
+    expect(tester.takeException(), null);
   });
 }
