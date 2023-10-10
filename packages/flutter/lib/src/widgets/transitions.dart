@@ -473,13 +473,12 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
   final double axisAlignment;
 
-  /// The factor to multiply the cross axis size of the child by.
+  /// The factor by which to multiply the cross axis size of the child.
   ///
-  /// If the value of [fixedCrossAxisSizeFactor] is less than one, the child will be
-  /// clipped in the appropriate axis.
+  /// If the value of [fixedCrossAxisSizeFactor] is less than one, the child
+  /// will be clipped along the appropriate axis.
   ///
-  /// If `null` (the default), the cross axis size is as large as the
-  /// parent.
+  /// If `null` (the default), the cross axis size is as large as the parent.
   final double? fixedCrossAxisSizeFactor;
 
   /// The widget below this widget in the tree.
