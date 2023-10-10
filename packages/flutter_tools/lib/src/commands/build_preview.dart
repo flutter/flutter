@@ -61,12 +61,12 @@ class BuildPreviewCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (!globals.platform.isWindows) {
+      throwToolExit('"build _preview" is currently only supported on Windows hosts.');
+    }
     final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
     try {
       final FlutterProject flutterProject = await _createProject(targetDir);
-      if (!globals.platform.isWindows) {
-        throwToolExit('"build _preview" is currently only supported on Windows hosts.');
-      }
       await buildWindows(
         flutterProject.windows,
         buildInfo,
