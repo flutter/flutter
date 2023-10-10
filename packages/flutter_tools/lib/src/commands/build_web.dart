@@ -4,7 +4,6 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
@@ -197,7 +196,7 @@ class BuildWebCommand extends BuildSubCommand {
       flutterVersion: globals.flutterVersion,
       usage: globals.flutterUsage,
     );
-    final Directory outputDirectory = await webBuilder.buildWeb(
+    await webBuilder.buildWeb(
       flutterProject,
       target,
       buildInfo,
@@ -206,15 +205,6 @@ class BuildWebCommand extends BuildSubCommand {
       baseHref: baseHref,
       outputDirectoryPath: outputDirectoryPath,
     );
-
-    // We don't print a size because the output directory can contain
-    // optional files not needed by the user.
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}',
-      color: TerminalColor.green,
-    );
-
     return FlutterCommandResult.success();
   }
 }

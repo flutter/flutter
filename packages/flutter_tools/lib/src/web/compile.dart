@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -50,7 +51,7 @@ class WebBuilder {
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
 
-  Future<Directory> buildWeb(
+  Future<void> buildWeb(
     FlutterProject flutterProject,
     String target,
     BuildInfo buildInfo,
@@ -127,6 +128,15 @@ class WebBuilder {
     } finally {
       status.stop();
     }
+
+    // We don't print a size because the output directory can contain
+    // optional files not needed by the user.
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+      color: TerminalColor.green,
+    );
+
     BuildEvent(
       'web-compile',
       type: 'web',
@@ -142,8 +152,6 @@ class WebBuilder {
       compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
       Duration(milliseconds: sw.elapsedMilliseconds),
     );
-
-    return outputDirectory;
   }
 }
 
