@@ -126,7 +126,6 @@ class _MyContextMenuState extends State<MyContextMenu> {
         onSecondaryTapDown: _handleSecondaryTapDown,
         child: MenuAnchor(
           controller: _menuController,
-          anchorTapClosesMenu: true,
           menuChildren: <Widget>[
             MenuItemButton(
               child: Text(MenuEntry.about.label),
@@ -217,10 +216,18 @@ class _MyContextMenuState extends State<MyContextMenu> {
   }
 
   void _handleSecondaryTapDown(TapDownDetails details) {
+    if (_menuController.isOpen) {
+      _menuController.close();
+      return;
+    }
     _menuController.open(position: details.localPosition);
   }
 
   void _handleTapDown(TapDownDetails details) {
+    if (_menuController.isOpen) {
+      _menuController.close();
+      return;
+    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
