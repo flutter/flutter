@@ -147,7 +147,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Whether software rendering is used.
   private boolean usesSoftwareRendering = false;
 
-  private static boolean enableHardwareBufferRenderingTarget = false;
+  private static boolean enableHardwareBufferRenderingTarget = true;
 
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
@@ -181,12 +181,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
           if (textureRegistry == null) {
             throw new IllegalStateException(
-                "Texture registry is null. This means that platform views controller was detached, view id: "
+                "Texture registry is null. This means that platform views controller was detached,"
+                    + " view id: "
                     + viewId);
           }
           if (flutterView == null) {
             throw new IllegalStateException(
-                "Flutter view is null. This means the platform views controller doesn't have an attached view, view id: "
+                "Flutter view is null. This means the platform views controller doesn't have an"
+                    + " attached view, view id: "
                     + viewId);
           }
 
@@ -195,7 +197,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final View embeddedView = platformView.getView();
           if (embeddedView.getParent() != null) {
             throw new IllegalStateException(
-                "The Android view returned from PlatformView#getView() was already added to a parent view.");
+                "The Android view returned from PlatformView#getView() was already added to a"
+                    + " parent view.");
           }
 
           // The newer Texture Layer Hybrid Composition mode isn't suppported if any of the
@@ -1098,7 +1101,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
     if (embeddedView.getParent() != null) {
       throw new IllegalStateException(
-          "The Android view returned from PlatformView#getView() was already added to a parent view.");
+          "The Android view returned from PlatformView#getView() was already added to a parent"
+              + " view.");
     }
     final FlutterMutatorView parentView =
         new FlutterMutatorView(

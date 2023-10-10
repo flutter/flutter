@@ -19,7 +19,7 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   private int bufferWidth = 0;
   private int bufferHeight = 0;
   private static final String TAG = "ImageReaderPlatformViewRenderTarget";
-  private static final int MAX_IMAGES = 3;
+  private static final int MAX_IMAGES = 4;
 
   private void closeReader() {
     if (this.reader != null) {
@@ -40,7 +40,7 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
           try {
             image = reader.acquireLatestImage();
           } catch (IllegalStateException e) {
-            Log.e(TAG, "New image available but it could not be acquired: " + e.toString());
+            Log.e(TAG, "onImageAvailable acquireLatestImage failed: " + e.toString());
           }
           if (image == null) {
             return;
