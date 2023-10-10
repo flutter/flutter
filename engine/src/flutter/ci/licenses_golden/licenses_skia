@@ -1,4 +1,4 @@
-Signature: fb5883a71c45eeef7a1dfd4e67517a74
+Signature: 7dc84feb910de83ff45abc19a3297659
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,6 +386,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/relnotes/grsurface-info.md
 FILE: ../../../third_party/skia/relnotes/mesh.md
 FILE: ../../../third_party/skia/relnotes/readbuffer-deserial.md
 FILE: ../../../third_party/skia/relnotes/vk-directcontext.md
@@ -7314,7 +7315,6 @@ ORIGIN: ../../../third_party/skia/gm/mesh.cpp + ../../../third_party/skia/LICENS
 ORIGIN: ../../../third_party/skia/include/core/SkBlender.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkMesh.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/effects/SkBlenders.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/gpu/GrSurfaceInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ShaderErrorHandler.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h + ../../../third_party/skia/LICENSE
@@ -7351,7 +7351,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrMeshDrawTarget.cpp + ../../..
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrMeshDrawTarget.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrOpsTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrPersistentCacheUtils.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrSurfaceInfo.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrWritePixelsRenderTask.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrWritePixelsRenderTask.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrYUVATextureProxies.cpp + ../../../third_party/skia/LICENSE
@@ -7531,7 +7530,6 @@ FILE: ../../../third_party/skia/gm/mesh.cpp
 FILE: ../../../third_party/skia/include/core/SkBlender.h
 FILE: ../../../third_party/skia/include/core/SkMesh.h
 FILE: ../../../third_party/skia/include/effects/SkBlenders.h
-FILE: ../../../third_party/skia/include/gpu/GrSurfaceInfo.h
 FILE: ../../../third_party/skia/include/gpu/ShaderErrorHandler.h
 FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
 FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
@@ -7568,7 +7566,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrMeshDrawTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrMeshDrawTarget.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrOpsTypes.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrPersistentCacheUtils.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrSurfaceInfo.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrYUVATextureProxies.cpp
