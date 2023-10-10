@@ -57,6 +57,9 @@ class GoldenPlaygroundTest
 
   ISize GetWindowSize() const;
 
+ protected:
+  void SetWindowSize(ISize size);
+
  private:
 #if FML_OS_MACOSX
   // This must be placed first so that the autorelease pool is not destroyed
