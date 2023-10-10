@@ -155,6 +155,7 @@ if (enable_unittests) {
       "//flutter/common/graphics",
       "//flutter/display_list/testing:display_list_surface_provider",
       "//flutter/display_list/testing:display_list_testing",
+      "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
       "//flutter/testing",
     ]
 
