@@ -66,8 +66,7 @@ class RelativeRect {
     required double end,
     required double bottom,
   }) {
-    final double left, right;
-    (left, right) = switch (textDirection) {
+    final (double left, double right) = switch (textDirection) {
       TextDirection.rtl => (end, start),
       TextDirection.ltr => (start, end),
     };
