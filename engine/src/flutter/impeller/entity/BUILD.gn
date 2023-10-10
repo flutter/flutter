@@ -103,20 +103,15 @@ impeller_shaders("modern_entity_shaders") {
 
 impeller_shaders("framebuffer_blend_entity_shaders") {
   name = "framebuffer_blend"
+  require_framebuffer_fetch = true
+
+  # malioc does not support analyzing shaders that use the framebuffer fetch extension on some GPUs.
+  analyze = false
 
   if (is_mac && !is_ios) {
     # Note: this needs to correspond to the Apple7 Support family
     # for M1 and M2.
     metal_version = "2.3"
-  }
-
-  # This version is to disable malioc checks.
-  if (impeller_enable_opengles) {
-    gles_language_version = 460
-  }
-
-  if (impeller_enable_vulkan) {
-    vulkan_language_version = 130
   }
 
   shaders = [
