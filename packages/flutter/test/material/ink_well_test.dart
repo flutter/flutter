@@ -1041,7 +1041,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -2086,7 +2086,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
   });
 
-  testWidgets('InkWell disposes statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkWell disposes statesController', (WidgetTester tester) async {
     int tapCount = 0;
     Widget buildFrame(MaterialStatesController? statesController) {
       return MaterialApp(
@@ -2103,6 +2103,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     }
 
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     int pressedCount = 0;
     controller.addListener(() {
       if (controller.value.contains(MaterialState.pressed)) {

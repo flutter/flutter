@@ -80,8 +80,8 @@ class NavigationRail extends StatefulWidget {
   /// [minExtendedWidth] is specified, it must be non-negative and greater than
   /// [minWidth].
   ///
-  /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when the [labelType] is null or [NavigationRailLabelType.none].
+  /// The [extended] argument can only be set to true when the [labelType] is
+  /// null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
@@ -581,9 +581,9 @@ class _RailDestination extends StatelessWidget {
     );
 
     final ThemeData theme = Theme.of(context);
-
+    final TextDirection textDirection = Directionality.of(context);
     final bool material3 = theme.useMaterial3;
-    final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
+    final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(textDirection);
     Offset indicatorOffset;
     bool applyXOffset = false;
 
@@ -594,11 +594,19 @@ class _RailDestination extends StatelessWidget {
       child: icon,
     );
     final Widget styledLabel = DefaultTextStyle(
-      style: labelTextStyle,
+      style: disabled
+        ? labelTextStyle.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        : labelTextStyle,
       child: label,
     );
 
     Widget content;
+
+    // The indicator height is fixed and equal to _kIndicatorHeight.
+    // When the icon height is larger than the indicator height the indicator
+    // vertical offset is used to vertically center the indicator.
+    final bool isLargeIconSize = iconTheme.size != null && iconTheme.size! > _kIndicatorHeight;
+    final double indicatorVerticalOffset = isLargeIconSize ? (iconTheme.size! - _kIndicatorHeight) / 2 : 0;
 
     switch (labelType) {
       case NavigationRailLabelType.none:
@@ -606,7 +614,7 @@ class _RailDestination extends StatelessWidget {
         final Widget? spacing = material3 ? const SizedBox(height: _verticalDestinationSpacingM3 / 2) : null;
         indicatorOffset = Offset(
           minWidth / 2 + destinationPadding.left,
-          _verticalDestinationSpacingM3 / 2 + destinationPadding.top,
+          _verticalDestinationSpacingM3 / 2 + destinationPadding.top + indicatorVerticalOffset,
         );
         final Widget iconPart = Column(
           children: <Widget>[
@@ -685,9 +693,15 @@ class _RailDestination extends StatelessWidget {
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : verticalPadding);
         final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
         final double indicatorVerticalPadding = destinationPadding.top;
-        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        indicatorOffset = Offset(
+          minWidth / 2 + indicatorHorizontalPadding,
+          indicatorVerticalPadding + indicatorVerticalOffset,
+        );
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
-          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+          indicatorOffset = Offset(
+            minWidth / 2 + _horizontalDestinationSpacingM3,
+            indicatorVerticalPadding + indicatorVerticalOffset,
+          );
         }
         content = Container(
           constraints: BoxConstraints(
@@ -732,9 +746,15 @@ class _RailDestination extends StatelessWidget {
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : _verticalDestinationPaddingWithLabel);
         final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
         final double indicatorVerticalPadding = destinationPadding.top;
-        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        indicatorOffset = Offset(
+          minWidth / 2 + indicatorHorizontalPadding,
+          indicatorVerticalPadding + indicatorVerticalOffset,
+        );
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
-          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+          indicatorOffset = Offset(
+            minWidth / 2 + _horizontalDestinationSpacingM3,
+            indicatorVerticalPadding + indicatorVerticalOffset,
+          );
         }
         content = Container(
           constraints: BoxConstraints(
@@ -778,6 +798,7 @@ class _RailDestination extends StatelessWidget {
               useMaterial3: material3,
               indicatorOffset: indicatorOffset,
               applyXOffset: applyXOffset,
+              textDirection: textDirection,
               child: content,
             ),
           ),
@@ -801,6 +822,7 @@ class _IndicatorInkWell extends InkResponse {
     required this.useMaterial3,
     required this.indicatorOffset,
     required this.applyXOffset,
+    required this.textDirection,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
@@ -809,16 +831,25 @@ class _IndicatorInkWell extends InkResponse {
   );
 
   final bool useMaterial3;
+
   // The offset used to position Ink highlight.
   final Offset indicatorOffset;
+
   // Whether the horizontal offset from indicatorOffset should be used to position Ink highlight.
   // If true, Ink highlight uses the indicator horizontal offset. If false, Ink highlight is centered horizontally.
   final bool applyXOffset;
 
+  // The text direction used to adjust the indicator horizontal offset.
+  final TextDirection textDirection;
+
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
     if (useMaterial3) {
-      final double indicatorHorizontalCenter = applyXOffset ? indicatorOffset.dx : referenceBox.size.width / 2;
+      final double boxWidth = referenceBox.size.width;
+      double indicatorHorizontalCenter = applyXOffset ? indicatorOffset.dx : boxWidth / 2;
+      if (textDirection == TextDirection.rtl) {
+        indicatorHorizontalCenter = boxWidth - indicatorHorizontalCenter;
+      }
       return () {
         return Rect.fromLTWH(
           indicatorHorizontalCenter - (_kCircularIndicatorDiameter / 2),
@@ -915,9 +946,9 @@ enum NavigationRailLabelType {
 class NavigationRailDestination {
   /// Creates a destination that is used with [NavigationRail.destinations].
   ///
-  /// [icon] and [label] must be non-null. When the [NavigationRail.labelType]
-  /// is [NavigationRailLabelType.none], the label is still used for semantics,
-  /// and may still be used if [NavigationRail.extended] is true.
+  /// When the [NavigationRail.labelType] is [NavigationRailLabelType.none], the
+  /// label is still used for semantics, and may still be used if
+  /// [NavigationRail.extended] is true.
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,

@@ -1651,7 +1651,7 @@ void main() {
     expect(lastTableRowBoxDecoration().color, disabledColor);
   });
 
-  testWidgetsWithLeakTracking('DataRow renders custom colors when pressed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - DataRow renders custom colors when pressed', (WidgetTester tester) async {
     const Color pressedColor = Color(0xff4caf50);
     Widget buildTable() {
       return DataTable(
@@ -1688,6 +1688,53 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
     expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
+    await gesture.up();
+  });
+
+  testWidgetsWithLeakTracking('Material3 - DataRow renders custom colors when pressed', (WidgetTester tester) async {
+    const Color pressedColor = Color(0xff4caf50);
+    Widget buildTable() {
+      return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Column1'),
+          ),
+        ],
+        rows: <DataRow>[
+          DataRow(
+            color: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return pressedColor;
+                }
+                return Colors.transparent;
+              },
+            ),
+            onSelectChanged: (bool? value) {},
+            cells: const <DataCell>[
+              DataCell(Text('Content1')),
+            ],
+          ),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Material(child: buildTable()),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
+    await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods.
+    expect(
+      box,
+      paints
+        ..rect()
+        ..rect(rect: const Rect.fromLTRB(0.0, 56.0, 800.0, 104.0), color: pressedColor.withOpacity(0.0)),
+    );
     await gesture.up();
   });
 
@@ -2279,4 +2326,46 @@ void main() {
     // Test that cursor is updated for the row.
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/114470.
+  testWidgetsWithLeakTracking('DataTable text styles are merged with default text style', (WidgetTester tester) async {
+    late DefaultTextStyle defaultTextStyle;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              defaultTextStyle = DefaultTextStyle.of(context);
+              return DataTable(
+                headingTextStyle: const TextStyle(),
+                dataTextStyle: const TextStyle(),
+                columns: const <DataColumn>[
+                  DataColumn(label: Text('Header 1')),
+                  DataColumn(label: Text('Header 2')),
+                ],
+                rows: const <DataRow>[
+                  DataRow(
+                    cells: <DataCell>[
+                      DataCell(Text('Data 1')),
+                      DataCell(Text('Data 2')),
+                    ],
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle? headingTextStyle = _getTextRenderObject(tester, 'Header 1').text.style;
+    expect(headingTextStyle, defaultTextStyle.style);
+
+    final TextStyle? dataTextStyle = _getTextRenderObject(tester, 'Data 1').text.style;
+    expect(dataTextStyle, defaultTextStyle.style);
+  });
+}
+
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.renderObject(find.text(text));
 }

@@ -644,7 +644,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Material2 - Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool enabled = true}) {
@@ -715,7 +715,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Material3 - Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     final ThemeData theme = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
@@ -1244,7 +1244,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
@@ -1345,7 +1345,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Material2 - Checkbox default overlay color in active/pressed/focused/hovered states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     final ThemeData theme = ThemeData(useMaterial3: false);
@@ -1413,7 +1413,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Material3 - Checkbox default overlay color in active/pressed/focused/hovered states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -1479,7 +1479,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Checkbox overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
@@ -1973,7 +1973,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Material3 - Checkbox has default error color when isError is set to true', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
@@ -2046,7 +2046,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Material3 - Checkbox MaterialStateBorderSide applies in error states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     final ThemeData themeData = ThemeData(useMaterial3: true);
     const Color borderColor = Color(0xffffeb3b);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;

@@ -121,7 +121,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
     RenderBox icon;
     final bool material3 = theme.useMaterial3;
 
@@ -331,7 +331,7 @@ void main() {
     expect(box.size, const Size(80.0, 80.0));
   });
 
-  testWidgets('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -407,7 +407,7 @@ void main() {
     expect(align.alignment, Alignment.center);
   });
 
-  testWidgets('test tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -2023,7 +2023,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -2588,7 +2588,7 @@ void main() {
   });
 
   group('IconTheme tests in Material 3', () {
-    testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('IconTheme overrides default values in M3', (WidgetTester tester) async {
       // Theme's IconTheme
       await tester.pumpWidget(
         MaterialApp(

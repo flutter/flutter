@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
@@ -49,7 +50,17 @@ void main() {
       '0123456789ABCDEFGHIJ';
 
   const String testVerticalText = '1\n2\n3\n4\n5\n6\n7\n8\n9';
+  const String longText =
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+      'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
+      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris '
+      'nisi ut aliquip ex ea commodo consequat. '
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
+      'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
+      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris '
+      'nisi ut aliquip ex ea commodo consequat. ';
   final TextEditingController controller = TextEditingController(text: testText);
+  final ScrollController scrollController = ScrollController();
 
   final FocusNode focusNode = FocusNode();
   Widget buildEditableText({
@@ -84,6 +95,7 @@ void main() {
             textAlign: textAlign,
             obscureText: obscured,
             enableInteractiveSelection: enableInteractiveSelection,
+            scrollController: scrollController
           ),
         ),
       ),
@@ -97,7 +109,7 @@ void main() {
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
 
-        testWidgets('backspace', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace', (WidgetTester tester) async {
           controller.text = testText;
           // Move the selection to the beginning of the 2nd line (after the newline
           // character).
@@ -122,7 +134,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 20,
@@ -140,7 +152,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('backspace at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -163,7 +175,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('backspace at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -187,7 +199,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -208,7 +220,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -233,7 +245,7 @@ void main() {
       group('delete: ', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
 
-        testWidgets('delete', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete', (WidgetTester tester) async {
           controller.text = testText;
           // Move the selection to the beginning of the 2nd line (after the newline
           // character).
@@ -259,7 +271,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 20,
@@ -277,7 +289,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -300,7 +312,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -324,7 +336,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('delete inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -345,7 +357,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -371,7 +383,7 @@ void main() {
         // This shares the same logic as backspace.
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 9,
@@ -392,7 +404,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at the boundaries of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at the boundaries of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 8,
@@ -413,7 +425,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('cross-cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('cross-cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 1,
@@ -434,7 +446,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('cross-cluster obscured text', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('cross-cluster obscured text', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 1,
@@ -464,7 +476,7 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets('WordModifier-backspace', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('WordModifier-backspace', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret before "people".
           controller.selection = const TextSelection.collapsed(
@@ -489,7 +501,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 29,
@@ -507,7 +519,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -530,7 +542,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -554,7 +566,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -575,7 +587,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -604,7 +616,7 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets('WordModifier-delete', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('WordModifier-delete', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret after "all".
           controller.selection = const TextSelection.collapsed(
@@ -629,7 +641,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 23,
@@ -647,7 +659,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -670,7 +682,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -687,7 +699,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -708,7 +720,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -737,7 +749,7 @@ void main() {
           return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
-        testWidgets('alt-backspace', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('alt-backspace', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret before "people".
           controller.selection = const TextSelection.collapsed(
@@ -762,7 +774,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
@@ -786,7 +798,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, downstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
@@ -803,7 +815,7 @@ void main() {
           expect(controller.text, testSoftwrapText);
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 29,
@@ -821,7 +833,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -844,7 +856,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -867,7 +879,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -888,7 +900,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -917,7 +929,7 @@ void main() {
           return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
-        testWidgets('alt-delete', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('alt-delete', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret after "all".
           controller.selection = const TextSelection.collapsed(
@@ -942,7 +954,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
@@ -961,7 +973,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, downstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
@@ -984,7 +996,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 23,
@@ -1002,7 +1014,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -1025,7 +1037,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -1042,7 +1054,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -1063,7 +1075,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -1089,7 +1101,7 @@ void main() {
         group('left', () {
           const LogicalKeyboardKey trigger = LogicalKeyboardKey.arrowLeft;
 
-          testWidgets('at start', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
@@ -1109,7 +1121,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
@@ -1123,7 +1135,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
@@ -1137,7 +1149,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
@@ -1155,7 +1167,7 @@ void main() {
         group('right', () {
           const LogicalKeyboardKey trigger = LogicalKeyboardKey.arrowRight;
 
-          testWidgets('at end', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
@@ -1172,7 +1184,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
@@ -1186,7 +1198,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
@@ -1200,7 +1212,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-         testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+         testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
@@ -1217,7 +1229,7 @@ void main() {
         });
 
         group('With initial non-collapsed selection', () {
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             // The word "all" is selected.
             controller.selection = const TextSelection(
@@ -1269,7 +1281,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             // "good" to "come" is selected.
             controller.selection = const TextSelection(
@@ -1322,7 +1334,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-         testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+         testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             // "good" to "come" is selected.
             controller.selection = const TextSelection(
@@ -1378,7 +1390,7 @@ void main() {
         });
 
         group('vertical movement', () {
-          testWidgets('at start', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
@@ -1411,7 +1423,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('at end', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
@@ -1438,7 +1450,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1525,7 +1537,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run with page down/up', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run with page down/up', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1560,7 +1572,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS})); // intended: on macOS Page Up/Down only scrolls
 
-          testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1589,7 +1601,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run can be interrupted by selection changes', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run can be interrupted by selection changes', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1624,7 +1636,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('long run with fractional text height', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('long run with fractional text height', (WidgetTester tester) async {
             controller.text = "${'źdźbło\n' * 49}źdźbło";
             controller.selection = const TextSelection.collapsed(offset: 2);
             await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 13.0, height: 1.17)));
@@ -1658,7 +1670,7 @@ void main() {
   group('macOS shortcuts', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
@@ -1672,7 +1684,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
@@ -1686,7 +1698,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
@@ -1700,7 +1712,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
@@ -1715,7 +1727,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
       controller.text = testText;
       // "good" to "come" is selected.
       controller.selection = const TextSelection(
@@ -1768,7 +1780,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
       controller.text = testText;
       // "good" to "come" is selected.
       controller.selection = const TextSelection(
@@ -1828,7 +1840,7 @@ void main() {
     const TargetPlatformVariant appleOnly = TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.iOS });
     group('macOS shortcuts', () {
 
-      testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 7,   // Before the first "the"
@@ -1840,7 +1852,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 7));
       }, variant: appleOnly);
 
-      testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 7,   // Before the first "the"
@@ -1852,7 +1864,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 7));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 24,   // Before the "good".
@@ -1864,7 +1876,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 24,));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 24,   // Before the "good".
@@ -1878,7 +1890,7 @@ void main() {
         ));
       }, variant: appleOnly);
 
-      testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection(
           baseOffset: 24,
@@ -1931,7 +1943,7 @@ void main() {
         ));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
         controller.text = testText;
         // "good" to "come" is selected.
         controller.selection = const TextSelection(
@@ -1988,7 +2000,7 @@ void main() {
       }, variant: appleOnly);
     });
 
-    testWidgets('vertical movement outside of selection',
+    testWidgetsWithLeakTracking('vertical movement outside of selection',
         (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
@@ -2014,7 +2026,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('select all non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2027,7 +2039,7 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(offset: 0));
     }, variant: allExceptApple);
 
-    testWidgets('select all apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2040,7 +2052,7 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(offset: 0));
     }, variant: appleOnly);
 
-    testWidgets('copy non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('copy non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2055,7 +2067,7 @@ void main() {
       expect(clipboardData['text'], 'empty');
     }, variant: allExceptApple);
 
-    testWidgets('copy apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('copy apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2070,7 +2082,7 @@ void main() {
       expect(clipboardData['text'], 'empty');
     }, variant: appleOnly);
 
-    testWidgets('cut non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('cut non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2089,7 +2101,7 @@ void main() {
       ));
     }, variant: allExceptApple);
 
-    testWidgets('cut apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('cut apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2108,7 +2120,7 @@ void main() {
       ));
     }, variant: appleOnly);
 
-    testWidgets('paste non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('paste non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(offset: 0);
       mockClipboard.clipboardData = <String, dynamic>{
@@ -2121,7 +2133,7 @@ void main() {
       expect(controller.text, testText);
     }, variant: allExceptApple);
 
-    testWidgets('paste apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('paste apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(offset: 0);
       mockClipboard.clipboardData = <String, dynamic>{
@@ -2137,7 +2149,13 @@ void main() {
   }, skip: !kIsWeb);// [intended] specific tests target web.
 
   group('Web does accept', () {
-      testWidgets('select up', (WidgetTester tester) async {
+    final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
+    const TargetPlatformVariant desktopExceptMacOS = TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    });
+
+      testWidgetsWithLeakTracking('select up', (WidgetTester tester) async {
         const SingleActivator selectUp =
             SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
         controller.text = testVerticalText;
@@ -2159,7 +2177,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select down', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('select down', (WidgetTester tester) async {
         const SingleActivator selectDown =
             SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
         controller.text = testVerticalText;
@@ -2181,7 +2199,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select all up', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('select all up', (WidgetTester tester) async {
         final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
         final SingleActivator selectAllUp = isMacOS
             ? const SingleActivator(LogicalKeyboardKey.arrowUp,
@@ -2207,7 +2225,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select all down', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('select all down', (WidgetTester tester) async {
         final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
         final SingleActivator selectAllDown = isMacOS
             ? const SingleActivator(LogicalKeyboardKey.arrowDown,
@@ -2233,7 +2251,7 @@ void main() {
         );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select left', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select left', (WidgetTester tester) async {
       const SingleActivator selectLeft =
           SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
       controller.text = 'testing';
@@ -2253,7 +2271,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select right', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select right', (WidgetTester tester) async {
       const SingleActivator selectRight =
           SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
       controller.text = 'testing';
@@ -2273,7 +2291,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
         'select left should not expand selection if selection is disabled',
         (WidgetTester tester) async {
       const SingleActivator selectLeft =
@@ -2296,7 +2314,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
         'select right should not expand selection if selection is disabled',
         (WidgetTester tester) async {
       const SingleActivator selectRight =
@@ -2317,7 +2335,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select all left', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all left', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
       final SingleActivator selectAllLeft = isMacOS
           ? const SingleActivator(LogicalKeyboardKey.arrowLeft,
@@ -2341,7 +2359,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select all right', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all right', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
       final SingleActivator selectAllRight = isMacOS
           ? const SingleActivator(LogicalKeyboardKey.arrowRight,
@@ -2364,5 +2382,522 @@ void main() {
         reason: selectAllRight.toString(),
       );
     }, variant: TargetPlatformVariant.desktop());
+    group('macOS only', () {
+      testWidgetsWithLeakTracking('pageUp scrolls 80% of viewport dimension upwards', (WidgetTester tester) async {
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, pageUp);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          TextSelection.collapsed(offset: controller.text.length), // selection stays the same.
+          reason: pageUp.toString(),
+        );
+
+        // default page up/down scroll increment is 80% of viewport dimension.
+        final double newOffset = initialScrollOffset - (0.8 * scrollController.position.viewportDimension);
+
+        expect(scrollController.offset, newOffset);
+      }, variant: macOSOnly);
+
+      testWidgetsWithLeakTracking('pageUp + shift scrolls upwards and modifies selection', (WidgetTester tester) async {
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, pageUp);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          TextSelection(baseOffset: controller.text.length, extentOffset: 232),
+          reason: pageUp.toString(),
+        );
+
+        expect(scrollController.offset, lessThan(initialScrollOffset));
+      }, variant: macOSOnly);
+
+      testWidgetsWithLeakTracking('pageDown scrolls 80% of viewport dimension downwards', (WidgetTester tester) async {
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: 0);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, pageDown);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 0), // selection stays the same.
+          reason: pageDown.toString(),
+        );
+
+        // default page up/down scroll increment is 80% of viewport dimension.
+        final double newOffset = initialScrollOffset + (0.8 * scrollController.position.viewportDimension);
+
+        expect(scrollController.offset, newOffset);
+      }, variant: macOSOnly);
+
+      testWidgetsWithLeakTracking('pageDown + shift scrolls downwards and modifies selection', (WidgetTester tester) async {
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: 0);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, pageDown);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 238),
+          reason: pageDown.toString(),
+        );
+
+        expect(scrollController.offset, greaterThan(initialScrollOffset));
+      }, variant: macOSOnly);
+
+      testWidgetsWithLeakTracking('end scrolls to the end of the text field', (WidgetTester tester) async {
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end);
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: 0);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 0), // selection stays the same.
+          reason: end.toString(),
+        );
+
+        // scrolls to end.
+        final double newOffset = scrollController.position.maxScrollExtent;
+
+        expect(scrollController.offset, newOffset);
+      }, variant: macOSOnly);
+
+      testWidgetsWithLeakTracking('end + shift scrolls to the end of the text field and selects everything', (WidgetTester tester) async {
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, shift: true);
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: 0);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection changes.
+          reason: end.toString(),
+        );
+
+        // scrolls to end.
+        final double newOffset = scrollController.position.maxScrollExtent;
+
+        expect(scrollController.offset, newOffset);
+      }, variant: macOSOnly);
+
+      testWidgetsWithLeakTracking('home scrolls to the beginning of the text field', (WidgetTester tester) async {
+        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, home);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          TextSelection.collapsed(offset: controller.text.length), // selection stays the same.
+          reason: home.toString(),
+        );
+
+        // scrolls to beginning.
+        const double newOffset = 0;
+
+        expect(scrollController.offset, newOffset);
+      }, variant: macOSOnly);
+
+      testWidgetsWithLeakTracking('home + shift scrolls to the beginning of text field and selects everything', (WidgetTester tester) async {
+          const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+
+          controller.text = longText;
+          controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+          await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+          await tester.pumpAndSettle();
+
+          final double initialScrollOffset = scrollController.offset;
+
+          expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+          await sendKeyCombination(tester, home);
+          await tester.pump();
+
+          expect(controller.text, longText);
+          expect(
+            controller.selection,
+            TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection changes.
+            reason: home.toString(),
+          );
+
+          // scrolls to beginning.
+          const double newOffset = 0;
+
+          expect(scrollController.offset, newOffset);
+        }, variant: macOSOnly);
+      });
+
+    group('non-macOS', () {
+      testWidgetsWithLeakTracking('pageUp scrolls up and modifies selection', (WidgetTester tester) async {
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp);
+
+        final int initialSelectionOffset = controller.text.length;
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, pageUp);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, lessThan(initialSelectionOffset));
+        expect(scrollController.offset, lessThan(initialScrollOffset));
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('pageUp + shift scrolls up and modifies selection', (WidgetTester tester) async {
+        const SingleActivator pageUp = SingleActivator(LogicalKeyboardKey.pageUp, shift: true);
+
+        final int initialSelectionOffset = controller.text.length;
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, pageUp);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, lessThan(initialSelectionOffset));
+        expect(scrollController.offset, lessThan(initialScrollOffset));
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('pageDown scrolls down and modifies selection', (WidgetTester tester) async {
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown);
+
+        const int initialSelectionOffset = 0;
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, pageDown);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, greaterThan(initialSelectionOffset));
+        expect(scrollController.offset, greaterThan(initialScrollOffset));
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('pageDown + shift scrolls down and modifies selection', (WidgetTester tester) async {
+        const SingleActivator pageDown = SingleActivator(LogicalKeyboardKey.pageDown, shift: true);
+
+        const int initialSelectionOffset = 0;
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, pageDown);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, greaterThan(initialSelectionOffset));
+        expect(scrollController.offset, greaterThan(initialScrollOffset));
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('end moves selection to the end of the line, no scroll', (WidgetTester tester) async {
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end);
+        const int initialSelectionOffset = 0;
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, greaterThan(initialSelectionOffset));
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('end + shift highlights selection to the end of the line, no scroll', (WidgetTester tester) async {
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, shift: true);
+        const int initialSelectionOffset = 0;
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, greaterThan(initialSelectionOffset));
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('home moves selection to the beginning of the line, no scroll', (WidgetTester tester) async {
+        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
+        final int initialSelectionOffset = controller.text.length;
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, home);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isTrue);
+        expect(controller.selection.baseOffset, lessThan(initialSelectionOffset));
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('home + shift highlights selection to the beginning of the line, no scroll', (WidgetTester tester) async {
+        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+        final int initialSelectionOffset = controller.text.length;
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, home);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, lessThan(initialSelectionOffset));
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
+      }, variant: desktopExceptMacOS);
+
+      testWidgetsWithLeakTracking('end + ctrl scrolls to the end of the text field and changes selection on Windows', (WidgetTester tester) async {
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, control: true);
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: 0);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          TextSelection.collapsed(offset: controller.text.length), // selection goes to end.
+          reason: end.toString(),
+        );
+
+        // scrolls to end.
+        final double newOffset = scrollController.position.maxScrollExtent;
+
+        expect(scrollController.offset, newOffset);
+      }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+      testWidgetsWithLeakTracking('end + shift + ctrl scrolls to the end of the text field and highlights everything on Windows', (WidgetTester tester) async {
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end, control: true, shift: true);
+
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: 0);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          TextSelection(baseOffset: 0, extentOffset: controller.text.length), // selection goes to end.
+          reason: end.toString(),
+        );
+
+        // scrolls to end.
+        final double newOffset = scrollController.position.maxScrollExtent;
+
+        expect(scrollController.offset, newOffset);
+      }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+      testWidgetsWithLeakTracking('home + ctrl scrolls to the beginning of the text field and changes selection on Windows', (WidgetTester tester) async {
+        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, control: true);
+
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        final double initialScrollOffset = scrollController.offset;
+
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, home);
+        await tester.pump();
+
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 0), // selection goes to beginning.
+          reason: home.toString(),
+        );
+
+        // scrolls to beginning.
+        const double newOffset = 0;
+
+        expect(scrollController.offset, newOffset);
+      }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+      testWidgetsWithLeakTracking('home + shift + ctrl scrolls to the beginning of the text field and highlights everything on Windows', (WidgetTester tester) async {
+            const SingleActivator home = SingleActivator(LogicalKeyboardKey.home, control: true, shift: true);
+
+            controller.text = longText;
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+            await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+            await tester.pumpAndSettle();
+
+            final double initialScrollOffset = scrollController.offset;
+
+            expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+            await sendKeyCombination(tester, home);
+            await tester.pump();
+
+            expect(controller.text, longText);
+            expect(
+              controller.selection,
+              TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection goes to beginning.
+              reason: home.toString(),
+            );
+
+            // scrolls to beginning.
+            const double newOffset = 0;
+
+            expect(scrollController.offset, newOffset);
+          }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+    });
   }, skip: !kIsWeb); // [intended] specific tests target web.
 }
