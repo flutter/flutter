@@ -287,7 +287,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       child: widget.title,
     );
 
-    final EdgeInsetsGeometry? padding = widget.padding ?? switch (widget._type) {
+    final EdgeInsetsGeometry padding = widget.padding ?? switch (widget._type) {
       _CupertinoListTileType.base    => widget.subtitle == null ? _kPadding : _kPaddingWithSubtitle,
       _CupertinoListTileType.notched => widget.leading  == null ? _kNotchedPaddingWithoutLeading : _kNotchedPadding,
     };

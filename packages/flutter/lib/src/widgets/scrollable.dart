@@ -892,7 +892,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     delta = switch ((widget.axis, flipAxes)) {
       (Axis.horizontal, true) || (Axis.vertical, false) => event.scrollDelta.dy,
       (Axis.horizontal, false) || (Axis.vertical, true) => event.scrollDelta.dx,
-    }
+    };
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
