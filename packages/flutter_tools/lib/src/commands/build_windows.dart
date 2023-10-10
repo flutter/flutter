@@ -65,7 +65,6 @@ class BuildWindowsCommand extends BuildSubCommand {
         flutterUsage: globals.flutterUsage,
       ),
     );
-
     return FlutterCommandResult.success();
   }
 }
