@@ -277,7 +277,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   double? _fiddleWithDouble(double? value, double defaultValue, double max) {
     return switch (_random.nextInt(10)) {
       0 when value == null => math.min(defaultValue * (0.95 + _random.nextDouble() * 0.1), max),
-      0 => math.min(value * (0.51 + _random.nextDouble()), max),
+      0 => math.min(value! * (0.51 + _random.nextDouble()), max),
       1 => null,
       _ => value,
     };

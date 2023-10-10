@@ -204,7 +204,7 @@ Future<void> checkFlingItemAfterMovement(
 }
 
 Future<void> rollbackElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
-  Offset delta = switch (gestureDirection) {
+  final Offset delta = switch (gestureDirection) {
     AxisDirection.left  => const Offset(-30.0, 0.0),
     AxisDirection.right => const Offset( 30.0, 0.0),
     AxisDirection.up    => const Offset(0.0, -30.0),

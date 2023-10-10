@@ -39,7 +39,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) {
-    late ByteData data = switch (key) {
+    final ByteData data = switch (key) {
       'AssetManifest.bin'     => manifest,
       'assets/image.png'      => testByteData(1.0),
       'assets/1.0x/image.png' => testByteData(10.0), // see "...with a main asset and a 1.0x asset"
@@ -47,6 +47,7 @@ class TestAssetBundle extends CachingAssetBundle {
       'assets/2.0x/image.png' => testByteData(2.0),
       'assets/3.0x/image.png' => testByteData(3.0),
       'assets/4.0x/image.png' => testByteData(4.0),
+      _ => throw Exception('Unexpected key: $key'),
     };
     return SynchronousFuture<ByteData>(data);
   }
