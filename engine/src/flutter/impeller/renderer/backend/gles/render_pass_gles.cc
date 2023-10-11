@@ -207,7 +207,12 @@ struct RenderPassData {
                 pass_data.clear_color.alpha   // alpha
   );
   if (pass_data.depth_attachment) {
+    // TODO(bdero): Desktop GL for Apple requires glClearDepth. glClearDepthf
+    //              throws GL_INVALID_OPERATION.
+    //              https://github.com/flutter/flutter/issues/136322
+#if !FML_OS_MACOSX
     gl.ClearDepthf(pass_data.clear_depth);
+#endif
   }
   if (pass_data.stencil_attachment) {
     gl.ClearStencil(pass_data.clear_stencil);
@@ -303,7 +308,12 @@ struct RenderPassData {
                 viewport.rect.size.height       // height
     );
     if (pass_data.depth_attachment) {
+      // TODO(bdero): Desktop GL for Apple requires glDepthRange. glDepthRangef
+      //              throws GL_INVALID_OPERATION.
+      //              https://github.com/flutter/flutter/issues/136322
+#if !FML_OS_MACOSX
       gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
+#endif
     }
 
     //--------------------------------------------------------------------------
