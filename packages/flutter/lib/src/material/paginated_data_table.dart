@@ -262,7 +262,7 @@ class PaginatedDataTable extends StatefulWidget {
   final ValueChanged<int?>? onRowsPerPageChanged;
 
   /// Used as a string replacement for Rows Per Title text in Pagination Footer Section
-  /// Defaults to [localizations.this.rowsPerPageTitle]
+  /// Defaults to [localizations.rowsPerPageTitle]
   final String? rowsPerPageTitle;
 
   /// The data source which provides data to show in each row.
