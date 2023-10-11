@@ -1584,12 +1584,12 @@ class ThemeData with Diagnosticable {
     Color? selectedRowColor,
     @Deprecated(
       'Use colorScheme.error instead. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? errorColor,
     @Deprecated(
       'Use colorScheme.background instead. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
+      'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? backgroundColor,
     @Deprecated(
@@ -1623,6 +1623,8 @@ class ThemeData with Diagnosticable {
       platform: platform ?? this.platform,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
+      // When deprecated useMaterial3 removed, maintain `this.useMaterial3` here
+      // for == evaluation.
       useMaterial3: useMaterial3 ?? this.useMaterial3,
       visualDensity: visualDensity ?? this.visualDensity,
       // COLOR
