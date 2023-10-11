@@ -1041,7 +1041,9 @@ void main() {
           '--dart-define-from-file=config.json',
         ]);
         expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
-          throwsToolExit(message: 'Unable to parse config.json. FormatException: Missing expected digit'));
+          throwsToolExit(message: 'Unable to parse the file at path "config.json" due to '
+            'a formatting error. Ensure that the file contains valid JSON.\n'
+            'Error details: FormatException: Missing expected digit (at line 2, character 25)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         Logger: () => logger,
