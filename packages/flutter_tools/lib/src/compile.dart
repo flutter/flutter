@@ -244,19 +244,9 @@ class KernelCompiler {
     String? nativeAssets,
   }) async {
     final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
-    final String frontendServer = (frontendServerStarterPath == null || frontendServerStarterPath.isEmpty)
-        ? _artifacts.getArtifactPath(
-            Artifact.frontendServerSnapshotForEngineDartSdk,
-            platform: platform,
-          )
-        : frontendServerStarterPath;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
-    }
-    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
-    if (!_processManager.canRun(engineDartPath)) {
-      throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
     String? mainUri;
     final File mainFile = _fileSystem.file(mainPath);
@@ -282,10 +272,33 @@ class KernelCompiler {
         toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     }
 
-    final List<String> command = <String>[
-      engineDartPath,
-      '--disable-dart-dev',
-      frontendServer,
+    final List<String> commandToStartFrontendServer;
+    if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
+      final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
+      if (!_processManager.canRun(engineDartPath)) {
+        throwToolExit('Unable to find Dart binary at $engineDartPath');
+      }
+      commandToStartFrontendServer = <String>[
+        engineDartPath,
+        '--disable-dart-dev',
+        frontendServerStarterPath,
+      ];
+    } else {
+      final String engineDartAotRuntimePath = _artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform);
+      if (!_processManager.canRun(engineDartAotRuntimePath)) {
+        throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
+      }
+      commandToStartFrontendServer = <String>[
+        engineDartAotRuntimePath,
+        '--disable-dart-dev',
+        _artifacts.getArtifactPath(
+          Artifact.frontendServerSnapshotForEngineDartSdk,
+          platform: platform,
+        ),
+      ];
+    }
+
+    final List<String> command = commandToStartFrontendServer + <String>[
       '--sdk-root',
       sdkRoot,
       '--target=$targetModel',
@@ -777,16 +790,25 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? nativeAssetsUri,
   }) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
-    final String frontendServer = (frontendServerStarterPath == null || frontendServerStarterPath!.isEmpty)
-        ? artifacts.getArtifactPath(
-            Artifact.frontendServerSnapshotForEngineDartSdk,
-            platform: platform,
-          )
-        : frontendServerStarterPath!;
-    final List<String> command = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
-      '--disable-dart-dev',
-      frontendServer,
+    late final List<String> commandToStartFrontendServer;
+    if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
+      commandToStartFrontendServer = <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
+        '--disable-dart-dev',
+        frontendServerStarterPath!,
+      ];
+    } else {
+      commandToStartFrontendServer = <String>[
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
+        '--disable-dart-dev',
+        artifacts.getArtifactPath(
+          Artifact.frontendServerSnapshotForEngineDartSdk,
+          platform: platform,
+        ),
+      ];
+    }
+
+    final List<String> command = commandToStartFrontendServer + <String>[
       '--sdk-root',
       sdkRoot,
       '--incremental',

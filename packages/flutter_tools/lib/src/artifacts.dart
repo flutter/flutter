@@ -190,7 +190,7 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
     case Artifact.wasmOptBinary:
       return 'wasm-opt$exe';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
-      return 'frontend_server.dart.snapshot';
+      return 'frontend_server_aot.dart.snapshot';
     case Artifact.linuxDesktopPath:
       return '';
     case Artifact.linuxHeaders:
