@@ -183,7 +183,7 @@ void main() {
     // framework, excluding any that are for the widget inspector (see
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions). Any test counted here must be tested in this file!
-    const int serviceExtensionCount = 29;
+    const int serviceExtensionCount = 30;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
     expect(testedExtensions, hasLength(serviceExtensionCount));
@@ -595,6 +595,34 @@ void main() {
     expect(binding.frameScheduled, isFalse);
 
     testedExtensions.add(RenderingServiceExtensions.profileRenderObjectLayouts.name);
+  });
+
+  test('Service extensions - profilePlatformChannels', () async {
+    Map<String, dynamic> result;
+
+    expect(debugProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{'enabled': 'true'});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(debugProfilePlatformChannels, true);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(debugProfilePlatformChannels, true);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{'enabled': 'false'});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfilePlatformChannels, false);
+
+    testedExtensions.add(ServicesServiceExtensions.profilePlatformChannels.name);
   });
 
   test('Service extensions - evict', () async {
