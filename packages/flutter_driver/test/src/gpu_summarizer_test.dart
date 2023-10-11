@@ -21,7 +21,6 @@ TimelineEvent newGPUEnd(int timeStamp) => TimelineEvent(<String, dynamic>{
   'args': <String, String>{},
 });
 
-
 void main() {
   test('Can process GPU start and end events.', () {
     final GpuSumarizer summarizer = GpuSumarizer(<TimelineEvent>[

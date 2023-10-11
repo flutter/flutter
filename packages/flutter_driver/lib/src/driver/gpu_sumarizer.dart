@@ -47,7 +47,7 @@ class GpuSumarizer {
 
   static double _computeAverage(List<_StartAndEnd> values) {
     if (values.isEmpty) {
-      return -1;
+      return 0;
     }
 
     Duration total = Duration.zero;
@@ -62,7 +62,7 @@ class GpuSumarizer {
       return 0;
     }
 
-    final List<double> durationValues = [
+    final List<double> durationValues = <double>[
       for (final _StartAndEnd data in values)
         data.duration.inMilliseconds.toDouble()
     ];
