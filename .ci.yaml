@@ -2454,6 +2454,17 @@ targets:
       task_name: new_gallery_impeller__transition_perf
 
   # Pixel 7 Pro, Impeller (Vulkan)
+  - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery_impeller_old_zoom__transition_perf
+
+  # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     bringup: true
