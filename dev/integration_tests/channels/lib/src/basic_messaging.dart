@@ -33,9 +33,9 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   @override
   dynamic readValueOfType(int type, ReadBuffer buffer) {
     return switch (type) {
-    _dateTime => DateTime.fromMillisecondsSinceEpoch(buffer.getInt64()),
-    _pair => Pair(readValue(buffer), readValue(buffer)),
-    _ => super.readValueOfType(type, buffer),
+      _dateTime => DateTime.fromMillisecondsSinceEpoch(buffer.getInt64()),
+      _pair => Pair(readValue(buffer), readValue(buffer)),
+      _ => super.readValueOfType(type, buffer),
     };
   }
 }
