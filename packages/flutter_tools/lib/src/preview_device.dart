@@ -55,6 +55,12 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   bool get canListAnything => _platform.isWindows;
 
   @override
+  bool get supportsPlatform => true;
+
+  @override
+  List<String> get wellKnownIds => <String>['preview'];
+
+  @override
   Future<List<Device>> devices({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
@@ -95,12 +101,6 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   }) {
     return devices();
   }
-
-  @override
-  bool get supportsPlatform => true;
-
-  @override
-  List<String> get wellKnownIds => <String>['preview'];
 }
 
 /// A device type that runs a prebuilt desktop binary alongside a locally compiled kernel file.
