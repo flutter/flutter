@@ -91,13 +91,14 @@ class _FocusDemoState extends State<FocusDemo> {
     super.dispose();
   }
 
-  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
     if (event is RawKeyDownEvent) {
       print('Scope got key event: ${event.logicalKey}, $node');
       print('Keys down: ${RawKeyboard.instance.keysPressed}');
       if (event.logicalKey == LogicalKeyboardKey.tab) {
         debugDumpFocusTree();
-        if (event.isShiftPressed) {
+        if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftLeft)
+            || HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftRight)) {
           print('Moving to previous.');
           node.previousFocus();
           return KeyEventResult.handled;
@@ -135,7 +136,7 @@ class _FocusDemoState extends State<FocusDemo> {
       policy: ReadingOrderTraversalPolicy(),
       child: FocusScope(
         debugLabel: 'Scope',
-        onKey: _handleKeyPress,
+        onKeyEvent: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
           style: textTheme.headlineMedium!,
