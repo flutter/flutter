@@ -173,6 +173,39 @@ void main() {
     log.clear();
   });
 
+    testWidgetsWithLeakTracking('PaginatedDataTable footer rowsPerPage Title', (WidgetTester tester) async {
+    int rowsPerPage = 2;
+    String rowsPerPageTitle = 'Rows per Page';
+
+    Widget buildTable(TestDataSource source, int rowsPerPage) {
+      return PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: rowsPerPage,
+        rowsPerPageTitle: rowsPerPageTitle,
+        showFirstLastButtons: true,
+        availableRowsPerPage: const <int>[
+          2, 3, 4, 5, 7, 8,
+        ],
+        onRowsPerPageChanged: (int? rowsPerPage) {
+        },
+        onPageChanged: (int rowIndex) {
+        },
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.text(rowsPerPageTitle), findsOneWidget);
+    });
+
   testWidgetsWithLeakTracking('PaginatedDataTable footer page number', (WidgetTester tester) async {
     int rowsPerPage = 2;
 
