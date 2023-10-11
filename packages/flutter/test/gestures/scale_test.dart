@@ -35,7 +35,6 @@ void main() {
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
       updatedSourceTimestamp = details.sourceTimeStamp;
-      updatedSourceTimestamp = details.sourceTimeStamp;
     };
 
     bool didEndScale = false;
