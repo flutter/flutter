@@ -242,23 +242,29 @@ class SemanticsController {
   /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
   /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
   bool _isImportantForAccessibility(SemanticsNode node) {
+    if (node.isMergedIntoParent) {
+      // If this node is merged, all its information are present on an ancestor
+      // node.
+      return false;
+    }
+    final SemanticsData data = node.getSemanticsData();
     // If the node scopes a route, it doesn't matter what other flags/actions it
     // has, it is _not_ important for accessibility, so we short circuit.
-    if (node.hasFlag(SemanticsFlag.scopesRoute)) {
+    if (data.hasFlag(SemanticsFlag.scopesRoute)) {
       return false;
     }
 
-    final bool hasNonScrollingAction = node.getSemanticsData().actions & ~_scrollingActions != 0;
+    final bool hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
     if (hasNonScrollingAction) {
       return true;
     }
 
-    final bool hasImportantFlag = node.getSemanticsData().flags & _importantFlagsForAccessibility != 0;
+    final bool hasImportantFlag = data.flags & _importantFlagsForAccessibility != 0;
     if (hasImportantFlag) {
       return true;
     }
 
-    final bool hasContent = node.label.isNotEmpty || node.value.isNotEmpty || node.hint.isNotEmpty;
+    final bool hasContent = data.label.isNotEmpty || data.value.isNotEmpty || data.hint.isNotEmpty;
     if (hasContent) {
       return true;
     }
@@ -1426,7 +1432,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null.
+  /// else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1471,7 +1477,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null.
+  /// else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US

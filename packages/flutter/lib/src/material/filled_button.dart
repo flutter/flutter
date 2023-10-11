@@ -64,8 +64,6 @@ enum _FilledButtonVariant { filled, tonal }
 ///  * <https://m3.material.io/components/buttons>
 class FilledButton extends ButtonStyleButton {
   /// Create a FilledButton.
-  ///
-  /// The [autofocus] and [clipBehavior] arguments must not be null.
   const FilledButton({
     super.key,
     required super.onPressed,
@@ -84,8 +82,6 @@ class FilledButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row with padding at the start and end
   /// and a gap between them.
-  ///
-  /// The [icon] and [label] arguments must not be null.
   factory FilledButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -107,8 +103,6 @@ class FilledButton extends ButtonStyleButton {
   /// [FilledButton] and [OutlinedButton]. They’re useful in contexts where
   /// a lower-priority button requires slightly more emphasis than an
   /// outline would give, such as "Next" in an onboarding flow.
-  ///
-  /// The [autofocus] and [clipBehavior] arguments must not be null.
   const FilledButton.tonal({
     super.key,
     required super.onPressed,
@@ -127,8 +121,6 @@ class FilledButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row with padding at the start and end
   /// and a gap between them.
-  ///
-  /// The [icon] and [label] arguments must not be null.
   factory FilledButton.tonalIcon({
     Key? key,
     required VoidCallback? onPressed,

@@ -736,15 +736,15 @@ class _TabBarScrollController extends ScrollController {
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design primary tab bar.
   ///
-  /// The [tabs] argument must not be null and its length must match the [controller]'s
+  /// The length of the [tabs] argument must match the [controller]'s
   /// [TabController.length].
   ///
   /// If a [TabController] is not provided, then there must be a
   /// [DefaultTabController] ancestor.
   ///
-  /// The [indicatorWeight] parameter defaults to 2, and must not be null.
+  /// The [indicatorWeight] parameter defaults to 2.
   ///
-  /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
+  /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero].
   ///
   /// If [indicator] is not null or provided from [TabBarTheme],
   /// then [indicatorWeight] and [indicatorColor] are ignored.
@@ -1380,6 +1380,7 @@ class _TabBarState extends State<TabBar> {
       _controller!.removeListener(_handleTabControllerTick);
     }
     _controller = null;
+    _scrollController?.dispose();
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1783,7 +1784,7 @@ class TabBarView extends StatefulWidget {
 
 class _TabBarViewState extends State<TabBarView> {
   TabController? _controller;
-  late PageController _pageController;
+  PageController? _pageController;
   late List<Widget> _childrenWithKey;
   int? _currentIndex;
   int _warpUnderwayCount = 0;
@@ -1825,7 +1826,7 @@ class _TabBarViewState extends State<TabBarView> {
 
   void _jumpToPage(int page) {
     _warpUnderwayCount += 1;
-    _pageController.jumpToPage(page);
+    _pageController!.jumpToPage(page);
     _warpUnderwayCount -= 1;
   }
 
@@ -1835,7 +1836,7 @@ class _TabBarViewState extends State<TabBarView> {
     required Curve curve,
   }) async {
     _warpUnderwayCount += 1;
-    await _pageController.animateToPage(page, duration: duration, curve: curve);
+    await _pageController!.animateToPage(page, duration: duration, curve: curve);
     _warpUnderwayCount -= 1;
   }
 
@@ -1850,6 +1851,8 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
+    // TODO(chunhtai): https://github.com/flutter/flutter/issues/134253
+    _pageController?.dispose();
     _pageController = PageController(
       initialPage: _currentIndex!,
       viewportFraction: widget.viewportFraction,
@@ -1864,6 +1867,13 @@ class _TabBarViewState extends State<TabBarView> {
       _currentIndex = _controller!.index;
       _jumpToPage(_currentIndex!);
     }
+    if (widget.viewportFraction != oldWidget.viewportFraction) {
+      _pageController?.dispose();
+      _pageController = PageController(
+        initialPage: _currentIndex!,
+        viewportFraction: widget.viewportFraction,
+      );
+    }
     // While a warp is under way, we stop updating the tab page contents.
     // This is tracked in https://github.com/flutter/flutter/issues/31269.
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0) {
@@ -1877,6 +1887,7 @@ class _TabBarViewState extends State<TabBarView> {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
     }
     _controller = null;
+    _pageController?.dispose();
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1897,7 +1908,7 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _warpToCurrentIndex() {
-    if (!mounted || _pageController.page == _currentIndex!.toDouble()) {
+    if (!mounted || _pageController!.page == _currentIndex!.toDouble()) {
       return;
     }
 
@@ -1957,7 +1968,7 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _syncControllerOffset() {
-    _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
+    _controller!.offset = clampDouble(_pageController!.page! - _controller!.index, -1.0, 1.0);
   }
 
   // Called when the PageView scrolls
@@ -1975,15 +1986,16 @@ class _TabBarViewState extends State<TabBarView> {
     }
 
     _scrollUnderwayCount += 1;
+    final double page = _pageController!.page!;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
-      final bool pageChanged = (_pageController.page! - _controller!.index).abs() > 1.0;
+      final bool pageChanged = (page - _controller!.index).abs() > 1.0;
       if (pageChanged) {
-        _controller!.index = _pageController.page!.round();
+        _controller!.index = page.round();
         _currentIndex =_controller!.index;
       }
       _syncControllerOffset();
     } else if (notification is ScrollEndNotification) {
-      _controller!.index = _pageController.page!.round();
+      _controller!.index = page.round();
       _currentIndex = _controller!.index;
       if (!_controller!.indexIsChanging) {
         _syncControllerOffset();
@@ -2042,8 +2054,6 @@ class _TabBarViewState extends State<TabBarView> {
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
   /// Creates an indicator used by [TabPageSelector].
-  ///
-  /// The [backgroundColor], [borderColor], and [size] parameters must not be null.
   const TabPageSelectorIndicator({
     super.key,
     required this.backgroundColor,

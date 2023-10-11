@@ -141,7 +141,7 @@
   "expandedHint": "Skjules",
   "collapsedHint": "Vises",
   "menuDismissLabel": "Lukk menyen",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Slå opp",
+  "searchWebButtonLabel": "Søk på nettet",
+  "shareButtonLabel": "Del…"
 }

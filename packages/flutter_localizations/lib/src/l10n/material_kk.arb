@@ -144,7 +144,7 @@
   "expandedHint": "Жиылды",
   "collapsedHint": "Жайылды",
   "menuDismissLabel": "Мәзірді жабу",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Іздеу",
+  "searchWebButtonLabel": "Интернеттен іздеу",
+  "shareButtonLabel": "Бөлісу…"
 }

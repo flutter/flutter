@@ -1643,6 +1643,54 @@ void main() {
     expect(pageController.viewportFraction, 1);
   });
 
+  testWidgets('TabBarView viewportFraction can be updated', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/135557.
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    TabController? controller;
+
+    Widget buildFrame(double viewportFraction) {
+      controller = _tabController(
+        vsync: const TestVSync(),
+        length: tabs.length,
+        initialIndex: 1,
+      );
+      return boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              controller: controller,
+            ),
+            SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: TabBarView(
+                viewportFraction: viewportFraction,
+                controller: controller,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(0.8));
+    PageView pageView = tester.widget(find.byType(PageView));
+    PageController pageController = pageView.controller;
+    expect(pageController.viewportFraction, 0.8);
+
+    // Rebuild with a different viewport fraction.
+    await tester.pumpWidget(buildFrame(0.5));
+    pageView = tester.widget(find.byType(PageView));
+    pageController = pageView.controller;
+    expect(pageController.viewportFraction, 0.5);
+  });
+
   testWidgets('TabBarView has clipBehavior Clip.hardEdge by default', (WidgetTester tester) async {
     final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
 
@@ -2222,6 +2270,57 @@ void main() {
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
     expect(tabController.index, 0);
+  });
+
+  testWidgets('On going TabBarView animation can be interrupted by a new animation', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/132293.
+
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    // First page is visible.
+    expect(tabController.index, 0);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+
+    // Animate to the second page.
+    tabController.animateTo(1);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Animate back to the first page before the previous animation ends.
+    tabController.animateTo(0);
+    await tester.pumpAndSettle();
+
+    // First page should be visible.
+    expect(tabController.index, 0);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
   });
 
   testWidgets('Can switch to non-neighboring tab in nested TabBarView without crashing', (WidgetTester tester) async {
@@ -5103,9 +5202,13 @@ void main() {
 
     // Touch TabBarView while ballistic scrolling is happening and
     // check if tabController's animation value properly follows page value.
-    await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
     await tester.pump();
     expect(tabController.animation!.value, pageController.page);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Does not instantiate intermediate tabs during animation', (WidgetTester tester) async {
