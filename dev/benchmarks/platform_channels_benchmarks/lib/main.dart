@@ -24,7 +24,7 @@ List<Object?> _makeTestBuffer(int size) {
         6 => 'this is a test',
         7 => true,
         8 => Uint8List(64),
-        _ => null, // Never evaluates, since i % 9 is always in the above range.
+        _ => throw StateError('Unreachable'), // i % 9 is always in the above range.
       },
     );
   }

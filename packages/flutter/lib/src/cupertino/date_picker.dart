@@ -1757,7 +1757,10 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
     double totalColumnWidths = 3 * _kDatePickerPadSize;
 
     for (int i = 0; i < columnWidths.length; i++) {
-      final double offAxisFraction = (i == 0 ? -0.3 : 0.5) * textDirectionFactor;
+      final double offAxisFraction = switch (i) {
+        0 => -0.3 * textDirectionFactor,
+        _ =>  0.5 * textDirectionFactor,
+      };
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (textDirectionFactor == -1) {
