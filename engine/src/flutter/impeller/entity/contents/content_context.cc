@@ -164,6 +164,7 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
   const auto default_color_format =
       context.GetCapabilities()->GetDefaultColorFormat();
   ContentContextOptions{.sample_count = SampleCount::kCount4,
+                        .primitive_type = PrimitiveType::kTriangleStrip,
                         .color_attachment_pixel_format = default_color_format}
       .ApplyToPipelineDescriptor(*desc);
   return std::make_unique<PipelineT>(context, desc);
@@ -191,6 +192,11 @@ ContentContext::ContentContext(
       .sample_count = SampleCount::kCount4,
       .color_attachment_pixel_format =
           context_->GetCapabilities()->GetDefaultColorFormat()};
+  auto options_trianglestrip = ContentContextOptions{
+      .sample_count = SampleCount::kCount4,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format =
+          context_->GetCapabilities()->GetDefaultColorFormat()};
 
 #ifdef IMPELLER_DEBUG
   checkerboard_pipelines_.CreateDefault(*context_, options);
@@ -211,56 +217,76 @@ ContentContext::ContentContext(
   }
 
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
-    framebuffer_blend_color_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_colorburn_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_colordodge_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_darken_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_difference_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_exclusion_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_hardlight_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_hue_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_lighten_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_luminosity_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_multiply_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_overlay_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_saturation_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_screen_pipelines_.CreateDefault(*context_, options);
-    framebuffer_blend_softlight_pipelines_.CreateDefault(*context_, options);
+    framebuffer_blend_color_pipelines_.CreateDefault(*context_,
+                                                     options_trianglestrip);
+    framebuffer_blend_colorburn_pipelines_.CreateDefault(*context_,
+                                                         options_trianglestrip);
+    framebuffer_blend_colordodge_pipelines_.CreateDefault(
+        *context_, options_trianglestrip);
+    framebuffer_blend_darken_pipelines_.CreateDefault(*context_,
+                                                      options_trianglestrip);
+    framebuffer_blend_difference_pipelines_.CreateDefault(
+        *context_, options_trianglestrip);
+    framebuffer_blend_exclusion_pipelines_.CreateDefault(*context_,
+                                                         options_trianglestrip);
+    framebuffer_blend_hardlight_pipelines_.CreateDefault(*context_,
+                                                         options_trianglestrip);
+    framebuffer_blend_hue_pipelines_.CreateDefault(*context_,
+                                                   options_trianglestrip);
+    framebuffer_blend_lighten_pipelines_.CreateDefault(*context_,
+                                                       options_trianglestrip);
+    framebuffer_blend_luminosity_pipelines_.CreateDefault(
+        *context_, options_trianglestrip);
+    framebuffer_blend_multiply_pipelines_.CreateDefault(*context_,
+                                                        options_trianglestrip);
+    framebuffer_blend_overlay_pipelines_.CreateDefault(*context_,
+                                                       options_trianglestrip);
+    framebuffer_blend_saturation_pipelines_.CreateDefault(
+        *context_, options_trianglestrip);
+    framebuffer_blend_screen_pipelines_.CreateDefault(*context_,
+                                                      options_trianglestrip);
+    framebuffer_blend_softlight_pipelines_.CreateDefault(*context_,
+                                                         options_trianglestrip);
   }
 
-  blend_color_pipelines_.CreateDefault(*context_, options);
-  blend_colorburn_pipelines_.CreateDefault(*context_, options);
-  blend_colordodge_pipelines_.CreateDefault(*context_, options);
-  blend_darken_pipelines_.CreateDefault(*context_, options);
-  blend_difference_pipelines_.CreateDefault(*context_, options);
-  blend_exclusion_pipelines_.CreateDefault(*context_, options);
-  blend_hardlight_pipelines_.CreateDefault(*context_, options);
-  blend_hue_pipelines_.CreateDefault(*context_, options);
-  blend_lighten_pipelines_.CreateDefault(*context_, options);
-  blend_luminosity_pipelines_.CreateDefault(*context_, options);
-  blend_multiply_pipelines_.CreateDefault(*context_, options);
-  blend_overlay_pipelines_.CreateDefault(*context_, options);
-  blend_saturation_pipelines_.CreateDefault(*context_, options);
-  blend_screen_pipelines_.CreateDefault(*context_, options);
-  blend_softlight_pipelines_.CreateDefault(*context_, options);
+  blend_color_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_colorburn_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_colordodge_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_darken_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_difference_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_exclusion_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_hardlight_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_hue_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_lighten_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_luminosity_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_multiply_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_overlay_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_saturation_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_screen_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  blend_softlight_pipelines_.CreateDefault(*context_, options_trianglestrip);
 
-  rrect_blur_pipelines_.CreateDefault(*context_, options);
+  rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
   texture_blend_pipelines_.CreateDefault(*context_, options);
   texture_pipelines_.CreateDefault(*context_, options);
   position_uv_pipelines_.CreateDefault(*context_, options);
   tiled_texture_pipelines_.CreateDefault(*context_, options);
-  gaussian_blur_noalpha_decal_pipelines_.CreateDefault(*context_, options);
-  gaussian_blur_noalpha_nodecal_pipelines_.CreateDefault(*context_, options);
-  border_mask_blur_pipelines_.CreateDefault(*context_, options);
-  morphology_filter_pipelines_.CreateDefault(*context_, options);
-  color_matrix_color_filter_pipelines_.CreateDefault(*context_, options);
-  linear_to_srgb_filter_pipelines_.CreateDefault(*context_, options);
-  srgb_to_linear_filter_pipelines_.CreateDefault(*context_, options);
+  gaussian_blur_noalpha_decal_pipelines_.CreateDefault(*context_,
+                                                       options_trianglestrip);
+  gaussian_blur_noalpha_nodecal_pipelines_.CreateDefault(*context_,
+                                                         options_trianglestrip);
+  border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  morphology_filter_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  color_matrix_color_filter_pipelines_.CreateDefault(*context_,
+                                                     options_trianglestrip);
+  linear_to_srgb_filter_pipelines_.CreateDefault(*context_,
+                                                 options_trianglestrip);
+  srgb_to_linear_filter_pipelines_.CreateDefault(*context_,
+                                                 options_trianglestrip);
   glyph_atlas_pipelines_.CreateDefault(*context_, options);
   glyph_atlas_color_pipelines_.CreateDefault(*context_, options);
   geometry_color_pipelines_.CreateDefault(*context_, options);
-  yuv_to_rgb_filter_pipelines_.CreateDefault(*context_, options);
-  porter_duff_blend_pipelines_.CreateDefault(*context_, options);
+  yuv_to_rgb_filter_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  porter_duff_blend_pipelines_.CreateDefault(*context_, options_trianglestrip);
   // GLES only shader.
 #ifdef IMPELLER_ENABLE_OPENGLES
   if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {

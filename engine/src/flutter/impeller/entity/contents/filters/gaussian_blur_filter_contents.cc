@@ -157,10 +157,8 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     vtx_builder.AddVertices({
         {Point(0, 0), input_uvs[0]},
         {Point(1, 0), input_uvs[1]},
-        {Point(1, 1), input_uvs[3]},
-        {Point(0, 0), input_uvs[0]},
-        {Point(1, 1), input_uvs[3]},
         {Point(0, 1), input_uvs[2]},
+        {Point(1, 1), input_uvs[3]},
     });
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
@@ -185,6 +183,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     cmd.BindVertices(vtx_buffer);
 
     auto options = OptionsFromPass(pass);
+    options.primitive_type = PrimitiveType::kTriangleStrip;
     options.blend_mode = BlendMode::kSource;
     auto input_descriptor = input_snapshot->sampler_descriptor;
     switch (tile_mode_) {
