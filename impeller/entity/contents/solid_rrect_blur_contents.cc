@@ -80,8 +80,6 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
         {Point(left, top)},
         {Point(right, top)},
         {Point(left, bottom)},
-        {Point(left, bottom)},
-        {Point(right, top)},
         {Point(right, bottom)},
     });
   }
@@ -89,7 +87,7 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "RRect Shadow");
   ContentContextOptions opts = OptionsFromPassAndEntity(pass, entity);
-  opts.primitive_type = PrimitiveType::kTriangle;
+  opts.primitive_type = PrimitiveType::kTriangleStrip;
   Color color = color_;
   if (entity.GetBlendMode() == BlendMode::kClear) {
     opts.is_for_rrect_blur_clear = true;
