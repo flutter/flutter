@@ -16,9 +16,11 @@ TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyTextureToTextureCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
+      .format = PixelFormat::kR8G8B8A8UNormInt,
       .size = ISize(100, 100),
   });
   cmd.destination = context->GetResourceAllocator()->CreateTexture({
+      .format = PixelFormat::kR8G8B8A8UNormInt,
       .size = ISize(100, 100),
   });
   bool result = cmd.Encode(*encoder.get());
@@ -32,6 +34,7 @@ TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyTextureToBufferCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
+      .format = PixelFormat::kR8G8B8A8UNormInt,
       .size = ISize(100, 100),
   });
   cmd.destination = context->GetResourceAllocator()->CreateBuffer({
@@ -48,6 +51,7 @@ TEST(BlitCommandVkTest, BlitCopyBufferToTextureCommandVK) {
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyBufferToTextureCommandVK cmd;
   cmd.destination = context->GetResourceAllocator()->CreateTexture({
+      .format = PixelFormat::kR8G8B8A8UNormInt,
       .size = ISize(100, 100),
   });
   cmd.source = context->GetResourceAllocator()
@@ -66,6 +70,7 @@ TEST(BlitCommandVkTest, BlitGenerateMipmapCommandVK) {
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitGenerateMipmapCommandVK cmd;
   cmd.texture = context->GetResourceAllocator()->CreateTexture({
+      .format = PixelFormat::kR8G8B8A8UNormInt,
       .size = ISize(100, 100),
       .mip_count = 2,
   });

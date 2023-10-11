@@ -1695,6 +1695,11 @@ bool Shell::OnServiceProtocolScreenshotSKP(
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document* response) {
   FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+  if (settings_.enable_impeller) {
+    ServiceProtocolFailureError(
+        response, "Cannot capture SKP screenshot with Impeller enabled.");
+    return false;
+  }
   auto screenshot = rasterizer_->ScreenshotLastLayerTree(
       Rasterizer::ScreenshotType::SkiaPicture, true);
   if (screenshot.data) {

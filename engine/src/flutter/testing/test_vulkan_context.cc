@@ -14,18 +14,11 @@
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/native_library.h"
+#include "flutter/vulkan/swiftshader_path.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
 #include "vulkan/vulkan_core.h"
-
-#ifdef FML_OS_MACOSX
-#define VULKAN_SO_PATH "libvk_swiftshader.dylib"
-#elif FML_OS_WIN
-#define VULKAN_SO_PATH "vk_swiftshader.dll"
-#else
-#define VULKAN_SO_PATH "libvk_swiftshader.so"
-#endif
 
 namespace flutter {
 namespace testing {

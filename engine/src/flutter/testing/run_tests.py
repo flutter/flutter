@@ -576,13 +576,37 @@ def run_engine_benchmarks(build_dir, executable_filter):
     )
 
 
-def gather_dart_test(
-    build_dir,
-    dart_file,
-    multithreaded,
-    enable_observatory=False,
-    expect_failure=False,
-):
+class FlutterTesterOptions():
+
+  def __init__(
+      self,
+      multithreaded=False,
+      enable_impeller=False,
+      enable_observatory=False,
+      expect_failure=False
+  ):
+    self.multithreaded = multithreaded
+    self.enable_impeller = enable_impeller
+    self.enable_observatory = enable_observatory
+    self.expect_failure = expect_failure
+
+  def apply_args(self, command_args):
+    if not self.enable_observatory:
+      command_args.append('--disable-observatory')
+
+    if self.enable_impeller:
+      command_args += ['--enable-impeller']
+
+    if self.multithreaded:
+      command_args.insert(0, '--force-multithreading')
+
+  def threading_description(self):
+    if self.multithreaded:
+      return 'multithreaded'
+    return 'single-threaded'
+
+
+def gather_dart_test(build_dir, dart_file, options):
   kernel_file_name = os.path.basename(dart_file) + '.dill'
   kernel_file_output = os.path.join(build_dir, 'gen', kernel_file_name)
   error_message = "%s doesn't exist. Please run the build that populates %s" % (
@@ -591,8 +615,8 @@ def gather_dart_test(
   assert os.path.isfile(kernel_file_output), error_message
 
   command_args = []
-  if not enable_observatory:
-    command_args.append('--disable-observatory')
+
+  options.apply_args(command_args)
 
   dart_file_contents = open(dart_file, 'r')
   custom_options = re.findall(
@@ -610,18 +634,12 @@ def gather_dart_test(
       kernel_file_output,
   ]
 
-  if multithreaded:
-    threading = 'multithreaded'
-    command_args.insert(0, '--force-multithreading')
-  else:
-    threading = 'single-threaded'
-
   tester_name = 'flutter_tester'
   logger.info(
       "Running test '%s' using '%s' (%s)", kernel_file_name, tester_name,
-      threading
+      options.threading_description()
   )
-  forbidden_output = [] if 'unopt' in build_dir or expect_failure else [
+  forbidden_output = [] if 'unopt' in build_dir or options.expect_failure else [
       '[ERROR'
   ]
   return EngineExecutableTask(
@@ -630,7 +648,7 @@ def gather_dart_test(
       None,
       command_args,
       forbidden_output=forbidden_output,
-      expect_failure=expect_failure,
+      expect_failure=options.expect_failure,
   )
 
 
@@ -849,8 +867,38 @@ def gather_dart_tests(build_dir, test_filter):
         logger.info(
             "Gathering dart test '%s' with observatory enabled", dart_test_file
         )
-        yield gather_dart_test(build_dir, dart_test_file, True, True)
-        yield gather_dart_test(build_dir, dart_test_file, False, True)
+        yield gather_dart_test(
+            build_dir, dart_test_file,
+            FlutterTesterOptions(
+                multithreaded=True,
+                enable_impeller=False,
+                enable_observatory=True
+            )
+        )
+        yield gather_dart_test(
+            build_dir, dart_test_file,
+            FlutterTesterOptions(
+                multithreaded=True,
+                enable_impeller=True,
+                enable_observatory=True
+            )
+        )
+        yield gather_dart_test(
+            build_dir, dart_test_file,
+            FlutterTesterOptions(
+                multithreaded=False,
+                enable_impeller=False,
+                enable_observatory=True
+            )
+        )
+        yield gather_dart_test(
+            build_dir, dart_test_file,
+            FlutterTesterOptions(
+                multithreaded=False,
+                enable_impeller=True,
+                enable_observatory=True
+            )
+        )
 
   for dart_test_file in dart_tests:
     if test_filter is not None and os.path.basename(dart_test_file
@@ -858,8 +906,22 @@ def gather_dart_tests(build_dir, test_filter):
       logger.info("Skipping '%s' due to filter.", dart_test_file)
     else:
       logger.info("Gathering dart test '%s'", dart_test_file)
-      yield gather_dart_test(build_dir, dart_test_file, True)
-      yield gather_dart_test(build_dir, dart_test_file, False)
+      yield gather_dart_test(
+          build_dir, dart_test_file,
+          FlutterTesterOptions(multithreaded=True, enable_impeller=False)
+      )
+      yield gather_dart_test(
+          build_dir, dart_test_file,
+          FlutterTesterOptions(multithreaded=True, enable_impeller=True)
+      )
+      yield gather_dart_test(
+          build_dir, dart_test_file,
+          FlutterTesterOptions(multithreaded=False, enable_impeller=False)
+      )
+      yield gather_dart_test(
+          build_dir, dart_test_file,
+          FlutterTesterOptions(multithreaded=False, enable_impeller=True)
+      )
 
 
 def gather_dart_smoke_test(build_dir, test_filter):
@@ -874,8 +936,14 @@ def gather_dart_smoke_test(build_dir, test_filter):
                                                  ) not in test_filter:
     logger.info("Skipping '%s' due to filter.", smoke_test)
   else:
-    yield gather_dart_test(build_dir, smoke_test, True, expect_failure=True)
-    yield gather_dart_test(build_dir, smoke_test, False, expect_failure=True)
+    yield gather_dart_test(
+        build_dir, smoke_test,
+        FlutterTesterOptions(multithreaded=True, expect_failure=True)
+    )
+    yield gather_dart_test(
+        build_dir, smoke_test,
+        FlutterTesterOptions(multithreaded=False, expect_failure=True)
+    )
 
 
 def gather_dart_package_tests(build_dir, package_path, extra_opts):

@@ -3,6 +3,15 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
+import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/shell/gpu/gpu.gni")
+
+shell_gpu_configuration("tester_gpu_configuration") {
+  enable_software = true
+  enable_gl = true
+  enable_vulkan = true
+  enable_metal = false
+}
 
 executable("testing") {
   output_name = "flutter_tester"
@@ -13,8 +22,9 @@ executable("testing") {
   ]
 
   sources = [ "tester_main.cc" ]
+  libs = []
   if (is_win) {
-    libs = [
+    libs += [
       "psapi.lib",
       "user32.lib",
       "FontSub.lib",
@@ -35,6 +45,14 @@ executable("testing") {
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",
   ]
+
+  if (impeller_supports_rendering) {
+    deps += [
+      ":tester_gpu_configuration",
+      "//flutter/impeller",
+      "//third_party/swiftshader",
+    ]
+  }
 
   metadata = {
     entitlement_file_path = [ "flutter_tester" ]

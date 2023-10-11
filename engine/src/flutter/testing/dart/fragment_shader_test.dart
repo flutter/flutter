@@ -12,6 +12,7 @@ import 'dart:ui';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 
+import 'impeller_enabled.dart';
 import 'shader_test_file_utils.dart';
 
 void main() async {
@@ -172,6 +173,10 @@ void main() async {
   });
 
   test('FragmentShader simple shader renders correctly', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'functions.frag.iplr',
     );
@@ -182,6 +187,10 @@ void main() async {
   });
 
   test('Reused FragmentShader simple shader renders correctly', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'functions.frag.iplr',
     );
@@ -196,6 +205,10 @@ void main() async {
   });
 
   test('FragmentShader blue-green image renders green', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'blue_green_sampler.frag.iplr',
     );
@@ -208,6 +221,10 @@ void main() async {
   });
 
   test('FragmentShader blue-green image renders green - GPU image', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'blue_green_sampler.frag.iplr',
     );
@@ -220,6 +237,10 @@ void main() async {
   });
 
   test('FragmentShader with uniforms renders correctly', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'uniforms.frag.iplr',
     );
@@ -246,6 +267,10 @@ void main() async {
   });
 
   test('FragmentShader shader with array uniforms renders correctly', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'uniform_arrays.frag.iplr',
     );
@@ -260,6 +285,10 @@ void main() async {
   });
 
   test('FragmentShader The ink_sparkle shader is accepted', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'ink_sparkle.frag.iplr',
     );
@@ -273,6 +302,10 @@ void main() async {
   });
 
   test('FragmentShader Uniforms are sorted correctly', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'uniforms_sorted.frag.iplr',
     );
@@ -314,6 +347,10 @@ void main() async {
   });
 
   test('FragmentShader user defined functions do not redefine builtins', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'no_builtin_redefinition.frag.iplr',
     );
@@ -324,6 +361,10 @@ void main() async {
   });
 
   test('FragmentShader fromAsset accepts a shader with no uniforms', () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      return;
+    }
     final FragmentProgram program = await FragmentProgram.fromAsset(
       'no_uniforms.frag.iplr',
     );
@@ -331,6 +372,11 @@ void main() async {
     await _expectShaderRendersGreen(shader);
     shader.dispose();
   });
+
+  if (impellerEnabled) {
+    print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+    return;
+  }
 
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
   final Map<String, FragmentProgram> iplrSupportedGLSLOpShaders = await _loadShaderAssets(

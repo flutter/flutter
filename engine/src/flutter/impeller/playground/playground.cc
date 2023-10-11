@@ -102,7 +102,7 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
       return false;
 #endif  // IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kVulkan:
-#if IMPELLER_ENABLE_VULKAN
+#if IMPELLER_ENABLE_VULKAN && IMPELLER_ENABLE_VULKAN_PLAYGROUNDS
       return true;
 #else   // IMPELLER_ENABLE_VULKAN
       return false;

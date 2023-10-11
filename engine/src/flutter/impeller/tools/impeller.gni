@@ -22,7 +22,14 @@ declare_args() {
       (is_linux || is_win || is_android) && target_os != "fuchsia"
 
   # Whether the Vulkan backend is enabled.
-  impeller_enable_vulkan =
+  impeller_enable_vulkan = (is_linux || is_win || is_android ||
+                            enable_unittests) && target_os != "fuchsia"
+
+  # Whether playgrounds should run with Vulkan.
+  #
+  # impeller_enable_vulkan may be true in build environments that run tests but
+  # do not have a Vulkan ICD present.
+  impeller_enable_vulkan_playgrounds =
       (is_linux || is_win || is_android) && target_os != "fuchsia"
 
   # Whether to use a prebuilt impellerc.
