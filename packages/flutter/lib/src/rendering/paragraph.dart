@@ -826,8 +826,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
             locale: locale,
           )..layout();
           if (didOverflowWidth) {
-            double fadeStart, fadeEnd;
-            (fadeStart, fadeEnd) = switch (textDirection) {
+            final (double fadeStart, double fadeEnd) = switch (textDirection) {
               TextDirection.rtl => (fadeSizePainter.width, 0.0),
               TextDirection.ltr => (size.width - fadeSizePainter.width, size.width),
             };
