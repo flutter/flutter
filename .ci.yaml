@@ -2945,10 +2945,12 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_arm64 build_ios_framework_module_test
+  - name: Mac_arm64_ios build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: build_ios_framework_module_test
@@ -3323,10 +3325,12 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_arm64 module_test_ios
+  - name: Mac_arm64_ios module_test_ios
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: module_test_ios
@@ -3389,10 +3393,12 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_arm64 plugin_lint_mac
+  - name: Mac_arm64_ios plugin_lint_mac
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: plugin_lint_mac
@@ -3964,10 +3970,12 @@ targets:
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hello_world_ios__compile
 
-  - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
+  - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
@@ -3975,10 +3983,12 @@ targets:
       - dev/**
       - .ci.yaml
 
-  - name: Mac_arm64 hot_mode_dev_cycle_macos_target__benchmark
+  - name: Mac_arm64_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
@@ -4079,10 +4089,12 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: ios_content_validation_test
 
-  - name: Mac_arm64 ios_content_validation_test
+  - name: Mac_arm64_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: ios_content_validation_test
@@ -4114,18 +4126,22 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: large_image_changer_perf_ios
 
-  - name: Mac_x64 macos_chrome_dev_mode
+  - name: Mac_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: macos_chrome_dev_mode
 
-  - name: Mac_arm64 macos_chrome_dev_mode
+  - name: Mac_arm64_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: macos_chrome_dev_mode
@@ -4154,10 +4170,12 @@ targets:
         }
     bringup: true
 
-  - name: Mac native_assets_ios_simulator
+  - name: Mac_ios native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: native_assets_ios_simulator
@@ -4297,10 +4315,12 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
 
-  - name: Mac hot_mode_dev_cycle_ios_simulator
+  - name: Mac_ios hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios_simulator
@@ -4421,10 +4441,12 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_arm64 run_debug_test_macos
+  - name: Mac_arm64_ios run_debug_test_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: run_debug_test_macos
@@ -4452,10 +4474,12 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_arm64 run_release_test_macos
+  - name: Mac_arm64_ios run_release_test_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: none
+      device_os: null
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: run_release_test_macos
