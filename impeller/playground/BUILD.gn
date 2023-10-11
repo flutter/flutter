@@ -47,7 +47,7 @@ impeller_component("playground") {
     "../scene/shaders",
     "imgui:imgui_impeller_backend",
     "//flutter/fml",
-    "//third_party/glfw",
+    "//flutter/third_party/glfw",
     "//third_party/imgui:imgui_glfw",
   ]
 
