@@ -202,28 +202,7 @@ void main() {
     );
   }
 
-  test('Simple gradient', () async {
-    // TODO(matanl): While deprecated, we still don't want to accidentally
-    // change the behavior of the old API,
-    // https://github.com/flutter/flutter/issues/112498.
-    // ignore: deprecated_member_use
-    Paint.enableDithering = false;
-    final Image image = await toImage((Canvas canvas) {
-      final Paint paint = Paint()..shader = makeGradient();
-      canvas.drawPaint(paint);
-    }, 100, 100);
-    expect(image.width, equals(100));
-    expect(image.height, equals(100));
-
-    final bool areEqual =
-        await fuzzyGoldenImageCompare(image, 'canvas_test_gradient.png');
-    expect(areEqual, true);
-  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
-
-  test('Simple dithered gradient', () async {
-    // TODO(matanl): Reword this test once we remove the deprecated API.
-    // ignore: deprecated_member_use
-    Paint.enableDithering = true;
+  test('Simple gradient, which is implicitly dithered', () async {
     final Image image = await toImage((Canvas canvas) {
       final Paint paint = Paint()..shader = makeGradient();
       canvas.drawPaint(paint);
