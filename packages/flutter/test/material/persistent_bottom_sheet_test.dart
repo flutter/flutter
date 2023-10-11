@@ -589,7 +589,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71435
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Scaffold.bottomSheet should be updated without creating a new RO'
     ' when the new widget has the same key and type.',
     (WidgetTester tester) async {
