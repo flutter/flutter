@@ -178,9 +178,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Release'),
-    ]),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -466,7 +464,7 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -559,7 +557,7 @@ STDERR STUFF
     );
     createMinimalMockProjectFiles();
 
-    fileSystem.file('build/macos/Build/Products/Release/Runner.app/App')
+    fileSystem.file('build/macos/Build/Products/Release/example.app/App')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
