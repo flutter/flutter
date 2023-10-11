@@ -55,7 +55,7 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   bool get canListAnything => _platform.isWindows;
 
   @override
-  bool get supportsPlatform => true;
+  bool get supportsPlatform => _platform.isWindows;
 
   @override
   List<String> get wellKnownIds => <String>['preview'];
@@ -65,10 +65,6 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) async {
-    if (!_platform.isWindows) {
-      // we need to early return before looking up the path of [Artifact.flutterPreviewDevice].
-      return const <Device>[];
-    }
     final File previewBinary = _fileSystem.file(_artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
     if (!previewBinary.existsSync()) {
       return const <Device>[];
