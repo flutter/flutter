@@ -31,7 +31,6 @@ import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
-import io.flutter.embedding.engine.systemchannels.ProcessTextChannel;
 import io.flutter.embedding.engine.systemchannels.RestorationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
@@ -39,7 +38,6 @@ import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
-import io.flutter.plugin.text.ProcessTextPlugin;
 import io.flutter.util.ViewUtils;
 import java.util.HashSet;
 import java.util.List;
@@ -97,7 +95,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull private final NavigationChannel navigationChannel;
   @NonNull private final RestorationChannel restorationChannel;
   @NonNull private final PlatformChannel platformChannel;
-  @NonNull private final ProcessTextChannel processTextChannel;
   @NonNull private final SettingsChannel settingsChannel;
   @NonNull private final SpellCheckChannel spellCheckChannel;
   @NonNull private final SystemChannel systemChannel;
@@ -332,7 +329,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     mouseCursorChannel = new MouseCursorChannel(dartExecutor);
     navigationChannel = new NavigationChannel(dartExecutor);
     platformChannel = new PlatformChannel(dartExecutor);
-    processTextChannel = new ProcessTextChannel(dartExecutor, context.getPackageManager());
     restorationChannel = new RestorationChannel(dartExecutor, waitForRestorationData);
     settingsChannel = new SettingsChannel(dartExecutor);
     spellCheckChannel = new SpellCheckChannel(dartExecutor);
@@ -388,9 +384,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     }
 
     ViewUtils.calculateMaximumDisplayMetrics(context, this);
-
-    ProcessTextPlugin processTextPlugin = new ProcessTextPlugin(this.getProcessTextChannel());
-    this.pluginRegistry.add(processTextPlugin);
   }
 
   private void attachToJni() {
@@ -550,12 +543,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public PlatformChannel getPlatformChannel() {
     return platformChannel;
-  }
-
-  /** System channel that sends text processing requests from Flutter to Android. */
-  @NonNull
-  public ProcessTextChannel getProcessTextChannel() {
-    return processTextChannel;
   }
 
   /**
