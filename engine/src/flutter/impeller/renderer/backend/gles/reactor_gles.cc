@@ -257,12 +257,14 @@ bool ReactorGLES::FlushOps() {
 
 void ReactorGLES::SetupDebugGroups() {
   // Setup of a default active debug group: Filter everything in.
-  proc_table_->DebugMessageControlKHR(GL_DONT_CARE,  // source
-                                      GL_DONT_CARE,  // type
-                                      GL_DONT_CARE,  // severity
-                                      0,             // count
-                                      nullptr,       // ids
-                                      GL_TRUE);      // enabled
+  if (proc_table_->DebugMessageControlKHR.IsAvailable()) {
+    proc_table_->DebugMessageControlKHR(GL_DONT_CARE,  // source
+                                        GL_DONT_CARE,  // type
+                                        GL_DONT_CARE,  // severity
+                                        0,             // count
+                                        nullptr,       // ids
+                                        GL_TRUE);      // enabled
+  }
 }
 
 void ReactorGLES::SetDebugLabel(const HandleGLES& handle, std::string label) {
