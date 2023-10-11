@@ -349,6 +349,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
+    ScrollController? testController;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -357,6 +358,7 @@ void main() {
           bottomSheet: DraggableScrollableSheet(
             expand: false,
             builder: (_, ScrollController controller) {
+              testController = controller;
               return ListView.builder(
                 itemExtent: 50.0,
                 itemCount: 50,
@@ -407,12 +409,28 @@ void main() {
     print('>>> 13');
     expect(find.text('Item 22'), findsNothing);
 
-    print('>>> 14');
-    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
-    print('>>> 15');
-    await tester.pumpAndSettle();
+    (int, int) itemsOnScreen() {
+      int min = 1000000;
+      int max = -1;
+      for (int i = 0; i < 100; i++) {
+        if (find.text('Item $i').evaluate().isNotEmpty) {
+          if (i < min) {
+            min = i;
+          }
+          if (i > max) {
+            max = i;
+          }
+        }
+      }
+      return (min, max);
+    }
 
-    print('>>> 16');
+    print('>>> 14: before fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    print('>>> 15: after fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+    await tester.pumpAndSettle();
+    print('>>> 16: after pumpAndSettle: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+
     expect(find.text('Item 2'), findsNothing);
     print('>>> 17');
     expect(find.text('Item 22'), findsOneWidget);
