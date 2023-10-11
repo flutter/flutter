@@ -1,4 +1,4 @@
-Signature: c34931134b5196fbe2a4ac6dfd04a299
+Signature: 5a10fa747cefdae79b8be0d5e79aed14
 
 ====================================================================================================
 LIBRARY: dart
@@ -4278,14 +4278,10 @@ ORIGIN: ../../../third_party/dart/runtime/platform/mach_o.h + ../../../third_par
 ORIGIN: ../../../third_party/dart/runtime/platform/pe.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/download.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/explore.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/heapsnapshot.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/analysis.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/cli.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/completion.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/console.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/expression.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/format.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/intset.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/load.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.h + ../../../third_party/dart/LICENSE
@@ -4358,14 +4354,10 @@ FILE: ../../../third_party/dart/runtime/platform/mach_o.h
 FILE: ../../../third_party/dart/runtime/platform/pe.h
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/download.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/explore.dart
-FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/heapsnapshot.dart
-FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/analysis.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/cli.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/completion.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/console.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/expression.dart
-FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/format.dart
-FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/intset.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/load.dart
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.h
