@@ -216,10 +216,6 @@ class _MyContextMenuState extends State<MyContextMenu> {
   }
 
   void _handleSecondaryTapDown(TapDownDetails details) {
-    if (_menuController.isOpen) {
-      _menuController.close();
-      return;
-    }
     _menuController.open(position: details.localPosition);
   }
 
