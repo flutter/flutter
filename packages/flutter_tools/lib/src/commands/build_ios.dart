@@ -754,6 +754,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       return FlutterCommandResult.success();
     }
 
-    return FlutterCommandResult.success();
+    return FlutterCommandResult.fail();
   }
 }
