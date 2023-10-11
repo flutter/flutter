@@ -142,6 +142,7 @@ SwapchainImplVK::SwapchainImplVK(
     vk::SwapchainKHR old_swapchain,
     vk::SurfaceTransformFlagBitsKHR last_transform) {
   if (!context) {
+    VALIDATION_LOG << "Cannot create a swapchain without a context.";
     return;
   }
 

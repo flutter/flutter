@@ -265,6 +265,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                            vk::Device device,
                            bool supports_memoryless_textures)
       : TextureSourceVK(desc), resource_(std::move(resource_manager)) {
+    FML_DCHECK(desc.format != PixelFormat::kUnknown);
     TRACE_EVENT0("impeller", "CreateDeviceTexture");
     vk::ImageCreateInfo image_info;
     image_info.flags = ToVKImageCreateFlags(desc.type);

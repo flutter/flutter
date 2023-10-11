@@ -7,6 +7,8 @@
 import 'package:litetest/litetest.dart';
 import '../../lib/gpu/lib/gpu.dart' as gpu;
 
+import 'impeller_enabled.dart';
+
 void main() {
   // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
   test('smoketest', () async {
@@ -25,9 +27,14 @@ void main() {
   test('gpu.context throws exception for incompatible embedders', () async {
     try {
       // ignore: unnecessary_statements
-      gpu.gpuContext; // Force the
-      fail('Exception not thrown');
+      gpu.gpuContext; // Force the context to instantiate.
+      if (!impellerEnabled) {
+        fail('Exception not thrown, but no Impeller context available.');
+      }
     } catch (e) {
+      if (impellerEnabled) {
+        fail('Exception thrown even though Impeller is enabled.');
+      }
       expect(
           e.toString(),
           contains(

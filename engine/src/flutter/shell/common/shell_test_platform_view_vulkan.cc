@@ -17,12 +17,8 @@
 
 #if OS_FUCHSIA
 #define VULKAN_SO_PATH "libvulkan.so"
-#elif FML_OS_MACOSX
-#define VULKAN_SO_PATH "libvk_swiftshader.dylib"
-#elif FML_OS_WIN
-#define VULKAN_SO_PATH "vk_swiftshader.dll"
 #else
-#define VULKAN_SO_PATH "libvk_swiftshader.so"
+#include "flutter/vulkan/swiftshader_path.h"
 #endif
 
 namespace flutter {

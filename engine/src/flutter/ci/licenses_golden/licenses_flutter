@@ -4043,6 +4043,7 @@ ORIGIN: ../../../flutter/vulkan/procs/vulkan_interface.cc + ../../../flutter/LIC
 ORIGIN: ../../../flutter/vulkan/procs/vulkan_interface.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/vulkan/procs/vulkan_proc_table.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/vulkan/procs/vulkan_proc_table.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/vulkan/swiftshader_path.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/vulkan/vulkan_application.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/vulkan/vulkan_application.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/vulkan/vulkan_backbuffer.cc + ../../../flutter/LICENSE
@@ -6828,6 +6829,7 @@ FILE: ../../../flutter/vulkan/procs/vulkan_interface.cc
 FILE: ../../../flutter/vulkan/procs/vulkan_interface.h
 FILE: ../../../flutter/vulkan/procs/vulkan_proc_table.cc
 FILE: ../../../flutter/vulkan/procs/vulkan_proc_table.h
+FILE: ../../../flutter/vulkan/swiftshader_path.h
 FILE: ../../../flutter/vulkan/vulkan_application.cc
 FILE: ../../../flutter/vulkan/vulkan_application.h
 FILE: ../../../flutter/vulkan/vulkan_backbuffer.cc

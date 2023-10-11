@@ -29,6 +29,46 @@
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
+#if IMPELLER_SUPPORTS_RENDERING
+#include <vulkan/vulkan.h>                                        // nogncheck
+#include "flutter/vulkan/procs/vulkan_proc_table.h"               // nogncheck
+#include "flutter/vulkan/swiftshader_path.h"                      // nogncheck
+#include "impeller/entity/vk/entity_shaders_vk.h"                 // nogncheck
+#include "impeller/entity/vk/modern_shaders_vk.h"                 // nogncheck
+#include "impeller/renderer/backend/vulkan/context_vk.h"          // nogncheck
+#include "impeller/renderer/backend/vulkan/surface_context_vk.h"  // nogncheck
+#include "impeller/renderer/context.h"                            // nogncheck
+#include "impeller/renderer/vk/compute_shaders_vk.h"              // nogncheck
+#include "shell/gpu/gpu_surface_vulkan_impeller.h"                // nogncheck
+#if IMPELLER_ENABLE_3D
+#include "impeller/scene/shaders/vk/scene_shaders_vk.h"  // nogncheck
+#endif                                                   // IMPELLER_ENABLE_3D
+
+static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
+  return {
+    std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
+                                           impeller_entity_shaders_vk_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_shaders_vk_data, impeller_modern_shaders_vk_length),
+#if IMPELLER_ENABLE_3D
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_scene_shaders_vk_data, impeller_scene_shaders_vk_length),
+#endif  // IMPELLER_ENABLE_3D
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_compute_shaders_vk_data,
+            impeller_compute_shaders_vk_length),
+  };
+}
+
+struct ImpellerVulkanContextHolder {
+  fml::RefPtr<vulkan::VulkanProcTable> vulkan_proc_table;
+  std::shared_ptr<impeller::ContextVK> context;
+  std::shared_ptr<impeller::SurfaceContextVK> surface_context;
+};
+#else
+struct ImpellerVulkanContextHolder {};
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
 #if defined(FML_OS_WIN)
 #include <combaseapi.h>
 #endif  // defined(FML_OS_WIN)
@@ -81,11 +121,41 @@ class TesterGPUSurfaceSoftware : public GPUSurfaceSoftware {
 class TesterPlatformView : public PlatformView,
                            public GPUSurfaceSoftwareDelegate {
  public:
-  TesterPlatformView(Delegate& delegate, const TaskRunners& task_runners)
-      : PlatformView(delegate, task_runners) {}
+  TesterPlatformView(Delegate& delegate,
+                     const TaskRunners& task_runners,
+                     ImpellerVulkanContextHolder impeller_context_holder)
+      : PlatformView(delegate, task_runners),
+        impeller_context_holder_(std::move(impeller_context_holder)) {}
+
+  ~TesterPlatformView() {
+#if IMPELLER_SUPPORTS_RENDERING
+    if (impeller_context_holder_.context) {
+      impeller_context_holder_.context->Shutdown();
+    }
+#endif
+  }
+
+  // |PlatformView|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override {
+#if IMPELLER_SUPPORTS_RENDERING
+    return std::static_pointer_cast<impeller::Context>(
+        impeller_context_holder_.context);
+#else
+    return nullptr;
+#endif  // IMPELLER_SUPPORTS_RENDERING
+  }
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override {
+#if IMPELLER_SUPPORTS_RENDERING
+    if (delegate_.OnPlatformViewGetSettings().enable_impeller) {
+      FML_DCHECK(impeller_context_holder_.context);
+      auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+          impeller_context_holder_.surface_context);
+      FML_DCHECK(surface->IsValid());
+      return surface;
+    }
+#endif  // IMPELLER_SUPPORTS_RENDERING
     auto surface = std::make_unique<TesterGPUSurfaceSoftware>(
         this, true /* render to surface */);
     FML_DCHECK(surface->IsValid());
@@ -126,6 +196,7 @@ class TesterPlatformView : public PlatformView,
 
  private:
   sk_sp<SkSurface> sk_surface_ = nullptr;
+  [[maybe_unused]] ImpellerVulkanContextHolder impeller_context_holder_;
   std::shared_ptr<TesterExternalViewEmbedder> external_view_embedder_ =
       std::make_shared<TesterExternalViewEmbedder>();
 };
@@ -235,10 +306,63 @@ int RunTester(const flutter::Settings& settings,
                                           io_task_runner         // io
   );
 
+  ImpellerVulkanContextHolder impeller_context_holder;
+
+#if IMPELLER_SUPPORTS_RENDERING
+  if (settings.enable_impeller) {
+    impeller_context_holder.vulkan_proc_table =
+        fml::MakeRefCounted<vulkan::VulkanProcTable>(VULKAN_SO_PATH);
+    if (!impeller_context_holder.vulkan_proc_table
+             ->NativeGetInstanceProcAddr()) {
+      FML_LOG(ERROR) << "Could not load Swiftshader library.";
+      return EXIT_FAILURE;
+    }
+    impeller::ContextVK::Settings context_settings;
+    context_settings.proc_address_callback =
+        impeller_context_holder.vulkan_proc_table->NativeGetInstanceProcAddr();
+    context_settings.shader_libraries_data = ShaderLibraryMappings();
+    context_settings.cache_directory = fml::paths::GetCachesDirectory();
+    context_settings.enable_validation = settings.enable_vulkan_validation;
+
+    impeller_context_holder.context =
+        impeller::ContextVK::Create(std::move(context_settings));
+    if (!impeller_context_holder.context ||
+        !impeller_context_holder.context->IsValid()) {
+      VALIDATION_LOG << "Could not create Vulkan context.";
+      return EXIT_FAILURE;
+    }
+
+    impeller::vk::SurfaceKHR vk_surface;
+    impeller::vk::HeadlessSurfaceCreateInfoEXT surface_create_info;
+    auto res =
+        impeller_context_holder.context->GetInstance().createHeadlessSurfaceEXT(
+            &surface_create_info,  // surface create info
+            nullptr,               // allocator
+            &vk_surface            // surface
+        );
+    if (res != impeller::vk::Result::eSuccess) {
+      VALIDATION_LOG << "Could not create surface for tester "
+                     << impeller::vk::to_string(res);
+      return EXIT_FAILURE;
+    }
+
+    impeller::vk::UniqueSurfaceKHR surface{
+        vk_surface, impeller_context_holder.context->GetInstance()};
+    impeller_context_holder.surface_context =
+        impeller_context_holder.context->CreateSurfaceContext();
+    if (!impeller_context_holder.surface_context->SetWindowSurface(
+            std::move(surface))) {
+      VALIDATION_LOG << "Could not set up surface for context.";
+      return EXIT_FAILURE;
+    }
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [](Shell& shell) {
-        return std::make_unique<TesterPlatformView>(shell,
-                                                    shell.GetTaskRunners());
+      [impeller_context_holder =
+           std::move(impeller_context_holder)](Shell& shell) {
+        return std::make_unique<TesterPlatformView>(
+            shell, shell.GetTaskRunners(), impeller_context_holder);
       };
 
   Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {

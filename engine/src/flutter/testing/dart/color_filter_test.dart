@@ -7,6 +7,8 @@ import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
 
+import 'impeller_enabled.dart';
+
 const Color transparent = Color(0x00000000);
 const Color red = Color(0xFFAA0000);
 const Color green = Color(0xFF00AA00);
@@ -56,6 +58,11 @@ void main() {
     Uint32List bytes = await getBytesForPaint(paint);
     expect(bytes[0], greenRedColorBlend);
 
+    // TODO(135699): enable this
+    if (impellerEnabled) {
+      return;
+    }
+
     paint.invertColors = true;
     bytes = await getBytesForPaint(paint);
     expect(bytes[0], greenRedColorBlendInverted);
@@ -86,6 +93,11 @@ void main() {
 
     Uint32List bytes = await getBytesForPaint(paint);
     expect(bytes[0], greenGreyscaled);
+
+    // TODO(135699): enable this
+    if (impellerEnabled) {
+      return;
+    }
 
     paint.invertColors = true;
     bytes = await getBytesForPaint(paint);
@@ -118,6 +130,10 @@ void main() {
     Uint32List bytes = await getBytesForPaint(paint);
     expect(bytes[0], greenLinearToSrgbGamma);
 
+    // TODO(135699): enable this
+    if (impellerEnabled) {
+      return;
+    }
     paint.invertColors = true;
     bytes = await getBytesForPaint(paint);
     expect(bytes[0], greenLinearToSrgbGammaInverted);
@@ -130,6 +146,11 @@ void main() {
 
     Uint32List bytes = await getBytesForPaint(paint);
     expect(bytes[0], greenSrgbToLinearGamma);
+
+    // TODO(135699): enable this
+    if (impellerEnabled) {
+      return;
+    }
 
     paint.invertColors = true;
     bytes = await getBytesForPaint(paint);

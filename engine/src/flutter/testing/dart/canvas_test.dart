@@ -12,6 +12,8 @@ import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:vector_math/vector_math_64.dart';
 
+import 'impeller_enabled.dart';
+
 typedef CanvasCallback = void Function(Canvas canvas);
 
 Future<Image> createImage(int width, int height) {
@@ -192,7 +194,7 @@ void main() {
     final bool areEqual =
         await fuzzyGoldenImageCompare(image, 'canvas_test_toImage.png');
     expect(areEqual, true);
-  });
+  }, skip: impellerEnabled);
 
   Gradient makeGradient() {
     return Gradient.linear(
@@ -213,7 +215,7 @@ void main() {
     final bool areEqual =
         await fuzzyGoldenImageCompare(image, 'canvas_test_dithered_gradient.png');
     expect(areEqual, true);
-  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
+  }, skip: !Platform.isLinux || impellerEnabled); // https://github.com/flutter/flutter/issues/53784
 
   test('Null values allowed for drawAtlas methods', () async {
     final Image image = await createImage(100, 100);
@@ -349,7 +351,7 @@ void main() {
     final bool areEqual =
         await fuzzyGoldenImageCompare(image, 'dotted_path_effect_mixed_with_stroked_geometry.png');
     expect(areEqual, true);
-  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
+  }, skip: !Platform.isLinux || impellerEnabled); // https://github.com/flutter/flutter/issues/53784
 
   test('Gradients with matrices in Paragraphs render correctly', () async {
     final Image image = await toImage((Canvas canvas) {
@@ -401,7 +403,7 @@ void main() {
     final bool areEqual =
     await fuzzyGoldenImageCompare(image, 'text_with_gradient_with_matrix.png');
     expect(areEqual, true);
-  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
+  }, skip: !Platform.isLinux || impellerEnabled); // https://github.com/flutter/flutter/issues/53784
 
   test('toImageSync - too big', () async {
     PictureRecorder recorder = PictureRecorder();
@@ -417,6 +419,12 @@ void main() {
     recorder = PictureRecorder();
     canvas = Canvas(recorder);
 
+    if (impellerEnabled) {
+      // Impeller tries to automagically scale this. See
+      // https://github.com/flutter/flutter/issues/128885
+      canvas.drawImage(image, Offset.zero, Paint());
+      return;
+    }
     // On a slower CI machine, the raster thread may get behind the UI thread
     // here. However, once the image is in an error state it will immediately
     // throw on subsequent attempts.
