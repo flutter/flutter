@@ -180,7 +180,7 @@ class ChromeInstaller {
     /// Windows LUCI bots does not have a `unzip`. Instead we are
     /// using `archive` pub package.
     ///
-    /// We didn't use `archieve` on Mac/Linux since the new files have
+    /// We didn't use `archive` on Mac/Linux since the new files have
     /// permission issues. For now we are not able change file permissions
     /// from dart.
     /// See: https://github.com/dart-lang/sdk/issues/15078.
@@ -219,7 +219,7 @@ class ChromeInstaller {
       // named e.g. 'chrome-linux'. We need to copy the files out of that
       // directory and into the version directory.
       final io.Directory tmpDir = await io.Directory.systemTemp.createTemp();
-      final io.Directory unzipDir = io.Platform.isLinux ? tmpDir : versionDir;
+      final io.Directory unzipDir = tmpDir;
       final io.ProcessResult unzipResult =
           await io.Process.run('unzip', <String>[
         downloadedFile.path,
@@ -233,17 +233,13 @@ class ChromeInstaller {
             'The unzip process exited with code ${unzipResult.exitCode}.');
       }
 
-      // Remove the "chrome-linux/" path prefix, which is the Linux
-      // convention for Chromium directory structure.
-      if (io.Platform.isLinux) {
-        final io.Directory chromeLinuxDir =
-            await tmpDir.list().single as io.Directory;
-        await for (final io.FileSystemEntity entity in chromeLinuxDir.list()) {
-          await entity
-              .rename(path.join(versionDir.path, path.basename(entity.path)));
-        }
-        await tmpDir.delete(recursive: true);
+      final io.Directory topLevelDir =
+          await tmpDir.list().single as io.Directory;
+      await for (final io.FileSystemEntity entity in topLevelDir.list()) {
+        await entity
+            .rename(path.join(versionDir.path, path.basename(entity.path)));
       }
+      await tmpDir.delete(recursive: true);
     }
 
     downloadedFile.deleteSync();

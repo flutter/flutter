@@ -355,7 +355,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -391,7 +391,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -427,7 +427,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -463,7 +463,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -499,7 +499,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -535,7 +535,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -571,7 +571,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -607,7 +607,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -823,7 +823,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -859,7 +859,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -895,7 +895,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -931,7 +931,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -967,7 +967,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1003,7 +1003,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1039,7 +1039,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1075,7 +1075,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1095,7 +1095,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-12"
+        "os=Mac"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1127,7 +1127,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-12"
+        "os=Mac"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1159,7 +1159,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-12"
+        "os=Mac"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1191,7 +1191,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-12"
+        "os=Mac"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1223,7 +1223,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-12"
+        "os=Mac"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1271,7 +1271,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1307,7 +1307,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1343,7 +1343,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1379,7 +1379,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1415,7 +1415,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1451,7 +1451,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1487,7 +1487,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
@@ -1523,7 +1523,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "version:117.0"
+          "version": "118.0.5993.70"
         }
       ],
       "tasks": [
