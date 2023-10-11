@@ -14,7 +14,7 @@ class _StartAndEnd {
   Duration get duration => Duration(microseconds: end.timestampMicros! - start.timestampMicros!);
 }
 
-/// Summarizes [TimelineEvents]s corresponding to GPU start and end events.
+/// Summarizes [GpuSumarizer]s corresponding to GPU start and end events.
 class GpuSumarizer {
   /// Creates a RasterCacheSummarizer given the timeline events.
   GpuSumarizer(List<TimelineEvent> gpuEvents) {
