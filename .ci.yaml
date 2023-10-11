@@ -234,7 +234,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      test_timeout_secs: "3600"
+      test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -4492,6 +4492,7 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_2_5
     recipe: flutter/flutter_drone
@@ -4510,6 +4511,7 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_3_5
     recipe: flutter/flutter_drone
@@ -4528,6 +4530,7 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_4_5
     recipe: flutter/flutter_drone
@@ -4546,6 +4549,7 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_5_5
     recipe: flutter/flutter_drone
@@ -4564,6 +4568,7 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows customer_testing
     enabled_branches:
