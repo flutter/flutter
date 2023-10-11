@@ -16863,7 +16863,8 @@ void main() {
             expect(focusNode.hasPrimaryFocus, isFalse);
         }
       }, variant: TargetPlatformVariant.all());
-
+    }
+    
     for (final PointerDeviceKind pointerDeviceKind in PointerDeviceKind.values.toSet()
     ..remove(PointerDeviceKind.trackpad)) {
     testWidgets("TextField handling of onTapOutside when doesn't have focus for ${pointerDeviceKind.name}",
@@ -16931,7 +16932,7 @@ void main() {
 
       expect(timesTriggered, 1);
     }, variant: TargetPlatformVariant.all());
-    }};
+  }
   });
 
   testWidgetsWithLeakTracking('Builds the corresponding default spell check toolbar by platform', (WidgetTester tester) async {
