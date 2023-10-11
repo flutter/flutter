@@ -4775,6 +4775,20 @@ targets:
         ["devicelab", "hostonly", "windows"]
       task_name: platform_channel_sample_test_windows
 
+  - name: Windows_arm64 platform_channel_sample_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: platform_channel_sample_test_windows
+
   - name: Windows plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
