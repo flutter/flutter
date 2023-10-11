@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -82,7 +83,8 @@ class ScreenshotCommand extends FlutterCommand {
         if (device == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }
-        if (!device!.supportsScreenshot) {
+        final bool bypassSupportCheck = device is IOSDevice && usingCISystem;
+        if (!bypassSupportCheck && !device!.supportsScreenshot) {
           throwToolExit('Screenshot not supported for ${device!.name}.');
         }
       default:

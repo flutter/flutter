@@ -34,6 +34,7 @@ import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
 import 'mac.dart';
+import 'ui_test_screenshot.dart';
 import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
@@ -977,7 +978,20 @@ class IOSDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+    if (isCoreDevice) {
+      final UITestScreenshot uiTestScreenshot = UITestScreenshot(
+        fileSystem: _fileSystem,
+        processUtils: globals.processUtils,
+        coreDeviceControl: _coreDeviceControl,
+      );
+      await uiTestScreenshot.takeScreenshot(
+        outputFile,
+        target: UITestScreenshotCompatibleTargets.ios,
+        deviceId: id,
+      );
+    } else {
+      await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+    }
   }
 
   @override
