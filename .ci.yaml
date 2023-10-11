@@ -3711,6 +3711,7 @@ targets:
       task_name: hot_mode_dev_cycle__benchmark
 
   - name: Mac_android integration_test_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/136337
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
