@@ -1091,9 +1091,8 @@ class Paint {
   /// Constructs an empty [Paint] object with all fields initialized to
   /// their defaults.
   Paint() {
-    if (enableDithering) {
-      _dither = true;
-    }
+    // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/112498.
+    _enableDithering();
   }
 
   // Paint objects are encoded in two buffers:
@@ -1479,26 +1478,10 @@ class Paint {
     _data.setInt32(_kInvertColorOffset, value ? 1 : 0, _kFakeHostEndian);
   }
 
-  bool get _dither {
-    return _data.getInt32(_kDitherOffset, _kFakeHostEndian) == 1;
+  // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/112498.
+  void _enableDithering() {
+    _data.setInt32(_kDitherOffset, 1, _kFakeHostEndian);
   }
-  set _dither(bool value) {
-    _data.setInt32(_kDitherOffset, value ? 1 : 0, _kFakeHostEndian);
-  }
-
-  /// Whether to dither the output when drawing some elements such as gradients.
-  ///
-  /// It is not expected that this flag will be used in the future; please leave
-  /// feedback in <https://github.com/flutter/flutter/issues/112498> if there is
-  /// a use case for this flag to remain long term.
-  @Deprecated(
-    'Dithering is now enabled by default on some elements (such as gradients) '
-    'and further support for dithering is expected to be handled by custom '
-    'shaders, so this flag is being removed: '
-    'https://github.com/flutter/flutter/issues/112498.'
-    'This feature was deprecated after 3.14.0-0.1.pre.'
-  )
-  static bool enableDithering = true;
 
   @override
   String toString() {
@@ -1561,9 +1544,6 @@ class Paint {
     }
     if (invertColors) {
       result.write('${semicolon}invert: $invertColors');
-    }
-    if (_dither) {
-      result.write('${semicolon}dither: $_dither');
     }
     result.write(')');
     return result.toString();

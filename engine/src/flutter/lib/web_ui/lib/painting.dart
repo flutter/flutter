@@ -217,7 +217,6 @@ enum Clip {
 
 abstract class Paint {
   factory Paint() => engine.renderer.createPaint();
-  static bool enableDithering = false;
   BlendMode get blendMode;
   set blendMode(BlendMode value);
   PaintingStyle get style;
