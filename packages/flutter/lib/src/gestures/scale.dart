@@ -743,6 +743,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           sourceTimeStamp: _initialEventTimestamp,
         ));
       });
+      _initialEventTimestamp = null;
     }
   }
 
