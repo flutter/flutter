@@ -11,6 +11,19 @@
 /// The String value for each of these extension names should be accessed by
 /// calling the `.name` property on the enum value.
 enum ServicesServiceExtensions {
+  /// Name of service extension that, when called, will toggle whether
+  /// statistics about the usage of Platform Channels will be printed out
+  /// periodically to the console and Timeline events will show the time between
+  /// sending and receiving a message (encoding and decoding time excluded).
+  ///
+  /// See also:
+  ///
+  /// * [debugProfilePlatformChannels], which is the flag that this service
+  ///   extension exposes.
+  /// * [ServicesBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  profilePlatformChannels,
+
   /// Name of service extension that, when called, will evict an image from the
   /// rootBundle cache and cause the image cache to be cleared.
   ///

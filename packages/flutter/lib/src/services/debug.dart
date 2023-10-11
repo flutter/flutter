@@ -41,3 +41,17 @@ bool debugAssertAllServicesVarsUnset(String reason) {
   }());
   return true;
 }
+
+/// Controls whether platform channel usage can be debugged in non-release mode.
+///
+/// This value is modified by calls to the
+/// [ServicesServiceExtensions.profilePlatformChannels] service extension.
+///
+/// See also:
+///
+/// * [shouldProfilePlatformChannels], which checks both
+///   [kProfilePlatformChannels] and [debugProfilePlatformChannels] for the
+///   current run mode.
+/// * [kProfilePlatformChannels], which determines whether platform channel
+///   usage can be debugged in release mode.
+bool debugProfilePlatformChannels = false;
