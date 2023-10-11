@@ -135,8 +135,8 @@ tests locally. To make changes effective on LUCI follow instructions in
 
 ### Rolling browsers
 
-When running tests on LUCI using Chromium, LUCI uses the version of Chromium
-fetched from CIPD.
+When running tests on LUCI using Chrome, LUCI uses the version of Chrome for 
+Testing fetched from CIPD.
 
 Since the engine code and infra recipes do not live in the same repository
 there are few steps to follow in order to upgrade a browser's version.
@@ -166,12 +166,11 @@ the `--dry-run` flag to the felt command.
 NOTE: Because this script uses `fc-config`, this roll step only actually works
 on Linux, not on macOS or Windows.
 
-#### Chromium
+#### Chrome for Testing
 
-Chromium is an independent project that gets rolled into Flutter manually, and as needed.
-Flutter consumes a pre-built Chromium version from chromium.org. When a new version of
-Chromium (check [here](https://www.chromium.org/getting-involved/download-chromium/#downloading-old-builds-of-chrome-chromium))
-is needed, follow these steps to roll the new version:
+Chrome for Testing is an independent project that gets rolled into Flutter
+manually, and as needed. Flutter consumes a pre-built Chrome for Testing build.
+The available versions of Chrome for Testing available can be found [here](https://googlechromelabs.github.io/chrome-for-testing/). To roll to a newer version:
 
 - Make sure you have `depot_tools` installed (if you are regularly hacking on
   the engine code, you probably do).
@@ -179,13 +178,8 @@ is needed, follow these steps to roll the new version:
   instructions (this step requires sufficient privileges; contact
   #hackers-infra-🌡 on [Flutter's Discord server](https://github.com/flutter/flutter/wiki/Chat)).
 - Edit `dev/browser_lock.yaml` and update the following values under `chrome`:
-  - Set `Windows`, `Mac` and `Linux` to the `branch_base_position`s given [in this table](https://omahaproxy.appspot.com).
-  (Pick from `linux`, `mac` and `win` as `os`, and the `stable` channel.)
-  - Set `version` to a string composed of the Major Version of the browser, and
-  the number of times that major version has been uploaded to CIPD. For example,
-  start with `'99'` for version 99.0.4844.51 of Chromium, and update to `'99.1'`,
-  `'99.2'` and so on if you need to upload newer bundles of the same major version.
-  (This is required because tags can't be repeated in CIPD).
+  - Set `version` to the full four part version number of the build of Chrome 
+    for Testing you want to roll (for example, `118.0.5993.70`)
 - Run `dart dev/browser_roller.dart` and make sure it completes successfully.
   The script uploads the specified versions of Chromium (and Chromedriver) to the
   right locations in CIPD: [Chrome](https://chrome-infra-packages.appspot.com/p/flutter_internal/browsers/chrome),

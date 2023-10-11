@@ -7,7 +7,6 @@ import 'dart:io' as io;
 import 'package:path/path.dart' as path;
 
 import 'browser.dart';
-import 'browser_lock.dart';
 import 'chrome.dart';
 import 'edge.dart';
 import 'environment.dart';
@@ -43,9 +42,14 @@ abstract class PlatformBinding {
     throw UnsupportedError('${io.Platform.operatingSystem} is not supported');
   }
 
-  String getChromeBuild(ChromeLock chromeLock);
-  String getChromeDownloadUrl(String version);
-  String getChromeDriverDownloadUrl(String version);
+  String get chromePlatformString;
+
+  String getChromeDownloadUrl(String version) =>
+      'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$version/$chromePlatformString/chrome-$chromePlatformString.zip';
+
+  String getChromeDriverDownloadUrl(String version) =>
+      'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$version/$chromePlatformString/chromedriver-$chromePlatformString.zip';
+
   String getFirefoxDownloadUrl(String version);
   String getFirefoxDownloadFilename(String version);
   String getChromeExecutablePath(io.Directory versionDir);
@@ -55,22 +59,9 @@ abstract class PlatformBinding {
   String getCommandToRunEdge();
 }
 
-const String _kBaseDownloadUrl =
-    'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o';
-
-class WindowsPlatformBinding implements PlatformBinding {
+class WindowsPlatformBinding extends PlatformBinding {
   @override
-  String getChromeBuild(ChromeLock chromeLock) {
-    return chromeLock.windows;
-  }
-
-  @override
-  String getChromeDownloadUrl(String version) =>
-      'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Win_x64%2F$version%2Fchrome-win.zip?alt=media';
-
-  @override
-  String getChromeDriverDownloadUrl(String version) =>
-      'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Win_x64%2F$version%2Fchromedriver_win32.zip?alt=media';
+  String get chromePlatformString => 'win64';
 
   @override
   String getChromeExecutablePath(io.Directory versionDir) =>
@@ -100,19 +91,9 @@ class WindowsPlatformBinding implements PlatformBinding {
   String getCommandToRunEdge() => 'MicrosoftEdgeLauncher';
 }
 
-class LinuxPlatformBinding implements PlatformBinding {
+class LinuxPlatformBinding extends PlatformBinding {
   @override
-  String getChromeBuild(ChromeLock chromeLock) {
-    return chromeLock.linux;
-  }
-
-  @override
-  String getChromeDownloadUrl(String version) =>
-      '$_kBaseDownloadUrl/Linux_x64%2F$version%2Fchrome-linux.zip?alt=media';
-
-  @override
-  String getChromeDriverDownloadUrl(String version) =>
-      '$_kBaseDownloadUrl/Linux_x64%2F$version%2Fchromedriver_linux64.zip?alt=media';
+  String get chromePlatformString => 'linux64';
 
   @override
   String getChromeExecutablePath(io.Directory versionDir) =>
@@ -144,25 +125,14 @@ class LinuxPlatformBinding implements PlatformBinding {
       throw UnsupportedError('Edge is not supported on Linux');
 }
 
-abstract class MacPlatformBinding implements PlatformBinding {
-  String get chromePlatformString;
-
-  @override
-  String getChromeDownloadUrl(String version) =>
-      '$_kBaseDownloadUrl/$chromePlatformString%2F$version%2Fchrome-mac.zip?alt=media';
-
-  @override
-  String getChromeDriverDownloadUrl(String version) =>
-      '$_kBaseDownloadUrl/$chromePlatformString%2F$version%2Fchromedriver_mac64.zip?alt=media';
-
+abstract class MacPlatformBinding extends PlatformBinding {
   @override
   String getChromeExecutablePath(io.Directory versionDir) => path.join(
         versionDir.path,
-        'chrome-mac',
-        'Chromium.app',
+        'Google Chrome for Testing.app',
         'Contents',
         'MacOS',
-        'Chromium',
+        'Google Chrome for Testing',
       );
 
   @override
@@ -191,22 +161,12 @@ abstract class MacPlatformBinding implements PlatformBinding {
 
 class MacArmPlatformBinding extends MacPlatformBinding {
   @override
-  String get chromePlatformString => 'Mac_Arm';
-
-  @override
-  String getChromeBuild(ChromeLock chromeLock) {
-    return chromeLock.macArm;
-  }
+  String get chromePlatformString => 'mac-arm64';
 }
 
 class Macx64PlatformBinding extends MacPlatformBinding {
   @override
-  String get chromePlatformString => 'Mac';
-
-  @override
-  String getChromeBuild(ChromeLock chromeLock) {
-    return chromeLock.mac;
-  }
+  String get chromePlatformString => 'mac-x64';
 }
 
 class BrowserInstallation {
