@@ -7,7 +7,6 @@ import 'dart:io' as io;
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import 'common.dart';
 import 'environment.dart';
 
 /// Returns the browser configuration based on the `browser_lock.yaml` file in
@@ -36,23 +35,10 @@ class BrowserLock {
 
 class ChromeLock {
   ChromeLock._fromYaml(YamlMap yaml) :
-    linux = (yaml['Linux'] as int).toString(),
-    mac = (yaml['Mac'] as int).toString(),
-    macArm = (yaml['Mac_Arm'] as int).toString(),
-    windows = (yaml['Win'] as int).toString(),
     version = yaml['version'] as String;
 
-  final String linux;
-  final String mac;
-  final String macArm;
-  final String windows;
-  /// The major version of Chromium represented by this lock. E.g: '96' (for Chromium 96.0.554.51)
+  /// The full version of Chromium represented by this lock. E.g: '119.0.6045.9'
   final String version;
-
-  /// Return the Chromium Build ID to use for the current operating system.
-  String get versionForCurrentPlatform {
-    return PlatformBinding.instance.getChromeBuild(this);
-  }
 }
 
 class FirefoxLock {

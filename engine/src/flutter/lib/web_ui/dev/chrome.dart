@@ -52,7 +52,7 @@ class ChromeEnvironment implements BrowserEnvironment {
 
   @override
   Future<void> prepare() async {
-    final String version = browserLock.chromeLock.versionForCurrentPlatform;
+    final String version = browserLock.chromeLock.version;
     _installation = await getOrInstallChrome(
       version,
       infoLog: isCi ? stdout : DevNull(),

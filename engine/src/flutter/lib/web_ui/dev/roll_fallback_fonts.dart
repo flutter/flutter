@@ -311,7 +311,6 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         description: 'A set of Noto fonts to fall back to for use in testing.',
         root: fontDir.path,
         version: versionString,
-        buildId: versionString,
         isDryRun: isDryRun,
       );
     }

@@ -40,7 +40,6 @@ Future<int> uploadDirectoryToCipd({
   required String description,
   required String root,
   required String version,
-  required String buildId,
   bool isDryRun = false,
   bool isVerbose = false,
 }) async {
@@ -72,7 +71,7 @@ data:
       '--tag',
       'version:$version',
       '--ref',
-      buildId,
+      version,
     ],
     if (isDryRun) ...<String>[
       '--out',
