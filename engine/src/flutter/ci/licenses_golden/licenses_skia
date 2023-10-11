@@ -1,4 +1,4 @@
-Signature: 4a4949218f693a1592bf1308dfdd43d3
+Signature: b01ab1f7f13ff28c50159876260e9ed9
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8607,7 +8607,6 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/coordclampshader.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/fontations.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/imagefiltersunpremul.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/vias/Draw.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkFontMgr_data.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkTypeface_fontations.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapInfo.h + ../../../third_party/skia/LICENSE
@@ -8648,7 +8647,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/coordclampshader.cpp
 FILE: ../../../third_party/skia/gm/fontations.cpp
 FILE: ../../../third_party/skia/gm/imagefiltersunpremul.cpp
-FILE: ../../../third_party/skia/gm/vias/Draw.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_data.h
 FILE: ../../../third_party/skia/include/ports/SkTypeface_fontations.h
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
@@ -8725,15 +8723,12 @@ ORIGIN: ../../../third_party/skia/fuzz/FuzzQuadRoots.cpp + ../../../third_party/
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicRoots.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPrecompile.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzQuadRoots.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/BazelGMRunner.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/BazelNoopRunner.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/fontations_ft_compare.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/graphite_replay.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/hello_bazel_world.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/png_codec.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/rippleshadergm.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/scaledrects.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/vias/SimpleVias.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/workingspace.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/android/SkCanvasAndroid.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/android/SkHeifDecoder.h + ../../../third_party/skia/LICENSE
@@ -8993,15 +8988,12 @@ FILE: ../../../third_party/skia/fuzz/FuzzQuadRoots.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicRoots.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPrecompile.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzQuadRoots.cpp
-FILE: ../../../third_party/skia/gm/BazelGMRunner.cpp
-FILE: ../../../third_party/skia/gm/BazelNoopRunner.cpp
 FILE: ../../../third_party/skia/gm/fontations_ft_compare.cpp
 FILE: ../../../third_party/skia/gm/graphite_replay.cpp
 FILE: ../../../third_party/skia/gm/hello_bazel_world.cpp
 FILE: ../../../third_party/skia/gm/png_codec.cpp
 FILE: ../../../third_party/skia/gm/rippleshadergm.cpp
 FILE: ../../../third_party/skia/gm/scaledrects.cpp
-FILE: ../../../third_party/skia/gm/vias/SimpleVias.cpp
 FILE: ../../../third_party/skia/gm/workingspace.cpp
 FILE: ../../../third_party/skia/include/android/SkCanvasAndroid.h
 FILE: ../../../third_party/skia/include/android/SkHeifDecoder.h
