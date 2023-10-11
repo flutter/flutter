@@ -47,17 +47,6 @@ void main() {
       .having((InstanceRef o) => o.kind, 'kind', 'Bool'));
   }
 
-  Future<void> sendEvent(Map<String, Object> event) async {
-    final VmService client = await vmServiceConnectUri(
-      '${flutter.vmServiceWsUri}');
-    final Response result = await client.callServiceExtension(
-      'ext.dwds.sendEvent',
-      args: event,
-    );
-    expect(result, isA<Success>());
-    await client.dispose();
-  }
-
   testWithoutContext('flutter run outputs info messages from dwds in verbose mode', () async {
     final Future<dynamic> info = expectLater(
       flutter.stdout, emitsThrough(contains('Loaded debug metadata')));
