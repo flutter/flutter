@@ -65,6 +65,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
   private FlutterEngine mockFlutterEngine;
   private FlutterActivityAndFragmentDelegate.Host mockHost;
+  private FlutterActivityAndFragmentDelegate.Host mockHost2;
 
   @SuppressWarnings("deprecation")
   // Robolectric.setupActivity
@@ -94,6 +95,24 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(mockHost.shouldDestroyEngineWithHost()).thenReturn(true);
     when(mockHost.shouldDispatchAppLifecycleState()).thenReturn(true);
     when(mockHost.attachToEngineAutomatically()).thenReturn(true);
+
+    mockHost2 = mock(FlutterActivityAndFragmentDelegate.Host.class);
+    when(mockHost2.getContext()).thenReturn(ctx);
+    when(mockHost2.getActivity()).thenReturn(Robolectric.setupActivity(Activity.class));
+    when(mockHost2.getLifecycle()).thenReturn(mock(Lifecycle.class));
+    when(mockHost2.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
+    when(mockHost2.getDartEntrypointFunctionName()).thenReturn("main");
+    when(mockHost2.getDartEntrypointArgs()).thenReturn(null);
+    when(mockHost2.getAppBundlePath()).thenReturn("/fake/path");
+    when(mockHost2.getInitialRoute()).thenReturn("/");
+    when(mockHost2.getRenderMode()).thenReturn(RenderMode.surface);
+    when(mockHost2.getTransparencyMode()).thenReturn(TransparencyMode.transparent);
+    when(mockHost2.provideFlutterEngine(any(Context.class))).thenReturn(mockFlutterEngine);
+    when(mockHost2.shouldAttachEngineToActivity()).thenReturn(true);
+    when(mockHost2.shouldHandleDeeplinking()).thenReturn(false);
+    when(mockHost2.shouldDestroyEngineWithHost()).thenReturn(true);
+    when(mockHost2.shouldDispatchAppLifecycleState()).thenReturn(true);
+    when(mockHost2.attachToEngineAutomatically()).thenReturn(true);
   }
 
   @Test
@@ -1273,6 +1292,72 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // --- Execute the behavior under test ---
     assertFalse(delegate.flutterView.isAttachedToFlutterEngine());
+  }
+
+  @Test
+  public void itDoesNotDetachTwice() {
+    FlutterEngine cachedEngine = mockFlutterEngine();
+    FlutterEngineCache.getInstance().put("my_flutter_engine", cachedEngine);
+
+    // Engine is a cached singleton that isn't owned by either hosts.
+    when(mockHost.shouldDestroyEngineWithHost()).thenReturn(false);
+    when(mockHost2.shouldDestroyEngineWithHost()).thenReturn(false);
+
+    // Adjust fake hosts to request cached engine.
+    when(mockHost.getCachedEngineId()).thenReturn("my_flutter_engine");
+    when(mockHost2.getCachedEngineId()).thenReturn("my_flutter_engine");
+
+    // Create the real objects that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    FlutterActivityAndFragmentDelegate delegate2 =
+        new FlutterActivityAndFragmentDelegate(mockHost2);
+
+    // This test is written to recreate the following scenario:
+    // 1. We have a FlutterFragment_A attached to a singleton cached engine.
+    // 2. An intent arrives that spawns FlutterFragment_B.
+    // 3. FlutterFragment_B starts and steals the engine from FlutterFragment_A while attaching.
+    //    Via a call to FlutterActivityAndFragmentDelegate.detachFromFlutterEngine().
+    // 4. FlutterFragment_A is forcibly detached from the engine.
+    // 5. FlutterFragment_B is attached to the engine.
+    // 6. FlutterFragment_A is detached from the engine.
+    // Note that the second detach for FlutterFragment_A is done unconditionally when the Fragment
+    // is being
+    // torn down.
+
+    // At this point the engine's life cycle channel receives a message (triggered by
+    // FlutterFragment_A's second detach)
+    // that indicates the app is detached. This breaks FlutterFragment_B.
+
+    // Below is a sequence of calls that mimicks the calls that the above scenario would trigger
+    // without
+    // relying on an intent to trigger the behaviour.
+
+    // FlutterFragment_A is attached to the engine.
+    delegate.onAttach(ctx);
+
+    // NOTE: The following two calls happen in a slightly different order in reality. That is, via,
+    // a call to host.detachFromFlutterEngine, delegate2.onAttach ends up invoking
+    // delegate.onDetach.
+    // To keep this regression test simple, we call them directly.
+
+    // Detach FlutterFragment_A.
+    delegate.onDetach();
+
+    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
+
+    // Attaches to the engine FlutterFragment_B.
+    delegate2.onAttach(ctx);
+    delegate2.onResume();
+
+    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsResumed();
+    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
+
+    // A second Detach of FlutterFragment_A happens when the Fragment is detached.
+    delegate.onDetach();
+
+    // IMPORTANT: The bug we fixed would have resulted in the engine thinking the app
+    // is detached twice instead of once.
+    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
   }
 
   /**
