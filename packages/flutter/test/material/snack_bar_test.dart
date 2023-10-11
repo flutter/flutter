@@ -2263,7 +2263,7 @@ void main() {
     );
 
     testWidgetsWithLeakTracking(
-      '${SnackBarBehavior.floating} should align SnackBar with the top of Scaffold '
+      '${SnackBarBehavior.floating} should align SnackBar with the top of BottomNavigationBar '
           'when Scaffold has both BottomNavigationBar and FloatingActionButton and '
           'BottomNavigationBar.top is higher than FloatingActionButton.top',
           (WidgetTester tester) async {
