@@ -12,7 +12,7 @@ if (build_embedder_examples) {
 
     deps = [
       "//flutter/shell/platform/embedder:embedder",
-      "//third_party/glfw",
+      "//flutter/third_party/glfw",
     ]
 
     libs = [ "EGL" ]
