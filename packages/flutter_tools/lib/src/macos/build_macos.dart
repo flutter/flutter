@@ -146,9 +146,10 @@ Future<void> buildMacOS({
   }
 
   final String? applicationBundle = MacOSApp.fromMacOSProject(flutterProject.macos).applicationBundle(buildInfo);
+  // This output directory is the .app folder itself.
   final Directory outputDirectory = globals.fs.directory(applicationBundle);
   final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-  final String appSize = (directorySize == null)
+  final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
       ? '' // Don't display the size when building a debug variant.
       : ' (${getSizeAsMB(directorySize)})';
   globals.printStatus(
@@ -164,20 +165,10 @@ Future<void> buildMacOS({
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('trace.$arch.json');
 
-    // This analysis is only supported for release builds.
-    // Attempt to guess the correct .app by picking the first one.
-    final Directory candidateDirectory = globals.fs.directory(
-      globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
-    );
-    final Directory appDirectory = candidateDirectory.listSync()
-      .whereType<Directory>()
-      .firstWhere((Directory directory) {
-      return globals.fs.path.extension(directory.path) == '.app';
-    });
     final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: aotSnapshot,
       precompilerTrace: precompilerTrace,
-      outputDirectory: appDirectory,
+      outputDirectory: outputDirectory,
       type: 'macos',
       excludePath: 'Versions', // Avoid double counting caused by symlinks
     );
