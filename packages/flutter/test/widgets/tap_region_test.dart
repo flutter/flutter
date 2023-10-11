@@ -102,7 +102,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-    testWidgetsWithLeakTracking('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -110,16 +110,16 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Column(
           children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                propagatedTaps += 1;
-              },
-              child: const Text('Outside Surface')
-            ),
+            const Text('Outside Surface'),
             TapRegionSurface(
               child: Row(
                 children: <Widget>[
-                  const Text('Outside'),
+                  GestureDetector(
+                    onTap: () {
+                      propagatedTaps += 1;
+                    },
+                    child: const Text('Outside'),
+                  ),
                   TapRegion(
                     consumeOutsideTaps: true,
                     onTapOutside: (PointerEvent event) {
@@ -366,7 +366,8 @@ void main() {
     await click(find.byKey(group1AKey));
     // No hittable children, but set to opaque, so it hits, triggering the
     // group.
-    expect(tappedInside,
+    expect(
+      tappedInside,
       equals(<String>{
         'Group 1 A',
         'Group 1 B',
