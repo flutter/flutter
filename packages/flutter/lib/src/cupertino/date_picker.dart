@@ -2007,6 +2007,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       selectedSecond = widget.initialTimerDuration.inSeconds % 60;
     }
 
+    hourController = FixedExtentScrollController(initialItem: selectedHour!);
+    minuteController = FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
+    secondController = FixedExtentScrollController(initialItem: selectedSecond! ~/ widget.secondInterval);
+
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
 
@@ -2037,6 +2041,14 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       oldWidget.mode == widget.mode,
       "The CupertinoTimerPicker's mode cannot change once it's built",
     );
+    if (widget.minuteInterval != oldWidget.minuteInterval) {
+      minuteController.dispose();
+      minuteController = FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
+    }
+    if (widget.secondInterval != oldWidget.secondInterval) {
+      secondController.dispose();
+      secondController = FixedExtentScrollController(initialItem: selectedSecond! ~/ widget.secondInterval);
+    }
   }
 
   @override
@@ -2171,7 +2183,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    hourController=FixedExtentScrollController(initialItem: selectedHour!);
     return CupertinoPicker(
       scrollController:hourController ,
       magnification: _kMagnification,
@@ -2231,7 +2242,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    minuteController=FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
     return CupertinoPicker(
       scrollController: minuteController,
       magnification: _kMagnification,
@@ -2296,7 +2306,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildSecondPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
-    secondController=FixedExtentScrollController(initialItem: selectedSecond! ~/ widget.secondInterval);
     return CupertinoPicker(
       scrollController: secondController,
       magnification: _kMagnification,
