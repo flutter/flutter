@@ -1448,7 +1448,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
     // Press
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
@@ -1482,19 +1482,24 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     );
 
     // Up
-    await gesture.up();
+    await gesture1.up();
     await tester.pumpAndSettle();
     expect(material, paintsNothing);
 
     // Press the previous parent
-    await gesture.down(tester.getCenter(find.byKey(middleKey)));
+    await gesture1.down(tester.getCenter(find.byKey(middleKey)));
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Use a second pointer to press the previous child
-    await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+
+    // Finish gesture to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Parent inkwell does not block child inkwells from splashes', (WidgetTester tester) async {
@@ -1535,14 +1540,19 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
     // Press middle
-    await tester.startGesture(tester.getTopLeft(find.byKey(middleKey)) + const Offset(1, 1), pointer: 1);
+    final TestGesture gesture1 = await tester.startGesture(tester.getTopLeft(find.byKey(middleKey)) + const Offset(1, 1), pointer: 1);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Press inner
-    await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+
+    // Finish gesture to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Parent inkwell can count the number of pressed children to prevent splash', (WidgetTester tester) async {

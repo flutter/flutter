@@ -178,11 +178,15 @@ void main() {
       ),
     ));
 
-    await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
     final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
     expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Static Scrollable methods can target a specific axis', (WidgetTester tester) async {

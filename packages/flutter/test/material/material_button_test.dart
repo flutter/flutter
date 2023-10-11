@@ -49,7 +49,7 @@ void main() {
     expect(material.type, MaterialType.transparency);
 
     final Offset center = tester.getCenter(find.byType(MaterialButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Only elevation changes when enabled and pressed.
@@ -95,6 +95,10 @@ void main() {
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Does MaterialButton work with hover', (WidgetTester tester) async {
@@ -262,10 +266,14 @@ void main() {
 
     // Highlighted (pressed).
     final Offset center = tester.getCenter(find.byType(MaterialButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );

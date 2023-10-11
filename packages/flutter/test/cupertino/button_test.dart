@@ -240,7 +240,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -249,6 +249,10 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, 0.4);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('pressedOpacity parameter', (WidgetTester tester) async {
@@ -261,7 +265,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -270,6 +274,10 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, pressedOpacity);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Cupertino button is semantically a button', (WidgetTester tester) async {

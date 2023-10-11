@@ -1382,7 +1382,7 @@ void main() {
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
     // Tap center and wait for animation.
     final Offset center = tester.getCenter(find.byType(Slider));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
@@ -1395,6 +1395,10 @@ void main() {
         color: sliderTheme.overlayColor,
       ),
     );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/74503
@@ -1883,7 +1887,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final Offset center = tester.getCenter(find.byType(Slider));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     expect(
       find.byType(Slider),
       paints
@@ -1898,6 +1902,10 @@ void main() {
           bottomRight: const Radius.circular(2.0),
         )),
     );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('The mouse cursor is themeable', (WidgetTester tester) async {
@@ -2060,7 +2068,7 @@ void main() {
       final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
       final Offset center = tester.getCenter(find.byType(Slider));
-      await tester.startGesture(center);
+      final TestGesture gesture = await tester.startGesture(center);
       // Wait for value indicator animation to finish.
       await tester.pumpAndSettle();
       expect(
@@ -2075,6 +2083,9 @@ void main() {
           )
       );
 
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     } finally {
       debugDisableShadows = true;
     }
@@ -2273,7 +2284,7 @@ void main() {
         final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
         final Offset center = tester.getCenter(find.byType(Slider));
-        await tester.startGesture(center);
+        final TestGesture gesture = await tester.startGesture(center);
         // Wait for value indicator animation to finish.
         await tester.pumpAndSettle();
         expect(
@@ -2286,6 +2297,9 @@ void main() {
             ..path(color: const Color(0xf55f5f5f))
         );
 
+        // Finish gesture to release resources.
+        await gesture.up();
+        await tester.pumpAndSettle();
       } finally {
         debugDisableShadows = true;
       }
