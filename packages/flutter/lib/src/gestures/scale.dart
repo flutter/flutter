@@ -100,6 +100,7 @@ class ScaleStartDetails {
     this.focalPoint = Offset.zero,
     Offset? localFocalPoint,
     this.pointerCount = 0,
+    this.sourceTimeStamp,
   }) : localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The initial focal point of the pointers in contact with the screen.
@@ -128,6 +129,12 @@ class ScaleStartDetails {
   /// Typically this is the number of fingers being used to pan the widget using the gesture
   /// recognizer.
   final int pointerCount;
+
+  /// Recorded timestamp of the source pointer event that triggered the drag
+  /// event.
+  ///
+  /// Could be null if triggered from proxied events such as accessibility.
+  final Duration? sourceTimeStamp;
 
   @override
   String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
@@ -423,6 +430,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   final Map<int, _PointerPanZoomData> _pointerPanZooms = <int, _PointerPanZoomData>{};
   double _initialPanZoomScaleFactor = 1;
   double _initialPanZoomRotationFactor = 0;
+  Duration? _initialEventTimestamp;
 
   double get _pointerScaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
@@ -483,6 +491,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
+    _initialEventTimestamp = event.timeStamp;
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
       _initialSpan = 0.0;
@@ -502,6 +511,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     super.addAllowedPointerPanZoom(event);
     startTrackingPointer(event.pointer, event.transform);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
+    _initialEventTimestamp = event.timeStamp;
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
       _initialPanZoomScaleFactor = 1.0;
@@ -730,6 +740,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           focalPoint: _currentFocalPoint!,
           localFocalPoint: _localFocalPoint,
           pointerCount: pointerCount,
+          sourceTimeStamp: _initialEventTimestamp,
         ));
       });
     }
