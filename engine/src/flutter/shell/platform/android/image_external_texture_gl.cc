@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/hardware_buffer_external_texture_gl.h"
+#include "flutter/shell/platform/android/image_external_texture_gl.h"
 
 #include <android/hardware_buffer_jni.h>
 #include <android/sensor.h>
@@ -28,13 +28,13 @@
 
 namespace flutter {
 
-HardwareBufferExternalTextureGL::HardwareBufferExternalTextureGL(
+ImageExternalTextureGL::ImageExternalTextureGL(
     int64_t id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : HardwareBufferExternalTexture(id, image_texture_entry, jni_facade) {}
+    : ImageExternalTexture(id, image_texture_entry, jni_facade) {}
 
-void HardwareBufferExternalTextureGL::Attach(PaintContext& context) {
+void ImageExternalTextureGL::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
     if (!android_image_.is_null()) {
       JavaLocalRef hardware_buffer = HardwareBufferFor(android_image_);
@@ -47,11 +47,11 @@ void HardwareBufferExternalTextureGL::Attach(PaintContext& context) {
   }
 }
 
-void HardwareBufferExternalTextureGL::Detach() {
+void ImageExternalTextureGL::Detach() {
   egl_image_.reset();
 }
 
-bool HardwareBufferExternalTextureGL::MaybeSwapImages() {
+bool ImageExternalTextureGL::MaybeSwapImages() {
   JavaLocalRef image = AcquireLatestImage();
   if (image.is_null()) {
     return false;
@@ -72,7 +72,7 @@ bool HardwareBufferExternalTextureGL::MaybeSwapImages() {
   return true;
 }
 
-impeller::UniqueEGLImageKHR HardwareBufferExternalTextureGL::CreateEGLImage(
+impeller::UniqueEGLImageKHR ImageExternalTextureGL::CreateEGLImage(
     AHardwareBuffer* hardware_buffer) {
   if (hardware_buffer == nullptr) {
     return impeller::UniqueEGLImageKHR();
@@ -98,31 +98,31 @@ impeller::UniqueEGLImageKHR HardwareBufferExternalTextureGL::CreateEGLImage(
   return impeller::UniqueEGLImageKHR(maybe_image);
 }
 
-HardwareBufferExternalTextureGLSkia::HardwareBufferExternalTextureGLSkia(
+ImageExternalTextureGLSkia::ImageExternalTextureGLSkia(
     const std::shared_ptr<AndroidContextGLSkia>& context,
     int64_t id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : HardwareBufferExternalTextureGL(id, image_texture_entry, jni_facade) {}
+    : ImageExternalTextureGL(id, image_texture_entry, jni_facade) {}
 
-void HardwareBufferExternalTextureGLSkia::Attach(PaintContext& context) {
+void ImageExternalTextureGLSkia::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
     // After this call state_ will be AttachmentState::kAttached and egl_image_
     // will have been created if we still have an Image associated with us.
-    HardwareBufferExternalTextureGL::Attach(context);
+    ImageExternalTextureGL::Attach(context);
     GLuint texture_name;
     glGenTextures(1, &texture_name);
     texture_.reset(impeller::GLTexture{texture_name});
   }
 }
 
-void HardwareBufferExternalTextureGLSkia::Detach() {
-  HardwareBufferExternalTextureGL::Detach();
+void ImageExternalTextureGLSkia::Detach() {
+  ImageExternalTextureGL::Detach();
   texture_.reset();
 }
 
-void HardwareBufferExternalTextureGLSkia::ProcessFrame(PaintContext& context,
-                                                       const SkRect& bounds) {
+void ImageExternalTextureGLSkia::ProcessFrame(PaintContext& context,
+                                              const SkRect& bounds) {
   const bool swapped = MaybeSwapImages();
   if (!swapped && !egl_image_.is_valid()) {
     // Nothing to do.
@@ -132,7 +132,7 @@ void HardwareBufferExternalTextureGLSkia::ProcessFrame(PaintContext& context,
   dl_image_ = CreateDlImage(context, bounds);
 }
 
-void HardwareBufferExternalTextureGLSkia::BindImageToTexture(
+void ImageExternalTextureGLSkia::BindImageToTexture(
     const impeller::UniqueEGLImageKHR& image,
     GLuint tex) {
   if (!image.is_valid() || tex == 0) {
@@ -143,7 +143,7 @@ void HardwareBufferExternalTextureGLSkia::BindImageToTexture(
                                (GLeglImageOES)image.get().image);
 }
 
-sk_sp<flutter::DlImage> HardwareBufferExternalTextureGLSkia::CreateDlImage(
+sk_sp<flutter::DlImage> ImageExternalTextureGLSkia::CreateDlImage(
     PaintContext& context,
     const SkRect& bounds) {
   GrGLTextureInfo textureInfo = {GL_TEXTURE_EXTERNAL_OES,
@@ -155,26 +155,24 @@ sk_sp<flutter::DlImage> HardwareBufferExternalTextureGLSkia::CreateDlImage(
       kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr));
 }
 
-HardwareBufferExternalTextureGLImpeller::
-    HardwareBufferExternalTextureGLImpeller(
-        const std::shared_ptr<impeller::ContextGLES>& context,
-        int64_t id,
-        const fml::jni::ScopedJavaGlobalRef<jobject>& image_textury_entry,
-        const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : HardwareBufferExternalTextureGL(id, image_textury_entry, jni_facade),
+ImageExternalTextureGLImpeller::ImageExternalTextureGLImpeller(
+    const std::shared_ptr<impeller::ContextGLES>& context,
+    int64_t id,
+    const fml::jni::ScopedJavaGlobalRef<jobject>& image_textury_entry,
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
+    : ImageExternalTextureGL(id, image_textury_entry, jni_facade),
       impeller_context_(context) {}
 
-void HardwareBufferExternalTextureGLImpeller::Detach() {}
+void ImageExternalTextureGLImpeller::Detach() {}
 
-void HardwareBufferExternalTextureGLImpeller::Attach(PaintContext& context) {
+void ImageExternalTextureGLImpeller::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
-    HardwareBufferExternalTextureGL::Attach(context);
+    ImageExternalTextureGL::Attach(context);
   }
 }
 
-void HardwareBufferExternalTextureGLImpeller::ProcessFrame(
-    PaintContext& context,
-    const SkRect& bounds) {
+void ImageExternalTextureGLImpeller::ProcessFrame(PaintContext& context,
+                                                  const SkRect& bounds) {
   const bool swapped = MaybeSwapImages();
   if (!swapped && !egl_image_.is_valid()) {
     // Nothing to do.
@@ -183,7 +181,7 @@ void HardwareBufferExternalTextureGLImpeller::ProcessFrame(
   dl_image_ = CreateDlImage(context, bounds);
 }
 
-sk_sp<flutter::DlImage> HardwareBufferExternalTextureGLImpeller::CreateDlImage(
+sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
     PaintContext& context,
     const SkRect& bounds) {
   impeller::TextureDescriptor desc;

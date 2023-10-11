@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_HARDWARE_BUFFER_EXTERNAL_TEXTURE_GL_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_HARDWARE_BUFFER_EXTERNAL_TEXTURE_GL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_
 
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/shell/platform/android/hardware_buffer_external_texture.h"
+#include "flutter/shell/platform/android/image_external_texture.h"
 
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
 #include "flutter/impeller/renderer/backend/gles/gles.h"
@@ -20,9 +20,9 @@
 
 namespace flutter {
 
-class HardwareBufferExternalTextureGL : public HardwareBufferExternalTexture {
+class ImageExternalTextureGL : public ImageExternalTexture {
  public:
-  HardwareBufferExternalTextureGL(
+  ImageExternalTextureGL(
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_textury_entry,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
@@ -39,13 +39,12 @@ class HardwareBufferExternalTextureGL : public HardwareBufferExternalTexture {
   fml::jni::ScopedJavaGlobalRef<jobject> android_image_;
   impeller::UniqueEGLImageKHR egl_image_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(HardwareBufferExternalTextureGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGL);
 };
 
-class HardwareBufferExternalTextureGLSkia
-    : public HardwareBufferExternalTextureGL {
+class ImageExternalTextureGLSkia : public ImageExternalTextureGL {
  public:
-  HardwareBufferExternalTextureGLSkia(
+  ImageExternalTextureGLSkia(
       const std::shared_ptr<AndroidContextGLSkia>& context,
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_textury_entry,
@@ -62,13 +61,12 @@ class HardwareBufferExternalTextureGLSkia
 
   impeller::UniqueGLTexture texture_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(HardwareBufferExternalTextureGLSkia);
+  FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGLSkia);
 };
 
-class HardwareBufferExternalTextureGLImpeller
-    : public HardwareBufferExternalTextureGL {
+class ImageExternalTextureGLImpeller : public ImageExternalTextureGL {
  public:
-  HardwareBufferExternalTextureGLImpeller(
+  ImageExternalTextureGLImpeller(
       const std::shared_ptr<impeller::ContextGLES>& context,
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>&
@@ -85,9 +83,9 @@ class HardwareBufferExternalTextureGLImpeller
 
   const std::shared_ptr<impeller::ContextGLES> impeller_context_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(HardwareBufferExternalTextureGLImpeller);
+  FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGLImpeller);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_HARDWARE_BUFFER_EXTERNAL_TEXTURE_GL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_

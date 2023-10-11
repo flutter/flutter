@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_HARDWARE_BUFFER_EXTERNAL_TEXTURE_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_HARDWARE_BUFFER_EXTERNAL_TEXTURE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_H_
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/logging.h"
@@ -17,14 +17,14 @@ namespace flutter {
 
 // External texture peered to a sequence of android.hardware.HardwareBuffers.
 //
-class HardwareBufferExternalTexture : public flutter::Texture {
+class ImageExternalTexture : public flutter::Texture {
  public:
-  explicit HardwareBufferExternalTexture(
+  explicit ImageExternalTexture(
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
-  virtual ~HardwareBufferExternalTexture() = default;
+  virtual ~ImageExternalTexture() = default;
 
   // |flutter::Texture|.
   void Paint(PaintContext& context,
@@ -65,9 +65,9 @@ class HardwareBufferExternalTexture : public flutter::Texture {
 
   sk_sp<flutter::DlImage> dl_image_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(HardwareBufferExternalTexture);
+  FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTexture);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_HARDWARE_BUFFER_EXTERNAL_TEXTURE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_H_

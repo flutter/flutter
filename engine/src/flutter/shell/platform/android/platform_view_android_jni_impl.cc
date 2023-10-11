@@ -31,7 +31,7 @@
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/flutter_main.h"
-#include "flutter/shell/platform/android/hardware_buffer_external_texture_gl.h"
+#include "flutter/shell/platform/android/image_external_texture_gl.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl.h"
