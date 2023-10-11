@@ -178,7 +178,9 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpFakeXcodeBuildHandler('Release'),
+    ]),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -464,7 +466,7 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
