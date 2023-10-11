@@ -734,7 +734,17 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     }
 
     if (result.output != null) {
-      globals.printStatus('Built ${result.output}.');
+      final Directory outputDirectory = globals.fs.directory(result.output);
+      final int? directorySize = globals.os.getDirectorySize(outputDirectory);
+      final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsMB(directorySize)})';
+
+      globals.printStatus(
+        '${globals.terminal.successMark} '
+        'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
+        color: TerminalColor.green,
+      );
 
       // When an app is successfully built, record to analytics whether Impeller
       // is enabled or disabled.
