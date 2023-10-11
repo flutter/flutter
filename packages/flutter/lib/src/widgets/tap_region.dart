@@ -10,7 +10,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 
 // Enable if you want verbose logging about tap region changes.
-const bool _kDebugTapRegion = true;
+const bool _kDebugTapRegion = false;
 
 bool _tapRegionDebug(String message, [Iterable<String>? details]) {
   if (_kDebugTapRegion) {
