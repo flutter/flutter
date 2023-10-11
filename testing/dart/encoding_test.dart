@@ -10,6 +10,8 @@ import 'dart:ui';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 
+import 'impeller_enabled.dart';
+
 const int _kWidth = 10;
 const int _kRadius = 2;
 
@@ -18,6 +20,10 @@ const Color _kGreen = Color.fromRGBO(0, 255, 0, 1.0);
 
 void main() {
   test('decodeImageFromPixels float32', () async {
+    if (impellerEnabled) {
+      print('Disabled on Impeller - https://github.com/flutter/flutter/issues/135702');
+      return;
+    }
     const int width = 2;
     const int height = 2;
     final Float32List pixels = Float32List(width * height * 4);
@@ -91,6 +97,10 @@ void main() {
   });
 
   test('Image.toByteData Unmodified format works with grayscale images', () async {
+    if (impellerEnabled) {
+      print('Disabled on Impeller - https://github.com/flutter/flutter/issues/135706');
+      return;
+    }
     final Image image = await GrayscaleImage.load();
     final ByteData data = (await image.toByteData(format: ImageByteFormat.rawUnmodified))!;
     final Uint8List bytes = data.buffer.asUint8List();
@@ -99,6 +109,10 @@ void main() {
   });
 
   test('Image.toByteData PNG format works with simple image', () async {
+    if (impellerEnabled) {
+      print('Disabled on Impeller - https://github.com/flutter/flutter/issues/135706');
+      return;
+    }
     final Image image = await Square4x4Image.image;
     final ByteData data = (await image.toByteData(format: ImageByteFormat.png))!;
     final List<int> expected = await readFile('square.png');

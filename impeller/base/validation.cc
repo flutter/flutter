@@ -48,7 +48,7 @@ void ImpellerValidationBreak(const char* message) {
   } else {
     FML_LOG(ERROR) << stream.str();
   }
-#endif  // IMPELLER_DEBUG
+#endif  // IMPELLER_ENABLE_VALIDATION
 }
 
 }  // namespace impeller

@@ -12,6 +12,8 @@ import 'package:litetest/litetest.dart';
 import 'package:vm_service/vm_service.dart' as vms;
 import 'package:vm_service/vm_service_io.dart';
 
+import '../impeller_enabled.dart';
+
 void main() {
   test('Setting invalid directory returns an error', () async {
     vms.VmService? vmService;
@@ -59,7 +61,7 @@ void main() {
         'ext.ui.window.impellerEnabled',
         isolateId: isolateId,
       );
-      expect(response.json!['enabled'], false);
+      expect(response.json!['enabled'], impellerEnabled);
     } finally {
       await vmService?.dispose();
     }

@@ -55,7 +55,8 @@ Dart_Handle InternalFlutterGpu_Context_InitializeDefault(Dart_Handle wrapper) {
     // Grab the Impeller context from the IO manager.
     std::promise<std::shared_ptr<impeller::Context>> context_promise;
     auto impeller_context_future = context_promise.get_future();
-    dart_state->GetTaskRunners().GetIOTaskRunner()->PostTask(
+    fml::TaskRunner::RunNowOrPostTask(
+        dart_state->GetTaskRunners().GetIOTaskRunner(),
         fml::MakeCopyable([promise = std::move(context_promise),
                            io_manager = dart_state->GetIOManager()]() mutable {
           promise.set_value(io_manager ? io_manager->GetImpellerContext()
