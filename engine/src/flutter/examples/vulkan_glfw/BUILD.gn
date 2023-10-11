@@ -9,7 +9,7 @@ executable("vulkan_glfw") {
 
   deps = [
     "//flutter/shell/platform/embedder:embedder",
-    "//third_party/glfw",
+    "//flutter/third_party/glfw",
     "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
   ]
 }

@@ -278,6 +278,331 @@ limitations under the License.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/mappings.h
+ORIGIN: ../../../flutter/third_party/glfw/src/mappings.h.in
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/mappings.h
+FILE: ../../../flutter/third_party/glfw/src/mappings.h.in
+----------------------------------------------------------------------------------------------------
+Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the
+use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/LICENSE.md
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/glfw.rc.in
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+
+Copyright (c) 2006-2019 Camilla Löwy
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/context.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/context.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+Copyright (c) 2006-2016 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/linux_joystick.c
+ORIGIN: ../../../flutter/third_party/glfw/src/posix_thread.c
+ORIGIN: ../../../flutter/third_party/glfw/src/posix_thread.h
+ORIGIN: ../../../flutter/third_party/glfw/src/posix_time.c
+ORIGIN: ../../../flutter/third_party/glfw/src/posix_time.h
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_thread.c
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_thread.h
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_time.c
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_time.h
+ORIGIN: ../../../flutter/third_party/glfw/src/xkb_unicode.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/linux_joystick.c
+FILE: ../../../flutter/third_party/glfw/src/posix_thread.c
+FILE: ../../../flutter/third_party/glfw/src/posix_thread.h
+FILE: ../../../flutter/third_party/glfw/src/posix_time.c
+FILE: ../../../flutter/third_party/glfw/src/posix_time.h
+FILE: ../../../flutter/third_party/glfw/src/win32_thread.c
+FILE: ../../../flutter/third_party/glfw/src/win32_thread.h
+FILE: ../../../flutter/third_party/glfw/src/win32_time.c
+FILE: ../../../flutter/third_party/glfw/src/win32_time.h
+FILE: ../../../flutter/third_party/glfw/src/xkb_unicode.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+Copyright (c) 2006-2017 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/include/GLFW/glfw3native.h
+ORIGIN: ../../../flutter/third_party/glfw/src/init.c
+ORIGIN: ../../../flutter/third_party/glfw/src/platform.c
+ORIGIN: ../../../flutter/third_party/glfw/src/platform.h
+ORIGIN: ../../../flutter/third_party/glfw/src/vulkan.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/include/GLFW/glfw3native.h
+FILE: ../../../flutter/third_party/glfw/src/init.c
+FILE: ../../../flutter/third_party/glfw/src/platform.c
+FILE: ../../../flutter/third_party/glfw/src/platform.h
+FILE: ../../../flutter/third_party/glfw/src/vulkan.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+Copyright (c) 2006-2018 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/include/GLFW/glfw3.h
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_monitor.m
+ORIGIN: ../../../flutter/third_party/glfw/src/egl_context.c
+ORIGIN: ../../../flutter/third_party/glfw/src/glx_context.c
+ORIGIN: ../../../flutter/third_party/glfw/src/input.c
+ORIGIN: ../../../flutter/third_party/glfw/src/internal.h
+ORIGIN: ../../../flutter/third_party/glfw/src/monitor.c
+ORIGIN: ../../../flutter/third_party/glfw/src/wgl_context.c
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_init.c
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_joystick.c
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_monitor.c
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_platform.h
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_window.c
+ORIGIN: ../../../flutter/third_party/glfw/src/x11_init.c
+ORIGIN: ../../../flutter/third_party/glfw/src/x11_monitor.c
+ORIGIN: ../../../flutter/third_party/glfw/src/x11_platform.h
+ORIGIN: ../../../flutter/third_party/glfw/src/x11_window.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/include/GLFW/glfw3.h
+FILE: ../../../flutter/third_party/glfw/src/cocoa_monitor.m
+FILE: ../../../flutter/third_party/glfw/src/egl_context.c
+FILE: ../../../flutter/third_party/glfw/src/glx_context.c
+FILE: ../../../flutter/third_party/glfw/src/input.c
+FILE: ../../../flutter/third_party/glfw/src/internal.h
+FILE: ../../../flutter/third_party/glfw/src/monitor.c
+FILE: ../../../flutter/third_party/glfw/src/wgl_context.c
+FILE: ../../../flutter/third_party/glfw/src/win32_init.c
+FILE: ../../../flutter/third_party/glfw/src/win32_joystick.c
+FILE: ../../../flutter/third_party/glfw/src/win32_monitor.c
+FILE: ../../../flutter/third_party/glfw/src/win32_platform.h
+FILE: ../../../flutter/third_party/glfw/src/win32_window.c
+FILE: ../../../flutter/third_party/glfw/src/x11_init.c
+FILE: ../../../flutter/third_party/glfw/src/x11_monitor.c
+FILE: ../../../flutter/third_party/glfw/src/x11_platform.h
+FILE: ../../../flutter/third_party/glfw/src/x11_window.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+Copyright (c) 2006-2019 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/window.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/window.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+Copyright (c) 2006-2019 Camilla Löwy <elmindreda@glfw.org>
+Copyright (c) 2012 Torsten Walluhn <tw@mad-cad.net>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_joystick.h
+ORIGIN: ../../../flutter/third_party/glfw/src/null_joystick.h
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_joystick.h
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/cocoa_joystick.h
+FILE: ../../../flutter/third_party/glfw/src/null_joystick.h
+FILE: ../../../flutter/third_party/glfw/src/win32_joystick.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2006-2017 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/mappings.h
+ORIGIN: ../../../flutter/third_party/glfw/src/mappings.h.in
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/mappings.h
+FILE: ../../../flutter/third_party/glfw/src/mappings.h.in
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2006-2018 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: accessibility
 ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc + ../../../flutter/third_party/accessibility/LICENSE
 TYPE: LicenseType.bsd
@@ -310,6 +635,125 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_time.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/cocoa_time.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009-2016 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_init.m
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_platform.h
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_window.m
+ORIGIN: ../../../flutter/third_party/glfw/src/nsgl_context.m
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/cocoa_init.m
+FILE: ../../../flutter/third_party/glfw/src/cocoa_platform.h
+FILE: ../../../flutter/third_party/glfw/src/cocoa_window.m
+FILE: ../../../flutter/third_party/glfw/src/nsgl_context.m
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009-2019 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_joystick.m
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/cocoa_joystick.m
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009-2019 Camilla Löwy <elmindreda@glfw.org>
+Copyright (c) 2012 Torsten Walluhn <tw@mad-cad.net>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/cocoa_time.h
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/cocoa_time.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009-2021 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
 ====================================================================================================
 
 ====================================================================================================
@@ -531,6 +975,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/linux_joystick.h
+ORIGIN: ../../../flutter/third_party/glfw/src/wl_init.c
+ORIGIN: ../../../flutter/third_party/glfw/src/wl_monitor.c
+ORIGIN: ../../../flutter/third_party/glfw/src/wl_platform.h
+ORIGIN: ../../../flutter/third_party/glfw/src/wl_window.c
+ORIGIN: ../../../flutter/third_party/glfw/src/xkb_unicode.h
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/linux_joystick.h
+FILE: ../../../flutter/third_party/glfw/src/wl_init.c
+FILE: ../../../flutter/third_party/glfw/src/wl_monitor.c
+FILE: ../../../flutter/third_party/glfw/src/wl_platform.h
+FILE: ../../../flutter/third_party/glfw/src/wl_window.c
+FILE: ../../../flutter/third_party/glfw/src/xkb_unicode.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2014 Jonas Ådahl <jadahl@gmail.com>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: accessibility
 ORIGIN: ../../../flutter/third_party/accessibility/base/win/windows_types.h + ../../../flutter/third_party/accessibility/LICENSE
 TYPE: LicenseType.bsd
@@ -563,6 +1045,158 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/null_init.c
+ORIGIN: ../../../flutter/third_party/glfw/src/null_platform.h
+ORIGIN: ../../../flutter/third_party/glfw/src/osmesa_context.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/null_init.c
+FILE: ../../../flutter/third_party/glfw/src/null_platform.h
+FILE: ../../../flutter/third_party/glfw/src/osmesa_context.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2016 Google Inc.
+Copyright (c) 2016-2017 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/null_monitor.c
+ORIGIN: ../../../flutter/third_party/glfw/src/null_window.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/null_monitor.c
+FILE: ../../../flutter/third_party/glfw/src/null_window.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2016 Google Inc.
+Copyright (c) 2016-2019 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/null_joystick.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/null_joystick.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2016-2017 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/posix_module.c
+ORIGIN: ../../../flutter/third_party/glfw/src/win32_module.c
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/posix_module.c
+FILE: ../../../flutter/third_party/glfw/src/win32_module.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2021 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../flutter/third_party/glfw/src/posix_poll.c
+ORIGIN: ../../../flutter/third_party/glfw/src/posix_poll.h
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/glfw/src/posix_poll.c
+FILE: ../../../flutter/third_party/glfw/src/posix_poll.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2022 Camilla Löwy <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
 ====================================================================================================
 
 ====================================================================================================
@@ -6849,4 +7483,4 @@ use or other dealings in these Data Files or Software without prior
 written authorization of the copyright holder.
 ====================================================================================================
 
-Total license count: 20
+Total license count: 39

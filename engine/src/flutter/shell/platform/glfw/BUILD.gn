@@ -59,7 +59,7 @@ source_set("flutter_glfw") {
     "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw",
-    "//third_party/glfw",
+    "//flutter/third_party/glfw",
     "//third_party/rapidjson",
   ]
 
