@@ -94,7 +94,7 @@ class BuildPreviewCommand extends BuildSubCommand {
   }
 
   Future<FlutterProject> _createProject(Directory targetDir) async {
-    final List<String> args = <String>[
+    final List<String> cmd = <String>[
       fs.path.join(flutterRoot, 'bin', 'flutter.bat'),
       'create',
       '--empty',
@@ -103,14 +103,14 @@ class BuildPreviewCommand extends BuildSubCommand {
       targetDir.path,
     ];
     final RunResult result = await processUtils.run(
-      args,
+      cmd,
       allowReentrantFlutter: true,
     );
     if (result.exitCode != 0) {
-      final StringBuffer buffer = StringBuffer('${args.join(' ')} exited with code ${result.exitCode}\n');
+      final StringBuffer buffer = StringBuffer('${cmd.join(' ')} exited with code ${result.exitCode}\n');
       buffer.writeln('stdout:\n${result.stdout}\n');
       buffer.writeln('stderr:\n${result.stderr}');
-      throw ProcessException(args.first, args.sublist(1), buffer.toString(), result.exitCode);
+      throw ProcessException(cmd.first, cmd.sublist(1), buffer.toString(), result.exitCode);
     }
     return FlutterProject.fromDirectory(targetDir);
   }
