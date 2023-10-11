@@ -71,7 +71,7 @@ void main() {
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
-    tester.route(pointer1.move(const Offset(20.0, 30.0), timeStamp: Duration(milliseconds: 100)));
+    tester.route(pointer1.move(const Offset(20.0, 30.0), const timeStamp: Duration(milliseconds: 100)));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, const Offset(20.0, 30.0));
@@ -80,7 +80,7 @@ void main() {
     updatedScale = null;
     expect(updatedDelta, const Offset(20.0, 30.0));
     updatedDelta = null;
-    expect(updatedSourceTimestamp, Duration(milliseconds: 100));
+    expect(updatedSourceTimestamp, const Duration(milliseconds: 100));
     updatedSourceTimestamp = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
@@ -104,7 +104,7 @@ void main() {
     expect(didStartScale, isFalse);
 
     // Zoom in
-    tester.route(pointer2.move(const Offset(0.0, 10.0), timestamp: const Duration(milliseconds: 200)));
+    tester.route(pointer2.move(const Offset(0.0, 10.0), timeStamp: const Duration(milliseconds: 200)));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, const Offset(10.0, 20.0));
@@ -129,7 +129,7 @@ void main() {
     expect(updatedHorizontalScale, 0.5);
     expect(updatedVerticalScale, 0.5);
     expect(updatedDelta, const Offset(7.5, 7.5));
-    expect(updatedTimestamp, const Duration(milliseconds: 300));
+    expect(updatedTimeStamp, const Duration(milliseconds: 300));
     expect(didTap, isFalse);
 
     // Horizontal scaling
@@ -247,7 +247,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Continue panning with one finger
-    tester.route(pointer3.move(Offset.zero), timestamp: Duration(milliseconds: 800));
+    tester.route(pointer3.move(Offset.zero), timeStamp: const Duration(milliseconds: 800));
     expect(didStartScale, isTrue);
     didStartScale = false;
     expect(updatedFocalPoint, Offset.zero);
