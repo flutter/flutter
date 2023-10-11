@@ -234,7 +234,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      test_timeout_secs: "3600"
+      test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2454,6 +2454,17 @@ targets:
       task_name: new_gallery_impeller__transition_perf
 
   # Pixel 7 Pro, Impeller (Vulkan)
+  - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery_impeller_old_zoom__transition_perf
+
+  # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     bringup: true
@@ -4481,6 +4492,7 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_2_5
     recipe: flutter/flutter_drone
@@ -4499,6 +4511,7 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_3_5
     recipe: flutter/flutter_drone
@@ -4517,6 +4530,7 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_4_5
     recipe: flutter/flutter_drone
@@ -4535,6 +4549,7 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows build_tests_5_5
     recipe: flutter/flutter_drone
@@ -4553,6 +4568,7 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "3600" # 1 hour
 
   - name: Windows customer_testing
     enabled_branches:
@@ -4673,6 +4689,20 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
+      task_name: hot_mode_dev_cycle_win_target__benchmark
+
+  - name: Windows_arm64 hot_mode_dev_cycle_win_target__benchmark
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
 
   - name: Windows module_custom_host_app_name_test
@@ -5150,6 +5180,21 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_home_scroll_perf__timeline_summary
+
+  - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_home_scroll_perf__timeline_summary
+
 
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
