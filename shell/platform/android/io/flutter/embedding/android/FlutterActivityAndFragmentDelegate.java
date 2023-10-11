@@ -714,6 +714,10 @@ import java.util.List;
    * </ol>
    */
   void onDetach() {
+    if (!isAttached) {
+      // Already detached.
+      return;
+    }
     Log.v(TAG, "onDetach()");
     ensureAlive();
 
