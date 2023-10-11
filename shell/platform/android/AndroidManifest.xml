@@ -24,4 +24,12 @@
             </intent-filter>
         </activity>
     </application>
+
+    <!-- Required for io.flutter.plugin.text.ProcessTextPlugin to query activities that can process text. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
+        </intent>
+    </queries>
  </manifest>
