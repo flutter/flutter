@@ -468,7 +468,7 @@ class _RenderFlexibleSpaceHeaderOpacity extends RenderOpacity {
     if (child == null) {
       return;
     }
-    if (opacity == 0) {
+    if ((opacity * 255).roundToDouble() <= 0) {
       layer = null;
       return;
     }
