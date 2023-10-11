@@ -176,7 +176,7 @@ class VisualStudio {
   String? get cmakeGenerator {
     // From https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html#visual-studio-generators
     return switch (_majorVersion) {
-      17 => 'Visual Studio 17 2022',
+      17      => 'Visual Studio 17 2022',
       16 || _ => 'Visual Studio 16 2019',
     };
   }

@@ -207,9 +207,9 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
       return false;
     }
     return switch (side) {
-      KeyboardSide.any => true,
-      KeyboardSide.all => metaState & leftMask != 0 && metaState & rightMask != 0,
-      KeyboardSide.left => metaState & leftMask != 0,
+      KeyboardSide.any   => true,
+      KeyboardSide.all   => metaState & leftMask  != 0 && metaState & rightMask != 0,
+      KeyboardSide.left  => metaState & leftMask  != 0,
       KeyboardSide.right => metaState & rightMask != 0,
     };
   }

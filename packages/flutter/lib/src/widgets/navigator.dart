@@ -5565,7 +5565,7 @@ abstract class _RestorationInformation {
     assert(casted.isNotEmpty);
     final _RouteRestorationType type = _RouteRestorationType.values[casted[0]! as int];
     return switch (type) {
-      _RouteRestorationType.named => _NamedRestorationInformation.fromSerializableData(casted.sublist(1)),
+      _RouteRestorationType.named     =>     _NamedRestorationInformation.fromSerializableData(casted.sublist(1)),
       _RouteRestorationType.anonymous => _AnonymousRestorationInformation.fromSerializableData(casted.sublist(1)),
     };
   }

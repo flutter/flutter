@@ -271,7 +271,7 @@ enum AxisDirection {
 /// and [AxisDirection.right].
 Axis axisDirectionToAxis(AxisDirection axisDirection) {
   return switch (axisDirection) {
-    AxisDirection.up || AxisDirection.down => Axis.vertical,
+    AxisDirection.up   || AxisDirection.down  => Axis.vertical,
     AxisDirection.left || AxisDirection.right => Axis.horizontal,
   };
 }

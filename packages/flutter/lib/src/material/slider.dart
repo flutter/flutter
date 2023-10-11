@@ -875,8 +875,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         };
     }
 
-    final Map<ShortcutActivator, Intent> shortcutMap;
-    shortcutMap = switch (MediaQuery.navigationModeOf(context)) {
+    final Map<ShortcutActivator, Intent> shortcutMap = switch (MediaQuery.navigationModeOf(context)) {
       NavigationMode.directional => _directionalNavShortcutMap,
       NavigationMode.traditional => _traditionalNavShortcutMap,
     };
@@ -1556,7 +1555,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final double valueDelta = details.primaryDelta! / _trackRect.width;
           _currentDragValue += switch (textDirection) {
             TextDirection.rtl => -valueDelta,
-            TextDirection.ltr => valueDelta,
+            TextDirection.ltr =>  valueDelta,
           };
           onChanged!(_discretize(_currentDragValue));
         }

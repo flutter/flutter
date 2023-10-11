@@ -308,8 +308,8 @@ class ReverseAnimation extends Animation<double>
 
   AnimationStatus _reverseStatus(AnimationStatus status) {
     return switch (status) {
-      AnimationStatus.forward => AnimationStatus.reverse,
-      AnimationStatus.reverse => AnimationStatus.forward,
+      AnimationStatus.forward   => AnimationStatus.reverse,
+      AnimationStatus.reverse   => AnimationStatus.forward,
       AnimationStatus.completed => AnimationStatus.dismissed,
       AnimationStatus.dismissed => AnimationStatus.completed,
     };

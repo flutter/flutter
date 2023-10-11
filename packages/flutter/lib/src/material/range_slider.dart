@@ -1375,8 +1375,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     // The visual position is the position of the thumb from 0 to 1 from left
     // to right. In left to right, this is the same as the value, but it is
     // reversed for right to left text.
-    final double startVisualPosition, endVisualPosition;
-    (startVisualPosition, endVisualPosition) = switch (textDirection) {
+    final (double startVisualPosition, double endVisualPosition) = switch (textDirection) {
       TextDirection.rtl => (1.0 - startValue, 1.0 - endValue),
       TextDirection.ltr => (      startValue,       endValue),
     };

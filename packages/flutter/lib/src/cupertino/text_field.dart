@@ -1179,9 +1179,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         final bool showClearButton = _shouldShowAttachment(attachment: widget.clearButtonMode, hasText: hasText);
         final Widget? suffixWidget = switch ((showUserSuffix, showClearButton)) {
           (false, false) => null,
-          (true, false)  => widget.suffix,
-          (true, true)   => widget.suffix ?? _buildClearButton(),
-          (false, true)  => _buildClearButton(),
+          (true,  false) => widget.suffix,
+          (true,   true) => widget.suffix ?? _buildClearButton(),
+          (false,  true) => _buildClearButton(),
         };
         return Row(children: <Widget>[
           // Insert a prefix at the front if the prefix visibility mode matches

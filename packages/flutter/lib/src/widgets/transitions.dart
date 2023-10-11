@@ -300,7 +300,7 @@ class MatrixTransition extends AnimatedWidget {
       transform: onTransform(animation.value),
       alignment: alignment,
       filterQuality: switch (animation.status) {
-        AnimationStatus.forward || AnimationStatus.reverse => filterQuality,
+        AnimationStatus.forward   || AnimationStatus.reverse   => filterQuality,
         AnimationStatus.dismissed || AnimationStatus.completed => null,
       },
       child: child,

@@ -509,7 +509,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? checkboxTheme.visualDensity
       ?? defaults.visualDensity!;
     Size size = switch (effectiveMaterialTapTargetSize) {
-      MaterialTapTargetSize.padded => const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+      MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
       MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
     };
     size += effectiveVisualDensity.baseSizeAdjustment;

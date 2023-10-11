@@ -621,8 +621,8 @@ enum DarwinArch {
   /// merged into a universal binary using the `lipo` tool.
   String get dartName {
     return switch (this) {
-      DarwinArch.armv7 => 'armv7',
-      DarwinArch.arm64 => 'arm64',
+      DarwinArch.armv7  => 'armv7',
+      DarwinArch.arm64  => 'arm64',
       DarwinArch.x86_64 => 'x64'
     };
   }
@@ -638,18 +638,18 @@ enum AndroidArch {
   String get archName {
     return switch (this) {
       AndroidArch.armeabi_v7a => 'armeabi-v7a',
-      AndroidArch.arm64_v8a => 'arm64-v8a',
-      AndroidArch.x86_64 => 'x86_64',
-      AndroidArch.x86 => 'x86'
+      AndroidArch.arm64_v8a   => 'arm64-v8a',
+      AndroidArch.x86_64      => 'x86_64',
+      AndroidArch.x86         => 'x86'
     };
   }
 
   String get platformName {
     return switch (this) {
       AndroidArch.armeabi_v7a => 'android-arm',
-      AndroidArch.arm64_v8a => 'android-arm64',
-      AndroidArch.x86_64 => 'android-x64',
-      AndroidArch.x86 => 'android-x86'
+      AndroidArch.arm64_v8a   => 'android-arm64',
+      AndroidArch.x86_64      => 'android-x64',
+      AndroidArch.x86         => 'android-x86'
     };
   }
 }
@@ -713,7 +713,7 @@ DarwinArch getIOSArchForName(String arch) {
 
 DarwinArch getDarwinArchForName(String arch) {
   return switch (arch) {
-    'arm64' => DarwinArch.arm64,
+    'arm64'  => DarwinArch.arm64,
     'x86_64' => DarwinArch.x86_64,
     _ => throw Exception('Unsupported MacOS arch name "$arch"'),
   };
@@ -721,54 +721,54 @@ DarwinArch getDarwinArchForName(String arch) {
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   return switch (platform) {
-    TargetPlatform.android_arm => 'android-arm',
-    TargetPlatform.android_arm64 => 'android-arm64',
-    TargetPlatform.android_x64 => 'android-x64',
-    TargetPlatform.android_x86 => 'android-x86',
-    TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
-    TargetPlatform.ios => 'ios',
+    TargetPlatform.ios    when darwinArch != null => 'ios-${darwinArch.name}',
     TargetPlatform.darwin when darwinArch != null => 'darwin-${darwinArch.name}',
-    TargetPlatform.darwin => 'darwin',
-    TargetPlatform.linux_x64 => 'linux-x64',
-    TargetPlatform.linux_arm64 => 'linux-arm64',
-    TargetPlatform.windows_x64 => 'windows-x64',
-    TargetPlatform.fuchsia_arm64 => 'fuchsia-arm64',
-    TargetPlatform.fuchsia_x64 => 'fuchsia-x64',
-    TargetPlatform.tester => 'flutter-tester',
+    TargetPlatform.ios            => 'ios',
+    TargetPlatform.darwin         => 'darwin',
+    TargetPlatform.android_arm    => 'android-arm',
+    TargetPlatform.android_arm64  => 'android-arm64',
+    TargetPlatform.android_x64    => 'android-x64',
+    TargetPlatform.android_x86    => 'android-x86',
+    TargetPlatform.linux_x64      => 'linux-x64',
+    TargetPlatform.linux_arm64    => 'linux-arm64',
+    TargetPlatform.windows_x64    => 'windows-x64',
+    TargetPlatform.fuchsia_arm64  => 'fuchsia-arm64',
+    TargetPlatform.fuchsia_x64    => 'fuchsia-x64',
+    TargetPlatform.tester         => 'flutter-tester',
     TargetPlatform.web_javascript => 'web-javascript',
-    TargetPlatform.android => 'android',
+    TargetPlatform.android        => 'android',
   };
 }
 
 TargetPlatform getTargetPlatformForName(String platform) {
   return switch (platform) {
-    'android' => TargetPlatform.android,
-    'android-arm' => TargetPlatform.android_arm,
-    'android-arm64' => TargetPlatform.android_arm64,
-    'android-x64' => TargetPlatform.android_x64,
-    'android-x86' => TargetPlatform.android_x86,
-    'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
-    'fuchsia-x64' => TargetPlatform.fuchsia_x64,
-    'ios' => TargetPlatform.ios,
+    'android'        => TargetPlatform.android,
+    'android-arm'    => TargetPlatform.android_arm,
+    'android-arm64'  => TargetPlatform.android_arm64,
+    'android-x64'    => TargetPlatform.android_x64,
+    'android-x86'    => TargetPlatform.android_x86,
+    'fuchsia-arm64'  => TargetPlatform.fuchsia_arm64,
+    'fuchsia-x64'    => TargetPlatform.fuchsia_x64,
+    'ios'            => TargetPlatform.ios,
+    'linux-x64'      => TargetPlatform.linux_x64,
+    'linux-arm64'    => TargetPlatform.linux_arm64,
+    'windows-x64'    => TargetPlatform.windows_x64,
+    'web-javascript' => TargetPlatform.web_javascript,
+    'flutter-tester' => TargetPlatform.tester,
     'darwin' ||
     // For backward-compatibility and also for Tester, where it must match
     // host platform name (HostPlatform.darwin_x64)
     'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
-    'linux-x64' => TargetPlatform.linux_x64,
-    'linux-arm64' => TargetPlatform.linux_arm64,
-    'windows-x64' => TargetPlatform.windows_x64,
-    'web-javascript' => TargetPlatform.web_javascript,
-    'flutter-tester' => TargetPlatform.tester,
     _ => throw Exception('Unsupported platform name "$platform"'),
   };
 }
 
 AndroidArch getAndroidArchForName(String platform) {
   return switch (platform) {
-    'android-arm' => AndroidArch.armeabi_v7a,
+    'android-arm'   => AndroidArch.armeabi_v7a,
     'android-arm64' => AndroidArch.arm64_v8a,
-    'android-x64' => AndroidArch.x86_64,
-    'android-x86' => AndroidArch.x86,
+    'android-x64'   => AndroidArch.x86_64,
+    'android-x86'   => AndroidArch.x86,
     _ => throw Exception('Unsupported Android arch name "$platform"'),
   };
 }

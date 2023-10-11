@@ -251,7 +251,7 @@ class RenderListBody extends RenderBox
   double computeMinIntrinsicWidth(double height) {
     return switch (mainAxis) {
       Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicWidth(height)),
-      Axis.vertical   => _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height)),
     };
   }
 
@@ -259,7 +259,7 @@ class RenderListBody extends RenderBox
   double computeMaxIntrinsicWidth(double height) {
     return switch (mainAxis) {
       Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicWidth(height)),
-      Axis.vertical   => _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height)),
     };
   }
 
@@ -267,7 +267,7 @@ class RenderListBody extends RenderBox
   double computeMinIntrinsicHeight(double width) {
     return switch (mainAxis) {
       Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicHeight(width)),
-      Axis.vertical   => _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width)),
     };
   }
 
@@ -275,7 +275,7 @@ class RenderListBody extends RenderBox
   double computeMaxIntrinsicHeight(double width) {
     return switch (mainAxis) {
       Axis.horizontal => _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicHeight(width)),
-      Axis.vertical   => _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width)),
+      Axis.vertical  => _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width)),
     };
   }
 

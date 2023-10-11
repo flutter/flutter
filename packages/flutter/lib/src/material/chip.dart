@@ -1964,7 +1964,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   void _paintCheck(Canvas canvas, Offset origin, double size) {
     Color? paintColor = theme.checkmarkColor ?? switch (theme.brightness) {
       Brightness.light => theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha),
-      Brightness.dark => theme.showAvatar  ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha),
+      Brightness.dark  => theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha),
     };
 
     final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);

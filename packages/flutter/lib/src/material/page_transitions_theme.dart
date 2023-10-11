@@ -867,8 +867,8 @@ mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {
 
   void onAnimationStatusChange(AnimationStatus status) {
     controller.allowSnapshotting = switch (status) {
+      AnimationStatus.forward   || AnimationStatus.reverse   => useSnapshot,
       AnimationStatus.dismissed || AnimationStatus.completed => false,
-      AnimationStatus.forward || AnimationStatus.reverse => useSnapshot,
     };
   }
 

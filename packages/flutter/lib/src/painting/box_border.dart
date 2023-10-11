@@ -1013,9 +1013,8 @@ class BorderDirectional extends BoxBorder {
       return;
     }
 
-    final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
-    (left, right) = switch (textDirection!) {
+    final (BorderSide left, BorderSide right) = switch (textDirection!) {
       TextDirection.rtl => (end, start),
       TextDirection.ltr => (start, end),
     };

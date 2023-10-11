@@ -665,7 +665,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   double _convertToLogical(double value) {
     return switch (Directionality.of(context)) {
       TextDirection.rtl => -value,
-      TextDirection.ltr => value,
+      TextDirection.ltr =>  value,
     };
   }
 

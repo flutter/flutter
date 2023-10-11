@@ -383,9 +383,8 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      RenderBox? child;
       double currentHeight = 0.0;
-      child = switch (verticalDirection) {
+      RenderBox? child = switch (verticalDirection) {
         VerticalDirection.down => firstChild,
         VerticalDirection.up   => lastChild,
       };

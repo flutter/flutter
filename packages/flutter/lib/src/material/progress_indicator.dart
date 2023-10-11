@@ -191,8 +191,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         return;
       }
 
-      final double left;
-      left = switch (textDirection) {
+      final double left = switch (textDirection) {
         TextDirection.rtl => size.width - width - x,
         TextDirection.ltr => x,
       };

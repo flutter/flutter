@@ -1214,7 +1214,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
     if (direction == Axis.horizontal) {
       childParentData.offset = switch (textDirection) {
-        TextDirection.ltr => Offset(leadingBorderSide.width, borderSide.width),
+        TextDirection.ltr => Offset(leadingBorderSide.width,  borderSide.width),
         TextDirection.rtl => Offset(trailingBorderSide.width, borderSide.width),
       };
     } else {

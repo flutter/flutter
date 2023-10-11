@@ -603,16 +603,16 @@ const Duration _kPauseBetweenIsolateRefresh = Duration(milliseconds: 100);
 List<String> _timelineStreamsToString(List<TimelineStream> streams) {
   return streams.map<String>((TimelineStream stream) {
     return switch (stream) {
-      TimelineStream.all => 'all',
-      TimelineStream.api => 'API',
-      TimelineStream.compiler => 'Compiler',
-      TimelineStream.compilerVerbose => 'CompilerVerbose',
-      TimelineStream.dart => 'Dart',
+      TimelineStream.all      => 'all',
+      TimelineStream.api      => 'API',
+      TimelineStream.dart     => 'Dart',
       TimelineStream.debugger => 'Debugger',
       TimelineStream.embedder => 'Embedder',
-      TimelineStream.gc => 'GC',
-      TimelineStream.isolate => 'Isolate',
-      TimelineStream.vm => 'VM',
+      TimelineStream.gc       => 'GC',
+      TimelineStream.isolate  => 'Isolate',
+      TimelineStream.vm       => 'VM',
+      TimelineStream.compiler => 'Compiler',
+      TimelineStream.compilerVerbose => 'CompilerVerbose',
     };
   }).toList();
 }

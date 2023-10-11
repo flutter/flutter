@@ -792,7 +792,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       final double delta = details.primaryDelta! / _trackInnerLength;
       positionController.value += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
-        TextDirection.ltr => delta,
+        TextDirection.ltr =>  delta,
       };
     }
   }

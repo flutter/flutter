@@ -558,7 +558,7 @@ class _BottomNavigationTile extends StatelessWidget {
     }
 
     size = switch (type) {
-      BottomNavigationBarType.fixed    => 1,
+      BottomNavigationBarType.fixed => 1,
       BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
     };
 
@@ -959,7 +959,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
     final Color themeColor = switch (themeData.brightness) {
       Brightness.light => themeData.colorScheme.primary,
-      Brightness.dark => themeData.colorScheme.secondary,
+      Brightness.dark  => themeData.colorScheme.secondary,
     };
 
     final TextStyle effectiveSelectedLabelStyle =

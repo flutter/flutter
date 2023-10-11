@@ -1953,7 +1953,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   late CupertinoLocalizations localizations;
   int get textDirectionFactor {
     return switch (textDirection) {
-      TextDirection.ltr => 1,
+      TextDirection.ltr =>  1,
       TextDirection.rtl => -1,
     };
   }

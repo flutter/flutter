@@ -369,13 +369,13 @@ class FlutterTesterTestDevice extends TestDevice {
 
 String _getExitCodeMessage(int exitCode) {
   return switch (exitCode) {
-    1 => 'Shell subprocess cleanly reported an error. Check the logs above for an error message.',
-    0 => 'Shell subprocess ended cleanly. Did main() call exit()?',
-    -0x0f => 'Shell subprocess crashed with SIGTERM ($exitCode).', // ProcessSignal.SIGTERM
-    -0x0b => 'Shell subprocess crashed with segmentation fault.', // ProcessSignal.SIGSEGV
-    -0x06 => 'Shell subprocess crashed with SIGABRT ($exitCode).', // ProcessSignal.SIGABRT
+    1     => 'Shell subprocess cleanly reported an error. Check the logs above for an error message.',
+    0     => 'Shell subprocess ended cleanly. Did main() call exit()?',
+    -0x0f => 'Shell subprocess crashed with SIGTERM ($exitCode).',     // ProcessSignal.SIGTERM
+    -0x0b => 'Shell subprocess crashed with segmentation fault.',      // ProcessSignal.SIGSEGV
+    -0x06 => 'Shell subprocess crashed with SIGABRT ($exitCode).',     // ProcessSignal.SIGABRT
     -0x02 => 'Shell subprocess terminated by ^C (SIGINT, $exitCode).', // ProcessSignal.SIGINT
-    _ => 'Shell subprocess crashed with unexpected exit code $exitCode.',
+    _     => 'Shell subprocess crashed with unexpected exit code $exitCode.',
   };
 }
 

@@ -182,7 +182,7 @@ class BannerPainter extends CustomPainter {
   double _translationY(double height) {
     return switch (location) {
       BannerLocation.bottomStart || BannerLocation.bottomEnd => height - _kBottomOffset,
-      BannerLocation.topStart || BannerLocation.topEnd => 0.0,
+      BannerLocation.topStart    || BannerLocation.topEnd    => 0.0,
     };
   }
 
@@ -191,11 +191,11 @@ class BannerPainter extends CustomPainter {
       case TextDirection.rtl:
         return switch (location) {
           BannerLocation.bottomStart || BannerLocation.topEnd => -math.pi / 4.0,
-          BannerLocation.bottomEnd || BannerLocation.topStart => math.pi / 4.0,
+          BannerLocation.bottomEnd || BannerLocation.topStart =>  math.pi / 4.0,
         };
       case TextDirection.ltr:
         return switch (location) {
-          BannerLocation.bottomStart || BannerLocation.topEnd => math.pi / 4.0,
+          BannerLocation.bottomStart || BannerLocation.topEnd =>  math.pi / 4.0,
           BannerLocation.bottomEnd || BannerLocation.topStart => -math.pi / 4.0,
         };
     }

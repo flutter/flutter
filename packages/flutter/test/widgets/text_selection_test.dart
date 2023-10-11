@@ -1819,8 +1819,8 @@ class TextSelectionControlsSpy extends TextSelectionControls {
       child: Text(
         'height ${textLineHeight.toInt()}',
         key: switch (type) {
-          TextSelectionHandleType.left => leftHandleKey,
-          TextSelectionHandleType.right => rightHandleKey,
+          TextSelectionHandleType.left      => leftHandleKey,
+          TextSelectionHandleType.right     => rightHandleKey,
           TextSelectionHandleType.collapsed => collapsedHandleKey,
         },
       ),

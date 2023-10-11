@@ -330,11 +330,11 @@ mixin CommandHandlerFactory {
     final Element element = finder.evaluate().single;
     final RenderBox box = (element.renderObject as RenderBox?)!;
     final Offset localPoint = switch (getOffsetCommand.offsetType) {
-      OffsetType.topLeft => Offset.zero,
-      OffsetType.topRight => box.size.topRight(Offset.zero),
-      OffsetType.bottomLeft => box.size.bottomLeft(Offset.zero),
+      OffsetType.topLeft     => Offset.zero,
+      OffsetType.topRight    => box.size.topRight(Offset.zero),
+      OffsetType.bottomLeft  => box.size.bottomLeft(Offset.zero),
       OffsetType.bottomRight => box.size.bottomRight(Offset.zero),
-      OffsetType.center => box.size.center(Offset.zero),
+      OffsetType.center      => box.size.center(Offset.zero),
     };
     final Offset globalPoint = box.localToGlobal(localPoint);
     return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);

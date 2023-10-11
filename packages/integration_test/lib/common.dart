@@ -213,8 +213,8 @@ class DriverTestMessage {
   /// Return a DriverTestMessage depending on `status`.
   static DriverTestMessage fromString(String status) {
     return switch (status) {
-      'error' => DriverTestMessage.error(),
-      'pending' => DriverTestMessage.pending(),
+      'error'    => DriverTestMessage.error(),
+      'pending'  => DriverTestMessage.pending(),
       'complete' => DriverTestMessage.complete(),
       _ => throw StateError('This type of status does not exist: $status'),
     };
