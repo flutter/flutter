@@ -60,6 +60,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
     cmd.stencil_reference = entity.GetClipDepth();
 
     auto options = OptionsFromPassAndEntity(pass, entity);
+    options.primitive_type = PrimitiveType::kTriangleStrip;
     cmd.pipeline = renderer.GetColorMatrixColorFilterPipeline(options);
 
     auto size = input_snapshot->texture->GetSize();
@@ -68,10 +69,8 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
     vtx_builder.AddVertices({
         {Point(0, 0)},
         {Point(1, 0)},
-        {Point(1, 1)},
-        {Point(0, 0)},
-        {Point(1, 1)},
         {Point(0, 1)},
+        {Point(1, 1)},
     });
     auto& host_buffer = pass.GetTransientsBuffer();
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
