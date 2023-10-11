@@ -146,19 +146,22 @@ Future<void> buildMacOS({
   }
 
   final String? applicationBundle = MacOSApp.fromMacOSProject(flutterProject.macos).applicationBundle(buildInfo);
-  // This output directory is the .app folder itself.
-  final Directory outputDirectory = globals.fs.directory(applicationBundle);
-  final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-  final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
-      ? '' // Don't display the size when building a debug variant.
-      : ' (${getSizeAsMB(directorySize)})';
-  globals.printStatus(
-    '${globals.terminal.successMark} '
-    'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
-    color: TerminalColor.green,
-  );
+  if (applicationBundle != null) {
+    final Directory outputDirectory = globals.fs.directory(applicationBundle);
+    // This output directory is the .app folder itself.
+    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
+    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsMB(directorySize)})';
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
+      color: TerminalColor.green,
+    );
+  }
 
-  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
+  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null && applicationBundle != null) {
+    final Directory outputDirectory = globals.fs.directory(applicationBundle);
     final String arch = DarwinArch.x86_64.name;
     final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('snapshot.$arch.json');
