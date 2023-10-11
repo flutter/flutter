@@ -59,6 +59,17 @@ abstract class DotEnvRegex {
   static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
 }
 
+abstract class HttpRegex {
+  // --web-header HTTP header regex
+  // --web-header is provided as key=value for consistency with --dart-define
+  // https://datatracker.ietf.org/doc/html/rfc7230#section-3.2
+  static const String vchar = r'\x21-\x7E';
+  static const String spaceOrTab = r'\x20\x09';
+  static const String nonDelimiterVchar = r'\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x39\x41-\x5A\x5E-\x7A\x7C\x7E';
+
+  static final RegExp httpHeader = RegExp('^([$nonDelimiterVchar]+)' r'\s*=\s*' '([$vchar$spaceOrTab]+)' r'$');
+}
+
 enum ExitStatus {
   success,
   warning,
@@ -1530,11 +1541,25 @@ abstract class FlutterCommand extends Command<void> {
   }
 
 
-  List<String> extractWebHeaders() {
-    final List<String> webHeaders = <String>[];
+  Map<String, String> extractWebHeaders() {
+    final Map<String, String> webHeaders = <String, String>{};
 
     if (argParser.options.containsKey('web-header')) {
-      webHeaders.addAll(stringsArg('web-header'));
+      final List<String> candidates = stringsArg('web-header');
+      final List<String> invalidHeaders = <String>[];
+      for (final String candidate in candidates) {
+        final Match? keyValueMatch = HttpRegex.httpHeader.firstMatch(candidate);
+          if (keyValueMatch == null) {
+            invalidHeaders.add(candidate);
+            continue;
+          }
+
+          webHeaders[keyValueMatch.group(1)!] = keyValueMatch.group(2)!;
+      }
+
+      if (invalidHeaders.isNotEmpty) {
+        throwToolExit('Invalid web headers: ${invalidHeaders.join(', ')}');
+      }
     }
 
     return webHeaders;

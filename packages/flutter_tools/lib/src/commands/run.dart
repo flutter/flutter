@@ -240,9 +240,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ? stringsArg(FlutterOptions.kWebBrowserFlag)
         : const <String>[];
 
-    final List<String> webHeaders = featureFlags.isWebEnabled
+    final Map<String, String> webHeaders = featureFlags.isWebEnabled
         ? extractWebHeaders()
-        : const <String>[];
+        : const <String, String>{};
 
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(

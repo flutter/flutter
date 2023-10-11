@@ -959,7 +959,7 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
-    this.webHeaders = const <String>[],
+    this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
@@ -987,7 +987,7 @@ class DebuggingOptions {
       this.webBrowserDebugPort,
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
-      this.webHeaders = const <String>[],
+      this.webHeaders = const <String, String>{},
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -1145,7 +1145,7 @@ class DebuggingOptions {
   final String? webLaunchUrl;
 
   /// Allow developers to add custom headers to web server
-  final List<String> webHeaders;
+  final Map<String, String> webHeaders;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1304,7 +1304,7 @@ class DebuggingOptions {
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
       webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
       webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
-      webHeaders: (json['webHeaders']! as List<dynamic>).cast<String>(),
+      webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
