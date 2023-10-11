@@ -16864,7 +16864,6 @@ void main() {
         }
       }, variant: TargetPlatformVariant.all());
     }
-    
     for (final PointerDeviceKind pointerDeviceKind in PointerDeviceKind.values.toSet()
     ..remove(PointerDeviceKind.trackpad)) {
     testWidgets("TextField handling of onTapOutside when doesn't have focus for ${pointerDeviceKind.name}",
