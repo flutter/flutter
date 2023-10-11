@@ -17,11 +17,11 @@
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
-#include "flutter/shell/platform/android/hardware_buffer_external_texture_gl.h"
+#include "flutter/shell/platform/android/image_external_texture_gl.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vulkan_impeller.h"
-#include "flutter/shell/platform/android/hardware_buffer_external_texture_vk.h"
+#include "flutter/shell/platform/android/image_external_texture_vk.h"
 #endif
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
@@ -324,18 +324,18 @@ void PlatformViewAndroid::RegisterImageTexture(
   if (android_context_->RenderingApi() == AndroidRenderingAPI::kOpenGLES) {
     if (android_context_->GetImpellerContext()) {
       // Impeller GLES.
-      RegisterTexture(std::make_shared<HardwareBufferExternalTextureGLImpeller>(
+      RegisterTexture(std::make_shared<ImageExternalTextureGLImpeller>(
           std::static_pointer_cast<impeller::ContextGLES>(
               android_context_->GetImpellerContext()),
           texture_id, image_texture_entry, jni_facade_));
     } else {
       // Legacy GL.
-      RegisterTexture(std::make_shared<HardwareBufferExternalTextureGLSkia>(
+      RegisterTexture(std::make_shared<ImageExternalTextureGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
           texture_id, image_texture_entry, jni_facade_));
     }
   } else if (android_context_->RenderingApi() == AndroidRenderingAPI::kVulkan) {
-    RegisterTexture(std::make_shared<HardwareBufferExternalTextureVK>(
+    RegisterTexture(std::make_shared<ImageExternalTextureVK>(
         std::static_pointer_cast<impeller::ContextVK>(
             android_context_->GetImpellerContext()),
         texture_id, image_texture_entry, jni_facade_));

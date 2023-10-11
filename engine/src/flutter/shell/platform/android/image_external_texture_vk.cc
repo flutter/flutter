@@ -1,5 +1,5 @@
 
-#include "flutter/shell/platform/android/hardware_buffer_external_texture_vk.h"
+#include "flutter/shell/platform/android/image_external_texture_vk.h"
 
 #include "flutter/impeller/core/formats.h"
 #include "flutter/impeller/core/texture_descriptor.h"
@@ -10,27 +10,27 @@
 
 namespace flutter {
 
-HardwareBufferExternalTextureVK::HardwareBufferExternalTextureVK(
+ImageExternalTextureVK::ImageExternalTextureVK(
     const std::shared_ptr<impeller::ContextVK>& impeller_context,
     int64_t id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : HardwareBufferExternalTexture(id, image_texture_entry, jni_facade),
+    : ImageExternalTexture(id, image_texture_entry, jni_facade),
       impeller_context_(impeller_context) {}
 
-HardwareBufferExternalTextureVK::~HardwareBufferExternalTextureVK() {}
+ImageExternalTextureVK::~ImageExternalTextureVK() {}
 
-void HardwareBufferExternalTextureVK::Attach(PaintContext& context) {
+void ImageExternalTextureVK::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
     // First processed frame we are attached.
     state_ = AttachmentState::kAttached;
   }
 }
 
-void HardwareBufferExternalTextureVK::Detach() {}
+void ImageExternalTextureVK::Detach() {}
 
-void HardwareBufferExternalTextureVK::ProcessFrame(PaintContext& context,
-                                                   const SkRect& bounds) {
+void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
+                                          const SkRect& bounds) {
   JavaLocalRef image = AcquireLatestImage();
   if (image.is_null()) {
     return;
