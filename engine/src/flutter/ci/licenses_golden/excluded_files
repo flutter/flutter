@@ -2650,7 +2650,9 @@
 ../../../third_party/skia/experimental
 ../../../third_party/skia/fuzz/README.md
 ../../../third_party/skia/gm/BUILD.bazel
+../../../third_party/skia/gm/android_gm_test.bzl
 ../../../third_party/skia/gm/png_codec.bzl
+../../../third_party/skia/gm/vias/BUILD.bazel
 ../../../third_party/skia/gn/BUILD.bazel
 ../../../third_party/skia/gn/__init__.py
 ../../../third_party/skia/gn/bazel_build.py
