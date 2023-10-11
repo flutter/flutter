@@ -1605,7 +1605,7 @@ void main() {
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
     final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1663,7 +1663,7 @@ void main() {
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
     final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1688,7 +1688,7 @@ void main() {
 
     // Drag and drop the Draggable onto the Target a second time.
     final TestGesture secondGesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -2424,13 +2424,17 @@ void main() {
       ),
     );
 
-    await tester.startGesture(const Offset(10.0, 10.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(10.0, 10.0));
     expect(didTap, isFalse);
 
     // This tears down the draggable without terminating the gesture sequence,
     // which used to trigger asserts in the multi-drag gesture recognizer.
     await tester.pumpWidget(Container(key: UniqueKey()));
     expect(didTap, isFalse);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/6128.
@@ -2815,7 +2819,7 @@ void main() {
     expect(onDragStartedCalled, isFalse);
 
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Source'), findsOneWidget);
@@ -2827,6 +2831,10 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(onDragStartedCalled, isTrue);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Custom long press delay for LongPressDraggable', (WidgetTester tester) async {
@@ -2846,7 +2854,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(onDragStartedCalled, isFalse);
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
@@ -2861,6 +2869,10 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(onDragStartedCalled, isTrue);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Default long press delay for LongPressDraggable', (WidgetTester tester) async {
@@ -2879,7 +2891,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(onDragStartedCalled, isFalse);
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
@@ -2894,6 +2906,10 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(onDragStartedCalled, isTrue);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
@@ -3280,9 +3296,13 @@ void main() {
     ));
 
     final Offset location = tester.getCenter(find.text('Source'));
-    await tester.startGesture(location, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(location, pointer: 7);
 
     expect(dragAnchorStrategyCalled, true);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('configurable Draggable hit test behavior', (WidgetTester tester) async {
@@ -3505,7 +3525,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   expect(onDragStartedCalled, isFalse);
 
   final Offset firstLocation = tester.getCenter(find.text('Source'));
-  await tester.startGesture(firstLocation, pointer: 7);
+  final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
   await tester.pump();
 
   expect(find.text('Source'), findsOneWidget);
@@ -3518,6 +3538,10 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   expect(find.text('Dragging'), findsOneWidget);
   expect(onDragStartedCalled, isTrue);
   expect(hapticFeedbackCalls, expectedHapticFeedbackCount);
+
+  // Finish gesture to release resources.
+  await gesture.up();
+  await tester.pumpAndSettle();
 }
 
 Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
