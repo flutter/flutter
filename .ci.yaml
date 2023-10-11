@@ -2952,7 +2952,7 @@ targets:
       device_type: none
       device_os: null
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: build_ios_framework_module_test
     runIf:
       - dev/**
@@ -3331,8 +3331,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: module_test_ios
     runIf:
       - dev/**
@@ -3399,8 +3403,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: plugin_lint_mac
     runIf:
       - dev/**
@@ -3976,8 +3984,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
       - dev/**
@@ -3989,8 +4001,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
       - dev/**
@@ -4095,8 +4111,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: ios_content_validation_test
 
   - name: Mac_ios ios_defines_test
@@ -4132,8 +4152,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "mac"]
       task_name: macos_chrome_dev_mode
 
   - name: Mac_arm64_ios macos_chrome_dev_mode
@@ -4142,8 +4166,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: macos_chrome_dev_mode
 
   - name: Mac_ios microbenchmarks_ios
@@ -4176,8 +4204,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "mac"]
       task_name: native_assets_ios_simulator
 
   - name: Mac_ios native_assets_ios
@@ -4321,8 +4353,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "mac"]
       task_name: hot_mode_dev_cycle_ios_simulator
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
@@ -4447,8 +4483,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: run_debug_test_macos
     runIf:
       - dev/**
@@ -4480,8 +4520,12 @@ targets:
     properties:
       device_type: none
       device_os: null
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "mac", "arm64"]
       task_name: run_release_test_macos
     runIf:
       - dev/**
