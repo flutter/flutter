@@ -652,13 +652,13 @@ class DragTarget<T extends Object> extends StatefulWidget {
   final DragTargetWillAcceptWithDetails<T>? onWillAcceptWithDetails;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
-  /// It will not be called if `data` is `null`
+  /// It will not be called if `data` is `null`.
   ///
   /// Equivalent to [onAcceptWithDetails], but only includes the data.
   final DragTargetAccept<T>? onAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
-  /// It will not be called if `data` is `null`
+  /// It will not be called if `data` is `null`.
   ///
   /// Equivalent to [onAccept], but with information, including the data, in a
   /// [DragTargetDetails].
@@ -668,7 +668,8 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// the target.
   final DragTargetLeave<T>? onLeave;
 
-  /// Called when a [Draggable] moves within this [DragTarget].
+  /// Called when a [Draggable] moves within this [DragTarget]. It will not be
+  /// called if `data` is `null`.
   ///
   /// This includes entering and leaving the target.
   final DragTargetMove<T>? onMove;
