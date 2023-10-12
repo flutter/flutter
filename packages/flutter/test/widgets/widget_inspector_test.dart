@@ -4128,7 +4128,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      final ValueListenableBuilder<bool> builder = find
+      final ValueListenableBuilder<bool> valueListenableBuilderWidget = find
           .byType(ValueListenableBuilder<bool>)
           .evaluate()
           .single
@@ -4139,7 +4139,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
 
       WidgetsApp.debugShowWidgetInspectorOverride = false;
-      builder.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
+      valueListenableBuilderWidget.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
+
       service.rebuildCount = 0;
       expect(extensionChangedEvents, isEmpty);
       expect(
