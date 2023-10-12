@@ -680,6 +680,8 @@ class _ViewContentState extends State<_ViewContent> {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
+    _controller.addListener(updateSuggestions);
+
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
     }
@@ -711,6 +713,7 @@ class _ViewContentState extends State<_ViewContent> {
 
   @override
   void dispose() {
+    _controller.removeListener(updateSuggestions);
     _focusNode.dispose();
     super.dispose();
   }
@@ -750,7 +753,6 @@ class _ViewContentState extends State<_ViewContent> {
         icon: const Icon(Icons.close),
         onPressed: () {
           _controller.clear();
-          updateSuggestions();
         },
       ),
     ];
