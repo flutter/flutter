@@ -113,18 +113,27 @@ if (flutter_prebuilt_dart_sdk) {
     _host_os_name = "windows"
   }
 
+  # When building 32-bit Android development artifacts for Windows host (like
+  # gen_snapshot), the host_cpu is set to x86. However, the correct prebuilt
+  # Dart SDK to use during this build is still the 64-bit one.
+  _host_cpu = host_cpu
+  if (host_os == "win" && host_cpu == "x86") {
+    _host_cpu = "x64"
+  }
+
   _target_prebuilt_dart_sdk_config = "$_target_os_name-$target_cpu"
-  _host_prebuilt_dart_sdk_config = "$_host_os_name-$host_cpu"
+  _host_prebuilt_dart_sdk_config = "$_host_os_name-$_host_cpu"
 
   target_prebuilt_dart_sdk =
       "//flutter/prebuilts/$_target_prebuilt_dart_sdk_config/dart-sdk"
   host_prebuilt_dart_sdk =
       "//flutter/prebuilts/$_host_prebuilt_dart_sdk_config/dart-sdk"
 
-  # There is no prebuilt Dart SDK targeting Fuchsia, but we also don't need
-  # one, so even when the build is targeting Fuchsia, use the prebuilt
-  # Dart SDK for the host.
-  if (current_toolchain == host_toolchain || is_fuchsia || is_wasm) {
+  # There is no prebuilt Dart SDK targeting Fuchsia, iOS, and Android, but we
+  # also don't need one, so even when the build is targeting one of these
+  # platforms, we use the prebuilt Dart SDK for the host.
+  if (current_toolchain == host_toolchain || target_os == "android" ||
+      target_os == "fuchsia" || target_os == "ios" || target_os == "wasm") {
     prebuilt_dart_sdk = host_prebuilt_dart_sdk
     prebuilt_dart_sdk_config = _host_prebuilt_dart_sdk_config
   } else {
