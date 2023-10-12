@@ -4174,6 +4174,7 @@ targets:
   # TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
   - name: Mac_ios microbenchmarks_ios_xcode_debug
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4425,12 +4426,15 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      device_type: null
+      device_os: iOS-16
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       tags: >
-        ["devicelab", "hostonly", "mac"]
+        ["devicelab", "ios", "mac"]
       task_name: native_ui_tests_macos
     runIf:
       - dev/**
