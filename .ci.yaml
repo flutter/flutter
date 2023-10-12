@@ -4138,7 +4138,6 @@ targets:
   # TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
   - name: Mac_ios microbenchmarks_ios_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
