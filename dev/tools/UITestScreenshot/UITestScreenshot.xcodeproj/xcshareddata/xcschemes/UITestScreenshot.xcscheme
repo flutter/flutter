@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7805D1652AD5FF68001BD483"
-               BuildableName = "XcodeScreenshot.app"
-               BlueprintName = "XcodeScreenshot"
-               ReferencedContainer = "container:XcodeScreenshot.xcodeproj">
+               BlueprintIdentifier = "7805D1912AD862AE001BD483"
+               BuildableName = "UITestScreenshot.app"
+               BlueprintName = "UITestScreenshot"
+               ReferencedContainer = "container:UITestScreenshot.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,10 +34,10 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7805D17D2AD5FFE5001BD483"
-               BuildableName = "XcodeScreenshotUITests.xctest"
-               BlueprintName = "XcodeScreenshotUITests"
-               ReferencedContainer = "container:XcodeScreenshot.xcodeproj">
+               BlueprintIdentifier = "7805D1A72AD862F5001BD483"
+               BuildableName = "UITestScreenshotUITests.xctest"
+               BlueprintName = "UITestScreenshotUITests"
+               ReferencedContainer = "container:UITestScreenshot.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -56,10 +56,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7805D1652AD5FF68001BD483"
-            BuildableName = "XcodeScreenshot.app"
-            BlueprintName = "XcodeScreenshot"
-            ReferencedContainer = "container:XcodeScreenshot.xcodeproj">
+            BlueprintIdentifier = "7805D1912AD862AE001BD483"
+            BuildableName = "UITestScreenshot.app"
+            BlueprintName = "UITestScreenshot"
+            ReferencedContainer = "container:UITestScreenshot.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -73,10 +73,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7805D1652AD5FF68001BD483"
-            BuildableName = "XcodeScreenshot.app"
-            BlueprintName = "XcodeScreenshot"
-            ReferencedContainer = "container:XcodeScreenshot.xcodeproj">
+            BlueprintIdentifier = "7805D1912AD862AE001BD483"
+            BuildableName = "UITestScreenshot.app"
+            BlueprintName = "UITestScreenshot"
+            ReferencedContainer = "container:UITestScreenshot.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

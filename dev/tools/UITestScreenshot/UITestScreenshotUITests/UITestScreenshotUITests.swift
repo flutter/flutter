@@ -1,13 +1,10 @@
-//
-//  XcodeScreenshotUITests.swift
-//  XcodeScreenshotUITests
-//
-//  Created by Victoria Ashworth on 10/10/23.
-//
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import XCTest
 
-final class XcodeScreenshotUITests: XCTestCase {
+final class UITestScreenshotUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
     }
@@ -15,7 +12,7 @@ final class XcodeScreenshotUITests: XCTestCase {
     func testLaunch() throws {
         let mainScreenScreenshot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: mainScreenScreenshot)
-        attachment.name = "Launch Screen"
+        attachment.name = "Screenshot"
         attachment.lifetime = .keepAlways
         add(attachment)
     }

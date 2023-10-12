@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -204,6 +205,85 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Pub: () => FakePub(),
     DeviceManager: () => fakeDeviceManager,
+  });
+
+  group('screenshot on iOS Core Devices', () {
+    testUsingContext('works in CI', () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        signals: signals,
+      );
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.directory('drive_screenshots').createSync();
+
+      final Device screenshotDevice = ThrowingIOSScreenshotDevice()
+        ..supportsScreenshot = false
+        ..isCoreDevice = true;
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      await expectLater(() => createTestCommandRunner(command).run(
+        <String>[
+          'drive',
+          '--no-pub',
+          '-d',
+          screenshotDevice.id,
+          '--screenshot',
+          'drive_screenshots',
+          '--ci'
+        ]),
+        throwsToolExit(message: 'cannot start app'),
+      );
+
+      expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png'));
+      expect(logger.statusText, isNot(contains('drive_02.png')));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    });
+
+    testUsingContext('does not work if not in CI', () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        signals: signals,
+      );
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.directory('drive_screenshots').createSync();
+
+      final Device screenshotDevice = ThrowingIOSScreenshotDevice()
+        ..supportsScreenshot = false
+        ..isCoreDevice = true;
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      await expectLater(() => createTestCommandRunner(command).run(
+        <String>[
+          'drive',
+          '--no-pub',
+          '-d',
+          screenshotDevice.id,
+          '--screenshot',
+          'drive_screenshots',
+        ]),
+        throwsToolExit(message: 'cannot start app'),
+      );
+
+      expect(logger.errorText, contains('Screenshot not supported for FakeDevice'));
+      expect(logger.statusText, isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    });
   });
 
   testUsingContext('drive --screenshot errors but does not fail if screenshot fails', () async {
@@ -723,4 +803,60 @@ class FakeSignals extends Fake implements Signals {
 
   @override
   Future<bool> removeHandler(ProcessSignal signal, Object token) async => true;
+}
+
+class ThrowingIOSScreenshotDevice extends ScreenshotIOSDevice {
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage? package, {
+      String? mainPath,
+      String? route,
+      required DebuggingOptions debuggingOptions,
+      Map<String, Object?> platformArgs = const <String, Object?>{},
+      bool prebuiltApplication = false,
+      bool ipv6 = false,
+      String? userIdentifier,
+      Duration? discoveryTimeout,
+      ShutdownHooks? shutdownHooks,
+    }) async {
+    throwToolExit('cannot start app');
+  }
+}
+
+class ScreenshotIOSDevice extends Fake implements IOSDevice {
+  final List<File> screenshots = <File>[];
+
+  final Completer<void> _firstScreenshotCompleter = Completer<void>();
+
+  @override
+  final String id = 'fake_device';
+
+  @override
+  final String name = 'FakeDevice';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
+  bool get devModeEnabled => true;
+
+  @override
+  bool supportsScreenshot = true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  bool get isWirelesslyConnected => false;
+
+  @override
+  bool isCoreDevice = false;
+
+  @override
+  Future<void> takeScreenshotForCI(File outputFile) async {
+    if (!_firstScreenshotCompleter.isCompleted) {
+      _firstScreenshotCompleter.complete();
+    }
+    screenshots.add(outputFile);
+  }
 }

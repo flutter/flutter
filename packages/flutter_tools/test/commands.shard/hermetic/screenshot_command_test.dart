@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -116,4 +120,68 @@ void main() {
               message: 'It appears the output file contains an error message, not valid output.'));
     });
   });
+
+  group('Screenshot on iOS Core Devices', () {
+    late FileSystem fileSystem;
+    late FakeDeviceManager fakeDeviceManager;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      fakeDeviceManager = FakeDeviceManager();
+    });
+
+    testUsingContext('works in CI', () async {
+      final ScreenshotCommand command = ScreenshotCommand(fs: fileSystem);
+      final FakeIOSDevice screenshotDevice = FakeIOSDevice()
+        ..supportsScreenshot = false
+        ..isCoreDevice = true;
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      await createTestCommandRunner(command).run(
+        <String>['screenshot', '--ci'],
+      );
+
+      expect(screenshotDevice.screenshotTaken, isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => fakeDeviceManager,
+    });
+
+    testUsingContext('does not work if not in CI', () async {
+      final ScreenshotCommand command = ScreenshotCommand(fs: fileSystem);
+      final FakeIOSDevice screenshotDevice = FakeIOSDevice()
+        ..supportsScreenshot = false
+        ..isCoreDevice = true;
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      expect(
+        () => createTestCommandRunner(command).run(<String>['screenshot']),
+        throwsToolExit(message: 'Screenshot not supported for FakeDevice.'),
+      );
+      expect(screenshotDevice.screenshotTaken, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => fakeDeviceManager,
+    });
+  });
+}
+
+class FakeIOSDevice extends Fake implements IOSDevice {
+  @override
+  final String name = 'FakeDevice';
+
+  @override
+  bool isCoreDevice = false;
+
+  @override
+  bool supportsScreenshot = true;
+
+  bool screenshotTaken = false;
+
+  @override
+  Future<void> takeScreenshotForCI(File outputFile) async {
+    screenshotTaken = true;
+  }
 }

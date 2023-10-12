@@ -978,20 +978,23 @@ class IOSDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    if (isCoreDevice) {
-      final UITestScreenshot uiTestScreenshot = UITestScreenshot(
-        fileSystem: _fileSystem,
-        processUtils: globals.processUtils,
-        coreDeviceControl: _coreDeviceControl,
-      );
-      await uiTestScreenshot.takeScreenshot(
-        outputFile,
-        target: UITestScreenshotCompatibleTargets.ios,
-        deviceId: id,
-      );
-    } else {
-      await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
-    }
+    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+  }
+
+  /// Take a screenshot of the device using a UI Test. Should only be used in
+  /// Flutter CI.
+  // TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/128598 is fixed.
+  Future<void> takeScreenshotForCI(File outputFile) async {
+    final UITestScreenshot uiTestScreenshot = UITestScreenshot(
+      fileSystem: _fileSystem,
+      processUtils: globals.processUtils,
+      coreDeviceControl: _coreDeviceControl,
+    );
+    await uiTestScreenshot.takeScreenshot(
+      outputFile,
+      target: UITestScreenshotCompatibleTargets.ios,
+      deviceId: id,
+    );
   }
 
   @override

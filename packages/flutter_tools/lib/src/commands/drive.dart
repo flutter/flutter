@@ -240,7 +240,7 @@ class DriveCommand extends RunCommandBase {
     if (device == null) {
       throwToolExit(null);
     }
-    if (screenshot != null && !device.supportsScreenshot) {
+    if (screenshot != null && !usingCIWithIOSCoreDevice(device) && !device.supportsScreenshot) {
       _logger.printError('Screenshot not supported for ${device.name}.');
     }
 
@@ -452,8 +452,17 @@ class DriveCommand extends RunCommandBase {
     return '${pathWithNoExtension}_test${_fileSystem.path.extension(appFile)}';
   }
 
+  /// iOS CoreDevices don't currently support screenshots
+  /// (https://github.com/flutter/flutter/issues/128598).
+  ///
+  /// A workaround is available, but should only be used in Flutter CI.
+  // TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/128598 is fixed.
+  bool usingCIWithIOSCoreDevice(Device device) {
+    return usingCISystem && device is IOSDevice && device.isCoreDevice;
+  }
+
   Future<void> _takeScreenshot(Device device, Directory outputDirectory) async {
-    if (!device.supportsScreenshot) {
+    if (!usingCIWithIOSCoreDevice(device) && !device.supportsScreenshot) {
       return;
     }
     try {
@@ -463,7 +472,11 @@ class DriveCommand extends RunCommandBase {
         'drive',
         'png',
       );
-      await device.takeScreenshot(outputFile);
+      if (usingCIWithIOSCoreDevice(device)) {
+        await (device as IOSDevice).takeScreenshotForCI(outputFile);
+      } else {
+        await device.takeScreenshot(outputFile);
+      }
       _logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
       _logger.printError('Error taking screenshot: $error');

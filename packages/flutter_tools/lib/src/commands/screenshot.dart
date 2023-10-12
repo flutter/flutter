@@ -73,6 +73,16 @@ class ScreenshotCommand extends FlutterCommand {
 
   Device? device;
 
+  /// iOS CoreDevices don't currently support screenshots
+  /// (https://github.com/flutter/flutter/issues/128598).
+  ///
+  /// A workaround is available, but should only be used in Flutter CI.
+  // TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/128598 is fixed.
+  bool get usingCIWithIOSCoreDevice {
+    final bool forceUITestScreenshot = globals.platform.environment['FORCE_UI_TEST_SCREENSHOT']?.toLowerCase() == 'true';
+    return usingCISystem && device != null && device is IOSDevice && ((device! as IOSDevice).isCoreDevice || forceUITestScreenshot);
+  }
+
   Future<void> _validateOptions(String? screenshotType, String? vmServiceUrl) async {
     switch (screenshotType) {
       case _kDeviceType:
@@ -83,8 +93,7 @@ class ScreenshotCommand extends FlutterCommand {
         if (device == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }
-        final bool bypassSupportCheck = device is IOSDevice && usingCISystem;
-        if (!bypassSupportCheck && !device!.supportsScreenshot) {
+        if (!usingCIWithIOSCoreDevice && !device!.supportsScreenshot) {
           throwToolExit('Screenshot not supported for ${device!.name}.');
         }
       default:
@@ -130,7 +139,11 @@ class ScreenshotCommand extends FlutterCommand {
     );
 
     try {
-      await device!.takeScreenshot(outputFile);
+      if (usingCIWithIOSCoreDevice) {
+        await (device! as IOSDevice).takeScreenshotForCI(outputFile);
+      } else {
+        await device!.takeScreenshot(outputFile);
+      }
     } on Exception catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
