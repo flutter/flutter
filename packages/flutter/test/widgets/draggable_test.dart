@@ -2433,7 +2433,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Drag and drop - onAccept no called if dropped with null data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onAccept is not called if dropped with null data', (WidgetTester tester) async {
     bool onAcceptCalled = false;
     bool onAcceptWithDetailsCalled = false;
 
