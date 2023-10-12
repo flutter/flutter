@@ -119,6 +119,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'platforms where such a tracer is available (Android, iOS, '
               'macOS and Fuchsia).',
       )
+      ..addOption('trace-to-file',
+        help: 'Write the timeline trace to a file at the specified path. The '
+              "file will be in Perfetto's proto format; it will be possible to "
+              "load the file into Perfetto's trace viewer.",
+        valueHelp: 'path/to/trace.binpb',
+      )
       ..addFlag('trace-skia',
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging '
@@ -270,6 +276,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         traceAllowlist: traceAllowlist,
         traceSkiaAllowlist: stringArg('trace-skia-allowlist'),
         traceSystrace: boolArg('trace-systrace'),
+        traceToFile: stringArg('trace-to-file'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
