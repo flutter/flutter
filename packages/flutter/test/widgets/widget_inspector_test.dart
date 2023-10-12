@@ -4128,12 +4128,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      final ValueListenableBuilder<bool> valueListenableBuilderWidget = find
-          .byType(ValueListenableBuilder<bool>)
-          .evaluate()
-          .single
-          .widget as ValueListenableBuilder<bool>;
-
+      final ValueListenableBuilder<bool> valueListenableBuilderWidget = tester.widget(
+        find.byType(ValueListenableBuilder<bool>),
+      );
       void debugShowWidgetInspectorOverrideCallback() {
         debugShowChangeCounter++;
       }
