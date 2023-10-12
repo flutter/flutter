@@ -19,6 +19,7 @@ class UITestScreenshot {
   UITestScreenshot({
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
+    this.environment,
     IOSCoreDeviceControl? coreDeviceControl,
     String? flutterRoot,
   }) : _fileSystem = fileSystem,
@@ -31,6 +32,7 @@ class UITestScreenshot {
   final ProcessUtils _processUtils;
   final String? _flutterRoot;
   final IOSCoreDeviceControl? _coreDeviceControl;
+  final Map<String, String>? environment;
 
   String get uiTestScreenshotXcodeProject {
     final String flutterRoot = _flutterRoot ?? Cache.flutterRoot!;
@@ -58,6 +60,15 @@ class UITestScreenshot {
     final String resultBundleTemp = _fileSystem.systemTempDirectory.createTempSync('flutter_xcresult.').path;
     final String resultBundlePath = _fileSystem.path.join(resultBundleTemp, 'result');
 
+    String? developmentTeam;
+    String? codeSignStyle;
+    String? provisioningProfile;
+    if (environment != null) {
+      developmentTeam = environment!['FLUTTER_XCODE_DEVELOPMENT_TEAM'];
+      codeSignStyle = environment!['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+      provisioningProfile = environment!['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+    }
+
     final RunResult result = await _processUtils.run(
       <String>[
         'xcrun',
@@ -73,6 +84,13 @@ class UITestScreenshot {
         resultBundlePath,
         '-only-testing:UITestScreenshotUITests',
         'test',
+        'COMPILER_INDEX_STORE_ENABLE=NO',
+        if (developmentTeam != null)
+          'DEVELOPMENT_TEAM=$developmentTeam',
+        if (codeSignStyle != null)
+          'CODE_SIGN_STYLE=$codeSignStyle',
+        if (provisioningProfile != null)
+          'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ],
       workingDirectory: uiTestScreenshotXcodeProject,
     );

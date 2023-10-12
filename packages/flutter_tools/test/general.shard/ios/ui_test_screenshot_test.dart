@@ -128,6 +128,7 @@ void main() {
             resultBundlePath,
             '-only-testing:UITestScreenshotUITests',
             'test',
+            'COMPILER_INDEX_STORE_ENABLE=NO'
           ],
           exitCode: 1,
         ),
@@ -165,6 +166,7 @@ void main() {
             resultBundlePath,
             '-only-testing:UITestScreenshotUITests',
             'test',
+            'COMPILER_INDEX_STORE_ENABLE=NO'
           ],
         ),
         const FakeCommand(
@@ -213,6 +215,7 @@ void main() {
             resultBundlePath,
             '-only-testing:UITestScreenshotUITests',
             'test',
+            'COMPILER_INDEX_STORE_ENABLE=NO'
           ],
         ),
         const FakeCommand(
@@ -261,6 +264,7 @@ void main() {
             resultBundlePath,
             '-only-testing:UITestScreenshotUITests',
             'test',
+            'COMPILER_INDEX_STORE_ENABLE=NO'
           ],
         ),
         const FakeCommand(
@@ -323,6 +327,103 @@ void main() {
             resultBundlePath,
             '-only-testing:UITestScreenshotUITests',
             'test',
+            'COMPILER_INDEX_STORE_ENABLE=NO'
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcresulttool',
+            'get',
+            '--path',
+            resultBundlePath,
+            '--format',
+            'json'
+          ],
+          stdout: resultJson,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcresulttool',
+            'get',
+            '--path',
+            resultBundlePath,
+            '--id',
+            testsRefId,
+            '--format',
+            'json'
+          ],
+          stdout: testRefResultJson,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcresulttool',
+            'get',
+            '--path',
+            resultBundlePath,
+            '--id',
+            summaryRefId,
+            '--format',
+            'json'
+          ],
+          stdout: summaryRefResultJson,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcresulttool',
+            'get',
+            '--path',
+            resultBundlePath,
+            '--id',
+            payloadRefId,
+          ],
+          stdout: payloadResult,
+        ),
+      ]);
+
+      await uiTestScreenshot.takeScreenshot(
+        outputFile,
+        target: UITestScreenshotCompatibleTargets.ios,
+        deviceId: deviceId,
+      );
+      expect(fakeProcessManager.hasRemainingExpectations, false);
+      expect(coreDeviceControl.appUninstalled, true);
+      expect(outputFile.readAsBytesSync(), isNotEmpty);
+    });
+
+    testWithoutContext('succeeds with codesigning flags', () async {
+      final UITestScreenshot uiTestScreenshot = UITestScreenshot(
+        fileSystem: fileSystem,
+        processUtils: processUtils,
+        coreDeviceControl: coreDeviceControl,
+        environment: <String, String>{
+          'FLUTTER_XCODE_DEVELOPMENT_TEAM': 'TEAM_ID',
+          'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+          'FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER': 'match Development *'
+        },
+        flutterRoot: flutterRoot,
+      );
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-scheme',
+            'UITestScreenshot',
+            '-destination',
+            'id=$deviceId',
+            '-resultBundlePath',
+            resultBundlePath,
+            '-only-testing:UITestScreenshotUITests',
+            'test',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+            'DEVELOPMENT_TEAM=TEAM_ID',
+            'CODE_SIGN_STYLE=Manual',
+            'PROVISIONING_PROFILE_SPECIFIER=match Development *'
           ],
         ),
         const FakeCommand(
@@ -420,6 +521,7 @@ void main() {
             resultBundlePath,
             '-only-testing:UITestScreenshotUITests',
             'test',
+            'COMPILER_INDEX_STORE_ENABLE=NO'
           ],
         ),
         const FakeCommand(

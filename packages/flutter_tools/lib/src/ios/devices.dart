@@ -989,6 +989,7 @@ class IOSDevice extends Device {
       fileSystem: _fileSystem,
       processUtils: globals.processUtils,
       coreDeviceControl: _coreDeviceControl,
+      environment: _platform.environment,
     );
     await uiTestScreenshot.takeScreenshot(
       outputFile,
