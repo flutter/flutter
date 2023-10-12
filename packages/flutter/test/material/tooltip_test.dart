@@ -864,12 +864,15 @@ void main() {
     expect(tooltipContainer.padding, const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
 
-  testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
       color: Color(0x80800000),
     );
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -877,7 +880,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Tooltip(
                     key: tooltipKey,
@@ -1422,16 +1425,18 @@ void main() {
     await tester.pump(waitDuration);
   });
 
-  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Stack(
                   children: <Widget>[
@@ -2321,9 +2326,13 @@ void main() {
       ),
     );
 
-    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Tooltip does not crash when showing the tooltip but the OverlayPortal is unmounted, during dispose', (WidgetTester tester) async {
@@ -2343,13 +2352,17 @@ void main() {
     );
 
     final TooltipState tooltipState = tester.state(find.byType(Tooltip));
-    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
     tooltipState.ensureTooltipVisible();
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgets('Tooltip is not selectable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip is not selectable', (WidgetTester tester) async {
     const String tooltipText = 'AAAAAAAAAAAAAAAAAAAAAAA';
     String? selectedText;
     await tester.pumpWidget(
