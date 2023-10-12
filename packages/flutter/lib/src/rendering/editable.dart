@@ -3333,7 +3333,7 @@ class _EditableSelectableFragment with Selectable, ChangeNotifier {
             extentOffset: _textSelectionEnd?.offset,
           ),
         ),
-        SelectionChangedCause.tap,
+        SelectionChangedCause.tap, // Is SelectionChangedCause necessary? If so we will need to add it to SelectionEvent.
       );
     }
     return result;
