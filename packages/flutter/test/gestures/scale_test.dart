@@ -18,9 +18,13 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
+    Duration? initialSourceTimestamp;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
+      initialSourceTimestamp = details.sourceTimeStamp;
+      print("changing sourcetimestamp");
+      print(initialSourceTimestamp);
     };
 
     double? updatedScale;
@@ -61,6 +65,7 @@ void main() {
     expect(updatedSourceTimestamp, isNull);
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
+    expect(initialSourceTimestamp, isNull);
 
     // One-finger panning
     tester.route(down);
@@ -70,6 +75,7 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
+    expect(initialSourceTimestamp, isNull);
 
     tester.route(pointer1.move(const Offset(20.0, 30.0), timeStamp: const Duration(milliseconds: 10)));
     expect(didStartScale, isTrue);
@@ -82,6 +88,8 @@ void main() {
     updatedDelta = null;
     expect(updatedSourceTimestamp, const Duration(milliseconds: 10));
     updatedSourceTimestamp = null;
+    expect(initialSourceTimestamp, const Duration(milliseconds: 10));
+    initialSourceTimestamp = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
     expect(scale.pointerCount, 1);
@@ -102,6 +110,7 @@ void main() {
     expect(updatedDelta, isNull);
     expect(updatedSourceTimestamp, isNull);
     expect(didStartScale, isFalse);
+    expect(initialSourceTimestamp, isNull);
 
     // Zoom in
     tester.route(pointer2.move(const Offset(0.0, 10.0), timeStamp: const Duration(milliseconds: 20)));
@@ -114,11 +123,13 @@ void main() {
     expect(updatedVerticalScale, 2.0);
     expect(updatedDelta, const Offset(-5.0, -5.0));
     expect(updatedSourceTimestamp, const Duration(milliseconds: 20));
+    expect(initialSourceTimestamp, const Duration(milliseconds: 20));
     updatedScale = null;
     updatedHorizontalScale = null;
     updatedVerticalScale = null;
     updatedDelta = null;
     updatedSourceTimestamp = null;
+    initialSourceTimestamp = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -165,6 +176,7 @@ void main() {
     expect(updatedFocalPoint, isNull);
     expect(updatedDelta, isNull);
     expect(didStartScale, isFalse);
+    expect(initialSourceTimestamp, isNull);
 
 
     // Zoom in
@@ -179,6 +191,8 @@ void main() {
     updatedDelta = null;
     expect(updatedSourceTimestamp, const Duration(milliseconds: 60));
     updatedSourceTimestamp = null;
+    expect(initialSourceTimestamp, const Duration(milliseconds: 60));
+    initialSourceTimestamp = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
@@ -198,6 +212,7 @@ void main() {
     expect(didTap, isFalse);
     expect(updatedSourceTimestamp, const Duration(milliseconds: 90));
     updatedSourceTimestamp = null;
+    expect(initialSourceTimestamp, isNull);
     tester.route(pointer1.up());
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, isNull);
@@ -205,6 +220,7 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndScale, isTrue);
     expect(updatedSourceTimestamp, isNull);
+    expect(initialSourceTimestamp, isNull);
     didEndScale = false;
     expect(didTap, isFalse);
 
@@ -220,6 +236,8 @@ void main() {
     updatedDelta = null;
     expect(updatedSourceTimestamp, const Duration(milliseconds: 100));
     updatedSourceTimestamp = null;
+    expect(initialSourceTimestamp, const Duration(milliseconds: 100));
+    initialSourceTimestamp = null;
 
     // Continue rotating with two fingers
     tester.route(pointer3.move(const Offset(30.0, 40.0), timeStamp: const Duration(milliseconds: 110)));
@@ -247,6 +265,7 @@ void main() {
     expect(updatedScale, isNull);
     expect(updatedDelta, isNull);
     expect(updatedSourceTimestamp, isNull);
+    expect(initialSourceTimestamp, isNull);
     expect(didEndScale, isTrue);
     didEndScale = false;
     expect(didTap, isFalse);
@@ -263,6 +282,8 @@ void main() {
     updatedDelta = null;
     expect(updatedSourceTimestamp, const Duration(milliseconds: 130));
     updatedSourceTimestamp = null;
+    expect(initialSourceTimestamp, const Duration(milliseconds: 130));
+    initialSourceTimestamp = null;
 
     // We are done
     tester.route(pointer3.up());
@@ -272,6 +293,7 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndScale, isTrue);
     expect(updatedSourceTimestamp, isNull);
+    expect(initialSourceTimestamp, isNull);
     didEndScale = false;
     expect(didTap, isFalse);
 
