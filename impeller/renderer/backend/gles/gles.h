@@ -6,7 +6,11 @@
 
 // IWYU pragma: begin_exports
 #include "GLES3/gl3.h"
-#define GL_CLAMP_TO_BORDER 0x812D
+
+// Defines for extension enums.
+#define IMPELLER_GL_CLAMP_TO_BORDER 0x812D
+#define IMPELLER_GL_TEXTURE_BORDER_COLOR 0x1004
+
 #define GL_GLEXT_PROTOTYPES
 #include "GLES2/gl2ext.h"
 // IWYU pragma: end_exports
