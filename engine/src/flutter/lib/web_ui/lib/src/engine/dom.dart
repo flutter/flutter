@@ -529,6 +529,7 @@ extension DomElementExtension on DomElement {
       createDomListWrapper<DomElement>(_children);
 
   external DomElement? get firstElementChild;
+  external DomElement? get lastElementChild;
 
   external DomElement? get nextElementSibling;
 

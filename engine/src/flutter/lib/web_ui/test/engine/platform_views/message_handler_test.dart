@@ -24,18 +24,17 @@ void testMain() {
       const int viewId = 6;
       late PlatformViewManager contentManager;
       late Completer<ByteData?> completer;
-      late Completer<DomElement> contentCompleter;
 
       setUp(() {
         contentManager = PlatformViewManager();
         completer = Completer<ByteData?>();
-        contentCompleter = Completer<DomElement>();
       });
 
       group('"create" message', () {
         test('unregistered viewType, fails with descriptive exception',
             () async {
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
           final ByteData? message = _getCreateMessage(viewType, viewId);
@@ -57,6 +56,7 @@ void testMain() {
               viewType, (int id) => createDomHTMLDivElement());
           contentManager.renderContent(viewType, viewId, null);
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
           final ByteData? message = _getCreateMessage(viewType, viewId);
@@ -77,6 +77,7 @@ void testMain() {
           contentManager.registerFactory(
               viewType, (int id) => createDomHTMLDivElement()..id = 'success');
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
           final ByteData? message = _getCreateMessage(viewType, viewId);
@@ -89,27 +90,37 @@ void testMain() {
                   'The response should be a success envelope, with null in it.');
         });
 
-        test('calls a contentHandler with the result of creating a view',
+        test('inserts the created view into the platformViewsContainer',
             () async {
+          final DomElement platformViewsContainer = createDomElement('pv-container');
           contentManager.registerFactory(
               viewType, (int id) => createDomHTMLDivElement()..id = 'success');
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: platformViewsContainer,
             contentManager: contentManager,
-            contentHandler: contentCompleter.complete,
           );
           final ByteData? message = _getCreateMessage(viewType, viewId);
 
           messageHandler.handlePlatformViewCall(message, completer.complete);
 
-          final DomElement contents = await contentCompleter.future;
           final ByteData? response = await completer.future;
 
-          expect(contents.querySelector('div#success'), isNotNull,
-              reason:
-                  'The element created by the factory should be present in the created view.');
-          expect(codec.decodeEnvelope(response!), isNull,
-              reason:
-                  'The response should be a success envelope, with null in it.');
+          expect(
+            platformViewsContainer.children.single,
+            isNotNull,
+            reason: 'The container has a single child, the created view.',
+          );
+          final DomElement platformView = platformViewsContainer.children.single;
+          expect(
+            platformView.querySelector('div#success'),
+            isNotNull,
+            reason: 'The element created by the factory should be present in the created view.',
+          );
+          expect(
+            codec.decodeEnvelope(response!),
+            isNull,
+            reason: 'The response should be a success envelope, with null in it.',
+          );
         });
 
         test('passes creation params to the factory', () async {
@@ -119,6 +130,7 @@ void testMain() {
             return createDomHTMLDivElement();
           });
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
 
@@ -177,8 +189,10 @@ void testMain() {
             return Object();
           });
 
-          final PlatformViewMessageHandler messageHandler =
-              PlatformViewMessageHandler(contentManager: contentManager);
+          final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: createDomElement('div'),
+            contentManager: contentManager,
+          );
           final ByteData? message = _getCreateMessage(viewType, viewId);
 
           expect(() {
@@ -196,6 +210,7 @@ void testMain() {
 
         test('never fails, even for unknown viewIds', () async {
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
           final ByteData? message = _getDisposeMessage(viewId);
@@ -210,6 +225,7 @@ void testMain() {
 
         test('never fails, even for unknown viewIds', () async {
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
+            platformViewsContainer: createDomElement('div'),
             contentManager: _FakePlatformViewManager(viewIdCompleter.complete),
           );
           final ByteData? message = _getDisposeMessage(viewId);

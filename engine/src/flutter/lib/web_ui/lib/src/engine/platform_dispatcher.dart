@@ -432,8 +432,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     };
   }
 
-  PlatformViewMessageHandler? _platformViewMessageHandler;
-
   void _sendPlatformMessage(
     String name,
     ByteData? data,
@@ -595,13 +593,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         return;
 
       case 'flutter/platform_views':
-        _platformViewMessageHandler ??= PlatformViewMessageHandler(
-          contentManager: PlatformViewManager.instance,
-          contentHandler: (DomElement content) {
-            flutterViewEmbedder.glassPaneElement.append(content);
-          },
-        );
-        _platformViewMessageHandler!.handlePlatformViewCall(data, callback!);
+        implicitView!.platformViewMessageHandler.handlePlatformViewCall(data, callback!);
         return;
 
       case 'flutter/accessibility':

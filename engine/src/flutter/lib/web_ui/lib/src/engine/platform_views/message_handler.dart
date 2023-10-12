@@ -5,9 +5,11 @@
 import 'dart:typed_data';
 
 import '../dom.dart';
+import '../platform_dispatcher.dart';
 import '../services.dart';
 import '../util.dart';
 import 'content_manager.dart';
+import 'slots.dart';
 
 /// The signature for a callback for a Platform Message. From the `ui` package.
 /// Copied here so there's no circular dependencies.
@@ -40,24 +42,23 @@ typedef PlatformViewContentHandler = void Function(DomElement);
 /// [HtmlViewEmbedder.disposeViews]
 class PlatformViewMessageHandler {
   PlatformViewMessageHandler({
-    required PlatformViewManager contentManager,
-    PlatformViewContentHandler? contentHandler,
-  }) : _contentManager = contentManager,
-       _contentHandler = contentHandler;
+    required DomElement platformViewsContainer,
+    PlatformViewManager? contentManager,
+  }) : _contentManager = contentManager ?? PlatformViewManager.instance,
+       _platformViewsContainer = platformViewsContainer;
 
   final MethodCodec _codec = const StandardMethodCodec();
   final PlatformViewManager _contentManager;
-  final PlatformViewContentHandler? _contentHandler;
+  final DomElement _platformViewsContainer;
 
   /// Handle a `create` Platform View message.
   ///
   /// This will attempt to render the `contents` and of a Platform View, if its
   /// `viewType` has been registered previously.
   ///
-  /// (See [PlatformViewContentManager.registerFactory] for more details.)
+  /// (See [PlatformViewManager.registerFactory] for more details.)
   ///
-  /// The `contents` are delegated to a [_contentHandler] function, so the
-  /// active rendering backend can inject them in the right place of the DOM.
+  /// The `contents` are inserted into the [_platformViewsContainer].
   ///
   /// If all goes well, this function will `callback` with an empty success envelope.
   /// In case of error, this will `callback` with an error envelope describing the error.
@@ -98,7 +99,7 @@ class PlatformViewMessageHandler {
 
     // For now, we don't need anything fancier. If needed, this can be converted
     // to a PlatformViewStrategy class for each web-renderer backend?
-    _contentHandler?.call(content);
+    _platformViewsContainer.append(content);
     callback(_codec.encodeSuccessEnvelope(null));
   }
 
