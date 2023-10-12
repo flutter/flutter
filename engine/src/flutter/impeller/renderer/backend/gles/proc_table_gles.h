@@ -175,6 +175,7 @@ struct GLProc {
   PROC(StencilOpSeparate);                   \
   PROC(TexImage2D);                          \
   PROC(TexParameteri);                       \
+  PROC(TexParameterfv);                      \
   PROC(Uniform1fv);                          \
   PROC(Uniform1i);                           \
   PROC(Uniform2fv);                          \
