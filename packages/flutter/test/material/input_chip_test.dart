@@ -90,6 +90,16 @@ RenderBox getMaterialBox(WidgetTester tester) {
   );
 }
 
+IconThemeData getIconData(WidgetTester tester) {
+  final IconTheme iconTheme = tester.firstWidget(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(IconTheme),
+    ),
+  );
+  return iconTheme.data;
+}
+
 void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
   final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
@@ -376,5 +386,29 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
     expect(materialBox, paints..path(color: material3ChipDefaults.disabledColor));
+  });
+
+  testWidgetsWithLeakTracking('InputChip uses provided iconTheme', (WidgetTester tester) async {
+    Widget buildChip({ IconThemeData? iconTheme }) {
+      return MaterialApp(
+        home: Material(
+          child: InputChip(
+            iconTheme: iconTheme,
+            avatar: const Icon(Icons.add),
+            label: const Text('Test'),
+          ),
+        ),
+      );
+    }
+
+    // Test default icon theme.
+    await tester.pumpWidget(buildChip());
+
+    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+
+    // Test provided icon theme.
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
+
+    expect(getIconData(tester).color, const Color(0xff00ff00));
   });
 }
