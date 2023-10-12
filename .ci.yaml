@@ -3328,17 +3328,13 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_arm64 module_test_ios
+  - name: Mac_arm64_ios module_test_ios # Must be run on devicelab bot for codesigning https://github.com/flutter/flutter/issues/112033
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
       tags: >
-        ["devicelab", "hostonly", "mac", "arm64"]
+        ["devicelab", "ios", "mac", "arm64"]
       task_name: module_test_ios
     runIf:
       - dev/**
