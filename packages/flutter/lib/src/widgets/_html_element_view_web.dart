@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'framework.dart';
 import 'platform_view.dart';
+import 'view.dart';
 
 /// The platform-specific implementation of [HtmlElementView].
 extension HtmlElementViewImpl on HtmlElementView {
@@ -38,9 +39,10 @@ extension HtmlElementViewImpl on HtmlElementView {
   /// The implementation on Flutter Web builds an HTML platform view and handles
   /// its lifecycle.
   Widget buildImpl(BuildContext context) {
+    final FlutterView flutterView = View.of(context);
     return PlatformViewLink(
       viewType: viewType,
-      onCreatePlatformView: _createController,
+      onCreatePlatformView: (PlatformViewCreationParams params) => _createController(params, flutterView.viewId),
       surfaceFactory: (BuildContext context, PlatformViewController controller) {
         return PlatformViewSurface(
           controller: controller,
@@ -54,11 +56,13 @@ extension HtmlElementViewImpl on HtmlElementView {
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createController(
     PlatformViewCreationParams params,
+    int flutterViewId,
   ) {
     final _HtmlElementViewController controller = _HtmlElementViewController(
       params.id,
       viewType,
       creationParams,
+      flutterViewId,
     );
     controller._initialize().then((_) {
       params.onPlatformViewCreated(params.id);
@@ -84,6 +88,7 @@ class _HtmlElementViewController extends PlatformViewController {
     this.viewId,
     this.viewType,
     this.creationParams,
+    this.flutterViewId,
   );
 
   @override
@@ -96,6 +101,9 @@ class _HtmlElementViewController extends PlatformViewController {
 
   final dynamic creationParams;
 
+  /// The ID of the [FlutterView] that this platform view is rendererd into.
+  final int flutterViewId;
+
   bool _initialized = false;
 
   Future<void> _initialize() async {
@@ -103,6 +111,7 @@ class _HtmlElementViewController extends PlatformViewController {
       'id': viewId,
       'viewType': viewType,
       'params': creationParams,
+      'flutterViewId': flutterViewId,
     };
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     _initialized = true;
@@ -123,7 +132,11 @@ class _HtmlElementViewController extends PlatformViewController {
   @override
   Future<void> dispose() async {
     if (_initialized) {
-      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
+      final Map<String, dynamic> args = <String, dynamic>{
+        'id': viewId,
+        'flutterViewId': flutterViewId,
+      };
+      await SystemChannels.platform_views.invokeMethod<void>('dispose', args);
     }
   }
 }

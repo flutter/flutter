@@ -131,7 +131,7 @@ class View extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [View.maybeOf], which throws instead of returning null if no
+  ///  * [View.maybeOf], which returns null instead of throwing if no
   ///    [FlutterView] is found.
   static FlutterView of(BuildContext context) {
     final FlutterView? result = maybeOf(context);
