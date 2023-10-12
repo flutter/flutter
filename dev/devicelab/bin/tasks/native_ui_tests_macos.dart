@@ -2,63 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
-import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/host_agent.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> main() async {
-  // Screenshots stopped working with CoreDevices (iOS 17+ and Xcode 15+). This
-  // tests a workaround solution that takes a screenshot using a UI Test.  Use
-  // FORCE_UI_TEST_SCREENSHOT environment variable to force the use this
-  // workaround since devicelab has not yet been updated to iOS 17 and Xcode 15.
   await task(() async {
-    try {
-      final Directory? dumpDirectory = hostAgent.dumpDirectory;
-      if (dumpDirectory == null) {
-        return TaskResult.success(null);
-      }
+    final String projectDirectory = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery';
 
-      // On command failure try uploading screenshot of failing command.
-      final String screenshotPath = path.join(
-        dumpDirectory.path,
-        'device-screenshot-${DateTime.now().toLocal().toIso8601String()}.png',
-      );
+    await inDirectory(projectDirectory, () async {
+      section('Build gallery app');
 
-      deviceOperatingSystem = DeviceOperatingSystem.ios;
-      final String deviceId = (await devices.workingDevice).deviceId;
-      print('Taking screenshot of working device $deviceId at $screenshotPath');
-      final int exitCode = await flutter(
-        'screenshot',
+      await flutter(
+        'build',
         options: <String>[
-          '--out',
-          screenshotPath,
-          '-d', deviceId,
+          'macos',
+          '-v',
+          '--debug',
         ],
-        environment: <String, String>{
-          'FORCE_UI_TEST_SCREENSHOT': 'true',
-        },
       );
+    });
 
-      if (exitCode != 0) {
-        return TaskResult.failure('Failed to take screenshot.');
-      }
+    section('Run platform unit tests');
 
-      final File screenshot = File(screenshotPath);
-
-      if (!screenshot.existsSync() || screenshot.readAsBytesSync().isEmpty) {
-        return TaskResult.failure('Screenshot not created.');
-      }
-
-      return TaskResult.success(null);
-    } on TaskResult catch (taskResult) {
-      return taskResult;
-    } catch (e) {
-      return TaskResult.failure(e.toString());
+    if (!await runXcodeTests(
+      platformDirectory: path.join(projectDirectory, 'macos'),
+      destination: 'platform=macOS',
+      testName: 'native_ui_tests_macos',
+      skipCodesign: true,
+    )) {
+      return TaskResult.failure('Platform unit tests failed');
     }
+
+    return TaskResult.success(null);
   });
 }
