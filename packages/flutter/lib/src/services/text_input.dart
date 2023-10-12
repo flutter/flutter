@@ -1707,7 +1707,6 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
-    print('TextInput.attach()');
     final TextInputConnection connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
@@ -1718,7 +1717,6 @@ class TextInput {
   // `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    print('TextInput._attach()');
     _currentConnection = connection;
     _currentConfiguration = configuration;
     _setClient(connection._client, configuration);
@@ -2029,8 +2027,6 @@ class TextInput {
         control.setEditingState(value);
       }
     }
-
-    print('TextInput.updateEditingValue() ${value}');
 
     _instance._currentConnection!._client.updateEditingValue(value);
   }

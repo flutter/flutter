@@ -78,7 +78,6 @@ class _EditableWebState extends State<EditableWeb> {
 
   @override
   void dispose() {
-    print('EditableWeb.dispose()');
     WebTextInputControl.instance.deregisterInstance(widget.clientId);
 
     super.dispose();
@@ -463,11 +462,14 @@ class _EditableWebState extends State<EditableWeb> {
         baseOffset: element.selectionStart ?? 0,
         extentOffset: element.selectionEnd ?? 0);
 
+    print('handle change value ${text}');
+    print('handle change selection ${element.selectionStart} - ${element.selectionEnd}');
     final TextEditingValue newEditingState =
         TextEditingValue(text: text, selection: selection);
 
     if (newEditingState != lastEditingState) {
       lastEditingState = newEditingState;
+      print('updateEditingState');
       updateEditingState(newEditingState);
     }
   }
@@ -494,23 +496,23 @@ class _EditableWebState extends State<EditableWeb> {
     });
 
     inputEl.onKeyDown.listen((html.KeyboardEvent event) {
-      print('KEYDOWN');
       maybeSendAction(event);
     });
 
     // Prevent default for mouse events to prevent selection interference/flickering.
     // We want to let the framework handle these pointerevents.
-    inputEl.onMouseDown.listen((html.MouseEvent event) {
-      event.preventDefault();
-    });
+    // NEW 10/10 - we actually want the browser to handle these.
+    // inputEl.onMouseDown.listen((html.MouseEvent event) {
+    //   event.preventDefault();
+    // });
 
-    inputEl.onMouseUp.listen((html.MouseEvent event) {
-      event.preventDefault();
-    });
+    // inputEl.onMouseUp.listen((html.MouseEvent event) {
+    //   event.preventDefault();
+    // });
 
-    inputEl.onMouseMove.listen((html.MouseEvent event) {
-      event.preventDefault();
-    });
+    // inputEl.onMouseMove.listen((html.MouseEvent event) {
+    //   event.preventDefault();
+    // });
   }
 
   void setGeneralAttributes(html.HtmlElement inputEl) {
@@ -562,7 +564,7 @@ class _EditableWebState extends State<EditableWeb> {
     textAreaEl.readOnly = widget.textInputConfiguration.readOnly;
     _textAreaElement = textAreaEl;
   }
-
+  // TODO add a submit type input to each autofill group
   void setupAutofill(html.HtmlElement inputEl) {
     // No autofill group, nothing to setup
     if (widget.currentAutofillScope == null) {
@@ -656,7 +658,6 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   void maybeSendAction(html.KeyboardEvent event) {
-    print('event ${event}');
     if (event.keyCode == html.KeyCode.ENTER) {
       performAction(widget.textInputConfiguration.inputAction);
 
@@ -750,13 +751,11 @@ class WebTextInputControl with TextInputControl {
   /// an id that can be referenced from a TextInputClient (due to attach's function
   /// signature).
   void registerInstance(int clientId, _EditableWebState instance) {
-    print('WebTextInputControl.register()');
     editableWebMap[clientId] = instance;
   }
 
   /// De-register an input element.
   void deregisterInstance(int clientId) {
-    print('WebTextInputControl.deregister()');
     editableWebMap.remove(clientId);
   }
 
@@ -765,7 +764,6 @@ class WebTextInputControl with TextInputControl {
   void attach(TextInputClient client, TextInputConfiguration configuration) {
     // set currentInputElement by grabbing it from the map. This is why we have to register
     // the id of the TextInputClient (editabletext) above, because we need that id in attach.
-    print('WebTextInputControl.attach()');
     _currentEditableWebInstance = editableWebMap[client.clientId];
     _currentInputElement = _currentEditableWebInstance!._inputEl;
 
@@ -779,9 +777,7 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void detach(TextInputClient client) {
-    print('WebTextInputControl.detach()');
     // Blur here since order goes detach -> hide.
-    print('blurring in detach');
     (_currentInputElement! as html.InputElement).blur();
 
     // Remove selectionchange listener.
@@ -799,7 +795,7 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void setEditingState(TextEditingValue value) {
-    print('WebTextInputControl.setEditingState() ${value}');
+    print('setEditingState ${value}');
     final html.InputElement element =
         _currentInputElement! as html.InputElement;
     final int minOffset =
@@ -833,8 +829,6 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void show() {
-    print('--inside show--');
-    print('is current element == document.activeElement ${_currentInputElement == html.document.activeElement}');
     (_currentInputElement! as html.InputElement).focus();
   }
 
@@ -845,7 +839,6 @@ class WebTextInputControl with TextInputControl {
     // This blur call is for instances where we blur to hide keyboard without
     // detaching the connection (if such a circumstance exists).
     if (_currentInputElement != null) {
-      print('blurring');
       (_currentInputElement! as html.InputElement).blur();
     }
   }
