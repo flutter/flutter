@@ -4117,11 +4117,29 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Map<Object, Object?> extensionChangedEvent;
       int debugShowChangeCounter = 0;
 
-      void debugShowWidgetInspectorOverrideCallback(){
-        debugShowChangeCounter ++;
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        WidgetsApp(
+          key: key,
+          builder: (BuildContext context, Widget? child) {
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      );
+
+      final ValueListenableBuilder<bool> builder = find
+          .byType(ValueListenableBuilder<bool>)
+          .evaluate()
+          .single
+          .widget as ValueListenableBuilder<bool>;
+
+      void debugShowWidgetInspectorOverrideCallback() {
+        debugShowChangeCounter++;
       }
-      WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value = false;
-      WidgetsApp.debugShowWidgetInspectorOverrideNotifier.addListener(debugShowWidgetInspectorOverrideCallback);
+
+      WidgetsApp.debugShowWidgetInspectorOverride = false;
+      builder.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
       service.rebuildCount = 0;
       expect(extensionChangedEvents, isEmpty);
       expect(
@@ -4135,6 +4153,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
       expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
@@ -4143,8 +4162,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
         equals('true'),
       );
-      expect(WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value, isTrue);
+      expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
       expect(extensionChangedEvents.length, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
       expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
@@ -4157,6 +4177,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
       expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
@@ -4169,6 +4190,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isFalse);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
       expect(debugShowChangeCounter, equals(2));
       expect(
         await service.testBoolExtension(
@@ -4178,8 +4200,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         equals('false'),
       );
       expect(extensionChangedEvents.length, equals(3));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
       expect(debugShowChangeCounter, equals(2));
-      expect(WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value, isFalse);
+      expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });
 
     testWidgetsWithLeakTracking('ext.flutter.inspector.screenshot', (WidgetTester tester) async {
