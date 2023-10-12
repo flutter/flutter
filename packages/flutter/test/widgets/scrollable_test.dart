@@ -1039,7 +1039,7 @@ void main() {
 
     // Make the outer constraints larger that the scrollable widget is no longer able to scroll.
     await tester.pumpWidget(build(300.0));
-    expect(controller.position.pixels, 100.0);
+    expect(controller.position.pixels, 0.0);
     expect(controller.position.maxScrollExtent, 0.0);
 
     // Hover over the scroll view and create a zero offset pointer scroll.
