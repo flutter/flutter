@@ -53,7 +53,7 @@ class _ColorfulButtonState extends State<ColorfulButton> {
   }
 
   KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
-    if (event is RawKeyDownEvent) {
+    if (event is KeyDownEvent) {
       debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
       if (event.logicalKey == LogicalKeyboardKey.keyR) {
         debugPrint('Changing color to red.');

@@ -92,7 +92,7 @@ class _FocusDemoState extends State<FocusDemo> {
   }
 
   KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
-    if (event is RawKeyDownEvent) {
+    if (event is KeyDownEvent) {
       print('Scope got key event: ${event.logicalKey}, $node');
       print('Keys down: ${HardwareKeyboard.instance.logicalKeysPressed}');
       if (event.logicalKey == LogicalKeyboardKey.tab) {
