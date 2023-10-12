@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/testing/dart/compile_test.gni")
+import("//flutter/build/dart/rules.gni")
 
 tests = [
   "assets_test.dart",
@@ -48,10 +48,10 @@ tests = [
 ]
 
 foreach(test, tests) {
-  compile_flutter_dart_test("compile_$test") {
-    dart_file = test
-    dart_kernel = "$root_gen_dir/$test.dill"
-    packages = ".dart_tool/package_config.json"
+  flutter_frontend_server("compile_$test") {
+    main_dart = test
+    kernel_output = "$root_gen_dir/$test.dill"
+    package_config = ".dart_tool/package_config.json"
   }
 }
 
