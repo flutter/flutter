@@ -29,7 +29,12 @@ class GpuSumarizer {
   double computeAverageGPUTime() => _computeAverage(_frameTimes);
 
   /// The [percentile]-th percentile GPU time recorded.
-  double computePercentileGPUTime(double percentile) => findPercentile(_frameTimes, percentile);
+  double computePercentileGPUTime(double percentile) {
+    if (_frameTimes.isEmpty) {
+      return 0;
+    }
+    return findPercentile(_frameTimes, percentile);
+  }
 
   /// Compute the worst GPU time recorded.
   double computeWorstGPUTime() => _computeWorst(_frameTimes);

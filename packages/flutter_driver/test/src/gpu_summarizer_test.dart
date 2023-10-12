@@ -16,7 +16,7 @@ TimelineEvent newGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic>{
 });
 
 void main() {
-  test('Can process GPU start and end events.', () {
+  test('Can process GPU frame times.', () {
     final GpuSumarizer summarizer = GpuSumarizer(<TimelineEvent>[
       newGPUTraceEvent(4.233),
       newGPUTraceEvent(7.22),
@@ -24,8 +24,8 @@ void main() {
       newGPUTraceEvent(40.23),
     ]);
 
-    expect(summarizer.computeAverageGPUTime(), 45);
-    expect(summarizer.computePercentileGPUTime(50.0), 50);
+    expect(summarizer.computeAverageGPUTime(), closeTo(15.19, 0.1));
+    expect(summarizer.computePercentileGPUTime(50.0), closeTo(9.1, 0.1));
     expect(summarizer.computeWorstGPUTime(), 40.23);
   });
 }
