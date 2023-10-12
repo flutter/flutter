@@ -198,37 +198,45 @@ void main() {
     expect(find.text(localizations.rowsPerPageTitle), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('PaginatedDataTable footer with custom rowsPerPage Title', (WidgetTester tester) async {
-    int rowsPerPage = 2;
-    String rowsPerPageTitle = 'Items per Page:';
-
-    Widget buildTable(TestDataSource source, int rowsPerPage) {
-      return PaginatedDataTable(
-        header: const Text('Test table'),
-        source: source,
-        rowsPerPage: rowsPerPage,
-        rowsPerPageTitle: rowsPerPageTitle,
-        showFirstLastButtons: true,
-        availableRowsPerPage: const <int>[
-          2, 3, 4, 5, 7, 8,
-        ],
-        onRowsPerPageChanged: (int? rowsPerPage) {
-        },
-        onPageChanged: (int rowIndex) {
-        },
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Calories'), numeric: true),
-          DataColumn(label: Text('Generation')),
-        ],
+  testWidgetsWithLeakTracking('PaginatedDataTable.rowsPerPageTitle overrides the default rowsPerPageTitle', (WidgetTester tester) async {
+    Widget buildTable({String? rowsPerPageTitle}) {
+      return MaterialApp(
+        home: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: source,
+          rowsPerPageTitle: rowsPerPageTitle,
+          // This callback shows the rows page title in the footer.
+          onRowsPerPageChanged: (int? rowsPerPage) { },
+          rowsPerPage: 2,
+          availableRowsPerPage: const <int>[
+            2, 3, 4, 5, 7, 8,
+          ],
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
       );
     }
 
-    await tester.pumpWidget(MaterialApp(
-      home: buildTable(source, rowsPerPage)
-    ));
+    // Test default rowsPerPageTitle.
+    await tester.pumpWidget(buildTable());
 
-    expect(find.text(rowsPerPageTitle), findsOneWidget);
+    MaterialLocalizations localizations = MaterialLocalizations.of(
+      tester.element(find.byType(PaginatedDataTable)),
+    );
+    expect(find.text(localizations.rowsPerPageTitle), findsOneWidget);
+
+    // Test custom rowsPerPageTitle.
+    await tester.pumpWidget(buildTable(rowsPerPageTitle: 'Items per page:'));
+
+    localizations = MaterialLocalizations.of(
+      tester.element(find.byType(PaginatedDataTable)),
+    );
+
+    expect(find.text(localizations.rowsPerPageTitle), findsNothing);
+    expect(find.text('Items per page:'), findsOneWidget);
   });
 
   testWidgetsWithLeakTracking('PaginatedDataTable footer page number', (WidgetTester tester) async {
