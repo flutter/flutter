@@ -76,7 +76,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('character: ${_event?.character}'));
           }
           final List<String> pressed = <String>['Pressed:'];
-          for (final LogicalKeyboardKey key in RawKeyboard.instance.keysPressed) {
+          for (final LogicalKeyboardKey key in HardwareKeyboard.instance.logicalKeysPressed) {
             pressed.add(key.debugName!);
           }
           dataText.add(Text(pressed.join(' ')));
