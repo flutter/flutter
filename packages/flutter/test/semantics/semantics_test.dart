@@ -575,8 +575,6 @@ void main() {
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
-      '   elevation: 0.0\n'
-      '   thickness: 0.0\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -698,8 +696,6 @@ void main() {
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
-      '   elevation: 0.0\n'
-      '   thickness: 0.0\n',
     );
   });
 

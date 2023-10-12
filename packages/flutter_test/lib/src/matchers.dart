@@ -634,8 +634,6 @@ Matcher matchesSemantics({
   TextDirection? textDirection,
   Rect? rect,
   Size? size,
-  double? elevation,
-  double? thickness,
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
@@ -711,8 +709,6 @@ Matcher matchesSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
@@ -814,8 +810,6 @@ Matcher containsSemantics({
   TextDirection? textDirection,
   Rect? rect,
   Size? size,
-  double? elevation,
-  double? thickness,
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
@@ -891,8 +885,6 @@ Matcher containsSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
@@ -2213,8 +2205,6 @@ class _MatchesSemanticsData extends Matcher {
     required this.textDirection,
     required this.rect,
     required this.size,
-    required this.elevation,
-    required this.thickness,
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
@@ -2352,8 +2342,6 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection? textDirection;
   final Rect? rect;
   final Size? size;
-  final double? elevation;
-  final double? thickness;
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
@@ -2445,12 +2433,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (size != null) {
       description.add(' with size: $size');
-    }
-    if (elevation != null) {
-      description.add(' with elevation: $elevation');
-    }
-    if (thickness != null) {
-      description.add(' with thickness: $thickness');
     }
     if (platformViewId != null) {
       description.add(' with platformViewId: $platformViewId');
@@ -2559,12 +2541,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (size != null && size != data.rect.size) {
       return failWithDescription(matchState, 'size was: ${data.rect.size}');
-    }
-    if (elevation != null && elevation != data.elevation) {
-      return failWithDescription(matchState, 'elevation was: ${data.elevation}');
-    }
-    if (thickness != null && thickness != data.thickness) {
-      return failWithDescription(matchState, 'thickness was: ${data.thickness}');
     }
     if (platformViewId != null && platformViewId != data.platformViewId) {
       return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');

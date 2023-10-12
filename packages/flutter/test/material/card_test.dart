@@ -39,8 +39,6 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: 1,
-            elevation: 1.0,
-            thickness: 0.0,
             children: <TestSemantics>[
               TestSemantics(
                 id: 2,

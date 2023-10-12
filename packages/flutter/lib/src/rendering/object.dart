@@ -3601,7 +3601,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     interestingFragment.compileChildren(
       parentSemanticsClipRect: _semantics?.parentSemanticsClipRect,
       parentPaintClipRect: _semantics?.parentPaintClipRect,
-      elevationAdjustment: _semantics?.elevationAdjustment ?? 0.0,
       result: result,
       siblingNodes: siblingNodes,
     );
@@ -4532,12 +4531,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   ///    of the `parentSemanticsClipRect` argument.
   ///  * [SemanticsNode.parentPaintClipRect] for the source and definition
   ///    of the `parentPaintClipRect` argument.
-  ///  * [SemanticsNode.elevationAdjustment] for the source and definition
-  ///    of the `elevationAdjustment` argument.
   void compileChildren({
     required Rect? parentSemanticsClipRect,
     required Rect? parentPaintClipRect,
-    required double elevationAdjustment,
     required List<SemanticsNode> result,
     required List<SemanticsNode> siblingNodes,
   });
@@ -4610,7 +4606,6 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   void compileChildren({
     Rect? parentSemanticsClipRect,
     Rect? parentPaintClipRect,
-    required double elevationAdjustment,
     required List<SemanticsNode> result,
     required List<SemanticsNode> siblingNodes,
   }) {
@@ -4618,7 +4613,6 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(parentSemanticsClipRect == null);
     assert(parentPaintClipRect == null);
     assert(_ancestorChain.length == 1);
-    assert(elevationAdjustment == 0.0);
 
     owner._semantics ??= SemanticsNode.root(
       showOnScreen: owner.showOnScreen,
@@ -4637,7 +4631,6 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
       fragment.compileChildren(
         parentSemanticsClipRect: parentSemanticsClipRect,
         parentPaintClipRect: parentPaintClipRect,
-        elevationAdjustment: 0.0,
         result: children,
         siblingNodes: siblingNodes,
       );
@@ -4691,7 +4684,6 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
   void compileChildren({
     required Rect? parentSemanticsClipRect,
     required Rect? parentPaintClipRect,
-    required double elevationAdjustment,
     required List<SemanticsNode> result,
     required List<SemanticsNode> siblingNodes,
   }) {
@@ -4836,7 +4828,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   void compileChildren({
     Rect? parentSemanticsClipRect,
     Rect? parentPaintClipRect,
-    required double elevationAdjustment,
     required List<SemanticsNode> result,
     required List<SemanticsNode> siblingNodes,
   }) {
@@ -4871,10 +4862,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         fragment.compileChildren(
           parentSemanticsClipRect: parentSemanticsClipRect,
           parentPaintClipRect: parentPaintClipRect,
-          // The fragment is not explicit, its elevation has been absorbed by
-          // the parent config (as thickness). We still need to make sure that
-          // its children are placed at the elevation dictated by this config.
-          elevationAdjustment: elevationAdjustment + _config.elevation,
           result: result,
           siblingNodes: siblingNodes,
         );
@@ -4895,12 +4882,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     final SemanticsNode node = owner._semantics!
       ..isMergedIntoParent = _mergeIntoParent
       ..tags = _tagsForChildren;
-
-    node.elevationAdjustment = elevationAdjustment;
-    if (elevationAdjustment != 0.0) {
-      _ensureConfigIsWritable();
-      _config.elevation += elevationAdjustment;
-    }
 
     if (geometry != null) {
       assert(_needsGeometryUpdate);
@@ -4936,7 +4917,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       fragment.compileChildren(
         parentSemanticsClipRect: node.parentSemanticsClipRect,
         parentPaintClipRect: node.parentPaintClipRect,
-        elevationAdjustment: 0.0,
         result: children,
         siblingNodes: childSiblingNodes,
       );
