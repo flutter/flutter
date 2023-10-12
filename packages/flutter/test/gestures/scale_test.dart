@@ -23,8 +23,6 @@ void main() {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
       initialSourceTimestamp = details.sourceTimeStamp;
-      print("changing sourcetimestamp");
-      print(initialSourceTimestamp);
     };
 
     double? updatedScale;
