@@ -4185,6 +4185,16 @@ targets:
         }
     bringup: true
 
+  # TODO(vashworth): Remove after https://github.com/flutter/flutter/issues/128598 is fixed
+  - name: Mac_ios ios_core_device_screenshot
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: ios_core_device_screenshot
+    bringup: true
+
   - name: Mac native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
     bringup: true

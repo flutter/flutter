@@ -12,6 +12,10 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> main() async {
+  // Screenshots stopped working with CoreDevices (iOS 17+ and Xcode 15+). This
+  // tests a workaround solution that takes a screenshot using a UI Test.  Use
+  // FORCE_UI_TEST_SCREENSHOT environment variable to force the use this
+  // workaround since devicelab has not yet been updated to iOS 17 and Xcode 15.
   await task(() async {
     try {
       final Directory? dumpDirectory = hostAgent.dumpDirectory;
@@ -35,6 +39,9 @@ Future<void> main() async {
           screenshotPath,
           '-d', deviceId,
         ],
+        environment: <String, String>{
+          'FORCE_UI_TEST_SCREENSHOT': 'true',
+        },
       );
 
       if (exitCode != 0) {

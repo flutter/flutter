@@ -35,6 +35,9 @@ Future<void> main() async {
           screenshotPath,
           '-d', deviceId,
         ],
+        environment: <String, String>{
+          'FORCE_UI_TEST_SCREENSHOT': 'true',
+        },
       );
 
       if (exitCode != 0) {
