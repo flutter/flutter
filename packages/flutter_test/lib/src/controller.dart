@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'event_simulation.dart';
-import 'finders.dart';
+import 'finders.dart' as finders;
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
 import 'tree_traversal.dart';
@@ -74,7 +74,7 @@ class SemanticsController {
   ///
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
-  SemanticsNode find(FinderBase<Element> finder) {
+  SemanticsNode find(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     if (!_controller.binding.semanticsEnabled) {
       throw StateError('Semantics are not enabled.');
@@ -149,7 +149,7 @@ class SemanticsController {
   ///   parts of the traversal.
   /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
   ///   match the order of the traversal.
-  Iterable<SemanticsNode> simulatedAccessibilityTraversal({FinderBase<Element>? start, FinderBase<Element>? end, FlutterView? view}) {
+  Iterable<SemanticsNode> simulatedAccessibilityTraversal({finders.FinderBase<Element>? start, finders.FinderBase<Element>? end, FlutterView? view}) {
     TestAsyncUtils.guardSync();
     FlutterView? startView;
     FlutterView? endView;
@@ -348,21 +348,21 @@ abstract class WidgetController {
   ///
   ///   * [view] which returns the [TestFlutterView] used when only a single
   ///     view is being used.
-  TestFlutterView viewOf(FinderBase<Element> finder) {
+  TestFlutterView viewOf(finders.FinderBase<Element> finder) {
     return _viewOf(finder) as TestFlutterView;
   }
 
-  FlutterView _viewOf(FinderBase<Element> finder) {
+  FlutterView _viewOf(finders.FinderBase<Element> finder) {
     return firstWidget<View>(
-      find.ancestor(
+      finders.find.ancestor(
         of: finder,
-        matching: find.byType(View),
+        matching: finders.find.byType(View),
       ),
     ).view;
   }
 
   /// Checks if `finder` exists in the tree.
-  bool any(FinderBase<Element> finder) {
+  bool any(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().isNotEmpty;
   }
@@ -383,7 +383,7 @@ abstract class WidgetController {
   ///
   /// * Use [firstWidget] if you expect to match several widgets but only want the first.
   /// * Use [widgetList] if you expect to match several widgets and want all of them.
-  T widget<T extends Widget>(FinderBase<Element> finder) {
+  T widget<T extends Widget>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single.widget as T;
   }
@@ -394,7 +394,7 @@ abstract class WidgetController {
   /// Throws a [StateError] if `finder` is empty.
   ///
   /// * Use [widget] if you only expect to match one widget.
-  T firstWidget<T extends Widget>(FinderBase<Element> finder) {
+  T firstWidget<T extends Widget>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first.widget as T;
   }
@@ -403,7 +403,7 @@ abstract class WidgetController {
   ///
   /// * Use [widget] if you only expect to match one widget.
   /// * Use [firstWidget] if you expect to match several but only want the first.
-  Iterable<T> widgetList<T extends Widget>(FinderBase<Element> finder) {
+  Iterable<T> widgetList<T extends Widget>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
       final T result = element.widget as T;
@@ -414,7 +414,7 @@ abstract class WidgetController {
   /// Find all layers that are children of the provided [finder].
   ///
   /// The [finder] must match exactly one element.
-  Iterable<Layer> layerListOf(FinderBase<Element> finder) {
+  Iterable<Layer> layerListOf(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
     final RenderObject object = element.renderObject!;
@@ -443,7 +443,7 @@ abstract class WidgetController {
   ///
   /// * Use [firstElement] if you expect to match several elements but only want the first.
   /// * Use [elementList] if you expect to match several elements and want all of them.
-  T element<T extends Element>(FinderBase<Element> finder) {
+  T element<T extends Element>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single as T;
   }
@@ -454,7 +454,7 @@ abstract class WidgetController {
   /// Throws a [StateError] if `finder` is empty.
   ///
   /// * Use [element] if you only expect to match one element.
-  T firstElement<T extends Element>(FinderBase<Element> finder) {
+  T firstElement<T extends Element>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first as T;
   }
@@ -463,7 +463,7 @@ abstract class WidgetController {
   ///
   /// * Use [element] if you only expect to match one element.
   /// * Use [firstElement] if you expect to match several but only want the first.
-  Iterable<T> elementList<T extends Element>(FinderBase<Element> finder) {
+  Iterable<T> elementList<T extends Element>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().cast<T>();
   }
@@ -485,7 +485,7 @@ abstract class WidgetController {
   ///
   /// * Use [firstState] if you expect to match several states but only want the first.
   /// * Use [stateList] if you expect to match several states and want all of them.
-  T state<T extends State>(FinderBase<Element> finder) {
+  T state<T extends State>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().single, finder);
   }
@@ -497,7 +497,7 @@ abstract class WidgetController {
   /// matching widget has no state.
   ///
   /// * Use [state] if you only expect to match one state.
-  T firstState<T extends State>(FinderBase<Element> finder) {
+  T firstState<T extends State>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().first, finder);
   }
@@ -509,17 +509,17 @@ abstract class WidgetController {
   ///
   /// * Use [state] if you only expect to match one state.
   /// * Use [firstState] if you expect to match several but only want the first.
-  Iterable<T> stateList<T extends State>(FinderBase<Element> finder) {
+  Iterable<T> stateList<T extends State>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) => _stateOf<T>(element, finder));
   }
 
-  T _stateOf<T extends State>(Element element, FinderBase<Element> finder) {
+  T _stateOf<T extends State>(Element element, finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     if (element is StatefulElement) {
       return element.state as T;
     }
-    throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.describeMatch(Plurality.many)}, is not a StatefulWidget.');
+    throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.describeMatch(finders.Plurality.many)}, is not a StatefulWidget.');
   }
 
   /// Render objects of all the widgets currently in the widget tree
@@ -541,7 +541,7 @@ abstract class WidgetController {
   ///
   /// * Use [firstRenderObject] if you expect to match several render objects but only want the first.
   /// * Use [renderObjectList] if you expect to match several render objects and want all of them.
-  T renderObject<T extends RenderObject>(FinderBase<Element> finder) {
+  T renderObject<T extends RenderObject>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single.renderObject! as T;
   }
@@ -552,7 +552,7 @@ abstract class WidgetController {
   /// Throws a [StateError] if `finder` is empty.
   ///
   /// * Use [renderObject] if you only expect to match one render object.
-  T firstRenderObject<T extends RenderObject>(FinderBase<Element> finder) {
+  T firstRenderObject<T extends RenderObject>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first.renderObject! as T;
   }
@@ -561,7 +561,7 @@ abstract class WidgetController {
   ///
   /// * Use [renderObject] if you only expect to match one render object.
   /// * Use [firstRenderObject] if you expect to match several but only want the first.
-  Iterable<T> renderObjectList<T extends RenderObject>(FinderBase<Element> finder) {
+  Iterable<T> renderObjectList<T extends RenderObject>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
       final T result = element.renderObject! as T;
@@ -609,7 +609,7 @@ abstract class WidgetController {
   /// For example, a test that verifies that tapping a disabled button does not
   /// trigger the button would set `warnIfMissed` to false, because the button
   /// would ignore the tap.
-  Future<void> tap(FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
+  Future<void> tap(finders.FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
     return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons);
   }
 
@@ -634,7 +634,7 @@ abstract class WidgetController {
   ///  * [tap], which presses and releases a pointer at the given location.
   ///  * [longPress], which presses and releases a pointer with a gap in
   ///    between long enough to trigger the long-press gesture.
-  Future<TestGesture> press(FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
+  Future<TestGesture> press(finders.FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'), pointer: pointer, buttons: buttons);
     });
@@ -652,7 +652,7 @@ abstract class WidgetController {
   /// later verify that long-pressing the same location (using the same finder)
   /// has no effect (since the widget is now obscured), setting `warnIfMissed`
   /// to false on that second call.
-  Future<void> longPress(FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
+  Future<void> longPress(finders.FinderBase<Element> finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
     return longPressAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'), pointer: pointer, buttons: buttons);
   }
 
@@ -713,7 +713,7 @@ abstract class WidgetController {
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [drag].
   Future<void> fling(
-    FinderBase<Element> finder,
+    finders.FinderBase<Element> finder,
     Offset offset,
     double speed, {
     int? pointer,
@@ -793,7 +793,7 @@ abstract class WidgetController {
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [drag].
   Future<void> trackpadFling(
-    FinderBase<Element> finder,
+    finders.FinderBase<Element> finder,
     Offset offset,
     double speed, {
     int? pointer,
@@ -958,7 +958,7 @@ abstract class WidgetController {
   /// should be left to their default values.
   /// {@endtemplate}
   Future<void> drag(
-    FinderBase<Element> finder,
+    finders.FinderBase<Element> finder,
     Offset offset, {
     int? pointer,
     int buttons = kPrimaryButton,
@@ -1091,7 +1091,7 @@ abstract class WidgetController {
   /// more accurate time control.
   /// {@endtemplate}
   Future<void> timedDrag(
-    FinderBase<Element> finder,
+    finders.FinderBase<Element> finder,
     Offset offset,
     Duration duration, {
     int? pointer,
@@ -1288,14 +1288,14 @@ abstract class WidgetController {
   /// this method is being called from another that is forwarding its own
   /// `warnIfMissed` parameter (see e.g. the implementation of [tap]).
   /// {@endtemplate}
-  Offset getCenter(FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getCenter' }) {
+  Offset getCenter(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getCenter' }) {
     return _getElementPoint(finder, (Size size) => size.center(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
   }
 
   /// Returns the point at the top left of the given widget.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getTopLeft(FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getTopLeft' }) {
+  Offset getTopLeft(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getTopLeft' }) {
     return _getElementPoint(finder, (Size size) => Offset.zero, warnIfMissed: warnIfMissed, callee: callee);
   }
 
@@ -1303,7 +1303,7 @@ abstract class WidgetController {
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getTopRight(FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getTopRight' }) {
+  Offset getTopRight(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getTopRight' }) {
     return _getElementPoint(finder, (Size size) => size.topRight(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
   }
 
@@ -1311,7 +1311,7 @@ abstract class WidgetController {
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getBottomLeft(FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getBottomLeft' }) {
+  Offset getBottomLeft(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getBottomLeft' }) {
     return _getElementPoint(finder, (Size size) => size.bottomLeft(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
   }
 
@@ -1319,7 +1319,7 @@ abstract class WidgetController {
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getBottomRight(FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getBottomRight' }) {
+  Offset getBottomRight(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getBottomRight' }) {
     return _getElementPoint(finder, (Size size) => size.bottomRight(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
   }
 
@@ -1346,7 +1346,7 @@ abstract class WidgetController {
   /// in the documentation for the [flutter_test] library.
   static bool hitTestWarningShouldBeFatal = false;
 
-  Offset _getElementPoint(FinderBase<Element> finder, Offset Function(Size size) sizeToPoint, { required bool warnIfMissed, required String callee }) {
+  Offset _getElementPoint(finders.FinderBase<Element> finder, Offset Function(Size size) sizeToPoint, { required bool warnIfMissed, required String callee }) {
     TestAsyncUtils.guardSync();
     final Iterable<Element> elements = finder.evaluate();
     if (elements.isEmpty) {
@@ -1417,7 +1417,7 @@ abstract class WidgetController {
 
   /// Returns the size of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
-  Size getSize(FinderBase<Element> finder) {
+  Size getSize(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
     final RenderBox box = element.renderObject! as RenderBox;
@@ -1585,7 +1585,7 @@ abstract class WidgetController {
 
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
-  Rect getRect(FinderBase<Element> finder) => Rect.fromPoints(getTopLeft(finder), getBottomRight(finder));
+  Rect getRect(finders.FinderBase<Element> finder) => Rect.fromPoints(getTopLeft(finder), getBottomRight(finder));
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
@@ -1602,7 +1602,7 @@ abstract class WidgetController {
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   // TODO(pdblasi-google): Deprecate this and point references to semantics.find. See https://github.com/flutter/flutter/issues/112670.
-  SemanticsNode getSemantics(FinderBase<Element> finder) => semantics.find(finder);
+  SemanticsNode getSemantics(finders.FinderBase<Element> finder) => semantics.find(finder);
 
   /// Enable semantics in a test by creating a [SemanticsHandle].
   ///
@@ -1626,7 +1626,7 @@ abstract class WidgetController {
   ///
   ///  * [Scrollable.ensureVisible], which is the production API used to
   ///    implement this method.
-  Future<void> ensureVisible(FinderBase<Element> finder) => Scrollable.ensureVisible(element(finder));
+  Future<void> ensureVisible(finders.FinderBase<Element> finder) => Scrollable.ensureVisible(element(finder));
 
   /// Repeatedly scrolls a [Scrollable] by `delta` in the
   /// [Scrollable.axisDirection] direction until a widget matching `finder` is
@@ -1651,15 +1651,15 @@ abstract class WidgetController {
   ///
   ///  * [dragUntilVisible], which implements the body of this method.
   Future<void> scrollUntilVisible(
-    FinderBase<Element> finder,
+    finders.FinderBase<Element> finder,
     double delta, {
-      FinderBase<Element>? scrollable,
+      finders.FinderBase<Element>? scrollable,
       int maxScrolls = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
   ) {
     assert(maxScrolls > 0);
-    scrollable ??= find.byType(Scrollable);
+    scrollable ??= finders.find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
       Offset moveStep;
       switch (widget<Scrollable>(scrollable!).axisDirection) {
@@ -1694,8 +1694,8 @@ abstract class WidgetController {
   ///  * [scrollUntilVisible], which wraps this method with an API that is more
   ///    convenient when dealing with a [Scrollable].
   Future<void> dragUntilVisible(
-    FinderBase<Element> finder,
-    FinderBase<Element> view,
+    finders.FinderBase<Element> finder,
+    finders.FinderBase<Element> view,
     Offset moveStep, {
       int maxIteration = 50,
       Duration duration = const Duration(milliseconds: 50),
