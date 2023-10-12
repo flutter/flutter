@@ -867,38 +867,15 @@ def gather_dart_tests(build_dir, test_filter):
         logger.info(
             "Gathering dart test '%s' with observatory enabled", dart_test_file
         )
-        yield gather_dart_test(
-            build_dir, dart_test_file,
-            FlutterTesterOptions(
-                multithreaded=True,
-                enable_impeller=False,
-                enable_observatory=True
-            )
-        )
-        yield gather_dart_test(
-            build_dir, dart_test_file,
-            FlutterTesterOptions(
-                multithreaded=True,
-                enable_impeller=True,
-                enable_observatory=True
-            )
-        )
-        yield gather_dart_test(
-            build_dir, dart_test_file,
-            FlutterTesterOptions(
-                multithreaded=False,
-                enable_impeller=False,
-                enable_observatory=True
-            )
-        )
-        yield gather_dart_test(
-            build_dir, dart_test_file,
-            FlutterTesterOptions(
-                multithreaded=False,
-                enable_impeller=True,
-                enable_observatory=True
-            )
-        )
+        for multithreaded, enable_impeller in [(True, False), (False, False)]:
+          yield gather_dart_test(
+              build_dir, dart_test_file,
+              FlutterTesterOptions(
+                  multithreaded=multithreaded,
+                  enable_impeller=enable_impeller,
+                  enable_observatory=True
+              )
+          )
 
   for dart_test_file in dart_tests:
     if test_filter is not None and os.path.basename(dart_test_file
@@ -906,22 +883,13 @@ def gather_dart_tests(build_dir, test_filter):
       logger.info("Skipping '%s' due to filter.", dart_test_file)
     else:
       logger.info("Gathering dart test '%s'", dart_test_file)
-      yield gather_dart_test(
-          build_dir, dart_test_file,
-          FlutterTesterOptions(multithreaded=True, enable_impeller=False)
-      )
-      yield gather_dart_test(
-          build_dir, dart_test_file,
-          FlutterTesterOptions(multithreaded=True, enable_impeller=True)
-      )
-      yield gather_dart_test(
-          build_dir, dart_test_file,
-          FlutterTesterOptions(multithreaded=False, enable_impeller=False)
-      )
-      yield gather_dart_test(
-          build_dir, dart_test_file,
-          FlutterTesterOptions(multithreaded=False, enable_impeller=True)
-      )
+      for multithreaded, enable_impeller in [(True, False), (False, False)]:
+        yield gather_dart_test(
+            build_dir, dart_test_file,
+            FlutterTesterOptions(
+                multithreaded=multithreaded, enable_impeller=enable_impeller
+            )
+        )
 
 
 def gather_dart_smoke_test(build_dir, test_filter):
