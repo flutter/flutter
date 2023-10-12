@@ -12,6 +12,7 @@ void main() {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
     );
     // require js source is interpolated correctly.
     expect(result, contains('"requireJs": "require.js"'));
@@ -27,9 +28,20 @@ void main() {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
     );
     expect(result, contains('"flutter-loader"'));
     expect(result, contains('"indeterminate"'));
+  });
+
+  test('generateBootstrapScript does not include loading indicator', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+      generateLoadingIndicator: false,
+    );
+    expect(result, isNot(contains('"flutter-loader"')));
+    expect(result, isNot(contains('"indeterminate"')));
   });
 
   // https://github.com/flutter/flutter/issues/107742
@@ -37,6 +49,7 @@ void main() {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
     );
 
     // See: https://regexr.com/6q0ft
