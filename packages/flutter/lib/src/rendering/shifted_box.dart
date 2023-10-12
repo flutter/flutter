@@ -408,6 +408,26 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 
   @override
+  double computeMinIntrinsicWidth(double height) {
+    return super.computeMinIntrinsicWidth(height) * (_widthFactor ?? 1);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return super.computeMaxIntrinsicWidth(height) * (_widthFactor ?? 1);
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return super.computeMinIntrinsicHeight(width)  * (_heightFactor ?? 1);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return super.computeMaxIntrinsicHeight(width)  * (_heightFactor ?? 1);
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
     final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;

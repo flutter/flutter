@@ -198,7 +198,7 @@ void main() {
       expect(() {
         gradle_utils.updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
       }, throwsToolExit(
-        message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
+        message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
       ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,

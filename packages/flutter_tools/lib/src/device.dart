@@ -937,6 +937,7 @@ class DebuggingOptions {
     this.traceAllowlist,
     this.traceSkiaAllowlist,
     this.traceSystrace = false,
+    this.traceToFile,
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
     this.cacheSkSL = false,
@@ -1006,6 +1007,7 @@ class DebuggingOptions {
       traceSkia = false,
       traceSkiaAllowlist = null,
       traceSystrace = false,
+      traceToFile = null,
       endlessTraceBuffer = false,
       dumpSkpOnShaderCompilation = false,
       purgePersistentCache = false,
@@ -1037,6 +1039,7 @@ class DebuggingOptions {
     required this.traceAllowlist,
     required this.traceSkiaAllowlist,
     required this.traceSystrace,
+    required this.traceToFile,
     required this.endlessTraceBuffer,
     required this.dumpSkpOnShaderCompilation,
     required this.cacheSkSL,
@@ -1088,6 +1091,7 @@ class DebuggingOptions {
   final String? traceAllowlist;
   final String? traceSkiaAllowlist;
   final bool traceSystrace;
+  final String? traceToFile;
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;
   final bool cacheSkSL;
@@ -1178,6 +1182,7 @@ class DebuggingOptions {
       ],
       if (enableSoftwareRendering) '--enable-software-rendering',
       if (traceSystrace) '--trace-systrace',
+      if (traceToFile != null) '--trace-to-file="$traceToFile"',
       if (skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (traceSkia) '--trace-skia',
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
@@ -1218,6 +1223,7 @@ class DebuggingOptions {
     'traceAllowlist': traceAllowlist,
     'traceSkiaAllowlist': traceSkiaAllowlist,
     'traceSystrace': traceSystrace,
+    'traceToFile': traceToFile,
     'endlessTraceBuffer': endlessTraceBuffer,
     'dumpSkpOnShaderCompilation': dumpSkpOnShaderCompilation,
     'cacheSkSL': cacheSkSL,
@@ -1269,6 +1275,7 @@ class DebuggingOptions {
       traceAllowlist: json['traceAllowlist'] as String?,
       traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
       traceSystrace: json['traceSystrace']! as bool,
+      traceToFile: json['traceToFile'] as String?,
       endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
       dumpSkpOnShaderCompilation: json['dumpSkpOnShaderCompilation']! as bool,
       cacheSkSL: json['cacheSkSL']! as bool,
