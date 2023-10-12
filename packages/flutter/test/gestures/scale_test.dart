@@ -140,6 +140,7 @@ void main() {
     expect(updatedDelta, const Offset(7.5, 7.5));
     expect(updatedSourceTimestamp, const Duration(milliseconds: 30));
     expect(didTap, isFalse);
+    expect(initialSourceTimestamp, isNull);
 
 
     // Horizontal scaling
@@ -147,6 +148,7 @@ void main() {
     expect(updatedHorizontalScale, 2.0);
     expect(updatedVerticalScale, 1.0);
     expect(updatedSourceTimestamp, const Duration(milliseconds: 40));
+    expect(initialSourceTimestamp, isNull);
 
     // Vertical scaling
     tester.route(pointer2.move(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 50)));
@@ -154,6 +156,7 @@ void main() {
     expect(updatedVerticalScale, 2.0);
     expect(updatedDelta, const Offset(5.0, -5.0));
     expect(updatedSourceTimestamp, const Duration(milliseconds: 50));
+    expect(initialSourceTimestamp, isNull);
     tester.route(pointer2.move(const Offset(15.0, 25.0)));
     updatedFocalPoint = null;
     updatedScale = null;
@@ -247,6 +250,7 @@ void main() {
     updatedDelta = null;
     expect(updatedSourceTimestamp, const Duration(milliseconds: 110));
     updatedSourceTimestamp = null;
+    expect(initialSourceTimestamp, isNull);
     tester.route(pointer3.move(const Offset(10.0, 20.0), timeStamp: const Duration(milliseconds: 120)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
     updatedFocalPoint = null;
@@ -256,6 +260,7 @@ void main() {
     updatedDelta = null;
     expect(updatedSourceTimestamp, const Duration(milliseconds: 120));
     updatedSourceTimestamp = null;
+    expect(initialSourceTimestamp, isNull);
 
     tester.route(pointer2.up());
     expect(didStartScale, isFalse);
