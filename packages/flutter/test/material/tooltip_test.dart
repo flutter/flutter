@@ -2326,9 +2326,13 @@ void main() {
       ),
     );
 
-    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Tooltip does not crash when showing the tooltip but the OverlayPortal is unmounted, during dispose', (WidgetTester tester) async {
@@ -2348,10 +2352,14 @@ void main() {
     );
 
     final TooltipState tooltipState = tester.state(find.byType(Tooltip));
-    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
     tooltipState.ensureTooltipVisible();
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Tooltip is not selectable', (WidgetTester tester) async {
