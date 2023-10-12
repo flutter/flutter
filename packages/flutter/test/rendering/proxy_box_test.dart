@@ -961,6 +961,7 @@ void main() {
     expect(fancyProxyBox.fancyMethod(), 36);
     // Box has behavior from RenderProxyBox:
     expect(
+      // ignore: invalid_use_of_protected_member
       fancyProxyBox.computeDryLayout(const BoxConstraints(minHeight: 8)),
       const Size(0, 8),
     );
