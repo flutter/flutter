@@ -663,7 +663,7 @@ end
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      unawaited(removeIOSimulator(simulatorDeviceId));
+      unawaited(removeIOSSimulator(simulatorDeviceId));
       rmTree(tempDir);
     }
   });

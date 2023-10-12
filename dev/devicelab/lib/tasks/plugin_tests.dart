@@ -278,7 +278,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
             }
           });
         } finally {
-          await removeIOSimulator(simulatorDeviceId);
+          await removeIOSSimulator(simulatorDeviceId);
         }
       case 'linux':
         if (await exec(
