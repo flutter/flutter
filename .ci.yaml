@@ -2947,7 +2947,7 @@ targets:
 
   - name: Mac_arm64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3330,7 +3330,7 @@ targets:
 
   - name: Mac_arm64 module_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3401,7 +3401,7 @@ targets:
 
   - name: Mac_arm64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3981,7 +3981,7 @@ targets:
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3997,7 +3997,7 @@ targets:
 
   - name: Mac_arm64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4142,7 +4142,7 @@ targets:
 
   - name: Mac_x64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4153,13 +4153,17 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: macos_chrome_dev_mode
 
-  - name: Mac_arm64_ios macos_chrome_dev_mode
+  - name: Mac_arm64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       task_name: macos_chrome_dev_mode
 
   - name: Mac_ios microbenchmarks_ios
@@ -4188,7 +4192,7 @@ targets:
 
   - name: Mac native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4336,7 +4340,7 @@ targets:
 
   - name: Mac_x64 hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4465,7 +4469,7 @@ targets:
 
   - name: Mac_arm64 run_debug_test_macos
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4501,7 +4505,7 @@ targets:
 
   - name: Mac_arm64 run_release_test_macos
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
