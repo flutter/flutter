@@ -3326,18 +3326,15 @@ class _EditableSelectableFragment with Selectable, ChangeNotifier {
     if (existingSelectionStart != _textSelectionStart ||
         existingSelectionEnd != _textSelectionEnd) {
       _didChangeSelection();
-      if (_textSelectionStart != null && _textSelectionEnd != null) {
-        debugPrint('woah');
-        editable.textSelectionDelegate.userUpdateTextEditingValue(
-          editable.textSelectionDelegate.textEditingValue.copyWith(
-            selection: editable.textSelectionDelegate.textEditingValue.selection.copyWith(
-              baseOffset: _textSelectionStart!.offset,
-              extentOffset: _textSelectionEnd!.offset,
-            ),
+      editable.textSelectionDelegate.userUpdateTextEditingValue(
+        editable.textSelectionDelegate.textEditingValue.copyWith(
+          selection: editable.textSelectionDelegate.textEditingValue.selection.copyWith(
+            baseOffset: _textSelectionStart?.offset,
+            extentOffset: _textSelectionEnd?.offset,
           ),
-          SelectionChangedCause.tap,
-        );
-      }
+        ),
+        SelectionChangedCause.tap,
+      );
     }
     return result;
   }
