@@ -5,76 +5,53 @@
 import 'percentile_utils.dart';
 import 'timeline.dart';
 
-class _StartAndEnd {
-  const _StartAndEnd(this.start, this.end);
-
-  final TimelineEvent start;
-  final TimelineEvent end;
-
-  Duration get duration => Duration(microseconds: end.timestampMicros! - start.timestampMicros!);
-}
-
 /// Summarizes [GpuSumarizer]s corresponding to GPU start and end events.
 class GpuSumarizer {
   /// Creates a RasterCacheSummarizer given the timeline events.
   GpuSumarizer(List<TimelineEvent> gpuEvents) {
-    TimelineEvent? start;
     for (final TimelineEvent event in gpuEvents) {
-      if (event.name == 'GPUStart') {
-        start = event;
-      } else if (event.name == 'GPUEnd') {
-        if (start != null) {
-          _gpuEvents.add(_StartAndEnd(start, event));
-          start = null;
+      final Object? value = event.arguments!['FrameTimeMS'];
+      if (value is String) {
+        final double? parsedValue = double.tryParse(value);
+        if (parsedValue != null) {
+          _frameTimes.add(parsedValue);
         }
       }
     }
   }
 
   /// Whether or not this event is a GPU event.
-  static const Set<String> kGpuEvents = <String>{'GPUStart', 'GPUEnd'};
+  static const Set<String> kGpuEvents = <String>{'GPUTracer'};
 
-  final List<_StartAndEnd> _gpuEvents = <_StartAndEnd>[];
+  final List<double> _frameTimes = <double>[];
 
   /// Computes the average GPU time recorded.
-  double computeAverageGPUTime() => _computeAverage(_gpuEvents);
+  double computeAverageGPUTime() => _computeAverage(_frameTimes);
 
   /// The [percentile]-th percentile GPU time recorded.
-  double computePercentileGPUTime(double percentile) => _computePercentile(_gpuEvents, percentile);
+  double computePercentileGPUTime(double percentile) => findPercentile(_frameTimes, percentile);
 
   /// Compute the worst GPU time recorded.
-  double computeWorstGPUTime() => _computeWorst(_gpuEvents);
+  double computeWorstGPUTime() => _computeWorst(_frameTimes);
 
-  static double _computeAverage(List<_StartAndEnd> values) {
+  static double _computeAverage(List<double> values) {
     if (values.isEmpty) {
       return 0;
     }
 
-    Duration total = Duration.zero;
-    for (final _StartAndEnd data in values) {
-      total += data.duration;
+    double total = 0;
+    for (final double data in values) {
+      total += data;
     }
-    return total.inMilliseconds / values.length;
+    return total / values.length;
   }
 
-  static double _computePercentile(List<_StartAndEnd> values, double percentile) {
+  static double _computeWorst(List<double> values) {
     if (values.isEmpty) {
       return 0;
     }
 
-    final List<double> durationValues = <double>[
-      for (final _StartAndEnd data in values)
-        data.duration.inMilliseconds.toDouble()
-    ];
-    return findPercentile(durationValues, percentile);
-  }
-
-  static double _computeWorst(List<_StartAndEnd> values) {
-    if (values.isEmpty) {
-      return 0;
-    }
-
-    values.sort((_StartAndEnd a, _StartAndEnd b) => a.duration.compareTo(b.duration));
-    return values.last.duration.inMilliseconds.toDouble();
+    values.sort();
+    return values.last;
   }
 }
