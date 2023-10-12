@@ -450,13 +450,6 @@ void main() {
   });
 
   test('backgroundColor', () {
-    // TODO(matanlurey): Remove when https://github.com/flutter/engine/pull/44705 rolls into the framework.
-    // Currently, dithering is disabled by default, but it's about to be flipped (enabled by default),
-    // and deprecated. This avoids #44705 causing a breakage in this test.
-    //
-    // ignore: deprecated_member_use
-    Paint.enableDithering = true;
-
     const TextStyle s1 = TextStyle();
     expect(s1.backgroundColor, isNull);
     expect(s1.toString(), 'TextStyle(<all styles inherited>)');
@@ -467,15 +460,14 @@ void main() {
 
     final ui.TextStyle ts2 = s2.getTextStyle();
 
-    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/133698 is resolved.
-    // There are 5+ implementations of Paint, so we should either align the toString() or stop
-    // testing it, IMO.
-    if (kIsWeb) {
-      // The web implementation never includes "dither: ..." as a property.
-      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
-    } else {
-      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00); dither: true)'));
-    }
+    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/112498 is resolved.
+    // The web implementation never includes "dither: ..." as a property, and after #112498 neither
+    // does non-web (as there will no longer be a user-visible "dither" property). So, relax the
+    // test to just check for the color by using a regular expression.
+    expect(
+      ts2.toString(),
+      matches(RegExp(r'background: Paint\(Color\(0xff00ff00\).*\)')),
+    );
   });
 
   test('TextStyle background and backgroundColor combos', () {

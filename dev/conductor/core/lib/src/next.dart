@@ -141,15 +141,12 @@ class NextContext extends Context {
         }
 
         await pushWorkingBranch(engine, state.engine);
-      case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
-        stdio.printStatus(<String>[
-          'You must validate pre-submit CI for your engine PR, merge it, and codesign',
-          'binaries before proceeding.\n',
-        ].join('\n'));
+      case pb.ReleasePhase.VERIFY_ENGINE_CI:
+        stdio.printStatus('You must validate post-submit CI for your engine PR and merge it');
         if (!autoAccept) {
-          // TODO(fujino): actually test if binaries have been codesigned on macOS
           final bool response = await prompt(
-            'Has CI passed for the engine PR and binaries been codesigned?',
+            'Has CI passed for the engine PR?\n\n'
+            '${state_import.luciConsoleLink(state.releaseChannel, 'engine')}'
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -190,10 +187,10 @@ class NextContext extends Context {
               addFirst: true,
           );
           // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
+          state.framework.cherrypicks.add(pb.Cherrypick.create()
+                  ..appliedRevision = revision
+                  ..state = pb.CherrypickState.COMPLETED
+          );
         }
         stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
         needsCommit = await framework.updateEngineRevision(engineRevision);
@@ -203,10 +200,10 @@ class NextContext extends Context {
               addFirst: true,
           );
           // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
+          state.framework.cherrypicks.add(pb.Cherrypick.create()
+                  ..appliedRevision = revision
+                  ..state = pb.CherrypickState.COMPLETED
+          );
         }
 
         final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
@@ -250,83 +247,18 @@ class NextContext extends Context {
 
         await pushWorkingBranch(framework, state.framework);
       case pb.ReleasePhase.PUBLISH_VERSION:
-        stdio.printStatus('Please ensure that you have merged your framework PR and that');
-        stdio.printStatus('post-submit CI has finished successfully.\n');
-        final Remote frameworkUpstream = Remote(
-            name: RemoteName.upstream,
-            url: state.framework.upstream.url,
-        );
-        final FrameworkRepository framework = FrameworkRepository(
-            checkouts,
-            // We explicitly want to check out the merged version from upstream
-            initialRef: '${frameworkUpstream.name}/${state.framework.candidateBranch}',
-            upstreamRemote: frameworkUpstream,
-            previousCheckoutLocation: state.framework.checkoutPath,
-        );
-        final String frameworkHead = await framework.reverseParse('HEAD');
-        final Remote engineUpstream = Remote(
-            name: RemoteName.upstream,
-            url: state.engine.upstream.url,
-        );
-        final EngineRepository engine = EngineRepository(
-            checkouts,
-            // We explicitly want to check out the merged version from upstream
-            initialRef: '${engineUpstream.name}/${state.engine.candidateBranch}',
-            upstreamRemote: engineUpstream,
-            previousCheckoutLocation: state.engine.checkoutPath,
-        );
-        final String engineHead = await engine.reverseParse('HEAD');
-        if (!autoAccept) {
-          final bool response = await prompt(
-            'Are you ready to tag commit $frameworkHead as ${state.releaseVersion}\n'
-            'and push to remote ${state.framework.upstream.url}?',
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            updateState(state, stdio.logs);
-            return;
-          }
-        }
-        await framework.tag(frameworkHead, state.releaseVersion, frameworkUpstream.name);
-        await engine.tag(engineHead, state.releaseVersion, engineUpstream.name);
-      case pb.ReleasePhase.PUBLISH_CHANNEL:
-        final Remote upstream = Remote(
-            name: RemoteName.upstream,
-            url: state.framework.upstream.url,
-        );
-        final FrameworkRepository framework = FrameworkRepository(
-            checkouts,
-            // We explicitly want to check out the merged version from upstream
-            initialRef: '${upstream.name}/${state.framework.candidateBranch}',
-            upstreamRemote: upstream,
-            previousCheckoutLocation: state.framework.checkoutPath,
-        );
-        final String headRevision = await framework.reverseParse('HEAD');
-        if (!autoAccept) {
-          // dryRun: true means print out git command
-          await framework.pushRef(
-              fromRef: headRevision,
-              toRef: state.releaseChannel,
-              remote: state.framework.upstream.url,
-              force: force,
-              dryRun: true,
-          );
-
-          final bool response = await prompt(
-            'Are you ready to publish version ${state.releaseVersion} to ${state.releaseChannel}?',
-          );
-          if (!response) {
-            stdio.printError('Aborting command.');
-            updateState(state, stdio.logs);
-            return;
-          }
-        }
-        await framework.pushRef(
-            fromRef: headRevision,
-            toRef: state.releaseChannel,
-            remote: state.framework.upstream.url,
-            force: force,
-        );
+        final String command = '''
+          tool-proxy-cli --tool_proxy=/abns/dart-eng-tool-proxy/prod-dart-eng-tool-proxy-tool-proxy.annealed-tool-proxy \\
+          --block_on_mpa -I flutter_release \\
+          :git_branch ${state.framework.candidateBranch} \\
+          :release_channel ${state.releaseChannel} \\
+          :tag ${state.releaseVersion} \\
+          :force false
+        ''';
+        stdio.printStatus('Please ensure that you have merged your framework PR');
+        stdio.printStatus('and post-submit CI has finished successfully.\n');
+        stdio.printStatus('Run the following command, and ask a Googler');
+        stdio.printStatus('to review the request\n\n$command');
       case pb.ReleasePhase.VERIFY_RELEASE:
         stdio.printStatus(
             'The current status of packaging builds can be seen at:\n'
