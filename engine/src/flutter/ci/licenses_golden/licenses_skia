@@ -1,4 +1,4 @@
-Signature: 6a9f7e57b6ac3b40b65178a7bcb1846e
+Signature: cf6b982df4fd0956282a7bc325240fe2
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8770,7 +8770,9 @@ ORIGIN: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayList
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrPromiseImageTexture.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrSurfaceCharacterization.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/SkImageChromium.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrGLTypes_empty.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrVkTypes_empty.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/graphite/ContextOptionsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/BentleyOttmann1.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/BruteForceCrossings.h + ../../../third_party/skia/LICENSE
@@ -9035,7 +9037,9 @@ FILE: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayListRe
 FILE: ../../../third_party/skia/include/private/chromium/GrPromiseImageTexture.h
 FILE: ../../../third_party/skia/include/private/chromium/GrSurfaceCharacterization.h
 FILE: ../../../third_party/skia/include/private/chromium/SkImageChromium.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrGLTypes_empty.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrVkTypes_empty.h
 FILE: ../../../third_party/skia/include/private/gpu/graphite/ContextOptionsPriv.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/BentleyOttmann1.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/BruteForceCrossings.h
