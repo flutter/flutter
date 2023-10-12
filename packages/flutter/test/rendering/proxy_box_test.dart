@@ -965,6 +965,12 @@ void main() {
       const Size(0, 8),
     );
   });
+
+  test('computeDryLayout constraints are covariant', () {
+    final RenderBoxWithTestConstraints box = RenderBoxWithTestConstraints();
+    final TestConstraints constraints = TestConstraints(testValue: 6);
+    expect(box.computeDryLayout(constraints), const Size.square(6));
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -1087,3 +1093,19 @@ void expectAssertionError() {
 }
 
 typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset);
+
+class TestConstraints extends BoxConstraints {
+  const TestConstraints({
+    double extent = 100,
+    required this.testValue,
+  }) : super(maxWidth: extent, maxHeight: extent);
+
+  final double testValue;
+}
+
+class RenderBoxWithTestConstraints extends RenderProxyBox {
+  @override
+  Size computeDryLayout(TestConstraints constraints) {
+    return constraints.constrain(Size.square(constraints.testValue));
+  }
+}
