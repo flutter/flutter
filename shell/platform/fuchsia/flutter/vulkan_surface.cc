@@ -508,7 +508,7 @@ void VulkanSurface::Reset() {
   VkFence fence = command_buffer_fence_;
 
   if (command_buffer_) {
-    VK_CALL_LOG_ERROR(vulkan_provider_.vk().WaitForFences(
+    VK_CALL_LOG_FATAL(vulkan_provider_.vk().WaitForFences(
         vulkan_provider_.vk_device(), 1, &fence, VK_TRUE, UINT64_MAX));
     command_buffer_.reset();
   }
