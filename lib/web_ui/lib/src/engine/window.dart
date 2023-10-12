@@ -21,6 +21,7 @@ import 'mouse/context_menu.dart';
 import 'mouse/cursor.dart';
 import 'navigation/history.dart';
 import 'platform_dispatcher.dart';
+import 'platform_views/message_handler.dart';
 import 'services.dart';
 import 'util.dart';
 
@@ -39,6 +40,7 @@ const int kImplicitViewId = 0;
 abstract interface class EngineFlutterView extends ui.FlutterView {
   ContextMenu get contextMenu;
   MouseCursor get mouseCursor;
+  PlatformViewMessageHandler get platformViewMessageHandler;
   DomElement get rootElement;
 }
 
@@ -74,6 +76,10 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow implements EngineFlu
 
   @override
   DomElement get rootElement => flutterViewEmbedder.flutterViewElement;
+
+  @override
+  late final PlatformViewMessageHandler platformViewMessageHandler =
+      PlatformViewMessageHandler(platformViewsContainer: flutterViewEmbedder.glassPaneElement);
 
   /// Handles the browser history integration to allow users to use the back
   /// button, etc.
