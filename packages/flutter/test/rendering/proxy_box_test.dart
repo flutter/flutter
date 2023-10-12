@@ -969,7 +969,7 @@ void main() {
 
   test('computeDryLayout constraints are covariant', () {
     final RenderBoxWithTestConstraints box = RenderBoxWithTestConstraints();
-    final TestConstraints constraints = const TestConstraints(testValue: 6);
+    const TestConstraints constraints = TestConstraints(testValue: 6);
     expect(box.computeDryLayout(constraints), const Size.square(6));
   });
 }
