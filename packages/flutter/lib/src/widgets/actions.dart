@@ -1231,7 +1231,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
-    });
+    }, debugLabel: 'FocusableActionDetector.updateHighlightMode');
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -1339,7 +1339,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     if (widget.enabled != oldWidget.enabled) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
-      });
+      }, debugLabel: 'FocusableActionDetector.mayTriggerCallback');
     }
   }
 

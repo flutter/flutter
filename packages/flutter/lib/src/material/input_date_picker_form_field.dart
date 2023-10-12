@@ -174,7 +174,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
           _selectedDate = widget.initialDate;
           _updateValueForSelectedDate();
         });
-      });
+      }, debugLabel: 'InputDatePickerFormField.update');
     }
   }
 
