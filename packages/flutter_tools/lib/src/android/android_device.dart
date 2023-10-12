@@ -625,6 +625,7 @@ class AndroidDevice extends Device {
     final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
+    final String? traceToFile = debuggingOptions.traceToFile;
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
@@ -648,6 +649,8 @@ class AndroidDevice extends Device {
         ...<String>['--es', 'trace-skia-allowlist', traceSkiaAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
+      if (traceToFile != null)
+        ...<String>['--es', 'trace-to-file', traceToFile],
       if (debuggingOptions.endlessTraceBuffer)
         ...<String>['--ez', 'endless-trace-buffer', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
