@@ -3,9 +3,8 @@
 # found in the LICENSE file.
 
 import("//build/compiled_action.gni")
+import("//flutter/build/dart/rules.gni")
 import("//flutter/common/config.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
-import("//third_party/dart/sdk_args.gni")
 
 is_aot_test =
     flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
@@ -51,48 +50,6 @@ template("fixtures_location") {
   }
 }
 
-# Invokes the frontend server using the built Dart SDK or the prebuilt Dart SDK
-# as appropriate.
-#
-# Parameters:
-#   The parameters testonly, deps, inputs, outputs, depfile, and args are
-#   forwarded from the invoker either to an 'action' target or a 'dart_action'
-#   target depending on whether a prebuilt Dart SDK is used or not,
-#   respectively.
-template("_frontend_server") {
-  if (flutter_prebuilt_dart_sdk) {
-    action(target_name) {
-      testonly = invoker.testonly
-      deps = invoker.deps
-      script = "//build/gn_run_binary.py"
-      inputs = invoker.inputs
-      outputs = invoker.outputs
-      depfile = invoker.depfile
-      pool = "//flutter/build/dart:dart_pool"
-
-      ext = ""
-      if (is_win) {
-        ext = ".exe"
-      }
-      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
-      frontend_server = rebase_path(
-              "$host_prebuilt_dart_sdk/bin/snapshots/frontend_server.dart.snapshot")
-
-      args = [
-               dart,
-               frontend_server,
-             ] + invoker.args
-    }
-  } else {
-    dart_action(target_name) {
-      forward_variables_from(invoker, "*")
-      deps += [ "//third_party/dart/utils/kernel-service:frontend_server" ]
-      script = "$root_out_dir/frontend_server.dart.snapshot"
-      pool = "//flutter/build/dart:dart_pool"
-    }
-  }
-}
-
 # Generates the Dart kernel snapshot.
 #
 # Arguments
@@ -107,45 +64,26 @@ template("dart_snapshot_kernel") {
   assert(defined(invoker.dart_kernel),
          "The Dart Kernel file location must be specified")
 
-  _frontend_server(target_name) {
-    testonly = true
+  args = []
+  if (flutter_runtime_mode == "release" ||
+      flutter_runtime_mode == "jit_release") {
+    args += [ "-Ddart.vm.product=true" ]
+  }
 
-    deps = [ "//flutter/lib/snapshot:strong_platform" ]
+  if (is_aot_test) {
+    args += [
+      "--aot",
 
-    inputs = [ invoker.dart_main ]
-
-    outputs = [ invoker.dart_kernel ]
-
-    snapshot_depfile = "$target_gen_dir/snapshot_$target_name.depfile.d"
-    depfile = snapshot_depfile
-
-    args = [
-      "--sdk-root",
-      rebase_path("$root_out_dir/flutter_patched_sdk"),
-      "--target",
-      "flutter",
-      "--sound-null-safety",
-      "--output-dill",
-      rebase_path(invoker.dart_kernel, root_out_dir),
-      "--depfile",
-      rebase_path(snapshot_depfile),
+      # type flow analysis
+      "--tfa",
     ]
+  }
 
-    if (flutter_runtime_mode == "release" ||
-        flutter_runtime_mode == "jit_release") {
-      args += [ "-Ddart.vm.product=true" ]
-    }
-
-    if (is_aot_test) {
-      args += [
-        "--aot",
-
-        # type flow analysis
-        "--tfa",
-      ]
-    }
-
-    args += [ rebase_path(invoker.dart_main) ]
+  flutter_frontend_server(target_name) {
+    testonly = true
+    main_dart = invoker.dart_main
+    kernel_output = invoker.dart_kernel
+    extra_args = args
   }
 }
 
