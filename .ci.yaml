@@ -4116,17 +4116,11 @@ targets:
 
   - name: Mac_arm64_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
-      device_type: none
-      device_os: null
-      dependencies: >-
-        [
-          {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
-        ]
       tags: >
-        ["devicelab", "hostonly", "mac", "arm64"]
+        ["devicelab", "ios", "mac", "arm64"]
       task_name: ios_content_validation_test
 
   - name: Mac_ios ios_defines_test
