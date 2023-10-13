@@ -1617,6 +1617,7 @@ ORIGIN: ../../../flutter/fml/shared_thread_merger.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/shared_thread_merger.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/size.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/status.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/status_or.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/string_conversion.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/string_conversion.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/synchronization/atomic_object.h + ../../../flutter/LICENSE
@@ -4377,6 +4378,7 @@ FILE: ../../../flutter/fml/shared_thread_merger.cc
 FILE: ../../../flutter/fml/shared_thread_merger.h
 FILE: ../../../flutter/fml/size.h
 FILE: ../../../flutter/fml/status.h
+FILE: ../../../flutter/fml/status_or.h
 FILE: ../../../flutter/fml/string_conversion.cc
 FILE: ../../../flutter/fml/string_conversion.h
 FILE: ../../../flutter/fml/synchronization/atomic_object.h
