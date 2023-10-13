@@ -1,4 +1,4 @@
-Signature: 244d5b4ec05eae279e56381c0e102ae8
+Signature: 6a65dcc04e4e876df43db5cc3ba07c24
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8770,9 +8770,7 @@ ORIGIN: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayList
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrPromiseImageTexture.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrSurfaceCharacterization.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/SkImageChromium.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrGLTypes_empty.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrVkTypes_empty.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/graphite/ContextOptionsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/BentleyOttmann1.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/BruteForceCrossings.h + ../../../third_party/skia/LICENSE
@@ -8952,7 +8950,6 @@ ORIGIN: ../../../third_party/skia/src/image/SkSurface_Null.cpp + ../../../third_
 ORIGIN: ../../../third_party/skia/src/image/SkTiledImageUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/opts/SkOpts_RestoreTarget.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/opts/SkOpts_SetTarget.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/ports/SkImageGenerator_empty.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/fontations/src/ffi.rs + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/fontations/src/skpath_bridge.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkBlendShader.h + ../../../third_party/skia/LICENSE
@@ -9037,9 +9034,7 @@ FILE: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayListRe
 FILE: ../../../third_party/skia/include/private/chromium/GrPromiseImageTexture.h
 FILE: ../../../third_party/skia/include/private/chromium/GrSurfaceCharacterization.h
 FILE: ../../../third_party/skia/include/private/chromium/SkImageChromium.h
-FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrGLTypes_empty.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h
-FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrVkTypes_empty.h
 FILE: ../../../third_party/skia/include/private/gpu/graphite/ContextOptionsPriv.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/BentleyOttmann1.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/BruteForceCrossings.h
@@ -9219,7 +9214,6 @@ FILE: ../../../third_party/skia/src/image/SkSurface_Null.cpp
 FILE: ../../../third_party/skia/src/image/SkTiledImageUtils.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_RestoreTarget.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_SetTarget.h
-FILE: ../../../third_party/skia/src/ports/SkImageGenerator_empty.cpp
 FILE: ../../../third_party/skia/src/ports/fontations/src/ffi.rs
 FILE: ../../../third_party/skia/src/ports/fontations/src/skpath_bridge.h
 FILE: ../../../third_party/skia/src/shaders/SkBlendShader.h
