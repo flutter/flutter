@@ -116,6 +116,16 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
+/// The argument [experimentalLeakTracking] is experimental and is not recommended
+/// for use outside of Flutter Framework.
+/// When [experimentalLeakTracking] is set, it is used to configure leak tracking.
+/// Otherwise [LeakTrackingForTests.settings] is used.
+/// You can update [LeakTrackingForTests.settings] in flutter_test_config.dart for your
+/// package or in 'setUpAll' for the test library or group. If you set it for group,
+/// remember original value to a local variable and restore it in `tearDownAll`.
+/// Set [experimentalLeakTracking] to null to exempt the test from leak tracking.
+/// Give it
+///
 /// ## Sample code
 ///
 /// ```dart
@@ -135,7 +145,11 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   int? retry,
+  Object? experimentalLeakTracking,
 }) {
+  // TODO(polina-c): change type of experimentalLeakTracking and configure leak tracking.
+  // https://github.com/flutter/flutter/issues/135856
+
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
