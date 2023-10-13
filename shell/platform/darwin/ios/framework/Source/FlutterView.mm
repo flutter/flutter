@@ -100,7 +100,7 @@ static void PrintWideGamutWarningOnce() {
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
     CAMetalLayer* layer = (CAMetalLayer*)self.layer;
 #pragma clang diagnostic pop
-    CGFloat screenScale = [UIScreen mainScreen].scale;
+    CGFloat screenScale = self.screen.scale;
     layer.allowsGroupOpacity = YES;
     layer.contentsScale = screenScale;
     layer.rasterizationScale = screenScale;
