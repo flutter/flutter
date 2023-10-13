@@ -2614,6 +2614,12 @@ Future<void> testMain() async {
       expect(testInputElement.getAttribute('autocomplete'),'on');
       expect(testInputElement.placeholder, 'enter your password');
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/135542
+    test('autofill with middleName hint', () {
+      expect(BrowserAutofillHints.instance.flutterToEngine('middleName'),
+          'additional-name');
+    });
   });
 
   group('EditingState', () {

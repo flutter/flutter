@@ -33,7 +33,7 @@ class BrowserAutofillHints {
           'impp': 'impp',
           'jobTitle': 'organization-title',
           'language': 'language',
-          'middleName': 'middleName',
+          'middleName': 'additional-name',
           'name': 'name',
           'namePrefix': 'honorific-prefix',
           'nameSuffix': 'honorific-suffix',
