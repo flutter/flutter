@@ -32,6 +32,7 @@ class DebugReportVK;
 class FenceWaiterVK;
 class ResourceManagerVK;
 class SurfaceContextVK;
+class GPUTracerVK;
 
 class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
@@ -144,6 +145,10 @@ class ContextVK final : public Context,
 
   std::shared_ptr<CommandPoolRecyclerVK> GetCommandPoolRecycler() const;
 
+  std::shared_ptr<GPUTracerVK> GetGPUTracer() const;
+
+  void RecordFrameEndTime() const;
+
  private:
   struct DeviceHolderImpl : public DeviceHolder {
     // |DeviceHolder|
@@ -171,6 +176,8 @@ class ContextVK final : public Context,
   std::shared_ptr<CommandPoolRecyclerVK> command_pool_recycler_;
   std::string device_name_;
   std::shared_ptr<fml::ConcurrentMessageLoop> raster_message_loop_;
+  std::shared_ptr<GPUTracerVK> gpu_tracer_;
+
   bool sync_presentation_ = false;
   const uint64_t hash_;
 

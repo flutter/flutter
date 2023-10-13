@@ -4,12 +4,15 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain_impl_vk.h"
 
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain_image_vk.h"
+#include "impeller/renderer/context.h"
 #include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
@@ -376,6 +379,9 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
       nullptr               // fence
   );
 
+  /// Record the approximate start of the GPU workload.
+  context.GetGPUTracer()->RecordStartFrameTime();
+
   switch (acq_result) {
     case vk::Result::eSuccess:
       // Keep going.
@@ -450,6 +456,9 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
       return false;
     }
   }
+
+  /// Record the approximate end of the GPU workload.
+  context.GetGPUTracer()->RecordEndFrameTime();
 
   //----------------------------------------------------------------------------
   /// Signal that the presentation semaphore is ready.

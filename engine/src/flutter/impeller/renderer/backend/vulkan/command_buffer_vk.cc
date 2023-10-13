@@ -52,6 +52,9 @@ const std::shared_ptr<CommandEncoderVK>& CommandBufferVK::GetEncoder() {
 }
 
 bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
+  if (!encoder_) {
+    encoder_ = encoder_factory_->Create();
+  }
   if (!callback) {
     return encoder_->Submit();
   }
