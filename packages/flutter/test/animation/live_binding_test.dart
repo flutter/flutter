@@ -137,7 +137,6 @@ void main() {
     );
   },
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+    leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String, int?>{'Image': 4}),
   );
 }
