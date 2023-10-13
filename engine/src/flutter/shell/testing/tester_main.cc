@@ -29,7 +29,10 @@
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-#if IMPELLER_SUPPORTS_RENDERING
+// Impeller should only be enabled if the Vulkan backend is enabled.
+#define ALLOW_IMPELLER (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN)
+
+#if ALLOW_IMPELLER
 #include <vulkan/vulkan.h>                                        // nogncheck
 #include "flutter/vulkan/procs/vulkan_proc_table.h"               // nogncheck
 #include "flutter/vulkan/swiftshader_path.h"                      // nogncheck
@@ -128,7 +131,7 @@ class TesterPlatformView : public PlatformView,
         impeller_context_holder_(std::move(impeller_context_holder)) {}
 
   ~TesterPlatformView() {
-#if IMPELLER_SUPPORTS_RENDERING
+#if ALLOW_IMPELLER
     if (impeller_context_holder_.context) {
       impeller_context_holder_.context->Shutdown();
     }
@@ -137,17 +140,17 @@ class TesterPlatformView : public PlatformView,
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override {
-#if IMPELLER_SUPPORTS_RENDERING
+#if ALLOW_IMPELLER
     return std::static_pointer_cast<impeller::Context>(
         impeller_context_holder_.context);
 #else
     return nullptr;
-#endif  // IMPELLER_SUPPORTS_RENDERING
+#endif  // ALLOW_IMPELLER
   }
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override {
-#if IMPELLER_SUPPORTS_RENDERING
+#if ALLOW_IMPELLER
     if (delegate_.OnPlatformViewGetSettings().enable_impeller) {
       FML_DCHECK(impeller_context_holder_.context);
       auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(
@@ -155,7 +158,7 @@ class TesterPlatformView : public PlatformView,
       FML_DCHECK(surface->IsValid());
       return surface;
     }
-#endif  // IMPELLER_SUPPORTS_RENDERING
+#endif  // ALLOW_IMPELLER
     auto surface = std::make_unique<TesterGPUSurfaceSoftware>(
         this, true /* render to surface */);
     FML_DCHECK(surface->IsValid());
@@ -308,7 +311,7 @@ int RunTester(const flutter::Settings& settings,
 
   ImpellerVulkanContextHolder impeller_context_holder;
 
-#if IMPELLER_SUPPORTS_RENDERING
+#if ALLOW_IMPELLER
   if (settings.enable_impeller) {
     impeller_context_holder.vulkan_proc_table =
         fml::MakeRefCounted<vulkan::VulkanProcTable>(VULKAN_SO_PATH);
@@ -356,7 +359,7 @@ int RunTester(const flutter::Settings& settings,
       return EXIT_FAILURE;
     }
   }
-#endif  // IMPELLER_SUPPORTS_RENDERING
+#endif  // ALLOW_IMPELLER
 
   Shell::CreateCallback<PlatformView> on_create_platform_view =
       [impeller_context_holder =
