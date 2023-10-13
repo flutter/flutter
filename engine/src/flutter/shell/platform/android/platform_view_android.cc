@@ -386,7 +386,7 @@ sk_sp<GrDirectContext> PlatformViewAndroid::CreateResourceContext() const {
     // the OpenGL surface will be able to make a resource context current. If
     // this changes, this assumption breaks. Handle the same.
     resource_context = ShellIOManager::CreateCompatibleResourceLoadingContext(
-        GrBackend::kOpenGL_GrBackend,
+        GrBackendApi::kOpenGL,
         GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
   } else {
     FML_DLOG(ERROR) << "Could not make the resource context current.";
