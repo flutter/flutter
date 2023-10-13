@@ -46,6 +46,8 @@
                           opaque:(BOOL)opaque
                  enableWideGamut:(BOOL)isWideGamutEnabled NS_DESIGNATED_INITIALIZER;
 
+- (UIScreen*)screen;
+
 // Set by FlutterEngine or FlutterViewController to override software rendering.
 @property(class, nonatomic) BOOL forceSoftwareRendering;
 @end

@@ -69,4 +69,17 @@
   XCTAssertEqual(layer.pixelFormat, MTLPixelFormatBGRA8Unorm);
 }
 
+- (void)testLayerScalesMatchScreenAfterLayoutSubviews {
+  FakeDelegate* delegate = [[[FakeDelegate alloc] init] autorelease];
+  FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate opaque:NO enableWideGamut:NO];
+  view.layer.contentsScale = CGFloat(-99.0);
+  view.layer.rasterizationScale = CGFloat(-99.0);
+  UIScreen* screen = [view screen];
+  XCTAssertNotEqual(view.layer.contentsScale, screen.scale);
+  XCTAssertNotEqual(view.layer.rasterizationScale, screen.scale);
+  [view layoutSubviews];
+  XCTAssertEqual(view.layer.contentsScale, screen.scale);
+  XCTAssertEqual(view.layer.rasterizationScale, screen.scale);
+}
+
 @end
