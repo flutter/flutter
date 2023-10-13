@@ -258,8 +258,8 @@ class Context {
   void addVmServiceBonjourService() {
     // Skip adding Bonjour service settings when DISABLE_PORT_PUBLICATION is YES.
     // These settings are not needed if port publication is disabled.
-    final bool disablePortPublication = environment['DISABLE_PORT_PUBLICATION'] != null && environment['DISABLE_PORT_PUBLICATION'] == 'YES';
-    if (disablePortPublication) {
+    if (environment['DISABLE_PORT_PUBLICATION'] != null &&
+        environment['DISABLE_PORT_PUBLICATION'] == 'YES') {
       return;
     }
 
