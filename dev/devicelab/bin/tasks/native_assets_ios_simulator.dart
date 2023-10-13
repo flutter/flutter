@@ -24,7 +24,7 @@ Future<void> main() async {
         },
       );
     } finally {
-      await removeIOSimulator(simulatorDeviceId);
+      await removeIOSSimulator(simulatorDeviceId);
     }
     return TaskResult.success(null);
   });
