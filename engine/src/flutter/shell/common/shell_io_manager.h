@@ -12,6 +12,9 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/io_manager.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
+
+struct GrGLInterface;
 
 namespace flutter {
 
@@ -21,7 +24,7 @@ class ShellIOManager final : public IOManager {
   // supply to the IOManager. The platforms may create the context themselves if
   // they so desire.
   static sk_sp<GrDirectContext> CreateCompatibleResourceLoadingContext(
-      GrBackend backend,
+      GrBackendApi backend,
       const sk_sp<const GrGLInterface>& gl_interface);
 
   ShellIOManager(

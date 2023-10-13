@@ -107,7 +107,7 @@ sk_sp<GrDirectContext> EmbedderSurfaceGL::CreateResourceContext() const {
   auto callback = gl_dispatch_table_.gl_make_resource_current_callback;
   if (callback && callback()) {
     if (auto context = ShellIOManager::CreateCompatibleResourceLoadingContext(
-            GrBackend::kOpenGL_GrBackend, GetGLInterface())) {
+            GrBackendApi::kOpenGL, GetGLInterface())) {
       return context;
     } else {
       FML_LOG(ERROR)

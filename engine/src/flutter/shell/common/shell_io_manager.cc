@@ -10,14 +10,15 @@
 #include "flutter/shell/common/context_options.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
+#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 namespace flutter {
 
 sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
-    GrBackend backend,
+    GrBackendApi backend,
     const sk_sp<const GrGLInterface>& gl_interface) {
 #if SK_GL
-  if (backend != GrBackend::kOpenGL_GrBackend) {
+  if (backend != GrBackendApi::kOpenGL) {
     return nullptr;
   }
 
