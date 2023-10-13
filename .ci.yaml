@@ -2947,7 +2947,7 @@ targets:
 
   - name: Mac_arm64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3397,7 +3397,7 @@ targets:
 
   - name: Mac_arm64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3977,7 +3977,6 @@ targets:
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3993,7 +3992,7 @@ targets:
 
   - name: Mac_arm64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4138,7 +4137,7 @@ targets:
 
   - name: Mac_x64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4151,7 +4150,7 @@ targets:
 
   - name: Mac_arm64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4188,7 +4187,7 @@ targets:
 
   - name: Mac native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4336,7 +4335,7 @@ targets:
 
   - name: Mac_x64 hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4465,7 +4464,6 @@ targets:
 
   - name: Mac_arm64 run_debug_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4501,7 +4499,7 @@ targets:
 
   - name: Mac_arm64 run_release_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
