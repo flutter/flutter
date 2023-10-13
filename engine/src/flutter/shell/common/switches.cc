@@ -78,12 +78,11 @@ static const std::string kAllowedDartFlags[] = {
 // of the engine's own symbols on some older versions of Android.
 #if FML_OS_ANDROID
 extern uint8_t _binary_icudtl_dat_start[];
-extern uint8_t _binary_icudtl_dat_end[];
+extern size_t _binary_icudtl_dat_size;
 
 static std::unique_ptr<fml::Mapping> GetICUStaticMapping() {
-  return std::make_unique<fml::NonOwnedMapping>(
-      _binary_icudtl_dat_start,
-      _binary_icudtl_dat_end - _binary_icudtl_dat_start);
+  return std::make_unique<fml::NonOwnedMapping>(_binary_icudtl_dat_start,
+                                                _binary_icudtl_dat_size);
 }
 #endif
 
