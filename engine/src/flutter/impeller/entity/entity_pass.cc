@@ -726,9 +726,10 @@ bool EntityPass::OnRender(
     VALIDATION_LOG << SPrintF("Pass context invalid (Depth=%d)", pass_depth);
     return false;
   }
+  auto clear_color_size = pass_target.GetRenderTarget().GetRenderTargetSize();
 
   if (!collapsed_parent_pass &&
-      !GetClearColor(root_pass_size).IsTransparent()) {
+      !GetClearColor(clear_color_size).IsTransparent()) {
     // Force the pass context to create at least one new pass if the clear color
     // is present.
     pass_context.GetRenderPass(pass_depth);
@@ -897,7 +898,7 @@ bool EntityPass::OnRender(
     // Skip elements that are incorporated into the clear color.
     if (is_collapsing_clear_colors) {
       auto [entity_color, _] =
-          ElementAsBackgroundColor(element, root_pass_size);
+          ElementAsBackgroundColor(element, clear_color_size);
       if (entity_color.has_value()) {
         continue;
       }
