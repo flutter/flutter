@@ -1936,16 +1936,20 @@ base class _Image extends NativeFieldWrapperClass1 {
   external int get height;
 
   Future<ByteData?> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) {
-    return _futurize((_Callback<ByteData> callback) {
-      return _toByteData(format.index, (Uint8List? encoded) {
-        callback(encoded!.buffer.asByteData());
+    return _futurizeWithError((_CallbackWithError<ByteData?> callback) {
+      return _toByteData(format.index, (Uint8List? encoded, String? error) {
+        if (error == null && encoded != null) {
+          callback(encoded.buffer.asByteData(), null);
+        } else {
+          callback(null, error);
+        }
       });
     });
   }
 
   /// Returns an error message on failure, null on success.
   @Native<Handle Function(Pointer<Void>, Int32, Handle)>(symbol: 'Image::toByteData')
-  external String? _toByteData(int format, _Callback<Uint8List?> callback);
+  external String? _toByteData(int format, void Function(Uint8List?, String?) callback);
 
   bool _disposed = false;
   void dispose() {
@@ -6884,11 +6888,18 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
 /// Generic callback signature, used by [_futurize].
 typedef _Callback<T> = void Function(T result);
 
+/// Generic callback signature, used by [_futurizeWithError].
+typedef _CallbackWithError<T> = void Function(T result, String? error);
+
 /// Signature for a method that receives a [_Callback].
 ///
 /// Return value should be null on success, and a string error message on
 /// failure.
 typedef _Callbacker<T> = String? Function(_Callback<T?> callback);
+
+/// Signature for a method that receives a [_CallbackWithError].
+/// See also: [_Callbacker]
+typedef _CallbackerWithError<T> = String? Function(_CallbackWithError<T?> callback);
 
 // Converts a method that receives a value-returning callback to a method that
 // returns a Future.
@@ -6932,6 +6943,31 @@ Future<T> _futurize<T>(_Callbacker<T> callbacker) {
       }
     } else {
       completer.complete(t);
+    }
+  });
+  isSync = false;
+  if (error != null) {
+    throw Exception(error);
+  }
+  return completer.future;
+}
+
+/// A variant of `_futurize` that can communicate specific errors.
+Future<T> _futurizeWithError<T>(_CallbackerWithError<T> callbacker) {
+  final Completer<T> completer = Completer<T>.sync();
+  // If the callback synchronously throws an error, then synchronously
+  // rethrow that error instead of adding it to the completer. This
+  // prevents the Zone from receiving an uncaught exception.
+  bool isSync = true;
+  final String? error = callbacker((T? t, String? error) {
+    if (t != null) {
+      completer.complete(t);
+    } else {
+      if (isSync) {
+        throw Exception(error ?? 'operation failed');
+      } else {
+        completer.completeError(Exception(error ?? 'operation failed'));
+      }
     }
   });
   isSync = false;
