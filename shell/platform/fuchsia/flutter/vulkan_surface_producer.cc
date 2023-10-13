@@ -20,6 +20,7 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
@@ -153,7 +154,7 @@ bool VulkanSurfaceProducer::Initialize() {
   GrContextOptions options;
   options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
 
-  context_ = GrDirectContext::MakeVulkan(backend_context, options);
+  context_ = GrDirectContexts::MakeVulkan(backend_context, options);
 
   if (context_ == nullptr) {
     FML_LOG(ERROR)

@@ -14,6 +14,7 @@
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/vk/GrVkBackendContext.h"
 #include "include/gpu/vk/GrVkExtensions.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
 
 namespace flutter {
 
@@ -171,7 +172,7 @@ sk_sp<GrDirectContext> EmbedderSurfaceVulkan::CreateGrContext(
   GrContextOptions options =
       MakeDefaultContextOptions(context_type, GrBackendApi::kVulkan);
   options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
-  return GrDirectContext::MakeVulkan(backend_context, options);
+  return GrDirectContexts::MakeVulkan(backend_context, options);
 }
 
 }  // namespace flutter

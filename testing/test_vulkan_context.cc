@@ -17,6 +17,7 @@
 #include "flutter/vulkan/swiftshader_path.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
 #include "vulkan/vulkan_core.h"
 
@@ -106,7 +107,7 @@ TestVulkanContext::TestVulkanContext() {
   GrContextOptions options =
       MakeDefaultContextOptions(ContextType::kRender, GrBackendApi::kVulkan);
   options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
-  context_ = GrDirectContext::MakeVulkan(backend_context, options);
+  context_ = GrDirectContexts::MakeVulkan(backend_context, options);
 }
 
 TestVulkanContext::~TestVulkanContext() {
