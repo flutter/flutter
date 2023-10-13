@@ -79,6 +79,10 @@ void main() {
     AlignmentGeometry? alignment,
     Offset alignmentOffset = Offset.zero,
     TextDirection textDirection = TextDirection.ltr,
+    bool consumesOutsideTap = false,
+    void Function(TestMenu)? onPressed,
+    void Function(TestMenu)? onOpen,
+    void Function(TestMenu)? onClose,
   }) {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -87,44 +91,61 @@ void main() {
       home: Material(
         child: Directionality(
           textDirection: textDirection,
-          child: Center(
-            child: MenuAnchor(
-              childFocusNode: focusNode,
-              controller: controller,
-              alignmentOffset: alignmentOffset,
-              style: MenuStyle(alignment: alignment),
-              menuChildren: <Widget>[
-                MenuItemButton(
-                  key: menuItemKey,
-                  shortcut: const SingleActivator(
-                    LogicalKeyboardKey.keyB,
-                    control: true,
+          child: Column(
+            children: <Widget>[
+              GestureDetector(onTap: () {
+                onPressed?.call(TestMenu.outsideButton);
+              }, child: Text(TestMenu.outsideButton.label)),
+              MenuAnchor(
+                childFocusNode: focusNode,
+                controller: controller,
+                alignmentOffset: alignmentOffset,
+                consumeOutsideTap: consumesOutsideTap,
+                style: MenuStyle(alignment: alignment),
+                onOpen: () {
+                  onOpen?.call(TestMenu.anchorButton);
+                },
+                onClose: () {
+                  onClose?.call(TestMenu.anchorButton);
+                },
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    key: menuItemKey,
+                    shortcut: const SingleActivator(
+                      LogicalKeyboardKey.keyB,
+                      control: true,
+                    ),
+                    onPressed: () {
+                      onPressed?.call(TestMenu.subMenu00);
+                    },
+                    child: Text(TestMenu.subMenu00.label),
                   ),
-                  onPressed: () {},
-                  child: Text(TestMenu.subMenu00.label),
-                ),
-                MenuItemButton(
-                  leadingIcon: const Icon(Icons.send),
-                  trailingIcon: const Icon(Icons.mail),
-                  onPressed: () {},
-                  child: Text(TestMenu.subMenu01.label),
-                ),
-              ],
-              builder: (BuildContext context, MenuController controller, Widget? child) {
-                return ElevatedButton(
-                  focusNode: focusNode,
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  child: child,
-                );
-              },
-              child: const Text('Press Me'),
-            ),
+                  MenuItemButton(
+                    leadingIcon: const Icon(Icons.send),
+                    trailingIcon: const Icon(Icons.mail),
+                    onPressed: () {
+                      onPressed?.call(TestMenu.subMenu01);
+                    },
+                    child: Text(TestMenu.subMenu01.label),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return ElevatedButton(
+                    focusNode: focusNode,
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                      onPressed?.call(TestMenu.anchorButton);
+                    },
+                    child: child,
+                  );
+                },
+                child: Text(TestMenu.anchorButton.label),
+              ),
+            ],
           ),
         ),
       ),
@@ -739,26 +760,26 @@ void main() {
       await tester.pumpWidget(buildTestApp());
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope = find.ancestor(of: find.byKey(menuItemKey), matching: find.byType(FocusScope)).first;
 
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 324.0, 602.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 62.0, 602.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.topStart));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 276.0, 602.0, 388.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 14.0, 602.0, 126.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.center));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 300.0, 674.0, 412.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 38.0, 674.0, 150.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.bottomEnd));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(472.0, 324.0, 746.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(472.0, 62.0, 746.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.topStart));
       await tester.pump();
@@ -782,7 +803,7 @@ void main() {
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope =
           find.ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope)).first;
@@ -790,20 +811,20 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 324.0, 472.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 62.0, 472.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.topStart));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 276.0, 472.0, 388.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 14.0, 472.0, 126.0)));
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.center));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(126.0, 300.0, 400.0, 412.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(126.0, 38.0, 400.0, 150.0)));
 
       await tester
           .pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.bottomEnd));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(54.0, 324.0, 328.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(54.0, 62.0, 328.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.topStart));
       await tester.pump();
@@ -824,7 +845,7 @@ void main() {
       await tester.pumpWidget(buildTestApp(alignmentOffset: const Offset(100, 50)));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope =
           find.ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope)).first;
@@ -832,13 +853,13 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(428.0, 374.0, 702.0, 486.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(428.0, 112.0, 702.0, 224.0)));
 
       // Now move the menu by calling open() again with a local position on the
       // anchor.
       controller.open(position: const Offset(200, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 476.0, 800.0, 588.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 214.0, 800.0, 326.0)));
     });
 
     testWidgetsWithLeakTracking('menu position in RTL', (WidgetTester tester) async {
@@ -848,8 +869,8 @@ void main() {
       ));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope =
           find.ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope)).first;
@@ -857,13 +878,13 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(98.0, 374.0, 372.0, 486.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(98.0, 112.0, 372.0, 224.0)));
 
       // Now move the menu by calling open() again with a local position on the
       // anchor.
       controller.open(position: const Offset(400, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 476.0, 800.0, 588.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 214.0, 800.0, 326.0)));
     });
 
     testWidgetsWithLeakTracking('works with Padding around menu and overlay', (WidgetTester tester) async {
@@ -1114,6 +1135,79 @@ void main() {
 
       expect(opened, equals(<TestMenu>[TestMenu.mainMenu0]));
       expect(closed, equals(<TestMenu>[TestMenu.mainMenu1]));
+    });
+
+
+    testWidgetsWithLeakTracking('Menus close and consume tap when open and tapped outside', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildTestApp(consumesOutsideTap: true, onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+      );
+
+      expect(opened, isEmpty);
+      expect(closed, isEmpty);
+
+      // Doesn't consume tap when the menu is closed.
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+      expect(selected, equals(<TestMenu>[TestMenu.outsideButton]));
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.anchorButton.label));
+      await tester.pump();
+      expect(opened, equals(<TestMenu>[TestMenu.anchorButton]));
+      expect(closed, isEmpty);
+      expect(selected, equals(<TestMenu>[TestMenu.anchorButton]));
+      opened.clear();
+      closed.clear();
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+
+      expect(opened, isEmpty);
+      expect(closed, equals(<TestMenu>[TestMenu.anchorButton]));
+      // When the menu is open, don't expect the outside button to be selected:
+      // it's supposed to consume the key down.
+      expect(selected, isEmpty);
+      selected.clear();
+      opened.clear();
+      closed.clear();
+    });
+
+    testWidgetsWithLeakTracking("Menus close and don't consume tap when open and tapped outside", (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+      );
+
+      expect(opened, isEmpty);
+      expect(closed, isEmpty);
+
+      // Doesn't consume tap when the menu is closed.
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+      expect(selected, equals(<TestMenu>[TestMenu.outsideButton]));
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.anchorButton.label));
+      await tester.pump();
+      expect(opened, equals(<TestMenu>[TestMenu.anchorButton]));
+      expect(closed, isEmpty);
+      expect(selected, equals(<TestMenu>[TestMenu.anchorButton]));
+      opened.clear();
+      closed.clear();
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+
+      expect(opened, isEmpty);
+      expect(closed, equals(<TestMenu>[TestMenu.anchorButton]));
+      // Because consumesOutsideTap is false, this is expected to receive its
+      // tap.
+      expect(selected, equals(<TestMenu>[TestMenu.outsideButton]));
+      selected.clear();
+      opened.clear();
+      closed.clear();
     });
 
     testWidgetsWithLeakTracking('select works', (WidgetTester tester) async {
@@ -3503,7 +3597,9 @@ enum TestMenu {
   subSubMenu110('Sub Sub Menu 11&0'),
   subSubMenu111('Sub Sub Menu 11&1'),
   subSubMenu112('Sub Sub Menu 11&2'),
-  subSubMenu113('Sub Sub Menu 11&3');
+  subSubMenu113('Sub Sub Menu 11&3'),
+  anchorButton('Press Me'),
+  outsideButton('Outside');
 
   const TestMenu(this.acceleratorLabel);
   final String acceleratorLabel;
