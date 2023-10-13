@@ -1147,6 +1147,60 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Logger: () => BufferLogger.test(),
   });
+
+  testUsingContext('can pass --web-header', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(
+      () => createTestCommandRunner(command).run(<String>[
+        'run',
+        '--web-header', 'foo = bar',
+      ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(true);
+    expect(options.webHeaders, <String, String>{'foo': 'bar'});
+  });
+
+  testUsingContext('--web-header without values are rejected', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(
+      () => createTestCommandRunner(command).run(<String>[
+        'run',
+        '--web-header', 'foo',
+      ]), throwsToolExit());
+
+    await expectLater(
+      () => command.createDebuggingOptions(true),
+      throwsToolExit(),
+    );
+  });
+
+  testUsingContext('--web-header delimiter keys are rejected', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(
+      () => createTestCommandRunner(command).run(<String>[
+        'run',
+        '--web-header', 'hurray/headers=flutter',
+      ]), throwsToolExit());
+
+    await expectLater(
+      () => command.createDebuggingOptions(true),
+      throwsToolExit(),
+    );
+  });
+
+  testUsingContext('can pass complex --web-header values', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(
+      () => createTestCommandRunner(command).run(<String>[
+        'run',
+        '--web-header', 'hurray=flutter,flutter=hurray',
+      ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(true);
+    expect(options.webHeaders, <String, String>{
+      'hurray': 'flutter,flutter=hurray'
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
