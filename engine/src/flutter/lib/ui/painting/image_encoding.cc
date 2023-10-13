@@ -11,6 +11,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/make_copyable.h"
+#include "flutter/fml/status_or.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
 #if IMPELLER_SUPPORTS_RENDERING
@@ -40,25 +41,27 @@ void FinalizeSkData(void* isolate_callback_data, void* peer) {
 }
 
 void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
-                        sk_sp<SkData> buffer) {
+                        fml::StatusOr<sk_sp<SkData>>&& buffer) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  if (!buffer) {
-    DartInvoke(callback->value(), {Dart_Null()});
+  if (!buffer.ok()) {
+    std::string error_copy(buffer.status().message());
+    Dart_Handle dart_string = ToDart(error_copy);
+    DartInvoke(callback->value(), {Dart_Null(), dart_string});
     return;
   }
   // Skia will not modify the buffer, and it is backed by memory that is
   // read/write, so Dart can be given direct access to the buffer through an
   // external Uint8List.
-  void* bytes = const_cast<void*>(buffer->data());
-  const intptr_t length = buffer->size();
-  void* peer = reinterpret_cast<void*>(buffer.release());
+  void* bytes = const_cast<void*>(buffer.value()->data());
+  const intptr_t length = buffer.value()->size();
+  void* peer = reinterpret_cast<void*>(buffer.value().release());
   Dart_Handle dart_data = Dart_NewExternalTypedDataWithFinalizer(
       Dart_TypedData_kUint8, bytes, length, peer, length, FinalizeSkData);
-  DartInvoke(callback->value(), {dart_data});
+  DartInvoke(callback->value(), {dart_data, Dart_Null()});
 }
 
 sk_sp<SkData> CopyImageByteData(const sk_sp<SkImage>& raster_image,
@@ -110,21 +113,30 @@ void EncodeImageAndInvokeDataCallback(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
     const std::shared_ptr<impeller::Context>& impeller_context,
     bool is_impeller_enabled) {
-  auto callback_task = fml::MakeCopyable(
-      [callback = std::move(callback)](sk_sp<SkData> encoded) mutable {
+  auto callback_task =
+      fml::MakeCopyable([callback = std::move(callback)](
+                            fml::StatusOr<sk_sp<SkData>>&& encoded) mutable {
         InvokeDataCallback(std::move(callback), std::move(encoded));
       });
   // The static leak checker gets confused by the use of fml::MakeCopyable in
   // EncodeImage.
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-  auto encode_task = [callback_task = std::move(callback_task), format,
-                      ui_task_runner](const sk_sp<SkImage>& raster_image) {
-    sk_sp<SkData> encoded = EncodeImage(raster_image, format);
-    ui_task_runner->PostTask([callback_task = callback_task,
-                              encoded = std::move(encoded)]() mutable {
-      callback_task(std::move(encoded));
-    });
-  };
+  auto encode_task =
+      [callback_task = std::move(callback_task), format,
+       ui_task_runner](const fml::StatusOr<sk_sp<SkImage>>& raster_image) {
+        if (raster_image.ok()) {
+          sk_sp<SkData> encoded = EncodeImage(raster_image.value(), format);
+          ui_task_runner->PostTask([callback_task = callback_task,
+                                    encoded = std::move(encoded)]() mutable {
+            callback_task(std::move(encoded));
+          });
+        } else {
+          ui_task_runner->PostTask([callback_task = callback_task,
+                                    raster_image = raster_image]() mutable {
+            callback_task(raster_image.status());
+          });
+        }
+      };
 
   FML_DCHECK(image);
 #if IMPELLER_SUPPORTS_RENDERING

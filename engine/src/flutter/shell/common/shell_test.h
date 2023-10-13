@@ -135,6 +135,8 @@ class ShellTest : public FixtureTest {
   static size_t GetLiveTrackedPathCount(
       const std::shared_ptr<VolatilePathTracker>& tracker);
 
+  static void TurnOffGPU(Shell* shell);
+
  private:
   ThreadHost thread_host_;
 

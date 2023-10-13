@@ -7,6 +7,7 @@
 
 #include "flutter/common/task_runners.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/fml/status_or.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 
 namespace impeller {
@@ -26,14 +27,14 @@ class ImageEncodingImpeller {
   /// Visible for testing.
   static void ConvertDlImageToSkImage(
       const sk_sp<DlImage>& dl_image,
-      std::function<void(sk_sp<SkImage>)> encode_task,
+      std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
       const std::shared_ptr<impeller::Context>& impeller_context);
 
   /// Converts a DlImage to a SkImage.
   /// `encode_task` is executed with the resulting `SkImage`.
   static void ConvertImageToRaster(
       const sk_sp<DlImage>& dl_image,
-      std::function<void(sk_sp<SkImage>)> encode_task,
+      std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
       const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
       const fml::RefPtr<fml::TaskRunner>& io_task_runner,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,

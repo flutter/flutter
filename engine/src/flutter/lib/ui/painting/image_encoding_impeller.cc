@@ -58,12 +58,15 @@ sk_sp<SkImage> ConvertBufferToSkImage(
 
 void DoConvertImageToRasterImpeller(
     const sk_sp<DlImage>& dl_image,
-    std::function<void(sk_sp<SkImage>)> encode_task,
+    std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
     const std::shared_ptr<impeller::Context>& impeller_context) {
   is_gpu_disabled_sync_switch->Execute(
       fml::SyncSwitch::Handlers()
-          .SetIfTrue([&encode_task] { encode_task(nullptr); })
+          .SetIfTrue([&encode_task] {
+            encode_task(
+                fml::Status(fml::StatusCode::kUnavailable, "GPU unavailable."));
+          })
           .SetIfFalse([&dl_image, &encode_task, &impeller_context] {
             ImageEncodingImpeller::ConvertDlImageToSkImage(
                 dl_image, std::move(encode_task), impeller_context);
@@ -74,19 +77,19 @@ void DoConvertImageToRasterImpeller(
 
 void ImageEncodingImpeller::ConvertDlImageToSkImage(
     const sk_sp<DlImage>& dl_image,
-    std::function<void(sk_sp<SkImage>)> encode_task,
+    std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
     const std::shared_ptr<impeller::Context>& impeller_context) {
   auto texture = dl_image->impeller_texture();
 
   if (impeller_context == nullptr) {
-    FML_LOG(ERROR) << "Impeller context was null.";
-    encode_task(nullptr);
+    encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
+                            "Impeller context was null."));
     return;
   }
 
   if (texture == nullptr) {
-    FML_LOG(ERROR) << "Image was null.";
-    encode_task(nullptr);
+    encode_task(
+        fml::Status(fml::StatusCode::kFailedPrecondition, "Image was null."));
     return;
   }
 
@@ -94,14 +97,14 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
   auto color_type = ToSkColorType(texture->GetTextureDescriptor().format);
 
   if (dimensions.isEmpty()) {
-    FML_LOG(ERROR) << "Image dimensions were empty.";
-    encode_task(nullptr);
+    encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
+                            "Image dimensions were empty."));
     return;
   }
 
   if (!color_type.has_value()) {
-    FML_LOG(ERROR) << "Failed to get color type from pixel format.";
-    encode_task(nullptr);
+    encode_task(fml::Status(fml::StatusCode::kUnimplemented,
+                            "Failed to get color type from pixel format."));
     return;
   }
 
@@ -121,7 +124,7 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
                      encode_task = std::move(encode_task)](
                         impeller::CommandBuffer::Status status) {
     if (status != impeller::CommandBuffer::Status::kCompleted) {
-      encode_task(nullptr);
+      encode_task(fml::Status(fml::StatusCode::kUnknown, ""));
       return;
     }
     auto sk_image = ConvertBufferToSkImage(buffer, color_type, dimensions);
@@ -135,14 +138,14 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
 
 void ImageEncodingImpeller::ConvertImageToRaster(
     const sk_sp<DlImage>& dl_image,
-    std::function<void(sk_sp<SkImage>)> encode_task,
+    std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
     const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
     const fml::RefPtr<fml::TaskRunner>& io_task_runner,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
     const std::shared_ptr<impeller::Context>& impeller_context) {
   auto original_encode_task = std::move(encode_task);
   encode_task = [original_encode_task = std::move(original_encode_task),
-                 io_task_runner](sk_sp<SkImage> image) mutable {
+                 io_task_runner](fml::StatusOr<sk_sp<SkImage>> image) mutable {
     fml::TaskRunner::RunNowOrPostTask(
         io_task_runner,
         [original_encode_task = std::move(original_encode_task),
