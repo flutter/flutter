@@ -85,7 +85,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
-        final Offset localOffset = Offset(event.offsetX, event.offsetY);
+        final Offset localOffset = Offset(event.offsetX.toDouble(), event.offsetY.toDouble());
         final Matrix4 transform = client.getTransformTo(null);
         final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
         client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));

@@ -55,6 +55,10 @@ void main() {
     final RenderPositionedBox positioner = RenderPositionedBox(child: sizer, widthFactor: 1.0, heightFactor: 0.0);
     layout(positioner, constraints: BoxConstraints.loose(const Size(200.0, 200.0)));
 
+    expect(positioner.computeMinIntrinsicWidth(200), equals(100.0));
+    expect(positioner.computeMaxIntrinsicWidth(200), equals(100.0));
+    expect(positioner.computeMinIntrinsicHeight(200), equals(0));
+    expect(positioner.computeMaxIntrinsicHeight(200), equals(0));
     expect(positioner.size.width, equals(100.0));
     expect(positioner.size.height, equals(0.0));
 
@@ -62,6 +66,10 @@ void main() {
     positioner.heightFactor = 0.5;
     pumpFrame();
 
+    expect(positioner.computeMinIntrinsicWidth(200), equals(50.0));
+    expect(positioner.computeMaxIntrinsicWidth(200), equals(50.0));
+    expect(positioner.computeMinIntrinsicHeight(200), equals(50.0));
+    expect(positioner.computeMaxIntrinsicHeight(200), equals(50.0));
     expect(positioner.size.width, equals(50.0));
     expect(positioner.size.height, equals(50.0));
 
@@ -69,6 +77,10 @@ void main() {
     positioner.heightFactor = null;
     pumpFrame();
 
+    expect(positioner.computeMinIntrinsicWidth(200), equals(100.0));
+    expect(positioner.computeMaxIntrinsicWidth(200), equals(100.0));
+    expect(positioner.computeMinIntrinsicHeight(200), equals(100.0));
+    expect(positioner.computeMaxIntrinsicHeight(200), equals(100.0));
     expect(positioner.size.width, equals(200.0));
     expect(positioner.size.height, equals(200.0));
   });

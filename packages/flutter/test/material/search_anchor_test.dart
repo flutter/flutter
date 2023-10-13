@@ -33,9 +33,10 @@ void main() {
     checkSearchBarDefaults(tester, colorScheme, material);
   });
 
-  testWidgets('SearchBar respects controller property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects controller property', (WidgetTester tester) async {
     const String defaultText = 'default text';
     final TextEditingController controller = TextEditingController(text: defaultText);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -57,8 +58,10 @@ void main() {
     expect(find.text(updatedText), findsOneWidget);
   });
 
-  testWidgets('SearchBar respects focusNode property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects focusNode property', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -80,7 +83,74 @@ void main() {
     expect(node.hasFocus, false);
   });
 
-  testWidgets('SearchBar has correct default layout and padding LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar focusNode is hot swappable', (WidgetTester tester) async {
+    final FocusNode node1 = FocusNode();
+    addTearDown(node1.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchBar(
+            focusNode: node1,
+          ),
+        ),
+      ),
+    );
+
+    expect(node1.hasFocus, isFalse);
+
+    node1.requestFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isTrue);
+
+    node1.unfocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+
+    final FocusNode node2 = FocusNode();
+    addTearDown(node2.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchBar(
+            focusNode: node2,
+          ),
+        ),
+      ),
+    );
+
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    node2.requestFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isTrue);
+
+    node2.unfocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SearchBar(),
+        ),
+      ),
+    );
+
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    await tester.tap(find.byType(SearchBar));
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+  });
+
+  testWidgetsWithLeakTracking('SearchBar has correct default layout and padding LTR', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -117,7 +187,7 @@ void main() {
     expect(trailingIcon.right, equals(barRect.right - 8.0));
   });
 
-  testWidgets('SearchBar has correct default layout and padding - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar has correct default layout and padding - RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -157,7 +227,7 @@ void main() {
     expect(trailingIcon.left, equals(barRect.left + 8.0));
   });
 
-  testWidgets('SearchBar respects hintText property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects hintText property', (WidgetTester tester) async {
     const String hintText = 'hint text';
     await tester.pumpWidget(
       const MaterialApp(
@@ -172,7 +242,7 @@ void main() {
     expect(find.text(hintText), findsOneWidget);
   });
 
-  testWidgets('SearchBar respects leading property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects leading property', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
@@ -193,7 +263,7 @@ void main() {
     expect(iconColor, colorScheme.onSurface); // Default icon color.
   });
 
-  testWidgets('SearchBar respects trailing property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects trailing property', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
@@ -216,7 +286,7 @@ void main() {
     expect(iconColor, colorScheme.onSurfaceVariant); // Default icon color.
   });
 
-  testWidgets('SearchBar respects onTap property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects onTap property', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -242,7 +312,7 @@ void main() {
     expect(tapCount, 2);
   });
 
-  testWidgets('SearchBar respects onChanged property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects onChanged property', (WidgetTester tester) async {
     int changeCount = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -269,7 +339,7 @@ void main() {
     expect(changeCount, 2);
   });
 
-  testWidgets('SearchBar respects onSubmitted property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects onSubmitted property', (WidgetTester tester) async {
     String submittedQuery = '';
     await tester.pumpWidget(
       MaterialApp(
@@ -289,7 +359,7 @@ void main() {
     expect(submittedQuery, equals('query'));
   });
 
-  testWidgets('SearchBar respects constraints property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects constraints property', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
     await tester.pumpWidget(
       const MaterialApp(
@@ -307,7 +377,7 @@ void main() {
     expect(barRect.size, const Size(350.0, 80.0));
   });
 
-  testWidgets('SearchBar respects elevation property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects elevation property', (WidgetTester tester) async {
     const double pressedElevation = 0.0;
     const double hoveredElevation = 1.0;
     const double focusedElevation = 2.0;
@@ -363,7 +433,7 @@ void main() {
     expect(material.elevation, focusedElevation);
   });
 
-  testWidgets('SearchBar respects backgroundColor property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects backgroundColor property', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -403,7 +473,7 @@ void main() {
     expect(material.color, focusedColor);
   });
 
-  testWidgets('SearchBar respects shadowColor property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects shadowColor property', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -443,7 +513,7 @@ void main() {
     expect(material.shadowColor, focusedColor);
   });
 
-  testWidgets('SearchBar respects surfaceTintColor property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects surfaceTintColor property', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -483,8 +553,10 @@ void main() {
     expect(material.surfaceTintColor, focusedColor);
   });
 
-  testWidgets('SearchBar respects overlayColor property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects overlayColor property', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -521,7 +593,7 @@ void main() {
     expect(inkFeatures, paints..rect()..rect(color: focusedColor.withOpacity(1.0)));
   });
 
-  testWidgets('SearchBar respects side and shape properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects side and shape properties', (WidgetTester tester) async {
     const BorderSide pressedSide = BorderSide(width: 2.0);
     const BorderSide hoveredSide = BorderSide(width: 3.0);
     const BorderSide focusedSide = BorderSide(width: 4.0);
@@ -595,7 +667,7 @@ void main() {
     expect(material.shape, focusedShape.copyWith(side: focusedSide));
   });
 
-  testWidgets('SearchBar respects padding property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects padding property', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -623,7 +695,7 @@ void main() {
     expect(trailingRect.right, barRect.right - 16.0);
   });
 
-  testWidgets('SearchBar respects hintStyle property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects hintStyle property', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -657,8 +729,10 @@ void main() {
     expect(helperText.style?.color, focusedColor);
   });
 
-  testWidgets('SearchBar respects textStyle property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects textStyle property', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'input text');
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -692,7 +766,7 @@ void main() {
     expect(inputText.style.color, focusedColor);
   });
 
-  testWidgets('SearchBar respects textCapitalization property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar respects textCapitalization property', (WidgetTester tester) async {
     Widget buildSearchBar(TextCapitalization textCapitalization) {
       return MaterialApp(
         home: Center(
@@ -725,7 +799,7 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.none);
   });
 
-  testWidgets('SearchAnchor respects textCapitalization property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects textCapitalization property', (WidgetTester tester) async {
     Widget buildSearchAnchor(TextCapitalization textCapitalization) {
       return MaterialApp(
         home: Center(
@@ -765,7 +839,7 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.none);
   });
 
-  testWidgets('SearchAnchor.bar respects textCapitalization property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor.bar respects textCapitalization property', (WidgetTester tester) async {
     Widget buildSearchAnchor(TextCapitalization textCapitalization) {
       return MaterialApp(
         home: Center(
@@ -794,7 +868,7 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.characters);
   });
 
-  testWidgets('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -830,7 +904,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/127092.
-  testWidgets('The text is still centered when SearchBar text field is smaller than 48', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The text is still centered when SearchBar text field is smaller than 48', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -852,7 +926,7 @@ void main() {
     expect(textCenterY, searchBarCenterY);
   });
 
-  testWidgets('The search view defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The search view defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
@@ -912,7 +986,7 @@ void main() {
     expect(inputText.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('The search view default size on different platforms', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The search view default size on different platforms', (WidgetTester tester) async {
     // The search view should be is full-screen on mobile platforms,
     // and have a size of (360, 2/3 screen height) on other platforms
     Widget buildSearchAnchor(TargetPlatform platform) {
@@ -959,7 +1033,7 @@ void main() {
     }
   });
 
-  testWidgets('SearchAnchor respects isFullScreen property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects isFullScreen property', (WidgetTester tester) async {
     Widget buildSearchAnchor(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -995,9 +1069,10 @@ void main() {
     }
   });
 
-  testWidgets('SearchAnchor respects controller property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects controller property', (WidgetTester tester) async {
     const String defaultText = 'initial text';
     final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
     controller.text = defaultText;
 
     await tester.pumpWidget(
@@ -1030,7 +1105,82 @@ void main() {
     expect(find.text(updatedText), findsOneWidget);
   });
 
-  testWidgets('SearchAnchor respects viewBuilder property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor attaches and detaches controllers property', (WidgetTester tester) async {
+    Widget builder(BuildContext context, SearchController controller)  {
+      return const Icon(Icons.search);
+    }
+    List<Widget> suggestionsBuilder(BuildContext context, SearchController controller) {
+      return const <Widget>[];
+    }
+
+    final SearchController controller1 = SearchController();
+    addTearDown(controller1.dispose);
+
+    expect(controller1.isAttached, isFalse);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            searchController: controller1,
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isFalse);
+
+    final SearchController controller2 = SearchController();
+    addTearDown(controller2.dispose);
+
+    expect(controller2.isAttached, isFalse);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            searchController: controller2,
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isFalse);
+    expect(controller2.isAttached, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            builder: builder,
+            suggestionsBuilder: suggestionsBuilder,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller1.isAttached, isFalse);
+    expect(controller2.isAttached, isFalse);
+  });
+
+  testWidgetsWithLeakTracking('SearchAnchor respects viewBuilder property', (WidgetTester tester) async {
     Widget buildAnchor({ViewBuilder? viewBuilder}) {
       return MaterialApp(
         home: Material(
@@ -1065,7 +1215,7 @@ void main() {
     expect(find.byType(GridView), findsOneWidget);
   });
 
-  testWidgets('SearchAnchor respects viewLeading property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewLeading property', (WidgetTester tester) async {
     Widget buildAnchor({Widget? viewLeading}) {
       return MaterialApp(
         home: Material(
@@ -1098,7 +1248,7 @@ void main() {
     expect(find.byIcon(Icons.history), findsOneWidget);
   });
 
-  testWidgets('SearchAnchor respects viewTrailing property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewTrailing property', (WidgetTester tester) async {
     Widget buildAnchor({Iterable<Widget>? viewTrailing}) {
       return MaterialApp(
         home: Material(
@@ -1131,7 +1281,7 @@ void main() {
     expect(find.byIcon(Icons.history), findsOneWidget);
   });
 
-  testWidgets('SearchAnchor respects viewHintText property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewHintText property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
@@ -1152,7 +1302,7 @@ void main() {
     expect(find.text('hint text'), findsOneWidget);
   });
 
-  testWidgets('SearchAnchor respects viewBackgroundColor property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewBackgroundColor property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
@@ -1174,7 +1324,7 @@ void main() {
     expect(getSearchViewMaterial(tester).color, Colors.purple);
   });
 
-  testWidgets('SearchAnchor respects viewElevation property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewElevation property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
@@ -1196,7 +1346,7 @@ void main() {
     expect(getSearchViewMaterial(tester).elevation, 3.0);
   });
 
-  testWidgets('SearchAnchor respects viewSurfaceTint property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewSurfaceTint property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
@@ -1218,7 +1368,7 @@ void main() {
     expect(getSearchViewMaterial(tester).surfaceTintColor, Colors.purple);
   });
 
-  testWidgets('SearchAnchor respects viewSide property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewSide property', (WidgetTester tester) async {
     const BorderSide side = BorderSide(color: Colors.purple, width: 5.0);
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -1242,7 +1392,7 @@ void main() {
     expect(getSearchViewMaterial(tester).shape, RoundedRectangleBorder(side: side, borderRadius: BorderRadius.circular(28.0)));
   });
 
-  testWidgets('SearchAnchor respects viewShape property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewShape property', (WidgetTester tester) async {
     const BorderSide side = BorderSide(color: Colors.purple, width: 5.0);
     const OutlinedBorder shape = StadiumBorder(side: side);
 
@@ -1268,7 +1418,7 @@ void main() {
     expect(getSearchViewMaterial(tester).shape, shape);
   });
 
-  testWidgets('SearchAnchor respects headerTextStyle property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects headerTextStyle property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
@@ -1294,7 +1444,7 @@ void main() {
     expect(inputText.style.color, Colors.red);
   });
 
-  testWidgets('SearchAnchor respects headerHintStyle property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects headerHintStyle property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
@@ -1319,7 +1469,7 @@ void main() {
     expect(inputText.style?.color, Colors.orange);
   });
 
-  testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
@@ -1345,7 +1495,7 @@ void main() {
     expect(decoration.border!.bottom.color, Colors.red);
   });
 
-  testWidgets('SearchAnchor respects viewConstraints property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects viewConstraints property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -1373,7 +1523,7 @@ void main() {
     expect(sizedBox.height, 390.0);
   });
 
-  testWidgets('SearchAnchor respects builder property - LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects builder property - LTR', (WidgetTester tester) async {
     Widget buildAnchor({required SearchAnchorChildBuilder builder}) {
       return MaterialApp(
         home: Material(
@@ -1409,7 +1559,7 @@ void main() {
     expect(searchViewRect.topLeft, anchorRect.topLeft);
   });
 
-  testWidgets('SearchAnchor respects builder property - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects builder property - RTL', (WidgetTester tester) async {
     Widget buildAnchor({required SearchAnchorChildBuilder builder}) {
       return MaterialApp(
         home: Directionality(
@@ -1446,8 +1596,9 @@ void main() {
     expect(searchViewRect.topRight, anchorRect.topRight);
   });
 
-  testWidgets('SearchAnchor respects suggestionsBuilder property', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor respects suggestionsBuilder property', (WidgetTester tester) async {
     final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
     const String suggestion = 'suggestion text';
 
     await tester.pumpWidget(MaterialApp(
@@ -1490,8 +1641,98 @@ void main() {
     expect(controller.value.text, suggestion);
   });
 
-  testWidgets('SearchAnchor suggestionsBuilder property could be async', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor should update suggestions on changes to search controller', (WidgetTester tester) async {
     final SearchController controller = SearchController();
+    const List<String> suggestions = <String>['foo','far','bim'];
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Material(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SearchAnchor(
+                searchController: controller,
+                builder: (BuildContext context, SearchController controller) {
+                  return const Icon(Icons.search);
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  final String searchText = controller.text.toLowerCase();
+                  if (searchText.isEmpty) {
+                    return const <Widget>[
+                      Center(
+                        child: Text('No Search'),
+                      ),
+                    ];
+                  }
+                  final Iterable<String> filterSuggestions = suggestions.where(
+                    (String suggestion) => suggestion.toLowerCase().contains(searchText),
+                  );
+                  return filterSuggestions.map((String suggestion) {
+                    return ListTile(
+                      title: Text(suggestion),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.call_missed),
+                        onPressed: () {
+                          controller.text = suggestion;
+                        },
+                      ),
+                      onTap: () {
+                        controller.closeView(suggestion);
+                      },
+                    );
+                  }).toList();
+                },
+              ),
+            ),
+          );
+        }
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder listTile1 = find.widgetWithText(ListTile, 'foo');
+    final Finder listTile2 = find.widgetWithText(ListTile, 'far');
+    final Finder listTile3 = find.widgetWithText(ListTile, 'bim');
+    final Finder textWidget = find.widgetWithText(Center, 'No Search');
+    final Finder iconInListTile1 = find.descendant(of: listTile1, matching: find.byIcon(Icons.call_missed));
+
+    expect(textWidget,findsOneWidget);
+    expect(listTile1, findsNothing);
+    expect(listTile2, findsNothing);
+    expect(listTile3, findsNothing);
+
+    await tester.enterText(find.byType(SearchBar), 'f');
+    await tester.pumpAndSettle();
+    expect(textWidget,findsNothing);
+    expect(listTile1, findsOneWidget);
+    expect(listTile2, findsOneWidget);
+    expect(listTile3, findsNothing);
+
+    await tester.tap(iconInListTile1);
+    await tester.pumpAndSettle();
+    expect(controller.value.text, 'foo');
+    expect(textWidget,findsNothing);
+    expect(listTile1, findsOneWidget);
+    expect(listTile2, findsNothing);
+    expect(listTile3, findsNothing);
+
+    await tester.tap(listTile1);
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, false);
+    expect(controller.value.text, 'foo');
+    expect(textWidget,findsNothing);
+    expect(listTile1, findsNothing);
+    expect(listTile2, findsNothing);
+    expect(listTile3, findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('SearchAnchor suggestionsBuilder property could be async', (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
     const String suggestion = 'suggestion text';
 
     await tester.pumpWidget(MaterialApp(
@@ -1535,7 +1776,7 @@ void main() {
     expect(controller.value.text, suggestion);
   });
 
-  testWidgets('SearchAnchor.bar has a default search bar as the anchor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor.bar has a default search bar as the anchor', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Align(
@@ -1565,8 +1806,10 @@ void main() {
     expect(searchViewRect.width, anchorRect.width);
   });
 
-  testWidgets('SearchController can open/close view', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchController can open/close view', (WidgetTester tester) async {
     final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor.bar(
@@ -1598,7 +1841,7 @@ void main() {
     expect(controller.isOpen, true);
   });
 
-  testWidgets('Search view does not go off the screen - LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Search view does not go off the screen - LTR', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Align(
@@ -1635,7 +1878,7 @@ void main() {
     expect(searchViewRect, equals(const Rect.fromLTRB(440.0, 200.0, 800.0, 600.0)));
   });
 
-  testWidgets('Search view does not go off the screen - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Search view does not go off the screen - RTL', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
         textDirection: TextDirection.rtl,
@@ -1674,7 +1917,7 @@ void main() {
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 200.0, 360.0, 600.0)));
   });
 
-  testWidgets('Search view becomes smaller if the window size is smaller than the view size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Search view becomes smaller if the window size is smaller than the view size', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(200.0, 200.0);
     tester.view.devicePixelRatio = 1.0;
@@ -1735,7 +1978,7 @@ void main() {
     expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
   });
 
-  testWidgets('Docked search view route is popped if the window size changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Docked search view route is popped if the window size changes', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(500.0, 600.0);
     tester.view.devicePixelRatio = 1.0;
@@ -1774,7 +2017,7 @@ void main() {
     expect(find.byIcon(Icons.arrow_back), findsNothing);
   });
 
-  testWidgets('Full-screen search view route should stay if the window size changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Full-screen search view route should stay if the window size changes', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(500.0, 600.0);
     tester.view.devicePixelRatio = 1.0;
@@ -1813,7 +2056,7 @@ void main() {
     expect(find.byIcon(Icons.arrow_back), findsOneWidget);
   });
 
-  testWidgets('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126590.
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -1853,7 +2096,7 @@ void main() {
     // No exception.
   });
 
-  testWidgets('Docked search should position itself correctly based on closest navigator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Docked search should position itself correctly based on closest navigator', (WidgetTester tester) async {
     const double rootSpacing = 100.0;
 
     await tester.pumpWidget(MaterialApp(
@@ -1890,7 +2133,7 @@ void main() {
     expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
   });
 
-  testWidgets('Docked search view with nested navigator does not go off the screen', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Docked search view with nested navigator does not go off the screen', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(400.0, 400.0);
     tester.view.devicePixelRatio = 1.0;
@@ -1981,7 +2224,7 @@ void main() {
       expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
     }
 
-    testWidgets('Overall InputDecorationTheme does not override text field style'
+    testWidgetsWithLeakTracking('Overall InputDecorationTheme does not override text field style'
         ' in SearchBar', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2007,7 +2250,7 @@ void main() {
       checkSearchBarDefaults(tester, theme.colorScheme, material);
     });
 
-    testWidgets('Overall InputDecorationTheme does not override text field style'
+    testWidgetsWithLeakTracking('Overall InputDecorationTheme does not override text field style'
         ' in the search view route', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2056,7 +2299,7 @@ void main() {
     });
   });
 
-  testWidgets('SearchAnchor view respects theme brightness', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor view respects theme brightness', (WidgetTester tester) async {
     Widget buildSearchAnchor(ThemeData theme) {
       return MaterialApp(
         theme: theme,
@@ -2101,7 +2344,7 @@ void main() {
     expect(material.color, theme.colorScheme.surface);
   });
 
-  testWidgets('Search view widgets can inherit local themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Search view widgets can inherit local themes', (WidgetTester tester) async {
     final ThemeData globalTheme = ThemeData(colorSchemeSeed: Colors.red);
     final ThemeData localTheme = ThemeData(
       colorSchemeSeed: Colors.green,

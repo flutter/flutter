@@ -1024,7 +1024,8 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (rows * columns == 0) {
       return constraints.constrain(Size.zero);
     }
