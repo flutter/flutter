@@ -59,15 +59,14 @@ abstract class DotEnvRegex {
   static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
 }
 
-abstract class HttpRegex {
-  // --web-header HTTP header regex
-  // --web-header is provided as key=value for consistency with --dart-define
+abstract class _HttpRegex {
   // https://datatracker.ietf.org/doc/html/rfc7230#section-3.2
-  static const String vchar = r'\x21-\x7E';
-  static const String spaceOrTab = r'\x20\x09';
-  static const String nonDelimiterVchar = r'\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x39\x41-\x5A\x5E-\x7A\x7C\x7E';
+  static const String _vchar = r'\x21-\x7E';
+  static const String _spaceOrTab = r'\x20\x09';
+  static const String _nonDelimiterVchar = r'\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x39\x41-\x5A\x5E-\x7A\x7C\x7E';
 
-  static final RegExp httpHeader = RegExp('^([$nonDelimiterVchar]+)' r'\s*=\s*' '([$vchar$spaceOrTab]+)' r'$');
+  // --web-header is provided as key=value for consistency with --dart-define
+  static final RegExp httpHeader = RegExp('^([$_nonDelimiterVchar]+)' r'\s*=\s*' '([$_vchar$_spaceOrTab]+)' r'$');
 }
 
 enum ExitStatus {
@@ -1548,7 +1547,7 @@ abstract class FlutterCommand extends Command<void> {
       final List<String> candidates = stringsArg('web-header');
       final List<String> invalidHeaders = <String>[];
       for (final String candidate in candidates) {
-        final Match? keyValueMatch = HttpRegex.httpHeader.firstMatch(candidate);
+        final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
           if (keyValueMatch == null) {
             invalidHeaders.add(candidate);
             continue;
