@@ -28,6 +28,7 @@ import 'build.dart';
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
   BuildIOSCommand({ required super.logger, required super.verboseHelp }) {
+    addPublishPort();
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -658,6 +659,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
+      disablePortPublication: usingCISystem && await disablePortPublication,
     );
     xcodeBuildResult = result;
 
