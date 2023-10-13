@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'view_utils.dart';
+
 void main() {
   testWidgetsWithLeakTracking('Widgets running with runApp can find View', (WidgetTester tester) async {
     FlutterView? viewOf;
@@ -76,9 +78,8 @@ void main() {
     PipelineOwner? outsideParent;
     PipelineOwner? insideParent;
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: Builder(
+    await tester.pumpWidgetWithoutViewWrapper(
+      Builder(
         builder: (BuildContext context) {
           outsideView = View.maybeOf(context);
           outsideParent = View.pipelineOwnerOf(context);
@@ -113,9 +114,8 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidgetWithoutViewWrapper(
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -223,9 +223,8 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidgetWithoutViewWrapper(
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -249,9 +248,8 @@ void main() {
     });
     expect(children, hasLength(3));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidgetWithoutViewWrapper(
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -270,9 +268,8 @@ void main() {
   group('renderObject getter', () {
     testWidgetsWithLeakTracking('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
-      await pumpWidgetWithoutViewWrapper(
-        tester: tester,
-        widget: Builder(
+      await tester.pumpWidgetWithoutViewWrapper(
+        Builder(
           builder: (BuildContext context) {
             builderContext = context;
             return View(
@@ -292,9 +289,8 @@ void main() {
 
     testWidgetsWithLeakTracking('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
-      await pumpWidgetWithoutViewWrapper(
-        tester: tester,
-        widget: Builder(
+      await tester.pumpWidgetWithoutViewWrapper(
+        Builder(
           builder: (BuildContext context) {
             builderContext = context;
             return ViewCollection(
@@ -344,9 +340,8 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('correctly switches between view configurations', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidgetWithoutViewWrapper(
+      View(
         view: tester.view,
         deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
@@ -358,9 +353,8 @@ void main() {
     expect(renderView.owner, same(tester.binding.pipelineOwner));
     expect(tester.renderObject(find.byType(SizedBox)).owner, same(tester.binding.pipelineOwner));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidgetWithoutViewWrapper(
+      View(
         view: tester.view,
         child: const SizedBox(),
       ),
@@ -370,9 +364,8 @@ void main() {
     expect(renderView.owner, isNot(same(tester.binding.pipelineOwner)));
     expect(tester.renderObject(find.byType(SizedBox)).owner, isNot(same(tester.binding.pipelineOwner)));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidgetWithoutViewWrapper(
+      View(
         view: tester.view,
         deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
@@ -448,12 +441,6 @@ void main() {
     });
     expect(children, isNot(contains(rawViewOwner)));
   });
-}
-
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(widget);
-  tester.binding.scheduleFrame();
-  return tester.binding.pump();
 }
 
 class FakeView extends TestFlutterView{

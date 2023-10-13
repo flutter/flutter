@@ -18,6 +18,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
+import 'view_utils.dart';
+
 final Object _mockHtmlElement = Object();
 Object _mockViewFactory(int id, {Object? params}) {
   return _mockHtmlElement;
@@ -47,12 +49,15 @@ void main() {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(viewType: 'webview'),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(viewType: 'webview'),
+            ),
           ),
         ),
       );
@@ -60,7 +65,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
         ]),
       );
     });
@@ -74,14 +79,17 @@ void main() {
         hasPlatformViewCreated = true;
       }
 
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(
-              viewType: 'webview',
-              onPlatformViewCreated: onPlatformViewCreatedCallBack,
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(
+                viewType: 'webview',
+                onPlatformViewCreated: onPlatformViewCreatedCallBack,
+              ),
             ),
           ),
         ),
@@ -93,7 +101,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
         ]),
       );
     });
@@ -101,34 +109,37 @@ void main() {
     testWidgetsWithLeakTracking('Create HTML view with creation params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
-      await tester.pumpWidget(
-        const Column(
-          children: <Widget>[
-            SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: HtmlElementView(
-                viewType: 'webview',
-                creationParams: 'foobar',
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Column(
+            children: <Widget>[
+              SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: HtmlElementView(
+                  viewType: 'webview',
+                  creationParams: 'foobar',
+                ),
               ),
-            ),
-            SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: HtmlElementView(
-                viewType: 'webview',
-                creationParams: 123,
+              SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: HtmlElementView(
+                  viewType: 'webview',
+                  creationParams: 123,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: 'foobar', htmlElement: _mockHtmlElement),
-          (id: currentViewId + 2, viewType: 'webview', params: 123, htmlElement: _mockHtmlElement),
+          (id: currentViewId + 1, viewType: 'webview', params: 'foobar', htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
+          (id: currentViewId + 2, viewType: 'webview', params: 123, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
         ]),
       );
     });
@@ -136,24 +147,30 @@ void main() {
     testWidgetsWithLeakTracking('Resize HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(viewType: 'webview'),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(viewType: 'webview'),
+            ),
           ),
         ),
       );
 
       final Completer<void> resizeCompleter = Completer<void>();
 
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 100.0,
-            height: 50.0,
-            child: HtmlElementView(viewType: 'webview'),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 50.0,
+              child: HtmlElementView(viewType: 'webview'),
+            ),
           ),
         ),
       );
@@ -164,7 +181,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
         ]),
       );
     });
@@ -173,22 +190,28 @@ void main() {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       fakePlatformViewRegistry.registerViewFactory('maps', _mockViewFactory);
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(viewType: 'webview'),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(viewType: 'webview'),
+            ),
           ),
         ),
       );
 
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(viewType: 'maps'),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(viewType: 'maps'),
+            ),
           ),
         ),
       );
@@ -196,28 +219,34 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 2, viewType: 'maps', params: null, htmlElement: _mockHtmlElement),
+          (id: currentViewId + 2, viewType: 'maps', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
         ]),
       );
     });
 
     testWidgetsWithLeakTracking('Dispose HTML view', (WidgetTester tester) async {
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(viewType: 'webview'),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(viewType: 'webview'),
+            ),
           ),
         ),
       );
 
-      await tester.pumpWidget(
-        const Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+            ),
           ),
         ),
       );
@@ -232,22 +261,28 @@ void main() {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       final GlobalKey key = GlobalKey();
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(viewType: 'webview', key: key),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(viewType: 'webview', key: key),
+            ),
           ),
         ),
       );
 
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView(viewType: 'webview', key: key),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(viewType: 'webview', key: key),
+            ),
           ),
         ),
       );
@@ -255,7 +290,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
         ]),
       );
     });
@@ -266,16 +301,19 @@ void main() {
       expect(currentViewId, greaterThanOrEqualTo(0));
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
-      await tester.pumpWidget(
-        Semantics(
-          container: true,
-          child: const Align(
-            alignment: Alignment.bottomRight,
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: HtmlElementView(
-                viewType: 'webview',
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: Semantics(
+            container: true,
+            child: const Align(
+              alignment: Alignment.bottomRight,
+              child: SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: HtmlElementView(
+                  viewType: 'webview',
+                ),
               ),
             ),
           ),
@@ -310,12 +348,15 @@ void main() {
     testWidgetsWithLeakTracking('Create platform view from tagName', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView.fromTagName(tagName: 'div'),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView.fromTagName(tagName: 'div'),
+            ),
           ),
         ),
       );
@@ -335,12 +376,15 @@ void main() {
     testWidgetsWithLeakTracking('Create invisible platform view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView.fromTagName(tagName: 'script', isVisible: false),
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView.fromTagName(tagName: 'script', isVisible: false),
+            ),
           ),
         ),
       );
@@ -364,14 +408,17 @@ void main() {
         createdElements.add(element);
       }
 
-      await tester.pumpWidget(
-        Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 100.0,
-            child: HtmlElementView.fromTagName(
-              tagName: 'table',
-              onElementCreated: onElementCreated,
+      await tester.pumpWidgetWithoutViewWrapper(
+        View(
+          view: tester.view,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView.fromTagName(
+                tagName: 'table',
+                onElementCreated: onElementCreated,
+              ),
             ),
           ),
         ),
@@ -400,6 +447,7 @@ typedef FakePlatformView = ({
   String viewType,
   Object? params,
   Object htmlElement,
+  int flutterViewId,
 });
 
 class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
@@ -457,6 +505,7 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
     final Object? params = args['params'];
+    final int flutterViewId = args['flutterViewId'] as int;
 
     if (_findViewById(id) != null) {
       throw PlatformException(
@@ -481,12 +530,15 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
       viewType: viewType,
       params: params,
       htmlElement: viewFactory(id, params: params),
+      flutterViewId: flutterViewId,
     ));
     return null;
   }
 
   Future<dynamic> _dispose(MethodCall call) async {
-    final int id = call.arguments as int;
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final int flutterViewId = args['flutterViewId'] as int;
 
     final FakePlatformView? view = _findViewById(id);
     if (view == null) {
@@ -495,6 +547,8 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
         message: 'Trying to dispose a platform view with unknown id: $id',
       );
     }
+
+    expect(view.flutterViewId, flutterViewId);
 
     _views.remove(view);
     return null;
