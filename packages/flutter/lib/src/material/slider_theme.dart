@@ -2714,7 +2714,7 @@ class RectangularRangeSliderValueIndicatorShape
       textScaleFactor: textScaleFactor!,
       sizeWithOverflow: sizeWithOverflow!,
       backgroundPaintColor: sliderTheme!.valueIndicatorColor!,
-      strokePaintColor: isOnTop! ? sliderTheme.overlappingShapeStrokeColor : null,
+      strokePaintColor: isOnTop! ? sliderTheme.overlappingShapeStrokeColor : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2902,7 +2902,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       labelPainter,
       textScaleFactor,
       sizeWithOverflow,
-      null,
+      sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2984,7 +2984,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
       labelPainter,
       textScaleFactor!,
       sizeWithOverflow!,
-      isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
+      isOnTop ? sliderTheme.overlappingShapeStrokeColor : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -3432,6 +3432,7 @@ class DropSliderValueIndicatorShape extends SliderComponentShape {
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+      strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -3548,8 +3549,17 @@ class _DropSliderValueIndicatorPathPainter {
       ..lineTo(-_triangleHeight, -_triangleHeight)
       ..lineTo(_triangleHeight, -_triangleHeight)
       ..close();
+    trianglePath.addRRect(borderRect);
+
+    if (strokePaintColor != null) {
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawPath(trianglePath, strokePaint);
+    }
+
     canvas.drawPath(trianglePath, fillPaint);
-    canvas.drawRRect(borderRect, fillPaint);
 
     // The label text is centered within the value indicator.
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;

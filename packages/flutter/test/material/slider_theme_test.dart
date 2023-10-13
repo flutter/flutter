@@ -2095,7 +2095,7 @@ void main() {
     }
   });
 
-  testWidgets('RectangularSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RectangularSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2136,6 +2136,144 @@ void main() {
         ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
         ..path(color: theme.sliderTheme.valueIndicatorColor),
     );
+  });
+
+
+  testWidgetsWithLeakTracking('PaddleSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('DropSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: DropSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+      showValueIndicator: ShowValueIndicator.always,
+      rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+      valueIndicatorColor: Color(0xff000001),
+      valueIndicatorStrokeColor: Color(0xff000002),
+      )
+    );
+
+    RangeValues values = const RangeValues(0, 0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              values: values,
+              labels: RangeLabels(
+                values.start.toString(),
+                values.end.toString(),
+              ),
+              onChanged: (RangeValues val) {
+                values = val;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+    );
+
+    await gesture.up();
   });
 
   group('Material 2', () {
