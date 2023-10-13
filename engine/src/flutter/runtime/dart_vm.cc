@@ -95,9 +95,8 @@ static const char* kDartEndlessTraceBufferArgs[]{
     "--timeline_recorder=endless",
 };
 
-// This is the same as --timeline_recorder=systrace.
 static const char* kDartSystraceTraceBufferArgs[] = {
-    "--systrace_timeline",
+    "--timeline_recorder=systrace",
 };
 
 static std::string DartFileRecorderArgs(const std::string& path) {
