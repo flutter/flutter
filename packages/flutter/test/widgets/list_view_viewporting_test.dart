@@ -506,12 +506,7 @@ void main() {
 
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
     expect(renderObject, paintsExactlyCountTimes(#drawParagraph, 10));
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134661
-    notDisposedAllowList: <String, int?> {'AnnotatedRegionLayer<SystemUiOverlayStyle>': 1},
-  ));
+  });
 
   testWidgetsWithLeakTracking('ListView should paint with rtl', (WidgetTester tester) async {
     await tester.pumpWidget(
