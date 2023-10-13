@@ -16,6 +16,24 @@ class DoNothingAndStopPropagationTextIntent extends Intent {
   const DoNothingAndStopPropagationTextIntent();
 }
 
+/// An [Intent] to send the event straight to the engine when the receiver
+/// is editable text.
+/// 
+/// When the receiver is not an editable text, then the `fallbackIntent` will
+/// be invoked.
+///
+/// See also:
+///
+///   * [DefaultTextEditingShortcuts], which triggers this [Intent].
+class DoNothingAndStopPropagationEditableTextIntent extends Intent {
+  /// Creates an instance of [DoNothingAndStopPropagationEditableTextIntent].
+  const DoNothingAndStopPropagationEditableTextIntent({required this.fallbackIntent});
+
+  /// The [Intent] that should be invoked when the receiver is a non-editable
+  /// text.
+  final Intent fallbackIntent;
+}
+
 /// A text editing related [Intent] that performs an operation towards a given
 /// direction of the current caret location.
 abstract class DirectionalTextEditingIntent extends Intent {

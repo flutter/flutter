@@ -4732,6 +4732,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
+    DoNothingAndStopPropagationEditableTextIntent: _DoNothingOnEditableTextAction(isEditable: !widget.readOnly),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
@@ -5630,6 +5631,28 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
+}
+
+class _DoNothingOnEditableTextAction extends ContextAction<DoNothingAndStopPropagationEditableTextIntent> {
+  _DoNothingOnEditableTextAction({required this.isEditable});
+
+  final bool isEditable;
+
+  @override
+  bool consumesKey(Intent intent) => !isEditable;
+
+  @override
+  Object? invoke(DoNothingAndStopPropagationEditableTextIntent intent, [BuildContext? context]) {
+    if (!isEditable) {
+      return Actions.invoke(
+        context!,
+        intent.fallbackIntent,
+      );
+    }
+  }
+
+  @override
+  bool get isActionEnabled => true;
 }
 
 /// The start and end glyph heights of some range of text.
