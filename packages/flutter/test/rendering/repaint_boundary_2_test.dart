@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('repaint boundary with constraint changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('repaint boundary with constraint changes', (WidgetTester tester) async {
     // Regression test for as https://github.com/flutter/flutter/issues/39151.
     await tester.pumpWidget(const RelayoutBoundariesCrash());
     tester.state<RelayoutBoundariesCrashState>(find.byType(RelayoutBoundariesCrash))._toggleMode();
