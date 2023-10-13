@@ -1825,11 +1825,13 @@ void main() {
     );
     layout(editable, constraints: constraints);
 
+    // ignore: invalid_use_of_protected_member
     final double initialWidth = editable.computeDryLayout(constraints).width;
     expect(initialWidth, 500);
 
     // Turn off forceLine. Now the width should be significantly smaller.
     editable.forceLine = false;
+    // ignore: invalid_use_of_protected_member
     expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
   });
 
