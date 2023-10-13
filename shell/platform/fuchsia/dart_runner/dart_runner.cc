@@ -41,7 +41,7 @@ namespace {
 const char* kDartVMArgs[] = {
     // clang-format off
 
-    "--systrace_timeline",
+    "--timeline_recorder=systrace",
     "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",
 
 #if defined(AOT_RUNTIME)
