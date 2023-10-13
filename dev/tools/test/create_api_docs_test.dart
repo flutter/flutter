@@ -223,6 +223,93 @@ void main() {
       expect(info['engineRealm'], equals('realm'));
     });
   });
+
+  group('DartDocGenerator', () {
+    late apidocs.DartdocGenerator generator;
+    late MemoryFileSystem fs;
+    late FakeProcessManager processManager;
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      processManager = FakeProcessManager.empty();
+      generator = apidocs.DartdocGenerator(
+        packageRoot: fs.directory('/path/to/package'),
+        publishRoot: fs.directory('/path/to/publish'),
+        docsRoot: fs.directory('/path/to/docs'),
+        filesystem: fs,
+        processManager: processManager,
+      );
+      final Directory repoRoot = fs.directory('/flutter');
+      repoRoot.childDirectory('packages').createSync(recursive: true);
+      apidocs.FlutterInformation.instance = apidocs.FlutterInformation(
+        filesystem: fs,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{
+          'FLUTTER_ROOT': repoRoot.path,
+        }),
+      );
+    });
+
+    test('.generateDartDoc', () async {
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'get']),
+        const FakeCommand(
+          command: <String>['/flutter/bin/flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+        ),
+        const FakeCommand(
+          command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list'],
+        ),
+        FakeCommand(
+          command: <Pattern>[
+            '/flutter/bin/flutter',
+            'pub',
+            'global',
+            'run',
+            '--enable-asserts',
+            'dartdoc',
+            '--output',
+            '/path/to/publish/flutter',
+            '--allow-tools',
+            '--json',
+            '--validate-links',
+            '--link-to-source-excludes',
+            '/flutter/bin/cache',
+            '--link-to-source-root',
+            '/flutter',
+            '--link-to-source-uri-template',
+            'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+            '--inject-html',
+            '--use-base-href',
+            '--header',
+            '/path/to/docs/styles.html',
+            '--header',
+            '/path/to/docs/analytics-header.html',
+            '--header',
+            '/path/to/docs/survey.html',
+            '--header',
+            '/path/to/docs/snippets.html',
+            '--header',
+            '/path/to/docs/opensearch.html',
+            '--footer',
+            '/path/to/docs/analytics-footer.html',
+            '--footer-text',
+            '/path/to/package/footer.html',
+            '--allow-warnings-in-packages',
+            RegExp('.*'),
+          ],
+        ),
+      ]);
+      await generator.generateDartdoc();
+    });
+  });
 }
 
 const String branchName = 'stable';
