@@ -1,0 +1,91 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/compiled_action.gni")
+import("//flutter/common/config.gni")
+import("//third_party/dart/build/dart/dart_action.gni")
+import("//third_party/dart/sdk_args.gni")
+
+import("//third_party/dart/build/dart/dart_action.gni")
+
+# Generates a Dart kernel snapshot using flutter_frontend_server.
+#
+# Arguments
+#     dart_main (required): The Main Dart file.
+#
+#     dart_kernel (required): The path to the output kernel snapshot in the out
+#                             directory.
+#
+#     packages (required): The path to the .packages file.
+template("compile_flutter_dart_test") {
+  assert(defined(invoker.dart_file), "The Dart test file must be specified.")
+  assert(defined(invoker.dart_kernel),
+         "The Dart Kernel file location must be specified.")
+  assert(defined(invoker.packages),
+         "The path to the .packages file must be specified.")
+
+  common_deps = [
+    "//flutter/flutter_frontend_server:frontend_server",
+    "//flutter/lib/snapshot:strong_platform",
+  ]
+  if (defined(invoker.deps)) {
+    common_deps += invoker.deps
+  }
+
+  snapshot_depfile =
+      "$root_gen_dir/flutter/testing/snapshot_$target_name.depfile.d"
+
+  common_vm_args = [ "--disable-dart-dev" ]
+
+  flutter_patched_sdk = rebase_path("$root_out_dir/flutter_patched_sdk")
+
+  common_args = [
+    "--sound-null-safety",
+    "--sdk-root",
+    flutter_patched_sdk,
+    "--target=flutter",
+    "--packages",
+    rebase_path(invoker.packages),
+    "--depfile",
+    rebase_path(snapshot_depfile),
+    "--output-dill",
+    rebase_path(invoker.dart_kernel, root_out_dir),
+    rebase_path(invoker.dart_file),
+  ]
+
+  if (flutter_prebuilt_dart_sdk) {
+    action(target_name) {
+      testonly = true
+      deps = common_deps
+      pool = "//flutter/build/dart:dart_pool"
+      script = "//build/gn_run_binary.py"
+      inputs = [ invoker.dart_file ]
+      outputs = [ invoker.dart_kernel ]
+      depfile = snapshot_depfile
+
+      ext = ""
+      if (is_win) {
+        ext = ".exe"
+      }
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
+      frontend_server =
+          rebase_path("$root_gen_dir/frontend_server.dart.snapshot")
+
+      args = [ dart ] + common_vm_args + [ frontend_server ] + common_args
+    }
+  } else {
+    dart_action(target_name) {
+      testonly = true
+      deps = common_deps
+      pool = "//flutter/build/dart:dart_pool"
+      script = "$root_gen_dir/frontend_server.dart.snapshot"
+      packages = rebase_path(invoker.packages)
+      inputs = [ invoker.dart_file ]
+      outputs = [ invoker.dart_kernel ]
+      depfile = snapshot_depfile
+      vm_args = common_vm_args
+      args = common_args
+    }
+  }
+}
