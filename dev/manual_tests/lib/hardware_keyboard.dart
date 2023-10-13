@@ -13,20 +13,20 @@ void main() {
         title: const Text('Hardware Key Demo'),
       ),
       body: const Center(
-        child: RawKeyboardDemo(),
+        child: HardwareKeyboardDemo(),
       ),
     ),
   ));
 }
 
-class RawKeyboardDemo extends StatefulWidget {
-  const RawKeyboardDemo({super.key});
+class HardwareKeyboardDemo extends StatefulWidget {
+  const HardwareKeyboardDemo({super.key});
 
   @override
-  State<RawKeyboardDemo> createState() => _HardwareKeyDemoState();
+  State<HardwareKeyboardDemo> createState() => _HardwareKeyboardDemoState();
 }
 
-class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
+class _HardwareKeyboardDemoState extends State<HardwareKeyboardDemo> {
   final FocusNode _focusNode = FocusNode();
   KeyEvent? _event;
 
