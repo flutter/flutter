@@ -434,8 +434,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   static final Map<ShortcutActivator, Intent> _macDisablingTextShortcuts = <ShortcutActivator, Intent>{
     ..._commonDisablingTextShortcuts,
     ..._iOSDisablingTextShortcuts,
-    // Context aware text shortcuts. These shortcuts behave differently when received by
-    // an editable input field vs static text.
     const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationEditableTextIntent(
       fallbackIntent: DismissIntent(),
     ),
