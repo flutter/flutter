@@ -124,6 +124,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// package or folders, or in 'setUpAll' for the test library or group.
 /// If you set it for group, remember the original value to a local variable
 /// and restore it in `tearDownAll`.
+/// To pause leak tracking for one test assign [experimentalLeakTracking] to
+/// `LeakTrackingForTests.paused()`.
 ///
 /// ## Sample code
 ///
