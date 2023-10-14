@@ -20,8 +20,8 @@ import 'input_decorator.dart';
 import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
-import 'selection_area.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
+import 'selection_area.dart';
 import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -1460,7 +1460,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         };
     }
 
-    Widget selectionAreaBuilder = SelectionArea(
+    final Widget selectionAreaBuilder = SelectionArea(
       readOnly: widget.readOnly || !_isEnabled,
       // focusNode: focusNode,
       child: Builder(

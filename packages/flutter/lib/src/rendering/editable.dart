@@ -3319,8 +3319,20 @@ class _EditableSelectableFragment with Selectable, ChangeNotifier {
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
       case SelectionEventType.granularlyExtendSelection:
+        final GranularlyExtendSelectionEvent granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
+        result = _handleGranularlyExtendSelection(
+          granularlyExtendSelection.forward,
+          granularlyExtendSelection.isEnd,
+          granularlyExtendSelection.collapseSelection,
+          granularlyExtendSelection.granularity,
+        );
       case SelectionEventType.directionallyExtendSelection:
-        break;
+        final DirectionallyExtendSelectionEvent directionallyExtendSelection = event as DirectionallyExtendSelectionEvent;
+        result = _handleDirectionallyExtendSelection(
+          directionallyExtendSelection.dx,
+          directionallyExtendSelection.isEnd,
+          directionallyExtendSelection.direction,
+        );
     }
 
     if (existingSelectionStart != _textSelectionStart ||
@@ -3647,6 +3659,180 @@ class _EditableSelectableFragment with Selectable, ChangeNotifier {
       end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     }
     return (wordStart: start, wordEnd: end);
+  }
+
+  SelectionResult _handleDirectionallyExtendSelection(double horizontalBaseline, bool isExtent, SelectionExtendDirection movement) {
+    final Matrix4 transform = editable.getTransformTo(null);
+    if (transform.invert() == 0.0) {
+      switch (movement) {
+        case SelectionExtendDirection.previousLine:
+        case SelectionExtendDirection.backward:
+          return SelectionResult.previous;
+        case SelectionExtendDirection.nextLine:
+        case SelectionExtendDirection.forward:
+          return SelectionResult.next;
+      }
+    }
+    final double baselineInParagraphCoordinates = MatrixUtils.transformPoint(transform, Offset(horizontalBaseline, 0)).dx;
+    assert(!baselineInParagraphCoordinates.isNaN);
+    final TextPosition newPosition;
+    final SelectionResult result;
+    switch (movement) {
+      case SelectionExtendDirection.previousLine:
+      case SelectionExtendDirection.nextLine:
+        assert(_textSelectionEnd != null && _textSelectionStart != null);
+        final TextPosition targetedEdge = isExtent ? _textSelectionEnd! : _textSelectionStart!;
+        final MapEntry<TextPosition, SelectionResult> moveResult = _handleVerticalMovement(
+          targetedEdge,
+          horizontalBaselineInParagraphCoordinates: baselineInParagraphCoordinates,
+          below: movement == SelectionExtendDirection.nextLine,
+        );
+        newPosition = moveResult.key;
+        result = moveResult.value;
+      case SelectionExtendDirection.forward:
+      case SelectionExtendDirection.backward:
+        _textSelectionEnd ??= movement == SelectionExtendDirection.forward
+          ? TextPosition(offset: range.start)
+          : TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+        _textSelectionStart ??= _textSelectionEnd;
+        final TextPosition targetedEdge = isExtent ? _textSelectionEnd! : _textSelectionStart!;
+        final Offset edgeOffsetInParagraphCoordinates = editable._getOffsetForPosition(targetedEdge);
+        final Offset baselineOffsetInParagraphCoordinates = Offset(
+          baselineInParagraphCoordinates,
+          // Use half of line height to point to the middle of the line.
+          edgeOffsetInParagraphCoordinates.dy - editable._textPainter.preferredLineHeight / 2,
+        );
+        newPosition = editable._getPositionForOffset(baselineOffsetInParagraphCoordinates);
+        result = SelectionResult.end;
+    }
+    if (isExtent) {
+      _textSelectionEnd = newPosition;
+    } else {
+      _textSelectionStart = newPosition;
+    }
+    return result;
+  }
+
+  SelectionResult _handleGranularlyExtendSelection(bool forward, bool isExtent, bool collapseSelection, TextGranularity granularity) {
+    _textSelectionEnd ??= forward
+        ? TextPosition(offset: range.start)
+        : TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+    _textSelectionStart ??= _textSelectionEnd;
+    final TextPosition targetedEdge = isExtent ? _textSelectionEnd! : _textSelectionStart!;
+    if (forward && (targetedEdge.offset == range.end)) {
+      return SelectionResult.next;
+    }
+    if (!forward && (targetedEdge.offset == range.start)) {
+      return SelectionResult.previous;
+    }
+    final SelectionResult result;
+    final TextPosition newPosition;
+    switch (granularity) {
+      case TextGranularity.character:
+        final String text = range.textInside(fullText);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, CharacterBoundary(text));
+        result = SelectionResult.end;
+      case TextGranularity.word:
+        final TextBoundary textBoundary = editable._textPainter.wordBoundaries.moveByWordBoundary;
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
+        result = SelectionResult.end;
+      case TextGranularity.line:
+        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(editable));
+        result = SelectionResult.end;
+      case TextGranularity.document:
+        final String text = range.textInside(fullText);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, DocumentBoundary(text));
+        if (forward && newPosition.offset == range.end) {
+          result = SelectionResult.next;
+        } else if (!forward && newPosition.offset == range.start) {
+          result = SelectionResult.previous;
+        } else {
+          result = SelectionResult.end;
+        }
+    }
+
+    if (collapseSelection) {
+      _textSelectionStart = newPosition;
+      _textSelectionEnd = newPosition;
+    } else {
+      if (isExtent) {
+        _textSelectionEnd = newPosition;
+      } else {
+        _textSelectionStart = newPosition;
+      }
+    }
+    return result;
+  }
+
+  // Move **beyond** the local boundary of the given type (unless range.start or
+  // range.end is reached). Used for most TextGranularity types except for
+  // TextGranularity.line, to ensure the selection movement doesn't get stuck at
+  // a local fixed point.
+  TextPosition _moveBeyondTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
+    final int newOffset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(end.offset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(end.offset - 1) ?? range.start;
+    return TextPosition(offset: newOffset);
+  }
+
+  // Move **to** the local boundary of the given type. Typically used for line
+  // boundaries, such that performing "move to line start" more than once never
+  // moves the selection to the previous line.
+  TextPosition _moveToTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
+    assert(end.offset >= 0);
+    final int caretOffset;
+    switch (end.affinity) {
+      case TextAffinity.upstream:
+        if (end.offset < 1 && !forward) {
+          assert (end.offset == 0);
+          return const TextPosition(offset: 0);
+        }
+        final CharacterBoundary characterBoundary = CharacterBoundary(fullText);
+        caretOffset = math.max(
+          0,
+          characterBoundary.getLeadingTextBoundaryAt(range.start + end.offset) ?? range.start,
+        ) - 1;
+      case TextAffinity.downstream:
+        caretOffset = end.offset;
+    }
+    final int offset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? range.start;
+    return TextPosition(offset: offset);
+  }
+
+  MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {
+    final List<ui.LineMetrics> lines = editable._textPainter.computeLineMetrics();
+    final Offset offset = editable._textPainter.getOffsetForCaret(position, Rect.zero); // Revisit this line.
+    int currentLine = lines.length - 1;
+    for (final ui.LineMetrics lineMetrics in lines) {
+      if (lineMetrics.baseline > offset.dy) {
+        currentLine = lineMetrics.lineNumber;
+        break;
+      }
+    }
+    final TextPosition newPosition;
+    if (below && currentLine == lines.length - 1) {
+      newPosition = TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+    } else if (!below && currentLine == 0) {
+      newPosition = TextPosition(offset: range.start);
+    } else {
+      final int newLine = below ? currentLine + 1 : currentLine - 1;
+      newPosition = _clampTextPosition(
+        editable._getPositionForOffset(Offset(horizontalBaselineInParagraphCoordinates, lines[newLine].baseline))
+      );
+    }
+    final SelectionResult result;
+    if (newPosition.offset == range.start) {
+      result = SelectionResult.previous;
+    } else if (newPosition.offset == range.end) {
+      result = SelectionResult.next;
+    } else {
+      result = SelectionResult.end;
+    }
+    assert(result != SelectionResult.next || below);
+    assert(result != SelectionResult.previous || !below);
+    return MapEntry<TextPosition, SelectionResult>(newPosition, result);
   }
 
   /// Whether the given text position is contained in current selection

@@ -18,6 +18,7 @@ import 'context_menu_button_item.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
@@ -333,16 +334,27 @@ class SelectableRegion extends StatefulWidget {
 /// State for a [SelectableRegion].
 class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
+    DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+    // Copy.
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
+
+    // Extend/Move Selection.
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, granularity: TextGranularity.word)),
-    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
-    ExpandSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
     ExtendSelectionByCharacterIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionByCharacterIntent>(this, granularity: TextGranularity.character)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, granularity: TextGranularity.word)),
     ExtendSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_DirectionallyExtendCaretSelectionAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this)),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
+    // ExtendSelectionByPageIntent: _makeOverridable(CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage)),
+    // ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    // ExtendSelectionToNextParagraphBoundaryIntent : _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+    // ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+
+    // Expand Selection.
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
+    ExpandSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
   };
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
@@ -449,6 +461,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         _handleFocusChanged();
       }
     }
+  }
+
+  Object? _hideToolbarIfVisible(DismissIntent intent) {
+    if (_selectionOverlay?.toolbarIsVisible ?? false) {
+      hideToolbar(false);
+      return null;
+    }
+    return Actions.invoke(context, intent);
   }
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
@@ -1231,7 +1251,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     return _adjustingSelectionEnd = forward != isReversed;
   }
 
-  void _granularlyExtendSelection(TextGranularity granularity, bool forward) {
+  void _granularlyExtendSelection(TextGranularity granularity, bool forward, bool collapseSelection) {
     _directionalHorizontalBaseline = null;
     if (!_selectionDelegate.value.hasSelection) {
       return;
@@ -1240,6 +1260,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       GranularlyExtendSelectionEvent(
         forward: forward,
         isEnd: _determineIsAdjustingSelectionEnd(forward),
+        collapseSelection: collapseSelection,
         granularity: granularity,
       ),
     );
@@ -1587,7 +1608,7 @@ class _GranularlyExtendSelectionAction<T extends DirectionalTextEditingIntent> e
 
   @override
   void invokeAction(T intent, [BuildContext? context]) {
-    state._granularlyExtendSelection(granularity, intent.forward);
+    state._granularlyExtendSelection(granularity, intent.forward, false);
   }
 }
 
@@ -1599,11 +1620,7 @@ class _GranularlyExtendCaretSelectionAction<T extends DirectionalCaretMovementIn
 
   @override
   void invokeAction(T intent, [BuildContext? context]) {
-    if (intent.collapseSelection) {
-      // Selectable region never collapses selection.
-      return;
-    }
-    state._granularlyExtendSelection(granularity, intent.forward);
+    state._granularlyExtendSelection(granularity, intent.forward, intent.collapseSelection);
   }
 }
 
