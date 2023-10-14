@@ -13,13 +13,74 @@ import 'package:package_config/package_config.dart';
 /// This file is served when the browser requests "main.dart.js" in debug mode,
 /// and is responsible for bootstrapping the RequireJS modules and attaching
 /// the hot reload hooks.
+///
+/// If `generateLoadingIndicator` is true, embeds a loading indicator onto the
+/// web page that's visible while the Flutter app is loading.
 String generateBootstrapScript({
   required String requireUrl,
   required String mapperUrl,
+  required bool generateLoadingIndicator,
 }) {
   return '''
 "use strict";
 
+${generateLoadingIndicator ? _generateLoadingIndicator() : ''}
+
+// A map containing the URLs for the bootstrap scripts in debug.
+let _scriptUrls = {
+  "mapper": "$mapperUrl",
+  "requireJs": "$requireUrl"
+};
+
+// Create a TrustedTypes policy so we can attach Scripts...
+let _ttPolicy;
+if (window.trustedTypes) {
+  _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
+    createScriptURL: (url) => {
+      let scriptUrl = _scriptUrls[url];
+      if (!scriptUrl) {
+        console.error("Unknown Flutter Web bootstrap resource!", url);
+      }
+      return scriptUrl;
+    }
+  });
+}
+
+// Creates a TrustedScriptURL for a given `scriptName`.
+// See `_scriptUrls` and `_ttPolicy` above.
+function getTTScriptUrl(scriptName) {
+  let defaultUrl = _scriptUrls[scriptName];
+  return _ttPolicy ? _ttPolicy.createScriptURL(scriptName) : defaultUrl;
+}
+
+// Attach source mapping.
+var mapperEl = document.createElement("script");
+mapperEl.defer = true;
+mapperEl.async = false;
+mapperEl.src = getTTScriptUrl("mapper");
+document.head.appendChild(mapperEl);
+
+// Attach require JS.
+var requireEl = document.createElement("script");
+requireEl.defer = true;
+requireEl.async = false;
+requireEl.src = getTTScriptUrl("requireJs");
+// This attribute tells require JS what to load as main (defined below).
+requireEl.setAttribute("data-main", "main_module.bootstrap");
+document.head.appendChild(requireEl);
+''';
+}
+
+/// Creates a visual animated loading indicator and puts it on the page to
+/// provide feedback to the developer that the app is being loaded. Otherwise,
+/// the developer would be staring at a blank page wondering if the app will
+/// come up or not.
+///
+/// This indicator should only be used when DWDS is enabled, e.g. with the
+/// `-d chrome` option. Debug builds without DWDS, e.g. `flutter run -d web-server`
+/// or `flutter build web --debug` should not use this indicator.
+String _generateLoadingIndicator() {
+  return '''
 var styles = `
   .flutter-loader {
     width: 100%;
@@ -93,49 +154,6 @@ document.addEventListener('dart-app-ready', function (e) {
    loader.parentNode.removeChild(loader);
    styleSheet.parentNode.removeChild(styleSheet);
 });
-
-// A map containing the URLs for the bootstrap scripts in debug.
-let _scriptUrls = {
-  "mapper": "$mapperUrl",
-  "requireJs": "$requireUrl"
-};
-
-// Create a TrustedTypes policy so we can attach Scripts...
-let _ttPolicy;
-if (window.trustedTypes) {
-  _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
-    createScriptURL: (url) => {
-      let scriptUrl = _scriptUrls[url];
-      if (!scriptUrl) {
-        console.error("Unknown Flutter Web bootstrap resource!", url);
-      }
-      return scriptUrl;
-    }
-  });
-}
-
-// Creates a TrustedScriptURL for a given `scriptName`.
-// See `_scriptUrls` and `_ttPolicy` above.
-function getTTScriptUrl(scriptName) {
-  let defaultUrl = _scriptUrls[scriptName];
-  return _ttPolicy ? _ttPolicy.createScriptURL(scriptName) : defaultUrl;
-}
-
-// Attach source mapping.
-var mapperEl = document.createElement("script");
-mapperEl.defer = true;
-mapperEl.async = false;
-mapperEl.src = getTTScriptUrl("mapper");
-document.head.appendChild(mapperEl);
-
-// Attach require JS.
-var requireEl = document.createElement("script");
-requireEl.defer = true;
-requireEl.async = false;
-requireEl.src = getTTScriptUrl("requireJs");
-// This attribute tells require JS what to load as main (defined below).
-requireEl.setAttribute("data-main", "main_module.bootstrap");
-document.head.appendChild(requireEl);
 ''';
 }
 
