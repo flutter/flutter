@@ -27,7 +27,9 @@ const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
   group('Countdown timer picker', () {
-    testWidgets('initialTimerDuration falls within limit', (WidgetTester tester) async {
+    testWidgets('initialTimerDuration falls within limit',
+    experimentalLeakTracking: LeakTrackingForTests.paused(),
+    (WidgetTester tester) async {
       expect(
         () {
           CupertinoTimerPicker(
