@@ -2691,31 +2691,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   final LayerHandle<LeaderLayer> _leaderLayerHandler = LayerHandle<LeaderLayer>();
 
-  void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints, Offset offset) {
-    Offset startPoint = endpoints[0].point;
-    startPoint = Offset(
-      clampDouble(startPoint.dx, 0.0, size.width),
-      clampDouble(startPoint.dy, 0.0, size.height),
-    );
-    _leaderLayerHandler.layer = LeaderLayer(link: startHandleLayerLink, offset: startPoint + offset);
-    context.pushLayer(
-      _leaderLayerHandler.layer!,
-      super.paint,
-      Offset.zero,
-    );
-    if (endpoints.length == 2) {
-      Offset endPoint = endpoints[1].point;
-      endPoint = Offset(
-        clampDouble(endPoint.dx, 0.0, size.width),
-        clampDouble(endPoint.dy, 0.0, size.height),
-      );
-      context.pushLayer(
-        LeaderLayer(link: endHandleLayerLink, offset: endPoint + offset),
-        super.paint,
-        Offset.zero,
-      );
-    }
-  }
+  // void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints, Offset offset) {
+  //   Offset startPoint = endpoints[0].point;
+  //   startPoint = Offset(
+  //     clampDouble(startPoint.dx, 0.0, size.width),
+  //     clampDouble(startPoint.dy, 0.0, size.height),
+  //   );
+  //   _leaderLayerHandler.layer = LeaderLayer(link: startHandleLayerLink, offset: startPoint + offset);
+  //   context.pushLayer(
+  //     _leaderLayerHandler.layer!,
+  //     super.paint,
+  //     Offset.zero,
+  //   );
+  //   if (endpoints.length == 2) {
+  //     Offset endPoint = endpoints[1].point;
+  //     endPoint = Offset(
+  //       clampDouble(endPoint.dx, 0.0, size.width),
+  //       clampDouble(endPoint.dy, 0.0, size.height),
+  //     );
+  //     context.pushLayer(
+  //       LeaderLayer(link: endHandleLayerLink, offset: endPoint + offset),
+  //       super.paint,
+  //       Offset.zero,
+  //     );
+  //   }
+  // }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
