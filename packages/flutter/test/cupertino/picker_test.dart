@@ -83,7 +83,7 @@ void main() {
 
     testWidgetsWithLeakTracking('selected item is in the middle', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 1);
-
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
