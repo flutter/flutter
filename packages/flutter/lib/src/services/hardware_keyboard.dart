@@ -225,6 +225,49 @@ abstract class KeyEvent with Diagnosticable {
   /// Defaults to false.
   final bool synthesized;
 
+  /// Returns true if the given [LogicalKeyboardKey] is pressed, according to
+  /// the [HardwareKeyboard].
+  bool isLogicalKeyPressed(LogicalKeyboardKey key) => HardwareKeyboard.instance.logicalKeysPressed.contains(key);
+
+  /// Returns true if a logical CTRL modifier key is pressed, regardless of
+  /// which side of the keyboard it is on.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which control key was
+  /// pressed.
+  bool get isControlPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.controlLeft) || isLogicalKeyPressed(LogicalKeyboardKey.controlRight);
+  }
+
+  /// Returns true if a logical SHIFT modifier key is pressed, regardless of
+  /// which side of the keyboard it is on.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which shift key was pressed.
+  bool get isShiftPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.shiftLeft) || isLogicalKeyPressed(LogicalKeyboardKey.shiftRight);
+  }
+
+  /// Returns true if a logical ALT modifier key is pressed, regardless of which
+  /// side of the keyboard it is on.
+  ///
+  /// The `AltGr` key that appears on some keyboards is considered to be the
+  /// same as [LogicalKeyboardKey.altRight] on some platforms (notably Android).
+  /// On platforms that can distinguish between `altRight` and `altGr`, a press
+  /// of `AltGr` will not return true here, and will need to be tested for
+  /// separately.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which alt key was pressed.
+  bool get isAltPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.altLeft) || isLogicalKeyPressed(LogicalKeyboardKey.altRight);
+  }
+
+  /// Returns true if a logical META modifier key is pressed, regardless of
+  /// which side of the keyboard it is on.
+  ///
+  /// Use [isLogicalKeyPressed] if you need to know which meta key was pressed.
+  bool get isMetaPressed {
+    return isLogicalKeyPressed(LogicalKeyboardKey.metaLeft) || isLogicalKeyPressed(LogicalKeyboardKey.metaRight);
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

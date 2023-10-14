@@ -407,7 +407,7 @@ abstract class RawKeyEvent with Diagnosticable {
     }
   }
 
-  /// Returns true if the given [KeyboardKey] is pressed.
+  /// Returns true if the given [LogicalKeyboardKey] is pressed.
   bool isKeyPressed(LogicalKeyboardKey key) => RawKeyboard.instance.keysPressed.contains(key);
 
   /// Returns true if a CTRL modifier key is pressed, regardless of which side
