@@ -304,12 +304,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134205
-    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
-  ));
+  });
 
   testWidgetsWithLeakTracking('WidgetsApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -336,12 +331,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134205
-    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
-  ));
+  });
 
   testWidgetsWithLeakTracking('WidgetsApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -432,12 +422,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134205
-    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
-  ));
+  });
 
   testWidgetsWithLeakTracking('WidgetsApp.router has correct default', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -453,12 +438,7 @@ void main() {
       color: const Color(0xFF123456),
     ));
     expect(find.text('/'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134205
-    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
-  ));
+  });
 
   testWidgetsWithLeakTracking('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
