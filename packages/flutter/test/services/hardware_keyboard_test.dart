@@ -69,6 +69,47 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
+  testWidgetsWithLeakTracking('KeyEvent can tell which keys are pressed', (WidgetTester tester) async {
+    KeyEvent? event;
+
+    FocusManager.instance.addEarlyKeyEventHandler((KeyEvent newEvent) {
+      event = newEvent;
+      return KeyEventResult.handled;
+    });
+
+    await tester.pumpWidget(const Focus(autofocus: true, child: SizedBox()));
+    await tester.pump();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+
+    expect(event?.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(event?.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(event?.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(event?.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyRepeatEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(event?.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(event?.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock);
+    expect(event?.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(event?.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(event?.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(event?.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(event?.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isFalse);
+    expect(event?.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isFalse);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(event?.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isFalse);
+    expect(event?.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isFalse);
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
   testWidgetsWithLeakTracking('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {

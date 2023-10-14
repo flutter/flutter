@@ -229,6 +229,10 @@ abstract class KeyEvent with Diagnosticable {
   /// the [HardwareKeyboard].
   bool isLogicalKeyPressed(LogicalKeyboardKey key) => HardwareKeyboard.instance.logicalKeysPressed.contains(key);
 
+  /// Returns true if the given [PhysicalKeyboardKey] is pressed, according to
+  /// the [HardwareKeyboard].
+  bool isPhysicalKeyPressed(PhysicalKeyboardKey key) => HardwareKeyboard.instance.physicalKeysPressed.contains(key);
+
   /// Returns true if a logical CTRL modifier key is pressed, regardless of
   /// which side of the keyboard it is on.
   ///
