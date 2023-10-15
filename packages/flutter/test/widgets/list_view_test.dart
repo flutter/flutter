@@ -730,12 +730,8 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134572
-    notDisposedAllowList: <String, int?> {'ContainerLayer': 1},
-  ));
+    context.dispose();
+  });
 
   testWidgetsWithLeakTracking('ListView.builder respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(

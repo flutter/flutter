@@ -855,6 +855,7 @@ class WebDevFS implements DevFS {
         generateBootstrapScript(
           requireUrl: 'require.js',
           mapperUrl: 'stack_trace_mapper.js',
+          generateLoadingIndicator: enableDwds,
         ),
       );
       webAssetServer.writeFile(
