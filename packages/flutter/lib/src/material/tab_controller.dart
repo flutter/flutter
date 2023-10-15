@@ -132,8 +132,11 @@ class TabController extends ChangeNotifier {
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController,
-       _animationDuration = animationDuration;
-
+       _animationDuration = animationDuration {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
   /// `animationDuration` if they are non-null.
@@ -142,6 +145,10 @@ class TabController extends ChangeNotifier {
   ///
   /// When [DefaultTabController.length] is updated, this method is called to
   /// create a new [TabController] without creating a new [AnimationController].
+  ///
+  /// This instance of [TabController] must not be used anymore and has to be
+  /// disposed since [AnimationController] was injected into the new
+  /// [TabController].
   TabController _copyWith({
     required int? index,
     required int? length,
@@ -151,13 +158,15 @@ class TabController extends ChangeNotifier {
     if (index != null) {
       _animationController!.value = index.toDouble();
     }
-    return TabController._(
+    final TabController newController = TabController._(
       index: index ?? _index,
       length: length ?? this.length,
       animationController: _animationController,
       previousIndex: previousIndex ?? _previousIndex,
       animationDuration: animationDuration ?? _animationDuration,
     );
+    _animationController = null;
+    return newController;
   }
 
   /// An animation whose value represents the current position of the [TabBar]'s
@@ -485,21 +494,25 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
         newIndex = math.max(0, widget.length - 1);
         previousIndex = _controller.index;
       }
-      _controller = _controller._copyWith(
+      final TabController newController = _controller._copyWith(
         length: widget.length,
         animationDuration: widget.animationDuration,
         index: newIndex,
         previousIndex: previousIndex,
       );
+      _controller.dispose();
+      _controller = newController;
     }
 
     if (oldWidget.animationDuration != widget.animationDuration) {
-      _controller = _controller._copyWith(
+      final TabController newController = _controller._copyWith(
         length: widget.length,
         animationDuration: widget.animationDuration,
         index: _controller.index,
         previousIndex: _controller.previousIndex,
       );
+      _controller.dispose();
+      _controller = newController;
     }
   }
 }
