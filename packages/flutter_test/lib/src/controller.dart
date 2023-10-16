@@ -778,7 +778,9 @@ abstract class WidgetController {
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())));
+      final PointerUpEvent upEvent = testPointer.up(timeStamp: Duration(microseconds: timeStamp.round()));
+      await sendEventToBinding(upEvent);
+      debugPrint(upEvent.log.where((Object? entry) => !(entry is List && entry.isEmpty)).toList().toString());
     });
   }
 

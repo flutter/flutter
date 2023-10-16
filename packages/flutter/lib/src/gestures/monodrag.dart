@@ -361,6 +361,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
+    event.log.add('DragGestureRecognizer.handleEvent');
     assert(_state != _DragState.ready);
     if (!event.synthesized &&
         (event is PointerDownEvent ||
@@ -415,6 +416,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       }
     }
     if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
+      event.log.add('DragGestureRecognizer._giveUpPointer');
       _giveUpPointer(event.pointer);
     }
   }

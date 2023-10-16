@@ -195,7 +195,7 @@ class TestPointer {
       device: _device,
       pointer: pointer,
       position: location!,
-    );
+    )..log.add('create test PointerUpEvent');
   }
 
   /// Create a [PointerCancelEvent].

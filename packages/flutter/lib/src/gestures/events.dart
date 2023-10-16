@@ -215,6 +215,19 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///    the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
+final Expando<List<Object?>> _log = Expando<List<Object?>>();
+
+extension PointerEventLog on PointerEvent {
+  List<Object?> get log {
+    List<Object?>? selfLog = _log[this];
+    if (selfLog == null) {
+      selfLog = <Object?>[];
+      _log[this] = selfLog;
+    }
+    return selfLog;
+  }
+}
+
 /// Base class for touch, stylus, or mouse events.
 ///
 /// Pointer events operate in the coordinate space of the screen, scaled to
@@ -1693,7 +1706,10 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
 }
 
 class _TransformedPointerUpEvent extends _TransformedPointerEvent with _CopyPointerUpEvent implements PointerUpEvent {
-  _TransformedPointerUpEvent(this.original, this.transform);
+  _TransformedPointerUpEvent(this.original, this.transform) {
+    original.log.add('transformed');
+    original.log.add(log);
+  }
 
   @override
   final PointerUpEvent original;

@@ -93,6 +93,7 @@ class PointerRouter {
 
   @pragma('vm:notify-debugger-on-exception')
   void _dispatch(PointerEvent event, PointerRoute route, Matrix4? transform) {
+    event.log.add('PointerRouter._dispatch');
     try {
       event = event.transformed(transform);
       route(event);
@@ -138,6 +139,7 @@ class PointerRouter {
     Map<PointerRoute, Matrix4?> referenceRoutes,
     Map<PointerRoute, Matrix4?> copiedRoutes,
   ) {
+    event.log.add('PointerRouter._dispatchEventToRoutes');
     copiedRoutes.forEach((PointerRoute route, Matrix4? transform) {
       if (referenceRoutes.containsKey(route)) {
         _dispatch(event, route, transform);

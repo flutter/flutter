@@ -362,6 +362,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   ///  * [PointerHoverEvent]s, [PointerAddedEvent]s, and [PointerRemovedEvent]s
   ///    are dispatched without a hit test result.
   void handlePointerEvent(PointerEvent event) {
+    event.log.add('GestureBinding.handlePointerEvent');
     debugPrint('PointerEvent(${event.runtimeType})');
     assert(!locked);
 
@@ -378,6 +379,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   }
 
   void _handlePointerEventImmediately(PointerEvent event) {
+    event.log.add('GestureBinding._handlePointerEventImmediately');
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
       assert(!_hitTests.containsKey(event.pointer), 'Pointer of ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly has a HitTestResult associated with it.');
@@ -442,6 +444,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @override // from HitTestDispatcher
   @pragma('vm:notify-debugger-on-exception')
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
+    event.log.add('GestureBinding.dispathEvent');
     assert(!locked);
     // No hit test information implies that this is a [PointerAddedEvent] or
     // [PointerRemovedEvent]. These events are specially routed here; other
@@ -486,6 +489,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   @override // from HitTestTarget
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    event.log.add('GestureBinding.handleEvent');
     pointerRouter.route(event);
     if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
       gestureArena.close(event.pointer);
