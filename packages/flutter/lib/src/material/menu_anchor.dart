@@ -416,14 +416,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
       child:  Builder(
         key: _anchorKey,
         builder: (BuildContext context) {
-          if (widget.builder == null) {
-            return widget.child ?? const SizedBox();
-          }
-          return widget.builder!(
-            context,
-            _menuController,
-            widget.child,
-          );
+          return widget.builder?.call(context, _menuController, widget.child)
+              ?? widget.child ?? const SizedBox();
         },
       ),
     );
@@ -1923,6 +1917,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           });
           _waitingToFocusMenu = true;
         }
+        setState(() { /* Rebuild with updated controller.isOpen value */ });
         widget.onOpen?.call();
       },
       style: widget.menuStyle,
@@ -1933,9 +1928,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         // once.
         ButtonStyle mergedStyle = widget.themeStyleOf(context)?.merge(widget.defaultStyleOf(context))
           ?? widget.defaultStyleOf(context);
-        if (widget.style != null) {
-          mergedStyle = widget.style!.merge(mergedStyle);
-        }
+        mergedStyle = widget.style?.merge(mergedStyle) ?? mergedStyle;
 
         void toggleShowMenu(BuildContext context) {
           if (controller._anchor == null) {

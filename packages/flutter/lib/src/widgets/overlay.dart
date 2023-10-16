@@ -1648,14 +1648,12 @@ class _OverlayPortalState extends State<OverlayPortal> {
     final int? zOrderIndex = _zOrderIndex;
     if (zOrderIndex == null) {
       return _OverlayPortal(
-        key: ValueKey<int?>(_zOrderIndex),
         overlayLocation: null,
         overlayChild: null,
         child: widget.child,
       );
     }
     return _OverlayPortal(
-      key: ValueKey<int?>(_zOrderIndex),
       overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
       overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
       child: widget.child,
