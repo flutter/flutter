@@ -1172,6 +1172,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetLifecycleState();
   }
+
+  bool trackFrameSchedules = false;
+
+  @override
+  void scheduleFrame() {
+    if (trackFrameSchedules) {
+      debugPrintStack(maxFrames: 20);
+    }
+    super.scheduleFrame();
+  }
 }
 
 /// A variant of [TestWidgetsFlutterBinding] for executing tests in

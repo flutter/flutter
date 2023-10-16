@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -412,17 +413,48 @@ void main() {
       return (min, max);
     }
 
-    print('before fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
-    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
-    print('after fling: hasScheduledFrame = ${tester.binding.hasScheduledFrame}; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
-    final int pumps = await tester.pumpAndSettle();
-    print('after pumpAndSettle: pumps = $pumps; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+    tester.binding.trackFrameSchedules = true;
+    final DebugPrintCallback original = debugPrint;
 
-    expect(find.text('Item 2'), findsNothing);
-    print('>>> expect(find.text(\'Item 22\'), findsOneWidget)');
-    expect(find.text('Item 22'), findsOneWidget);
-    print('>>> PASSED: expect(find.text(\'Item 22\'), findsOneWidget)');
-    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+    int messageIdCounter = 0;
+    final List<int> messages = <int>[];
+    final Map<String, int> messageIds = <String, int>{};
+    debugPrint = (String? message, { int? wrapWidth }) {
+      if (message == null) {
+        return;
+      }
+      int? messageId = messageIds[message];
+      if (messageId == null) {
+        messageId = messageIdCounter++;
+        messageIds[message] = messageId;
+      }
+      messages.add(messageId);
+    };
+    try {
+      print('>>> before fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+      await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+      print('>>> messages: $messages');
+      messages.clear();
+      print('>>> after fling: hasScheduledFrame = ${tester.binding.hasScheduledFrame}; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+      final int pumps = await tester.pumpAndSettle();
+      print('>>> messages: $messages');
+      messages.clear();
+      print('>>> after pumpAndSettle: pumps = $pumps; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+
+      expect(find.text('Item 2'), findsNothing);
+      print('>>> expect(find.text(\'Item 22\'), findsOneWidget)');
+      expect(find.text('Item 22'), findsOneWidget);
+      print('>>> PASSED: expect(find.text(\'Item 22\'), findsOneWidget)');
+      expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+    } finally {
+      print('>>> messages: $messages');
+      messages.clear();
+      debugPrint = original;
+      tester.binding.trackFrameSchedules = false;
+      messageIds.forEach((String message, int id) {
+        print('>>> $id: $message');
+      });
+    }
 
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
