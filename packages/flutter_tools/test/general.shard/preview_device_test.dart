@@ -85,10 +85,6 @@ void main() {
       logger: logger,
       builderFactory: () => FakeBundleBuilder(fs),
     );
-    fs
-      .directory('artifacts_temp')
-      .childDirectory('Debug')
-      .createSync(recursive: true);
     final Directory previewDeviceCacheDir = fs
       .directory('Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
       ..createSync(recursive: true);
