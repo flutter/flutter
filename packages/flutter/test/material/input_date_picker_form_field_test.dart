@@ -51,6 +51,7 @@ void main() {
     ThemeData? theme,
     Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
     bool acceptEmptyDate = false,
+    FocusNode? focusNode,
   }) {
     return MaterialApp(
       theme: theme ?? ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -72,6 +73,7 @@ void main() {
             fieldLabelText: fieldLabelText,
             autofocus: autofocus,
             acceptEmptyDate: acceptEmptyDate,
+            focusNode: focusNode,
           ),
         ),
       ),
@@ -377,5 +379,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(errorFormatText), findsOneWidget);
     });
+  });
+
+  testWidgets('FocusNode can request focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(inputDatePickerField(
+      focusNode: focusNode,
+    ));
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
   });
 }
