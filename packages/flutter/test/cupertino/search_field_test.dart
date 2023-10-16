@@ -595,6 +595,7 @@ void main() {
 
   testWidgetsWithLeakTracking('autofocus:true gives focus to the widget', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
