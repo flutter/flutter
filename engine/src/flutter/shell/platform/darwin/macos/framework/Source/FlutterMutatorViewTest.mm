@@ -6,6 +6,8 @@
 
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/NSView+ClipsToBounds.h"
+
 @interface FlutterMutatorView (Private)
 
 @property(readonly, nonatomic, nonnull) NSMutableArray<NSView*>* pathClipViews;
@@ -94,6 +96,12 @@ TEST(FlutterMutatorViewTest, BasicFrameIsCorrect) {
   EXPECT_TRUE(CGRectEqualToRect(platformView.frame, CGRectMake(0, 0, 30, 20)));
   EXPECT_EQ(mutatorView.pathClipViews.count, 0ull);
   EXPECT_NE(mutatorView.platformViewContainer, nil);
+}
+
+TEST(FlutterMutatorViewTest, ClipsToBounds) {
+  NSView* platformView = [[NSView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+  EXPECT_TRUE(mutatorView.clipsToBounds);
 }
 
 TEST(FlutterMutatorViewTest, TransformedFrameIsCorrect) {
