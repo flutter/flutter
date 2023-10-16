@@ -824,9 +824,10 @@ class RenderListWheelViewport
   @override
   void dispose() {
     _clipRectLayer.layer = null;
+    _childOpacityLayerHandler.layer = null;
     super.dispose();
   }
-
+  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
     // The magnifier cannot be turned off if the opacity is less than 1.0.
@@ -837,7 +838,7 @@ class RenderListWheelViewport
 
     // In order to reduce the number of opacity layers, we first paint all
     // partially opaque children, then finally paint the fully opaque children.
-    context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
+    _childOpacityLayerHandler.layer = context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
       _paintAllChildren(context, offset, center: false);
     });
     _paintAllChildren(context, offset, center: true);
