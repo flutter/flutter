@@ -377,36 +377,23 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    print('>>> 1');
     expect(find.text('Item 2'), findsOneWidget);
-    print('>>> 2');
     expect(find.text('Item 22'), findsNothing);
-    print('>>> 3');
     expect(find.byType(BackButton).hitTestable(), findsNothing);
 
-    print('>>> 4');
     await tester.drag(find.text('Item 2'), const Offset(0, -20.0));
-    print('>>> 5');
     await tester.pumpAndSettle();
 
-    print('>>> 6');
     expect(find.text('Item 2'), findsOneWidget);
-    print('>>> 7');
     expect(find.text('Item 22'), findsNothing);
     // We've started to drag up, we should have a back button now for a11y
-    print('>>> 8');
     expect(find.byType(BackButton).hitTestable(), findsOneWidget);
 
-    print('>>> 9');
     await tester.tap(find.byType(BackButton));
-    print('>>> 10');
     await tester.pumpAndSettle();
 
-    print('>>> 11');
     expect(find.byType(BackButton).hitTestable(), findsNothing);
-    print('>>> 12');
     expect(find.text('Item 2'), findsOneWidget);
-    print('>>> 13');
     expect(find.text('Item 22'), findsNothing);
 
     (int, int) itemsOnScreen() {
@@ -425,28 +412,23 @@ void main() {
       return (min, max);
     }
 
-    print('>>> 14: before fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+    print('before fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
     await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
-    print('>>> 15: after fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
-    await tester.pumpAndSettle();
-    print('>>> 16: after pumpAndSettle: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+    print('after fling: hasScheduledFrame = ${tester.binding.hasScheduledFrame}; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
+    final int pumps = await tester.pumpAndSettle();
+    print('after pumpAndSettle: pumps = $pumps; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
 
     expect(find.text('Item 2'), findsNothing);
-    print('>>> 17');
+    print('>>> expect(find.text(\'Item 22\'), findsOneWidget)');
     expect(find.text('Item 22'), findsOneWidget);
-    print('>>> 18');
+    print('>>> PASSED: expect(find.text(\'Item 22\'), findsOneWidget)');
     expect(find.byType(BackButton).hitTestable(), findsOneWidget);
 
-    print('>>> 19');
     await tester.tap(find.byType(BackButton));
-    print('>>> 20');
     await tester.pumpAndSettle();
 
-    print('>>> 21');
     expect(find.byType(BackButton).hitTestable(), findsNothing);
-    print('>>> 22');
     expect(find.text('Item 2'), findsOneWidget);
-    print('>>> 23');
     expect(find.text('Item 22'), findsNothing);
   });
 
