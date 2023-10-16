@@ -5,11 +5,12 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMutatorView.h"
 
 #include <QuartzCore/QuartzCore.h>
-
 #include <vector>
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+
+#import "flutter/shell/platform/darwin/macos/framework/Source/NSView+ClipsToBounds.h"
 
 @interface FlutterMutatorView () {
   // Each of these views clips to a CGPathRef. These views, if present,
@@ -395,6 +396,7 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
     _platformView = platformView;
     _pathClipViews = [NSMutableArray array];
     self.wantsLayer = YES;
+    self.clipsToBounds = YES;
   }
   return self;
 }
