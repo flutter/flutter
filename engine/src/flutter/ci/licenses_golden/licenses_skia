@@ -1,4 +1,4 @@
-Signature: 7826dc252a3551276c5a189ae38ed620
+Signature: eb2e698e2711f26223294ad1f681b298
 
 ====================================================================================================
 LIBRARY: etc1
@@ -654,6 +654,7 @@ ORIGIN: ../../../third_party/skia/src/base/SkBase64.cpp + ../../../third_party/s
 ORIGIN: ../../../third_party/skia/src/base/SkBase64.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBuffer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBuffer.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/base/SkDebug.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkDeque.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkEndian.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkRandom.h + ../../../third_party/skia/LICENSE
@@ -678,7 +679,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.cpp + ../../../t
 ORIGIN: ../../../third_party/skia/src/core/SkColor.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkColorFilter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkCoreBlitters.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkDebug.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDescriptor.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDraw.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDraw.h + ../../../third_party/skia/LICENSE
@@ -800,6 +800,7 @@ FILE: ../../../third_party/skia/src/base/SkBase64.cpp
 FILE: ../../../third_party/skia/src/base/SkBase64.h
 FILE: ../../../third_party/skia/src/base/SkBuffer.cpp
 FILE: ../../../third_party/skia/src/base/SkBuffer.h
+FILE: ../../../third_party/skia/src/base/SkDebug.cpp
 FILE: ../../../third_party/skia/src/base/SkDeque.cpp
 FILE: ../../../third_party/skia/src/base/SkEndian.h
 FILE: ../../../third_party/skia/src/base/SkRandom.h
@@ -824,7 +825,6 @@ FILE: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.cpp
 FILE: ../../../third_party/skia/src/core/SkColor.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkCoreBlitters.h
-FILE: ../../../third_party/skia/src/core/SkDebug.cpp
 FILE: ../../../third_party/skia/src/core/SkDescriptor.h
 FILE: ../../../third_party/skia/src/core/SkDraw.cpp
 FILE: ../../../third_party/skia/src/core/SkDraw.h
