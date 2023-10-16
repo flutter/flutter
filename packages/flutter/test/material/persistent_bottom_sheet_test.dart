@@ -430,15 +430,44 @@ void main() {
       }
       messages.add(messageId);
     };
+
+    void flushMessages() {
+      if (messages.isEmpty) {
+        print('>>> messages: n/a');
+        return;
+      }
+      final StringBuffer buf = StringBuffer('>>> messages:');
+      int count = 1;
+      int lastMessage = messages.first;
+      for (final int message in messages.skip(1)) {
+        if (message == lastMessage) {
+          count++;
+        } else {
+          if (count > 1) {
+            buf.write(' ${lastMessage}x$count');
+          } else {
+            buf.write(' $lastMessage');
+          }
+          count = 1;
+        }
+        lastMessage = message;
+      }
+      if (count > 1) {
+        buf.write(' ${lastMessage}x$count');
+      } else {
+        buf.write(' $lastMessage');
+      }
+      print(buf);
+      messages.clear();
+    }
+
     try {
       print('>>> before fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
       await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
-      print('>>> messages: $messages');
-      messages.clear();
+      flushMessages();
       print('>>> after fling: hasScheduledFrame = ${tester.binding.hasScheduledFrame}; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
       final int pumps = await tester.pumpAndSettle();
-      print('>>> messages: $messages');
-      messages.clear();
+      flushMessages();
       print('>>> after pumpAndSettle: pumps = $pumps; offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
 
       expect(find.text('Item 2'), findsNothing);
@@ -447,8 +476,7 @@ void main() {
       print('>>> PASSED: expect(find.text(\'Item 22\'), findsOneWidget)');
       expect(find.byType(BackButton).hitTestable(), findsOneWidget);
     } finally {
-      print('>>> messages: $messages');
-      messages.clear();
+      flushMessages();
       debugPrint = original;
       tester.binding.trackFrameSchedules = false;
       messageIds.forEach((String message, int id) {
