@@ -3836,7 +3836,7 @@ targets:
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3927,7 +3927,7 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
