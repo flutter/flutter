@@ -367,7 +367,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   void dispose() {
     super.dispose();
-    if(widget.controller == null) {
+    if (widget.controller == null) {
       _controller?.dispose();
     }
   }
