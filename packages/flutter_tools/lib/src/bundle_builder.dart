@@ -60,6 +60,7 @@ class BundleBuilder {
         kTargetFile: mainPath,
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
+        kNativeAssets: 'false'
       },
       artifacts: globals.artifacts!,
       fileSystem: globals.fs,
