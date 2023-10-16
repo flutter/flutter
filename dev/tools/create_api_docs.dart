@@ -518,9 +518,9 @@ class DartdocGenerator {
     final Version version = FlutterInformation.instance.getFlutterVersion();
 
     // Verify which version of snippets and dartdoc we're using.
-    final ProcessResult snippetsResult = Process.runSync(
-      FlutterInformation.instance.getFlutterBinaryPath().path,
+    final ProcessResult snippetsResult = processManager.runSync(
       <String>[
+        FlutterInformation.instance.getFlutterBinaryPath().path,
         'pub',
         'global',
         'list',
@@ -574,13 +574,15 @@ class DartdocGenerator {
       '--header',
       docsRoot.childFile('styles.html').path,
       '--header',
-      docsRoot.childFile('analytics.html').path,
+      docsRoot.childFile('analytics-header.html').path,
       '--header',
       docsRoot.childFile('survey.html').path,
       '--header',
       docsRoot.childFile('snippets.html').path,
       '--header',
       docsRoot.childFile('opensearch.html').path,
+      '--footer',
+      docsRoot.childFile('analytics-footer.html').path,
       '--footer-text',
       packageRoot.childFile('footer.html').path,
       '--allow-warnings-in-packages',
@@ -643,6 +645,7 @@ class DartdocGenerator {
       arguments: dartdocArgs,
       workingDirectory: packageRoot,
       environment: pubEnvironment,
+      processManager: processManager,
     ));
     printStream(
       process.stdout,
@@ -669,7 +672,7 @@ class DartdocGenerator {
     }
 
     _sanityCheckDocs();
-    checkForUnresolvedDirectives(publishRoot.childDirectory('flutter').path);
+    checkForUnresolvedDirectives(publishRoot.childDirectory('flutter'));
 
     _createIndexAndCleanup();
 
@@ -690,12 +693,13 @@ class DartdocGenerator {
     }
   }
 
-  /// Runs a sanity check by running a test.
-  void _sanityCheckDocs([Platform platform = const LocalPlatform()]) {
+  /// A subset of all generated doc files for [_sanityCheckDocs].
+  @visibleForTesting
+  List<File> get canaries {
     final Directory flutterDirectory = publishRoot.childDirectory('flutter');
     final Directory widgetsDirectory = flutterDirectory.childDirectory('widgets');
 
-    final List<File> canaries = <File>[
+    return <File>[
       publishRoot.childDirectory('assets').childFile('overrides.css'),
       flutterDirectory.childDirectory('dart-io').childFile('File-class.html'),
       flutterDirectory.childDirectory('dart-ui').childFile('Canvas-class.html'),
@@ -710,12 +714,19 @@ class DartdocGenerator {
       widgetsDirectory.childFile('Widget-class.html'),
       widgetsDirectory.childFile('Listener-class.html'),
     ];
+  }
+
+  /// Runs a sanity check by running a test.
+  void _sanityCheckDocs([Platform platform = const LocalPlatform()]) {
     for (final File canary in canaries) {
       if (!canary.existsSync()) {
         throw Exception('Missing "${canary.path}", which probably means the documentation failed to build correctly.');
       }
     }
     // Make sure at least one example of each kind includes source code.
+    final Directory widgetsDirectory = publishRoot
+        .childDirectory('flutter')
+        .childDirectory('widgets');
 
     // Check a "sample" example, any one will do.
     _sanityCheckExample(
