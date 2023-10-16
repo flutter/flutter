@@ -1607,14 +1607,6 @@
 ../../../third_party/dart/runtime/observatory/tests
 ../../../third_party/dart/runtime/observatory/update_sources.py
 ../../../third_party/dart/runtime/observatory/web/third_party/README.md
-../../../third_party/dart/runtime/observatory_2/.gitignore
-../../../third_party/dart/runtime/observatory_2/HACKING.md
-../../../third_party/dart/runtime/observatory_2/analysis_options.yaml
-../../../third_party/dart/runtime/observatory_2/lib/src/elements/css/shared.css
-../../../third_party/dart/runtime/observatory_2/pubspec.yaml
-../../../third_party/dart/runtime/observatory_2/tests
-../../../third_party/dart/runtime/observatory_2/update_sources.py
-../../../third_party/dart/runtime/observatory_2/web/third_party/README.md
 ../../../third_party/dart/runtime/tests
 ../../../third_party/dart/runtime/third_party/binary_size
 ../../../third_party/dart/runtime/third_party/d3
