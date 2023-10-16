@@ -1865,7 +1865,6 @@ class _OverlayPortal extends RenderObjectWidget {
   /// The `overlayLocation` parameter must not be null when [overlayChild] is not
   /// null.
   _OverlayPortal({
-    super.key,
     required this.overlayLocation,
     required this.overlayChild,
     required this.child,
