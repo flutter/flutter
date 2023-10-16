@@ -2082,9 +2082,6 @@ void main() {
           ..rrect(color: const Color(0xff6750a4))
           ..rrect(color: const Color(0xffe7e0ec))
           ..path(color: Color(theme.colorScheme.primary.value))
-          ..rrect(
-            color: Color(theme.colorScheme.primary.value),
-          )
       );
 
       // Finish gesture to release resources.
@@ -2132,7 +2129,7 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
         ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
         ..path(color: theme.sliderTheme.valueIndicatorColor),
     );
@@ -2176,7 +2173,7 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
         ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
         ..path(color: theme.sliderTheme.valueIndicatorColor),
     );
@@ -2219,7 +2216,7 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
         ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
         ..path(color: theme.sliderTheme.valueIndicatorColor),
     );
@@ -2267,8 +2264,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..path(color: (theme.colorScheme.shadow)) // shadow
-        ..path(color: (theme.colorScheme.shadow)) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
         ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
         ..path(color: theme.sliderTheme.valueIndicatorColor)
     );
