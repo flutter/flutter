@@ -32,8 +32,26 @@ void SyncSwitch::Execute(const SyncSwitch::Handlers& handlers) const {
 }
 
 void SyncSwitch::SetSwitch(bool value) {
-  fml::UniqueLock lock(*mutex_);
-  value_ = value;
+  {
+    fml::UniqueLock lock(*mutex_);
+    value_ = value;
+  }
+  for (Observer* observer : observers_) {
+    observer->OnSyncSwitchUpdate(value);
+  }
 }
 
+void SyncSwitch::AddObserver(Observer* observer) const {
+  fml::UniqueLock lock(*mutex_);
+  if (std::find(observers_.begin(), observers_.end(), observer) ==
+      observers_.end()) {
+    observers_.push_back(observer);
+  }
+}
+
+void SyncSwitch::RemoveObserver(Observer* observer) const {
+  fml::UniqueLock lock(*mutex_);
+  observers_.erase(std::remove(observers_.begin(), observers_.end(), observer),
+                   observers_.end());
+}
 }  // namespace fml
