@@ -137,7 +137,6 @@ void main() {
     expect(localizations.currentDateLabel, isNotNull);
     expect(localizations.scrimLabel, isNotNull);
     expect(localizations.bottomSheetLabel, isNotNull);
-    expect(localizations.remainingTextFieldCharacterCountOther, isNotNull);
 
     expect(localizations.scrimOnTapHint('FOO'), contains('FOO'));
 
