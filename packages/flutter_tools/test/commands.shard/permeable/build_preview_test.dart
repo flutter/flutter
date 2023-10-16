@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -30,7 +31,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext('foo bar', () async {
+  testUsingContext('flutter build _preview creates preview device', () async {
     final String projectPath = await createProject(
       tempDir,
       arguments: <String>['--no-pub', '--template=app'],
@@ -49,5 +50,15 @@ void main() {
       '--no-pub',
       fs.path.join(projectPath, 'lib', 'main.dart'),
     ]);
+    expect(
+      fs
+          .directory(Cache.flutterRoot)
+          .childDirectory('bin')
+          .childDirectory('cache')
+          .childDirectory('artifacts')
+          .childDirectory('flutter_preview')
+          .childFile('flutter_preview.exe'),
+      exists,
+    );
   }, skip: !const LocalPlatform().isWindows); // [intended] Flutter Preview only supported on Windows currently
 }
