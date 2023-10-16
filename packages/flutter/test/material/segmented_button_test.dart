@@ -49,6 +49,7 @@ void main() {
     );
 
     expect(find.byType(SegmentedButton<int>), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgetsWithLeakTracking('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
