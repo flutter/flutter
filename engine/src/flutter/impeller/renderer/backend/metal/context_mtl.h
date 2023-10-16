@@ -16,6 +16,7 @@
 #include "impeller/core/sampler.h"
 #include "impeller/renderer/backend/metal/allocator_mtl.h"
 #include "impeller/renderer/backend/metal/command_buffer_mtl.h"
+#include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 #include "impeller/renderer/backend/metal/shader_library_mtl.h"
 #include "impeller/renderer/capabilities.h"
@@ -93,6 +94,10 @@ class ContextMTL final : public Context,
 
   std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const;
 
+#ifdef IMPELLER_DEBUG
+  std::shared_ptr<GPUTracerMTL> GetGPUTracer() const;
+#endif  // IMPELLER_DEBUG
+
   // |Context|
   void StoreTaskForGPU(std::function<void()> task) override;
 
@@ -116,6 +121,9 @@ class ContextMTL final : public Context,
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<fml::ConcurrentMessageLoop> raster_message_loop_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
+#ifdef IMPELLER_DEBUG
+  std::shared_ptr<GPUTracerMTL> gpu_tracer_;
+#endif  // IMPELLER_DEBUG
   std::deque<std::function<void()>> tasks_awaiting_gpu_;
   std::unique_ptr<SyncSwitchObserver> sync_switch_observer_;
   bool is_valid_ = false;

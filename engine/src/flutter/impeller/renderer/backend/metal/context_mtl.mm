@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/metal/context_mtl.h"
 
 #include <Foundation/Foundation.h>
+#include <memory>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/file.h"
@@ -12,6 +13,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
 #include "impeller/renderer/capabilities.h"
 
@@ -145,7 +147,9 @@ ContextMTL::ContextMTL(
 
   device_capabilities_ =
       InferMetalCapabilities(device_, PixelFormat::kB8G8R8A8UNormInt);
-
+#ifdef IMPELLER_DEBUG
+  gpu_tracer_ = std::make_shared<GPUTracerMTL>();
+#endif  // IMPELLER_DEBUG
   is_valid_ = true;
 }
 
@@ -329,6 +333,12 @@ std::shared_ptr<CommandBuffer> ContextMTL::CreateCommandBuffer() const {
 void ContextMTL::Shutdown() {
   raster_message_loop_.reset();
 }
+
+#ifdef IMPELLER_DEBUG
+std::shared_ptr<GPUTracerMTL> ContextMTL::GetGPUTracer() const {
+  return gpu_tracer_;
+}
+#endif  // IMPELLER_DEBUG
 
 const std::shared_ptr<fml::ConcurrentTaskRunner>
 ContextMTL::GetWorkerTaskRunner() const {

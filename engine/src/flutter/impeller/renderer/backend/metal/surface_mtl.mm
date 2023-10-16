@@ -246,6 +246,9 @@ bool SurfaceMTL::Present() const {
       return false;
     }
   }
+#ifdef IMPELLER_DEBUG
+  ContextMTL::Cast(context.get())->GetGPUTracer()->MarkFrameEnd();
+#endif  // IMPELLER_DEBUG
 
   if (drawable_) {
     id<MTLCommandBuffer> command_buffer =
