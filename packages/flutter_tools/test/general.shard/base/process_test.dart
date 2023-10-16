@@ -33,7 +33,10 @@ void main() {
         exitCode: 1,
       ));
 
-      expect(() async => processUtils.run(<String>['false'], throwOnError: true), throwsProcessException());
+      expect(
+        () async => processUtils.run(<String>['false'], throwOnError: true),
+        throwsProcessException(message: 'Process exited abnormally with exit code 1'),
+      );
     });
   });
 
