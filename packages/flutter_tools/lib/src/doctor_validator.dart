@@ -190,20 +190,7 @@ class ValidationResult {
   }
 
   /// The string representation of the type.
-  String get typeStr {
-    switch (type) {
-      case ValidationType.crash:
-        return 'crash';
-      case ValidationType.missing:
-        return 'missing';
-      case ValidationType.success:
-        return 'installed';
-      case ValidationType.notAvailable:
-        return 'notAvailable';
-      case ValidationType.partial:
-        return 'partial';
-    }
-  }
+  String get typeStr => type.name;
 
   @override
   String toString() {

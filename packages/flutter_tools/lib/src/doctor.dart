@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -374,6 +375,10 @@ class Doctor {
     }
     bool doctorResult = true;
     int issues = 0;
+    
+    // This timestamp will be used on the backend of GA4 to group each of the events that
+    // were sent for each doctor validator and its result
+    final int analyticsTimestamp = DateTime.now().millisecondsSinceEpoch;
 
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
@@ -404,6 +409,28 @@ class Doctor {
           break;
       }
       if (sendEvent) {
+        if (validator is GroupedValidator) {
+          for (int i = 0; i < validator.subValidators.length; i++) {
+            final DoctorValidator subValidator = validator.subValidators[i];
+            final ValidationResult subResult = validator.subResults[i];
+
+            await globals.analytics.send(Event.doctorValidatorResult(
+              validatorName: subValidator.title,
+              result: subResult.typeStr,
+              statusInfo: subResult.statusInfo,
+              partOfGroupedValidator: true,
+              timestamp: analyticsTimestamp,
+            ));
+          }
+        } else {
+            await globals.analytics.send(Event.doctorValidatorResult(
+              validatorName: validator.title,
+              result: result.typeStr,
+              statusInfo: result.statusInfo,
+              partOfGroupedValidator: false,
+              timestamp: analyticsTimestamp,
+            ));
+        }
         DoctorResultEvent(validator: validator, result: result).send();
       }
 
