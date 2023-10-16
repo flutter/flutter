@@ -325,7 +325,11 @@ external void _validateExternal(Uint8List result);
 @pragma('vm:external-name', 'ValidateError')
 external void _validateError(String? error);
 @pragma('vm:external-name', 'TurnOffGPU')
-external void _turnOffGPU();
+external void _turnOffGPU(bool value);
+@pragma('vm:external-name', 'FlushGpuAwaitingTasks')
+external void _flushGpuAwaitingTasks();
+@pragma('vm:external-name', 'ValidateNotNull')
+external void _validateNotNull(Object? object);
 
 @pragma('vm:entry-point')
 Future<void> toByteDataWithoutGPU() async {
@@ -338,12 +342,40 @@ Future<void> toByteDataWithoutGPU() async {
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
   final Image image = await picture.toImage(100, 100);
-  _turnOffGPU();
+  _turnOffGPU(true);
+  Timer flusher = Timer.periodic(Duration(milliseconds: 1), (timer) {
+    _flushGpuAwaitingTasks();
+  });
   try {
     ByteData? byteData = await image.toByteData();
     _validateError(null);
-  } catch (ex) {
-    _validateError(ex.toString());
+  } catch (error) {
+    _validateError(error.toString());
+  } finally {
+    flusher.cancel();
+  }
+}
+
+@pragma('vm:entry-point')
+Future<void> toByteDataRetries() async {
+  final PictureRecorder pictureRecorder = PictureRecorder();
+  final Canvas canvas = Canvas(pictureRecorder);
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
+  final Offset c = Offset(50.0, 50.0);
+  canvas.drawCircle(c, 25.0, paint);
+  final Picture picture = pictureRecorder.endRecording();
+  final Image image = await picture.toImage(100, 100);
+  _turnOffGPU(true);
+  Future<void>.delayed(Duration(milliseconds: 10), () {
+    _turnOffGPU(false);
+  });
+  try {
+    ByteData? byteData = await image.toByteData();
+    _validateNotNull(byteData);
+  } catch (error) {
+    _validateNotNull(null);
   }
 }
 

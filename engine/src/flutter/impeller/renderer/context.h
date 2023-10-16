@@ -52,6 +52,14 @@ class Context {
     kVulkan,
   };
 
+  /// The maximum number of tasks that should ever be stored for
+  /// `StoreTaskForGPU`.
+  ///
+  /// This number was arbitrarily chosen. The idea is that this is a somewhat
+  /// rare situation where tasks happen to get executed in that tiny amount of
+  /// time while an app is being backgrounded but still executing.
+  static constexpr int32_t kMaxTasksAwaitingGPU = 10;
+
   //----------------------------------------------------------------------------
   /// @brief      Destroys an Impeller context.
   ///
@@ -175,6 +183,19 @@ class Context {
   Pool<HostBuffer>& GetHostBufferPool() const { return host_buffer_pool_; }
 
   CaptureContext capture;
+
+  /// Stores a task on the `ContextMTL` that is awaiting access for the GPU.
+  ///
+  /// The task will be executed in the event that the GPU access has changed to
+  /// being available or that the task has been canceled. The task should
+  /// operate with the `SyncSwitch` to make sure the GPU is accessible.
+  ///
+  /// Threadsafe.
+  ///
+  /// `task` will be executed on the platform thread.
+  virtual void StoreTaskForGPU(std::function<void()> task) {
+    FML_CHECK(false && "not supported in this context");
+  }
 
  protected:
   Context();
