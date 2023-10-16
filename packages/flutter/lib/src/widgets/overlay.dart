@@ -1414,7 +1414,7 @@ class OverlayPortalController {
       : _zOrderIndex != null;
   }
 
-  /// Conventience method for toggling the current [isShowing] status.
+  /// Convenience method for toggling the current [isShowing] status.
   ///
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
@@ -1648,12 +1648,14 @@ class _OverlayPortalState extends State<OverlayPortal> {
     final int? zOrderIndex = _zOrderIndex;
     if (zOrderIndex == null) {
       return _OverlayPortal(
+        key: ValueKey<int?>(_zOrderIndex),
         overlayLocation: null,
         overlayChild: null,
         child: widget.child,
       );
     }
     return _OverlayPortal(
+      key: ValueKey<int?>(_zOrderIndex),
       overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
       overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
       child: widget.child,
@@ -1865,6 +1867,7 @@ class _OverlayPortal extends RenderObjectWidget {
   /// The `overlayLocation` parameter must not be null when [overlayChild] is not
   /// null.
   _OverlayPortal({
+    super.key,
     required this.overlayLocation,
     required this.overlayChild,
     required this.child,

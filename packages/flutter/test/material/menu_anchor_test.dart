@@ -93,9 +93,11 @@ void main() {
           textDirection: textDirection,
           child: Column(
             children: <Widget>[
-              GestureDetector(onTap: () {
-                onPressed?.call(TestMenu.outsideButton);
-              }, child: Text(TestMenu.outsideButton.label)),
+              GestureDetector(
+                onTap: () {
+                  onPressed?.call(TestMenu.outsideButton);
+                },
+                child: Text(TestMenu.outsideButton.label)),
               MenuAnchor(
                 childFocusNode: focusNode,
                 controller: controller,
@@ -1152,7 +1154,6 @@ void main() {
       expect(opened, equals(<TestMenu>[TestMenu.mainMenu0]));
       expect(closed, equals(<TestMenu>[TestMenu.mainMenu1]));
     });
-
 
     testWidgetsWithLeakTracking('Menus close and consume tap when open and tapped outside', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3324,11 +3325,10 @@ void main() {
         MaterialApp(
           home: Center(
             child: SubmenuButton(
-              onHover: (bool value) {},
-              //style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+              style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
               menuChildren: <Widget>[
                 MenuItemButton(
-                  //style: MenuItemButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
+                  style: MenuItemButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
                   child: const Text('Item 0'),
                   onPressed: () {},
                 ),
@@ -3350,16 +3350,16 @@ void main() {
               TestSemantics(
                 id: 1,
                 rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                children: <TestSemantics> [
+                children: <TestSemantics>[
                   TestSemantics(
                     id: 2,
                     rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                    children: <TestSemantics> [
+                    children: <TestSemantics>[
                       TestSemantics(
                         id: 3,
                         rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                        flags: <SemanticsFlag> [SemanticsFlag.scopesRoute],
-                        children: <TestSemantics> [
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
                             flags: <SemanticsFlag>[
@@ -3373,20 +3373,20 @@ void main() {
                             actions: <SemanticsAction>[SemanticsAction.tap],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                          )
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                   TestSemantics(
                     id: 6,
                     rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
-                    children: <TestSemantics> [
+                    children: <TestSemantics>[
                       TestSemantics(
                         id: 7,
                         rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                        flags: <SemanticsFlag> [SemanticsFlag.hasImplicitScrolling],
-                        children: <TestSemantics> [
+                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                        children: <TestSemantics>[
                           TestSemantics(
                             id: 8,
                             label: 'Item 0',
@@ -3396,7 +3396,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction> [SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
                           ),
                         ],
                       ),
@@ -3443,9 +3443,9 @@ void main() {
                             actions: <SemanticsAction>[SemanticsAction.tap],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                          )
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ],

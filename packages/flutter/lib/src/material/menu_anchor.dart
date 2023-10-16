@@ -457,6 +457,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   List<_MenuAnchorState> _getFocusableChildren() {
+    if (_parent == null) {
+      return <_MenuAnchorState>[];
+    }
     return _parent!._anchorChildren.where((_MenuAnchorState menu) {
       return menu.widget.childFocusNode?.canRequestFocus ?? false;
     },).toList();
@@ -508,17 +511,17 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   _MenuAnchorState get _topLevel {
     _MenuAnchorState handle = this;
-    while (handle._parent!._isTopLevel) {
+    while (handle._parent != null && handle._parent!._isTopLevel) {
       handle = handle._parent!;
     }
     return handle;
   }
 
   void _childChangedOpenState() {
-    if (mounted) {
-      _parent?._childChangedOpenState();
+    _parent?._childChangedOpenState();
+    if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       setState(() {
-        // Mark dirty, but only if mounted.
+        // Mark dirty, but only if mounted and not in a build.
       });
     }
   }
@@ -605,9 +608,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // currently disposing.
       _parent?._childChangedOpenState();
       widget.onClose?.call();
-      if (mounted) {
+      if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
         setState(() {
-          // Mark dirty, but only if mounted.
+          // Mark dirty, but only if mounted and not in a build.
         });
       }
     }
@@ -1961,10 +1964,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
-        debugPrint('Rebuilding semantics with isExpanded: ${controller.isOpen}');
         child = MergeSemantics(
           child: Semantics(
-            expanded: controller.isOpen,
+            expanded: _enabled && controller.isOpen,
             child: TextButton(
               style: mergedStyle,
               focusNode: _buttonFocusNode,
@@ -2423,9 +2425,6 @@ class _MenuNextFocusAction extends NextFocusAction {
     if (anchor == null || !anchor._root._isOpen) {
       return super.invoke(intent);
     }
-    debugPrint('Primary focus is ${FocusManager.instance.primaryFocus}');
-    debugPrint('Primary focus context is $context');
-    debugPrint('Current anchor is $anchor');
 
     return _moveToNextFocusable(anchor);
   }
@@ -2457,7 +2456,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     }
     final bool buttonIsFocused = anchor.widget.childFocusNode?.hasPrimaryFocus ?? false;
     Axis orientation;
-    if (buttonIsFocused) {
+    if (buttonIsFocused && anchor._parent != null) {
       orientation = anchor._parent!._orientation;
     } else {
       orientation = anchor._orientation;
@@ -2520,8 +2519,9 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                   }
                 }
               case TextDirection.ltr:
-                switch (anchor._parent!._orientation) {
+                switch (anchor._parent?._orientation) {
                   case Axis.horizontal:
+                  case null:
                     if (_moveToPreviousFocusableTopLevel(anchor)) {
                       return;
                     }
@@ -2554,8 +2554,9 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
           case Axis.vertical:
             switch (Directionality.of(context)) {
               case TextDirection.rtl:
-                switch (anchor._parent!._orientation) {
+                switch (anchor._parent?._orientation) {
                   case Axis.horizontal:
+                  case null:
                     if (_moveToPreviousFocusableTopLevel(anchor)) {
                       return;
                     }

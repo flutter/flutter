@@ -410,6 +410,48 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgetsWithLeakTracking('child is rebuilt when show/hide status changes', (WidgetTester tester) async {
+    late final OverlayEntry overlayEntry;
+    addTearDown(() => overlayEntry..remove()..dispose());
+    final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
+    int overlayBuildCount = 0;
+    int childBuildCount = 0;
+    final Widget widget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          overlayEntry = OverlayEntry(
+            builder: (BuildContext context) {
+              return OverlayPortal(
+                controller: controller,
+                overlayChildBuilder: (BuildContext context) {
+                  overlayBuildCount += 1;
+                  return const SizedBox();
+                },
+                child: Builder(builder: (BuildContext context) {
+                  childBuildCount += 1;
+                  return const SizedBox();
+                }),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    expect(overlayBuildCount, equals(0));
+    expect(childBuildCount, equals(1));
+    controller.show();
+    await tester.pump();
+    expect(overlayBuildCount, equals(1));
+    expect(childBuildCount, equals(2));
+    controller.hide();
+    await tester.pump();
+    expect(overlayBuildCount, equals(1));
+    expect(childBuildCount, equals(3));
+  });
+
   testWidgetsWithLeakTracking('overlay child can use Positioned', (WidgetTester tester) async {
     double dimensions = 30;
     late StateSetter setState;
