@@ -64,10 +64,57 @@ static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
 }
 
 struct ImpellerVulkanContextHolder {
+  ImpellerVulkanContextHolder() = default;
+  ImpellerVulkanContextHolder(ImpellerVulkanContextHolder&&) = default;
   fml::RefPtr<vulkan::VulkanProcTable> vulkan_proc_table;
   std::shared_ptr<impeller::ContextVK> context;
   std::shared_ptr<impeller::SurfaceContextVK> surface_context;
+
+  bool Initialize(bool enable_validation);
 };
+
+bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
+  vulkan_proc_table =
+      fml::MakeRefCounted<vulkan::VulkanProcTable>(VULKAN_SO_PATH);
+  if (!vulkan_proc_table->NativeGetInstanceProcAddr()) {
+    FML_LOG(ERROR) << "Could not load Swiftshader library.";
+    return false;
+  }
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback =
+      vulkan_proc_table->NativeGetInstanceProcAddr();
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  context_settings.cache_directory = fml::paths::GetCachesDirectory();
+  context_settings.enable_validation = enable_validation;
+
+  context = impeller::ContextVK::Create(std::move(context_settings));
+  if (!context || !context->IsValid()) {
+    VALIDATION_LOG << "Could not create Vulkan context.";
+    return false;
+  }
+
+  impeller::vk::SurfaceKHR vk_surface;
+  impeller::vk::HeadlessSurfaceCreateInfoEXT surface_create_info;
+  auto res = context->GetInstance().createHeadlessSurfaceEXT(
+      &surface_create_info,  // surface create info
+      nullptr,               // allocator
+      &vk_surface            // surface
+  );
+  if (res != impeller::vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create surface for tester "
+                   << impeller::vk::to_string(res);
+    return false;
+  }
+
+  impeller::vk::UniqueSurfaceKHR surface{vk_surface, context->GetInstance()};
+  surface_context = context->CreateSurfaceContext();
+  if (!surface_context->SetWindowSurface(std::move(surface))) {
+    VALIDATION_LOG << "Could not set up surface for context.";
+    return false;
+  }
+  return true;
+}
+
 #else
 struct ImpellerVulkanContextHolder {};
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -126,7 +173,7 @@ class TesterPlatformView : public PlatformView,
  public:
   TesterPlatformView(Delegate& delegate,
                      const TaskRunners& task_runners,
-                     ImpellerVulkanContextHolder impeller_context_holder)
+                     ImpellerVulkanContextHolder&& impeller_context_holder)
       : PlatformView(delegate, task_runners),
         impeller_context_holder_(std::move(impeller_context_holder)) {}
 
@@ -313,60 +360,19 @@ int RunTester(const flutter::Settings& settings,
 
 #if ALLOW_IMPELLER
   if (settings.enable_impeller) {
-    impeller_context_holder.vulkan_proc_table =
-        fml::MakeRefCounted<vulkan::VulkanProcTable>(VULKAN_SO_PATH);
-    if (!impeller_context_holder.vulkan_proc_table
-             ->NativeGetInstanceProcAddr()) {
-      FML_LOG(ERROR) << "Could not load Swiftshader library.";
-      return EXIT_FAILURE;
-    }
-    impeller::ContextVK::Settings context_settings;
-    context_settings.proc_address_callback =
-        impeller_context_holder.vulkan_proc_table->NativeGetInstanceProcAddr();
-    context_settings.shader_libraries_data = ShaderLibraryMappings();
-    context_settings.cache_directory = fml::paths::GetCachesDirectory();
-    context_settings.enable_validation = settings.enable_vulkan_validation;
-
-    impeller_context_holder.context =
-        impeller::ContextVK::Create(std::move(context_settings));
-    if (!impeller_context_holder.context ||
-        !impeller_context_holder.context->IsValid()) {
-      VALIDATION_LOG << "Could not create Vulkan context.";
-      return EXIT_FAILURE;
-    }
-
-    impeller::vk::SurfaceKHR vk_surface;
-    impeller::vk::HeadlessSurfaceCreateInfoEXT surface_create_info;
-    auto res =
-        impeller_context_holder.context->GetInstance().createHeadlessSurfaceEXT(
-            &surface_create_info,  // surface create info
-            nullptr,               // allocator
-            &vk_surface            // surface
-        );
-    if (res != impeller::vk::Result::eSuccess) {
-      VALIDATION_LOG << "Could not create surface for tester "
-                     << impeller::vk::to_string(res);
-      return EXIT_FAILURE;
-    }
-
-    impeller::vk::UniqueSurfaceKHR surface{
-        vk_surface, impeller_context_holder.context->GetInstance()};
-    impeller_context_holder.surface_context =
-        impeller_context_holder.context->CreateSurfaceContext();
-    if (!impeller_context_holder.surface_context->SetWindowSurface(
-            std::move(surface))) {
-      VALIDATION_LOG << "Could not set up surface for context.";
+    if (!impeller_context_holder.Initialize(
+            settings.enable_vulkan_validation)) {
       return EXIT_FAILURE;
     }
   }
 #endif  // ALLOW_IMPELLER
 
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [impeller_context_holder =
-           std::move(impeller_context_holder)](Shell& shell) {
+      fml::MakeCopyable([impeller_context_holder = std::move(
+                             impeller_context_holder)](Shell& shell) mutable {
         return std::make_unique<TesterPlatformView>(
-            shell, shell.GetTaskRunners(), impeller_context_holder);
-      };
+            shell, shell.GetTaskRunners(), std::move(impeller_context_holder));
+      });
 
   Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
     return std::make_unique<Rasterizer>(
