@@ -968,7 +968,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('--web-header delimiter keys are rejected', () async {
+      testUsingContext('throws a ToolExit when value includes delimiter characters', () async {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
         fileSystem.file('.packages').createSync();
@@ -992,7 +992,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('can pass complex --web-header values', () async {
+      testUsingContext('accepts headers with commas in them', () async {
         final RunCommand command = RunCommand();
         await expectLater(
           () => createTestCommandRunner(command).run(<String>[
