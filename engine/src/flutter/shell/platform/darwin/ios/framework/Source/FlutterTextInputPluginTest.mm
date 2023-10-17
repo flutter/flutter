@@ -786,6 +786,17 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeNo);
 }
 
+- (void)testFlutterTextInputViewOnlyRespondsToInsertionPointColorBelowIOS17 {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  BOOL respondsToInsertionPointColor =
+      [inputView respondsToSelector:@selector(insertionPointColor)];
+  if (@available(iOS 17, *)) {
+    XCTAssertFalse(respondsToInsertionPointColor);
+  } else {
+    XCTAssertTrue(respondsToInsertionPointColor);
+  }
+}
+
 #pragma mark - TextEditingDelta tests
 - (void)testTextEditingDeltasAreGeneratedOnTextInput {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
