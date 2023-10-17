@@ -534,10 +534,12 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     );
 
     if (result.passed) {
+      result.dispose();
       return true;
     }
 
     final String error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
     throw FlutterError(error);
   }
 }
