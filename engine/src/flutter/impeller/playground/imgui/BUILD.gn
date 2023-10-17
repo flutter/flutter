@@ -19,7 +19,7 @@ impeller_shaders("imgui_shaders") {
 impeller_component("imgui_impeller_backend") {
   public_deps = [
     ":imgui_shaders",
-    "//third_party/imgui",
+    "//flutter/third_party/imgui",
   ]
 
   deps = [ "//flutter/impeller/renderer" ]

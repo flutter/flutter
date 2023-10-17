@@ -445,6 +445,7 @@
 ../../../flutter/third_party/glfw/src/CMakeLists.txt
 ../../../flutter/third_party/glfw/tests
 ../../../flutter/third_party/gn
+../../../flutter/third_party/imgui
 ../../../flutter/third_party/ninja
 ../../../flutter/third_party/spring_animation/README.md
 ../../../flutter/third_party/test_shaders
@@ -2231,7 +2232,6 @@
 ../../../third_party/icu/source/tools/toolutil/sources.txt
 ../../../third_party/icu/source/tools/tzcode/Makefile.in
 ../../../third_party/icu/source/tools/tzcode/readme.txt
-../../../third_party/imgui
 ../../../third_party/inja/.clang-format
 ../../../third_party/inja/.git
 ../../../third_party/inja/.github

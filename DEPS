@@ -671,7 +671,7 @@ deps = {
   'src/third_party/pkg/vector_math':
   Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
 
-  'src/third_party/imgui':
+  'src/flutter/third_party/imgui':
   Var('github_git') + '/ocornut/imgui.git' + '@' + '3ea0fad204e994d669f79ed29dcaf61cd5cb571d',
 
   'src/third_party/tinygltf':
