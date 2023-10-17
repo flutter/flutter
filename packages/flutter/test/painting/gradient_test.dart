@@ -11,6 +11,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('LinearGradient scale test', () {
@@ -881,7 +882,7 @@ void main() {
 
     group('Gradients - 45 degrees', () {
       for (final Gradient gradient in gradients45) {
-        testWidgets('$gradient', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 45);
         });
       }
@@ -889,7 +890,7 @@ void main() {
 
     group('Gradients - 90 degrees', () {
       for (final Gradient gradient in gradients90) {
-        testWidgets('$gradient', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 90);
         });
       }
