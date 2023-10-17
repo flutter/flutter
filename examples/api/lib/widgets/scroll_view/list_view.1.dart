@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for a [ListView.custom] using the `findChildIndexCallback` argument
-
+/// Flutter code sample for a [ListView.custom] using the `findChildIndexCallback` argument.
 void main() => runApp(const ListViewExampleApp());
 
 class ListViewExampleApp extends StatelessWidget {

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for a [PageView] using the `findChildIndexCallback` argument
+/// Flutter code sample for a [PageView] using the `findChildIndexCallback` argument.
 void main() => runApp(const PageViewExampleApp());
 
 class PageViewExampleApp extends StatelessWidget {
