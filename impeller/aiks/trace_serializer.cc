@@ -51,11 +51,43 @@ std::ostream& operator<<(std::ostream& os,
   return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const ColorSource& color_source) {
+  os << "{ type: ";
+  switch (color_source.GetType()) {
+    case ColorSource::Type::kColor:
+      os << "kColor";
+      break;
+    case ColorSource::Type::kImage:
+      os << "kImage";
+      break;
+    case ColorSource::Type::kLinearGradient:
+      os << "kLinearGradient";
+      break;
+    case ColorSource::Type::kRadialGradient:
+      os << "kRadialGradient";
+      break;
+    case ColorSource::Type::kConicalGradient:
+      os << "kConicalGradient";
+      break;
+    case ColorSource::Type::kSweepGradient:
+      os << "kSweepGradient";
+      break;
+    case ColorSource::Type::kRuntimeEffect:
+      os << "kRuntimeEffect";
+      break;
+    case ColorSource::Type::kScene:
+      os << "kScene";
+      break;
+  }
+  os << " }";
+  return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const Paint& paint) {
   os << "{" << std::endl;
   os << "  color: [" << paint.color << "]" << std::endl;
   os << "  color_source:"
-     << "[ColorSource]" << std::endl;
+     << "[" << paint.color_source << "]" << std::endl;
   os << "  dither: [" << paint.dither << "]" << std::endl;
   os << "  stroke_width: [" << paint.stroke_width << "]" << std::endl;
   os << "  stroke_cap: "
