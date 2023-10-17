@@ -8,8 +8,8 @@ void main() =>
   runApp(
     const Center(
       child:
-        Text('Hello, world!',
-          key: Key('title'),
+        Text('Hello, World!',
+          key: Key('Title'),
           textDirection: TextDirection.ltr,
         ),
       ),
