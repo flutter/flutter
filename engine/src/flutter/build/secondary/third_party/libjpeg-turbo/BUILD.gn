@@ -1,0 +1,81 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("libjpeg_config") {
+  include_dirs = [ "." ]
+}
+
+source_set("libjpeg") {
+  public_configs = [ ":libjpeg_config" ]
+
+  defines = []
+
+  if (!is_win) {
+    cflags_c = [
+      "-Wno-unused-variable",
+      "-Wno-unused-function",
+    ]
+  } else {
+    defines += [ "TURBO_FOR_WINDOWS" ]
+  }
+
+  sources = [
+    "//third_party/libjpeg-turbo/jcapimin.c",
+    "//third_party/libjpeg-turbo/jcapistd.c",
+    "//third_party/libjpeg-turbo/jccoefct.c",
+    "//third_party/libjpeg-turbo/jccolor.c",
+    "//third_party/libjpeg-turbo/jcdctmgr.c",
+    "//third_party/libjpeg-turbo/jchuff.c",
+    "//third_party/libjpeg-turbo/jcinit.c",
+    "//third_party/libjpeg-turbo/jcmainct.c",
+    "//third_party/libjpeg-turbo/jcmarker.c",
+    "//third_party/libjpeg-turbo/jcmaster.c",
+    "//third_party/libjpeg-turbo/jcomapi.c",
+    "//third_party/libjpeg-turbo/jcparam.c",
+    "//third_party/libjpeg-turbo/jcphuff.c",
+    "//third_party/libjpeg-turbo/jcprepct.c",
+    "//third_party/libjpeg-turbo/jcsample.c",
+    "//third_party/libjpeg-turbo/jdapimin.c",
+    "//third_party/libjpeg-turbo/jdapistd.c",
+    "//third_party/libjpeg-turbo/jdcoefct.c",
+    "//third_party/libjpeg-turbo/jdcolor.c",
+    "//third_party/libjpeg-turbo/jddctmgr.c",
+    "//third_party/libjpeg-turbo/jdhuff.c",
+    "//third_party/libjpeg-turbo/jdinput.c",
+    "//third_party/libjpeg-turbo/jdmainct.c",
+    "//third_party/libjpeg-turbo/jdmarker.c",
+    "//third_party/libjpeg-turbo/jdmaster.c",
+    "//third_party/libjpeg-turbo/jdmerge.c",
+    "//third_party/libjpeg-turbo/jdphuff.c",
+    "//third_party/libjpeg-turbo/jdpostct.c",
+    "//third_party/libjpeg-turbo/jdsample.c",
+    "//third_party/libjpeg-turbo/jerror.c",
+    "//third_party/libjpeg-turbo/jfdctflt.c",
+    "//third_party/libjpeg-turbo/jfdctfst.c",
+    "//third_party/libjpeg-turbo/jfdctint.c",
+    "//third_party/libjpeg-turbo/jidctflt.c",
+    "//third_party/libjpeg-turbo/jidctfst.c",
+    "//third_party/libjpeg-turbo/jidctint.c",
+    "//third_party/libjpeg-turbo/jidctred.c",
+    "//third_party/libjpeg-turbo/jmemmgr.c",
+    "//third_party/libjpeg-turbo/jmemnobs.c",
+    "//third_party/libjpeg-turbo/jquant1.c",
+    "//third_party/libjpeg-turbo/jquant2.c",
+    "//third_party/libjpeg-turbo/jutils.c",
+  ]
+
+  if (current_cpu == "arm" && !is_ios) {
+    sources += [
+      "//third_party/libjpeg-turbo/simd/jsimd_arm.c",
+      "//third_party/libjpeg-turbo/simd/jsimd_arm_neon.S",
+    ]
+  } else if (current_cpu == "arm64") {
+    sources += [
+      "//third_party/libjpeg-turbo/simd/jsimd_arm64.c",
+      "//third_party/libjpeg-turbo/simd/jsimd_arm64_neon.S",
+    ]
+  } else {
+    sources += [ "//third_party/libjpeg-turbo/jsimd_none.c" ]
+  }
+}

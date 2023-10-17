@@ -130,3 +130,4 @@ app.*.symbols
 
 # Prebuilt binaries.
 /prebuilts/
+/build/secondary/third_party/protobuf
