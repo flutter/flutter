@@ -328,7 +328,7 @@ void main() {
           DataColumn(label: Text('Calories'), numeric: true),
           DataColumn(label: Text('Generation')),
         ],
-        hideEmptyLastPageRows: true,
+        showEmptyRows: false,
       );
     }
 
