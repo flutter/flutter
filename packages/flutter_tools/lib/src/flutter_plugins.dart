@@ -1035,6 +1035,14 @@ void handleSymlinkException(FileSystemException e, {
           : 'You must build from a terminal run as administrator.';
       throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
     }
+    // ERROR_INVALID_FUNCTION, trying to link across drives, which is not supported
+    if (e.osError?.errorCode == 1) {
+      throwToolExit(
+        'Creating symlink from $source to $destination failed with '
+        'ERROR_INVALID_FUNCTION. Try moving your Flutter project to the same '
+        'drive as your Flutter SDK.',
+      );
+    }
   }
 }
 
