@@ -32,6 +32,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/glfw/deps', // Only used by examples and tests; not linked in build.
   r'flutter/third_party/glfw/docs',
   r'flutter/third_party/gn',
+  r'flutter/third_party/imgui',
   r'flutter/third_party/ninja', // build system
   r'flutter/third_party/test_shaders', // for tests only
   r'flutter/third_party/txt/third_party/fonts',
@@ -112,7 +113,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/icu/source/data/brkitr/dictionaries/cjdict.txt', // explicitly handled by ICU license
   r'third_party/icu/source/data/brkitr/dictionaries/laodict.txt', // explicitly handled by ICU license
   r'third_party/icu/source/data/dtd',
-  r'third_party/imgui',
   r'third_party/inja/doc', // documentation
   r'third_party/inja/third_party/amalgamate', // only used at build time
   r'third_party/inja/third_party/include/doctest', // seems to be a unit test library
