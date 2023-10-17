@@ -264,12 +264,6 @@ allowed_hosts = [
 deps = {
   'src': 'https://github.com/flutter/buildroot.git' + '@' + '6f31be56e1058997feac2e93ff67fef21ae25eaf',
 
-   # Fuchsia compatibility
-   #
-   # The dependencies in this section should match the layout in the Fuchsia gn
-   # build. Eventually, we'll manage these dependencies together with Fuchsia
-   # and not have to specific hashes.
-
   'src/third_party/rapidjson':
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
 
@@ -286,13 +280,13 @@ deps = {
    Var('fuchsia_git') + '/third_party/glfw' + '@' + 'dd8a678a66f1967372e5a5e3deac41ebf65ee127',
 
   'src/third_party/shaderc':
-   Var('github_git') + '/google/shaderc.git' + '@' + '7ea834ecc59258a5c13c3d3e6fa0582bdde7c543',
+   Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + '7ea834ecc59258a5c13c3d3e6fa0582bdde7c543',
 
   'src/third_party/vulkan-deps':
    Var('chromium_git') + '/vulkan-deps' + '@' + '40b75117a60b11c42a1fb87bf14c0f49bcdb8b3d',
 
   'src/third_party/flatbuffers':
-   Var('github_git') + '/google/flatbuffers.git' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
+   Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'a622de35ac311c5ad390a7af80724634e5dc61ed',
@@ -304,13 +298,13 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/gtest-parallel' + '@' + '38191e2733d7cbaeaef6a3f1a942ddeb38a2ad14',
 
   'src/third_party/benchmark':
-   Var('github_git') + '/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
+   Var('chromium_git') + '/external/github.com/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
 
   'src/third_party/googletest':
-   Var('github_git') + '/google/googletest' + '@' + '054a986a8513149e8374fc669a5fe40117ca6b41',
+   Var('chromium_git') + '/external/github.com/google/googletest' + '@' + '054a986a8513149e8374fc669a5fe40117ca6b41',
 
   'src/third_party/boringssl':
-   Var('github_git') + '/dart-lang/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
+   Var('dart_git') + '/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
 
   'src/third_party/yapf':
   Var('github_git') + '/google/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
@@ -654,7 +648,7 @@ deps = {
   Var('dart_git') + '/external/github.com/google/file.dart.git' + '@' + 'b2e31cb6ef40b223701dbfa0b907fe58468484d7', # 6.1.4
 
   'src/third_party/pkg/flutter_packages':
-  Var('github_git') + '/flutter/packages.git' + '@' + '25454e63851fe7933f04d025606e68c1eac4fe0f', # various
+  Var('flutter_git') + '/mirrors/packages' + '@' + '25454e63851fe7933f04d025606e68c1eac4fe0f', # various
 
   'src/third_party/pkg/gcloud':
   Var('github_git') + '/dart-lang/gcloud.git' + '@' + 'a5276b85c4714378e84b1fb478b8feeeb686ac26', # 0.8.6-dev
@@ -663,16 +657,16 @@ deps = {
   Var('github_git') + '/google/googleapis.dart.git' + '@' + '526011f56d98eab183cc6075ee1392e8303e43e2', # various
 
   'src/third_party/pkg/platform':
-  Var('github_git') + '/google/platform.dart.git' + '@' + '1ffad63428bbd1b3ecaa15926bacfb724023648c', # 3.1.0
+  Var('dart_git') + '/platform.dart' + '@' + '1ffad63428bbd1b3ecaa15926bacfb724023648c', # 3.1.0
 
   'src/third_party/pkg/process':
-  Var('github_git') + '/google/process.dart.git' + '@' + '0c9aeac86dcc4e3a6cf760b76fed507107e244d5', # 4.2.1
+  Var('dart_git') + '/process.dart' + '@' + '0c9aeac86dcc4e3a6cf760b76fed507107e244d5', # 4.2.1
 
   'src/third_party/pkg/process_runner':
   Var('github_git') + '/google/process_runner.git' + '@' + 'f24c69efdcaf109168f23d381fa281453d2bc9b1', # 4.1.2
 
   'src/third_party/pkg/quiver':
-  Var('github_git') + '/google/quiver-dart.git' + '@' + '90b92bee895e507d435012356a8b5c5f17eafa52', # 3.2.1
+  Var('chromium_git') + '/external/github.com/google/quiver-dart' + '@' + '90b92bee895e507d435012356a8b5c5f17eafa52', # 3.2.1
 
   'src/third_party/pkg/vector_math':
   Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
