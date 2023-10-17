@@ -51,7 +51,6 @@
   "reorderItemRight": "दाएं ले जाएं",
   "expandedIconTapHint": "छोटा करें",
   "collapsedIconTapHint": "बड़ा करें",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "एक वर्ण आैर डाला जा सकता है",
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण आैर डाले जा सकते हैं",
   "refreshIndicatorSemanticLabel": "रीफ़्रेश करें",

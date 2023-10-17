@@ -52,7 +52,6 @@
   "reorderItemRight": "Mover hacia la derecha",
   "expandedIconTapHint": "Ocultar",
   "collapsedIconTapHint": "Mostrar",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
   "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
   "refreshIndicatorSemanticLabel": "Actualizar",

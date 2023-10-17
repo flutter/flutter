@@ -51,7 +51,6 @@
   "reorderItemRight": "Преместване надясно",
   "expandedIconTapHint": "Свиване",
   "collapsedIconTapHint": "Разгъване",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Остава 1 знак",
   "remainingTextFieldCharacterCountOther": "Остават $remainingCount знака",
   "refreshIndicatorSemanticLabel": "Опресняване",

@@ -57,7 +57,6 @@
   "reorderItemRight": "Przenieś w prawo",
   "expandedIconTapHint": "Zwiń",
   "collapsedIconTapHint": "Rozwiń",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Jeszcze 1 znak",
   "remainingTextFieldCharacterCountOther": "Pozostało $remainingCount znaków",
   "refreshIndicatorSemanticLabel": "Odśwież",
