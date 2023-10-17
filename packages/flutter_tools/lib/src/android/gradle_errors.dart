@@ -673,12 +673,29 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
 /// If an incompatible Java and Gradle versions error is caught, we expect an
 /// error specifying that the Java major class file version, one of
 /// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
-final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+6[23456]');
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+(\d\d)');
+
+bool _unsupportedClassFileIsNewerThanJava17(RegExpMatch? match) {
+  const int java17VersionCode = 62;
+  if ( match == null || match.groupCount < 2 || match.group(1) == null) {
+    return false;
+  }
+
+  final int versionCode = int.parse(match.group(1)!);
+
+  return versionCode >= java17VersionCode;
+}
 
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
   test: (String line) {
-    return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
+    if (!_unsupportedClassFileMajorVersionPattern.hasMatch(line)) {
+      return false;
+    }
+
+    return _unsupportedClassFileIsNewerThanJava17(
+      _unsupportedClassFileMajorVersionPattern.firstMatch(line)
+    );
   },
   handler: ({
     required String line,
@@ -707,16 +724,17 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
   eventLabel: 'incompatible-java-gradle-version',
 );
 
-/// If an incompatible Java and Gradle versions error is caught, we expect an
-/// error specifying that the Java major class file version, one of
-/// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
-final RegExp _unsupportedClassFileMajorVersionASFlamingoPattern = RegExp(r'Unsupported class file major version\s+\d+');
-
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsASFlamingoHandler = GradleHandledError(
   test: (String line) {
+    if (!_unsupportedClassFileMajorVersionPattern.hasMatch(line)) {
+      return false;
+    }
+
     // Return only if this error is occurring with Java version 17 or below.
-    return _unsupportedClassFileMajorVersionASFlamingoPattern.hasMatch(line) && !_unsupportedClassFileMajorVersionPattern.hasMatch(line);
+    return !_unsupportedClassFileIsNewerThanJava17(
+        _unsupportedClassFileMajorVersionPattern.firstMatch(line)
+    );
   },
   handler: ({
     required String line,
