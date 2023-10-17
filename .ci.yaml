@@ -445,6 +445,7 @@ targets:
       task_name: abstract_method_smoke_test
       physical_devices: >-
         [
+          "--device", "model=shiba,version=34",
           "--device", "model=panther,version=33",
           "--device", "model=redfin,version=30"
         ]
@@ -476,6 +477,7 @@ targets:
       task_name: android_embedding_v2_smoke_test
       physical_devices: >-
         [
+          "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
@@ -506,6 +508,7 @@ targets:
       task_name: release_smoke_test
       physical_devices: >-
         [
+          "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
