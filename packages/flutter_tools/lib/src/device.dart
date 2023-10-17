@@ -959,6 +959,7 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
+    this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
@@ -986,6 +987,7 @@ class DebuggingOptions {
       this.webBrowserDebugPort,
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
+      this.webHeaders = const <String, String>{},
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -1061,6 +1063,7 @@ class DebuggingOptions {
     required this.webBrowserDebugPort,
     required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
+    required this.webHeaders,
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
     required this.fastStart,
@@ -1140,6 +1143,9 @@ class DebuggingOptions {
 
   /// Allow developers to customize the browser's launch URL
   final String? webLaunchUrl;
+
+  /// Allow developers to add custom headers to web server
+  final Map<String, String> webHeaders;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1246,6 +1252,7 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
+    'webHeaders': webHeaders,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
@@ -1297,6 +1304,7 @@ class DebuggingOptions {
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
       webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
       webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
+      webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,

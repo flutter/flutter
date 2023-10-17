@@ -919,6 +919,99 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
     });
+
+    group('--web-header', () {
+      setUp(() {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+        testDeviceManager.devices = <Device>[device];
+      });
+
+      testUsingContext('can accept simple, valid values', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header', 'foo = bar',
+          ]), throwsToolExit());
+
+        final DebuggingOptions options = await command.createDebuggingOptions(true);
+        expect(options.webHeaders, <String, String>{'foo': 'bar'});
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when no value is provided', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header',
+            'foo',
+          ]), throwsToolExit(message: 'Invalid web headers: foo'));
+
+        await expectLater(
+          () => command.createDebuggingOptions(true),
+          throwsToolExit(),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when value includes delimiter characters', () async {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header', 'hurray/headers=flutter',
+          ]), throwsToolExit());
+
+        await expectLater(
+          () => command.createDebuggingOptions(true),
+          throwsToolExit(message: 'Invalid web headers: hurray/headers=flutter'),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('accepts headers with commas in them', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header', 'hurray=flutter,flutter=hurray',
+          ]), throwsToolExit());
+
+        final DebuggingOptions options = await command.createDebuggingOptions(true);
+        expect(options.webHeaders, <String, String>{
+          'hurray': 'flutter,flutter=hurray'
+        });
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+    });
   });
 
   group('dart-defines and web-renderer options', () {
