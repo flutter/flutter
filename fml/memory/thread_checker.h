@@ -75,9 +75,10 @@ class ThreadChecker final {
       if (0 == pthread_getname_np(current_thread, actual_thread,
                                   buffer_length) &&
           0 == pthread_getname_np(self_, expected_thread, buffer_length)) {
-        FML_DLOG(ERROR) << "IsCreationThreadCurrent expected thread: '"
-                        << expected_thread << "' actual thread:'"
-                        << actual_thread << "'";
+        FML_DLOG(ERROR) << "Object referenced on a thread other than the one "
+                           "on which it was created. Expected thread: '"
+                        << expected_thread << "'. Actual thread: '"
+                        << actual_thread << "'.";
       }
     }
 #endif  // __APPLE__
