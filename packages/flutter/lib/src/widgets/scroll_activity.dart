@@ -389,6 +389,7 @@ class ScrollDragController implements Drag {
 
   @override
   void end(DragEndDetails details) {
+    debugPrint('ScrollDragController.end');
     assert(details.primaryVelocity != null);
     // We negate the velocity here because if the touch is moving downwards,
     // the scroll has to move upwards. It's the same reason that update()
@@ -410,6 +411,7 @@ class ScrollDragController implements Drag {
         velocity += carriedVelocity!;
       }
     }
+    debugPrint('ScrollDragController: delegate.goBallistic(velocity)');
     delegate.goBallistic(velocity);
   }
 

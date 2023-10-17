@@ -228,6 +228,16 @@ extension PointerEventLog on PointerEvent {
   }
 }
 
+Map<int, List<Object?>> pointerLog = <int, List<Object?>>{};
+void logPointer(int pointer, Object? message) {
+  List<Object?>? log = pointerLog[pointer];
+  if (log == null) {
+    log = <Object?>[];
+    pointerLog[pointer] = log;
+  }
+  log.add(message);
+}
+
 /// Base class for touch, stylus, or mouse events.
 ///
 /// Pointer events operate in the coordinate space of the screen, scaled to
@@ -1707,7 +1717,6 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
 
 class _TransformedPointerUpEvent extends _TransformedPointerEvent with _CopyPointerUpEvent implements PointerUpEvent {
   _TransformedPointerUpEvent(this.original, this.transform) {
-    original.log.add('transformed');
     original.log.add(log);
   }
 

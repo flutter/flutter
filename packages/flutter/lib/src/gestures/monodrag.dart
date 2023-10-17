@@ -440,6 +440,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void didStopTrackingLastPointer(int pointer) {
     assert(_state != _DragState.ready);
+    if (_state != _DragState.accepted) {
+      logPointer(pointer, '_state == $_state (expected _DragState.accepted)');
+    }
     switch (_state) {
       case _DragState.ready:
         break;
@@ -458,6 +461,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _giveUpPointer(int pointer) {
+    logPointer(pointer, '_giveUpPointer');
     stopTrackingPointer(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
@@ -552,6 +556,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkEnd(int pointer) {
+    logPointer(pointer, '_checkEnd');
     if (onEnd == null) {
       return;
     }

@@ -463,7 +463,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
       _trackedPointers.remove(pointer);
       if (_trackedPointers.isEmpty) {
         didStopTrackingLastPointer(pointer);
+      } else {
+        logPointer(pointer, '_trackedPointers not empty: ${_trackedPointers.toList()}');
       }
+    } else {
+      logPointer(pointer, '_trackedPointers is missing $pointer: [${_trackedPointers.toList()}]');
     }
   }
 

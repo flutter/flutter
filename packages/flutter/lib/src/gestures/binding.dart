@@ -363,7 +363,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   ///    are dispatched without a hit test result.
   void handlePointerEvent(PointerEvent event) {
     event.log.add('GestureBinding.handlePointerEvent');
-    debugPrint('PointerEvent(${event.runtimeType})');
     assert(!locked);
 
     if (resamplingEnabled) {
