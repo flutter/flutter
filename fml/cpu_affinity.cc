@@ -47,14 +47,16 @@ CPUSpeedTracker::CPUSpeedTracker(std::vector<CpuIndexAndSpeed> data)
       min_speed.value() == max_speed.value()) {
     return;
   }
+  const int64_t max_speed_value = max_speed.value();
+  const int64_t min_speed_value = min_speed.value();
 
   for (const auto& data : cpu_speeds_) {
-    if (data.speed == max_speed.value()) {
+    if (data.speed == max_speed_value) {
       performance_.push_back(data.index);
     } else {
       not_performance_.push_back(data.index);
     }
-    if (data.speed == min_speed.value()) {
+    if (data.speed == min_speed_value) {
       efficiency_.push_back(data.index);
     }
   }
