@@ -51,7 +51,6 @@
   "reorderItemRight": "ย้ายไปทางขวา",
   "expandedIconTapHint": "ยุบ",
   "collapsedIconTapHint": "ขยาย",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "เหลือ 1 อักขระ",
   "remainingTextFieldCharacterCountOther": "เหลือ $remainingCount อักขระ",
   "refreshIndicatorSemanticLabel": "รีเฟรช",
@@ -143,7 +142,7 @@
   "expandedHint": "ยุบ",
   "collapsedHint": "ขยาย",
   "menuDismissLabel": "ปิดเมนู",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "ค้นหา",
+  "searchWebButtonLabel": "ค้นหาบนอินเทอร์เน็ต",
+  "shareButtonLabel": "แชร์..."
 }

@@ -51,7 +51,6 @@
   "reorderItemRight": "Ilipat pakanan",
   "expandedIconTapHint": "I-collapse",
   "collapsedIconTapHint": "I-expand",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 character ang natitira",
   "remainingTextFieldCharacterCountOther": "$remainingCount na character ang natitira",
   "refreshIndicatorSemanticLabel": "Nagre-refresh",
@@ -144,6 +143,6 @@
   "collapsedHint": "Naka-expand",
   "menuDismissLabel": "I-dismiss ang menu",
   "lookUpButtonLabel": "Tumingin sa Itaas",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Maghanap sa Web",
+  "shareButtonLabel": "Ibahagi..."
 }

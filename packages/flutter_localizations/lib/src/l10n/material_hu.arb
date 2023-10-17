@@ -51,7 +51,6 @@
   "reorderItemRight": "Áthelyezés jobbra",
   "expandedIconTapHint": "Összecsukás",
   "collapsedIconTapHint": "Kibontás",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 karakter maradt",
   "remainingTextFieldCharacterCountOther": "$remainingCount karakter maradt",
   "refreshIndicatorSemanticLabel": "Frissítés",
@@ -144,6 +143,6 @@
   "collapsedHint": "Kibontva",
   "menuDismissLabel": "Menü bezárása",
   "lookUpButtonLabel": "Felfelé nézés",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Keresés az interneten",
+  "shareButtonLabel": "Megosztás…"
 }

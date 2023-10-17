@@ -300,6 +300,8 @@ class CustomDeviceAppSession {
         'trace-allowlist=${debuggingOptions.traceAllowlist}',
       if (debuggingOptions.traceSystrace)
         'trace-systrace=true',
+      if (debuggingOptions.traceToFile != null)
+        'trace-to-file=${debuggingOptions.traceToFile}',
       if (debuggingOptions.endlessTraceBuffer)
         'endless-trace-buffer=true',
       if (debuggingOptions.dumpSkpOnShaderCompilation)

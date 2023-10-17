@@ -51,7 +51,6 @@
   "reorderItemRight": "दाएं ले जाएं",
   "expandedIconTapHint": "छोटा करें",
   "collapsedIconTapHint": "बड़ा करें",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "एक वर्ण आैर डाला जा सकता है",
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण आैर डाले जा सकते हैं",
   "refreshIndicatorSemanticLabel": "रीफ़्रेश करें",
@@ -143,7 +142,7 @@
   "expandedHint": "छोटा किया गया",
   "collapsedHint": "बड़ा किया गया",
   "menuDismissLabel": "मेन्यू खारिज करें",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "लुक अप बटन",
+  "searchWebButtonLabel": "वेब पर खोजें",
+  "shareButtonLabel": "शेयर करें…"
 }
