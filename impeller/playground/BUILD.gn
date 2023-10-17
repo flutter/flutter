@@ -48,7 +48,7 @@ impeller_component("playground") {
     "imgui:imgui_impeller_backend",
     "//flutter/fml",
     "//flutter/third_party/glfw",
-    "//third_party/imgui:imgui_glfw",
+    "//flutter/third_party/imgui:imgui_glfw",
   ]
 
   if (impeller_supports_rendering) {
