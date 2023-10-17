@@ -235,7 +235,7 @@ def CopyBuildToBucket(runtime_mode, arch, optimized, product):
   bucket_root = os.path.join(_bucket_directory, 'flutter')
   licenses_root = os.path.join(_src_root_dir, 'flutter/ci/licenses_golden')
   license_files = [
-      'licenses_flutter', 'licenses_fuchsia', 'licenses_gpu', 'licenses_skia',
+      'licenses_flutter', 'licenses_fuchsia', 'licenses_skia',
       'licenses_third_party'
   ]
   for license in license_files:

@@ -741,7 +741,6 @@
 ../../../fuchsia/sdk/linux/pkg/zx/meta.json
 ../../../fuchsia/sdk/linux/tools
 ../../../fuchsia/sdk/linux/version_history.json
-../../../gpu/README.md
 ../../../out
 ../../../third_party/abseil-cpp/.git
 ../../../third_party/abseil-cpp/.github
