@@ -659,6 +659,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       elevation: elevation,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
+      iconTheme: iconTheme,
     );
   }
 }
@@ -1219,7 +1220,10 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
-      ? IconTheme(data: iconTheme, child: widget.avatar!)
+      ? IconTheme.merge(
+          data: theme.useMaterial3 ? chipDefaults.iconTheme!.merge(iconTheme) : iconTheme,
+          child: widget.avatar!,
+        )
       : widget.avatar;
 
     Widget result = Material(
@@ -2034,6 +2038,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
+  final LayerHandle<OpacityLayer> _avatarOpacityLayerHandler = LayerHandle<OpacityLayer>();
+
   void _paintAvatar(PaintingContext context, Offset offset) {
     void paintWithOverlay(PaintingContext context, Offset offset) {
       context.paintChild(avatar!, _boxParentData(avatar!).offset + offset);
@@ -2041,13 +2047,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
 
     if (!theme.showAvatar && avatarDrawerAnimation.isDismissed) {
+      _avatarOpacityLayerHandler.layer = null;
       return;
     }
     final Color disabledColor = _disabledColor;
     final int disabledColorAlpha = disabledColor.alpha;
     if (needsCompositing) {
-      context.pushLayer(OpacityLayer(alpha: disabledColorAlpha), paintWithOverlay, offset);
+       _avatarOpacityLayerHandler.layer = context.pushOpacity(offset, disabledColorAlpha, paintWithOverlay, oldLayer: _avatarOpacityLayerHandler.layer);
     } else {
+      _avatarOpacityLayerHandler.layer = null;
       if (disabledColorAlpha != 0xff) {
         context.canvas.saveLayer(
           _boxRect(avatar).shift(offset).inflate(20.0),
@@ -2061,21 +2069,26 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
+  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
+
   void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
     if (child == null) {
+      _childOpacityLayerHandler.layer = null;
       return;
     }
     final int disabledColorAlpha = _disabledColor.alpha;
     if (!enableAnimation.isCompleted) {
       if (needsCompositing) {
-        context.pushLayer(
-          OpacityLayer(alpha: disabledColorAlpha),
+        _childOpacityLayerHandler.layer = context.pushOpacity(
+          offset,
+          disabledColorAlpha,
           (PaintingContext context, Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
-          offset,
+          oldLayer: _childOpacityLayerHandler.layer,
         );
       } else {
+        _childOpacityLayerHandler.layer = null;
         final Rect childRect = _boxRect(child).shift(offset);
         context.canvas.saveLayer(childRect.inflate(20.0), Paint()..color = _disabledColor);
         context.paintChild(child, _boxParentData(child).offset + offset);
@@ -2084,6 +2097,13 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     } else {
       context.paintChild(child, _boxParentData(child).offset + offset);
     }
+  }
+
+  @override
+  void dispose() {
+    _childOpacityLayerHandler.layer = null;
+    _avatarOpacityLayerHandler.layer = null;
+    super.dispose();
   }
 
   @override

@@ -958,11 +958,7 @@ class StartupTest {
           }
         }
 
-        await flutter('install', options: <String>[
-          '--uninstall-only',
-          '-d',
-          device.deviceId,
-        ]);
+        await device.uninstallApp();
       }
 
       final Map<String, dynamic> averageResults = _average(results, iterations);
@@ -1084,11 +1080,7 @@ class DevtoolsStartupTest {
         await process.exitCode;
       }
 
-      await flutter('install', options: <String>[
-        '--uninstall-only',
-        '-d',
-        device.deviceId,
-      ]);
+      await device.uninstallApp();
 
       if (sawLine) {
         return TaskResult.success(null, benchmarkScoreKeys: <String>[]);
@@ -1294,6 +1286,22 @@ class PerfTest {
         );
       }
 
+      final bool recordGPU;
+      switch (deviceOperatingSystem) {
+        case DeviceOperatingSystem.ios:
+          recordGPU = true;
+        case DeviceOperatingSystem.android:
+        case DeviceOperatingSystem.androidArm:
+        case DeviceOperatingSystem.androidArm64:
+          recordGPU = enableImpeller ?? false;
+        case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.linux:
+        case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.windows:
+          recordGPU = false;
+      }
+
       // TODO(liyuqian): Remove isAndroid restriction once
       // https://github.com/flutter/flutter/issues/61567 is fixed.
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
@@ -1308,6 +1316,9 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
+          'average_frame_request_pending_latency',
+          '90th_percentile_frame_request_pending_latency',
+          '99th_percentile_frame_request_pending_latency',
           if (measureCpuGpu && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_cpu_usage'] != null) 'average_cpu_usage',
@@ -1326,6 +1337,12 @@ class PerfTest {
           if (data['90hz_frame_percentage'] != null) '90hz_frame_percentage',
           if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
           if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
+          if (recordGPU) ...<String>[
+            if (data['average_gpu_frame_time'] != null) 'average_gpu_frame_time',
+            if (data['90th_percentile_gpu_frame_time'] != null) '90th_percentile_gpu_frame_time',
+            if (data['99th_percentile_gpu_frame_time'] != null) '99th_percentile_gpu_frame_time',
+            if (data['worst_gpu_frame_time'] != null) 'worst_gpu_frame_time',
+          ]
         ],
       );
     });
@@ -1357,7 +1374,6 @@ const List<String> _kCommonScoreKeys = <String>[
   '90th_percentile_picture_cache_memory',
   '99th_percentile_picture_cache_memory',
   'worst_picture_cache_memory',
-  'new_gen_gc_count',
   'old_gen_gc_count',
 ];
 
@@ -1851,7 +1867,7 @@ class MemoryTest {
       }
 
       await adb.cancel();
-      await flutter('install', options: <String>['--uninstall-only', '-d', device!.deviceId]);
+      await device!.uninstallApp();
 
       final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);

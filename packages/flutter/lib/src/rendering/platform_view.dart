@@ -148,7 +148,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -319,7 +320,8 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   _UiKitViewGestureRecognizer? _gestureRecognizer;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -711,7 +713,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 

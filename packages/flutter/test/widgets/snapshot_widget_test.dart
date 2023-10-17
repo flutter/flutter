@@ -217,7 +217,7 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
 
-  testWidgets('RenderSnapshotWidget throws assertion if platform view is encountered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderSnapshotWidget throws assertion if platform view is encountered', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
@@ -286,12 +286,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.layers.last, isA<PlatformViewLayer>());
   },
-  skip: kIsWeb, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/135141
-    allowAllNotDisposed: true,
-  ));
+  skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgetsWithLeakTracking('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
@@ -330,12 +325,7 @@ void main() {
 
     await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
   },
-  skip: kIsWeb, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/135137
-    notDisposedAllowList: <String, int> {'Image': 1},
-  ));
+  skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 }
 
 class TestPlatformView extends SingleChildRenderObjectWidget {

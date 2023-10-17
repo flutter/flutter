@@ -36,6 +36,7 @@
         "templates/app_shared/android.tmpl/app/src/main/res/values/styles.xml",
         "templates/app_shared/android.tmpl/app/src/profile/AndroidManifest.xml.tmpl",
         "templates/app_shared/android.tmpl/gradle.properties.tmpl",
+        "templates/app_shared/android.tmpl/settings.gradle.tmpl",
         "templates/app_shared/android.tmpl/gradle/wrapper/gradle-wrapper.properties.tmpl",
         "templates/app_shared/android.tmpl/settings.gradle",
         "templates/app_shared/ios-objc.tmpl/Runner.xcodeproj/project.pbxproj.tmpl",

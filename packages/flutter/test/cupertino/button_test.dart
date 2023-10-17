@@ -68,7 +68,7 @@ void main() {
   // TODO(LongCatIsLoong): Uncomment once https://github.com/flutter/flutter/issues/44115
   // is fixed.
   /*
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'CupertinoButton.filled default color contrast meets guideline',
     (WidgetTester tester) async {
       // The native color combination systemBlue text over white background fails
@@ -185,7 +185,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Disabled button doesn't animate", (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       child: Text('Tap me'),
@@ -240,7 +240,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -249,6 +249,10 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, 0.4);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('pressedOpacity parameter', (WidgetTester tester) async {
@@ -261,7 +265,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -270,6 +274,10 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, pressedOpacity);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Cupertino button is semantically a button', (WidgetTester tester) async {

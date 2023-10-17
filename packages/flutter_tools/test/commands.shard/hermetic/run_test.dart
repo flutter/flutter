@@ -1086,6 +1086,7 @@ void main() {
       '--use-test-fonts',
       '--trace-skia',
       '--trace-systrace',
+      '--trace-to-file=path/to/trace.binpb',
       '--verbose-system-logs',
       '--null-assertions',
       '--native-null-assertions',
@@ -1106,6 +1107,7 @@ void main() {
     expect(options.useTestFonts, true);
     expect(options.traceSkia, true);
     expect(options.traceSystrace, true);
+    expect(options.traceToFile, 'path/to/trace.binpb');
     expect(options.verboseSystemLogs, true);
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
@@ -1335,13 +1337,10 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
 class TestRunCommandForUsageValues extends RunCommand {
   TestRunCommandForUsageValues({
-   this.devices,
-  });
-
-  @override
-  // devices is not set within usageValues, so we override the field
-  // ignore: overridden_fields
-  List<Device>? devices;
+    List<Device>? devices,
+  }) {
+    this.devices = devices;
+  }
 
   @override
   Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
