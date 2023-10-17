@@ -21,5 +21,12 @@ class ToolExit implements Exception {
   final int? exitCode;
 
   @override
-  String toString() => 'Exception: $message'; // TODO(ianh): Really this should say "Error".
+  String toString() {
+    final List<String> parts = <String>[
+      if (exitCode != null) 'Exit code: $exitCode',
+      'Exception: $message',
+    ];
+
+    return parts.join('. ');
+  }
 }
