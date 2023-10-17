@@ -53,6 +53,8 @@ enum SelectionResult {
   /// [SelectAllSelectionEvent], [ClearSelectionEvent], and
   /// [SelectWordSelectionEvent].
   none,
+  /// TODO(Renzo-Olivares): Document.
+  forward,
 }
 
 /// The abstract interface to handle [SelectionEvent]s.

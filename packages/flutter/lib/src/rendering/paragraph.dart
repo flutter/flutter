@@ -407,13 +407,24 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final String plainText = text.toPlainText(includeSemanticsLabels: false);
     final List<_SelectableFragment> result = <_SelectableFragment>[];
     int start = 0;
+    bool currentFragmentFollowedByInlineElement = false;
     while (start < plainText.length) {
       int end = plainText.indexOf(_placeholderCharacter, start);
       if (start != end) {
         if (end == -1) {
           end = plainText.length;
+          currentFragmentFollowedByInlineElement = false;
+        } else {
+          currentFragmentFollowedByInlineElement = true;
         }
-        result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText));
+        result.add(
+          _SelectableFragment(
+            paragraph: this,
+            range: TextRange(start: start, end: end),
+            fullText: plainText,
+            isFollowedByInlineElement: currentFragmentFollowedByInlineElement,
+          ),
+        );
         start = end;
       }
       start += 1;
@@ -1323,6 +1334,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.paragraph,
     required this.fullText,
     required this.range,
+    required this.isFollowedByInlineElement,
   }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
@@ -1333,6 +1345,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   final TextRange range;
   final RenderParagraph paragraph;
   final String fullText;
+  final bool isFollowedByInlineElement;
 
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
@@ -1686,6 +1699,10 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     );
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
+    // if (isFollowedByInlineElement && textBoundary != null && !TextLayoutMetrics.isLineTerminator(fullText.codeUnitAt(textBoundary.boundaryEnd.offset - 1))) {
+    //   return SelectionResult.forward;
+    // }
+
     if (targetPosition.offset == range.end) {
       return SelectionResult.next;
     }
@@ -1733,13 +1750,14 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return SelectionResult.none;
   }
 
-  SelectionResult _handleSelectTextBoundary(_TextBoundaryRecord textBoundary, Offset globalPosition) {
+  SelectionResult _handleSelectTextBoundary(_TextBoundaryRecord textBoundary) {
     if (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset < range.start) {
       return SelectionResult.previous;
     } else if (textBoundary.boundaryStart.offset > range.end && textBoundary.boundaryEnd.offset > range.end) {
+      //make this || instead of && to fix double tap to select inline element.
       return SelectionResult.next;
     }
-    // Fragments are separated by placeholder span, the paragraph boundary shouldn't
+    // Fragments are separated by placeholder span, the text boundary shouldn't
     // expand across fragments.
     assert(textBoundary.boundaryStart.offset >= range.start && textBoundary.boundaryEnd.offset <= range.end);
     _textSelectionStart = textBoundary.boundaryStart;
@@ -1767,7 +1785,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       return SelectionResult.end;
     }
     final _TextBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
-    return _handleSelectTextBoundary(wordBoundary, globalPosition);
+    return _handleSelectTextBoundary(wordBoundary);
   }
 
   _TextBoundaryRecord _getWordBoundaryAtPosition(TextPosition position) {
@@ -1778,18 +1796,32 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
 
   SelectionResult _handleSelectParagraph(Offset globalPosition) {
     _selectableContainsOriginTextBoundary = true;
-    final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
+    final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition)));
     final _TextBoundaryRecord paragraphBoundary = _getParagraphBoundaryAtPosition(position);
-    return _handleSelectTextBoundary(paragraphBoundary, globalPosition);
+    // If this selectable fragment is followed by an inline element, then we
+    // should tell the selection delegate to continue walking through the selectable
+    // tree to find the complete paragraph. Only continue walking if the paragraph
+    // did not end on a line terminator.
+    final SelectionResult result = _handleSelectTextBoundary(paragraphBoundary);
+    if (isFollowedByInlineElement && !TextLayoutMetrics.isLineTerminator(fullText.codeUnitAt(paragraphBoundary.boundaryEnd.offset - 1))) {
+      return SelectionResult.forward;
+    }
+    return result;
   }
 
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position) {
-    final String text = range.textInside(fullText);
-    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(text);
+    // final String text = fullText;
+    // final String text = range.textInside(fullText);
+    // String text = fullText;
+    // text = range.textBefore(fullText) + '\n' + range.textAfter(fullText);
+    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.
-    final int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == range.end || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
-    final int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
+    int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == range.end || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? range.start;
+    int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? range.end;
+    // Clamp to selectable.
+    paragraphStart = paragraphStart < range.start ? range.start : paragraphStart;
+    paragraphEnd = paragraphEnd > range.end ? range.end : paragraphEnd;
     final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
     return _adjustTextBoundaryAtPosition(paragraphRange, position);

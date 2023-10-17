@@ -1887,27 +1887,44 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// assuming one of the rectangles enclose the other rect vertically.
   ///
   /// Returns positive if a is lower, negative if a is higher.
+  // static int _compareHorizontally(Rect a, Rect b) {
+  //   // a encloses b.
+  //   if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
+  //     // b ends before a.
+  //     if (a.right - b.right > precisionErrorTolerance) {
+  //       return 1;
+  //     }
+  //     return -1;
+  //   }
+
+  //   // b encloses a.
+  //   if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
+  //     // a ends before b.
+  //     if (b.right - a.right > precisionErrorTolerance) {
+  //       return -1;
+  //     }
+  //     return 1;
+  //   }
+  //   if ((a.left - b.left).abs() > precisionErrorTolerance) {
+  //     return a.left > b.left ? 1 : -1;
+  //   }
+  //   return a.right > b.right ? 1 : -1;
+  // }
+  /// Compares two rectangles in the screen order by their horizontal positions
+  /// assuming one of the rectangles enclose the other rect vertically.
+  ///
+  /// Returns positive if a is lower, negative if a is higher.
   static int _compareHorizontally(Rect a, Rect b) {
-    // a encloses b.
     if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
-      // b ends before a.
-      if (a.right - b.right > precisionErrorTolerance) {
-        return 1;
-      }
+      // a encloses b.
       return -1;
     }
-
-    // b encloses a.
     if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
-      // a ends before b.
-      if (b.right - a.right > precisionErrorTolerance) {
-        return -1;
-      }
+      // b encloses a.
       return 1;
     }
-    if ((a.left - b.left).abs() > precisionErrorTolerance) {
+    if ((a.left - b.left).abs() > precisionErrorTolerance)
       return a.left > b.left ? 1 : -1;
-    }
     return a.right > b.right ? 1 : -1;
   }
 
@@ -2176,6 +2193,18 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       if (globalRect.contains(effectiveGlobalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+        if (lastSelectionResult == SelectionResult.forward) {
+          currentSelectionStartIndex = index;
+          while (lastSelectionResult == SelectionResult.forward) {
+            index++;
+            currentSelectionEndIndex = index;
+            if (index < selectables.length) {
+              lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+            }
+          }
+          _flushInactiveSelections();
+          return SelectionResult.end;
+        }
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
           return SelectionResult.next;
         }
@@ -2417,6 +2446,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
         case SelectionResult.next:
+        case SelectionResult.forward:
         case SelectionResult.none:
           newIndex = index;
         case SelectionResult.end:
@@ -2514,6 +2544,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         case SelectionResult.pending:
         case SelectionResult.none:
           finalResult = currentSelectableResult;
+        case SelectionResult.forward:
         case SelectionResult.next:
           if (forward == false) {
             newIndex += 1;
