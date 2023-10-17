@@ -1,4 +1,4 @@
-Signature: c039ec8763d43d5d5f7efaa1c79dcd78
+Signature: 6ae266c2b1d31e983d2de563401c7b78
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8610,6 +8610,7 @@ ORIGIN: ../../../third_party/skia/gm/fontations.cpp + ../../../third_party/skia/
 ORIGIN: ../../../third_party/skia/gm/imagefiltersunpremul.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkFontMgr_data.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkTypeface_fontations.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/private/SkExif.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h + ../../../third_party/skia/LICENSE
@@ -8620,6 +8621,7 @@ ORIGIN: ../../../third_party/skia/modules/skshaper/src/SkShaper_skunicode.cpp + 
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkExif.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegConstants.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h + ../../../third_party/skia/LICENSE
@@ -8629,6 +8631,8 @@ ORIGIN: ../../../third_party/skia/src/codec/SkJpegSourceMgr.cpp + ../../../third
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegSourceMgr.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegXmp.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegXmp.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkTiffUtility.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkTiffUtility.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkXmp.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineContextUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h + ../../../third_party/skia/LICENSE
@@ -8650,6 +8654,7 @@ FILE: ../../../third_party/skia/gm/fontations.cpp
 FILE: ../../../third_party/skia/gm/imagefiltersunpremul.cpp
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_data.h
 FILE: ../../../third_party/skia/include/ports/SkTypeface_fontations.h
+FILE: ../../../third_party/skia/include/private/SkExif.h
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
 FILE: ../../../third_party/skia/include/private/SkGainmapShader.h
 FILE: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h
@@ -8660,6 +8665,7 @@ FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_skunicode.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.h
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h
+FILE: ../../../third_party/skia/src/codec/SkExif.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegConstants.h
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h
@@ -8669,6 +8675,8 @@ FILE: ../../../third_party/skia/src/codec/SkJpegSourceMgr.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegSourceMgr.h
 FILE: ../../../third_party/skia/src/codec/SkJpegXmp.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegXmp.h
+FILE: ../../../third_party/skia/src/codec/SkTiffUtility.cpp
+FILE: ../../../third_party/skia/src/codec/SkTiffUtility.h
 FILE: ../../../third_party/skia/src/codec/SkXmp.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineContextUtils.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h
