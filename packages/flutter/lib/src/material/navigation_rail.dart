@@ -80,8 +80,8 @@ class NavigationRail extends StatefulWidget {
   /// [minExtendedWidth] is specified, it must be non-negative and greater than
   /// [minWidth].
   ///
-  /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when the [labelType] is null or [NavigationRailLabelType.none].
+  /// The [extended] argument can only be set to true when the [labelType] is
+  /// null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
@@ -782,6 +782,13 @@ class _RailDestination extends StatelessWidget {
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
+    final bool primaryColorAlphaModified = colors.primary.alpha < 255.0;
+    final Color effectiveSplashColor = primaryColorAlphaModified
+      ? colors.primary
+      : colors.primary.withOpacity(0.12);
+    final Color effectiveHoverColor = primaryColorAlphaModified
+      ? colors.primary
+      : colors.primary.withOpacity(0.04);
     return Semantics(
       container: true,
       selected: selected,
@@ -793,8 +800,8 @@ class _RailDestination extends StatelessWidget {
               onTap: disabled ? null : onTap,
               borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
               customBorder: indicatorShape,
-              splashColor: colors.primary.withOpacity(0.12),
-              hoverColor: colors.primary.withOpacity(0.04),
+              splashColor: effectiveSplashColor,
+              hoverColor: effectiveHoverColor,
               useMaterial3: material3,
               indicatorOffset: indicatorOffset,
               applyXOffset: applyXOffset,
@@ -946,9 +953,9 @@ enum NavigationRailLabelType {
 class NavigationRailDestination {
   /// Creates a destination that is used with [NavigationRail.destinations].
   ///
-  /// [icon] and [label] must be non-null. When the [NavigationRail.labelType]
-  /// is [NavigationRailLabelType.none], the label is still used for semantics,
-  /// and may still be used if [NavigationRail.extended] is true.
+  /// When the [NavigationRail.labelType] is [NavigationRailLabelType.none], the
+  /// label is still used for semantics, and may still be used if
+  /// [NavigationRail.extended] is true.
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,

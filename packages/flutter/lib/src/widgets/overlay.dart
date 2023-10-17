@@ -384,6 +384,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
 ///
+/// For widgets drawn in an [OverlayEntry], do not assume that the size of the
+/// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
+/// have different sizes.
+///
 /// {@tool dartpad}
 /// This example shows how to use the [Overlay] to highlight the [NavigationBar]
 /// destination.
@@ -431,7 +435,7 @@ class Overlay extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// The [OverlayState] from the closest instance of [Overlay] that encloses
@@ -1011,7 +1015,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -1032,6 +1036,10 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
     adoptChild(child);
+    // The Overlay still needs repainting when a deferred child is added. Usually
+    // `markNeedsLayout` implies `markNeedsPaint`, but here `markNeedsLayout` is
+    // skipped when the `_skipMarkNeedsLayout` flag is set.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
 
     // After adding `child` to the render tree, we want to make sure it will be
@@ -1045,6 +1053,9 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
     dropChild(child);
+    // The Overlay still needs repainting when a deferred child is dropped. See
+    // the comment in `_addDeferredChild`.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
   }
 

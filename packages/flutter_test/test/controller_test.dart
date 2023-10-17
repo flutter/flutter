@@ -982,6 +982,38 @@ void main() {
           tester.semantics.simulatedAccessibilityTraversal(),
           containsAllInOrder(expectedMatchers));
       });
+
+      testWidgets('merging node should not be visited', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MergeSemantics(
+              child: Column(
+                children: <Widget>[
+                  Semantics(
+                    container: true,
+                    child: const Text('1'),
+                  ),
+                  Semantics(
+                    container: true,
+                    child: const Text('2'),
+                  ),
+                  Semantics(
+                    container: true,
+                    child: const Text('3'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(),
+          orderedEquals(
+            <Matcher>[containsSemantics(label: '1\n2\n3')],
+          ),
+        );
+      });
     });
   });
 }

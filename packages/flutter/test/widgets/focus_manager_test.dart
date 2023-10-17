@@ -1770,13 +1770,177 @@ void main() {
     tester.binding.focusManager.removeListener(handleFocusChange);
   });
 
-  test('$FocusManager dispatches object creation in constructor', () {
-    expect(()=> FocusManager().dispose(), dispatchesMemoryEvents(FocusManager));
+  test('$FocusManager dispatches object creation in constructor', () async {
+    await expectLater(
+      await memoryEvents(() => FocusManager().dispose(), FocusManager),
+      areCreateAndDispose,
+    );
   });
 
-  test('$FocusNode dispatches object creation in constructor', () {
-    expect(()=> FocusNode().dispose(), dispatchesMemoryEvents(FocusNode));
+  test('$FocusNode dispatches object creation in constructor', () async {
+    await expectLater(
+      await memoryEvents(() => FocusNode().dispose(), FocusNode),
+      areCreateAndDispose,
+    );
   });
+
+  testWidgetsWithLeakTracking('FocusManager.addEarlyKeyEventHandler works', (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+    addTearDown(focusNode1.dispose);
+    final List<int> logs = <int>[];
+    KeyEventResult earlyResult = KeyEventResult.ignored;
+    KeyEventResult focusResult = KeyEventResult.ignored;
+
+    await tester.pumpWidget(
+      Focus(
+        focusNode: focusNode1,
+        onKeyEvent: (_, KeyEvent event) {
+          logs.add(0);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        onKey: (_, RawKeyEvent event) {
+          logs.add(1);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: const SizedBox(),
+      ),
+    );
+    focusNode1.requestFocus();
+    await tester.pump();
+
+    KeyEventResult earlyHandler(KeyEvent event) {
+      if (event is KeyDownEvent) {
+        return earlyResult;
+      }
+      return KeyEventResult.ignored;
+    }
+
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.addEarlyKeyEventHandler(earlyHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    earlyResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    earlyResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    earlyResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.removeEarlyKeyEventHandler(earlyHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    earlyResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    earlyResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+  }, variant: KeySimulatorTransitModeVariant.all());
+
+  testWidgetsWithLeakTracking('FocusManager.addLateKeyEventHandler works', (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+    addTearDown(focusNode1.dispose);
+    final List<int> logs = <int>[];
+    KeyEventResult lateResult = KeyEventResult.ignored;
+    KeyEventResult focusResult = KeyEventResult.ignored;
+
+    await tester.pumpWidget(
+      Focus(
+        focusNode: focusNode1,
+        onKeyEvent: (_, KeyEvent event) {
+          logs.add(0);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        onKey: (_, RawKeyEvent event) {
+          logs.add(1);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: const SizedBox(),
+      ),
+    );
+    focusNode1.requestFocus();
+    await tester.pump();
+
+    KeyEventResult lateHandler(KeyEvent event) {
+      if (event is KeyDownEvent) {
+        return lateResult;
+      }
+      return KeyEventResult.ignored;
+    }
+
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.addLateKeyEventHandler(lateHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    lateResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    lateResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    lateResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.removeLateKeyEventHandler(lateHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    lateResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    lateResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgetsWithLeakTracking('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
     final FocusNode nodeA = FocusNode(debugLabel: 'a');

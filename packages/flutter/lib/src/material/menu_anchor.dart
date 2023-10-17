@@ -129,7 +129,12 @@ class MenuAnchor extends StatefulWidget {
     this.style,
     this.alignmentOffset = Offset.zero,
     this.clipBehavior = Clip.hardEdge,
+    @Deprecated(
+      'Use consumeOutsideTap instead. '
+      'This feature was deprecated after v3.16.0-8.0.pre.',
+    )
     this.anchorTapClosesMenu = false,
+    this.consumeOutsideTap = false,
     this.onOpen,
     this.onClose,
     this.crossAxisUnconstrained = true,
@@ -207,7 +212,22 @@ class MenuAnchor extends StatefulWidget {
   /// system by the user. In this case [anchorTapClosesMenu] should be true.
   ///
   /// Defaults to false.
+  @Deprecated(
+    'Use consumeOutsideTap instead. '
+    'This feature was deprecated after v3.16.0-8.0.pre.',
+  )
   final bool anchorTapClosesMenu;
+
+  /// Whether or not a tap event that closes the menu will be permitted to
+  /// continue on to the gesture arena.
+  ///
+  /// If false, then tapping outside of a menu when the menu is open will both
+  /// close the menu, and allow the tap to participate in the gesture arena. If
+  /// true, then it will only close the menu, and the tap event will be
+  /// consumed.
+  ///
+  /// Defaults to false.
+  final bool consumeOutsideTap;
 
   /// A callback that is invoked when the menu is opened.
   final VoidCallback? onOpen;
@@ -356,6 +376,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
         groupId: _root,
+        consumeOutsideTaps: _root._isOpen && widget.consumeOutsideTap,
         onTapOutside: (PointerDownEvent event) {
           assert(_debugMenuInfo('Tapped Outside ${widget.controller}'));
           _closeChildren();
@@ -469,8 +490,16 @@ class _MenuAnchorState extends State<MenuAnchor> {
     // Don't just close it on *any* scroll, since we want to be able to scroll
     // menus themselves if they're too big for the view.
     if (_isRoot) {
-      _root._close();
+      _close();
     }
+  }
+
+  KeyEventResult _checkForEscape(KeyEvent event) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      _close();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   /// Open the menu, optionally at a position relative to the [MenuAnchor].
@@ -538,6 +567,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     });
 
+    if (_isRoot) {
+      FocusManager.instance.addEarlyKeyEventHandler(_checkForEscape);
+    }
     Overlay.of(context).insert(_overlayEntry!);
     widget.onOpen?.call();
   }
@@ -550,6 +582,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Closing $this'));
     if (!_isOpen) {
       return;
+    }
+    if (_isRoot) {
+      FocusManager.instance.removeEarlyKeyEventHandler(_checkForEscape);
     }
     _closeChildren(inDispose: inDispose);
     _overlayEntry?.remove();
@@ -1189,7 +1224,7 @@ class CheckboxMenuButton extends StatelessWidget {
   /// The checkbox will have different default container color and check color when
   /// this is true. This is only used when [ThemeData.useMaterial3] is set to true.
   ///
-  /// Must not be null. Defaults to false.
+  /// Defaults to false.
   final bool isError;
 
   /// Called when the value of the checkbox should change.
@@ -3214,7 +3249,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       } else if (offBottom(y)) {
         final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
-          // Only move the menu up if its parent is horizontal (MenuAchor/MenuBar).
+          // Only move the menu up if its parent is horizontal (MenuAnchor/MenuBar).
           if (parentOrientation == Axis.horizontal) {
             y = newY - alignmentOffset.dy;
           } else {
@@ -3508,6 +3543,7 @@ class _Submenu extends StatelessWidget {
           ),
           child: TapRegion(
             groupId: anchor._root,
+            consumeOutsideTaps: anchor._root._isOpen && anchor.widget.consumeOutsideTap,
             onTapOutside: (PointerDownEvent event) {
               anchor._close();
             },

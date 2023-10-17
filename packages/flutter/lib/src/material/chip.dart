@@ -137,7 +137,7 @@ abstract interface class ChipAttributes {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   Clip get clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -333,7 +333,7 @@ abstract interface class SelectableChipAttributes {
   /// If [onSelected] is not null, this value will be used to determine if the
   /// select check mark will be shown or not.
   ///
-  /// Must not be null. Defaults to false.
+  /// Defaults to false.
   bool get selected;
 
   /// Called when the chip should change between selected and de-selected
@@ -447,7 +447,7 @@ abstract interface class DisabledChipAttributes {
   /// For classes which don't have this as a constructor argument, [isEnabled]
   /// returns true if their user action callback is set.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   bool get isEnabled;
 
   /// The color used for the chip's background to indicate that it is not
@@ -561,7 +561,6 @@ abstract interface class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a Material Design chip.
   ///
-  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// The [elevation] must be null or non-negative.
   const Chip({
     super.key,
@@ -660,6 +659,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       elevation: elevation,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
+      iconTheme: iconTheme,
     );
   }
 }
@@ -707,10 +707,8 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
-  /// arguments must not be null. The [pressElevation] and [elevation] must be
-  /// null or non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const RawChip({
     super.key,
     this.defaultProperties,
@@ -1222,7 +1220,10 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
-      ? IconTheme(data: iconTheme, child: widget.avatar!)
+      ? IconTheme.merge(
+          data: theme.useMaterial3 ? chipDefaults.iconTheme!.merge(iconTheme) : iconTheme,
+          child: widget.avatar!,
+        )
       : widget.avatar;
 
     Widget result = Material(
@@ -2037,6 +2038,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
+  final LayerHandle<OpacityLayer> _avatarOpacityLayerHandler = LayerHandle<OpacityLayer>();
+
   void _paintAvatar(PaintingContext context, Offset offset) {
     void paintWithOverlay(PaintingContext context, Offset offset) {
       context.paintChild(avatar!, _boxParentData(avatar!).offset + offset);
@@ -2044,13 +2047,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
 
     if (!theme.showAvatar && avatarDrawerAnimation.isDismissed) {
+      _avatarOpacityLayerHandler.layer = null;
       return;
     }
     final Color disabledColor = _disabledColor;
     final int disabledColorAlpha = disabledColor.alpha;
     if (needsCompositing) {
-      context.pushLayer(OpacityLayer(alpha: disabledColorAlpha), paintWithOverlay, offset);
+       _avatarOpacityLayerHandler.layer = context.pushOpacity(offset, disabledColorAlpha, paintWithOverlay, oldLayer: _avatarOpacityLayerHandler.layer);
     } else {
+      _avatarOpacityLayerHandler.layer = null;
       if (disabledColorAlpha != 0xff) {
         context.canvas.saveLayer(
           _boxRect(avatar).shift(offset).inflate(20.0),
@@ -2064,21 +2069,26 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
+  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
+
   void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
     if (child == null) {
+      _childOpacityLayerHandler.layer = null;
       return;
     }
     final int disabledColorAlpha = _disabledColor.alpha;
     if (!enableAnimation.isCompleted) {
       if (needsCompositing) {
-        context.pushLayer(
-          OpacityLayer(alpha: disabledColorAlpha),
+        _childOpacityLayerHandler.layer = context.pushOpacity(
+          offset,
+          disabledColorAlpha,
           (PaintingContext context, Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
-          offset,
+          oldLayer: _childOpacityLayerHandler.layer,
         );
       } else {
+        _childOpacityLayerHandler.layer = null;
         final Rect childRect = _boxRect(child).shift(offset);
         context.canvas.saveLayer(childRect.inflate(20.0), Paint()..color = _disabledColor);
         context.paintChild(child, _boxParentData(child).offset + offset);
@@ -2087,6 +2097,13 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     } else {
       context.paintChild(child, _boxParentData(child).offset + offset);
     }
+  }
+
+  @override
+  void dispose() {
+    _childOpacityLayerHandler.layer = null;
+    _avatarOpacityLayerHandler.layer = null;
+    super.dispose();
   }
 
   @override

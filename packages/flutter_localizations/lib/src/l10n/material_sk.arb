@@ -57,7 +57,6 @@
   "reorderItemRight": "Presunúť doprava",
   "expandedIconTapHint": "Zbaliť",
   "collapsedIconTapHint": "Rozbaliť",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Zostáva 1 znak",
   "remainingTextFieldCharacterCountOther": "Zostáva $remainingCount znakov",
   "refreshIndicatorSemanticLabel": "Obnoviť",
@@ -149,7 +148,7 @@
   "expandedHint": "Zbalené",
   "collapsedHint": "Rozbalené",
   "menuDismissLabel": "Zavrieť ponuku",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Pohľad nahor",
+  "searchWebButtonLabel": "Hľadať na webe",
+  "shareButtonLabel": "Zdieľať…"
 }
