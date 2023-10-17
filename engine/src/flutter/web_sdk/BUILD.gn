@@ -546,10 +546,13 @@ if (!is_fuchsia) {
     if (is_wasm) {
       sources += [
         "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.js",
+        "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.wasm",
         "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.js",
+        "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.wasm",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.js",
+        "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.wasm",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.worker.js",
       ]
