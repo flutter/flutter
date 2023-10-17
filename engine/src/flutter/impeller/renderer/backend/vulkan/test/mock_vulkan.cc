@@ -10,6 +10,8 @@
 #include "fml/thread_local.h"
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
+#include "third_party/swiftshader/include/vulkan/vulkan_core.h"
+#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 namespace testing {
@@ -22,6 +24,8 @@ struct MockCommandBuffer {
       : called_functions_(std::move(called_functions)) {}
   std::shared_ptr<std::vector<std::string>> called_functions_;
 };
+
+struct MockQueryPool {};
 
 struct MockCommandPool {};
 
@@ -153,6 +157,7 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
       static_cast<VkSampleCountFlags>(VK_SAMPLE_COUNT_1_BIT |
                                       VK_SAMPLE_COUNT_4_BIT);
   pProperties->limits.maxImageDimension2D = 4096;
+  pProperties->limits.timestampPeriod = 1;
 }
 
 void vkGetPhysicalDeviceQueueFamilyProperties(
@@ -495,6 +500,40 @@ VkResult vkSetDebugUtilsObjectNameEXT(
   return VK_SUCCESS;
 }
 
+VkResult vkCreateQueryPool(VkDevice device,
+                           const VkQueryPoolCreateInfo* pCreateInfo,
+                           const VkAllocationCallbacks* pAllocator,
+                           VkQueryPool* pQueryPool) {
+  *pQueryPool = reinterpret_cast<VkQueryPool>(new MockQueryPool());
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkCreateQueryPool");
+  return VK_SUCCESS;
+}
+
+VkResult vkGetQueryPoolResults(VkDevice device,
+                               VkQueryPool queryPool,
+                               uint32_t firstQuery,
+                               uint32_t queryCount,
+                               size_t dataSize,
+                               void* pData,
+                               VkDeviceSize stride,
+                               VkQueryResultFlags flags) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  if (dataSize == sizeof(uint32_t)) {
+    uint32_t* data = static_cast<uint32_t*>(pData);
+    for (auto i = firstQuery; i < queryCount; i++) {
+      data[0] = i;
+    }
+  } else if (dataSize == sizeof(int64_t)) {
+    uint64_t* data = static_cast<uint64_t*>(pData);
+    for (auto i = firstQuery; i < queryCount; i++) {
+      data[0] = i;
+    }
+  }
+  mock_device->AddCalledFunction("vkGetQueryPoolResults");
+  return VK_SUCCESS;
+}
+
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
@@ -595,6 +634,10 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkCreateDebugUtilsMessengerEXT;
   } else if (strcmp("vkSetDebugUtilsObjectNameEXT", pName) == 0) {
     return (PFN_vkVoidFunction)vkSetDebugUtilsObjectNameEXT;
+  } else if (strcmp("vkCreateQueryPool", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreateQueryPool;
+  } else if (strcmp("vkGetQueryPoolResults", pName) == 0) {
+    return (PFN_vkVoidFunction)vkGetQueryPoolResults;
   }
   return noop;
 }

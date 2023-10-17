@@ -379,9 +379,6 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
       nullptr               // fence
   );
 
-  /// Record the approximate start of the GPU workload.
-  context.GetGPUTracer()->RecordStartFrameTime();
-
   switch (acq_result) {
     case vk::Result::eSuccess:
       // Keep going.
@@ -402,6 +399,9 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
     VALIDATION_LOG << "Swapchain returned an invalid image index.";
     return {};
   }
+
+  /// Record all subsequent cmd buffers as part of the current frame.
+  context.GetGPUTracer()->MarkFrameStart();
 
   auto image = images_[index % images_.size()];
   uint32_t image_index = index;
@@ -427,6 +427,10 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
 
   const auto& context = ContextVK::Cast(*context_strong);
   const auto& sync = synchronizers_[current_frame_];
+
+  /// Record the approximate end of the GPU workload. This is intentionally
+  /// done before creating the final cmd buffer as that is not tracked.
+  context.GetGPUTracer()->MarkFrameEnd();
 
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
@@ -456,9 +460,6 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
       return false;
     }
   }
-
-  /// Record the approximate end of the GPU workload.
-  context.GetGPUTracer()->RecordEndFrameTime();
 
   //----------------------------------------------------------------------------
   /// Signal that the presentation semaphore is ready.
