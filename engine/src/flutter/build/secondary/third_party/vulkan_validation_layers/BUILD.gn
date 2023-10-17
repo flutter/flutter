@@ -1,0 +1,493 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+################################################################################
+# This is a temporary secondary build file until the rtti issue is solved
+# in vulkan-deps
+################################################################################
+
+import("//build_overrides/vulkan_validation_layers.gni")
+
+_checkout_dir = "//third_party/vulkan-deps/vulkan-validation-layers/src"
+
+vulkan_undefine_configs = []
+if (is_win) {
+  vulkan_undefine_configs += [ "//build/config/win:unicode" ]
+}
+
+vulkan_gen_dir = "$target_gen_dir/$vulkan_gen_subdir"
+raw_vulkan_gen_dir = rebase_path(vulkan_gen_dir, root_build_dir)
+
+vulkan_data_dir = "$root_out_dir/$vulkan_data_subdir"
+raw_vulkan_data_dir = rebase_path(vulkan_data_dir, root_build_dir)
+
+raw_root_out_dir = rebase_path(root_out_dir, root_build_dir)
+
+# This special action is needed to remove old VVL objects that are now renamed.
+action("vulkan_clean_old_validation_layer_objects") {
+  script = "$_checkout_dir/build-gn/remove_files.py"
+
+  # inputs is a (random) new file since the vvl roll, used to ensure the cleanup is done only once
+  inputs = [ "$_checkout_dir/layers/gpu_validation/gpu_validation.cpp" ]
+  outputs = [ "$vulkan_gen_dir/old_vvl_files_are_removed" ]
+  args = [
+    "$raw_vulkan_gen_dir/old_vvl_files_are_removed",
+    "$raw_root_out_dir/libVkLayer*",
+    "$raw_root_out_dir/VkLayer*",
+    "$raw_vulkan_data_dir/VkLayer*.json",
+  ]
+}
+
+config("generated_layers_config") {
+  if (is_clang) {
+    cflags = [
+      "-Wno-conversion",
+      "-Wno-deprecated-copy",
+      "-Wno-extra-semi",
+      "-Wno-implicit-fallthrough",
+      "-Wno-missing-field-initializers",
+      "-Wno-newline-eof",
+      "-Wno-sign-compare",
+      "-Wno-unused-const-variable",
+    ]
+  }
+}
+
+config("vulkan_internal_config") {
+  defines = [
+    "VULKAN_NON_CMAKE_BUILD",
+    "VK_ENABLE_BETA_EXTENSIONS",
+  ]
+
+  if (!is_win) {
+    cflags_cc = [ "-std=c++17" ]
+  } else {
+    cflags_cc = [ "/std:c++17" ]
+  }
+
+  cflags = []
+  if (is_clang || !is_win) {
+    cflags += [ "-Wno-unused-function" ]
+  }
+  if (is_clang && is_mac) {
+    cflags += [ "-Wno-unguarded-availability-new" ]
+  }
+  if (is_linux) {
+    defines += [
+      "SYSCONFDIR=\"/etc\"",
+      "FALLBACK_CONFIG_DIRS=\"/etc/xdg\"",
+      "FALLBACK_DATA_DIRS=\"/usr/local/share:/usr/share\"",
+    ]
+  }
+
+  # Suppress warnings the vulkan code doesn't comply with.
+  if (is_fuchsia) {
+    configs = [ "//build/config:Wno-unused-but-set-variable" ]
+  }
+  if (is_clang) {
+    cflags += [ "-Wno-extra-semi" ]
+  }
+}
+
+# The validation layers
+# ---------------------
+
+config("vulkan_layer_config") {
+  include_dirs = [
+    "$_checkout_dir/layers",
+    "$_checkout_dir/layers/external",
+    "$_checkout_dir/layers/generated",
+  ]
+  if (is_clang) {
+    cflags = [ "-Wno-extra-semi" ]
+  }
+}
+
+core_validation_sources = [
+  "$_checkout_dir/layers/containers/qfo_transfer.h",
+  "$_checkout_dir/layers/containers/range_vector.h",
+  "$_checkout_dir/layers/containers/subresource_adapter.cpp",
+  "$_checkout_dir/layers/containers/subresource_adapter.h",
+  "$_checkout_dir/layers/core_checks/cc_android.cpp",
+  "$_checkout_dir/layers/core_checks/cc_buffer.cpp",
+  "$_checkout_dir/layers/core_checks/cc_buffer_address.h",
+  "$_checkout_dir/layers/core_checks/cc_cmd_buffer.cpp",
+  "$_checkout_dir/layers/core_checks/cc_cmd_buffer_dynamic.cpp",
+  "$_checkout_dir/layers/core_checks/cc_copy_blit_resolve.cpp",
+  "$_checkout_dir/layers/core_checks/cc_descriptor.cpp",
+  "$_checkout_dir/layers/core_checks/cc_device.cpp",
+  "$_checkout_dir/layers/core_checks/cc_device_memory.cpp",
+  "$_checkout_dir/layers/core_checks/cc_drawdispatch.cpp",
+  "$_checkout_dir/layers/core_checks/cc_external_object.cpp",
+  "$_checkout_dir/layers/core_checks/cc_image.cpp",
+  "$_checkout_dir/layers/core_checks/cc_image_layout.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline_compute.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline_graphics.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline_ray_tracing.cpp",
+  "$_checkout_dir/layers/core_checks/cc_query.cpp",
+  "$_checkout_dir/layers/core_checks/cc_queue.cpp",
+  "$_checkout_dir/layers/core_checks/cc_ray_tracing.cpp",
+  "$_checkout_dir/layers/core_checks/cc_render_pass.cpp",
+  "$_checkout_dir/layers/core_checks/cc_shader.cpp",
+  "$_checkout_dir/layers/core_checks/cc_shader.h",
+  "$_checkout_dir/layers/core_checks/cc_synchronization.cpp",
+  "$_checkout_dir/layers/core_checks/cc_video.cpp",
+  "$_checkout_dir/layers/core_checks/cc_wsi.cpp",
+  "$_checkout_dir/layers/core_checks/cc_ycbcr.cpp",
+  "$_checkout_dir/layers/core_checks/core_validation.h",
+  "$_checkout_dir/layers/error_message/core_error_location.cpp",
+  "$_checkout_dir/layers/error_message/core_error_location.h",
+  "$_checkout_dir/layers/error_message/validation_error_enums.h",
+  "$_checkout_dir/layers/external/vma/vk_mem_alloc.h",
+  "$_checkout_dir/layers/external/vma/vma.cpp",
+  "$_checkout_dir/layers/external/vma/vma.h",
+  "$_checkout_dir/layers/generated/command_validation.cpp",
+  "$_checkout_dir/layers/generated/command_validation.h",
+  "$_checkout_dir/layers/generated/gpu_as_inspection_comp.h",
+  "$_checkout_dir/layers/generated/gpu_pre_dispatch_comp.h",
+  "$_checkout_dir/layers/generated/gpu_pre_draw_vert.h",
+  "$_checkout_dir/layers/generated/spirv_grammar_helper.cpp",
+  "$_checkout_dir/layers/generated/spirv_grammar_helper.h",
+  "$_checkout_dir/layers/generated/spirv_validation_helper.cpp",
+  "$_checkout_dir/layers/generated/sync_validation_types.cpp",
+  "$_checkout_dir/layers/generated/sync_validation_types.h",
+  "$_checkout_dir/layers/gpu_shaders/gpu_shaders_constants.h",
+  "$_checkout_dir/layers/gpu_validation/gpu_utils.cpp",
+  "$_checkout_dir/layers/gpu_validation/gpu_utils.h",
+  "$_checkout_dir/layers/gpu_validation/gpu_validation.cpp",
+  "$_checkout_dir/layers/gpu_validation/gpu_validation.h",
+  "$_checkout_dir/layers/gpu_validation/gpu_vuids.h",
+  "$_checkout_dir/layers/state_tracker/base_node.cpp",
+  "$_checkout_dir/layers/state_tracker/base_node.h",
+  "$_checkout_dir/layers/state_tracker/buffer_state.cpp",
+  "$_checkout_dir/layers/state_tracker/buffer_state.h",
+  "$_checkout_dir/layers/state_tracker/cmd_buffer_state.cpp",
+  "$_checkout_dir/layers/state_tracker/cmd_buffer_state.h",
+  "$_checkout_dir/layers/state_tracker/descriptor_sets.cpp",
+  "$_checkout_dir/layers/state_tracker/descriptor_sets.h",
+  "$_checkout_dir/layers/state_tracker/device_memory_state.cpp",
+  "$_checkout_dir/layers/state_tracker/device_memory_state.h",
+  "$_checkout_dir/layers/state_tracker/device_state.h",
+  "$_checkout_dir/layers/state_tracker/image_layout_map.cpp",
+  "$_checkout_dir/layers/state_tracker/image_layout_map.h",
+  "$_checkout_dir/layers/state_tracker/image_state.cpp",
+  "$_checkout_dir/layers/state_tracker/image_state.h",
+  "$_checkout_dir/layers/state_tracker/pipeline_layout_state.cpp",
+  "$_checkout_dir/layers/state_tracker/pipeline_layout_state.h",
+  "$_checkout_dir/layers/state_tracker/pipeline_state.cpp",
+  "$_checkout_dir/layers/state_tracker/pipeline_state.h",
+  "$_checkout_dir/layers/state_tracker/pipeline_sub_state.cpp",
+  "$_checkout_dir/layers/state_tracker/pipeline_sub_state.h",
+  "$_checkout_dir/layers/state_tracker/query_state.h",
+  "$_checkout_dir/layers/state_tracker/queue_state.cpp",
+  "$_checkout_dir/layers/state_tracker/queue_state.h",
+  "$_checkout_dir/layers/state_tracker/ray_tracing_state.h",
+  "$_checkout_dir/layers/state_tracker/render_pass_state.cpp",
+  "$_checkout_dir/layers/state_tracker/render_pass_state.h",
+  "$_checkout_dir/layers/state_tracker/sampler_state.h",
+  "$_checkout_dir/layers/state_tracker/shader_instruction.cpp",
+  "$_checkout_dir/layers/state_tracker/shader_instruction.h",
+  "$_checkout_dir/layers/state_tracker/shader_module.cpp",
+  "$_checkout_dir/layers/state_tracker/shader_module.h",
+  "$_checkout_dir/layers/state_tracker/state_tracker.cpp",
+  "$_checkout_dir/layers/state_tracker/state_tracker.h",
+  "$_checkout_dir/layers/state_tracker/video_session_state.cpp",
+  "$_checkout_dir/layers/state_tracker/video_session_state.h",
+  "$_checkout_dir/layers/sync/sync_utils.cpp",
+  "$_checkout_dir/layers/sync/sync_utils.h",
+  "$_checkout_dir/layers/sync/sync_validation.cpp",
+  "$_checkout_dir/layers/sync/sync_validation.h",
+  "$_checkout_dir/layers/sync/sync_vuid_maps.cpp",
+  "$_checkout_dir/layers/sync/sync_vuid_maps.h",
+  "$_checkout_dir/layers/utils/android_ndk_types.h",
+  "$_checkout_dir/layers/utils/convert_to_renderpass2.cpp",
+  "$_checkout_dir/layers/utils/convert_to_renderpass2.h",
+]
+
+object_lifetimes_sources = [
+  "$_checkout_dir/layers/generated/object_tracker.cpp",
+  "$_checkout_dir/layers/generated/object_tracker.h",
+  "$_checkout_dir/layers/object_tracker/object_lifetime_validation.h",
+  "$_checkout_dir/layers/object_tracker/object_tracker_utils.cpp",
+]
+
+stateless_validation_sources = [
+  "$_checkout_dir/layers/generated/enum_flag_bits.h",
+  "$_checkout_dir/layers/generated/parameter_validation.cpp",
+  "$_checkout_dir/layers/generated/parameter_validation.h",
+  "$_checkout_dir/layers/stateless/parameter_name.h",
+  "$_checkout_dir/layers/stateless/sl_buffer.cpp",
+  "$_checkout_dir/layers/stateless/sl_cmd_buffer.cpp",
+  "$_checkout_dir/layers/stateless/sl_cmd_buffer_dynamic.cpp",
+  "$_checkout_dir/layers/stateless/sl_descriptor.cpp",
+  "$_checkout_dir/layers/stateless/sl_device_memory.cpp",
+  "$_checkout_dir/layers/stateless/sl_external_object.cpp",
+  "$_checkout_dir/layers/stateless/sl_framebuffer.cpp",
+  "$_checkout_dir/layers/stateless/sl_image.cpp",
+  "$_checkout_dir/layers/stateless/sl_instance_device.cpp",
+  "$_checkout_dir/layers/stateless/sl_pipeline.cpp",
+  "$_checkout_dir/layers/stateless/sl_ray_tracing.cpp",
+  "$_checkout_dir/layers/stateless/sl_render_pass.cpp",
+  "$_checkout_dir/layers/stateless/sl_synchronization.cpp",
+  "$_checkout_dir/layers/stateless/sl_wsi.cpp",
+  "$_checkout_dir/layers/stateless/stateless_validation.h",
+]
+
+thread_safety_sources = [
+  "$_checkout_dir/layers/generated/thread_safety.cpp",
+  "$_checkout_dir/layers/generated/thread_safety.h",
+]
+
+unique_objects_sources = []
+
+best_practices_sources = [
+  "$_checkout_dir/layers/best_practices/best_practices_error_enums.h",
+  "$_checkout_dir/layers/best_practices/best_practices_utils.cpp",
+  "$_checkout_dir/layers/best_practices/best_practices_validation.h",
+  "$_checkout_dir/layers/best_practices/bp_buffer.cpp",
+  "$_checkout_dir/layers/best_practices/bp_cmd_buffer.cpp",
+  "$_checkout_dir/layers/best_practices/bp_copy_blit_resolve.cpp",
+  "$_checkout_dir/layers/best_practices/bp_descriptor.cpp",
+  "$_checkout_dir/layers/best_practices/bp_device_memory.cpp",
+  "$_checkout_dir/layers/best_practices/bp_drawdispatch.cpp",
+  "$_checkout_dir/layers/best_practices/bp_framebuffer.cpp",
+  "$_checkout_dir/layers/best_practices/bp_image.cpp",
+  "$_checkout_dir/layers/best_practices/bp_instance_device.cpp",
+  "$_checkout_dir/layers/best_practices/bp_pipeline.cpp",
+  "$_checkout_dir/layers/best_practices/bp_ray_tracing.cpp",
+  "$_checkout_dir/layers/best_practices/bp_render_pass.cpp",
+  "$_checkout_dir/layers/best_practices/bp_synchronization.cpp",
+  "$_checkout_dir/layers/best_practices/bp_video.cpp",
+  "$_checkout_dir/layers/best_practices/bp_wsi.cpp",
+  "$_checkout_dir/layers/generated/best_practices.cpp",
+  "$_checkout_dir/layers/generated/best_practices.h",
+]
+
+debug_printf_sources = [
+  "$_checkout_dir/layers/gpu_validation/debug_printf.cpp",
+  "$_checkout_dir/layers/gpu_validation/debug_printf.h",
+]
+
+chassis_sources = [
+  "$_checkout_dir/layers/generated/chassis.cpp",
+  "$_checkout_dir/layers/generated/chassis.h",
+  "$_checkout_dir/layers/generated/chassis_dispatch_helper.h",
+  "$_checkout_dir/layers/generated/layer_chassis_dispatch.cpp",
+  "$_checkout_dir/layers/generated/layer_chassis_dispatch.h",
+  "$_checkout_dir/layers/generated/valid_param_values.cpp",
+  "$_checkout_dir/layers/generated/valid_param_values.h",
+  "$_checkout_dir/layers/generated/vk_dispatch_table_helper.h",
+  "$_checkout_dir/layers/generated/vk_extension_helper.h",
+  "$_checkout_dir/layers/generated/vk_safe_struct.cpp",
+  "$_checkout_dir/layers/layer_options.cpp",
+  "$_checkout_dir/layers/layer_options.h",
+  "$_checkout_dir/layers/vk_layer_settings_ext.h",
+  "$vulkan_headers_dir/include/vulkan/vk_layer.h",
+  "$vulkan_headers_dir/include/vulkan/vulkan.h",
+]
+
+layers = [ [
+      "khronos_validation",
+      core_validation_sources + object_lifetimes_sources +
+          stateless_validation_sources + thread_safety_sources +
+          unique_objects_sources + best_practices_sources +
+          debug_printf_sources + chassis_sources,
+      [ ":vulkan_core_validation_glslang" ],
+      [],
+    ] ]
+
+if (!is_android) {
+  action("vulkan_gen_json_files") {
+    script = "$_checkout_dir/build-gn/generate_vulkan_layers_json.py"
+
+    deps = [ "$vulkan_headers_dir:vulkan_headers" ]
+    if (!is_fuchsia) {
+      # Make sure that the cleanup of old layer JSON files happens before the new ones are generated.
+      deps += [ ":vulkan_clean_old_validation_layer_objects" ]
+    }
+
+    sources = [ "$_checkout_dir/layers/VkLayer_khronos_validation.json.in" ]
+    outputs = [ "$vulkan_data_dir/VkLayer_khronos_validation.json" ]
+
+    if (is_linux) {
+      _platform = "Linux"
+    } else if (is_win) {
+      _platform = "Windows"
+    } else if (is_mac) {
+      _platform = "Darwin"
+    } else if (is_fuchsia) {
+      _platform = "Fuchsia"
+    } else {
+      _platform = "Other"
+    }
+
+    args = [
+             "--platform",
+             _platform,
+             rebase_path("$_checkout_dir/layers/", root_build_dir),
+             rebase_path(vulkan_data_dir, root_build_dir),
+           ] + rebase_path(sources, root_build_dir)
+    if (is_fuchsia) {
+      args += [ "--no-path-prefix" ]
+    }
+
+    # The layer JSON files are part of the necessary data deps.
+    data = outputs
+  }
+}
+
+config("vulkan_memory_allocator_config") {
+  if (is_clang) {
+    cflags_cc = [ "-Wno-nullability-completeness" ]
+  }
+}
+
+source_set("vulkan_layer_utils") {
+  include_dirs = [
+    "$_checkout_dir/layers",
+    "$_checkout_dir/layers/external",
+    "$_checkout_dir/layers/generated",
+  ]
+  sources = [
+    "$_checkout_dir/layers/containers/custom_containers.h",
+    "$_checkout_dir/layers/containers/sparse_containers.h",
+    "$_checkout_dir/layers/error_message/logging.cpp",
+    "$_checkout_dir/layers/error_message/logging.h",
+    "$_checkout_dir/layers/external/xxhash.cpp",
+    "$_checkout_dir/layers/external/xxhash.h",
+    "$_checkout_dir/layers/generated/vk_enum_string_helper.h",
+    "$_checkout_dir/layers/generated/vk_extension_helper.h",
+    "$_checkout_dir/layers/generated/vk_format_utils.cpp",
+    "$_checkout_dir/layers/generated/vk_format_utils.h",
+    "$_checkout_dir/layers/generated/vk_layer_dispatch_table.h",
+    "$_checkout_dir/layers/generated/vk_object_types.h",
+    "$_checkout_dir/layers/generated/vk_safe_struct.h",
+    "$_checkout_dir/layers/generated/vk_typemap_helper.h",
+    "$_checkout_dir/layers/generated/vk_validation_error_messages.h",
+    "$_checkout_dir/layers/utils/android_ndk_types.h",
+    "$_checkout_dir/layers/utils/cast_utils.h",
+    "$_checkout_dir/layers/utils/hash_util.h",
+    "$_checkout_dir/layers/utils/hash_vk_types.h",
+    "$_checkout_dir/layers/utils/vk_layer_extension_utils.cpp",
+    "$_checkout_dir/layers/utils/vk_layer_extension_utils.h",
+    "$_checkout_dir/layers/utils/vk_layer_utils.cpp",
+    "$_checkout_dir/layers/utils/vk_layer_utils.h",
+    "$_checkout_dir/layers/vk_layer_config.cpp",
+    "$_checkout_dir/layers/vk_layer_config.h",
+    "$vulkan_headers_dir/include/vulkan/vk_layer.h",
+    "$vulkan_headers_dir/include/vulkan/vulkan.h",
+  ]
+  defines = [ "XXH_NO_LONG_LONG" ]
+  public_configs = [
+    ":vulkan_internal_config",
+    ":vulkan_memory_allocator_config",
+  ]
+  public_deps = [ "$vulkan_headers_dir:vulkan_headers" ]
+
+  configs -= vulkan_undefine_configs
+  if (!is_fuchsia) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+config("vulkan_core_validation_config") {
+  include_dirs = [ "$vvl_glslang_dir" ]
+}
+
+source_set("vulkan_core_validation_glslang") {
+  public_deps = [
+    "${vvl_spirv_tools_dir}:spvtools",
+    "${vvl_spirv_tools_dir}:spvtools_opt",
+    "${vvl_spirv_tools_dir}:spvtools_val",
+  ]
+  public_configs = [
+    "$vulkan_headers_dir:vulkan_headers_config",
+    ":vulkan_core_validation_config",
+  ]
+}
+
+config("vulkan_stateless_validation_config") {
+  if (is_clang) {
+    cflags_cc = [ "-Wno-unused-const-variable" ]
+  }
+}
+
+if (is_fuchsia) {
+  library_type = "loadable_module"
+} else {
+  library_type = "shared_library"
+}
+
+foreach(layer_info, layers) {
+  name = layer_info[0]
+  target(library_type, "VkLayer_$name") {
+    defines = []
+    ldflags = []
+    if (is_fuchsia) {
+      configs -= [ "//build/config:thread_safety_annotations" ]
+      ldflags += [ "-static-libstdc++" ]
+      configs += [ "//build/config:rtti" ]
+    } else {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+
+      # The following line is what has to change to fix chromium compilation.
+      configs -= [ "//build/config/compiler:no_rtti" ]
+      configs += [ "//build/config/compiler:rtti" ]
+    }
+    configs -= vulkan_undefine_configs
+    configs += [ ":generated_layers_config" ]
+    public_configs = [ ":vulkan_layer_config" ]
+    deps = [ ":vulkan_layer_utils" ]
+    if (!is_fuchsia) {
+      deps += [
+        # Make sure the cleanup of old layers happen before the new ones are compiled.
+        ":vulkan_clean_old_validation_layer_objects",
+      ]
+    }
+    if (layer_info[2] != "") {
+      deps += layer_info[2]
+    }
+    sources = layer_info[1]
+    if (is_win) {
+      defines += [ "NOMINMAX" ]
+      sources += [ "$_checkout_dir/layers/VkLayer_$name.def" ]
+    }
+    if (is_linux || is_android || is_fuchsia) {
+      ldflags += [ "-Wl,-Bsymbolic,--exclude-libs,ALL" ]
+    }
+    if (defined(ozone_platform_x11) && ozone_platform_x11) {
+      defines += [ "VK_USE_PLATFORM_XLIB_KHR" ]
+    }
+    if (is_android) {
+      libs = [
+        "c++",  # Note: C++ added by Flutter.
+        "log",
+        "nativewindow",
+      ]
+      # Note: config edit removed by Flutter
+      # configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
+    }
+    defines += layer_info[3]
+  }
+}
+
+group("vulkan_validation_layers") {
+  public_deps = []
+  data_deps = []
+  foreach(layer_info, layers) {
+    name = layer_info[0]
+    if (is_fuchsia) {
+      public_deps += [ ":VkLayer_$name" ]
+    } else {
+      data_deps += [ ":VkLayer_$name" ]
+    }
+  }
+}
+
+group("tests") {
+  # TODO(fxbug.dev/13288)
+}

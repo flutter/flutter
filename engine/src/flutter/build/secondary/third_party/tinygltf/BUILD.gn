@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_root = "//third_party/tinygltf"
+
+source_set("tinygltf") {
+  public = [ "$source_root/tiny_gltf.h" ]
+
+  if (is_clang) {
+    cflags_cc = [ "-Wno-sign-compare" ]
+  }
+
+  include_dirs = [
+    "$source_root",
+    "$source_root/third_party/include",
+  ]
+
+  sources =
+      [ "//flutter/build/secondary/third_party/tinygltf/tinygltf_stub.cc" ]
+
+  deps = [ "//third_party/json" ]
+}

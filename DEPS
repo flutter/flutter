@@ -262,7 +262,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '60415e4cb48742a60ba3859d92bbdcb7d14841b0',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '6f31be56e1058997feac2e93ff67fef21ae25eaf',
 
    # Fuchsia compatibility
    #
@@ -325,7 +325,7 @@ deps = {
   'src/third_party/protobuf':
    Var('fuchsia_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),
 
-  'src/build/secondary/third_party/protobuf':
+  'src/flutter/build/secondary/third_party/protobuf':
    Var('fuchsia_git') + '/protobuf-gn' + '@' + Var('dart_protobuf_gn_rev'),
 
   'src/third_party/dart':
