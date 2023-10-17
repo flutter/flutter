@@ -27,6 +27,7 @@ copy("canvaskit_group") {
 
   sources = [
     "$root_out_dir/canvaskit/canvaskit.js",
+    "$root_out_dir/canvaskit/canvaskit.js.symbols",
     "$root_out_dir/canvaskit/canvaskit.wasm",
   ]
   outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
@@ -61,6 +62,7 @@ copy("canvaskit_chromium_group") {
 
   sources = [
     "$root_out_dir/canvaskit_chromium/canvaskit.js",
+    "$root_out_dir/canvaskit_chromium/canvaskit.js.symbols",
     "$root_out_dir/canvaskit_chromium/canvaskit.wasm",
   ]
   outputs = [
@@ -97,6 +99,7 @@ copy("skwasm_group") {
 
   sources = [
     "$root_out_dir/skwasm/skwasm.js",
+    "$root_out_dir/skwasm/skwasm.js.symbols",
     "$root_out_dir/skwasm/skwasm.wasm",
     "$root_out_dir/skwasm/skwasm.worker.js",
   ]
