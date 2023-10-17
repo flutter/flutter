@@ -526,7 +526,6 @@ int main(int argc, char* argv[]) {
     // it as a positional argument instead.
     settings.application_kernel_asset = command_line.positional_args()[0];
   }
-  settings.advisory_script_uri = settings.application_kernel_asset;
 
   if (settings.application_kernel_asset.empty()) {
     FML_LOG(ERROR) << "Dart kernel file not specified.";
