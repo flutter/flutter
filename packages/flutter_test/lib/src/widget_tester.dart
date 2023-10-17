@@ -122,8 +122,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// Otherwise [LeakTrackingForTests.settings] is used.
 /// You can adjust [LeakTrackingForTests.settings] in flutter_test_config.dart for your
 /// package or folders, or in 'setUpAll' for a test library or group.
-/// If you set it for group, remember the original value to a local variable
-/// and restore it in `tearDownAll`.
+/// If you set it for a group, remember the original value to a local variable
+/// and restore it in `tearDownAll` for the group.
 /// To pause leak tracking just for one test, set [experimentalLeakTracking] to
 /// `LeakTrackingForTests.ignore()`.
 ///
