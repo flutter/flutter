@@ -458,7 +458,7 @@ targets:
           "--device", "model=Nexus5,version=24",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=NexusLowRes,version=29",
         ]
 
   - name: Linux firebase_android_embedding_v2_smoke_test
@@ -487,7 +487,7 @@ targets:
           "--device", "model=Nexus5,version=23",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=NexusLowRes,version=29",
         ]
 
   - name: Linux firebase_release_smoke_test
@@ -516,7 +516,7 @@ targets:
           "--device", "model=Nexus5,version=23",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=NexusLowRes,version=29",
         ]
 
   - name: Linux flutter_packaging_test
