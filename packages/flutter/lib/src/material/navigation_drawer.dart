@@ -412,6 +412,7 @@ class _NavigationDestinationSemantics extends StatelessWidget {
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
+          button: true,
           selected: _isForwardOrCompleted(destinationInfo.selectedAnimation),
           container: true,
           child: child,

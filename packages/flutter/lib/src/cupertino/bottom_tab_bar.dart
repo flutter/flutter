@@ -222,6 +222,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
             // switching tabs doesn't unfocus text fields.
             child: TextFieldTapRegion(
               child: Semantics(
+                button: true,
                 selected: active,
                 hint: localizations.tabSemanticsLabel(
                   tabIndex: index + 1,

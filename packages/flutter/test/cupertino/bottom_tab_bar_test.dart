@@ -514,13 +514,14 @@ Future<void> main() async {
     expect(semantics, includesNodeWith(
       label: 'Tab 1',
       hint: 'Tab 1 of 2',
-      flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+      flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isSelected],
       textDirection: TextDirection.ltr,
     ));
 
     expect(semantics, includesNodeWith(
       label: 'Tab 2',
       hint: 'Tab 2 of 2',
+      flags: <SemanticsFlag>[SemanticsFlag.isButton],
       textDirection: TextDirection.ltr,
     ));
 
