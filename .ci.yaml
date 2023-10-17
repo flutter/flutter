@@ -458,6 +458,7 @@ targets:
           "--device", "model=Nexus5,version=22",
           "--device", "model=Nexus5,version=23",
           "--device", "model=Nexus5,version=24",
+          "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27"
         ]
@@ -488,6 +489,7 @@ targets:
           "--device", "model=Nexus5,version=21",
           "--device", "model=Nexus5,version=22",
           "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27"
         ]
@@ -518,6 +520,7 @@ targets:
           "--device", "model=Nexus5,version=21",
           "--device", "model=Nexus5,version=22",
           "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27"
         ]
