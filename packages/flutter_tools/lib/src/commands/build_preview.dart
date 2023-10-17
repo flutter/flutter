@@ -86,7 +86,7 @@ class BuildPreviewCommand extends BuildSubCommand {
       return FlutterCommandResult.success();
     } finally {
       try {
-        targetDir.deleteSync();
+        targetDir.deleteSync(recursive: true);
       } on FileSystemException catch (exception) {
         logger.printError('Failed to delete ${targetDir.path}\n\n$exception');
       }
