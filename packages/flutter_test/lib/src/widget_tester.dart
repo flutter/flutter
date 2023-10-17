@@ -125,7 +125,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If you set it for group, remember the original value to a local variable
 /// and restore it in `tearDownAll`.
 /// To pause leak tracking just for one test, set [experimentalLeakTracking] to
-/// `LeakTrackingForTests.copyWithPaused()`.
+/// `LeakTrackingForTests.ignore()`.
 ///
 /// ## Sample code
 ///
@@ -146,9 +146,9 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   int? retry,
-  Object? experimentalLeakTracking,
+  LeakTrackingForTestsSettings? experimentalLeakTracking,
 }) {
-  // TODO(polina-c): change type of experimentalLeakTracking and configure leak tracking.
+  // TODO(polina-c): configure leak tracking.
   // https://github.com/flutter/flutter/issues/135856
 
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
