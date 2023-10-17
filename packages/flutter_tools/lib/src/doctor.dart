@@ -419,7 +419,7 @@ class Doctor {
               result: subResult.typeStr,
               statusInfo: subResult.statusInfo,
               partOfGroupedValidator: true,
-              timestamp: analyticsTimestamp,
+              doctorInvocationId: analyticsTimestamp,
             ));
           }
         } else {
@@ -428,7 +428,7 @@ class Doctor {
               result: result.typeStr,
               statusInfo: result.statusInfo,
               partOfGroupedValidator: false,
-              timestamp: analyticsTimestamp,
+              doctorInvocationId: analyticsTimestamp,
             ));
         }
         DoctorResultEvent(validator: validator, result: result).send();
