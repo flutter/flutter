@@ -2224,10 +2224,10 @@ void main() {
   testWidgetsWithLeakTracking('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
-      showValueIndicator: ShowValueIndicator.always,
-      rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
-      valueIndicatorColor: Color(0xff000001),
-      valueIndicatorStrokeColor: Color(0xff000002),
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
       )
     );
 
@@ -2277,11 +2277,11 @@ void main() {
   testWidgetsWithLeakTracking('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
-      showValueIndicator: ShowValueIndicator.always,
-      rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
-      valueIndicatorColor: Color(0xff000001),
-      valueIndicatorStrokeColor: Color(0xff000002),
-      overlappingShapeStrokeColor: Color(0xff000003),
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+        overlappingShapeStrokeColor: Color(0xff000003),
       )
     );
 
@@ -2331,10 +2331,10 @@ void main() {
   testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
-      showValueIndicator: ShowValueIndicator.always,
-      rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
-      valueIndicatorColor: Color(0xff000001),
-      valueIndicatorStrokeColor: Color(0xff000002),
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
       )
     );
 
@@ -2384,11 +2384,11 @@ void main() {
   testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
-      showValueIndicator: ShowValueIndicator.always,
-      rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
-      valueIndicatorColor: Color(0xff000001),
-      valueIndicatorStrokeColor: Color(0xff000002),
-      overlappingShapeStrokeColor: Color(0xff000003),
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+        overlappingShapeStrokeColor: Color(0xff000003),
       )
     );
 
