@@ -886,7 +886,7 @@ class StartupTest {
              '-v',
             '--profile',
             '--target=$target',
-            '--no-publish-port',
+            if (deviceOperatingSystem == DeviceOperatingSystem.ios) '--no-publish-port',
           ]);
           final String buildRoot = path.join(testDirectory, 'build');
           applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
