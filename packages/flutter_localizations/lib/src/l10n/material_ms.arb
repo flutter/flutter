@@ -52,7 +52,6 @@
   "reorderItemRight": "Alih ke kanan",
   "expandedIconTapHint": "Runtuhkan",
   "collapsedIconTapHint": "Kembangkan",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 aksara lagi",
   "remainingTextFieldCharacterCountOther": "$remainingCount aksara lagi",
   "refreshIndicatorSemanticLabel": "Muat semula",
