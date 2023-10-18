@@ -786,6 +786,25 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeNo);
 }
 
+- (void)testReplaceTestLocalAdjustSelectionAndMarkedTextRange {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setMarkedText:@"test text" selectedRange:NSMakeRange(0, 5)];
+  NSRange selectedTextRange = ((FlutterTextRange*)inputView.selectedTextRange).range;
+  const NSRange markedTextRange = ((FlutterTextRange*)inputView.markedTextRange).range;
+  XCTAssertEqual(selectedTextRange.location, 0ul);
+  XCTAssertEqual(selectedTextRange.length, 5ul);
+  XCTAssertEqual(markedTextRange.location, 0ul);
+  XCTAssertEqual(markedTextRange.length, 9ul);
+
+  // Replaces space with space.
+  [inputView replaceRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(4, 1)] withText:@" "];
+  selectedTextRange = ((FlutterTextRange*)inputView.selectedTextRange).range;
+
+  XCTAssertEqual(selectedTextRange.location, 5ul);
+  XCTAssertEqual(selectedTextRange.length, 0ul);
+  XCTAssertEqual(inputView.markedTextRange, nil);
+}
+
 - (void)testFlutterTextInputViewOnlyRespondsToInsertionPointColorBelowIOS17 {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   BOOL respondsToInsertionPointColor =
