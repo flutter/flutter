@@ -274,7 +274,7 @@ void main() {
   );
 
   testWidgetsWithLeakTracking(
-    'validateGranually returns correct values for fields with keys and ignores fields without keys',
+    'validateGranularly returns correct values for fields with keys and ignores fields without keys',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
@@ -324,7 +324,7 @@ void main() {
 
       await tester.pumpWidget(builder());
 
-      final Map<Key, bool> validationResult = formKey.currentState!.validateGranually();
+      final Map<Key, bool> validationResult = formKey.currentState!.validateGranularly();
 
       expect(validationResult.length, equals(2));
       expect(validationResult[fieldKey1], isTrue);
@@ -333,7 +333,7 @@ void main() {
   );
 
   testWidgetsWithLeakTracking(
-    'Should announce error text when validateGranually is called even if an invalid field has no key',
+    'Should announce error text when validateGranularly is called even if an invalid field has no key',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
@@ -376,7 +376,7 @@ void main() {
       await tester.pumpWidget(builder());
       expect(find.text('error'), findsNothing);
 
-      final Map<Key, bool> validationResult = formKey.currentState!.validateGranually();
+      final Map<Key, bool> validationResult = formKey.currentState!.validateGranularly();
 
       expect(validationResult.length, equals(1));
       expect(validationResult.values, everyElement(isTrue));

@@ -293,7 +293,9 @@ class FormState extends State<Form> {
   /// returns true if there are no errors.
   ///
   /// The form will rebuild to report the results.
-  /// See also: [validateGranually]
+  /// See also:
+  ///  * [validateGranularly], which returns a [Map] describing the validation
+  /// status for each [FormField]
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
@@ -305,14 +307,14 @@ class FormState extends State<Form> {
   /// returns a [Map] which keys' are [Key]s of the descendant [FormField]s
   /// and values' are their corresponding validation results.
   ///
-  /// Any [FormField] that has not been asigned a key will be ignored in the result.
+  /// Any [FormField] that has not been assigned a key will be ignored in the result.
   /// To get the absolute validation value of the Form, Consider using [validate]
   ///
   /// Common usage of this method is when you need draw the user's attention
   /// to the invalid field(s) using their widget key(s).
   ///
   /// The form will rebuild to report the results.
-  Map<Key, bool> validateGranually() {
+  Map<Key, bool> validateGranularly() {
     _hasInteractedByUser = true;
     _forceRebuild();
     return _validate().fieldsValidationStatus;
@@ -638,11 +640,11 @@ enum AutovalidateMode {
   onUserInteraction,
 }
 
-// Used to encapsultae `Form`'s validation state.
-// Having all vlaues of `fieldsValidationStatus` as true is not a guarantee
+// Used to encapsulate `Form`'s validation state.
+// Having all values of `fieldsValidationStatus` as true is not a guarantee
 // of a valid form. Fields with no keys are skipped in this
 // Map.
-// a Form with no validation erros is only represented by setting `isValid` to true.
+// A Form with no validation errors is only represented by setting `isValid` to true.
 class _FormValidationStatus {
 
   _FormValidationStatus({
