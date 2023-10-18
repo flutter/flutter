@@ -276,7 +276,9 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   OCMStub([viewDelegateMock onTextInputKeyEvent:[OCMArg any]])
       .andCall(self, @selector(handleTextInputKeyEvent:));
   OCMStub([viewDelegateMock getBinaryMessenger]).andReturn(_messengerMock);
-  OCMStub([viewDelegateMock sendKeyEvent:FlutterKeyEvent {} callback:nil userData:nil])
+  OCMStub([viewDelegateMock sendKeyEvent:*(const FlutterKeyEvent*)[OCMArg anyPointer]
+                                callback:nil
+                                userData:nil])
       .ignoringNonObjectArgs()
       .andCall(self, @selector(handleEmbedderEvent:callback:userData:));
   OCMStub([viewDelegateMock subscribeToKeyboardLayoutChange:[OCMArg any]])
