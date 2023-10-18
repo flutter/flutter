@@ -459,6 +459,46 @@ void main() {
       expect(child2.hasPrimaryFocus, isTrue);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/136758
+    testWidgetsWithLeakTracking('removing grandchildren from scope updates focusedChild', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+
+      // Sets up this focus node tree:
+      //
+      //  root
+      //   |
+      // scope1
+      //   |
+      // child1
+      //   |
+      // child2
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope2');
+      addTearDown(scope1.dispose);
+      final FocusAttachment scope2Attachment = scope1.attach(context);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+
+      final FocusNode child1 = FocusNode(debugLabel: 'child2');
+      addTearDown(child1.dispose);
+      final FocusAttachment child2Attachment = child1.attach(context);
+
+      final FocusNode child2 = FocusNode(debugLabel: 'child3');
+      addTearDown(child2.dispose);
+      final FocusAttachment child3Attachment = child2.attach(context);
+
+      child2Attachment.reparent(parent: scope1);
+      child3Attachment.reparent(parent: child1);
+      expect(child1.parent, equals(scope1));
+      expect(scope1.children.first, equals(child1));
+      child2.requestFocus();
+      await tester.pump();
+      expect(scope1.focusedChild, equals(child2));
+
+      // Detach the middle child and make sure that the scope is updated so that
+      // it no longer references child2 as the focused child.
+      child2Attachment.detach();
+      expect(scope1.focusedChild, isNull);
+    });
+
     testWidgetsWithLeakTracking('Requesting focus before adding to tree results in a request after adding', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode();
