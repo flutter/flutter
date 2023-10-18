@@ -988,6 +988,110 @@ void main() {
         expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:'));
       });
     });
+
+    group('scrollable', () {
+      testWidgets('can find node that can scroll up', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController();
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            controller: controller,
+            child: const SizedBox(width: 100, height: 1000),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollUpAction: true,
+          hasScrollDownAction: false,
+        ));
+      });
+
+      testWidgets('can find node that can scroll down', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController(initialScrollOffset: 400);
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            controller: controller,
+            child: const SizedBox(width: 100, height: 1000),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollUpAction: false,
+          hasScrollDownAction: true,
+        ));
+      });
+
+      testWidgets('can find node that can scroll left', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController();
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            child: const SizedBox(width: 1000, height: 100),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollLeftAction: true,
+          hasScrollRightAction: false,
+        ));
+      });
+
+      testWidgets('can find node that can scroll right', (WidgetTester tester) async {
+        final ScrollController controller = ScrollController(initialScrollOffset: 200);
+        await tester.pumpWidget(MaterialApp(
+          home: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            child: const SizedBox(width: 1000, height: 100),
+          ),
+        ));
+
+        expect(find.semantics.scrollable(), containsSemantics(
+          hasScrollLeftAction: false,
+          hasScrollRightAction: true,
+        ));
+      });
+
+      testWidgets('can exclusively find node that scrolls horizontally', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Column(
+            children: <Widget>[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(width: 1000, height: 100),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(width: 100, height: 1000),
+                ),
+              ),
+            ],
+          )
+        ));
+
+        expect(find.semantics.scrollable(axis: Axis.horizontal), findsOne);
+      });
+
+      testWidgets('can exclusively find node that scrolls vertically', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Column(
+            children: <Widget>[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(width: 1000, height: 100),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(width: 100, height: 1000),
+                ),
+              ),
+            ],
+          )
+        ));
+
+        expect(find.semantics.scrollable(axis: Axis.vertical), findsOne);
+      });
+    });
   });
 
   group('FinderBase', () {
