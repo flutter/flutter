@@ -532,7 +532,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _pointerLocations[event.pointer] = event.position;
       shouldStartIfAccepted = true;
       _lastTransform = event.transform;
-      _initialEventTimestamp = event.timeStamp;
     } else if (event is PointerDownEvent) {
       _pointerLocations[event.pointer] = event.position;
       _pointerQueue.add(event.pointer);
@@ -550,7 +549,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       didChangeConfiguration = true;
       shouldStartIfAccepted = true;
       _lastTransform = event.transform;
-      _initialEventTimestamp = event.timeStamp;
     } else if (event is PointerPanZoomUpdateEvent) {
       assert(_pointerPanZooms[event.pointer] != null);
       if (!event.synthesized && !trackpadScrollCausesScale) {
