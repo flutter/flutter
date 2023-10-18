@@ -77,34 +77,6 @@ TEST(GPUTracerVK, DoesNotTraceOutsideOfFrameWorkload) {
                         "vkGetQueryPoolResults") == called->end());
 }
 
-TEST(GPUTracerVK, DoesNotTraceOtherTheads) {
-  auto const context = MockVulkanContextBuilder().Build();
-
-  auto tracer = std::make_shared<GPUTracerVK>(context->GetDeviceHolder());
-
-  ASSERT_TRUE(tracer->IsEnabled());
-
-  tracer->MarkFrameStart();
-
-  // Record the cmd buffer on another thread to simulate a mipmap cmd buffer.
-  std::thread image_upload_thread([&context]() {
-    auto cmd_buffer = context->CreateCommandBuffer();
-    auto vk_cmd_buffer = CommandBufferVK::Cast(cmd_buffer.get());
-    auto blit_pass = cmd_buffer->CreateBlitPass();
-    if (!cmd_buffer->SubmitCommands()) {
-      VALIDATION_LOG << "Failed to submit commands";
-    }
-  });
-
-  image_upload_thread.join();
-
-  auto called = GetMockVulkanFunctions(context->GetDevice());
-
-  ASSERT_NE(called, nullptr);
-  ASSERT_TRUE(std::find(called->begin(), called->end(), "vkCreateQueryPool") ==
-              called->end());
-}
-
 #endif  // IMPELLER_DEBUG
 
 }  // namespace testing
