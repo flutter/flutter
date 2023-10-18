@@ -3548,6 +3548,63 @@ void main() {
     expect(bcdLabelOpacity, closeTo(0.38, 0.01));
   });
 
+  testWidgetsWithLeakTracking('NavigationRail indicator inkwell can be transparent', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/135866.
+    final ThemeData theme = ThemeData(
+      colorScheme: const ColorScheme.light().copyWith(primary: Colors.transparent),
+      // Material 3 defaults to InkSparkle which is not testable using paints.
+      splashFactory: InkSplash.splashFactory,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+      theme: theme,
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Row(
+              children: <Widget>[
+                 NavigationRail(
+                  selectedIndex: 1,
+                  destinations: const <NavigationRailDestination>[
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite_border),
+                      selectedIcon: Icon(Icons.favorite),
+                      label: Text('ABC'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.bookmark_border),
+                      selectedIcon: Icon(Icons.bookmark),
+                      label: Text('DEF'),
+                    ),
+                  ],
+                  labelType: NavigationRailLabelType.all,
+                ),
+                const Expanded(
+                  child: Text('body'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+
+    expect(inkFeatures, paints..rect(color: Colors.transparent));
+
+    await gesture.down(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(color: Colors.transparent));
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
