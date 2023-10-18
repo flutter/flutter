@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -466,6 +467,7 @@ void main() {
     }
 
     try {
+      debugPrintRecognizerCallbacksTrace = true;
       print('>>> before fling: offset = ${testController?.position.pixels}; items = ${itemsOnScreen()}');
       await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
       flushMessages();
@@ -486,6 +488,7 @@ void main() {
       messageIds.forEach((String message, int id) {
         print('>>> $id: $message');
       });
+      debugPrintRecognizerCallbacksTrace = false;
     }
 
     await tester.tap(find.byType(BackButton));
