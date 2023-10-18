@@ -202,7 +202,7 @@ abstract class SearchDelegate<T> {
   ///
   /// See also:
   ///
-  ///  * [AppBar.automaticallyImplyLeading], which is controlled by this property.
+  ///  {@macro flutter.material.appbar.automaticallyImplyLeading}, which is controlled by this property.
   bool? automaticallyImplyLeading;
 
   /// The width of the leading widget in the [AppBar].
@@ -223,7 +223,7 @@ abstract class SearchDelegate<T> {
   ///
   /// See also:
   ///
-  ///  * [AppBar.leadingWidth], which is controlled by this property.
+  /// @macro flutter.material.appbar.leadingWidth} which is controlled by this property.
   double? leadingWidth;
 
   /// Widgets to display after the search query in the [AppBar].

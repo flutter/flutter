@@ -991,13 +991,13 @@ void main() {
     expect(find.text('HomeBody'), findsOneWidget);
     expect(find.text('HomeTitle'), findsOneWidget);
     expect(find.text('Suggestions'), findsNothing);
-
     expect(selectedResults, <String>['Result']);
   });
 
   testWidgets('Leading width size is 16', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     final List<String> selectedResults = <String>[];
+    delegate.leadingWidth = 16;
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -1055,7 +1055,7 @@ void main() {
     expect(rootObserver.pushCount, 0);
     expect(localObserver.pushCount, 0);
 
-    // showSearch normal and back
+    // showSearch normal and back.
     await tester.tap(find.text('showSearchLocalNavigator'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Close'));
@@ -1063,17 +1063,23 @@ void main() {
     expect(rootObserver.pushCount, 0);
     expect(localObserver.pushCount, 1);
 
-    // showSearch with rootNavigator
+    // showSearch with rootNavigator.
     await tester.tap(find.text('showSearchRootNavigator'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
 
-    // showSearch without back button
+    // showSearch without back button.
+    delegate.automaticallyImplyLeading = false;
     await tester.tap(find.text('showSearchRootNavigator'));
     await tester.pumpAndSettle();
+    final Finder appBarFinder = find.byType(AppBar);
+    final AppBar appBar = tester.widget<AppBar>(appBarFinder);
+    expect(appBar.automaticallyImplyLeading, false);
     expect(find.byTooltip('Back'), findsNothing);
-    expect(rootObserver.pushCount, 1);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(rootObserver.pushCount, 2);
     expect(localObserver.pushCount, 1);
   });
 
@@ -1191,9 +1197,6 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   static const Color hintTextColor = Colors.green;
 
   @override
-  double? get leadingWidth => 16;
-
-  @override
   ThemeData appBarTheme(BuildContext context) {
     if (defaultAppBarTheme) {
       return super.appBarTheme(context);
@@ -1261,8 +1264,6 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 }
 
 class _TestEmptySearchDelegate extends SearchDelegate<String> {
-  @override
-  bool? get automaticallyImplyLeading => false;
 
   @override
   Widget? buildLeading(BuildContext context) => null;
