@@ -814,7 +814,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
     // UITextInput
     _text = [[NSMutableString alloc] init];
-    _markedText = [[NSMutableString alloc] init];
     _selectedTextRange = [[FlutterTextRange alloc] initWithNSRange:NSMakeRange(0, 0)];
     _markedRect = kInvalidFirstRect;
     _cachedFirstRect = kInvalidFirstRect;
@@ -1249,25 +1248,17 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 // Replace the text within the specified range with the given text,
 // without notifying the framework.
 - (void)replaceRangeLocal:(NSRange)range withText:(NSString*)text {
-  NSRange selectedRange = _selectedTextRange.range;
-
-  // Adjust the text selection:
-  // * reduce the length by the intersection length
-  // * adjust the location by newLength - oldLength + intersectionLength
-  NSRange intersectionRange = NSIntersectionRange(range, selectedRange);
-  if (range.location <= selectedRange.location) {
-    selectedRange.location += text.length - range.length;
-  }
-  if (intersectionRange.location != NSNotFound) {
-    selectedRange.location += intersectionRange.length;
-    selectedRange.length -= intersectionRange.length;
-  }
-
   [self.text replaceCharactersInRange:[self clampSelection:range forText:self.text]
                            withString:text];
-  [self setSelectedTextRangeLocal:[FlutterTextRange
-                                      rangeWithNSRange:[self clampSelection:selectedRange
-                                                                    forText:self.text]]];
+
+  // Adjust the selected range and the marked text range. There's no
+  // documentation but UITextField always sets markedTextRange to nil,
+  // and collapses the selection to the end of the new replacement text.
+  const NSRange newSelectionRange =
+      [self clampSelection:NSMakeRange(range.location + text.length, 0) forText:self.text];
+
+  [self setSelectedTextRangeLocal:[FlutterTextRange rangeWithNSRange:newSelectionRange]];
+  self.markedTextRange = nil;
 }
 
 - (void)replaceRange:(UITextRange*)range withText:(NSString*)text {
@@ -1345,11 +1336,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   return YES;
 }
 
+// Either replaces the existing marked text or, if none is present, inserts it in
+// place of the current selection.
 - (void)setMarkedText:(NSString*)markedText selectedRange:(NSRange)markedSelectedRange {
   NSString* textBeforeChange = [self.text copy];
-  NSRange selectedRange = _selectedTextRange.range;
-  NSRange markedTextRange = ((FlutterTextRange*)self.markedTextRange).range;
-  NSRange actualReplacedRange;
 
   if (_scribbleInteractionStatus != FlutterScribbleInteractionStatusNone ||
       _scribbleFocusStatus != FlutterScribbleFocusStatusUnfocused) {
@@ -1360,26 +1350,24 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     markedText = @"";
   }
 
-  if (markedTextRange.length > 0) {
-    // Replace text in the marked range with the new text.
-    [self replaceRangeLocal:markedTextRange withText:markedText];
-    actualReplacedRange = markedTextRange;
-    markedTextRange.length = markedText.length;
-  } else {
-    // Replace text in the selected range with the new text.
-    actualReplacedRange = selectedRange;
-    [self replaceRangeLocal:selectedRange withText:markedText];
-    markedTextRange = NSMakeRange(selectedRange.location, markedText.length);
-  }
+  const FlutterTextRange* currentMarkedTextRange = (FlutterTextRange*)self.markedTextRange;
+  const NSRange& actualReplacedRange = currentMarkedTextRange && !currentMarkedTextRange.isEmpty
+                                           ? currentMarkedTextRange.range
+                                           : _selectedTextRange.range;
+  // No need to call replaceRangeLocal as this method always adjusts the
+  // selected/marked text ranges anyways.
+  [self.text replaceCharactersInRange:actualReplacedRange withString:markedText];
 
+  const NSRange newMarkedRange = NSMakeRange(actualReplacedRange.location, markedText.length);
   self.markedTextRange =
-      markedTextRange.length > 0 ? [FlutterTextRange rangeWithNSRange:markedTextRange] : nil;
+      newMarkedRange.length > 0 ? [FlutterTextRange rangeWithNSRange:newMarkedRange] : nil;
 
-  NSUInteger selectionLocation = markedSelectedRange.location + markedTextRange.location;
-  selectedRange = NSMakeRange(selectionLocation, markedSelectedRange.length);
-  [self setSelectedTextRangeLocal:[FlutterTextRange
-                                      rangeWithNSRange:[self clampSelection:selectedRange
-                                                                    forText:self.text]]];
+  [self setSelectedTextRangeLocal:
+            [FlutterTextRange
+                rangeWithNSRange:[self clampSelection:NSMakeRange(markedSelectedRange.location +
+                                                                      newMarkedRange.location,
+                                                                  markedSelectedRange.length)
+                                              forText:self.text]]];
   if (_enableDeltaModel) {
     NSRange nextReplaceRange = [self clampSelection:actualReplacedRange forText:textBeforeChange];
     [self updateEditingStateWithDelta:flutter::TextEditingDelta(
