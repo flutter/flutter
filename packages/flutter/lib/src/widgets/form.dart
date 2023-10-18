@@ -299,7 +299,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate().isValid;
+    return _validate();
   }
 
 
@@ -315,25 +315,24 @@ class FormState extends State<Form> {
   ///
   /// The form will rebuild to report the results.
   Map<Key, bool> validateGranularly() {
+    final Map<Key, bool> validationResults = <Key, bool>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate().fieldsValidationStatus;
+    _validate(validationResults);
+    return validationResults;
   }
 
-  _FormValidationStatus _validate() {
-    final Map<Key, bool> fieldsValidationStatus = <Key, bool>{};
+  bool _validate([Map<Key, bool>? validationResults]) {
     bool hasError = false;
     String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
       errorMessage += field.errorText ?? '';
       final Key? key = field.widget.key;
-      if (key != null) {
         fieldsValidationStatus[key] = field.validate();
+      if (validationResults != null && key != null) {
       }
     }
-    final _FormValidationStatus formValidationStatus = _FormValidationStatus(
-        fieldsValidationStatus: fieldsValidationStatus, isValid: !hasError);
 
     if (errorMessage.isNotEmpty) {
       final TextDirection directionality = Directionality.of(context);
@@ -346,7 +345,7 @@ class FormState extends State<Form> {
         SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
       }
     }
-    return formValidationStatus;
+    return !hasError;
   }
 }
 
@@ -645,13 +644,3 @@ enum AutovalidateMode {
 // of a valid form. Fields with no keys are skipped in this
 // Map.
 // A Form with no validation errors is only represented by setting `isValid` to true.
-class _FormValidationStatus {
-
-  _FormValidationStatus({
-    required this.fieldsValidationStatus,
-    required this.isValid,
-  });
-
-  final Map<Key, bool> fieldsValidationStatus;
-  final bool isValid;
-}
