@@ -841,6 +841,7 @@ void main() {
 
   testWidgetsWithLeakTracking('SearchAnchor respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
     final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
     int onChangedCalled = 0;
     int onSubmittedCalled = 0;
     await tester.pumpWidget(MaterialApp(
@@ -928,6 +929,7 @@ void main() {
 
   testWidgetsWithLeakTracking('SearchAnchor.bar respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
     final SearchController controller = SearchController();
+    addTearDown(controller.dispose);
     int onChangedCalled = 0;
     int onSubmittedCalled = 0;
     await tester.pumpWidget(MaterialApp(
