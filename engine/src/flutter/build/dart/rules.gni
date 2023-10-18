@@ -10,21 +10,113 @@ import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 import("//third_party/dart/sdk_args.gni")
 
-frontend_server_files =
-    exec_script("//third_party/dart/tools/list_dart_files.py",
-                [
-                  "absolute",
-                  rebase_path("//flutter/flutter_frontend_server"),
-                ],
-                "list lines")
+# Generates a Dart kernel snapshot using flutter_frontend_server.
+#
+# Arguments
+#     main_dart (required):
+#       The Dart entrypoint file.
+#
+#     kernel_output (required):
+#       The path to the output kernel snapshot in the out directory.
+#
+#     package_config (optional):
+#       The path to the package_config.json file.
+#
+#     deps (optional):
+#       Additional dependencies. Dependencies on the frontend server and
+#       Flutter's platform.dill are included by default. This rule creates and
+#       uses a depfile, so listing all Dart sources is not necessary.
+#
+#     extra_args (optional):
+#       Additional frontend server command line arguments.
+template("flutter_frontend_server") {
+  assert(defined(invoker.main_dart), "The Dart test file must be specified.")
+  assert(defined(invoker.kernel_output),
+         "The Dart Kernel file location must be specified.")
 
-frontend_server_files +=
-    exec_script("//third_party/dart/tools/list_dart_files.py",
-                [
-                  "absolute",
-                  rebase_path("//third_party/dart/pkg"),
-                ],
-                "list lines")
+  kernel_output = invoker.kernel_output
+
+  common_deps = [ "//flutter/lib/snapshot:strong_platform" ]
+  if (defined(invoker.deps)) {
+    common_deps += invoker.deps
+  }
+
+  extra_args = []
+  if (defined(invoker.extra_args)) {
+    extra_args += invoker.extra_args
+  }
+
+  packages_args = []
+  if (defined(invoker.package_config)) {
+    packages_args += [
+      "--packages",
+      rebase_path(invoker.package_config, root_build_dir),
+    ]
+  }
+
+  snapshot_depfile = "$kernel_output.d"
+
+  common_vm_args = [ "--disable-dart-dev" ]
+
+  flutter_patched_sdk =
+      rebase_path("$root_out_dir/flutter_patched_sdk", root_build_dir)
+
+  common_args = extra_args + packages_args + [
+                  "--sdk-root",
+                  flutter_patched_sdk,
+                  "--target=flutter",
+                  "--depfile",
+                  rebase_path(snapshot_depfile, root_build_dir),
+                  "--output-dill",
+                  rebase_path(invoker.kernel_output, root_build_dir),
+                  rebase_path(invoker.main_dart, root_build_dir),
+                ]
+
+  if (flutter_prebuilt_dart_sdk) {
+    common_deps += [ "//flutter/flutter_frontend_server:frontend_server" ]
+    action(target_name) {
+      forward_variables_from(invoker,
+                             [
+                               "visibility",
+                               "testonly",
+                             ],
+                             [ "pool" ])
+      deps = common_deps
+      pool = "//flutter/build/dart:dart_pool"
+      script = "//build/gn_run_binary.py"
+      inputs = [ invoker.main_dart ]
+      outputs = [ invoker.kernel_output ]
+      depfile = snapshot_depfile
+
+      ext = ""
+      if (is_win) {
+        ext = ".exe"
+      }
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
+      frontend_server =
+          rebase_path("$root_gen_dir/frontend_server.dart.snapshot")
+
+      args = [ dart ] + common_vm_args + [ frontend_server ] + common_args
+    }
+  } else {
+    prebuilt_dart_action(target_name) {
+      forward_variables_from(invoker,
+                             [
+                               "visibility",
+                               "testonly",
+                             ],
+                             [ "pool" ])
+      deps = common_deps
+      pool = "//flutter/build/dart:dart_pool"
+      script = "//third_party/dart/pkg/frontend_server/bin/frontend_server_starter.dart"
+      inputs = [ invoker.main_dart ]
+      outputs = [ invoker.kernel_output ]
+      depfile = snapshot_depfile
+      vm_args = common_vm_args
+      args = common_args
+    }
+  }
+}
 
 # Creates a dart kernel (dill) file suitable for use with gen_snapshot, as well
 # as the app-jit, aot-elf, or aot-assembly snapshot for targeting Flutter on
@@ -48,61 +140,38 @@ template("flutter_snapshot") {
 
   kernel_output = "$target_gen_dir/kernel_blob.bin"
 
-  prebuilt_dart_action(kernel_target) {
-    script = "//flutter/flutter_frontend_server/bin/starter.dart"
-
-    main_dart = rebase_path(invoker.main_dart)
-    package_config = rebase_path(invoker.package_config)
-    flutter_patched_sdk = rebase_path("$root_out_dir/flutter_patched_sdk")
-
-    deps = [ "//flutter/lib/snapshot:strong_platform" ]
-
-    inputs = [
-               main_dart,
-               package_config,
-             ] + frontend_server_files
-
-    outputs = [ kernel_output ]
-
-    depfile = "$kernel_output.d"
-    abs_depfile = rebase_path(depfile)
-    vm_args = [ "--disable-dart-dev" ]
-
-    args = [
-      "--depfile=$abs_depfile",
-      "--packages=" + rebase_path(package_config),
-      "--target=flutter",
-      "--sdk-root=" + flutter_patched_sdk,
-      "--output-dill=" + rebase_path(kernel_output, root_build_dir),
+  extra_frontend_server_args = []
+  if (is_aot) {
+    extra_frontend_server_args += [
+      "--aot",
+      "--tfa",
     ]
+  } else {
+    # --no-link-platform is only valid when --aot isn't specified
+    extra_frontend_server_args += [ "--no-link-platform" ]
+  }
 
-    if (is_aot) {
-      args += [
-        "--aot",
-        "--tfa",
-      ]
-    } else {
-      # --no-link-platform is only valid when --aot isn't specified
-      args += [ "--no-link-platform" ]
+  if (defined(invoker.product) && invoker.product) {
+    # Setting this flag in a non-product release build for AOT (a "profile"
+    # build) causes the vm service isolate code to be tree-shaken from an app.
+    # See the pragma on the entrypoint here:
+    #
+    # https://github.com/dart-lang/sdk/blob/main/sdk/lib/_internal/vm/bin/vmservice_io.dart#L240
+    #
+    # Also, this define excludes debugging and profiling code from Flutter.
+    extra_frontend_server_args += [ "-Ddart.vm.product=true" ]
+  } else {
+    if (flutter_runtime_mode == "profile") {
+      # The following define excludes debugging code from Flutter.
+      extra_frontend_server_args += [ "-Ddart.vm.profile=true" ]
     }
+  }
 
-    if (defined(invoker.product) && invoker.product) {
-      # Setting this flag in a non-product release build for AOT (a "profile"
-      # build) causes the vm service isolate code to be tree-shaken from an app.
-      # See the pragma on the entrypoint here:
-      #
-      # https://github.com/dart-lang/sdk/blob/main/sdk/lib/_internal/vm/bin/vmservice_io.dart#L240
-      #
-      # Also, this define excludes debugging and profiling code from Flutter.
-      args += [ "-Ddart.vm.product=true" ]
-    } else {
-      if (flutter_runtime_mode == "profile") {
-        # The following define excludes debugging code from Flutter.
-        args += [ "-Ddart.vm.profile=true" ]
-      }
-    }
-
-    args += [ rebase_path(main_dart) ]
+  flutter_frontend_server(kernel_target) {
+    main_dart = invoker.main_dart
+    package_config = invoker.package_config
+    kernel_output = kernel_output
+    extra_args = extra_frontend_server_args
   }
 
   compiled_action(snapshot_target) {
@@ -271,7 +340,7 @@ template("application_snapshot") {
   # Ensure the compiled appliation (e.g. frontend-server, ...) will use this
   # Dart SDK hash when consuming/producing kernel.
   #
-  # (Instead of ensuring every user of the "application_snapshot" passes it's
+  # (Instead of ensuring every user of the "application_snapshot" passes its
   # own)
   snapshot_vm_args += [ "-Dsdk_hash=$sdk_hash" ]
 
