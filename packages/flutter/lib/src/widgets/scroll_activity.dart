@@ -394,9 +394,12 @@ class ScrollDragController implements Drag {
     // We negate the velocity here because if the touch is moving downwards,
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
+    final StringBuffer velocityComputation = StringBuffer();
     double velocity = -details.primaryVelocity!;
+    velocityComputation.write('(primaryVelocity: $velocity) ');
     if (_reversed) {
       velocity = -velocity;
+      velocityComputation.write('(reversed: $velocity) ');
     }
     _lastDetails = details;
 
@@ -409,9 +412,10 @@ class ScrollDragController implements Drag {
         velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
       if (isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
         velocity += carriedVelocity!;
+        velocityComputation.write('(+carriedVelocity: $velocity) ');
       }
     }
-    isolatedDebugPrint('ScrollDragController: delegate.goBallistic($velocity)');
+    isolatedDebugPrint('ScrollDragController: delegate.goBallistic($velocity); computation: $velocityComputation');
     delegate.goBallistic(velocity);
   }
 
