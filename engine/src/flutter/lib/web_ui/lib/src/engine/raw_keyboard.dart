@@ -15,15 +15,6 @@ import 'services.dart';
 /// Provides keyboard bindings, such as the `flutter/keyevent` channel.
 class RawKeyboard {
   RawKeyboard._(this._onMacOs) {
-    _keydownListener = createDomEventListener((DomEvent event) {
-      _handleHtmlEvent(event);
-    });
-    domWindow.addEventListener('keydown', _keydownListener);
-
-    _keyupListener = createDomEventListener((DomEvent event) {
-      _handleHtmlEvent(event);
-    });
-    domWindow.addEventListener('keyup', _keyupListener);
     registerHotRestartListener(() {
       dispose();
     });
@@ -34,6 +25,9 @@ class RawKeyboard {
   /// Use the [instance] getter to get the singleton after calling this method.
   static void initialize({bool onMacOs = false}) {
     _instance ??= RawKeyboard._(onMacOs);
+    // KeyboardBinding is responsible for forwarding the keyboard
+    // events to the RawKeyboard handler.
+    KeyboardBinding.initInstance();
   }
 
   /// The [RawKeyboard] singleton.
@@ -46,24 +40,16 @@ class RawKeyboard {
   /// if no repeat events were received.
   final Map<String, Timer> _keydownTimers = <String, Timer>{};
 
-  DomEventListener? _keydownListener;
-  DomEventListener? _keyupListener;
-
   /// Uninitializes the [RawKeyboard] singleton.
   ///
   /// After calling this method this object becomes unusable and [instance]
   /// becomes `null`. Call [initialize] again to initialize a new singleton.
   void dispose() {
-    domWindow.removeEventListener('keydown', _keydownListener);
-    domWindow.removeEventListener('keyup', _keyupListener);
-
     for (final String key in _keydownTimers.keys) {
       _keydownTimers[key]!.cancel();
     }
     _keydownTimers.clear();
 
-    _keydownListener = null;
-    _keyupListener = null;
     _instance = null;
   }
 
@@ -96,7 +82,7 @@ class RawKeyboard {
     return event.type == 'keydown' && event.key == 'Tab' && event.isComposing;
   }
 
-  void _handleHtmlEvent(DomEvent domEvent) {
+  void handleHtmlEvent(DomEvent domEvent) {
     if (!domInstanceOfString(domEvent, 'KeyboardEvent')) {
       return;
     }
@@ -158,6 +144,7 @@ class RawKeyboard {
         if (jsonResponse['handled'] as bool) {
           // If the framework handled it, then don't propagate it any further.
           event.preventDefault();
+          event.stopPropagation();
         }
       },
     );
