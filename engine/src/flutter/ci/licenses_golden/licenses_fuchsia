@@ -1,4 +1,4 @@
-Signature: 824e98ccbd5ea04bb2f984607961d2e5
+Signature: c9323d0f315200ad5fb24eabd5fd1f87
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -4310,6 +4310,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/overview.fidl 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/names.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/endpoint.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/clock.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -4378,6 +4379,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/names.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.framework/driver_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/endpoint.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/clock.fidl
