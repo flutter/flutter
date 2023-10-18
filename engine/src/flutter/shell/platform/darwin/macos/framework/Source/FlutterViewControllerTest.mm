@@ -38,6 +38,42 @@
 }
 @end
 
+/// Responder wrapper that forwards key events to another responder. This is a necessary middle step
+/// for mocking responder because when setting the responder to controller AppKit will access ivars
+/// of the objects, which means it must extend NSResponder instead of just implementing the
+/// selectors.
+@interface FlutterResponderWrapper : NSResponder {
+  NSResponder* _responder;
+}
+@end
+
+@implementation FlutterResponderWrapper
+
+- (instancetype)initWithResponder:(NSResponder*)responder {
+  if (self = [super init]) {
+    _responder = responder;
+  }
+  return self;
+}
+
+- (void)keyDown:(NSEvent*)event {
+  [_responder keyDown:event];
+}
+
+- (void)keyUp:(NSEvent*)event {
+  [_responder keyUp:event];
+}
+
+- (BOOL)performKeyEquivalent:(NSEvent*)event {
+  return [_responder performKeyEquivalent:event];
+}
+
+- (void)flagsChanged:(NSEvent*)event {
+  [_responder flagsChanged:event];
+}
+
+@end
+
 // A FlutterViewController subclass for testing that mouseDown/mouseUp get called when
 // mouse events are sent to the associated view.
 @interface MouseEventFlutterViewController : FlutterViewController
@@ -417,7 +453,8 @@ TEST(FlutterViewControllerTest, testViewControllerIsReleased) {
                                                                                 nibName:@""
                                                                                  bundle:nil];
   id responderMock = flutter::testing::mockResponder();
-  viewController.nextResponder = responderMock;
+  id responderWrapper = [[FlutterResponderWrapper alloc] initWithResponder:responderMock];
+  viewController.nextResponder = responderWrapper;
   NSDictionary* expectedEvent = @{
     @"keymap" : @"macos",
     @"type" : @"keydown",
@@ -493,7 +530,8 @@ TEST(FlutterViewControllerTest, testViewControllerIsReleased) {
                                                                                 nibName:@""
                                                                                  bundle:nil];
   id responderMock = flutter::testing::mockResponder();
-  viewController.nextResponder = responderMock;
+  id responderWrapper = [[FlutterResponderWrapper alloc] initWithResponder:responderMock];
+  viewController.nextResponder = responderWrapper;
   NSDictionary* expectedEvent = @{
     @"keymap" : @"macos",
     @"type" : @"keydown",
@@ -546,7 +584,8 @@ TEST(FlutterViewControllerTest, testViewControllerIsReleased) {
                                                                                 nibName:@""
                                                                                  bundle:nil];
   id responderMock = flutter::testing::mockResponder();
-  viewController.nextResponder = responderMock;
+  id responderWrapper = [[FlutterResponderWrapper alloc] initWithResponder:responderMock];
+  viewController.nextResponder = responderWrapper;
   NSDictionary* expectedEvent = @{
     @"keymap" : @"macos",
     @"type" : @"keydown",
@@ -825,7 +864,7 @@ TEST(FlutterViewControllerTest, testViewControllerIsReleased) {
   CGEventRef cgEventDiscreteShift =
       CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0);
   CGEventSetType(cgEventDiscreteShift, kCGEventScrollWheel);
-  CGEventSetFlags(cgEventDiscreteShift, kCGEventFlagMaskShift);
+  CGEventSetFlags(cgEventDiscreteShift, kCGEventFlagMaskShift | flutter::kModifierFlagShiftLeft);
   CGEventSetIntegerValueField(cgEventDiscreteShift, kCGScrollWheelEventIsContinuous, 0);
   CGEventSetIntegerValueField(cgEventDiscreteShift, kCGScrollWheelEventDeltaAxis2,
                               0);  // scroll_delta_x
