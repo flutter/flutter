@@ -639,9 +639,3 @@ enum AutovalidateMode {
   /// interaction.
   onUserInteraction,
 }
-
-// Used to encapsulate `Form`'s validation state.
-// Having all values of `fieldsValidationStatus` as true is not a guarantee
-// of a valid form. Fields with no keys are skipped in this
-// Map.
-// A Form with no validation errors is only represented by setting `isValid` to true.
