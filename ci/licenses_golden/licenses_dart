@@ -1,4 +1,4 @@
-Signature: 764d20b7de9b833b72ac9c76cfccec95
+Signature: c74e00a0506ba58c362410dbb667f4f5
 
 ====================================================================================================
 LIBRARY: dart
@@ -1985,9 +1985,9 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/pream
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/jsshell.js + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/linked_hash_map.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/embedded_names.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/vm/lib/convert_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/vm/lib/lib_prefix.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/vm/lib/profiler.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/convert_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/collection/set.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/core/sink.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/developer/profiler.dart + ../../../third_party/dart/LICENSE
@@ -2077,9 +2077,9 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambl
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/jsshell.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/linked_hash_map.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/embedded_names.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/convert_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/lib_prefix.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/profiler.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm_shared/lib/convert_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/collection/set.dart
 FILE: ../../../third_party/dart/sdk/lib/core/sink.dart
 FILE: ../../../third_party/dart/sdk/lib/developer/profiler.dart
@@ -3962,6 +3962,7 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dar
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/wasm_types_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/weak_patch.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/convert_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/async/future_extensions.dart + ../../../third_party/dart/LICENSE
@@ -4012,6 +4013,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/wasm_types_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/weak_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/convert_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/async/future_extensions.dart
