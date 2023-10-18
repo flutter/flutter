@@ -440,9 +440,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void didStopTrackingLastPointer(int pointer) {
     assert(_state != _DragState.ready);
-    if (_state != _DragState.accepted) {
-      logPointer(pointer, '_state == $_state (expected _DragState.accepted)');
-    }
+    logPointer(pointer, 'didStopTrackingLastPointer (_state == $_state)');
     switch (_state) {
       case _DragState.ready:
         break;
@@ -556,7 +554,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkEnd(int pointer) {
-    logPointer(pointer, '_checkEnd');
+    logPointer(pointer, '_checkEnd (onEnd == ${onEnd == null ? 'null' : 'not null'})');
     if (onEnd == null) {
       return;
     }
@@ -576,7 +574,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     details ??= DragEndDetails(primaryVelocity: 0.0);
 
-    invokeCallback<void>('onEnd', () => onEnd!(details!), debugReport: debugReport);
+    logPointer(pointer, "invokeCallback<void>('onEnd'");
+    invokeCallback<void>('onEnd', () {
+      logPointer(pointer, 'onEnd!(details!)');
+      onEnd!(details!);
+    }, debugReport: debugReport);
   }
 
   void _checkCancel() {
