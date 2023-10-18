@@ -3886,6 +3886,7 @@ void main() {
       // (slider's left padding (overlayRadius), windowHeight / 2)
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset centerOfTheSlideTrack = Offset(400, 300);
+      final List<String> logs = <String>[];
 
       Widget buildWidget() => MaterialApp(
         home: Material(
@@ -3895,10 +3896,17 @@ void main() {
                 value: value,
                 key: sliderKey,
                 allowedInteraction: SliderInteraction.tapOnly,
+                onChangeStart: (double newValue) {
+                  logs.add('onChangeStart');
+                },
                 onChanged: (double newValue) {
+                  logs.add('onChanged');
                   setState(() {
                     value = newValue;
                   });
+                },
+                onChangeEnd: (double newValue) {
+                  logs.add('onChangeEnd');
                 },
               );
             }),
@@ -3909,26 +3917,35 @@ void main() {
       // allow tap only
       await tester.pumpWidget(buildWidget());
 
+      expect(logs, isEmpty);
+
       // test tap
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
       await tester.pump();
       // changes from 1.0 -> 0.5
       expect(value, 0.5);
+      expect(logs, <String>['onChangeStart', 'onChanged']);
 
       // test slide
       await gesture.moveTo(startOfTheSliderTrack);
       await tester.pump();
       // has no effect, remains 0.5
       expect(value, 0.5);
+      expect(logs, <String>['onChangeStart', 'onChanged']);
+
+      await gesture.up();
+      await tester.pump();
+      expect(logs, <String>['onChangeStart', 'onChanged', 'onChangeEnd']);
     });
 
-    testWidgetsWithLeakTracking('SliderInteraction.tapAndSlide', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliderInteraction.tapAndSlide (default)', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset centerOfTheSlideTrack = Offset(400, 300);
       const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+      final List<String> logs = <String>[];
 
       Widget buildWidget() => MaterialApp(
         home: Material(
@@ -3937,11 +3954,17 @@ void main() {
               return Slider(
                 value: value,
                 key: sliderKey,
-                // allowedInteraction: SliderInteraction.tapAndSlide, // default
+                onChangeStart: (double newValue) {
+                  logs.add('onChangeStart');
+                },
                 onChanged: (double newValue) {
+                  logs.add('onChanged');
                   setState(() {
                     value = newValue;
                   });
+                },
+                onChangeEnd: (double newValue) {
+                  logs.add('onChangeEnd');
                 },
               );
             }),
@@ -3951,11 +3974,14 @@ void main() {
 
       await tester.pumpWidget(buildWidget());
 
+      expect(logs, isEmpty);
+
       // Test tap.
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
       await tester.pump();
       // changes from 1.0 -> 0.5
       expect(value, 0.5);
+      expect(logs, <String>['onChangeStart', 'onChanged']);
 
       // test slide
       await gesture.moveTo(startOfTheSliderTrack);
@@ -3966,6 +3992,12 @@ void main() {
       await tester.pump();
       // changes from 0.0 -> 1.0
       expect(value, 1.0);
+      expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChanged']);
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChanged', 'onChangeEnd']);
     });
 
     testWidgetsWithLeakTracking('SliderInteraction.slideOnly', (WidgetTester tester) async {
@@ -3975,6 +4007,7 @@ void main() {
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset centerOfTheSlideTrack = Offset(400, 300);
       const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+      final List<String> logs = <String>[];
 
       Widget buildApp() {
         return MaterialApp(
@@ -3985,10 +4018,17 @@ void main() {
                   value: value,
                   key: sliderKey,
                   allowedInteraction: SliderInteraction.slideOnly,
+                  onChangeStart: (double newValue) {
+                    logs.add('onChangeStart');
+                  },
                   onChanged: (double newValue) {
+                    logs.add('onChanged');
                     setState(() {
                       value = newValue;
                     });
+                  },
+                  onChangeEnd: (double newValue) {
+                    logs.add('onChangeEnd');
                   },
                 );
               }),
@@ -3999,11 +4039,14 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
+      expect(logs, isEmpty);
+
       // test tap
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
       await tester.pump();
       // has no effect as tap is disabled, remains 1.0
       expect(value, 1.0);
+      expect(logs, <String>['onChangeStart']);
 
       // test slide
       await gesture.moveTo(startOfTheSliderTrack);
@@ -4014,6 +4057,12 @@ void main() {
       await tester.pump();
       // changes from 0.0 -> 1.0
       expect(value, 1.0);
+      expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged']);
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChangeEnd']);
     });
 
     testWidgetsWithLeakTracking('SliderInteraction.slideThumb', (WidgetTester tester) async {
@@ -4023,6 +4072,7 @@ void main() {
       const Offset startOfTheSliderTrack = Offset(24, 300);
       const Offset centerOfTheSliderTrack = Offset(400, 300);
       const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+      final List<String> logs = <String>[];
 
       Widget buildApp() {
         return MaterialApp(
@@ -4033,10 +4083,17 @@ void main() {
                   value: value,
                   key: sliderKey,
                   allowedInteraction: SliderInteraction.slideThumb,
+                  onChangeStart: (double newValue) {
+                    logs.add('onChangeStart');
+                  },
                   onChanged: (double newValue) {
+                    logs.add('onChanged');
                     setState(() {
                       value = newValue;
                     });
+                  },
+                  onChangeEnd: (double newValue) {
+                    logs.add('onChangeEnd');
                   },
                 );
               }),
@@ -4047,17 +4104,21 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
+      expect(logs, isEmpty);
+
       // test tap
       final TestGesture gesture = await tester.startGesture(centerOfTheSliderTrack);
       await tester.pump();
       // has no effect, remains 1.0
       expect(value, 1.0);
+      expect(logs, isEmpty);
 
       // test slide
       await gesture.moveTo(startOfTheSliderTrack);
       await tester.pump();
       // has no effect, remains 1.0
       expect(value, 1.0);
+      expect(logs, isEmpty);
 
       // test slide thumb
       await gesture.up();
@@ -4065,22 +4126,36 @@ void main() {
       await tester.pump();
       // has no effect, remains 1.0
       expect(value, 1.0);
+      expect(logs, <String>['onChangeStart']);
+
       await gesture.moveTo(centerOfTheSliderTrack);
       await tester.pump();
       // changes from 1.0 -> 0.5
       expect(value, 0.5);
+      expect(logs, <String>['onChangeStart', 'onChanged']);
 
       // test tap inside overlay but not on thumb, then slide
       await gesture.up();
       // default overlay radius is 12, so 10 is inside the overlay
       await gesture.down(centerOfTheSliderTrack.translate(-10, 0));
       await tester.pump();
-      // has no effect, remains 1.0
+      // changes from 1.0 -> 0.5
       expect(value, 0.5);
+      expect(logs, <String>['onChangeStart', 'onChanged', 'onChangeEnd', 'onChangeStart']);
+
       await gesture.moveTo(endOfTheSliderTrack.translate(-10, 0));
       await tester.pump();
       // changes from 0.5 -> 1.0
       expect(value, 1.0);
+      expect(logs, <String>['onChangeStart', 'onChanged', 'onChangeEnd', 'onChangeStart', 'onChanged']);
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(
+        logs,
+        <String>['onChangeStart', 'onChanged', 'onChangeEnd', 'onChangeStart', 'onChanged', 'onChangeEnd'],
+      );
     });
   });
 }
