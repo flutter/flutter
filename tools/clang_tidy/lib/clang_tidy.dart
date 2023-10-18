@@ -13,6 +13,7 @@ import 'package:process/process.dart';
 import 'package:process_runner/process_runner.dart';
 
 import 'src/command.dart';
+import 'src/lint_target.dart';
 import 'src/options.dart';
 
 const String _linterOutputHeader = '''
@@ -48,14 +49,17 @@ class ClangTidy {
   /// Builds an instance of [ClangTidy] using a repo's [buildCommandPath].
   ///
   /// ## Required
+  ///
   /// - [buildCommandsPath] is the path to the build_commands.json file.
   ///
   /// ## Optional
+  ///
   /// - [checksArg] are specific checks for clang-tidy to do.
   ///
   ///   If omitted, checks will be determined by the `.clang-tidy` file in the
   ///   repo.
-  /// - [lintAll] when true indicates that all files should be linted.
+  ///
+  /// - [lintTarget] is what files to lint.
   ///
   /// ## Optional (Test Overrides)
   ///
@@ -76,8 +80,7 @@ class ClangTidy {
   ClangTidy({
     required io.File buildCommandsPath,
     String checksArg = '',
-    bool lintAll = false,
-    bool lintHead = false,
+    LintTarget lintTarget = const LintChanged(),
     bool fix = false,
     StringSink? outSink,
     StringSink? errSink,
@@ -86,8 +89,7 @@ class ClangTidy {
     options = Options(
       buildCommandsPath: buildCommandsPath,
       checksArg: checksArg,
-      lintAll: lintAll,
-      lintHead: lintHead,
+      lintTarget: lintTarget,
       fix: fix,
       errSink: errSink,
     ),
@@ -143,12 +145,23 @@ class ClangTidy {
         _outSink.writeln('Checking for specific checks: ${options.checks}.');
       }
       final int changedFilesCount = filesOfInterest.length;
-      if (options.lintAll) {
-        _outSink.writeln('Checking all $changedFilesCount files the repo dir.');
-      } else {
-        _outSink.writeln(
-          'Dectected $changedFilesCount files that have changed',
-        );
+      switch (options.lintTarget) {
+        case LintAll():
+          _outSink.writeln('Checking all $changedFilesCount files in the repo.');
+        case LintChanged():
+          _outSink.writeln(
+            'Checking $changedFilesCount files that have changed since the '
+            'last commit.',
+          );
+        case LintHead():
+          _outSink.writeln(
+            'Checking $changedFilesCount files that have changed compared to '
+            'HEAD.',
+          );
+        case LintRegex(:final String regex):
+          _outSink.writeln(
+            'Checking $changedFilesCount files that match the regex "$regex".',
+          );
       }
     }
 
@@ -200,26 +213,39 @@ class ClangTidy {
     return computeResult + runResult > 0 ? 1 : 0;
   }
 
-  /// The files with local modifications or all the files if `lintAll` was
-  /// specified.
+  /// The files with local modifications or all/a subset of all files.
+  ///
+  /// See [LintTarget] for more information.
   @visibleForTesting
   Future<List<io.File>> computeFilesOfInterest() async {
-    if (options.lintAll) {
-      return options.repoPath
-        .listSync(recursive: true)
-        .whereType<io.File>()
-        .toList();
+    switch (options.lintTarget) {
+      case LintAll():
+        return options.repoPath
+          .listSync(recursive: true)
+          .whereType<io.File>()
+          .toList();
+      case LintRegex(:final String regex):
+        final RegExp pattern = RegExp(regex);
+        return options.repoPath
+          .listSync(recursive: true)
+          .whereType<io.File>()
+          .where((io.File file) => pattern.hasMatch(file.path))
+          .toList();
+      case LintChanged():
+        final GitRepo repo = GitRepo.fromRoot(
+          options.repoPath,
+          processManager: _processManager,
+          verbose: options.verbose,
+        );
+        return repo.changedFiles;
+      case LintHead():
+        final GitRepo repo = GitRepo.fromRoot(
+          options.repoPath,
+          processManager: _processManager,
+          verbose: options.verbose,
+        );
+        return repo.changedFilesAtHead;
     }
-
-    final GitRepo repo = GitRepo.fromRoot(
-      options.repoPath,
-      processManager: _processManager,
-      verbose: options.verbose,
-    );
-    if (options.lintHead) {
-      return repo.changedFilesAtHead;
-    }
-    return repo.changedFiles;
   }
 
   /// Returns f(n) = value(n * [shardCount] + [id]).
