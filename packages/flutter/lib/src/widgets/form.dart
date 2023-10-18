@@ -293,6 +293,7 @@ class FormState extends State<Form> {
   /// returns true if there are no errors.
   ///
   /// The form will rebuild to report the results.
+  ///
   /// See also:
   ///  * [validateGranularly], which returns a [Map] describing the validation
   /// status for each [FormField]
