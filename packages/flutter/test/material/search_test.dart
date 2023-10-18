@@ -1264,7 +1264,6 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 }
 
 class _TestEmptySearchDelegate extends SearchDelegate<String> {
-
   @override
   Widget? buildLeading(BuildContext context) => null;
 
