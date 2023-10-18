@@ -20,102 +20,20 @@ homepage: https://flutter.dev
 environment:
   sdk: '>=3.2.0-0 <4.0.0'
 
-dependencies:
-  args: any
-  frontend_server: any
-  path: any
-
 dev_dependencies:
   litetest: any
+  path: any
 
 dependency_overrides:
-  _fe_analyzer_shared:
-    path: ../../third_party/dart/pkg/_fe_analyzer_shared
-  _js_interop_checks:
-    path: ../../third_party/dart/pkg/_js_interop_checks
-  args:
-    path: ../../third_party/dart/third_party/pkg/args
-  async:
-    path: ../../third_party/dart/third_party/pkg/async
   async_helper:
     path: ../../third_party/dart/pkg/async_helper
-  bazel_worker:
-    path: ../../third_party/dart/third_party/pkg/bazel_worker
-  build_integration:
-    path: ../../third_party/dart/pkg/build_integration
-  collection:
-    path: ../../third_party/dart/third_party/pkg/collection
-  compiler:
-    path: ../../third_party/dart/pkg/compiler
-  crypto:
-    path: ../../third_party/dart/third_party/pkg/crypto
-  dart_internal:
-    path: ../../third_party/dart/pkg/dart_internal
-  dart2js_info:
-    path: ../../third_party/dart/pkg/dart2js_info
-  dart2wasm:
-    path: ../../third_party/dart/pkg/dart2wasm
-  dev_compiler:
-    path: ../../third_party/dart/pkg/dev_compiler
   expect:
     path: ../../third_party/dart/pkg/expect
-  ffi:
-    path: ../../third_party/dart/third_party/pkg/ffi
-  fixnum:
-    path: ../../third_party/dart/third_party/pkg/fixnum
-  front_end:
-    path: ../../third_party/dart/pkg/front_end
-  frontend_server:
-    path: ../../third_party/dart/pkg/frontend_server
-  http_parser:
-    path: ../../third_party/dart/third_party/pkg/http_parser
-  js_ast:
-    path: ../../third_party/dart/pkg/js_ast
-  js_runtime:
-    path: ../../third_party/dart/pkg/js_runtime
-  js_shared:
-    path: ../../third_party/dart/pkg/js_shared
-  kernel:
-    path: ../../third_party/dart/pkg/kernel
   litetest:
     path: ../testing/litetest
   meta:
     path: ../../third_party/dart/pkg/meta
-  mmap:
-    path: ../../third_party/dart/pkg/mmap
-  package_config:
-    path: ../../third_party/dart/third_party/pkg/package_config
   path:
     path: ../../third_party/dart/third_party/pkg/path
-  protobuf:
-    path: ../../third_party/dart/third_party/pkg/protobuf/protobuf
-  shelf:
-    path: ../../third_party/dart/third_party/pkg/shelf/pkgs/shelf
   smith:
     path: ../../third_party/dart/pkg/smith
-  source_maps:
-    path: ../../third_party/dart/third_party/pkg/source_maps
-  source_span:
-    path: ../../third_party/dart/third_party/pkg/source_span
-  stack_trace:
-    path: ../../third_party/dart/third_party/pkg/stack_trace
-  stream_channel:
-    path: ../../third_party/dart/third_party/pkg/stream_channel
-  string_scanner:
-    path: ../../third_party/dart/third_party/pkg/string_scanner
-  term_glyph:
-    path: ../../third_party/dart/third_party/pkg/term_glyph
-  typed_data:
-    path: ../../third_party/dart/third_party/pkg/typed_data
-  usage:
-    path: ../../third_party/dart/third_party/pkg/usage
-  vm:
-    path: ../../third_party/dart/pkg/vm
-  vm_service:
-    path: ../../third_party/dart/pkg/vm_service
-  vm_snapshot_analysis:
-    path: ../../third_party/dart/pkg/vm_snapshot_analysis
-  wasm_builder:
-    path: ../../third_party/dart/pkg/wasm_builder
-  yaml:
-    path: ../../third_party/dart/third_party/pkg/yaml

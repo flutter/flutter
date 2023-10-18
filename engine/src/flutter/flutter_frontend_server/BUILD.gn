@@ -2,19 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/build/dart/rules.gni")
+import("//flutter/common/config.gni")
 
-application_snapshot("frontend_server") {
-  main_dart = "bin/starter.dart"
-  deps = [ "//flutter/lib/snapshot:kernel_platform_files" ]
+copy("frontend_server") {
+  if (flutter_prebuilt_dart_sdk) {
+    snapshot =
+        "$host_prebuilt_dart_sdk/bin/snapshots/frontend_server.dart.snapshot"
+  } else {
+    deps = [ "//third_party/dart/utils/kernel-service:frontend_server" ]
+    snapshot = "$root_out_dir/frontend_server.dart.snapshot"
+  }
 
-  package_config = rebase_path(".dart_tool/package_config.json")
-  flutter_patched_sdk = rebase_path("$root_out_dir/flutter_patched_sdk")
-  training_args = [
-    "--train",
-    "--sdk-root=$flutter_patched_sdk",
-    rebase_path(main_dart),
-  ]
-
-  inputs = frontend_server_files
+  sources = [ snapshot ]
+  outputs = [ "$root_gen_dir/frontend_server.dart.snapshot" ]
 }
