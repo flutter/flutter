@@ -4,7 +4,6 @@
 ../../../.github
 ../../../.gitignore
 ../../../.gn
-../../../.ycm_extra_conf.py
 ../../../AUTHORS
 ../../../CODEOWNERS
 ../../../README.md
