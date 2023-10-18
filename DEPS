@@ -262,7 +262,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'ab1d95b34a806908a4a4b4cd9a6246e564e59566',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'f4b39f2bb89accd10cf097a6dedee5bcf9229286',
 
   'src/third_party/rapidjson':
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
@@ -980,17 +980,6 @@ hooks = [
     'condition': 'download_windows_deps',
     'pattern': '.',
     'action': ['python3', 'src/build/vs_toolchain.py', 'update'],
-  },
-  {
-    # Ensure that we don't accidentally reference any .pyc files whose
-    # corresponding .py files have already been deleted.
-    'name': 'remove_stale_pyc_files',
-    'pattern': 'src/tools/.*\\.py',
-    'action': [
-        'python3',
-        'src/tools/remove_stale_pyc_files.py',
-        'src/tools',
-    ],
   },
   {
     'name': 'dia_dll',
