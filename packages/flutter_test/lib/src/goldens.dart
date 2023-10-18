@@ -185,6 +185,34 @@ abstract class WebGoldenComparator {
   /// is left up to the implementation class.
   Future<void> update(double width, double height, Uri golden);
 
+  /// Compares the pixels of decoded png [bytes] against the golden file
+  /// identified by [golden].
+  ///
+  /// The returned future completes with a boolean value that indicates whether
+  /// the pixels rendered on screen match the golden file's pixels.
+  ///
+  /// In the case of comparison mismatch, the comparator may choose to throw a
+  /// [TestFailure] if it wants to control the failure message, often in the
+  /// form of a [ComparisonResult] that provides detailed information about the
+  /// mismatch.
+  ///
+  /// The method by which [golden] is located and by which its bytes are loaded
+  /// is left up to the implementation class. For instance, some implementations
+  /// may load files from the local file system, whereas others may load files
+  /// over the network or from a remote repository.
+  Future<bool> compareBytes(Uint8List bytes, Uri golden);
+
+  /// Compares the pixels of decoded png [bytes] against the golden file
+  /// identified by [golden].
+  ///
+  /// This will be invoked in lieu of [compareBytes] when [autoUpdateGoldenFiles]
+  /// is `true` (which gets set automatically by the test framework when the
+  /// user runs `flutter test --update-goldens --platform=chrome`).
+  ///
+  /// The method by which [golden] is located and by which its bytes are written
+  /// is left up to the implementation class.
+  Future<void> updateBytes(Uint8List bytes, Uri golden);
+
   /// Returns a new golden file [Uri] to incorporate any [version] number with
   /// the [key].
   ///
@@ -298,12 +326,7 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
 
   @override
   Future<bool> compare(double width, double height, Uri golden) {
-    // Ideally we would use markTestSkipped here but in some situations,
-    // comparators are called outside of tests.
-    // See also: https://github.com/flutter/flutter/issues/91285
-    // ignore: avoid_print
-    print('Golden comparison requested for "$golden"; skipping...');
-    return Future<bool>.value(true);
+    return _warnAboutSkipping(golden);
   }
 
   @override
@@ -314,6 +337,25 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
   @override
   Uri getTestUri(Uri key, int? version) {
     return key;
+  }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) {
+    return _warnAboutSkipping(golden);
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) {
+    throw StateError('webGoldenComparator has not been initialized');
+  }
+
+  Future<bool> _warnAboutSkipping(Uri golden) {
+    // Ideally we would use markTestSkipped here but in some situations,
+    // comparators are called outside of tests.
+    // See also: https://github.com/flutter/flutter/issues/91285
+    // ignore: avoid_print
+    print('Golden comparison requested for "$golden"; skipping...');
+    return Future<bool>.value(true);
   }
 }
 
