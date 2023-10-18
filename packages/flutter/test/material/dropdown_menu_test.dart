@@ -61,7 +61,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, TestMenu.mainMenu0.label),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, themeData.colorScheme.surface);
     expect(material.shadowColor, themeData.colorScheme.shadow);
@@ -143,7 +143,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
-    );
+    ).first;
     final Size menuSize = tester.getSize(menuMaterial);
     expect(menuSize, const Size(180.0, 304.0));
 
@@ -161,7 +161,7 @@ void main() {
     final Finder updatedMenu = find.ancestor(
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
-    );
+    ).first;
     final double updatedMenuWidth = tester.getSize(updatedMenu).width;
     expect(updatedMenuWidth, 200.0);
   });
@@ -192,7 +192,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
-    );
+    ).first;
     final double menuWidth = tester.getSize(menuMaterial).width;
     expect(menuWidth, closeTo(180.5, 0.1));
 
@@ -210,7 +210,7 @@ void main() {
     final Finder updatedMenu = find.ancestor(
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
-    );
+    ).first;
     final double updatedMenuWidth = tester.getSize(updatedMenu).width;
     expect(updatedMenuWidth, 200.0);
   });
@@ -644,8 +644,8 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label),
       matching: find.byType(Material),
-    ).last;
-    expect(menuMaterial, findsOneWidget);
+    );
+    expect(menuMaterial, findsNWidgets(3));
 
     // didChangeMetrics
     tester.view.physicalSize = const Size(700.0, 700.0);
