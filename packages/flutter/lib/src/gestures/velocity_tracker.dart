@@ -175,6 +175,7 @@ class VelocityTracker {
   /// Returns null if there is no data on which to base an estimate.
   VelocityEstimate? getVelocityEstimate() {
     // no recent user movement?
+    isolatedDebugPrint('>>> _sinceLastSample.elapsedMilliseconds = ${_sinceLastSample.elapsedMilliseconds}');
     if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
       return const VelocityEstimate(
         pixelsPerSecond: Offset.zero,
@@ -344,6 +345,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   @override
   VelocityEstimate getVelocityEstimate() {
     // no recent user movement?
+    isolatedDebugPrint('>>> _sinceLastSample.elapsedMilliseconds = ${_sinceLastSample.elapsedMilliseconds}');
     if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
       return const VelocityEstimate(
         pixelsPerSecond: Offset.zero,
@@ -415,6 +417,7 @@ class MacOSScrollViewFlingVelocityTracker extends IOSScrollViewFlingVelocityTrac
   @override
   VelocityEstimate getVelocityEstimate() {
     // no recent user movement?
+    isolatedDebugPrint('>>> _sinceLastSample.elapsedMilliseconds = ${_sinceLastSample.elapsedMilliseconds}');
     if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
       return const VelocityEstimate(
         pixelsPerSecond: Offset.zero,
