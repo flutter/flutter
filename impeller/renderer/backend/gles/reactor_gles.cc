@@ -159,6 +159,10 @@ bool ReactorGLES::React() {
   }
   TRACE_EVENT0("impeller", "ReactorGLES::React");
   while (HasPendingOperations()) {
+    // Both the raster thread and the IO thread can flush queued operations.
+    // Ensure that execution of the ops is serialized.
+    Lock execution_lock(ops_execution_mutex_);
+
     if (!ReactOnce()) {
       return false;
     }

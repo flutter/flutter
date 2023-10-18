@@ -233,6 +233,7 @@ class ReactorGLES {
 
   std::unique_ptr<ProcTableGLES> proc_table_;
 
+  Mutex ops_execution_mutex_;
   mutable Mutex ops_mutex_;
   std::vector<Operation> ops_ IPLR_GUARDED_BY(ops_mutex_);
 
@@ -252,7 +253,7 @@ class ReactorGLES {
   bool can_set_debug_labels_ = false;
   bool is_valid_ = false;
 
-  bool ReactOnce();
+  bool ReactOnce() IPLR_REQUIRES(ops_execution_mutex_);
 
   bool HasPendingOperations() const;
 
