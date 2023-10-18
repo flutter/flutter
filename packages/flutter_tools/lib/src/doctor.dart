@@ -378,7 +378,7 @@ class Doctor {
     
     // This timestamp will be used on the backend of GA4 to group each of the events that
     // were sent for each doctor validator and its result
-    final int analyticsTimestamp = DateTime.now().millisecondsSinceEpoch;
+    final int analyticsTimestamp = globals.systemClock.now().millisecondsSinceEpoch;
 
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;

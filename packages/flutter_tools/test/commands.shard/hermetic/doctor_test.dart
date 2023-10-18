@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -26,6 +27,7 @@ import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -815,6 +817,47 @@ void main() {
     expect(provider.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
   }, overrides: <Type, Generator>{
     AndroidWorkflow: () => FakeAndroidWorkflow(appliesToHostPlatform: false),
+  });
+
+  group('Doctor events with unified_analytics', () {
+    late FakeAnalytics fakeAnalytics;
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+
+    setUp(() {
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fakeFlutterVersion: fakeFlutterVersion,
+        fs: fs,
+      );
+    });
+
+    testUsingContext('ensure fake is being used and initialized', () {
+      expect(fakeAnalytics.sentEvents.length, 0);
+      expect(fakeAnalytics.okToSend, true);
+    }, overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+    });
+
+    testUsingContext('contains installed', () async {
+      final Doctor doctor = Doctor(logger: logger);
+      await doctor.diagnose(verbose: false);
+
+      expect(fakeAnalytics.sentEvents.length, 3);
+      
+      // The event that should have been fired off during the doctor invocation
+      final Event eventToFind = Event.doctorValidatorResult(
+        validatorName: 'Passing Validator',
+        result: 'success',
+        partOfGroupedValidator: false,
+        doctorInvocationId: DateTime(1995, 3, 3).millisecondsSinceEpoch,
+        statusInfo: 'with statusInfo',
+      );
+      expect(fakeAnalytics.sentEvents, contains(eventToFind));
+
+    }, overrides: <Type, Generator>{
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
+      Analytics: () => fakeAnalytics,
+      SystemClock: () => SystemClock.fixed(DateTime(1995, 3, 3)),
+    });
   });
 }
 
