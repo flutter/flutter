@@ -326,11 +326,12 @@ class FormState extends State<Form> {
     bool hasError = false;
     String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
-      hasError = !field.validate() || hasError;
+      final bool isFieldValid = field.validate();
+      hasError = !isFieldValid || hasError;
       errorMessage += field.errorText ?? '';
       final Key? key = field.widget.key;
-        fieldsValidationStatus[key] = field.validate();
       if (validationResults != null && key != null) {
+        validationResults[key] = isFieldValid;
       }
     }
 
