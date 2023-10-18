@@ -198,7 +198,7 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'installed',
+          label: 'success',
         ),
       ));
     }, overrides: <Type, Generator>{
@@ -206,19 +206,19 @@ void main() {
       Usage: () => testUsage,
     });
 
-    testUsingContext('contains installed and partial', () async {
+    testUsingContext('contains success and partial', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false);
 
       expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'installed',
+          label: 'success',
         ),
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'installed',
+          label: 'success',
         ),
         const TestUsageEvent(
           'doctor-result',
@@ -235,14 +235,14 @@ void main() {
       Usage: () => testUsage,
     });
 
-    testUsingContext('contains installed, missing and partial', () async {
+    testUsingContext('contains success, missing and partial', () async {
       await FakeDoctor(logger).diagnose(verbose: false);
 
       expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'installed',
+          label: 'success',
         ),
         const TestUsageEvent(
           'doctor-result',
@@ -276,17 +276,17 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
-          label: 'installed',
+          label: 'success',
         ),
         const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
-          label: 'installed',
+          label: 'success',
         ),
         const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
-          label: 'installed',
+          label: 'success',
         ),
         const TestUsageEvent(
           'doctor-result',
@@ -532,7 +532,7 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PiiValidator',
-          label: 'installed',
+          label: 'success',
         ),
       ]);
     }, overrides: <Type, Generator>{
