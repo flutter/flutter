@@ -234,7 +234,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
       return true;
     }(), 'A RenderTapRegion was registered when it was disabled.');
 
-    if (event is! PointerDownEvent || event.buttons != kPrimaryButton) {
+    if (event is! PointerDownEvent) {
       return;
     }
 
