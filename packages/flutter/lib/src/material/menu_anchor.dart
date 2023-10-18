@@ -461,39 +461,19 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   _MenuAnchorState? get _nextFocusableSibling {
     final List<_MenuAnchorState> focusable = _getFocusableChildren();
-    if (focusable.isEmpty) {
-      return null;
-    }
-    final int index = focusable.indexOf(this);
-    if (focusable.length == 1 || index == -1) {
-      // No other focusable widgets besides this one.
-      return focusable.first;
-    }
-    if (index < focusable.length - 1) {
-      return focusable[index + 1];
-    } else {
-      // Wrap around
-      return focusable.first;
-    }
+      if (focusable.isEmpty) {
+        return null;
+      }
+      return focusable[(focusable.indexOf(this) + 1) % focusable.length];
   }
 
-  _MenuAnchorState? get _previousFocusableSibling {
-    final List<_MenuAnchorState> focusable = _getFocusableChildren();
-    if (focusable.isEmpty) {
-      return null;
-    }
-    final int index = focusable.indexOf(this);
-    if (focusable.length == 1 || index == -1) {
-      // No other focusable widgets besides this one.
-      return focusable.last;
-    }
-    if (index > 0) {
-      return focusable[index - 1];
-    } else {
-      // Wrap around
-      return focusable.last;
-    }
+_MenuAnchorState? get _previousFocusableSibling {
+  final List<_MenuAnchorState> focusable = _getFocusableChildren();
+  if (focusable.isEmpty) {
+    return null;
   }
+  return focusable[(focusable.indexOf(this) - 1 + focusable.length) % focusable.length];
+}
 
   _MenuAnchorState get _root {
     _MenuAnchorState anchor = this;
@@ -513,11 +493,19 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   void _childChangedOpenState() {
     _parent?._childChangedOpenState();
-    if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+    assert(mounted);
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       setState(() {
-        // Mark dirty, but only if mounted and not in a build.
+        // Mark dirty now, but only if not in a build.
+      });
+    } else {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        setState(() {
+          // Mark dirty after this frame, but only if in a build.
+        });
       });
     }
+
   }
 
   void _focusButton() {
@@ -2399,7 +2387,7 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
     return _moveToPreviousFocusable(anchor);
   }
 
-  bool _moveToPreviousFocusable(_MenuAnchorState currentMenu) {
+  static bool _moveToPreviousFocusable(_MenuAnchorState currentMenu) {
     final _MenuAnchorState? sibling = currentMenu._previousFocusableSibling;
     sibling?._focusButton();
     return true;
@@ -2422,7 +2410,7 @@ class _MenuNextFocusAction extends NextFocusAction {
     return _moveToNextFocusable(anchor);
   }
 
-  bool _moveToNextFocusable(_MenuAnchorState currentMenu) {
+  static bool _moveToNextFocusable(_MenuAnchorState currentMenu) {
     final _MenuAnchorState? sibling = currentMenu._nextFocusableSibling;
     sibling?._focusButton();
     return true;
