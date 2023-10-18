@@ -350,6 +350,10 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
+    isIsolatedDebugPrintEnabled = true;
+    addTearDown(() {
+      isIsolatedDebugPrintEnabled = false;
+    });
     ScrollController? testController;
     await tester.pumpWidget(
       MaterialApp(

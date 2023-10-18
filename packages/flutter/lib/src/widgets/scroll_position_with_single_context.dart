@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -126,6 +127,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   void goIdle() {
+    isolatedDebugPrint('goIdle()');
     beginActivity(IdleScrollActivity(this));
   }
 
@@ -150,6 +152,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         activity?.shouldIgnorePointer ?? true,
       ));
     } else {
+      isolatedDebugPrint('simulation is null');
       goIdle();
     }
   }

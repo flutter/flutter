@@ -37,6 +37,15 @@ typedef DebugPrintCallback = void Function(String? message, { int? wrapWidth });
 ///   * [debugPrintThrottled], the default implementation.
 DebugPrintCallback debugPrint = debugPrintThrottled;
 
+bool isIsolatedDebugPrintEnabled = false;
+
+void isolatedDebugPrint(String? message) {
+  if (!isIsolatedDebugPrintEnabled) {
+    return;
+  }
+  debugPrint(message);
+}
+
 /// Alternative implementation of [debugPrint] that does not throttle.
 /// Used by tests.
 void debugPrintSynchronously(String? message, { int? wrapWidth }) {

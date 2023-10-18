@@ -938,8 +938,11 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     if ((velocity == 0.0 && !_shouldSnap) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && extent.isAtMax)) {
+      isolatedDebugPrint('super.goBallistic(velocity: $velocity)');
       super.goBallistic(velocity);
       return;
+    } else {
+      isolatedDebugPrint('goBallistic(velocity: $velocity) fallback');
     }
     // Scrollable expects that we will dispose of its current _dragCancelCallback
     _dragCancelCallback?.call();

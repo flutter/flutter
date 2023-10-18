@@ -1178,7 +1178,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   void scheduleFrame() {
     if (trackFrameSchedules) {
-      debugPrintStack(maxFrames: 50);
+      isolatedDebugPrintStack(maxFrames: 50);
     }
     super.scheduleFrame();
   }

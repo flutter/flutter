@@ -781,7 +781,7 @@ abstract class WidgetController {
       pointerLog.clear();
       final PointerUpEvent upEvent = testPointer.up(timeStamp: Duration(microseconds: timeStamp.round()));
       await sendEventToBinding(upEvent);
-      debugPrint('''
+      isolatedDebugPrint('''
 Up event: ${upEvent.log.where((Object? entry) => !(entry is List && entry.isEmpty)).toList()}
 Pointer:
 ${pointerLog.entries.map<String>((entry) => '  ${entry.key}: ${entry.value}\n').toList()}

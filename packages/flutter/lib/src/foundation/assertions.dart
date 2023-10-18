@@ -1182,6 +1182,13 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   }
 }
 
+void isolatedDebugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
+  if (!isIsolatedDebugPrintEnabled) {
+    return;
+  }
+  debugPrintStack(stackTrace: stackTrace, label: label, maxFrames: maxFrames);
+}
+
 /// Dump the stack to the console using [debugPrint] and
 /// [FlutterError.defaultStackFilter].
 ///
