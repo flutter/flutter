@@ -411,7 +411,7 @@ class ScrollDragController implements Drag {
         velocity += carriedVelocity!;
       }
     }
-    isolatedDebugPrint('ScrollDragController: delegate.goBallistic(velocity)');
+    isolatedDebugPrint('ScrollDragController: delegate.goBallistic($velocity)');
     delegate.goBallistic(velocity);
   }
 
