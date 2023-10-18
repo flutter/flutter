@@ -5,8 +5,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import '../widgets/editable_text_utils.dart';
 
 void main() {
   testWidgetsWithLeakTracking('SearchBar defaults', (WidgetTester tester) async {
@@ -839,6 +842,64 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.none);
   });
 
+  testWidgetsWithLeakTracking('SearchAnchor respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    int onChangedCalled = 0;
+    int onSubmittedCalled = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Material(
+                child: SearchAnchor(
+                  searchController: controller,
+                  viewOnChanged: (String value) {
+                    setState(() {
+                      onChangedCalled = onChangedCalled + 1;
+                    });
+                  },
+                  viewOnSubmitted: (String value) {
+                    setState(() {
+                      onSubmittedCalled = onSubmittedCalled + 1;
+                    });
+                    controller.closeView(value);
+                  },
+                  builder: (BuildContext context, SearchController controller) {
+                    return SearchBar(
+                      onTap: () {
+                        if (!controller.isOpen) {
+                          controller.openView();
+                        }
+                      },
+                    );
+                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                    return <Widget>[];
+                  },
+                ),
+              ),
+            );
+          }
+      ),
+    ));
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, true);
+
+    final Finder barOnView = find.descendant(
+        of: findViewContent(),
+        matching: find.byType(TextField)
+    );
+    await tester.enterText(barOnView, 'a');
+    expect(onChangedCalled, 1);
+    await tester.enterText(barOnView, 'abc');
+    expect(onChangedCalled, 2);
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(onSubmittedCalled, 1);
+    expect(controller.isOpen, false);
+  });
+
   testWidgetsWithLeakTracking('SearchAnchor.bar respects textCapitalization property', (WidgetTester tester) async {
     Widget buildSearchAnchor(TextCapitalization textCapitalization) {
       return MaterialApp(
@@ -866,6 +927,55 @@ void main() {
     await tester.pumpAndSettle();
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.textCapitalization, TextCapitalization.characters);
+  });
+
+  testWidgetsWithLeakTracking('SearchAnchor.bar respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    int onChangedCalled = 0;
+    int onSubmittedCalled = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Center(
+            child: Material(
+              child: SearchAnchor.bar(
+                searchController: controller,
+                viewOnChanged: (String value) {
+                  setState(() {
+                    onChangedCalled = onChangedCalled + 1;
+                  });
+                },
+                viewOnSubmitted: (String value) {
+                  setState(() {
+                    onSubmittedCalled = onSubmittedCalled + 1;
+                  });
+                  controller.closeView(value);
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  return <Widget>[];
+                },
+              ),
+            ),
+          );
+        }
+      ),
+    ));
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, true);
+
+    final Finder barOnView = find.descendant(
+      of: findViewContent(),
+      matching: find.byType(TextField)
+    );
+    await tester.enterText(barOnView, 'a');
+    expect(onChangedCalled, 1);
+    await tester.enterText(barOnView, 'abc');
+    expect(onChangedCalled, 2);
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(onSubmittedCalled, 1);
+    expect(controller.isOpen, false);
   });
 
   testWidgetsWithLeakTracking('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
