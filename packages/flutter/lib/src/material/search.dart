@@ -188,42 +188,16 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.leading], the intended use for the return value of this method.
   Widget? buildLeading(BuildContext context);
 
-  /// A flag to automatically control the visibility of the leading widget in the [AppBar].
+  /// {@macro flutter.material.appbar.automaticallyImplyLeading}
   ///
-  /// When set to `true`, the [AppBar] will automatically imply a leading widget. This is typically
-  /// a [BackButton] when there's a previous route in the navigation stack, or an [IconButton]
-  /// with a hamburger menu icon when there's not.
-  ///
-  /// When set to `false`, the [AppBar] will not imply a leading widget. In this case, the space
-  /// reserved for the leading widget will be empty, unless [buildLeading] is overridden
-  /// to provide a custom leading widget.
-  ///
-  /// When set to `null`, the [AppBar] will defer to the platform's default behavior.
-  ///
-  /// See also:
-  ///
-  ///  {@macro flutter.material.appbar.automaticallyImplyLeading}, which is controlled by this property.
+  /// This property is used to configure an [AppBar].
   bool? automaticallyImplyLeading;
 
-  /// The width of the leading widget in the [AppBar].
-  ///
-  /// This property defines the width of the area in the [AppBar] reserved for the
-  /// leading widget, which is typically set using [buildLeading].
-  ///
-  /// When this property is set to a non-null value, it overrides the default
-  /// width of the leading widget area, allowing for a custom width. This can be
-  /// useful when the leading widget needs more or less space than the default
-  /// provided by the [AppBar].
-  ///
-  /// When this property is set to `null`, the [AppBar] will use the default
-  /// width for the leading widget area.
-  ///
-  /// The value of this property must be non-negative, and is used only when
-  /// [buildLeading] returns a non-null widget.
-  ///
-  /// See also:
-  ///
-  /// @macro flutter.material.appbar.leadingWidth} which is controlled by this property.
+  /// {@template flutter.material.appbar.leadingWidth}
+  /// Defines the width of [leading] widget.
+  ///  
+  /// By default, the value of [leadingWidth] is 56.0.
+  /// {@endtemplate}
   double? leadingWidth;
 
   /// Widgets to display after the search query in the [AppBar].

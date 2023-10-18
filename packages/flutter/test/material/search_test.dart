@@ -1009,7 +1009,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tapAt(const Offset(16, 16));
     expect(find.text('Suggestions'), findsOneWidget);
-    await tester.tapAt(const Offset(8, 16));
+    final Finder appBarFinder = find.byType(AppBar);
+    final AppBar appBar = tester.widget<AppBar>(appBarFinder);
+    expect(appBar.leadingWidth, 16);
+    await tester.tapAt(const Offset(8, 16)); 
     await tester.pumpAndSettle();
     expect(find.text('Suggestions'), findsNothing);
     expect(find.text('HomeBody'), findsOneWidget);
@@ -1058,6 +1061,8 @@ void main() {
     // showSearch normal and back.
     await tester.tap(find.text('showSearchLocalNavigator'));
     await tester.pumpAndSettle();
+    final Finder backButtonFinder = find.byType(BackButton);
+    expect(backButtonFinder, findsWidgets);
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
     expect(rootObserver.pushCount, 0);
