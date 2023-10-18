@@ -126,6 +126,8 @@ void main() {
                 FocusScope(
                   child: Focus(
                     focusNode: outer2,
+                    // Add a padding to ensure both Focus widgets have different
+                    // sizes.
                     child: Padding(
                       padding: const EdgeInsets.all(5),
                       child: Focus(
