@@ -1,4 +1,4 @@
-Signature: f1238a3160899f5cdb88148f22bae3ac
+Signature: 0eb4b5ff319621f83b0ec3c19d32939d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -391,6 +391,7 @@ FILE: ../../../third_party/skia/relnotes/glbackendsemaphore.md
 FILE: ../../../third_party/skia/relnotes/grsurface-info.md
 FILE: ../../../third_party/skia/relnotes/mesh.md
 FILE: ../../../third_party/skia/relnotes/readbuffer-deserial.md
+FILE: ../../../third_party/skia/relnotes/typeface.md
 FILE: ../../../third_party/skia/relnotes/vk-directcontext.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/ports/fontations/Cargo.toml
