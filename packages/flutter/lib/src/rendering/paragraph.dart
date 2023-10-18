@@ -1810,10 +1810,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position) {
-    // final String text = fullText;
-    // final String text = range.textInside(fullText);
-    // String text = fullText;
-    // text = range.textBefore(fullText) + '\n' + range.textAfter(fullText);
     final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.

@@ -2186,24 +2186,25 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
     }
     SelectionResult? lastSelectionResult;
+    SelectionResult? previousSelectionResult;
+    bool _searchingForCompleteBoundary = false;
     for (int index = 0; index < selectables.length; index += 1) {
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      if (globalRect.contains(effectiveGlobalPosition)) {
+      if (globalRect.contains(effectiveGlobalPosition) || _searchingForCompleteBoundary) {
         final SelectionGeometry existingGeometry = selectables[index].value;
+        previousSelectionResult = lastSelectionResult;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
-        if (lastSelectionResult == SelectionResult.forward) {
-          currentSelectionStartIndex = index;
-          while (lastSelectionResult == SelectionResult.forward) {
-            index++;
-            currentSelectionEndIndex = index;
-            if (index < selectables.length) {
-              lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
-            }
+        if (previousSelectionResult == SelectionResult.forward) {
+          if (lastSelectionResult == SelectionResult.forward) {
+            continue;
           }
-          _flushInactiveSelections();
-          return SelectionResult.end;
+        }
+        if (previousSelectionResult != SelectionResult.forward && lastSelectionResult == SelectionResult.forward) {
+          currentSelectionStartIndex = index;
+          _searchingForCompleteBoundary = true;
+          continue;
         }
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
           return SelectionResult.next;
@@ -2217,10 +2218,18 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select text boundary, need to clear the
           // selection of other selectables to keep selection in sync.
-          selectables
-            .where((Selectable target) => target != selectables[index])
-            .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
-          currentSelectionStartIndex = currentSelectionEndIndex = index;
+          if (_searchingForCompleteBoundary) {
+            // A boundary may potentially span across multiple selectables if
+            // an inline element exists. In this case we set the start index of
+            // the current selection when the first SelectionResult.forward is
+            // received indicating the beginning of our search for the complete
+            // boundary. When we reach the selectable where our the end of the
+            // boundary is located we set the end index.
+            currentSelectionEndIndex = index;
+          } else {
+            currentSelectionStartIndex = currentSelectionEndIndex = index;
+          }
+          _flushAdditions();
         }
         return SelectionResult.end;
       } else {
