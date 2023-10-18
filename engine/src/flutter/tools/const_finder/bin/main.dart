@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:const_finder/const_finder.dart';
+import 'package:kernel/const_finder.dart';
 
 void main(List<String> args) {
   final ArgParser parser = ArgParser();

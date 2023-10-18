@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:const_finder/const_finder.dart';
+import 'package:kernel/const_finder.dart';
 import 'package:path/path.dart' as path;
 
 void expect<T>(T value, T expected) {

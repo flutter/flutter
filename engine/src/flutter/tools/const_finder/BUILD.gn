@@ -13,7 +13,6 @@ application_snapshot("const_finder") {
 
   inputs = [
     "bin/main.dart",
-    "lib/const_finder.dart",
     ".dart_tool/package_config.json",
   ]
 
