@@ -252,6 +252,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -285,6 +286,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -317,6 +319,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -350,6 +353,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -383,6 +387,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -416,6 +421,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -457,6 +463,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -498,6 +505,7 @@ void main() {
         kIconTreeShakerFlag: 'false',
         kDeferredComponents: 'false',
         kDartObfuscation: 'false',
+        kNativeAssets: 'false',
       });
     }),
     FileSystem: fsFactory,
@@ -516,7 +524,7 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
-    Uri? nativeAssets,
+    bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {}
 }

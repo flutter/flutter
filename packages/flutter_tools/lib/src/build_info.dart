@@ -967,6 +967,20 @@ const String kSdkRoot = 'SdkRoot';
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
 
+/// Whether to enable Native Assets.
+///
+/// If true, native assets are built and the mapping for native assets lookup
+/// at runtime is embedded in the kernel file.
+///
+/// If false, native assets are not built, and an empty mapping is embedded in
+/// the kernel file. Used for targets that trigger kernel builds but
+/// are not OS/architecture specific.
+///
+/// Supported values are 'true' and 'false'.
+///
+/// Defaults to 'true'.
+const String kNativeAssets = 'NativeAssets';
+
 /// An output directory where one or more code-size measurements may be written.
 const String kCodeSizeDirectory = 'CodeSizeDirectory';
 
