@@ -662,7 +662,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
-      disablePortPublication: usingCISystem && await disablePortPublication,
+      disablePortPublication: usingCISystem &&
+          xcodeBuildAction == XcodeBuildAction.build &&
+          await disablePortPublication,
     );
     xcodeBuildResult = result;
 
