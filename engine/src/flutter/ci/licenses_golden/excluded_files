@@ -4,7 +4,6 @@
 ../../../.github
 ../../../.gitignore
 ../../../.gn
-../../../.ycm_extra_conf.py
 ../../../AUTHORS
 ../../../CODEOWNERS
 ../../../README.md
@@ -3112,4 +3111,3 @@
 ../../../third_party/zlib/google/zip_unittest.cc
 ../../../third_party/zlib/patches/README
 ../../../third_party/zlib/zlib.3
-../../../tools
