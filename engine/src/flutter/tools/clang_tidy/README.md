@@ -88,7 +88,16 @@ Use `--lint-all` to lint all files in the repo:
 dart ./tools/clang_tidy/bin/main.dart --lint-all
 ```
 
-> **⚠️ WARNING**: This will take a long time to run.
+Or, provide a regular expression to lint files that match:
+
+```shell
+dart ./tools/clang_tidy/bin/main.dart --lint-regex=".*test.*\.cc"
+```
+
+> **⚠️ WARNING**: This may take a long time to run if a pattern is not provided
+> or if the pattern matches a large number of files, i.e. on the order of
+> thousands of files could take 30 minutes or more to run and lock your
+> machine.
 
 [^1]: Modified files are determined by a `git diff` command compared to `HEAD`.
 [^2]: Latest build is the last updated directory in `src/out/`.
