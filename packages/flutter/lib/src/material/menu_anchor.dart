@@ -485,7 +485,7 @@ _MenuAnchorState? get _previousFocusableSibling {
 
   _MenuAnchorState get _topLevel {
     _MenuAnchorState handle = this;
-    while (handle._parent != null && handle._parent!._isTopLevel) {
+    while (handle._parent != null && !handle._parent!._isTopLevel) {
       handle = handle._parent!;
     }
     return handle;
