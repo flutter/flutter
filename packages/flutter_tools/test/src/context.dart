@@ -382,7 +382,8 @@ class NoopCrashReporter implements CrashReporter {
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  // Use [FakeSignals] so developers running the test suite can kill the test runner.
+  // Use [FakeSignals] so developers running the test suite can kill the test
+  // runner.
   LocalFileSystemBlockingSetCurrentDirectory() : super.test(signals: FakeSignals());
 
   @override

@@ -173,9 +173,11 @@ List<FlutterCommand> generateCommands({
     fileSystem: globals.fs,
   ),
   BuildCommand(
+    artifacts: globals.artifacts!,
     fileSystem: globals.fs,
     buildSystem: globals.buildSystem,
     osUtils: globals.os,
+    processUtils: globals.processUtils,
     verboseHelp: verboseHelp,
     androidSdk: globals.androidSdk,
     logger: globals.logger,
