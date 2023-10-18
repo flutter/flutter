@@ -90,6 +90,7 @@ template("embedder_source_set") {
       "embedder_thread_host.cc",
       "embedder_thread_host.h",
       "pixel_formats.cc",
+      "pixel_formats.h",
       "platform_view_embedder.cc",
       "platform_view_embedder.h",
       "vsync_waiter_embedder.cc",
