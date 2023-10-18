@@ -290,6 +290,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
         '--profile',
         '-t',
         'test_driver/$testFile.dart',
+        '-v',
       ];
     }
     throw Exception('$deviceOperatingSystem has no build configuration');
