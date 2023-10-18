@@ -431,6 +431,7 @@ class Doctor {
               doctorInvocationId: analyticsTimestamp,
             ));
         }
+        // TODO(eliasyishak): remove this after migrating from package:usage
         DoctorResultEvent(validator: validator, result: result).send();
       }
 
