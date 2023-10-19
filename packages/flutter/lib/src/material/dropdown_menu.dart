@@ -325,7 +325,7 @@ class DropdownMenu<T> extends StatefulWidget {
   ///     if (query.isEmpty) {
   ///       return null;
   ///     }
-  ///     final int index = entries.indexWhere((DropdownMenuEntry<Text> entry) => entry.label == searchText);
+  ///     final int index = entries.indexWhere((DropdownMenuEntry<Text> entry) => entry.label == query);
   ///
   ///     return index != -1 ? index : null;
   ///   },
