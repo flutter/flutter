@@ -200,7 +200,7 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'success',
+          label: 'installed',
         ),
       ));
     }, overrides: <Type, Generator>{
@@ -215,12 +215,12 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'success',
+          label: 'installed',
         ),
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'success',
+          label: 'installed',
         ),
         const TestUsageEvent(
           'doctor-result',
@@ -244,7 +244,7 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: 'success',
+          label: 'installed',
         ),
         const TestUsageEvent(
           'doctor-result',
@@ -278,17 +278,17 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
-          label: 'success',
+          label: 'installed',
         ),
         const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
-          label: 'success',
+          label: 'installed',
         ),
         const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
-          label: 'success',
+          label: 'installed',
         ),
         const TestUsageEvent(
           'doctor-result',
@@ -538,7 +538,7 @@ void main() {
         const TestUsageEvent(
           'doctor-result',
           'PiiValidator',
-          label: 'success',
+          label: 'installed',
         ),
       ]);
     }, overrides: <Type, Generator>{
@@ -855,7 +855,7 @@ void main() {
       // The event that should have been fired off during the doctor invocation
       final Event eventToFind = Event.doctorValidatorResult(
         validatorName: 'Passing Validator',
-        result: 'success',
+        result: 'installed',
         partOfGroupedValidator: false,
         doctorInvocationId: DateTime(1995, 3, 3).millisecondsSinceEpoch,
         statusInfo: 'with statusInfo',
