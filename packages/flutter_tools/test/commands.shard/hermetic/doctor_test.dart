@@ -168,7 +168,7 @@ void main() {
 
   group('doctor with overridden validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
-      final Doctor doctor = Doctor(logger: logger);
+      final Doctor doctor = Doctor(logger: logger, clock: const SystemClock());
       expect(await doctor.diagnose(verbose: false), isTrue);
       expect(logger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
@@ -192,7 +192,7 @@ void main() {
     });
 
     testUsingContext('contains installed', () async {
-      final Doctor doctor = Doctor(logger: logger);
+      final Doctor doctor = Doctor(logger: logger, clock: const SystemClock());
       await doctor.diagnose(verbose: false);
 
       expect(testUsage.events.length, 3);
@@ -510,7 +510,11 @@ void main() {
 
     testUsingContext('PII separated, events only sent once', () async {
       final Doctor fakeDoctor = FakePiiDoctor(logger);
-      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      final DoctorText doctorText = DoctorText(
+        logger,
+        doctor: fakeDoctor,
+        clock: const SystemClock(),
+      );
       const String expectedPiiText = '[✓] PII Validator\n'
           '    • Contains PII path/to/username\n'
           '\n'
@@ -544,7 +548,11 @@ void main() {
 
     testUsingContext('without PII has same text and PII-stripped text', () async {
       final Doctor fakeDoctor = FakePassingDoctor(logger);
-      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      final DoctorText doctorText = DoctorText(
+        logger,
+        doctor: fakeDoctor,
+        clock: const SystemClock(),
+      );
       final String piiText = await doctorText.text;
       expect(piiText, isNotEmpty);
       expect(piiText, await doctorText.piiStrippedText);
@@ -822,6 +830,7 @@ void main() {
   group('Doctor events with unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+    final SystemClock fakeSystemClock = SystemClock.fixed(DateTime(1995, 3, 3));
 
     setUp(() {
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -838,7 +847,7 @@ void main() {
     });
 
     testUsingContext('contains installed', () async {
-      final Doctor doctor = Doctor(logger: logger);
+      final Doctor doctor = Doctor(logger: logger, clock: fakeSystemClock);
       await doctor.diagnose(verbose: false);
 
       expect(fakeAnalytics.sentEvents.length, 3);
@@ -856,7 +865,6 @@ void main() {
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       Analytics: () => fakeAnalytics,
-      SystemClock: () => SystemClock.fixed(DateTime(1995, 3, 3)),
     });
   });
 }
@@ -995,7 +1003,8 @@ class AsyncCrashingValidator extends DoctorValidator {
 
 /// A doctor that fails with a missing [ValidationResult].
 class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger) : super(logger: logger);
+  FakeDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1009,7 +1018,8 @@ class FakeDoctor extends Doctor {
 
 /// A doctor that should pass, but still has issues in some categories.
 class FakePassingDoctor extends Doctor {
-  FakePassingDoctor(Logger logger) : super(logger: logger);
+  FakePassingDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1023,7 +1033,8 @@ class FakePassingDoctor extends Doctor {
 /// A doctor that should pass, but still has 1 issue to test the singular of
 /// categories.
 class FakeSinglePassingDoctor extends Doctor {
-  FakeSinglePassingDoctor(Logger logger) : super(logger: logger);
+  FakeSinglePassingDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1033,7 +1044,8 @@ class FakeSinglePassingDoctor extends Doctor {
 
 /// A doctor that passes and has no issues anywhere.
 class FakeQuietDoctor extends Doctor {
-  FakeQuietDoctor(Logger logger) : super(logger: logger);
+  FakeQuietDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1046,7 +1058,8 @@ class FakeQuietDoctor extends Doctor {
 
 /// A doctor that passes and contains PII that can be hidden.
 class FakePiiDoctor extends Doctor {
-  FakePiiDoctor(Logger logger) : super(logger: logger);
+  FakePiiDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1056,7 +1069,8 @@ class FakePiiDoctor extends Doctor {
 
 /// A doctor with a validator that throws an exception.
 class FakeCrashingDoctor extends Doctor {
-  FakeCrashingDoctor(Logger logger) : super(logger: logger);
+  FakeCrashingDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1070,7 +1084,8 @@ class FakeCrashingDoctor extends Doctor {
 
 /// A doctor with a validator that will never finish.
 class FakeAsyncStuckDoctor extends Doctor {
-  FakeAsyncStuckDoctor(Logger logger) : super(logger: logger);
+  FakeAsyncStuckDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1084,7 +1099,9 @@ class FakeAsyncStuckDoctor extends Doctor {
 
 /// A doctor with a validator that throws an exception.
 class FakeAsyncCrashingDoctor extends Doctor {
-  FakeAsyncCrashingDoctor(this._time, Logger logger) : super(logger: logger);
+  FakeAsyncCrashingDoctor(this._time, Logger logger,
+      {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   final FakeAsync _time;
 
@@ -1164,7 +1181,8 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
 
 /// A doctor that has two groups of two validators each.
 class FakeGroupedDoctor extends Doctor {
-  FakeGroupedDoctor(Logger logger) : super(logger: logger);
+  FakeGroupedDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1180,7 +1198,9 @@ class FakeGroupedDoctor extends Doctor {
 }
 
 class FakeGroupedDoctorWithStatus extends Doctor {
-  FakeGroupedDoctorWithStatus(Logger logger) : super(logger: logger);
+  FakeGroupedDoctorWithStatus(Logger logger,
+      {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1194,7 +1214,9 @@ class FakeGroupedDoctorWithStatus extends Doctor {
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
-  FakeSmallGroupDoctor(Logger logger, DoctorValidator val1, DoctorValidator val2)
+  FakeSmallGroupDoctor(
+      Logger logger, DoctorValidator val1, DoctorValidator val2,
+      {super.clock = const SystemClock()})
     : validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])],
       super(logger: logger);
 

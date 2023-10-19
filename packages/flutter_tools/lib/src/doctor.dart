@@ -20,6 +20,7 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
+import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
@@ -230,9 +231,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 class Doctor {
   Doctor({
     required Logger logger,
-  }) : _logger = logger;
+    required SystemClock clock,
+  })  : _logger = logger,
+        _clock = clock;
 
   final Logger _logger;
+  final SystemClock _clock;
 
   List<DoctorValidator> get validators {
     return DoctorValidatorsProvider._instance.validators;
@@ -375,10 +379,10 @@ class Doctor {
     }
     bool doctorResult = true;
     int issues = 0;
-    
+
     // This timestamp will be used on the backend of GA4 to group each of the events that
     // were sent for each doctor validator and its result
-    final int analyticsTimestamp = globals.systemClock.now().millisecondsSinceEpoch;
+    final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
 
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
@@ -755,8 +759,10 @@ class DeviceValidator extends DoctorValidator {
 class DoctorText {
   DoctorText(
     BufferLogger logger, {
+    required SystemClock clock,
     @visibleForTesting Doctor? doctor,
-  }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
+  })  : _doctor = doctor ?? Doctor(logger: logger, clock: clock),
+        _logger = logger;
 
   final BufferLogger _logger;
   final Doctor _doctor;

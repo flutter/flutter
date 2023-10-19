@@ -208,7 +208,10 @@ Future<int> _handleToolError(
         outputPreferences: globals.outputPreferences,
       );
 
-      final DoctorText doctorText = DoctorText(logger);
+      final DoctorText doctorText = DoctorText(
+        logger,
+        clock: globals.systemClock,
+      );
 
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
