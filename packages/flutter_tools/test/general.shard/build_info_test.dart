@@ -242,7 +242,7 @@ void main() {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
       treeShakeIcons: true,
       trackWidgetCreation: true,
-      dartDefines: <String>['foo=2', 'bar=2', 'baz=2'],
+      dartDefines: <String>['foo=2', 'bar=2'],
       dartObfuscation: true,
       splitDebugInfoPath: 'foo/',
       frontendServerStarterPath: 'foo/bar/frontend_server_starter.dart',
