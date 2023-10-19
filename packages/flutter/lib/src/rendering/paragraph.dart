@@ -1764,9 +1764,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       return SelectionResult.end;
     }
     final _WordBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
-    if (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset < range.start) {
+    if (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset <= range.start) {
       return SelectionResult.previous;
-    } else if (wordBoundary.wordStart.offset > range.end && wordBoundary.wordEnd.offset > range.end) {
+    } else if (wordBoundary.wordStart.offset >= range.end && wordBoundary.wordEnd.offset > range.end) {
       return SelectionResult.next;
     }
     // Fragments are separated by placeholder span, the word boundary shouldn't
