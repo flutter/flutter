@@ -1735,14 +1735,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
-    _selectableContainsOriginWord = true;
-
-    // This gives me a position even when the globalPosition is not inside the rect.
-    // This is troublesome when we have a tree of text spans broken by a widget span
-    // and the widget span is a text widget. We will be given the start/end position as the result
-    // even when the globalPosition is not within the rect, and some unexpected text is
-    // selected as a result. What can we do to remedy this? 
-    // Should we check if the rect contains the position and invalidate if it does not?
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
@@ -1761,6 +1753,12 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       return SelectionResult.forward;
     }
 
+    // This gives us a position even when the global position is not inside the rect.
+    // This is troublesome when we have a tree of text spans broken by a widget span
+    // and the widget span is a text widget. We will be given the start/end position
+    // as the result even when the globalPosition is not within the rect, and some
+    // unexpected text is selected as a result. A potential solution might be to check if
+    // the rect contains the local position.
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
       return SelectionResult.end;
@@ -1776,6 +1774,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
     _textSelectionStart = wordBoundary.wordStart;
     _textSelectionEnd = wordBoundary.wordEnd;
+    _selectableContainsOriginWord = true;
     return SelectionResult.end;
   }
 
