@@ -1409,7 +1409,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    debugPrint('dispatch ${event.type} ${range.textInside(fullText)}, $range');
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
@@ -1435,7 +1434,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
         final SelectionResult localResult = _handleSelectWord(selectWord.globalPosition);
-        debugPrint('result from handleSelect word $localResult ${range.textInside(fullText)}');
         if (isFollowedByInlineElement && localResult != SelectionResult.end) {
           result = SelectionResult.forward;
         } else {
@@ -1748,7 +1746,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
-    debugPrint('_handleSelectWord does the rect contain the position? ${_rect.contains(localPosition)}');
     if (!_rect.contains(localPosition)) {
       // Open question: Should we always do this or only when the fragment is followed
       // by an inline element. If so we would need to add some flag to `Text` widget
@@ -1765,9 +1762,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
 
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
-    debugPrint('_handleSelectWord $globalPosition $position $isFollowedByInlineElement');
     if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
-      debugPrint('word is already selected?');
       return SelectionResult.end;
     }
     final _WordBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);

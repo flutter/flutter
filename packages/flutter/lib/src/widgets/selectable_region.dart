@@ -2131,54 +2131,44 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     SelectionResult? lastSelectionResult;
-    debugPrint('handle select word - delegate');
     bool _lookForwardWithoutRectConstraints = false;
     for (int index = 0; index < selectables.length; index += 1) {
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
       if (globalRect.contains(event.globalPosition) || _lookForwardWithoutRectConstraints) {
-        debugPrint('global rect contains position ${globalRect.contains(event.globalPosition)} - delegate');
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (lastSelectionResult == SelectionResult.forward) {
-          debugPrint('forward - delegate');
           _lookForwardWithoutRectConstraints = true;
           continue;
         }
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
-          debugPrint('next tree / end - delegate');
           return SelectionResult.next;
         }
         if (lastSelectionResult == SelectionResult.next) {
-          debugPrint('next - delegate');
           continue;
         }
         if (index == 0 && lastSelectionResult == SelectionResult.previous) {
-          debugPrint('prev / end - delegate');
           return SelectionResult.previous;
         }
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the
           // selection of other selectables to keep selection in sync.
-          debugPrint('flushing - delegate');
           selectables
             .where((Selectable target) => target != selectables[index])
             .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
-        debugPrint('end - delegate');
         return SelectionResult.end;
       } else {
         if (lastSelectionResult == SelectionResult.next) {
-          debugPrint('weird / end - delegate');
           currentSelectionStartIndex = currentSelectionEndIndex = index - 1;
           return SelectionResult.end;
         }
       }
     }
     assert(lastSelectionResult == null);
-    debugPrint('got to the end - delegate');
     return SelectionResult.end;
   }
 
