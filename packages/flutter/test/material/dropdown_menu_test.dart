@@ -1787,12 +1787,11 @@ void main() {
 
     // Test custom search algorithm - exact match.
     await tester.pumpWidget(dropdownMenu(
-      searchCallback: (List<DropdownMenuEntry<int>> entries, TextEditingController controller) {
-       final String searchText = controller.value.text;
-       if (searchText.isEmpty) {
+      searchCallback: (List<DropdownMenuEntry<int>> entries, String query) {
+       if (query.isEmpty) {
          return null;
        }
-       final int index = entries.indexWhere((DropdownMenuEntry<int> entry) => entry.label == searchText);
+       final int index = entries.indexWhere((DropdownMenuEntry<int> entry) => entry.label == query);
 
        return index != -1 ? index : null;
      },

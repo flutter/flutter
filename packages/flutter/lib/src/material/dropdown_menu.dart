@@ -21,10 +21,13 @@ import 'text_field.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// A callback to search which item should be highlighted.
+/// A callback function that returns the index of the item that matches the
+/// current contents of a text field.
+///
+/// If a match doesn't exist then null must be returned.
 ///
 /// Used by [DropdownMenu.searchCallback].
-typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, TextEditingController textEditingController);
+typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, String query);
 
 // Navigation shortcuts to move the selected menu items up or down.
 Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
@@ -308,18 +311,18 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
 
-  /// Invoked when [DropdownMenu.enableSearch] is true and return an index to
-  /// highlight the search result.
+  /// When  [DropdownMenu.enableSearch] is true, this callback is used to compute
+  /// the index of the search result to be highlighted.
   ///
   /// {@tool snippet}
   ///
-  /// The following code shows a searchCallback to get an exact-match result:
+  /// In this example the `searchCallback` returns the index of the search result
+  /// that exactly matches the query.
   ///
   /// ```dart
   /// DropdownMenu<Text>(
-  ///   searchCallback: (List<DropdownMenuEntry<Text>> entries, TextEditingController controller) {
-  ///     final String searchText = controller.value.text;
-  ///     if (searchText.isEmpty) {
+  ///   searchCallback: (List<DropdownMenuEntry<Text>> entries, String query) {
+  ///     if (query.isEmpty) {
   ///       return null;
   ///     }
   ///     final int index = entries.indexWhere((DropdownMenuEntry<Text> entry) => entry.label == searchText);
@@ -332,8 +335,8 @@ class DropdownMenu<T> extends StatefulWidget {
   /// {@end-tool}
   ///
   /// Defaults to null. If this is null and [DropdownMenu.enableSearch] is true,
-  /// the default function will return the first matching result which contains
-  /// the text input in the text field.
+  /// the default function will return the index of the first matching result
+  /// which contains the contents of the text input field.
   final SearchCallback<T>? searchCallback;
 
   @override
@@ -598,7 +601,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.enableSearch) {
       if (widget.searchCallback != null) {
-        currentHighlight = widget.searchCallback!.call(filteredEntries, _textEditingController);
+        currentHighlight = widget.searchCallback!.call(filteredEntries, _textEditingController.text);
       } else {
         currentHighlight = search(filteredEntries, _textEditingController);
       }
