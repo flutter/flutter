@@ -21,12 +21,5 @@ class ToolExit implements Exception {
   final int? exitCode;
 
   @override
-  String toString() {
-    final List<String> parts = <String>[
-      if (exitCode != null) 'Exit code: $exitCode',
-      'Error: $message',
-    ];
-
-    return parts.join('. ');
-  }
+  String toString() => 'Error: $message';
 }
