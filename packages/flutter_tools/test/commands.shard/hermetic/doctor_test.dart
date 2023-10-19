@@ -847,7 +847,7 @@ void main() {
     });
 
     testUsingContext('contains installed', () async {
-      final Doctor doctor = Doctor(logger: logger, clock: fakeSystemClock);
+      final Doctor doctor = Doctor(logger: logger, clock: fakeSystemClock, analytics: fakeAnalytics);
       await doctor.diagnose(verbose: false);
 
       expect(fakeAnalytics.sentEvents.length, 3);
@@ -864,7 +864,6 @@ void main() {
 
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('contains installed and partial', () async {

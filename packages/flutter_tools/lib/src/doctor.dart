@@ -233,11 +233,14 @@ class Doctor {
   Doctor({
     required Logger logger,
     required SystemClock clock,
+    Analytics? analytics,
   })  : _logger = logger,
-        _clock = clock;
+        _clock = clock,
+        _analytics = analytics ?? globals.analytics;
 
   final Logger _logger;
   final SystemClock _clock;
+  final Analytics _analytics;
 
   List<DoctorValidator> get validators {
     return DoctorValidatorsProvider._instance.validators;
@@ -420,7 +423,7 @@ class Doctor {
             final DoctorValidator subValidator = validator.subValidators[i];
             final ValidationResult subResult = validator.subResults[i];
 
-            analyticsFutures.add(globals.analytics.send(Event.doctorValidatorResult(
+            analyticsFutures.add(_analytics.send(Event.doctorValidatorResult(
               validatorName: subValidator.title,
               result: subResult.typeStr,
               statusInfo: subResult.statusInfo,
@@ -429,7 +432,7 @@ class Doctor {
             )));
           }
         } else {
-          analyticsFutures.add(globals.analytics.send(Event.doctorValidatorResult(
+          analyticsFutures.add(_analytics.send(Event.doctorValidatorResult(
             validatorName: validator.title,
             result: result.typeStr,
             statusInfo: result.statusInfo,
