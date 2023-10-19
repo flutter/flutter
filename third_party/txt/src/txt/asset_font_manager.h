@@ -89,7 +89,7 @@ class DynamicFontManager : public AssetFontManager {
   DynamicFontManager()
       : AssetFontManager(std::make_unique<TypefaceFontAssetProvider>()) {}
 
-  TypefaceFontAssetProvider& font_provider() {
+  TypefaceFontAssetProvider& font_provider() const {
     return static_cast<TypefaceFontAssetProvider&>(*font_provider_);
   }
 };

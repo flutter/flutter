@@ -98,7 +98,10 @@ source_set("txt") {
   }
 
   if (is_mac || is_ios) {
-    sources += [ "src/txt/platform_mac.mm" ]
+    sources += [
+      "src/txt/platform_mac.h",
+      "src/txt/platform_mac.mm",
+    ]
     deps += [ "//flutter/fml" ]
   } else if (is_android) {
     sources += [ "src/txt/platform_android.cc" ]
@@ -147,6 +150,10 @@ if (enable_unittests) {
       "tests/paragraph_unittests.cc",
       "tests/txt_run_all_unittests.cc",
     ]
+
+    if (is_mac || is_ios) {
+      sources += [ "tests/platform_mac_tests.cc" ]
+    }
 
     public_configs = [ ":txt_config" ]
 
