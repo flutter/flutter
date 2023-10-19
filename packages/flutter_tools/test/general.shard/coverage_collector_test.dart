@@ -53,7 +53,7 @@ void main() {
       Uri(),
       <String>{'foo'},
       serviceOverride: fakeVmServiceHost.vmService,
-      coverableLineCache: {},
+      coverableLineCache: <String, Set<int>>{},
     );
 
     expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
@@ -124,7 +124,7 @@ void main() {
       Uri(),
       <String>{'foo'},
       serviceOverride: fakeVmServiceHost.vmService,
-      coverableLineCache: {},
+      coverableLineCache: <String, Set<int>>{},
     );
 
     expect(result, <String, Object>{
@@ -153,7 +153,7 @@ void main() {
       Uri(),
       null,
       serviceOverride: fakeVmServiceHost.vmService,
-      coverableLineCache: {},
+      coverableLineCache: <String, Set<int>>{},
     );
 
     expect(result, <String, Object>{
@@ -240,7 +240,7 @@ void main() {
       Uri(),
       <String>{'foo'},
       serviceOverride: fakeVmServiceHost.vmService,
-      coverableLineCache: {},
+      coverableLineCache: <String, Set<int>>{},
     );
 
     expect(result, <String, Object>{
@@ -315,7 +315,7 @@ void main() {
       Uri(),
       null,
       serviceOverride: fakeVmServiceHost.vmService,
-      coverableLineCache: {},
+      coverableLineCache: <String, Set<int>>{},
     );
 
     expect(result, <String, Object>{
@@ -406,7 +406,7 @@ void main() {
       <String>{'foo'},
       serviceOverride: fakeVmServiceHost.vmService,
       branchCoverage: true,
-      coverableLineCache: {},
+      coverableLineCache: <String, Set<int>>{},
     );
 
     expect(result, <String, Object>{
@@ -632,8 +632,8 @@ void main() {
             'reports': <Object>['Coverage'],
             'forceCompile': true,
             'reportLines': true,
-            'libraryFilters': ['package:foo/'],
-            'librariesAlreadyCompiled': [],
+            'libraryFilters': <String>['package:foo/'],
+            'librariesAlreadyCompiled': <String>[],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -659,7 +659,7 @@ void main() {
       ],
     );
 
-    final coverableLineCache = <String, Set<int>>{};
+    final Map<String, Set<int>> coverableLineCache = <String, Set<int>>{};
     final Map<String, Object?> result = await collect(
       Uri(),
       <String>{'foo'},
@@ -685,7 +685,9 @@ void main() {
     });
 
     // coverableLineCache should contain every line mentioned in the report.
-    expect(coverableLineCache, {'package:foo/foo.dart': {1, 2, 3}});
+    expect(coverableLineCache, <String, Set<int>>{
+      'package:foo/foo.dart': <int>{1, 2, 3},
+    });
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
@@ -717,8 +719,8 @@ void main() {
             'reports': <Object>['Coverage'],
             'forceCompile': true,
             'reportLines': true,
-            'libraryFilters': ['package:foo/'],
-            'librariesAlreadyCompiled': ['package:foo/foo.dart'],
+            'libraryFilters': <String>['package:foo/'],
+            'librariesAlreadyCompiled': <String>['package:foo/foo.dart'],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -744,8 +746,8 @@ void main() {
       ],
     );
 
-    final coverableLineCache = <String, Set<int>>{
-      'package:foo/foo.dart': {1, 2, 3},
+    final Map<String, Set<int>> coverableLineCache = <String, Set<int>>{
+      'package:foo/foo.dart': <int>{1, 2, 3},
     };
     final Map<String, Object?> result2 = await collect(
       Uri(),
@@ -772,7 +774,9 @@ void main() {
         },
       ],
     });
-    expect(coverableLineCache, {'package:foo/foo.dart': {1, 2, 3}});
+    expect(coverableLineCache, <String, Set<int>>{
+      'package:foo/foo.dart': <int>{1, 2, 3},
+    });
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
