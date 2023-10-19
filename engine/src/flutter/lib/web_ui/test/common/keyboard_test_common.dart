@@ -22,7 +22,6 @@ class MockKeyboardEvent implements FlutterHtmlKeyboardEvent {
     bool altGrKey = false,
     this.location = 0,
     this.onPreventDefault,
-    this.onStopPropagation,
   }) : modifierState =
         <String>{
           if (altKey) 'Alt',
@@ -84,12 +83,6 @@ class MockKeyboardEvent implements FlutterHtmlKeyboardEvent {
   @override
   bool get defaultPrevented => _defaultPrevented;
   bool _defaultPrevented = false;
-
-  @override
-  void stopPropagation() {
-    onStopPropagation?.call();
-  }
-  VoidCallback? onStopPropagation;
 
   static bool get lastDefaultPrevented => _lastEvent?.defaultPrevented ?? false;
   static MockKeyboardEvent? _lastEvent;
