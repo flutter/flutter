@@ -293,11 +293,22 @@ class SearchAnchor extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
-  /// Invoked upon user input on the search view.
+  /// Called each time the user modifies the search view's text field.
+  ///
+  /// See also:
+  ///
+  ///  * [viewOnSubmitted], which is called when the user indicates that they
+  ///  are done editing the search view's text field.
   final ValueChanged<String>? viewOnChanged;
 
   /// Called when the user indicates that they are done editing the text in the
-  /// text field of a search view.
+  /// text field of a search view. Typically this is called when the user presses
+  /// the enter key.
+  ///
+  /// See also:
+  ///
+  /// * [viewOnChanged], which is called when the user modifies the text field
+  /// of the search view.
   final ValueChanged<String>? viewOnSubmitted;
 
   /// Called to create a widget which can open a search view route when it is tapped.
