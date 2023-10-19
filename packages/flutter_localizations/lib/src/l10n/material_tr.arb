@@ -51,7 +51,6 @@
   "reorderItemRight": "Sağa taşı",
   "expandedIconTapHint": "Daralt",
   "collapsedIconTapHint": "Genişlet",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 karakter kaldı",
   "remainingTextFieldCharacterCountOther": "$remainingCount karakter kaldı",
   "refreshIndicatorSemanticLabel": "Yenile",

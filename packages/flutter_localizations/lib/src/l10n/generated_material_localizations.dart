@@ -3336,7 +3336,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Преместване надолу';
@@ -4316,7 +4316,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Pomjeri nadolje';
@@ -4806,7 +4806,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mou avall';
@@ -5296,7 +5296,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Přesunout dolů';
@@ -6276,7 +6276,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Flyt ned';
@@ -6766,7 +6766,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -7320,7 +7320,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Μετακίνηση προς τα κάτω';
@@ -9097,7 +9097,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mover hacia abajo';
@@ -13450,7 +13450,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Teisalda alla';
@@ -14430,7 +14430,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'انتقال به پایین';
@@ -14920,7 +14920,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Siirrä alas';
@@ -15410,7 +15410,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -15900,7 +15900,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Déplacer vers le bas';
@@ -16550,7 +16550,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mover cara abaixo';
@@ -17040,7 +17040,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -18020,7 +18020,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => r'נותרו $remainingCount תווים';
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'העברה למטה';
@@ -18510,7 +18510,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'नीचे ले जाएं';
@@ -19000,7 +19000,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Pomakni prema dolje';
@@ -19490,7 +19490,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Áthelyezés lefelé';
@@ -20470,7 +20470,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Turunkan';
@@ -21450,7 +21450,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Sposta giù';
@@ -21940,7 +21940,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => '下に移動';
@@ -23410,7 +23410,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ផ្លាស់ទី​ចុះ​ក្រោម';
@@ -24390,7 +24390,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => '아래로 이동';
@@ -25860,7 +25860,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Perkelti žemyn';
@@ -28800,7 +28800,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Alih ke bawah';
@@ -30760,7 +30760,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Omlaag verplaatsen';
@@ -32720,7 +32720,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Przenieś w dół';
@@ -33700,7 +33700,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mover para baixo';
@@ -34368,7 +34368,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Mutați în jos';
@@ -34858,7 +34858,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Переместить вниз';
@@ -35838,7 +35838,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Presunúť nadol';
@@ -36328,7 +36328,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => r'Še $remainingCount znaka';
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Premakni navzdol';
@@ -37308,7 +37308,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Померите надоле';
@@ -38145,7 +38145,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Flytta nedåt';
@@ -40105,7 +40105,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'ย้ายลง';
@@ -40595,7 +40595,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -41085,7 +41085,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Aşağı taşı';
@@ -41575,7 +41575,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Перемістити вниз';
@@ -42065,7 +42065,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'نیچے منتقل کریں';
@@ -43045,7 +43045,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => 'Di chuyển xuống';
@@ -43535,7 +43535,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'TBD';
+  String? get remainingTextFieldCharacterCountZero => null;
 
   @override
   String get reorderItemDown => '下移';

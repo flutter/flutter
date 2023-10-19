@@ -54,7 +54,6 @@
   "reorderItemRight": "Померите удесно",
   "expandedIconTapHint": "Скупи",
   "collapsedIconTapHint": "Прошири",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Преостао је 1 знак",
   "remainingTextFieldCharacterCountOther": "Преостало је $remainingCount знакова",
   "refreshIndicatorSemanticLabel": "Освежи",

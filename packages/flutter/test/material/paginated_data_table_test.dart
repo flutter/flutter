@@ -303,6 +303,83 @@ void main() {
     expect(find.text('497–500 of 500'), findsOneWidget);
   });
 
+  testWidgetsWithLeakTracking('PaginatedDataTable Last Page Empty Space', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+    int rowsPerPage = 3;
+    final int rowCount = source.rowCount;
+    addTearDown(source.dispose);
+
+    Widget buildTable(TestDataSource source, int rowsPerPage) {
+      return PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: rowsPerPage,
+        showFirstLastButtons: true,
+        dataRowHeight: 46,
+        availableRowsPerPage: const <int>[
+          3, 6, 7, 8, 9,
+        ],
+        onRowsPerPageChanged: (int? rowsPerPage) {
+        },
+        onPageChanged: (int rowIndex) {
+        },
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+        showEmptyRows: false,
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: Center(child: buildTable(source, rowsPerPage)))
+    ));
+
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == 0), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.skip_next));
+    await tester.pump();
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == (rowsPerPage - (rowCount % rowsPerPage)) * 46.0), findsOneWidget);
+
+    rowsPerPage = 6;
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    await tester.tap(find.byIcon(Icons.skip_previous));
+    await tester.pump();
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == 0), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.skip_next));
+    await tester.pump();
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == (rowsPerPage - (rowCount % rowsPerPage)) * 46.0), findsOneWidget);
+
+    rowsPerPage = 7;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+    await tester.tap(find.byIcon(Icons.skip_previous));
+    await tester.pump();
+
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == 0), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.skip_next));
+    await tester.pump();
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == (rowsPerPage - (rowCount % rowsPerPage)) * 46.0), findsOneWidget);
+
+    rowsPerPage = 8;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+    await tester.tap(find.byIcon(Icons.skip_previous));
+    await tester.pump();
+
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == 0), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.skip_next));
+    await tester.pump();
+    expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == (rowsPerPage - (rowCount % rowsPerPage)) * 46.0), findsOneWidget);
+  });
+
   testWidgetsWithLeakTracking('PaginatedDataTable control test', (WidgetTester tester) async {
     TestDataSource source = TestDataSource()
       ..generation = 42;
