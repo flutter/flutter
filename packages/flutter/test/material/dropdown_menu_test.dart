@@ -1726,6 +1726,85 @@ void main() {
     // so there are some extra padding before "Item 1".
     expect(tester.getTopLeft(find.text('Item 1').last).dx, 48.0);
   });
+
+  testWidgetsWithLeakTracking('DropdownMenu can have customized search algorithm', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    Widget dropdownMenu({ SearchCallback<int>? searchCallback }) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            requestFocusOnTap: true,
+            searchCallback: searchCallback,
+            dropdownMenuEntries: const <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'All'),
+              DropdownMenuEntry<int>(value: 1, label: 'Unread'),
+              DropdownMenuEntry<int>(value: 2, label: 'Read'),
+            ],
+          ),
+        )
+      );
+    }
+
+    void checkExpectedHighlight({String? searchResult, required List<String> otherItems}) {
+      if (searchResult != null) {
+        final Finder material = find.descendant(
+          of: find.widgetWithText(MenuItemButton, searchResult).last,
+          matching: find.byType(Material),
+        );
+        final Material itemMaterial = tester.widget<Material>(material);
+        expect(itemMaterial.color, theme.colorScheme.onSurface.withOpacity(0.12));
+      }
+
+      for (final String nonHighlight in otherItems) {
+        final Finder material = find.descendant(
+          of: find.widgetWithText(MenuItemButton, nonHighlight).last,
+          matching: find.byType(Material),
+        );
+        final Material itemMaterial = tester.widget<Material>(material);
+        expect(itemMaterial.color, Colors.transparent);
+      }
+    }
+
+    // Test default.
+    await tester.pumpWidget(dropdownMenu());
+    await tester.pump();
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'read');
+    await tester.pump();
+    checkExpectedHighlight(searchResult: 'Unread', otherItems: <String>['All', 'Read']); // Because "Unread" contains "read".
+
+    // Test custom search algorithm.
+    await tester.pumpWidget(dropdownMenu(
+      searchCallback: (_, __) => 0
+    ));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'read');
+    await tester.pump();
+    checkExpectedHighlight(searchResult: 'All', otherItems: <String>['Unread', 'Read']); // Because the search result should always be index 0.
+
+    // Test custom search algorithm - exact match.
+    await tester.pumpWidget(dropdownMenu(
+      searchCallback: (List<DropdownMenuEntry<int>> entries, String query) {
+       if (query.isEmpty) {
+         return null;
+       }
+       final int index = entries.indexWhere((DropdownMenuEntry<int> entry) => entry.label == query);
+
+       return index != -1 ? index : null;
+     },
+    ));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), 'read');
+    await tester.pump();
+    checkExpectedHighlight(otherItems: <String>['All', 'Unread', 'Read']); // Because it's case sensitive.
+    await tester.enterText(find.byType(TextField), 'Read');
+    await tester.pump();
+    checkExpectedHighlight(searchResult: 'Read', otherItems: <String>['All', 'Unread']);
+  });
 }
 
 enum TestMenu {

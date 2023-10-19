@@ -146,6 +146,7 @@ void main() {
     bool verbose = false,
     bool simulator = false,
     bool customNaming = false,
+    bool disablePortPublication = false,
     String? deviceId,
     int exitCode = 0,
     String? stdout,
@@ -189,6 +190,8 @@ void main() {
         ],
         '-resultBundlePath', _xcBundleDirectoryPath,
         '-resultBundleVersion', '3',
+        if (disablePortPublication)
+          'DISABLE_PORT_PUBLICATION=YES',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
@@ -299,6 +302,69 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ios build invokes xcode build with disable port publication setting', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']
+    );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(
+        disablePortPublication: true,
+        onRun: () {
+          fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        },
+      ),
+      setUpRsyncCommand(),
+    ]),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ios build invokes xcode build without disable port publication setting when not in CI', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ios', '--no-pub', '--no-publish-port']
+    );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(
+        onRun: () {
+          fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        },
+      ),
+      setUpRsyncCommand(),
+    ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
