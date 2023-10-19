@@ -2139,16 +2139,16 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     SelectionResult? lastSelectionResult;
-    bool _lookForwardWithoutRectConstraints = false;
+    bool lookForwardWithoutRectConstraints = false;
     for (int index = 0; index < selectables.length; index += 1) {
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      if (globalRect.contains(event.globalPosition) || _lookForwardWithoutRectConstraints) {
+      if (globalRect.contains(event.globalPosition) || lookForwardWithoutRectConstraints) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (lastSelectionResult == SelectionResult.forward) {
-          _lookForwardWithoutRectConstraints = true;
+          lookForwardWithoutRectConstraints = true;
           continue;
         }
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
