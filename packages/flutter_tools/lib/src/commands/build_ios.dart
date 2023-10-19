@@ -27,7 +27,11 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required super.logger, required super.verboseHelp }) {
+  BuildIOSCommand({
+    required super.logger,
+    required bool verboseHelp,
+  }) : super(verboseHelp: verboseHelp) {
+    addPublishPort(verboseHelp: verboseHelp);
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -658,6 +662,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
+      disablePortPublication: usingCISystem &&
+          xcodeBuildAction == XcodeBuildAction.build &&
+          await disablePortPublication,
     );
     xcodeBuildResult = result;
 
