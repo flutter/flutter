@@ -239,6 +239,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
         ? stringsArg(FlutterOptions.kWebBrowserFlag)
         : const <String>[];
+
+    final Map<String, String> webHeaders = featureFlags.isWebEnabled
+        ? extractWebHeaders()
+        : const <String, String>{};
+
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -252,6 +257,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
+        webHeaders: webHeaders,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         impellerForceGL: impellerForceGL,
@@ -298,6 +304,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
+        webHeaders: webHeaders,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
