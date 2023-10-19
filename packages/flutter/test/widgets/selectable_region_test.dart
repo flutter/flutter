@@ -3726,4 +3726,3 @@ class RenderSelectAll extends RenderProxyBox
     this.endHandle = endHandle;
   }
 }
-

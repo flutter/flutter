@@ -1856,10 +1856,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return a.bottom > b.bottom ? 1 : -1;
   }
 
-  // Compares two rectangles in the screen order by their horizontal positions
-  // assuming one of the rectangles enclose the other rect vertically.
-  //
-  // Returns positive if a is lower, negative if a is higher.
+  /// Compares two rectangles in the screen order by their horizontal positions
+  /// assuming one of the rectangles enclose the other rect vertically.
+  ///
+  /// Returns positive if a is lower, negative if a is higher.
   static int _compareHorizontally(Rect a, Rect b) {
     // a encloses b.
     if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
