@@ -69,6 +69,8 @@
 		686383152AC2175100E27AAD /* ../../Flutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* ../../Flutter.xcframework */; };
 		686383162AC2175100E27AAD /* ../../Flutter.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* ../../Flutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		68A5B63423EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */; };
+		68C9D8012AD9B0EF00DF9D79 /* DarwinSystemFontTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 68C9D8002AD9B0EF00DF9D79 /* DarwinSystemFontTests.m */; };
+		68C9D8092AD9B6C800DF9D79 /* golden_darwin_system_font_iPhone SE (3rd generation)_16.2_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 68C9D8082AD9B6C800DF9D79 /* golden_darwin_system_font_iPhone SE (3rd generation)_16.2_simulator.png */; };
 		68D4017D2564859300ECD91A /* ContinuousTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 68D4017C2564859300ECD91A /* ContinuousTexture.m */; };
 		68D93AEE2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 68D93AED2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png */; };
 		F26F15B8268B6B5600EC54D3 /* iPadGestureTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */; };
@@ -242,6 +244,8 @@
 		686383052AC2024200E27AAD /* FlutterAppExtensionTestHost.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = FlutterAppExtensionTestHost.xcodeproj; path = ../FlutterAppExtensionTestHost/FlutterAppExtensionTestHost.xcodeproj; sourceTree = "<group>"; };
 		686383122AC202B700E27AAD /* AppExtensionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppExtensionTests.m; sourceTree = "<group>"; };
 		68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlatformViewGestureRecognizerTests.m; sourceTree = "<group>"; };
+		68C9D8002AD9B0EF00DF9D79 /* DarwinSystemFontTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DarwinSystemFontTests.m; sourceTree = "<group>"; };
+		68C9D8082AD9B6C800DF9D79 /* golden_darwin_system_font_iPhone SE (3rd generation)_16.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_darwin_system_font_iPhone SE (3rd generation)_16.2_simulator.png"; sourceTree = "<group>"; };
 		68D4017B2564859300ECD91A /* ContinuousTexture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContinuousTexture.h; sourceTree = "<group>"; };
 		68D4017C2564859300ECD91A /* ContinuousTexture.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ContinuousTexture.m; sourceTree = "<group>"; };
 		68D93AED2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png"; sourceTree = "<group>"; };
@@ -366,6 +370,7 @@
 				0DDEBC88258830B40065D0E8 /* SpawnEngineTest.m */,
 				F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */,
 				686383122AC202B700E27AAD /* AppExtensionTests.m */,
+				68C9D8002AD9B0EF00DF9D79 /* DarwinSystemFontTests.m */,
 			);
 			path = ScenariosUITests;
 			sourceTree = "<group>";
@@ -401,6 +406,7 @@
 		F7B464DC2759D02B00079189 /* Goldens */ = {
 			isa = PBXGroup;
 			children = (
+				68C9D8082AD9B6C800DF9D79 /* golden_darwin_system_font_iPhone SE (3rd generation)_16.2_simulator.png */,
 				3BFD971E2A990CF40094F51B /* golden_bogus_font_text_impeller_iPhone SE (3rd generation)_16.2_simulator.png */,
 				3BFD971F2A990CF40094F51B /* golden_spawn_engine_works_impeller_iPhone SE (3rd generation)_16.2_simulator.png */,
 				68D93AED2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png */,
@@ -617,6 +623,7 @@
 				684FFF8729F9C10700281002 /* golden_platform_view_multiple_iPhone SE (3rd generation)_16.2_simulator.png in Resources */,
 				68D93AEE2A46097E0054AB6D /* golden_platform_view_with_negative_backdrop_filter_iPhone SE (3rd generation)_16.2_simulator.png in Resources */,
 				3BFD97202A990CF50094F51B /* golden_bogus_font_text_impeller_iPhone SE (3rd generation)_16.2_simulator.png in Resources */,
+				68C9D8092AD9B6C800DF9D79 /* golden_darwin_system_font_iPhone SE (3rd generation)_16.2_simulator.png in Resources */,
 				684FFF8D29F9C10700281002 /* golden_platform_view_large_cliprrect_iPhone SE (3rd generation)_16.2_simulator.png in Resources */,
 				684FFF8329F9C10700281002 /* golden_platform_view_transform_iPhone SE (3rd generation)_16.2_simulator.png in Resources */,
 				684FFF8B29F9C10700281002 /* golden_platform_view_clippath_iPhone SE (3rd generation)_16.2_simulator.png in Resources */,
@@ -666,6 +673,7 @@
 			files = (
 				6402EBD124147BDA00987DCB /* UnobstructedPlatformViewTests.m in Sources */,
 				68A5B63423EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m in Sources */,
+				68C9D8012AD9B0EF00DF9D79 /* DarwinSystemFontTests.m in Sources */,
 				6816DBA12317573300A51400 /* GoldenImage.m in Sources */,
 				0A02E8F724EFAD27002D54E5 /* BogusFontTextTest.m in Sources */,
 				6816DB9E231750ED00A51400 /* GoldenPlatformViewTests.m in Sources */,
