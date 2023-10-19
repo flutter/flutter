@@ -1304,7 +1304,6 @@ abstract class FlutterCommand extends Command<void> {
       dartExperiments: experiments,
       webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
-      dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
