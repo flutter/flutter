@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
@@ -386,7 +385,7 @@ void main() {
       scrollMetrics: metrics,
     );
 
-    testWidgets('down', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('down', (WidgetTester tester) async {
       painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
@@ -416,7 +415,7 @@ void main() {
       expect(size.width - rect1.right, padding.right);
     });
 
-    testWidgets('up', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('up', (WidgetTester tester) async {
       painter.update(
         metrics.copyWith(
           viewportDimension: size.height,
@@ -448,7 +447,7 @@ void main() {
       expect(size.width - rect1.right, padding.right);
     });
 
-    testWidgets('left', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('left', (WidgetTester tester) async {
       painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
@@ -480,7 +479,7 @@ void main() {
       expect(rect1.left, padding.left);
     });
 
-    testWidgets('right', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('right', (WidgetTester tester) async {
       painter.update(
         metrics.copyWith(
           viewportDimension: size.width,
@@ -513,7 +512,7 @@ void main() {
     });
   });
 
-  testWidgets('thumb resizes gradually on overscroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('thumb resizes gradually on overscroll', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
     const Size size = Size(60, 300);
     final double scrollExtent = size.height * 10;
@@ -666,7 +665,7 @@ void main() {
     expect(trackRRect.trRadius, const Radius.circular(2.0));
   });
 
-  testWidgets('ScrollbarPainter asserts if no TextDirection has been provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollbarPainter asserts if no TextDirection has been provided', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,
       fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
@@ -685,8 +684,9 @@ void main() {
     }
   });
 
-  testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -747,7 +747,7 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -805,7 +805,7 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar does not fade away while hovering', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar does not fade away while hovering', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -852,7 +852,7 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar will fade back in when hovering over known track area', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar will fade back in when hovering over known track area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -913,7 +913,7 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar will show on hover without needing to scroll first for metrics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar will show on hover without needing to scroll first for metrics', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -948,8 +948,9 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1003,8 +1004,9 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar thumb cannot be dragged into overscroll if the physics do not allow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb cannot be dragged into overscroll if the physics do not allow', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1055,8 +1057,9 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar thumb cannot be dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb cannot be dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1123,8 +1126,9 @@ void main() {
     TargetPlatform.fuchsia,
   }));
 
-  testWidgets('Scrollbar thumb can be dragged into overscroll if the platform allows it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged into overscroll if the platform allows it', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1190,7 +1194,7 @@ void main() {
   }));
 
   // Regression test for https://github.com/flutter/flutter/issues/66444
-  testWidgets("RawScrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("RawScrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     final GlobalKey outerKey = GlobalKey();
@@ -1252,8 +1256,9 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar hit test area adjusts for PointerDeviceKind', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar hit test area adjusts for PointerDeviceKind', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1341,9 +1346,10 @@ void main() {
     );
   });
 
-  testWidgets('hit test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hit test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99324
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     bool onTap = false;
     await tester.pumpWidget(
       Directionality(
@@ -1390,12 +1396,14 @@ void main() {
     expect(onTap, true);
   });
 
-  testWidgets('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
     final FlutterExceptionHandler? handler = FlutterError.onError;
     FlutterErrorDetails? error;
     FlutterError.onError = (FlutterErrorDetails details) {
       error = details;
     };
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1404,7 +1412,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             thumbVisibility: true,
-            controller: ScrollController(),
+            controller: controller,
             thumbColor: const Color(0x11111111),
             child: const SingleChildScrollView(
               child: SizedBox(
@@ -1428,12 +1436,14 @@ void main() {
     FlutterError.onError = handler;
   });
 
-  testWidgets('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
     final FlutterExceptionHandler? handler = FlutterError.onError;
     FlutterErrorDetails? error;
     FlutterError.onError = (FlutterErrorDetails details) {
       error = details;
     };
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1442,7 +1452,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             thumbVisibility: true,
-            controller: ScrollController(),
+            controller: controller,
             thumbColor: const Color(0x11111111),
             child: const SingleChildScrollView(
               child: SizedBox(
@@ -1466,9 +1476,11 @@ void main() {
     FlutterError.onError = handler;
   });
 
-  testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1507,9 +1519,10 @@ void main() {
     );
   });
 
-  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1681,8 +1694,9 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar thumb can be dragged in reverse', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged in reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1737,7 +1751,7 @@ void main() {
     );
   });
 
-  testWidgets('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollbarPainter asserts if scrollbarOrientation is used with wrong axisDirection', (WidgetTester tester) async {
     final ScrollbarPainter painter = ScrollbarPainter(
       color: _kScrollbarColor,
       fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
@@ -1755,8 +1769,9 @@ void main() {
     expect(() => painter.paint(testCanvas, size), throwsA(isA<AssertionError>()));
   });
 
-  testWidgets('RawScrollbar mainAxisMargin property works properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawScrollbar mainAxisMargin property works properly', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1785,8 +1800,9 @@ void main() {
     );
   });
 
-  testWidgets('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shape property of RawScrollbar can draw a BeveledRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1822,8 +1838,9 @@ void main() {
     );
   });
 
-  testWidgets('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('minThumbLength property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1848,8 +1865,9 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0))); // thumb
   });
 
-  testWidgets('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shape property of RawScrollbar can draw a CircleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1884,8 +1902,9 @@ void main() {
     );
   });
 
-  testWidgets('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('crossAxisMargin property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1909,8 +1928,9 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(764.0, 0.0, 770.0, 360.0)));
   });
 
-  testWidgets('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shape property of RawScrollbar can draw a RoundedRectangleBorder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1943,8 +1963,9 @@ void main() {
     );
   });
 
-  testWidgets('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('minOverscrollLength property of RawScrollbar is respected', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1975,8 +1996,9 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 8.0)));
   });
 
-  testWidgets('not passing any shape or radius to RawScrollbar will draw the usual rectangular thumb', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('not passing any shape or radius to RawScrollbar will draw the usual rectangular thumb', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2001,8 +2023,9 @@ void main() {
     );
   });
 
-  testWidgets('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The bar can show or hide when the viewport size change', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame(double height) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2032,10 +2055,11 @@ void main() {
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Hide the bar.
   });
 
-  testWidgets('The bar can show or hide when the view size change', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The bar can show or hide when the view size change', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2074,10 +2098,12 @@ void main() {
     expect(find.byType(RawScrollbar), isNot(paints..rect())); // Not shown.
   });
 
-  testWidgets('Scrollbar will not flip axes based on notification is there is a scroll controller', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar will not flip axes based on notification is there is a scroll controller', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/87697
     final ScrollController verticalScrollController = ScrollController();
+    addTearDown(verticalScrollController.dispose);
     final ScrollController horizontalScrollController = ScrollController();
+    addTearDown(horizontalScrollController.dispose);
     Widget buildFrame() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2135,8 +2161,9 @@ void main() {
     );
   });
 
-  testWidgets('notificationPredicate depth test.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('notificationPredicate depth test.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final List<int> depths = <int>[];
     Widget buildFrame() {
       return Directionality(
@@ -2169,8 +2196,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/92262
-  testWidgets('Do not crash when resize from scrollable to non-scrollable.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not crash when resize from scrollable to non-scrollable.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame(double height) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2205,10 +2233,11 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent - desktop', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent - desktop', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/95840
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -2287,10 +2316,11 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent - mobile', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged when the scrollable widget has a negative minScrollExtent - mobile', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/95840
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -2423,8 +2453,9 @@ void main() {
     expect(painter.shouldRepaint(createPainter(scrollbarOrientation: ScrollbarOrientation.bottom)), true);
   });
 
-  testWidgets('Scrollbar track can be drawn', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar track can be drawn', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2466,8 +2497,9 @@ void main() {
     );
   });
 
-  testWidgets('RawScrollbar correctly assigns colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawScrollbar correctly assigns colors', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2512,8 +2544,9 @@ void main() {
     );
   });
 
-  testWidgets('trackRadius and radius properties of RawScrollbar can draw RoundedRectangularRect', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('trackRadius and radius properties of RawScrollbar can draw RoundedRectangularRect', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2551,8 +2584,9 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar asserts that a visible track has a visible thumb', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar asserts that a visible track has a visible thumb', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildApp() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2575,9 +2609,10 @@ void main() {
     expect(() => tester.pumpWidget(buildApp()), throwsAssertionError);
   });
 
-  testWidgets('Skip the ScrollPosition check if the bar was unmounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Skip the ScrollPosition check if the bar was unmounted', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103939
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildApp(bool buildBar) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2613,9 +2648,10 @@ void main() {
     // Go without throw.
   });
 
-  testWidgets('Track offset respects MediaQuery padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Track offset respects MediaQuery padding', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106834
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2645,8 +2681,9 @@ void main() {
     ); // thumb
   });
 
-  testWidgets('RawScrollbar.padding replaces MediaQueryData.padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawScrollbar.padding replaces MediaQueryData.padding', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
         Directionality(
             textDirection: TextDirection.ltr,
@@ -2677,8 +2714,9 @@ void main() {
     ); // thumb
   });
 
-  testWidgets('Scrollbar respect the NeverScrollableScrollPhysics physics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar respect the NeverScrollableScrollPhysics physics', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2719,9 +2757,10 @@ void main() {
     expect(scrollController.offset, 0.0);
   });
 
-  testWidgets('The thumb should follow the pointer when the scroll metrics changed during dragging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The thumb should follow the pointer when the scroll metrics changed during dragging', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/112072
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2789,9 +2828,10 @@ void main() {
     );
   });
 
-  testWidgets('The scrollable should not stutter when the scroll metrics shrink during dragging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The scrollable should not stutter when the scroll metrics shrink during dragging', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/121574
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2853,9 +2893,10 @@ void main() {
     expect(scrollController.offset, greaterThan(lastPosition));
   });
 
-  testWidgets('The bar support mouse wheel event', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The bar support mouse wheel event', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/109659
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     Widget buildFrame() {
       return Directionality(
         textDirection: TextDirection.ltr,

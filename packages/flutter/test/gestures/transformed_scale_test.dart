@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('gets local coordinates', (WidgetTester tester) async {
@@ -32,7 +31,7 @@ void main() {
       ),
     );
 
-    await tester.startGesture(tester.getCenter(find.byKey(redContainer)) - const Offset(20, 20));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(redContainer)) - const Offset(20, 20));
     final TestGesture pointer2 = await tester.startGesture(tester.getCenter(find.byKey(redContainer)) + const Offset(30, 30));
     await pointer2.moveTo(tester.getCenter(find.byKey(redContainer)) + const Offset(20, 20));
 
@@ -44,5 +43,11 @@ void main() {
     expect(startDetails.first.focalPoint, const Offset(380, 280));
     expect(startDetails.last.localFocalPoint, const Offset(50, 50));
     expect(startDetails.last.focalPoint, const Offset(400, 300));
+
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await pointer2.up();
+    await tester.pumpAndSettle();
+
   });
 }

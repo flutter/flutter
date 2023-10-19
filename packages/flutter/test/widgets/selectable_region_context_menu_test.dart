@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
 extension on web.HTMLCollection {
@@ -18,7 +19,6 @@ extension on web.CSSRuleList {
   Iterable<web.CSSRule> get iterable => _genIterable(this);
 }
 
-typedef ItemGetter<T> = T? Function(int index);
 Iterable<T> _genIterable<T>(dynamic jsCollection) {
   // ignore: avoid_dynamic_calls
   return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
@@ -60,8 +60,9 @@ void main() {
     expect(foundStyle, isTrue);
   });
 
-  testWidgets('right click can trigger select word', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('right click can trigger select word', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
         MaterialApp(
@@ -159,8 +160,7 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  SelectionGeometry get value => _value;
-  SelectionGeometry _value = const SelectionGeometry(
+  final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
     startSelectionPoint: SelectionPoint(
@@ -174,15 +174,6 @@ class RenderSelectionSpy extends RenderProxyBox
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
-    if (other == _value) {
-      return;
-    }
-    _value = other;
-    for (final VoidCallback callback in listeners) {
-      callback();
-    }
-  }
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }

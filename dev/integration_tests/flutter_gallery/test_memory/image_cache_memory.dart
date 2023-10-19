@@ -56,7 +56,7 @@ Future<void> main() async {
   do {
     await controller.drag(list, const Offset(0.0, -30.0));
     await Future<void>.delayed(const Duration(milliseconds: 20));
-  } while (!lastItem.precache());
+  } while (!lastItem.tryEvaluate());
 
   debugPrint('==== MEMORY BENCHMARK ==== DONE ====');
 }

@@ -145,10 +145,15 @@
   "keyboardKeySelect": "Select",
   "keyboardKeyShift": "Shift",
   "keyboardKeySpace": "Space",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "tapiwch ddwywaith i grebachu",
+  "expansionTileCollapsedHint": "tapiwch ddwywaith i ehangu",
+  "expansionTileExpandedTapHint": "Crebachu",
+  "expansionTileCollapsedTapHint": "Ehangwch am ragor o fanylion",
+  "expandedHint": "Wedi'i grebachu",
+  "collapsedHint": "Wedi'i ehangu",
+  "scanTextButtonLabel": "Sganio testun",
+  "menuDismissLabel": "Diystyru'r ddewislen",
+  "lookUpButtonLabel": "Chwilio",
+  "searchWebButtonLabel": "Chwilio'r We",
+  "shareButtonLabel": "Rhannu..."
 }

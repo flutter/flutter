@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -22,7 +23,7 @@ void main() {
 }
 
 void _defineTests() {
-  testWidgets('builds no semantics by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('builds no semantics by default', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -36,7 +37,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('provides foreground semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('provides foreground semantics', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -72,7 +73,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('provides background semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('provides background semantics', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -108,7 +109,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('combines background, child and foreground semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('combines background, child and foreground semantics', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -167,7 +168,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('applies $SemanticsProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('applies $SemanticsProperties', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -270,7 +271,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
         semantics: const CustomPainterSemantics(
@@ -312,7 +313,7 @@ void _defineTests() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
-  testWidgets('Supports all actions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Supports all actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<SemanticsAction> performedActions = <SemanticsAction>[];
 
@@ -410,7 +411,7 @@ void _defineTests() {
     semantics.dispose();
   });
 
-  testWidgets('Supports all flags', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(CustomPaint(
@@ -440,6 +441,7 @@ void _defineTests() {
             image: true,
             liveRegion: true,
             toggled: true,
+            expanded: true,
           ),
         ),
       ),
@@ -494,6 +496,7 @@ void _defineTests() {
             namesRoute: true,
             image: true,
             liveRegion: true,
+            expanded: true,
           ),
         ),
       ),
@@ -523,7 +526,7 @@ void _defineTests() {
   });
 
   group('diffing', () {
-    testWidgets('complains about duplicate keys', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('complains about duplicate keys', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       await tester.pumpWidget(CustomPaint(
         painter: _SemanticsDiffTest(<String>[
@@ -620,7 +623,7 @@ void _defineTests() {
     });
   });
 
-  testWidgets('rebuilds semantics upon resize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('rebuilds semantics upon resize', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     final _PainterWithSemantics painter = _PainterWithSemantics(
@@ -665,7 +668,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('does not rebuild when shouldRebuildSemantics is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('does not rebuild when shouldRebuildSemantics is false', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     const CustomPainterSemantics testSemantics = CustomPainterSemantics(
@@ -710,7 +713,7 @@ void _defineTests() {
 }
 
 void _testDiff(String description, Future<void> Function(_DiffTester tester) testFunction) {
-  testWidgets(description, (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(description, (WidgetTester tester) async {
     await testFunction(_DiffTester(tester));
   });
 }

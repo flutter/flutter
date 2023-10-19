@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   late BoxConstraints constraintsFromGetSize;
@@ -93,7 +94,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 }
 
 void main() {
-  testWidgets('Control test for CustomSingleChildLayout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Control test for CustomSingleChildLayout', (WidgetTester tester) async {
     final TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
@@ -114,7 +115,7 @@ void main() {
     expect(delegate.childSizeFromGetPositionForChild.height, 400.0);
   });
 
-  testWidgets('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
     TestSingleChildLayoutDelegate delegate =
         TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
@@ -138,7 +139,7 @@ void main() {
     expect(delegate.constraintsFromGetConstraintsForChild, isNotNull);
   });
 
-  testWidgets('Delegate can change size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delegate can change size', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(FixedSizeLayoutDelegate(const Size(100.0, 200.0))));
 
     RenderBox box = tester.renderObject(find.byType(CustomSingleChildLayout));
@@ -150,8 +151,9 @@ void main() {
     expect(box.size, equals(const Size(150.0, 240.0)));
   });
 
-  testWidgets('Can use listener for relayout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can use listener for relayout', (WidgetTester tester) async {
     final ValueNotifier<Size> size = ValueNotifier<Size>(const Size(100.0, 200.0));
+    addTearDown(size.dispose);
 
     await tester.pumpWidget(buildFrame(NotifierLayoutDelegate(size)));
 

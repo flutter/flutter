@@ -245,6 +245,44 @@ Error launching application on iPhone.''',
       );
     });
 
+    testWithoutContext('fallback to stdout: Ineligible destinations', () async {
+      final Map<String, String> buildSettingsWithDevTeam = <String, String>{
+        'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
+        'DEVELOPMENT_TEAM': 'a team',
+      };
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stderr: '''
+Launching lib/main.dart on iPhone in debug mode...
+Signing iOS app for device deployment using developer identity: "iPhone Developer: test@flutter.io (1122334455)"
+Running Xcode build...                                1.3s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+               		{ id:1234D567-890C-1DA2-34E5-F6789A0123C4 }
+
+               	Ineligible destinations for the "Runner" scheme:
+               		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 17.0 is not installed. To use with Xcode, first download and install the platform }
+
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettingsWithDevTeam,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
+      expect(
+        logger.errorText,
+        contains(missingPlatformInstructions('iOS 17.0')),
+      );
+    });
+
     testWithoutContext('No development team shows message', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,

@@ -13,11 +13,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
     int mutatedIndex = -1;
     final Widget widget = _buildWidget(
       NavigationBar(
@@ -49,7 +48,7 @@ void main() {
     expect(mutatedIndex, 0);
   });
 
-  testWidgets('NavigationBar can update background color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBar can update background color', (WidgetTester tester) async {
     const Color color = Colors.yellow;
 
     await tester.pumpWidget(
@@ -74,7 +73,7 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-  testWidgets('NavigationBar can update elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBar can update elevation', (WidgetTester tester) async {
     const double elevation = 42.0;
 
     await tester.pumpWidget(
@@ -99,7 +98,7 @@ void main() {
     expect(_getMaterial(tester).elevation, equals(elevation));
   });
 
-  testWidgets('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
     const double bottomPadding = 40.0;
 
     await tester.pumpWidget(
@@ -148,7 +147,7 @@ void main() {
     expect(tester.getSize(find.byType(NavigationBar)).height, expectedHeight);
   });
 
-  testWidgets('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
     const double safeAreaPadding = 40.0;
     Widget navigationBar() {
       return NavigationBar(
@@ -246,7 +245,7 @@ void main() {
     );
   });
 
-  testWidgets('NavigationBar uses proper defaults when no parameters are given - M2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
     // M2 settings that were hand coded.
     await tester.pumpWidget(
       _buildWidget(
@@ -275,7 +274,7 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
   });
 
-  testWidgets('NavigationBar uses proper defaults when no parameters are given - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
     // M3 settings from the token database.
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
@@ -305,7 +304,7 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
-  testWidgets('NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
     Widget buildApp({ required double textScaleFactor }) {
@@ -364,7 +363,69 @@ void main() {
     expect(tester.getSize(find.text(label).last), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
   });
 
-  testWidgets('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
+    const String label = 'A';
+
+    Widget buildApp({ required double textScaleFactor }) {
+      return MediaQuery(
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: MaterialApp(
+            theme: ThemeData(useMaterial3: true),
+            home: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      bottomNavigationBar: NavigationBar(
+                        destinations: const <NavigationDestination>[
+                          NavigationDestination(
+                            label: label,
+                            icon: Icon(Icons.ac_unit),
+                            tooltip: label,
+                          ),
+                          NavigationDestination(
+                            label: 'B',
+                            icon: Icon(Icons.battery_alert),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+    expect(find.text(label), findsNWidgets(2));
+
+    if (!kIsWeb || isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(14.25, 20.0));
+    }
+    // The duration is needed to ensure the tooltip disappears.
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+
+    if (!kIsWeb || isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
+    }
+  });
+
+  testWidgetsWithLeakTracking('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -404,7 +465,7 @@ void main() {
   });
 
 
-  testWidgets('Navigation bar semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigation bar semantics', (WidgetTester tester) async {
     Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
@@ -468,7 +529,7 @@ void main() {
     );
   });
 
-  testWidgets('Navigation bar semantics with some labels hidden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigation bar semantics with some labels hidden', (WidgetTester tester) async {
     Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
@@ -533,7 +594,7 @@ void main() {
     );
   });
 
-  testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
     const int animationMilliseconds = 800;
 
     Widget widget({double textScaleFactor = 1}) {
@@ -566,7 +627,7 @@ void main() {
     expect(newHeight, equals(initialHeight));
   });
 
-  testWidgets('Navigation indicator renders ripple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Navigation indicator renders ripple', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/116751.
     int selectedIndex = 0;
 
@@ -765,9 +826,9 @@ void main() {
           color: const Color(0x0a000000),
         )
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-  testWidgets('Navigation indicator ripple golden test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.
 
     Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
@@ -824,7 +885,7 @@ void main() {
     await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_onlyShowSelected_unselected_m3.png'));
   });
 
-  testWidgets('Navigation indicator scale transform', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Navigation indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
 
     Widget buildNavigationBar() {
@@ -875,7 +936,7 @@ void main() {
     expect(transform.getColumn(0)[0], 1.0);
   });
 
-  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Navigation destination updates indicator color and shape', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const Color color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
@@ -916,12 +977,49 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, shape);
   });
 
+  testWidgetsWithLeakTracking('Destinations respect their disabled state', (WidgetTester tester) async {
+    int selectedIndex = 0;
+
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bookmark),
+              label: 'Bookmark',
+              enabled: false,
+            ),
+          ],
+          onDestinationSelected: (int i) => selectedIndex = i,
+          selectedIndex: selectedIndex,
+        ),
+      )
+    );
+
+    await tester.tap(find.text('AC'));
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Alarm'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Bookmark'));
+    expect(selectedIndex, 1);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - Navigation destination updates indicator color and shape', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       const Color color = Color(0xff0000ff);
       const ShapeBorder shape = RoundedRectangleBorder();
@@ -965,7 +1063,7 @@ void main() {
       expect(_getIndicatorDecoration(tester)?.shape, shape);
     });
 
-    testWidgets('Navigation indicator renders ripple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - Navigation indicator renders ripple', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/116751.
       int selectedIndex = 0;
 
@@ -1166,7 +1264,7 @@ void main() {
       );
     });
 
-    testWidgets('Navigation indicator ripple golden test', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - Navigation indicator ripple golden test', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/117420.
 
       Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
@@ -1223,7 +1321,7 @@ void main() {
       await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_onlyShowSelected_unselected_m2.png'));
     });
 
-    testWidgets('Destination icon does not rebuild when tapped', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination icon does not rebuild when tapped', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/122811.
 
       Widget buildNavigationBar() {

@@ -1,4 +1,9 @@
 {
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share...",
+  "lookUpButtonLabel": "Look up",
+  "noSpellCheckReplacementsLabel": "No replacements found",
+  "menuDismissLabel": "Dismiss menu",
   "searchTextFieldPlaceholderLabel": "Search",
   "tabSemanticsLabel": "Tab $tabIndex of $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour o'clock",

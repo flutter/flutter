@@ -112,12 +112,12 @@ import 'viewport.dart';
 /// {@end-tool}
 class PageController extends ScrollController {
   /// Creates a page controller.
-  ///
-  /// The [initialPage], [keepPage], and [viewportFraction] arguments must not be null.
   PageController({
     this.initialPage = 0,
     this.keepPage = true,
     this.viewportFraction = 1.0,
+    super.onAttach,
+    super.onDetach,
   }) : assert(viewportFraction > 0.0);
 
   /// The page to show when first creating the [PageView].
@@ -183,8 +183,6 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   Future<void> animateToPage(
     int page, {
     required Duration duration,
@@ -221,8 +219,6 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   Future<void> nextPage({ required Duration duration, required Curve curve }) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
   }
@@ -231,8 +227,6 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   Future<void> previousPage({ required Duration duration, required Curve curve }) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
   }
@@ -612,6 +606,14 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// ** See code in examples/api/lib/widgets/page_view/page_view.0.dart **
 /// {@end-tool}
 ///
+/// ## Persisting the scroll position during a session
+///
+/// Scroll views attempt to persist their scroll position using [PageStorage].
+/// For a [PageView], this can be disabled by setting [PageController.keepPage]
+/// to false on the [controller]. If it is enabled, using a [PageStorageKey] for
+/// the [key] of this widget is recommended to help disambiguate different
+/// scroll views from each other.
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.
@@ -634,10 +636,10 @@ class PageView extends StatefulWidget {
   /// See the documentation at [SliverChildListDelegate.children] for more details.
   ///
   /// {@template flutter.widgets.PageView.allowImplicitScrolling}
-  /// The [allowImplicitScrolling] parameter must not be null. If true, the
-  /// [PageView] will participate in accessibility scrolling more like a
-  /// [ListView], where implicit scroll actions will move to the next page
-  /// rather than into the contents of the [PageView].
+  /// If [allowImplicitScrolling] is true, the [PageView] will participate in
+  /// accessibility scrolling more like a [ListView], where implicit scroll
+  /// actions will move to the next page rather than into the contents of the
+  /// [PageView].
   /// {@endtemplate}
   PageView({
     super.key,
@@ -709,84 +711,11 @@ class PageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
   ///
-  /// {@tool snippet}
-  ///
-  /// This [PageView] uses a custom [SliverChildBuilderDelegate] to support child
+  /// {@tool dartpad}
+  /// This example shows a [PageView] that uses a custom [SliverChildBuilderDelegate] to support child
   /// reordering.
   ///
-  /// ```dart
-  /// class MyPageView extends StatefulWidget {
-  ///   const MyPageView({super.key});
-  ///
-  ///   @override
-  ///   State<MyPageView> createState() => _MyPageViewState();
-  /// }
-  ///
-  /// class _MyPageViewState extends State<MyPageView> {
-  ///   List<String> items = <String>['1', '2', '3', '4', '5'];
-  ///
-  ///   void _reverse() {
-  ///     setState(() {
-  ///       items = items.reversed.toList();
-  ///     });
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Scaffold(
-  ///       body: SafeArea(
-  ///         child: PageView.custom(
-  ///           childrenDelegate: SliverChildBuilderDelegate(
-  ///             (BuildContext context, int index) {
-  ///               return KeepAlive(
-  ///                 data: items[index],
-  ///                 key: ValueKey<String>(items[index]),
-  ///               );
-  ///             },
-  ///             childCount: items.length,
-  ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey<String> valueKey = key as ValueKey<String>;
-  ///               final String data = valueKey.value;
-  ///               return items.indexOf(data);
-  ///             }
-  ///           ),
-  ///         ),
-  ///       ),
-  ///       bottomNavigationBar: BottomAppBar(
-  ///         child: Row(
-  ///           mainAxisAlignment: MainAxisAlignment.center,
-  ///           children: <Widget>[
-  ///             TextButton(
-  ///               onPressed: () => _reverse(),
-  ///               child: const Text('Reverse items'),
-  ///             ),
-  ///           ],
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({super.key, required this.data});
-  ///
-  ///   final String data;
-  ///
-  ///   @override
-  ///   State<KeepAlive> createState() => _KeepAliveState();
-  /// }
-  ///
-  /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
-  ///   @override
-  ///   bool get wantKeepAlive => true;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     super.build(context);
-  ///     return Text(widget.data);
-  ///   }
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/page_view/page_view.1.dart **
   /// {@end-tool}
   ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
@@ -909,7 +838,7 @@ class PageView extends StatefulWidget {
   ///
   /// If [PageController.viewportFraction] >= 1.0, this property has no effect.
   ///
-  /// This property defaults to true and must not be null.
+  /// This property defaults to true.
   final bool padEnds;
 
   @override

@@ -5,13 +5,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 final Key blockKey = UniqueKey();
 const double expandedAppbarHeight = 250.0;
 final Key appbarContainerKey = UniqueKey();
 
 void main() {
-  testWidgets('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
@@ -49,7 +50,7 @@ void main() {
     expect(topAfterScroll.dy, equals(0.0));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgets('FlexibleSpaceBar collapse mode pin', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar collapse mode pin', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
@@ -87,7 +88,7 @@ void main() {
     expect(topAfterScroll.dy, equals(-100.0));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgets('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),

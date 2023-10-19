@@ -459,7 +459,15 @@ void main() {
     expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
 
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
+
+    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/112498 is resolved.
+    // The web implementation never includes "dither: ..." as a property, and after #112498 neither
+    // does non-web (as there will no longer be a user-visible "dither" property). So, relax the
+    // test to just check for the color by using a regular expression.
+    expect(
+      ts2.toString(),
+      matches(RegExp(r'background: Paint\(Color\(0xff00ff00\).*\)')),
+    );
   });
 
   test('TextStyle background and backgroundColor combos', () {
@@ -503,9 +511,9 @@ void main() {
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75)!.background!.color, blue);
   });
 
-  test('TextStyle strut textScaleFactor', () {
+  test('TextStyle strut textScaler', () {
     const TextStyle style0 = TextStyle(fontSize: 10);
-    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
+    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaler: const TextScaler.linear(2.5));
 
     const TextStyle style1 = TextStyle(fontSize: 25);
     final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle();

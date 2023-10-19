@@ -34,6 +34,41 @@ import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
 
+abstract class DotEnvRegex {
+  // Dot env multi-line block value regex
+  static final RegExp multiLineBlock = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*"""\s*(.*)$');
+
+  // Dot env full line value regex (eg FOO=bar)
+  // Entire line will be matched including key and value
+  static final RegExp keyValue = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*(.*)?$');
+
+  // Dot env value wrapped in double quotes regex (eg FOO="bar")
+  // Value between double quotes will be matched (eg only bar in "bar")
+  static final RegExp doubleQuotedValue = RegExp(r'^"(.*)"\s*(\#\s*.*)?$');
+
+  // Dot env value wrapped in single quotes regex (eg FOO='bar')
+  // Value between single quotes will be matched (eg only bar in 'bar')
+  static final RegExp singleQuotedValue = RegExp(r"^'(.*)'\s*(\#\s*.*)?$");
+
+  // Dot env value wrapped in back quotes regex (eg FOO=`bar`)
+  // Value between back quotes will be matched (eg only bar in `bar`)
+  static final RegExp backQuotedValue = RegExp(r'^`(.*)`\s*(\#\s*.*)?$');
+
+  // Dot env value without quotes regex (eg FOO=bar)
+  // Value without quotes will be matched (eg full value after the equals sign)
+  static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
+}
+
+abstract class _HttpRegex {
+  // https://datatracker.ietf.org/doc/html/rfc7230#section-3.2
+  static const String _vchar = r'\x21-\x7E';
+  static const String _spaceOrTab = r'\x20\x09';
+  static const String _nonDelimiterVchar = r'\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x39\x41-\x5A\x5E-\x7A\x7C\x7E';
+
+  // --web-header is provided as key=value for consistency with --dart-define
+  static final RegExp httpHeader = RegExp('^([$_nonDelimiterVchar]+)' r'\s*=\s*' '([$_vchar$_spaceOrTab]+)' r'$');
+}
+
 enum ExitStatus {
   success,
   warning,
@@ -87,6 +122,7 @@ class FlutterCommandResult {
 
 /// Common flutter command line options.
 abstract final class FlutterOptions {
+  static const String kFrontendServerStarterPath = 'frontend-server-starter-path';
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
@@ -192,6 +228,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebOptions({ required bool verboseHelp }) {
+    argParser.addMultiOption('web-header',
+      help: 'Additional key-value pairs that will added by the web server '
+            'as headers to all responses. Multiple headers can be passed by '
+            'repeating "--web-header" multiple times.',
+      valueHelp: 'X-Custom-Header=header-value',
+      splitCommas: false,
+      hide: !verboseHelp,
+    );
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help:
@@ -461,7 +505,7 @@ abstract class FlutterCommand extends Command<void> {
       }
       ddsEnabled = !boolArg('disable-dds');
       // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
-      if (false) { // ignore: dead_code
+      if (false) { // ignore: dead_code, literal_only_boolean_expressions
         if (ddsEnabled) {
           globals.printWarning('${globals.logger.terminal
               .warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.');
@@ -612,17 +656,18 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    useDartDefineConfigJsonFileOption();
+    _usesDartDefineFromFileOption();
   }
 
-  void useDartDefineConfigJsonFileOption() {
+  void _usesDartDefineFromFileOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
-      help: 'The path of a json format file where flutter define a global constant pool. '
-          'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'and int.fromEnvironment constructors; the key and field are json values.\n'
-          'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
-      valueHelp: 'use-define-config.json',
+      help:
+          'The path of a .json or .env file containing key-value pairs that will be available as environment variables.\n'
+          'These can be accessed using the String.fromEnvironment, bool.fromEnvironment, and int.fromEnvironment constructors.\n'
+          'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.\n'
+          'Entries from "--${FlutterOptions.kDartDefinesOption}" with identical keys take precedence over entries from these files.',
+      valueHelp: 'use-define-config.json|.env',
       splitCommas: false,
     );
   }
@@ -820,6 +865,18 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help: 'This flag is deprecated as only null-safe code is supported.',
       hide: true,
+    );
+  }
+
+  void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
+    argParser.addOption(
+      FlutterOptions.kFrontendServerStarterPath,
+      help: 'When this value is provided, the frontend server will be started '
+            'in JIT mode from the specified file, instead of from the AOT '
+            'snapshot shipped with the Dart SDK. The specified file can either '
+            'be a Dart source file, or an AppJIT snapshot. This option does '
+            'not affect web builds.',
+      hide: !verboseHelp,
     );
   }
 
@@ -1208,11 +1265,25 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    final String? flavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    if (flavor != null) {
+      if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
+        throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.');
+      }
+      if (dartDefines.any((String define) => define.startsWith('FLUTTER_APP_FLAVOR'))) {
+        throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be '
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}');
+      }
+      dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
+    }
+
     return BuildInfo(buildMode,
-      argParser.options.containsKey('flavor')
-        ? stringArg('flavor')
-        : null,
+      flavor,
       trackWidgetCreation: trackWidgetCreation,
+      frontendServerStarterPath: argParser.options
+              .containsKey(FlutterOptions.kFrontendServerStarterPath)
+          ? stringArg(FlutterOptions.kFrontendServerStarterPath)
+          : null,
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty
         ? extraFrontEndOptions
         : null,
@@ -1326,13 +1397,13 @@ abstract class FlutterCommand extends Command<void> {
   List<String> extractDartDefines({required Map<String, Object?> defineConfigJsonMap}) {
     final List<String> dartDefines = <String>[];
 
-    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
-    }
-
     defineConfigJsonMap.forEach((String key, Object? value) {
       dartDefines.add('$key=$value');
     });
+
+    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
+      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
+    }
 
     return dartDefines;
   }
@@ -1341,18 +1412,28 @@ abstract class FlutterCommand extends Command<void> {
     final Map<String, Object?> dartDefineConfigJsonMap = <String, Object?>{};
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final List<String> configJsonPaths = stringsArg(
+      final List<String> configFilePaths = stringsArg(
         FlutterOptions.kDartDefineFromFileOption,
       );
 
-      for (final String path in configJsonPaths) {
+      for (final String path in configFilePaths) {
         if (!globals.fs.isFileSync(path)) {
-          throwToolExit('Json config define file "--${FlutterOptions
-              .kDartDefineFromFileOption}=$path" is not a file, '
-              'please fix first!');
+          throwToolExit('Did not find the file passed to "--${FlutterOptions
+              .kDartDefineFromFileOption}". Path: $path');
         }
 
-        final String configJsonRaw = globals.fs.file(path).readAsStringSync();
+        final String configRaw = globals.fs.file(path).readAsStringSync();
+
+        // Determine whether the file content is JSON or .env format.
+        String configJsonRaw;
+        if (configRaw.trim().startsWith('{')) {
+          configJsonRaw = configRaw;
+        } else {
+
+          // Convert env file to JSON.
+          configJsonRaw = convertEnvFileToJsonRaw(configRaw);
+        }
+
         try {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>)
@@ -1360,14 +1441,91 @@ abstract class FlutterCommand extends Command<void> {
             dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions
-              .kDartDefineFromFileOption}=$path" format err, '
-              'please fix first! format err:\n$err');
+          throwToolExit('Unable to parse the file at path "$path" due to a formatting error. '
+            'Ensure that the file contains valid JSON.\n'
+            'Error details: $err'
+          );
         }
       }
     }
 
     return dartDefineConfigJsonMap;
+  }
+
+  /// Parse a property line from an env file.
+  /// Supposed property structure should be:
+  ///   key=value
+  ///
+  /// Where: key is a string without spaces and value is a string.
+  /// Value can also contain '=' char.
+  ///
+  /// Returns a record of key and value as strings.
+  MapEntry<String, String> _parseProperty(String line) {
+    if (DotEnvRegex.multiLineBlock.hasMatch(line)) {
+      throwToolExit('Multi-line value is not supported: $line');
+    }
+
+    final Match? keyValueMatch = DotEnvRegex.keyValue.firstMatch(line);
+    if (keyValueMatch == null) {
+      throwToolExit('Unable to parse file provided for '
+        '--${FlutterOptions.kDartDefineFromFileOption}.\n'
+        'Invalid property line: $line');
+    }
+
+    final String key = keyValueMatch.group(1)!;
+    final String value = keyValueMatch.group(2) ?? '';
+
+    // Remove wrapping quotes and trailing line comment.
+    final Match? doubleQuotedValueMatch = DotEnvRegex.doubleQuotedValue.firstMatch(value);
+    if (doubleQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, doubleQuotedValueMatch.group(1)!);
+    }
+
+    final Match? singleQuotedValueMatch = DotEnvRegex.singleQuotedValue.firstMatch(value);
+    if (singleQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, singleQuotedValueMatch.group(1)!);
+    }
+
+    final Match? backQuotedValueMatch = DotEnvRegex.backQuotedValue.firstMatch(value);
+    if (backQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, backQuotedValueMatch.group(1)!);
+    }
+
+    final Match? unquotedValueMatch = DotEnvRegex.unquotedValue.firstMatch(value);
+    if (unquotedValueMatch != null) {
+      return MapEntry<String, String>(key, unquotedValueMatch.group(1)!);
+    }
+
+    return MapEntry<String, String>(key, value);
+  }
+
+  /// Converts an .env file string to its equivalent JSON string.
+  ///
+  /// For example, the .env file string
+  ///   key=value # comment
+  ///   complexKey="foo#bar=baz"
+  /// would be converted to a JSON string equivalent to:
+  ///   {
+  ///     "key": "value",
+  ///     "complexKey": "foo#bar=baz"
+  ///   }
+  ///
+  /// Multiline values are not supported.
+  String convertEnvFileToJsonRaw(String configRaw) {
+    final List<String> lines = configRaw
+        .split('\n')
+        .map((String line) => line.trim())
+        .where((String line) => line.isNotEmpty)
+        .where((String line) => !line.startsWith('#')) // Remove comment lines.
+        .toList();
+
+    final Map<String, String> propertyMap = <String, String>{};
+    for (final String line in lines) {
+      final MapEntry<String, String> property = _parseProperty(line);
+      propertyMap[property.key] = property.value;
+    }
+
+    return jsonEncode(propertyMap);
   }
 
   /// Updates dart-defines based on [webRenderer].
@@ -1380,6 +1538,31 @@ abstract class FlutterCommand extends Command<void> {
     }
     dartDefinesSet.addAll(webRenderer.dartDefines);
     return dartDefinesSet.toList();
+  }
+
+
+  Map<String, String> extractWebHeaders() {
+    final Map<String, String> webHeaders = <String, String>{};
+
+    if (argParser.options.containsKey('web-header')) {
+      final List<String> candidates = stringsArg('web-header');
+      final List<String> invalidHeaders = <String>[];
+      for (final String candidate in candidates) {
+        final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
+          if (keyValueMatch == null) {
+            invalidHeaders.add(candidate);
+            continue;
+          }
+
+          webHeaders[keyValueMatch.group(1)!] = keyValueMatch.group(2)!;
+      }
+
+      if (invalidHeaders.isNotEmpty) {
+        throwToolExit('Invalid web headers: ${invalidHeaders.join(', ')}');
+      }
+    }
+
+    return webHeaders;
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {

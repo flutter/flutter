@@ -19,8 +19,6 @@ import 'theme.dart';
 abstract class MergeableMaterialItem {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  ///
-  /// The argument is the [key], which must not be null.
   const MergeableMaterialItem(this.key);
 
   /// The key for this item of the list.
@@ -470,7 +468,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       _removeChild(j);
     }
     while (i < newChildren.length) {
-      _insertChild(j, newChildren[i]);
+      final MergeableMaterialItem newChild = newChildren[i];
+      _insertChild(j, newChild);
+
+      if (newChild is MaterialGap) {
+        _animationTuples[newChild.key]!.controller.forward();
+      }
 
       i += 1;
       j += 1;

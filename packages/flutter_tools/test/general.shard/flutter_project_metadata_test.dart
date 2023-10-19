@@ -5,10 +5,13 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -183,5 +186,17 @@ migration:
     expect(projectMetadata.migrateConfig.unmanagedFiles[0], 'file1');
 
     expect(logger.traceText, contains('The key `create_revision` was not found'));
+  });
+
+  testUsingContext('enabledValues does not contain packageFfi if native-assets not enabled', () {
+    expect(FlutterProjectType.enabledValues, isNot(contains(FlutterProjectType.packageFfi)));
+    expect(FlutterProjectType.enabledValues, contains(FlutterProjectType.plugin));
+  });
+
+  testUsingContext('enabledValues contains packageFfi if natives-assets enabled', () {
+    expect(FlutterProjectType.enabledValues, contains(FlutterProjectType.packageFfi));
+    expect(FlutterProjectType.enabledValues, contains(FlutterProjectType.plugin));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
   });
 }

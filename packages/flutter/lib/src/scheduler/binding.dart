@@ -14,7 +14,6 @@ import 'debug.dart';
 import 'priority.dart';
 import 'service_extensions.dart';
 
-export 'dart:developer' show Flow;
 export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback;
 
 export 'priority.dart' show Priority;
@@ -560,6 +559,11 @@ mixin SchedulerBinding on BindingBase {
   /// Adds the given callback to the list of frame callbacks and ensures that a
   /// frame is scheduled.
   ///
+  /// If this is called during the frame's animation phase (when transient frame
+  /// callbacks are still being invoked), a new frame will be scheduled, and
+  /// `callback` will be called in the newly scheduled frame, not in the current
+  /// frame.
+  ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
   /// If this is a callback that will be re-registered each time it fires, then
@@ -574,6 +578,12 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where transient frame
+  ///    callbacks fit into those phases).
   int scheduleFrameCallback(FrameCallback callback, { bool rescheduling = false }) {
     scheduleFrame();
     _nextFrameCallbackId += 1;
@@ -726,6 +736,12 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Persistent frame callbacks cannot be unregistered. Once registered, they
   /// are called for every frame for the lifetime of the application.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where persistent frame
+  ///    callbacks fit into those phases).
   void addPersistentFrameCallback(FrameCallback callback) {
     _persistentCallbacks.add(callback);
   }
@@ -753,6 +769,9 @@ mixin SchedulerBinding on BindingBase {
   ///
   ///  * [scheduleFrameCallback], which registers a callback for the start of
   ///    the next frame.
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where post frame
+  ///    callbacks fit into those phases).
   void addPostFrameCallback(FrameCallback callback) {
     _postFrameCallbacks.add(callback);
   }
@@ -934,13 +953,40 @@ mixin SchedulerBinding on BindingBase {
   /// [scheduleWarmUpFrame] was already called, this call will be ignored.
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
+  ///
+  /// ## Design discussion
+  ///
+  /// The Flutter engine prompts the framework to generate frames when it
+  /// receives a request from the operating system (known for historical reasons
+  /// as a vsync). However, this may not happen for several milliseconds after
+  /// the app starts (or after a hot reload). To make use of the time between
+  /// when the widget tree is first configured and when the engine requests an
+  /// update, the framework schedules a _warm-up frame_.
+  ///
+  /// A warm-up frame may never actually render (as the engine did not request
+  /// it and therefore does not have a valid context in which to paint), but it
+  /// will cause the framework to go through the steps of building, laying out,
+  /// and painting, which can together take several milliseconds. Thus, when the
+  /// engine requests a real frame, much of the work will already have been
+  /// completed, and the framework can generate the frame with minimal
+  /// additional effort.
+  ///
+  /// Warm-up frames are scheduled by [runApp] on startup, and by
+  /// [RendererBinding.performReassemble] during a hot reload.
+  ///
+  /// Warm-up frames are also scheduled when the framework is unblocked by a
+  /// call to [RendererBinding.allowFirstFrame] (corresponding to a call to
+  /// [RendererBinding.deferFirstFrame] that blocked the rendering).
   void scheduleWarmUpFrame() {
     if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle) {
       return;
     }
 
     _warmUpFrame = true;
-    final TimelineTask timelineTask = TimelineTask()..start('Warm-up frame');
+    TimelineTask? debugTimelineTask;
+    if (!kReleaseMode) {
+      debugTimelineTask = TimelineTask()..start('Warm-up frame');
+    }
     final bool hadScheduledFrame = _hasScheduledFrame;
     // We use timers here to ensure that microtasks flush in between.
     Timer.run(() {
@@ -969,7 +1015,9 @@ mixin SchedulerBinding on BindingBase {
     // scheduled frame has finished.
     lockEvents(() async {
       await endOfFrame;
-      timelineTask.finish();
+      if (!kReleaseMode) {
+        debugTimelineTask!.finish();
+      }
     });
   }
 
@@ -1223,7 +1271,7 @@ mixin SchedulerBinding on BindingBase {
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
-      for (final FrameCallback callback in _persistentCallbacks) {
+      for (final FrameCallback callback in List<FrameCallback>.of(_persistentCallbacks)) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
       }
 

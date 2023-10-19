@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
@@ -331,8 +332,6 @@ class ComparisonResult {
   });
 
   /// Indicates whether or not a pixel comparison test has failed.
-  ///
-  /// This value cannot be null.
   final bool passed;
 
   /// Error message used to describe the cause of the pixel comparison failure.
@@ -344,4 +343,16 @@ class ComparisonResult {
 
   /// The calculated percentage of pixel difference between two images.
   final double diffPercent;
+
+  /// Disposes the images held by this [ComparisonResult].
+  @mustCallSuper
+  void dispose() {
+    if (diffs == null) {
+      return;
+    }
+
+    for (final MapEntry<String, Image> entry in diffs!.entries) {
+      entry.value.dispose();
+    }
+  }
 }

@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('ButtonBar default control smoketest', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ButtonBar default control smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -17,7 +18,7 @@ void main() {
 
   group('alignment', () {
 
-    testWidgets('default alignment is MainAxisAlignment.end', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default alignment is MainAxisAlignment.end', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: ButtonBar(
@@ -34,7 +35,7 @@ void main() {
       expect(tester.getRect(child).right, 792.0); // bar width - default padding
     });
 
-    testWidgets('ButtonBarTheme.alignment overrides default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBarTheme.alignment overrides default', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: ButtonBarTheme(
@@ -56,7 +57,7 @@ void main() {
       expect(tester.getRect(child).right, 405.0); // (bar width - padding) / 2 - 10 / 2 + 10
     });
 
-    testWidgets('ButtonBar.alignment overrides ButtonBarTheme.alignment and default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBar.alignment overrides ButtonBarTheme.alignment and default', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: ButtonBarTheme(
@@ -83,7 +84,7 @@ void main() {
 
   group('mainAxisSize', () {
 
-    testWidgets('Default mainAxisSize is MainAxisSize.max', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Default mainAxisSize is MainAxisSize.max', (WidgetTester tester) async {
       const Key buttonBarKey = Key('row');
       const Key child0Key = Key('child0');
       const Key child1Key = Key('child1');
@@ -130,7 +131,7 @@ void main() {
       expect(childRect.right, 800.0);
     });
 
-    testWidgets('ButtonBarTheme.mainAxisSize overrides default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBarTheme.mainAxisSize overrides default', (WidgetTester tester) async {
       const Key buttonBarKey = Key('row');
       const Key child0Key = Key('child0');
       const Key child1Key = Key('child1');
@@ -185,7 +186,7 @@ void main() {
       expect(childRect.left, ((800.0 - buttonBarRect.width) / 2.0) + 200.0);
     });
 
-    testWidgets('ButtonBar.mainAxisSize overrides ButtonBarTheme.mainAxisSize and default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBar.mainAxisSize overrides ButtonBarTheme.mainAxisSize and default', (WidgetTester tester) async {
       const Key buttonBarKey = Key('row');
       const Key child0Key = Key('child0');
       const Key child1Key = Key('child1');
@@ -240,7 +241,7 @@ void main() {
 
   group('button properties override ButtonTheme', () {
 
-    testWidgets('default button properties override ButtonTheme properties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default button properties override ButtonTheme properties', (WidgetTester tester) async {
       late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
@@ -263,7 +264,7 @@ void main() {
       expect(buttonTheme.layoutBehavior, equals(ButtonBarLayoutBehavior.padded));
     });
 
-    testWidgets('ButtonBarTheme button properties override defaults and ButtonTheme properties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBarTheme button properties override defaults and ButtonTheme properties', (WidgetTester tester) async {
       late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
@@ -296,7 +297,7 @@ void main() {
       expect(buttonTheme.layoutBehavior, equals(ButtonBarLayoutBehavior.constrained));
     });
 
-    testWidgets('ButtonBar button properties override ButtonBarTheme, defaults and ButtonTheme properties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBar button properties override ButtonBarTheme, defaults and ButtonTheme properties', (WidgetTester tester) async {
       late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
@@ -339,7 +340,7 @@ void main() {
 
   group('layoutBehavior', () {
 
-    testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(
@@ -362,7 +363,7 @@ void main() {
       expect(tester.getBottomRight(buttonBar).dy - tester.getTopRight(buttonBar).dy, 52.0);
     });
 
-    testWidgets('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(
@@ -387,7 +388,7 @@ void main() {
   });
 
   group("ButtonBar's children wrap when they overflow horizontally", () {
-    testWidgets("ButtonBar's children wrap when buttons overflow", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("ButtonBar's children wrap when buttons overflow", (WidgetTester tester) async {
       final Key keyOne = UniqueKey();
       final Key keyTwo = UniqueKey();
       await tester.pumpWidget(
@@ -409,7 +410,7 @@ void main() {
       expect(containerOneRect.left, containerTwoRect.left);
     });
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       "ButtonBar's children overflow defaults - MainAxisAlignment.end", (WidgetTester tester) async {
         final Key keyOne = UniqueKey();
         final Key keyTwo = UniqueKey();
@@ -437,7 +438,7 @@ void main() {
       },
     );
 
-    testWidgets("ButtonBar's children overflow - MainAxisAlignment.start", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("ButtonBar's children overflow - MainAxisAlignment.start", (WidgetTester tester) async {
       final Key keyOne = UniqueKey();
       final Key keyTwo = UniqueKey();
       await tester.pumpWidget(
@@ -464,7 +465,7 @@ void main() {
       expect(containerOneRect.left, buttonBarRect.left);
     });
 
-    testWidgets("ButtonBar's children overflow - MainAxisAlignment.center", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("ButtonBar's children overflow - MainAxisAlignment.center", (WidgetTester tester) async {
       final Key keyOne = UniqueKey();
       final Key keyTwo = UniqueKey();
       await tester.pumpWidget(
@@ -491,7 +492,7 @@ void main() {
       expect(containerOneRect.center.dx, buttonBarRect.center.dx);
     });
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       "ButtonBar's children default to MainAxisAlignment.start for horizontal "
       'alignment when overflowing in spaceBetween, spaceAround and spaceEvenly '
       'cases when overflowing.', (WidgetTester tester) async {
@@ -545,7 +546,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       "ButtonBar's children respects verticalDirection when overflowing",
       (WidgetTester tester) async {
         final Key keyOne = UniqueKey();
@@ -574,7 +575,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'ButtonBar has no spacing by default when overflowing',
       (WidgetTester tester) async {
         final Key keyOne = UniqueKey();
@@ -599,7 +600,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       "ButtonBar's children respects overflowButtonSpacing when overflowing",
       (WidgetTester tester) async {
         final Key keyOne = UniqueKey();
@@ -628,7 +629,7 @@ void main() {
     );
   });
 
-  testWidgets('_RenderButtonBarRow.constraints does not work before layout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('_RenderButtonBarRow.constraints does not work before layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: ButtonBar()),
       Duration.zero,

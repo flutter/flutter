@@ -189,6 +189,7 @@ class WebAssetServer implements AssetReader {
     bool enableDds,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler,
+    Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
@@ -216,6 +217,10 @@ class WebAssetServer implements AssetReader {
 
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
+    for (final MapEntry<String, String> header in extraHeaders.entries) {
+      httpServer.defaultResponseHeaders.add(header.key, header.value);
+    }
 
     final PackageConfig packageConfig = buildInfo.packageConfig;
     final Map<String, String> digests = <String, String>{};
@@ -295,7 +300,6 @@ class WebAssetServer implements AssetReader {
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        server.basePath,
         packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
         ),
@@ -347,6 +351,7 @@ class WebAssetServer implements AssetReader {
   ///
   /// It should have no leading or trailing slashes.
   @visibleForTesting
+  @override
   String basePath;
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
@@ -653,6 +658,7 @@ class WebDevFS implements DevFS {
     required this.enableDds,
     required this.entrypoint,
     required this.expressionCompiler,
+    required this.extraHeaders,
     required this.chromiumLauncher,
     required this.nullAssertions,
     required this.nativeNullAssertions,
@@ -670,6 +676,7 @@ class WebDevFS implements DevFS {
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool enableDds;
+  final Map<String, String> extraHeaders;
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
@@ -772,6 +779,7 @@ class WebDevFS implements DevFS {
       enableDds,
       entrypoint,
       expressionCompiler,
+      extraHeaders,
       nullSafetyMode,
       testMode: testMode,
     );
@@ -855,6 +863,7 @@ class WebDevFS implements DevFS {
         generateBootstrapScript(
           requireUrl: 'require.js',
           mapperUrl: 'stack_trace_mapper.js',
+          generateLoadingIndicator: enableDwds,
         ),
       );
       webAssetServer.writeFile(

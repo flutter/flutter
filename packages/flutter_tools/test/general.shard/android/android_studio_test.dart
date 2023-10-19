@@ -1287,6 +1287,20 @@ void main() {
       Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('handles file system exception when checking for explicitly configured Android Studio install', () {
+      const String androidStudioDir = '/Users/Dash/Desktop/android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
+
+      expect(() => AndroidStudio.latestValid(),
+        throwsToolExit(message: RegExp(r'[.\s\S]*Could not find[.\s\S]*FileSystemException[.\s\S]*')));
+    }, overrides: <Type, Generator>{
+      Config: () => config,
+      Platform: () => platform,
+      FileSystem: () => _FakeFileSystem(),
+      FileSystemUtils: () => _FakeFsUtils(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
@@ -1297,4 +1311,34 @@ class FakePlistUtils extends Fake implements PlistParser {
   Map<String, Object> parseFile(String plistFilePath) {
     return fileContents[plistFilePath]!;
   }
+}
+
+class _FakeFileSystem extends Fake implements FileSystem {
+  @override
+  Directory directory(dynamic path) {
+    return _NonExistentDirectory();
+  }
+
+  @override
+  Context get path {
+    return MemoryFileSystem.test().path;
+  }
+}
+
+class _NonExistentDirectory extends Fake implements Directory {
+  @override
+  bool existsSync() {
+    throw const FileSystemException('OS Error: Filename, directory name, or volume label syntax is incorrect.');
+  }
+
+  @override
+  String get path => '';
+
+  @override
+  Directory get parent => _NonExistentDirectory();
+}
+
+class _FakeFsUtils extends Fake implements FileSystemUtils {
+  @override
+  String get homeDirPath => '/home/';
 }

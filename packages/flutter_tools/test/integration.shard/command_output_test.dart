@@ -71,11 +71,12 @@ void main() {
     expect(result.stdout, contains('Shutdown hooks complete'));
   });
 
-  testWithoutContext('flutter config contains all features', () async {
+  testWithoutContext('flutter config --list contains all features', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'config',
+      '--list'
     ]);
 
     // contains all of the experiments in features.dart
@@ -158,8 +159,10 @@ void main() {
       '--debug-url=http://127.0.0.1:3333*/',
     ], workingDirectory: helloWorld);
 
-    expect(result.exitCode, 1);
-    expect(result.stderr, contains('Invalid `--debug-url`: http://127.0.0.1:3333*/'));
+    expect(
+      result,
+      const ProcessResultMatcher(exitCode: 1, stderrPattern: 'Invalid `--debug-url`: http://127.0.0.1:3333*/'),
+    );
   });
 
   testWithoutContext('--debug-uri is an alias for --debug-url', () async {
@@ -175,8 +178,14 @@ void main() {
       '--debug-uri=http://127.0.0.1:3333*/', // "uri" not "url"
     ], workingDirectory: helloWorld);
 
-    expect(result.exitCode, 1);
-    expect(result.stderr, contains('Invalid `--debug-url`: http://127.0.0.1:3333*/')); // _"url"_ not "uri"!
+    expect(
+      result,
+      const ProcessResultMatcher(
+        exitCode: 1,
+        // _"url"_ not "uri"!
+        stderrPattern: 'Invalid `--debug-url`: http://127.0.0.1:3333*/',
+      ),
+    );
   });
 
   testWithoutContext('will load bootstrap script before starting', () async {
@@ -211,8 +220,10 @@ void main() {
       '--bundle-sksl-path=foo/bar/baz.json', // This file does not exist.
     ], workingDirectory: helloWorld);
 
-    expect(result.exitCode, 1);
-    expect(result.stderr, contains('No SkSL shader bundle found at foo/bar/baz.json'));
+    expect(result, const ProcessResultMatcher(
+      exitCode: 1,
+      stderrPattern: 'No SkSL shader bundle found at foo/bar/baz.json'),
+    );
   });
 
   testWithoutContext('flutter attach does not support --release', () async {
@@ -257,7 +268,7 @@ void main() {
       'json',
     ], workingDirectory: helloWorld);
 
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
     expect(result.stderr, isEmpty);
   });
 }

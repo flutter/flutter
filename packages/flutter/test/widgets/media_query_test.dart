@@ -7,10 +7,11 @@ import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFe
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);
-  final Function(BuildContext) method;
+  final void Function(BuildContext) method;
   final MediaQueryData data;
 }
 
@@ -43,27 +44,26 @@ class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
 }
 
 void main() {
-  testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
-    bool tested = false;
+  testWidgetsWithLeakTracking('MediaQuery does not have a default', (WidgetTester tester) async {
+    late final FlutterError error;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
         builder: (BuildContext context) {
-          tested = true;
-          MediaQuery.of(context); // should throw
-          return Container();
+          try {
+            MediaQuery.of(context);
+          } on FlutterError catch (e) {
+            error = e;
+          }
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );
-    expect(tested, isTrue);
-    final dynamic exception = tester.takeException();
-    expect(exception, isNotNull);
-    expect(exception ,isFlutterError);
-    final FlutterError error = exception as FlutterError;
-    expect(error.diagnostics.length, 5);
-    expect(error.diagnostics.last, isA<ErrorHint>());
     expect(
       error.toStringDeep(),
       startsWith(
@@ -88,7 +88,7 @@ void main() {
     );
   });
 
-  testWidgets('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -108,7 +108,7 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
     bool tested = false;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
@@ -119,14 +119,17 @@ void main() {
           final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
           tested = true;
-          return Container();
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -144,7 +147,7 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromView is sane', (WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -154,12 +157,13 @@ void main() {
     expect(data.disableAnimations, false);
     expect(data.boldText, false);
     expect(data.highContrast, false);
+    expect(data.onOffSwitchLabels, false);
     expect(data.platformBrightness, Brightness.light);
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
       textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
@@ -168,6 +172,7 @@ void main() {
       disableAnimations: true,
       boldText: true,
       highContrast: true,
+      onOffSwitchLabels: true,
       alwaysUse24HourFormat: true,
       navigationMode: NavigationMode.directional,
     );
@@ -177,7 +182,7 @@ void main() {
     expect(data.hashCode, data.copyWith().hashCode);
     expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
     expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-    expect(data.textScaleFactor, platformData.textScaleFactor);
+    expect(data.textScaler, TextScaler.linear(platformData.textScaleFactor));
     expect(data.platformBrightness, platformData.platformBrightness);
     expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
     expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
@@ -188,13 +193,14 @@ void main() {
     expect(data.disableAnimations, platformData.disableAnimations);
     expect(data.boldText, platformData.boldText);
     expect(data.highContrast, platformData.highContrast);
+    expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
     expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQueryData.fromView uses data from platformDispatcher if no platformData is provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromView uses data from platformDispatcher if no platformData is provided', (WidgetTester tester) async {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
@@ -206,7 +212,7 @@ void main() {
     expect(data.hashCode, data.copyWith().hashCode);
     expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
     expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-    expect(data.textScaleFactor, tester.platformDispatcher.textScaleFactor);
+    expect(data.textScaler, TextScaler.linear(tester.platformDispatcher.textScaleFactor));
     expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
     expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
     expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
@@ -217,13 +223,14 @@ void main() {
     expect(data.disableAnimations, tester.platformDispatcher.accessibilityFeatures.disableAnimations);
     expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
     expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
+    expect(data.onOffSwitchLabels, tester.platformDispatcher.accessibilityFeatures.onOffSwitchLabels);
     expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
     expect(data.navigationMode, NavigationMode.traditional);
     expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
       textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
@@ -232,6 +239,7 @@ void main() {
       disableAnimations: true,
       boldText: true,
       highContrast: true,
+      onOffSwitchLabels: true,
       alwaysUse24HourFormat: true,
       navigationMode: NavigationMode.directional,
     );
@@ -253,7 +261,7 @@ void main() {
     expect(data, isNot(platformData));
     expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
     expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-    expect(data.textScaleFactor, platformData.textScaleFactor);
+    expect(data.textScaler, TextScaler.linear(platformData.textScaleFactor));
     expect(data.platformBrightness, platformData.platformBrightness);
     expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
     expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
@@ -264,13 +272,14 @@ void main() {
     expect(data.disableAnimations, platformData.disableAnimations);
     expect(data.boldText, platformData.boldText);
     expect(data.highContrast, platformData.highContrast);
+    expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
     expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
@@ -289,7 +298,10 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   data = MediaQuery.of(context);
-                  return const Placeholder();
+                  return View(
+                    view: tester.view,
+                    child: const SizedBox(),
+                  );
                 },
               )
           );
@@ -300,7 +312,7 @@ void main() {
     expect(outerData, isNull);
     expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
     expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-    expect(data.textScaleFactor, tester.platformDispatcher.textScaleFactor);
+    expect(data.textScaler, TextScaler.linear(tester.platformDispatcher.textScaleFactor));
     expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
     expect(data.padding, EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio));
     expect(data.viewPadding, EdgeInsets.fromViewPadding(tester.view.viewPadding, tester.view.devicePixelRatio));
@@ -311,13 +323,14 @@ void main() {
     expect(data.disableAnimations, tester.platformDispatcher.accessibilityFeatures.disableAnimations);
     expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
     expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
+    expect(data.onOffSwitchLabels, tester.platformDispatcher.accessibilityFeatures.onOffSwitchLabels);
     expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
     expect(data.navigationMode, NavigationMode.traditional);
     expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView updates on notifications (no parent data)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView updates on notifications (no parent data)', (WidgetTester tester) async {
     addTearDown(() => tester.platformDispatcher.clearAllTestValues());
     addTearDown(() => tester.view.reset());
 
@@ -341,7 +354,10 @@ void main() {
                 builder: (BuildContext context) {
                   rebuildCount++;
                   data = MediaQuery.of(context);
-                  return const Placeholder();
+                  return View(
+                    view: tester.view,
+                    child: const SizedBox(),
+                  );
                 },
               ),
           );
@@ -352,10 +368,10 @@ void main() {
     expect(outerData, isNull);
     expect(rebuildCount, 1);
 
-    expect(data.textScaleFactor, 123);
+    expect(data.textScaler, const TextScaler.linear(123));
     tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
-    expect(data.textScaleFactor, 456);
+    expect(data.textScaler, const TextScaler.linear(456));
     expect(rebuildCount, 2);
 
     expect(data.platformBrightness, Brightness.dark);
@@ -377,7 +393,7 @@ void main() {
     expect(rebuildCount, 5);
   });
 
-  testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView updates on notifications (with parent data)', (WidgetTester tester) async {
     addTearDown(() => tester.platformDispatcher.clearAllTestValues());
     addTearDown(() => tester.view.reset());
 
@@ -392,7 +408,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          textScaleFactor: 44,
+          textScaler: TextScaler.linear(44),
           platformBrightness: Brightness.dark,
           accessibleNavigation: true,
         ),
@@ -411,10 +427,10 @@ void main() {
 
     expect(rebuildCount, 1);
 
-    expect(data.textScaleFactor, 44);
+    expect(data.textScaler, const TextScaler.linear(44));
     tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
-    expect(data.textScaleFactor, 44);
+    expect(data.textScaler, const TextScaler.linear(44));
     expect(rebuildCount, 1);
 
     expect(data.platformBrightness, Brightness.dark);
@@ -436,17 +452,17 @@ void main() {
     expect(rebuildCount, 2);
   });
 
-  testWidgets('MediaQuery.fromView updates when parent data changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView updates when parent data changes', (WidgetTester tester) async {
     late MediaQueryData data;
     int rebuildCount = 0;
-    double textScaleFactor = 55;
+    TextScaler textScaler = const TextScaler.linear(55);
     late StateSetter stateSetter;
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           stateSetter = setState;
           return MediaQuery(
-            data: MediaQueryData(textScaleFactor: textScaleFactor),
+            data: MediaQueryData(textScaler: textScaler),
             child: MediaQuery.fromView(
               view: tester.view,
               child: Builder(
@@ -463,22 +479,22 @@ void main() {
     );
 
     expect(rebuildCount, 1);
-    expect(data.textScaleFactor, 55);
+    expect(data.textScaler, const TextScaler.linear(55));
 
     stateSetter(() {
-      textScaleFactor = 66;
+      textScaler = const TextScaler.linear(66);
     });
     await tester.pump();
-    expect(data.textScaleFactor, 66);
+    expect(data.textScaler, const TextScaler.linear(66));
     expect(rebuildCount, 2);
   });
 
-  testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
-    expect(copied.textScaleFactor, data.textScaleFactor);
+    expect(copied.textScaler, data.textScaler);
     expect(copied.padding, data.padding);
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
@@ -489,17 +505,18 @@ void main() {
     expect(copied.disableAnimations, data.disableAnimations);
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
+    expect(copied.onOffSwitchLabels, data.onOffSwitchLabels);
     expect(copied.platformBrightness, data.platformBrightness);
     expect(copied.gestureSettings, data.gestureSettings);
     expect(copied.displayFeatures, data.displayFeatures);
   });
 
-  testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
     // Random and unique double values are used to ensure that the correct
     // values are copied over exactly
     const Size customSize = Size(3.14, 2.72);
     const double customDevicePixelRatio = 1.41;
-    const double customTextScaleFactor = 1.62;
+    const TextScaler customTextScaler = TextScaler.linear(1.23);
     const EdgeInsets customPadding = EdgeInsets.all(9.10938);
     const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
     const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
@@ -517,7 +534,7 @@ void main() {
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,
-      textScaleFactor: customTextScaleFactor,
+      textScaler: customTextScaler,
       padding: customPadding,
       viewPadding: customViewPadding,
       viewInsets: customViewInsets,
@@ -528,6 +545,7 @@ void main() {
       disableAnimations: true,
       boldText: true,
       highContrast: true,
+      onOffSwitchLabels: true,
       platformBrightness: Brightness.dark,
       navigationMode: NavigationMode.directional,
       gestureSettings: gestureSettings,
@@ -535,7 +553,7 @@ void main() {
     );
     expect(copied.size, customSize);
     expect(copied.devicePixelRatio, customDevicePixelRatio);
-    expect(copied.textScaleFactor, customTextScaleFactor);
+    expect(copied.textScaler, customTextScaler);
     expect(copied.padding, customPadding);
     expect(copied.viewPadding, customViewPadding);
     expect(copied.viewInsets, customViewInsets);
@@ -546,16 +564,17 @@ void main() {
     expect(copied.disableAnimations, true);
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
+    expect(copied.onOffSwitchLabels, true);
     expect(copied.platformBrightness, Brightness.dark);
     expect(copied.navigationMode, NavigationMode.directional);
     expect(copied.gestureSettings, gestureSettings);
     expect(copied.displayFeatures, customDisplayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
@@ -573,7 +592,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -583,6 +602,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -608,7 +628,7 @@ void main() {
 
     expect(unpadded.size, size);
     expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.textScaler, textScaler);
     expect(unpadded.padding, EdgeInsets.zero);
     expect(unpadded.viewPadding, viewInsets);
     expect(unpadded.viewInsets, viewInsets);
@@ -618,14 +638,15 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.onOffSwitchLabels, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
@@ -643,7 +664,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -653,6 +674,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -675,7 +697,7 @@ void main() {
 
     expect(unpadded.size, size);
     expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.textScaler, textScaler);
     expect(unpadded.padding, padding.copyWith(top: 0));
     expect(unpadded.viewPadding, viewPadding.copyWith(top: viewInsets.top));
     expect(unpadded.viewInsets, viewInsets);
@@ -685,14 +707,15 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.onOffSwitchLabels, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
@@ -710,7 +733,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -720,6 +743,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -745,7 +769,7 @@ void main() {
 
     expect(unpadded.size, size);
     expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.textScaler, textScaler);
     expect(unpadded.padding, padding);
     expect(unpadded.viewPadding, padding);
     expect(unpadded.viewInsets, EdgeInsets.zero);
@@ -755,14 +779,15 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.onOffSwitchLabels, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
@@ -780,7 +805,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -790,6 +815,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -812,7 +838,7 @@ void main() {
 
     expect(unpadded.size, size);
     expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.textScaler, textScaler);
     expect(unpadded.padding, padding);
     expect(unpadded.viewPadding, viewPadding.copyWith(bottom: 8));
     expect(unpadded.viewInsets, viewInsets.copyWith(bottom: 0));
@@ -822,14 +848,15 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.onOffSwitchLabels, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
@@ -847,7 +874,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -857,6 +884,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -882,7 +910,7 @@ void main() {
 
     expect(unpadded.size, size);
     expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.textScaler, textScaler);
     expect(unpadded.padding, EdgeInsets.zero);
     expect(unpadded.viewPadding, EdgeInsets.zero);
     expect(unpadded.viewInsets, viewInsets);
@@ -892,14 +920,15 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.onOffSwitchLabels, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
@@ -917,7 +946,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -927,6 +956,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -949,7 +979,7 @@ void main() {
 
     expect(unpadded.size, size);
     expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.textScaler, textScaler);
     expect(unpadded.padding, padding.copyWith(left: 0));
     expect(unpadded.viewPadding, viewPadding.copyWith(left: 0));
     expect(unpadded.viewInsets, viewInsets);
@@ -959,25 +989,26 @@ void main() {
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
+    expect(unpadded.onOffSwitchLabels, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
-    late double outsideTextScaleFactor;
-    late double insideTextScaleFactor;
+  testWidgetsWithLeakTracking('MediaQuery.textScalerOf', (WidgetTester tester) async {
+    late TextScaler outsideTextScaler;
+    late TextScaler insideTextScaler;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          outsideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
+          outsideTextScaler = MediaQuery.textScalerOf(context);
           return MediaQuery(
             data: const MediaQueryData(
-              textScaleFactor: 4.0,
+              textScaler: TextScaler.linear(4.0),
             ),
             child: Builder(
               builder: (BuildContext context) {
-                insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
+                insideTextScaler = MediaQuery.textScalerOf(context);
                 return Container();
               },
             ),
@@ -986,11 +1017,11 @@ void main() {
       ),
     );
 
-    expect(outsideTextScaleFactor, 1.0);
-    expect(insideTextScaleFactor, 4.0);
+    expect(outsideTextScaler, TextScaler.noScaling);
+    expect(insideTextScaler, const TextScaler.linear(4.0));
   });
 
-  testWidgets('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
     late Brightness outsideBrightness;
     late Brightness insideBrightness;
 
@@ -1017,7 +1048,7 @@ void main() {
     expect(insideBrightness, Brightness.dark);
   });
 
-  testWidgets('MediaQuery.highContrastOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.highContrastOf', (WidgetTester tester) async {
     late bool outsideHighContrast;
     late bool insideHighContrast;
 
@@ -1044,7 +1075,34 @@ void main() {
     expect(insideHighContrast, true);
   });
 
-  testWidgets('MediaQuery.boldTextOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.onOffSwitchLabelsOf', (WidgetTester tester) async {
+    late bool outsideOnOffSwitchLabels;
+    late bool insideOnOffSwitchLabels;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outsideOnOffSwitchLabels = MediaQuery.onOffSwitchLabelsOf(context);
+          return MediaQuery(
+            data: const MediaQueryData(
+              onOffSwitchLabels: true,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                insideOnOffSwitchLabels = MediaQuery.onOffSwitchLabelsOf(context);
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideOnOffSwitchLabels, false);
+    expect(insideOnOffSwitchLabels, true);
+  });
+
+  testWidgetsWithLeakTracking('MediaQuery.boldTextOf', (WidgetTester tester) async {
     late bool outsideBoldTextOverride;
     late bool insideBoldTextOverride;
 
@@ -1071,7 +1129,7 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQuery.fromView creates a MediaQuery', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView creates a MediaQuery', (WidgetTester tester) async {
     MediaQuery? mediaQueryOutside;
     MediaQuery? mediaQueryInside;
 
@@ -1096,7 +1154,7 @@ void main() {
     expect(mediaQueryOutside, isNot(mediaQueryInside));
   });
 
-  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
     final MediaQueryData windowData = MediaQueryData.fromWindow(tester.view);
     late MediaQueryData fromWindowData;
 
@@ -1132,10 +1190,10 @@ void main() {
     expect(settingsA, isNot(settingsB));
   });
 
-  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
@@ -1161,7 +1219,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -1171,6 +1229,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           displayFeatures: displayFeatures,
         ),
         child: Builder(
@@ -1191,7 +1250,7 @@ void main() {
 
     expect(subScreenMediaQuery.size, size);
     expect(subScreenMediaQuery.devicePixelRatio, devicePixelRatio);
-    expect(subScreenMediaQuery.textScaleFactor, textScaleFactor);
+    expect(subScreenMediaQuery.textScaler, textScaler);
     expect(subScreenMediaQuery.padding, EdgeInsets.zero);
     expect(subScreenMediaQuery.viewPadding, EdgeInsets.zero);
     expect(subScreenMediaQuery.viewInsets, EdgeInsets.zero);
@@ -1201,13 +1260,14 @@ void main() {
     expect(subScreenMediaQuery.disableAnimations, true);
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
+    expect(subScreenMediaQuery.onOffSwitchLabels, true);
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
+    const TextScaler textScaler = TextScaler.linear(1.2);
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
     const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 46.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
@@ -1234,7 +1294,7 @@ void main() {
         data: const MediaQueryData(
           size: size,
           devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           padding: padding,
           viewPadding: viewPadding,
           viewInsets: viewInsets,
@@ -1244,6 +1304,7 @@ void main() {
           disableAnimations: true,
           boldText: true,
           highContrast: true,
+          onOffSwitchLabels: true,
           displayFeatures: displayFeatures,
         ),
         child: Builder(
@@ -1264,7 +1325,7 @@ void main() {
 
     expect(subScreenMediaQuery.size, size);
     expect(subScreenMediaQuery.devicePixelRatio, devicePixelRatio);
-    expect(subScreenMediaQuery.textScaleFactor, textScaleFactor);
+    expect(subScreenMediaQuery.textScaler, textScaler);
     expect(
       subScreenMediaQuery.padding,
       const EdgeInsets.only(top: 1.0, right: 2.0, bottom: 4.0),
@@ -1283,24 +1344,25 @@ void main() {
     expect(subScreenMediaQuery.disableAnimations, true);
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
+    expect(subScreenMediaQuery.onOffSwitchLabels, true);
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
   });
 
-  testWidgets('MediaQueryData.gestureSettings is set from view.gestureSettings', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.gestureSettings is set from view.gestureSettings', (WidgetTester tester) async {
     tester.view.gestureSettings = const GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100);
     addTearDown(() => tester.view.resetGestureSettings());
 
     expect(MediaQueryData.fromView(tester.view).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
   });
 
-  testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery can be partially depended-on', (WidgetTester tester) async {
     MediaQueryData data = const MediaQueryData(
       size: Size(800, 600),
-      textScaleFactor: 1.1
+      textScaler: TextScaler.linear(1.1),
     );
 
     int sizeBuildCount = 0;
-    int textScaleFactorBuildCount = 0;
+    int textScalerBuildCount = 0;
 
     final Widget showSize = Builder(
       builder: (BuildContext context) {
@@ -1309,10 +1371,10 @@ void main() {
       }
     );
 
-    final Widget showTextScaleFactor = Builder(
+    final Widget showTextScaler = Builder(
       builder: (BuildContext context) {
-        textScaleFactorBuildCount++;
-        return Text('textScaleFactor: ${MediaQuery.textScaleFactorOf(context).toStringAsFixed(1)}');
+        textScalerBuildCount++;
+        return Text('textScaler: ${MediaQuery.textScalerOf(context)}');
       }
     );
 
@@ -1324,7 +1386,7 @@ void main() {
             child: Column(
               children: <Widget>[
                 showSize,
-                showTextScaleFactor,
+                showTextScaler,
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -1336,10 +1398,10 @@ void main() {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      data = data.copyWith(textScaleFactor: data.textScaleFactor + 0.1);
+                      data = data.copyWith(textScaler: TextScaler.noScaling);
                     });
                   },
-                  child: const Text('Increase textScaleFactor by 0.1')
+                  child: const Text('Disable text scaling')
                 )
               ]
             )
@@ -1350,26 +1412,26 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(home: page));
     expect(find.text('size: Size(800.0, 600.0)'), findsOneWidget);
-    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
+    expect(find.text('textScaler: linear (1.1x)'), findsOneWidget);
     expect(sizeBuildCount, 1);
-    expect(textScaleFactorBuildCount, 1);
+    expect(textScalerBuildCount, 1);
 
     await tester.tap(find.text('Increase width by 100'));
     await tester.pumpAndSettle();
     expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
-    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
+    expect(find.text('textScaler: linear (1.1x)'), findsOneWidget);
     expect(sizeBuildCount, 2);
-    expect(textScaleFactorBuildCount, 1);
+    expect(textScalerBuildCount, 1);
 
-    await tester.tap(find.text('Increase textScaleFactor by 0.1'));
+    await tester.tap(find.text('Disable text scaling'));
     await tester.pumpAndSettle();
     expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
-    expect(find.text('textScaleFactor: 1.2'), findsOneWidget);
+    expect(find.text('textScaler: no scaling'), findsOneWidget);
     expect(sizeBuildCount, 2);
-    expect(textScaleFactorBuildCount, 2);
+    expect(textScalerBuildCount, 2);
   });
 
-  testWidgets('MediaQuery partial dependencies', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery partial dependencies', (WidgetTester tester) async {
     MediaQueryData data = const MediaQueryData();
 
     int buildCount = 0;
@@ -1435,6 +1497,8 @@ void main() {
       const _MediaQueryAspectCase(MediaQuery.maybeDevicePixelRatioOf, MediaQueryData(devicePixelRatio: 1.1)),
       const _MediaQueryAspectCase(MediaQuery.textScaleFactorOf, MediaQueryData(textScaleFactor: 1.1)),
       const _MediaQueryAspectCase(MediaQuery.maybeTextScaleFactorOf, MediaQueryData(textScaleFactor: 1.1)),
+      const _MediaQueryAspectCase(MediaQuery.textScalerOf, MediaQueryData(textScaler: TextScaler.linear(1.1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeTextScalerOf, MediaQueryData(textScaler: TextScaler.linear(1.1))),
       const _MediaQueryAspectCase(MediaQuery.platformBrightnessOf, MediaQueryData(platformBrightness: Brightness.dark)),
       const _MediaQueryAspectCase(MediaQuery.maybePlatformBrightnessOf, MediaQueryData(platformBrightness: Brightness.dark)),
       const _MediaQueryAspectCase(MediaQuery.paddingOf, MediaQueryData(padding: EdgeInsets.all(1))),
@@ -1453,6 +1517,8 @@ void main() {
       const _MediaQueryAspectCase(MediaQuery.maybeInvertColorsOf, MediaQueryData(invertColors: true)),
       const _MediaQueryAspectCase(MediaQuery.highContrastOf, MediaQueryData(highContrast: true)),
       const _MediaQueryAspectCase(MediaQuery.maybeHighContrastOf, MediaQueryData(highContrast: true)),
+      const _MediaQueryAspectCase(MediaQuery.onOffSwitchLabelsOf, MediaQueryData(onOffSwitchLabels: true)),
+      const _MediaQueryAspectCase(MediaQuery.maybeOnOffSwitchLabelsOf, MediaQueryData(onOffSwitchLabels: true)),
       const _MediaQueryAspectCase(MediaQuery.disableAnimationsOf, MediaQueryData(disableAnimations: true)),
       const _MediaQueryAspectCase(MediaQuery.maybeDisableAnimationsOf, MediaQueryData(disableAnimations: true)),
       const _MediaQueryAspectCase(MediaQuery.boldTextOf, MediaQueryData(boldText: true)),

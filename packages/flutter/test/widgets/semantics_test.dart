@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -15,7 +16,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics shutdown and restart', (WidgetTester tester) async {
     SemanticsTester? semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -59,7 +60,7 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
-  testWidgets('Semantics tag only applies to immediate child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics tag only applies to immediate child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -95,7 +96,7 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
-  testWidgets('Semantics tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics tooltip', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -123,7 +124,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Detach and reattach assert', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Detach and reattach assert', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
 
@@ -201,7 +202,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics and Directionality - RTL', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -218,7 +219,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics and Directionality - LTR', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -235,7 +236,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - cannot override RTL with LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics and Directionality - cannot override RTL with LTR', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -262,7 +263,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - cannot override LTR with RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics and Directionality - cannot override LTR with RTL', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -289,7 +290,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics label and hint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics label and hint', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -319,7 +320,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics hints can merge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics hints can merge', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -355,7 +356,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics values do not merge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics values do not merge', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -406,7 +407,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics value and hint can merge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics value and hint can merge', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -442,7 +443,7 @@ void main() {
     semantics.dispose();
   });
 
-    testWidgets('Semantics tagForChildren works', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Semantics tagForChildren works', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -490,7 +491,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widget supports all actions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics widget supports all actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<SemanticsAction> performedActions = <SemanticsAction>[];
@@ -580,7 +581,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
@@ -609,6 +610,7 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
+          expanded: true,
         ),
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
@@ -691,6 +693,7 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
+          expanded: true,
         ),
     );
     flags
@@ -708,7 +711,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
   });
 
-  testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -805,7 +808,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('onTapHint and onLongPressHint create custom actions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onTapHint and onLongPressHint create custom actions', (WidgetTester tester) async {
     final SemanticsHandle semantics = tester.ensureSemantics();
     await tester.pumpWidget(Semantics(
       container: true,
@@ -831,7 +834,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('CustomSemanticsActions can be added to a Semantics widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CustomSemanticsActions can be added to a Semantics widget', (WidgetTester tester) async {
     final SemanticsHandle semantics = tester.ensureSemantics();
     await tester.pumpWidget(Semantics(
       container: true,
@@ -850,7 +853,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Increased/decreased values are annotated', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -882,7 +885,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets built in a widget tree are sorted properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics widgets built in a widget tree are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -965,7 +968,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics widgets built with explicit sort orders are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -1023,7 +1026,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets without sort orders are sorted properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics widgets without sort orders are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -1084,7 +1087,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets that are transformed are sorted properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics widgets that are transformed are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -1148,7 +1151,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets without sort orders are sorted properly when no Directionality is present', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics widgets without sort orders are sorted properly when no Directionality is present', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(listener: () {
@@ -1249,7 +1252,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics excludeSemantics ignores children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics excludeSemantics ignores children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Semantics(
       label: 'label',
@@ -1277,7 +1280,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can change handlers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can change handlers', (WidgetTester tester) async {
     await tester.pumpWidget(Semantics(
       container: true,
       label: 'foo',
@@ -1664,7 +1667,7 @@ void main() {
     ));
   });
 
-  testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics with zero transform gets dropped', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/110671.
     // Construct a widget tree that will end up with a fitted box that applies
     // a zero transform because it does not actually draw its children.
@@ -1691,7 +1694,7 @@ void main() {
     expect(node.childrenCount, 0);
   });
 
-  testWidgets('blocking user interaction works on explicit child node.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('blocking user interaction works on explicit child node.', (WidgetTester tester) async {
     final UniqueKey key1 = UniqueKey();
     final UniqueKey key2 = UniqueKey();
     await tester.pumpWidget(
@@ -1734,7 +1737,7 @@ void main() {
     );
   });
 
-  testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('blocking user interaction on a merged child', (WidgetTester tester) async {
     final UniqueKey key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1769,7 +1772,7 @@ void main() {
     );
   });
 
-  testWidgets('does not merge conflicting actions even if one of them is blocked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('does not merge conflicting actions even if one of them is blocked', (WidgetTester tester) async {
     final UniqueKey key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(

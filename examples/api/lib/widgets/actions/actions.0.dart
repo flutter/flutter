@@ -91,8 +91,8 @@ class _SaveButtonState extends State<SaveButton> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.valueNotifier,
+    return ListenableBuilder(
+      listenable: widget.valueNotifier,
       builder: (BuildContext context, Widget? child) {
         return TextButton.icon(
           icon: const Icon(Icons.save),
@@ -146,8 +146,8 @@ class _ActionsExampleState extends State<ActionsExample> {
                       Actions.invoke(context, ModifyIntent(++count));
                     },
                   ),
-                  AnimatedBuilder(
-                      animation: model.data,
+                  ListenableBuilder(
+                      listenable: model.data,
                       builder: (BuildContext context, Widget? child) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
