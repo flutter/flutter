@@ -208,7 +208,7 @@ void main() {
       Usage: () => testUsage,
     });
 
-    testUsingContext('contains success and partial', () async {
+    testUsingContext('contains installed and partial', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false);
 
       expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
@@ -237,7 +237,7 @@ void main() {
       Usage: () => testUsage,
     });
 
-    testUsingContext('contains success, missing and partial', () async {
+    testUsingContext('contains installed, missing and partial', () async {
       await FakeDoctor(logger).diagnose(verbose: false);
 
       expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
@@ -273,6 +273,8 @@ void main() {
 
     testUsingContext('events for grouped validators are properly decomposed', () async {
       await FakeGroupedDoctor(logger).diagnose(verbose: false);
+
+      print(testUsage.events);
 
       expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
         const TestUsageEvent(
@@ -862,6 +864,65 @@ void main() {
       );
       expect(fakeAnalytics.sentEvents, contains(eventToFind));
 
+    }, overrides: <Type, Generator>{
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
+      Analytics: () => fakeAnalytics,
+    });
+
+    testUsingContext('contains installed and partial', () async {
+      await FakePassingDoctor(logger, clock: fakeSystemClock).diagnose(verbose: false);
+
+      expect(fakeAnalytics.sentEvents.length, 4);
+
+      final List<Event> eventsToFind = <Map<String, Object?>>[
+        <String, Object?>{
+          'validatorName': 'Passing Validator',
+          'result': 'installed',
+          'partOfGroupedValidator': false,
+          'doctorInvocationId': 794206800000,
+          'statusInfo': 'with statusInfo',
+        },
+        <String, Object?>{
+          'validatorName': 'Partial Validator with only a Hint',
+          'result': 'partial',
+          'partOfGroupedValidator': false,
+          'doctorInvocationId': 794206800000,
+          'statusInfo': null,
+        },
+        <String, Object?>{
+          'validatorName': 'Partial Validator with Errors',
+          'result': 'partial',
+          'partOfGroupedValidator': false,
+          'doctorInvocationId': 794206800000,
+          'statusInfo': null,
+        },
+        <String, Object?>{
+          'validatorName': 'Another Passing Validator',
+          'result': 'installed',
+          'partOfGroupedValidator': false,
+          'doctorInvocationId': 794206800000,
+          'statusInfo': 'with statusInfo',
+        },
+      ].map((Map<String, Object?> e) {
+        if (e['statusInfo'] == null) {
+          return Event.doctorValidatorResult(
+            validatorName: e['validatorName']! as String,
+            result: e['result']! as String,
+            partOfGroupedValidator: e['partOfGroupedValidator']! as bool,
+            doctorInvocationId: e['doctorInvocationId']! as int,
+          );
+        }
+
+        return Event.doctorValidatorResult(
+          validatorName: e['validatorName']! as String,
+          result: e['result']! as String,
+          partOfGroupedValidator: e['partOfGroupedValidator']! as bool,
+          doctorInvocationId: e['doctorInvocationId']! as int,
+          statusInfo: e['statusInfo']! as String,
+        );
+      }).toList();
+
+      expect(fakeAnalytics.sentEvents, unorderedEquals(eventsToFind));
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       Analytics: () => fakeAnalytics,
