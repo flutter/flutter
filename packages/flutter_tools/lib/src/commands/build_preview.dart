@@ -24,9 +24,7 @@ class BuildPreviewCommand extends BuildSubCommand {
     required this.flutterRoot,
     required this.processUtils,
     required this.artifacts,
-  }) {
-    //addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-  }
+  });
 
   @override
   final String name = '_preview';
