@@ -964,13 +964,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(node._manager == _manager);
 
     if (removeScopeFocus) {
-      final FocusScopeNode? nodeScope = node.enclosingScope;
-      if (nodeScope != null) {
-        nodeScope._focusedChildren.remove(node);
-        node.descendants.where((FocusNode descendant) {
-          return descendant.enclosingScope == nodeScope;
-        }).forEach(nodeScope._focusedChildren.remove);
-      }
+      node.enclosingScope?._focusedChildren.remove(node);
     }
 
     node._parent = null;
