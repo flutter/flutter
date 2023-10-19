@@ -90,6 +90,7 @@
     @"--two-platform-view-clip-rect" : @"two_platform_view_clip_rect",
     @"--two-platform-view-clip-rrect" : @"two_platform_view_clip_rrect",
     @"--two-platform-view-clip-path" : @"two_platform_view_clip_path",
+    @"--darwin-system-font" : @"darwin_system_font",
   };
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap

@@ -22,6 +22,9 @@
 #include "third_party/tonic/typed_data/typed_list.h"
 #include "txt/asset_font_manager.h"
 #include "txt/test_font_manager.h"
+#if FML_OS_MACOSX || FML_OS_IOS
+#include "txt/platform_mac.h"
+#endif
 
 namespace flutter {
 
@@ -63,6 +66,9 @@ void FontCollection::SetupDefaultFontManager(
 // Structure described in https://docs.flutter.dev/cookbook/design/fonts
 void FontCollection::RegisterFonts(
     const std::shared_ptr<AssetManager>& asset_manager) {
+#if FML_OS_MACOSX || FML_OS_IOS
+  RegisterSystemFonts(*dynamic_font_manager_);
+#endif
   std::unique_ptr<fml::Mapping> manifest_mapping =
       asset_manager->GetAsMapping("FontManifest.json");
   if (manifest_mapping == nullptr) {
