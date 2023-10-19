@@ -901,17 +901,20 @@ class _TooltipOverlay extends StatelessWidget {
         constraints: BoxConstraints(minHeight: height),
         child: DefaultTextStyle(
           style: Theme.of(context).textTheme.bodyMedium!,
-          child: Container(
-            decoration: decoration,
-            padding: padding,
-            margin: margin,
-            child: Center(
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: Text.rich(
-                richMessage,
-                style: textStyle,
-                textAlign: textAlign,
+          child: Semantics(
+            container: true,
+            child: Container(
+              decoration: decoration,
+              padding: padding,
+              margin: margin,
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: Text.rich(
+                  richMessage,
+                  style: textStyle,
+                  textAlign: textAlign,
+                ),
               ),
             ),
           ),
