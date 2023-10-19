@@ -41,7 +41,7 @@ static std::optional<GLuint> ConfigureFBO(
   gl.BindFramebuffer(fbo_type, fbo);
 
   if (!TextureGLES::Cast(*texture).SetAsFramebufferAttachment(
-          fbo_type, fbo, TextureGLES::AttachmentPoint::kColor0)) {
+          fbo_type, TextureGLES::AttachmentPoint::kColor0)) {
     VALIDATION_LOG << "Could not attach texture to framebuffer.";
     DeleteFBO(gl, fbo, fbo_type);
     return std::nullopt;

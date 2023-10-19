@@ -506,7 +506,6 @@ static GLenum ToAttachmentPoint(TextureGLES::AttachmentPoint point) {
 }
 
 bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
-                                             GLuint fbo,
                                              AttachmentPoint point) const {
   if (!IsValid()) {
     return false;
