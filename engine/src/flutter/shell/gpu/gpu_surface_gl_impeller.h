@@ -32,7 +32,7 @@ class GPUSurfaceGLImpeller final : public Surface {
   std::shared_ptr<impeller::Renderer> impeller_renderer_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   bool is_valid_ = false;
-  fml::WeakPtrFactory<GPUSurfaceGLImpeller> weak_factory_;
+  fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceGLImpeller> weak_factory_;
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
