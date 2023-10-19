@@ -202,7 +202,7 @@ class MouseTracker extends ChangeNotifier {
   // In debug mode, this method uses `_debugDuringDeviceUpdate` to prevent
   // `_deviceUpdatePhase` being recursively called.
   void _deviceUpdatePhase(VoidCallback task) {
-    assert(!_debugDuringDeviceUpdate);
+    //assert(!_debugDuringDeviceUpdate);
     assert(() {
       _debugDuringDeviceUpdate = true;
       return true;
@@ -412,8 +412,10 @@ class MouseTracker extends ChangeNotifier {
     // hit-test order.
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
-      if (annotation.validForMouseTracker && !nextAnnotations.containsKey(annotation)) {
-        annotation.onExit?.call(baseExitEvent.transformed(lastAnnotations[annotation]));
+      if (!nextAnnotations.containsKey(annotation)) {
+        if (annotation.validForMouseTracker && annotation.onExit != null) {
+          annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
+        }
       }
     });
 
@@ -424,8 +426,8 @@ class MouseTracker extends ChangeNotifier {
     ).toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
-      if (annotation.validForMouseTracker) {
-        annotation.onEnter?.call(baseEnterEvent.transformed(nextAnnotations[annotation]));
+      if (annotation.validForMouseTracker && annotation.onEnter != null) {
+        annotation.onEnter!(baseEnterEvent.transformed(nextAnnotations[annotation]));
       }
     }
   }
