@@ -1690,6 +1690,24 @@ flutter:
       );
     });
 
+    testWithoutContext('Symlink failures instruct developers to have their project on the same drive as their SDK', () async {
+      final Platform platform = FakePlatform(operatingSystem: 'windows');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972]');
+
+      const FileSystemException e = FileSystemException('', '', OSError('', 1));
+
+      expect(
+        () => handleSymlinkException(
+          e,
+          platform: platform,
+          os: os,
+          source: pubCachePath,
+          destination: ephemeralPackagePath,
+        ),
+        throwsToolExit(message: 'Try moving your Flutter project to the same drive as your Flutter SDK'),
+      );
+    });
+
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
       final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');

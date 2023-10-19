@@ -149,17 +149,12 @@ class VelocityTracker {
   /// The kind of pointer this tracker is for.
   final PointerDeviceKind kind;
 
-  // Time difference since the last sample was added
-  final Stopwatch _sinceLastSample = Stopwatch();
-
   // Circular buffer; current sample at _index.
   final List<_PointAtTime?> _samples = List<_PointAtTime?>.filled(_historySize, null);
   int _index = 0;
 
   /// Adds a position as the given time to the tracker.
   void addPosition(Duration time, Offset position) {
-    _sinceLastSample.start();
-    _sinceLastSample.reset();
     _index += 1;
     if (_index == _historySize) {
       _index = 0;
@@ -174,16 +169,6 @@ class VelocityTracker {
   ///
   /// Returns null if there is no data on which to base an estimate.
   VelocityEstimate? getVelocityEstimate() {
-    // no recent user movement?
-    if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
-      return const VelocityEstimate(
-        pixelsPerSecond: Offset.zero,
-        confidence: 1.0,
-        duration: Duration.zero,
-        offset: Offset.zero,
-      );
-    }
-
     final List<double> x = <double>[];
     final List<double> y = <double>[];
     final List<double> w = <double>[];
@@ -210,7 +195,7 @@ class VelocityTracker {
       final double age = (newestSample.time - sample.time).inMicroseconds.toDouble() / 1000;
       final double delta = (sample.time - previousSample.time).inMicroseconds.abs().toDouble() / 1000;
       previousSample = sample;
-      if (age > _horizonMilliseconds || delta > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
+      if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds) {
         break;
       }
 
@@ -303,8 +288,6 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 
   @override
   void addPosition(Duration time, Offset position) {
-    _sinceLastSample.start();
-    _sinceLastSample.reset();
     assert(() {
       final _PointAtTime? previousPoint = _touchSamples[_index];
       if (previousPoint == null || previousPoint.time <= time) {
@@ -343,16 +326,6 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 
   @override
   VelocityEstimate getVelocityEstimate() {
-    // no recent user movement?
-    if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
-      return const VelocityEstimate(
-        pixelsPerSecond: Offset.zero,
-        confidence: 1.0,
-        duration: Duration.zero,
-        offset: Offset.zero,
-      );
-    }
-
     // The velocity estimated using this expression is an approximation of the
     // scroll velocity of an iOS scroll view at the moment the user touch was
     // released, not the final velocity of the iOS pan gesture recognizer
@@ -414,16 +387,6 @@ class MacOSScrollViewFlingVelocityTracker extends IOSScrollViewFlingVelocityTrac
 
   @override
   VelocityEstimate getVelocityEstimate() {
-    // no recent user movement?
-    if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
-      return const VelocityEstimate(
-        pixelsPerSecond: Offset.zero,
-        confidence: 1.0,
-        duration: Duration.zero,
-        offset: Offset.zero,
-      );
-    }
-
     // The velocity estimated using this expression is an approximation of the
     // scroll velocity of a macOS scroll view at the moment the user touch was
     // released.
