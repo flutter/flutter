@@ -5,9 +5,9 @@
 #ifndef FLUTTER_FML_SYNCHRONIZATION_SYNC_SWITCH_H_
 #define FLUTTER_FML_SYNCHRONIZATION_SYNC_SWITCH_H_
 
-#include <forward_list>
 #include <functional>
 #include <memory>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/shared_mutex.h"
