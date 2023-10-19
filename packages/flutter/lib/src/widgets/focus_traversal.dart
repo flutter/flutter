@@ -306,7 +306,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     final FocusScopeNode scope = currentNode.nearestScope!;
     FocusNode? candidate = scope.focusedChild;
     if (ignoreCurrentFocus || candidate == null && scope.descendants.isNotEmpty) {
-      final Iterable<FocusNode> sorted = _sortAllDescendants(scope, currentNode).where((FocusNode node) => _canRequestTraversalFocus(node));
+      final Iterable<FocusNode> sorted = _sortAllDescendants(scope, currentNode);
       if (sorted.isEmpty) {
         candidate = null;
       } else {
@@ -405,17 +405,13 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   @protected
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode);
 
-  static bool _canRequestTraversalFocus(FocusNode node) {
-    return node.canRequestFocus && !node.skipTraversal;
-  }
-
   static Iterable<FocusNode> _getDescendantsWithoutExpandingScope(FocusNode node) {
     final List<FocusNode> result = <FocusNode>[];
     for (final FocusNode child in node.children) {
-      result.add(child);
       if (child is! FocusScopeNode) {
         result.addAll(_getDescendantsWithoutExpandingScope(child));
       }
+      result.add(child);
     }
     return result;
   }
@@ -492,7 +488,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     // They were left in above because they were needed to find their members
     // during sorting.
     sortedDescendants.removeWhere((FocusNode node) {
-      return node != currentNode && !_canRequestTraversalFocus(node);
+      return node != currentNode && (!node.canRequestFocus || node.skipTraversal);
     });
 
     // Sanity check to make sure that the algorithm above doesn't diverge from
@@ -500,7 +496,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     // finds.
     assert((){
       final Set<FocusNode> difference = sortedDescendants.toSet().difference(scope.traversalDescendants.toSet());
-      if (!_canRequestTraversalFocus(currentNode)) {
+      if (currentNode.skipTraversal || !currentNode.canRequestFocus) {
         // The scope.traversalDescendants will not contain currentNode if it
         // skips traversal or not focusable.
         assert(
