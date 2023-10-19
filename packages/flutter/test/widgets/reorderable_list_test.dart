@@ -1357,7 +1357,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'When creating a new item, be in the correct position',
     (WidgetTester tester) async {
       await tester.pumpWidget(
