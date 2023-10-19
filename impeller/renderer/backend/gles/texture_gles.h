@@ -46,7 +46,6 @@ class TextureGLES final : public Texture,
     kStencil,
   };
   [[nodiscard]] bool SetAsFramebufferAttachment(GLenum target,
-                                                GLuint fbo,
                                                 AttachmentPoint point) const;
 
   Type GetType() const;
