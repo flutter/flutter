@@ -56,13 +56,13 @@ extension HtmlElementViewImpl on HtmlElementView {
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createController(
     PlatformViewCreationParams params,
-    int flutterViewId,
+    int viewId,
   ) {
     final _HtmlElementViewController controller = _HtmlElementViewController(
       params.id,
       viewType,
       creationParams,
-      flutterViewId,
+      viewId,
     );
     controller._initialize().then((_) {
       params.onPlatformViewCreated(params.id);
@@ -85,19 +85,20 @@ PlatformViewCreatedCallback? _createPlatformViewCallbackForElementCallback(
 
 class _HtmlElementViewController extends PlatformViewController {
   _HtmlElementViewController(
-    this.viewId,
-    this.viewType,
+    this.platformViewId,
+    this.platformViewType,
     this.creationParams,
     this.flutterViewId,
   );
 
   @override
-  final int viewId;
+  int get viewId => platformViewId;
+  final int platformViewId;
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
   ///
   /// A PlatformViewFactory for this type must have been registered.
-  final String viewType;
+  final String platformViewType;
 
   final dynamic creationParams;
 
@@ -108,10 +109,10 @@ class _HtmlElementViewController extends PlatformViewController {
 
   Future<void> _initialize() async {
     final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': viewType,
+      'platformViewId': platformViewId,
+      'platformViewType': platformViewType,
       'params': creationParams,
-      'flutterViewId': flutterViewId,
+      'viewId': flutterViewId,
     };
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     _initialized = true;
@@ -133,8 +134,8 @@ class _HtmlElementViewController extends PlatformViewController {
   Future<void> dispose() async {
     if (_initialized) {
       final Map<String, dynamic> args = <String, dynamic>{
-        'id': viewId,
-        'flutterViewId': flutterViewId,
+        'platformViewId': viewId,
+        'viewId': flutterViewId,
       };
       await SystemChannels.platform_views.invokeMethod<void>('dispose', args);
     }

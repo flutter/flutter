@@ -65,7 +65,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
+          (platformViewId: currentViewId + 1, platformViewType: 'webview', params: null, htmlElement: _mockHtmlElement, viewId: tester.view.viewId),
         ]),
       );
     });
@@ -101,7 +101,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
+          (platformViewId: currentViewId + 1, platformViewType: 'webview', params: null, htmlElement: _mockHtmlElement, viewId: tester.view.viewId),
         ]),
       );
     });
@@ -138,8 +138,8 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: 'foobar', htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
-          (id: currentViewId + 2, viewType: 'webview', params: 123, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
+          (platformViewId: currentViewId + 1, platformViewType: 'webview', params: 'foobar', htmlElement: _mockHtmlElement, viewId: tester.view.viewId),
+          (platformViewId: currentViewId + 2, platformViewType: 'webview', params: 123, htmlElement: _mockHtmlElement, viewId: tester.view.viewId),
         ]),
       );
     });
@@ -181,7 +181,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
+          (platformViewId: currentViewId + 1, platformViewType: 'webview', params: null, htmlElement: _mockHtmlElement, viewId: tester.view.viewId),
         ]),
       );
     });
@@ -219,7 +219,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 2, viewType: 'maps', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
+          (platformViewId: currentViewId + 2, platformViewType: 'maps', params: null, htmlElement: _mockHtmlElement, viewId: tester.view.viewId),
         ]),
       );
     });
@@ -290,7 +290,7 @@ void main() {
       expect(
         fakePlatformViewRegistry.views,
         unorderedEquals(<FakePlatformView>[
-          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement, flutterViewId: tester.view.viewId),
+          (platformViewId: currentViewId + 1, platformViewType: 'webview', params: null, htmlElement: _mockHtmlElement, viewId: tester.view.viewId),
         ]),
       );
     });
@@ -364,8 +364,8 @@ void main() {
 
       expect(fakePlatformViewRegistry.views, hasLength(1));
       final FakePlatformView fakePlatformView = fakePlatformViewRegistry.views.single;
-      expect(fakePlatformView.id, currentViewId + 1);
-      expect(fakePlatformView.viewType, ui_web.PlatformViewRegistry.defaultVisibleViewType);
+      expect(fakePlatformView.platformViewId, currentViewId + 1);
+      expect(fakePlatformView.platformViewType, ui_web.PlatformViewRegistry.defaultVisibleViewType);
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'div'});
 
       // The HTML element should be a div.
@@ -392,9 +392,9 @@ void main() {
 
       expect(fakePlatformViewRegistry.views, hasLength(1));
       final FakePlatformView fakePlatformView = fakePlatformViewRegistry.views.single;
-      expect(fakePlatformView.id, currentViewId + 1);
+      expect(fakePlatformView.platformViewId, currentViewId + 1);
       // The view should be invisible.
-      expect(fakePlatformView.viewType, ui_web.PlatformViewRegistry.defaultInvisibleViewType);
+      expect(fakePlatformView.platformViewType, ui_web.PlatformViewRegistry.defaultInvisibleViewType);
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'script'});
 
       // The HTML element should be a script.
@@ -443,11 +443,11 @@ typedef FakeViewFactory = ({
 });
 
 typedef FakePlatformView = ({
-  int id,
-  String viewType,
+  int platformViewId,
+  String platformViewType,
   Object? params,
   Object htmlElement,
-  int flutterViewId,
+  int viewId,
 });
 
 class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
@@ -484,9 +484,9 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
     );
   }
 
-  FakePlatformView? _findViewById(int viewId) {
+  FakePlatformView? _findViewById(int platformViewId) {
     return _views.singleWhereOrNull(
-      (FakePlatformView view) => view.id == viewId,
+      (FakePlatformView view) => view.platformViewId == platformViewId,
     );
   }
 
@@ -502,23 +502,23 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
 
   Future<dynamic> _create(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
+    final int platformViewId = args['platformViewId'] as int;
+    final String platformViewType = args['platformViewType'] as String;
     final Object? params = args['params'];
-    final int flutterViewId = args['flutterViewId'] as int;
+    final int viewId = args['viewId'] as int;
 
-    if (_findViewById(id) != null) {
+    if (_findViewById(platformViewId) != null) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create an already created platform view, view id: $id',
+        message: 'Trying to create an already created platform view, view id: $platformViewId',
       );
     }
 
-    final FakeViewFactory? registered = _findRegisteredViewFactory(viewType);
+    final FakeViewFactory? registered = _findRegisteredViewFactory(platformViewType);
     if (registered == null) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create a platform view of unregistered type: $viewType',
+        message: 'Trying to create a platform view of unregistered type: $platformViewType',
       );
     }
 
@@ -526,29 +526,29 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
         registered.viewFactory as ui_web.ParameterizedPlatformViewFactory;
 
     _views.add((
-      id: id,
-      viewType: viewType,
+      platformViewId: platformViewId,
+      platformViewType: platformViewType,
       params: params,
-      htmlElement: viewFactory(id, params: params),
-      flutterViewId: flutterViewId,
+      htmlElement: viewFactory(platformViewId, params: params),
+      viewId: viewId,
     ));
     return null;
   }
 
   Future<dynamic> _dispose(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final int flutterViewId = args['flutterViewId'] as int;
+    final int platformViewId = args['platformViewId'] as int;
+    final int viewId = args['viewId'] as int;
 
-    final FakePlatformView? view = _findViewById(id);
+    final FakePlatformView? view = _findViewById(platformViewId);
     if (view == null) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to dispose a platform view with unknown id: $id',
+        message: 'Trying to dispose a platform view with unknown id: $platformViewId',
       );
     }
 
-    expect(view.flutterViewId, flutterViewId);
+    expect(view.viewId, viewId);
 
     _views.remove(view);
     return null;
