@@ -1846,12 +1846,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
   static int _compareVertically(Rect a, Rect b) {
+    if ((a.top - b.top).abs() > _kSelectableVerticalComparingThreshold) {
+      return a.top > b.top ? 1 : -1;
+    }
     if ((a.top - b.top < _kSelectableVerticalComparingThreshold && a.bottom - b.bottom > - _kSelectableVerticalComparingThreshold) ||
         (b.top - a.top < _kSelectableVerticalComparingThreshold && b.bottom - a.bottom > - _kSelectableVerticalComparingThreshold)) {
       return 0;
-    }
-    if ((a.top - b.top).abs() > _kSelectableVerticalComparingThreshold) {
-      return a.top > b.top ? 1 : -1;
     }
     return a.bottom > b.bottom ? 1 : -1;
   }
@@ -1863,11 +1863,19 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   static int _compareHorizontally(Rect a, Rect b) {
     // a encloses b.
     if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
+      // b ends before a.
+      if (a.right - b.right > precisionErrorTolerance) {
+        return 1;
+      }
       return -1;
     }
 
     // b encloses a.
     if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
+      // a ends before b.
+      if (b.right - a.right > precisionErrorTolerance) {
+        return -1;
+      }
       return 1;
     }
     if ((a.left - b.left).abs() > precisionErrorTolerance) {
