@@ -880,9 +880,7 @@ class _ViewContentState extends State<_ViewContent> {
                               widget.viewOnChanged?.call(value);
                               updateSuggestions();
                             },
-                            onSubmitted: (String value) {
-                              widget.viewOnSubmitted?.call(value);
-                            },
+                            onSubmitted: widget.viewOnSubmitted,
                             textCapitalization: widget.textCapitalization,
                           ),
                         ),
@@ -945,19 +943,13 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
-    ValueChanged<String>? viewOnChanged,
-    ValueChanged<String>? viewOnSubmitted,
+    super.viewOnChanged,
+    super.viewOnSubmitted,
     required super.suggestionsBuilder
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
-    viewOnChanged: (String value) {
-      viewOnChanged?.call(value);
-    },
-    viewOnSubmitted: (String value) {
-      viewOnSubmitted?.call(value);
-    },
     builder: (BuildContext context, SearchController controller) {
       return SearchBar(
         constraints: constraints,
