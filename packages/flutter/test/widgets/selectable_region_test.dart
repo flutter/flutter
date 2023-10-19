@@ -1949,6 +1949,56 @@ void main() {
     );
 
     testWidgetsWithLeakTracking(
+      'can select word when selectable is broken up by an unselectable WidgetSpan', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text.rich(
+                  const TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text:
+                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        ),
+                        WidgetSpan(child: SizedBox.shrink()),
+                        TextSpan(text: 'Hello, world.'),
+                      ],
+                  ),
+                  key: outerText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+
+      // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
+      // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
+      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
+
+      // Right click to select word at position.
+      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Should select "Hello".
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
       'widget span is ignored if it does not contain text - non Apple',
       (WidgetTester tester) async {
         final UniqueKey outerText = UniqueKey();
@@ -3676,3 +3726,4 @@ class RenderSelectAll extends RenderProxyBox
     this.endHandle = endHandle;
   }
 }
+

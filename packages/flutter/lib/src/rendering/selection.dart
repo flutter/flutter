@@ -53,6 +53,7 @@ enum SelectionResult {
   /// [SelectAllSelectionEvent], [ClearSelectionEvent], and
   /// [SelectWordSelectionEvent].
   none,
+  forward,
 }
 
 /// The abstract interface to handle [SelectionEvent]s.

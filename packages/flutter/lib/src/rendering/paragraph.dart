@@ -403,13 +403,24 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final String plainText = text.toPlainText(includeSemanticsLabels: false);
     final List<_SelectableFragment> result = <_SelectableFragment>[];
     int start = 0;
+    bool currentFragmentFollowedByInlineElement = false;
     while (start < plainText.length) {
       int end = plainText.indexOf(_placeholderCharacter, start);
       if (start != end) {
         if (end == -1) {
           end = plainText.length;
+          currentFragmentFollowedByInlineElement = false;
+        } else {
+          currentFragmentFollowedByInlineElement = true;
         }
-        result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText));
+        result.add(
+          _SelectableFragment(
+            paragraph: this,
+            range: TextRange(start: start, end: end),
+            fullText: plainText,
+            isFollowedByInlineElement: currentFragmentFollowedByInlineElement,
+          ),
+        );
         start = end;
       }
       start += 1;
@@ -1319,6 +1330,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.paragraph,
     required this.fullText,
     required this.range,
+    required this.isFollowedByInlineElement,
   }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
@@ -1329,6 +1341,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   final TextRange range;
   final RenderParagraph paragraph;
   final String fullText;
+  final bool isFollowedByInlineElement;
 
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
@@ -1396,6 +1409,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    debugPrint('dispatch ${event.type} ${range.textInside(fullText)}, $range');
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
@@ -1420,7 +1434,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         result = _handleSelectAll();
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
-        result = _handleSelectWord(selectWord.globalPosition);
+        final SelectionResult localResult = _handleSelectWord(selectWord.globalPosition);
+        debugPrint('result from handleSelect word $localResult ${range.textInside(fullText)}');
+        if (isFollowedByInlineElement && localResult != SelectionResult.end) {
+          result = SelectionResult.forward;
+        } else {
+          result = localResult;
+        }
       case SelectionEventType.granularlyExtendSelection:
         final GranularlyExtendSelectionEvent granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
         result = _handleGranularlyExtendSelection(
@@ -1719,8 +1739,35 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   SelectionResult _handleSelectWord(Offset globalPosition) {
     _selectableContainsOriginWord = true;
 
+    // This gives me a position even when the globalPosition is not inside the rect.
+    // This is troublesome when we have a tree of text spans broken by a widget span
+    // and the widget span is a text widget. We will be given the start/end position as the result
+    // even when the globalPosition is not within the rect, and some unexpected text is
+    // selected as a result. What can we do to remedy this? 
+    // Should we check if the rect contains the position and invalidate if it does not?
+    final Matrix4 transform = paragraph.getTransformTo(null);
+    transform.invert();
+    final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
+    debugPrint('_handleSelectWord does the rect contain the position? ${_rect.contains(localPosition)}');
+    if (!_rect.contains(localPosition)) {
+      // Open question: Should we always do this or only when the fragment is followed
+      // by an inline element. If so we would need to add some flag to `Text` widget
+      // to control this. `Text.rich`/`RichText` does not need this flag since the
+      // user provides an inline span tree instead of a flat string and we can
+      // parse and detect inline elements.
+      //
+      // It could be safe to always do this since `handleSelectWord` of the delegate 
+      // already only dispatches events to selectables whose global rect includes
+      // the global position, except in the case added in this pr of having received
+      // a `SelectionResult.forward` which tells `_handleSelectWord` to dispatch to the
+      // next selectable even if the position is not contained within its rect.
+      return SelectionResult.forward;
+    }
+
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
+    debugPrint('_handleSelectWord $globalPosition $position $isFollowedByInlineElement');
     if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
+      debugPrint('word is already selected?');
       return SelectionResult.end;
     }
     final _WordBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
