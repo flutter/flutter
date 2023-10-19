@@ -43,6 +43,15 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
+  Material getMaterial(WidgetTester tester) {
+    return tester.widget<Material>(
+      find.ancestor(
+        of: find.byType(Column).last,
+        matching: find.byType(Material),
+      ).first,
+    );
+  }
+
   test('ExpansionTileThemeData copyWith, ==, hashCode basics', () {
     expect(const ExpansionTileThemeData(), const ExpansionTileThemeData().copyWith());
     expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
@@ -171,21 +180,16 @@ void main() {
       ),
     );
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    final Material expansionTileMaterial = getMaterial(tester);
 
-    final Clip tileClipBehavior = tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).clipBehavior;
-
-    // expansionTile should have Clip.antiAlias as clipBehavior
-    expect(tileClipBehavior, clipBehavior);
+    // ExpansionTile should have Clip.antiAlias as clipBehavior.
+    expect(expansionTileMaterial.clipBehavior, clipBehavior);
 
     // Check the tile's collapsed background color when collapsedBackgroundColor is applied.
-    expect(shapeDecoration.color, collapsedBackgroundColor);
+    expect(expansionTileMaterial.color, collapsedBackgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Collapsed Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -209,7 +213,7 @@ void main() {
     // Check the collapsed text color when textColor is applied.
     expect(getTextColor(), collapsedTextColor);
     // Check the collapsed ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, collapsedShape);
+    expect(expansionTileMaterial.shape, collapsedShape);
   });
 
   testWidgetsWithLeakTracking('ExpansionTileTheme - expanded', (WidgetTester tester) async {
@@ -262,12 +266,12 @@ void main() {
       ),
     );
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    final Material expansionTileMaterial = getMaterial(tester);
     // Check the tile's background color when backgroundColor is applied.
-    expect(shapeDecoration.color, backgroundColor);
+    expect(expansionTileMaterial.color, backgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -291,7 +295,7 @@ void main() {
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, shape);
+    expect(expansionTileMaterial.shape, shape);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));

@@ -469,6 +469,9 @@ class ExpansionTile extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
+  /// If this is not null and a custom collapsed or expanded shape is provided,
+  /// specified clip behavior will be used to clip the expansion tile.
+  ///
   /// If this property is null, the [ExpansionTileThemeData.clipBehavior] is used. If that
   /// is also null, a [Clip.none] is used
   ///
@@ -607,10 +610,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
+    final Color backgroundColor = _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent;
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
-            top: BorderSide(color: Colors.transparent),
-            bottom: BorderSide(color: Colors.transparent),
-          );
+      top: BorderSide(color: Colors.transparent),
+      bottom: BorderSide(color: Colors.transparent),
+    );
     final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String onTapHint = _isExpanded
@@ -629,12 +633,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       case TargetPlatform.windows:
         break;
     }
-    return Container(
-      clipBehavior: clipBehavior,
-      decoration: ShapeDecoration(
-        color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
-        shape: expansionTileBorder,
-      ),
+
+    final Decoration decoration = ShapeDecoration(
+      color: backgroundColor,
+      shape: expansionTileBorder,
+    );
+
+    final Widget expansionTile = Padding(
+      padding: decoration.padding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -665,6 +671,23 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
         ],
       ),
+    );
+
+    final bool isShapeProvided = widget.shape != null || expansionTileTheme.shape != null
+      || widget.collapsedShape != null || expansionTileTheme.collapsedShape != null;
+
+    if (isShapeProvided) {
+      return Material(
+        clipBehavior: clipBehavior,
+        color: backgroundColor,
+        shape: expansionTileBorder,
+        child: expansionTile,
+      );
+    }
+
+    return DecoratedBox(
+      decoration: decoration,
+      child: expansionTile,
     );
   }
 

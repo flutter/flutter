@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,6 +54,15 @@ void main() {
   const Color foregroundColor = Colors.blueAccent;
   const Color unselectedWidgetColor = Colors.black54;
   const Color headerColor = Colors.black45;
+
+  Material getMaterial(WidgetTester tester) {
+    return tester.widget<Material>(
+      find.ancestor(
+        of: find.byType(Column).last,
+        matching: find.byType(Material),
+      ).first,
+    );
+  }
 
   testWidgetsWithLeakTracking('ExpansionTile initial state', (WidgetTester tester) async {
     final Key topKey = UniqueKey();
@@ -104,24 +119,21 @@ void main() {
     ));
 
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
-    Container getContainer(Key key) => tester.firstWidget(find.descendant(
+    DecoratedBox getDecoratedBox(Key key) => tester.firstWidget(find.descendant(
       of: find.byKey(key),
-      matching: find.byType(Container),
+      matching: find.byType(DecoratedBox),
     ));
 
     expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
     expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-    // expansionTile should have Clip.antiAlias as clipBehavior
-    expect(getContainer(expandedKey).clipBehavior, clipBehavior);
-
-    ShapeDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
+    ShapeDecoration expandedContainerDecoration = getDecoratedBox(expandedKey).decoration as ShapeDecoration;
     expect(expandedContainerDecoration.color, Colors.red);
     expect((expandedContainerDecoration.shape as Border).top.color, dividerColor);
     expect((expandedContainerDecoration.shape as Border).bottom.color, dividerColor);
 
-    ShapeDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    ShapeDecoration collapsedContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect((collapsedContainerDecoration.shape as Border).top.color, Colors.transparent);
     expect((collapsedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
@@ -134,7 +146,7 @@ void main() {
 
     // Pump to the middle of the animation for expansion.
     await tester.pump(const Duration(milliseconds: 100));
-    final ShapeDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    final ShapeDecoration collapsingContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
     expect((collapsingContainerDecoration.shape as Border).top.color, const Color(0x15222222));
     expect((collapsingContainerDecoration.shape as Border).bottom.color, const Color(0x15222222));
@@ -147,13 +159,13 @@ void main() {
     expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
 
     // Expanded should be collapsed now.
-    expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
+    expandedContainerDecoration = getDecoratedBox(expandedKey).decoration as ShapeDecoration;
     expect(expandedContainerDecoration.color, Colors.transparent);
     expect((expandedContainerDecoration.shape as Border).top.color, Colors.transparent);
     expect((expandedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
 
     // Collapsed should be expanded now.
-    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    collapsedContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect((collapsedContainerDecoration.shape as Border).top.color, dividerColor);
     expect((collapsedContainerDecoration.shape as Border).bottom.color, dividerColor);
@@ -507,20 +519,20 @@ void main() {
       ),
     ));
 
-    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+    ShapeDecoration shapeDecoration =  tester.firstWidget<DecoratedBox>(find.descendant(
       of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+      matching: find.byType(DecoratedBox),
+    )).decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, collapsedBackgroundColor);
 
     await tester.tap(find.text('Title'));
     await tester.pumpAndSettle();
 
-    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+    shapeDecoration =  tester.firstWidget<DecoratedBox>(find.descendant(
       of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+      matching: find.byType(DecoratedBox),
+    )).decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, backgroundColor);
   });
@@ -602,41 +614,34 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Material(
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              ExpansionTile(
-                key: expansionTileKey,
-                title: const Text('ExpansionTile'),
-                collapsedShape: collapsedShape,
-                shape: shape,
-                children: const <Widget>[
-                  ListTile(
-                    title: Text('0'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        child: ExpansionTile(
+          key: expansionTileKey,
+          title: const Text('ExpansionTile'),
+          collapsedShape: collapsedShape,
+          shape: shape,
+          children: const <Widget>[
+            ListTile(
+              title: Text('0'),
+            ),
+          ],
         ),
       ),
     ));
 
-    Container getContainer(Key key) => tester.firstWidget(find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(Container),
-    ));
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    Material expansionTileMaterial = getMaterial(tester);
+    // ExpansionTile should be collapsed initially.
+    expect(expansionTileMaterial.shape, collapsedShape);
 
-    // expansionTile should be Collapsed now.
-    ShapeDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
-    expect(expandedContainerDecoration.shape, collapsedShape);
-
+    // Tap the ExpansionTile to expand it.
     await tester.tap(find.text('ExpansionTile'));
     await tester.pumpAndSettle();
 
-    // expansionTile should be Expanded now.
-    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
-    expect(expandedContainerDecoration.shape, shape);
+    // ExpansionTile should be Expanded now.
+    expansionTileMaterial = getMaterial(tester);
+    expect(expansionTileMaterial.shape, shape);
   });
 
   testWidgetsWithLeakTracking('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
@@ -941,14 +946,14 @@ void main() {
       ),
     ));
 
-    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    Material expansionTileMaterial = getMaterial(tester);
 
     // Test initial ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
-    expect(shapeDecoration.color, const Color(0xffff0000));
+    expect(expansionTileMaterial.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(expansionTileMaterial.color, const Color(0xffff0000));
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
 
@@ -956,14 +961,11 @@ void main() {
     await tester.tap(find.text('Update collapsed properties'));
     await tester.pumpAndSettle();
 
-    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    expansionTileMaterial = getMaterial(tester);
 
     // Test updated ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))));
-    expect(shapeDecoration.color, const Color(0xffffff00));
+    expect(expansionTileMaterial.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))));
+    expect(expansionTileMaterial.color, const Color(0xffffff00));
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff000000));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff000000));
   });
@@ -1020,14 +1022,14 @@ void main() {
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
 
-    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    Material expansionTileMaterial = getMaterial(tester);
 
     // Test initial ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
-    expect(shapeDecoration.color, const Color(0xff0000ff));
+    expect(expansionTileMaterial.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
+    expect(expansionTileMaterial.color, const Color(0xff0000ff));
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff00ffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff00ffff));
 
@@ -1035,19 +1037,74 @@ void main() {
     await tester.tap(find.text('Update collapsed properties'));
     await tester.pumpAndSettle();
 
-    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(expansionTileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    expansionTileMaterial = getMaterial(tester);
     iconColor = tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
     textColor = tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
     // Test updated ExpansionTile properties.
-    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))));
-    expect(shapeDecoration.color, const Color(0xff123456));
+    expect(expansionTileMaterial.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))));
+    expect(expansionTileMaterial.color, const Color(0xff123456));
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
   });
+
+  testWidgetsWithLeakTracking('Material3 - ExpansionTile draws inkwell splash on top of background color', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+    final ThemeData theme = ThemeData(
+      // Use a constant turbulence seed to make the test deterministic.
+      splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+    );
+    const ShapeBorder shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+    );
+    const ShapeBorder collapsedShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+    );
+    const Color collapsedBackgroundColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xffff0000);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Material(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.0),
+            child: ExpansionTile(
+              key: expansionTileKey,
+              shape: shape,
+              collapsedBackgroundColor: collapsedBackgroundColor,
+              backgroundColor: backgroundColor,
+              collapsedShape: collapsedShape,
+              clipBehavior: Clip.hardEdge,
+              title: TestText('title'),
+              trailing: TestIcon(),
+              children: <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Tap and hold the ExpansionTile to trigger ink splash.
+    final Offset center = tester.getCenter(find.byKey(expansionTileKey));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start the splash animation
+    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods. Use a golden test instead.
+    // Check if the ink sparkle is drawn on top of the background color.
+    await expectLater(
+      find.byKey(expansionTileKey),
+      matchesGoldenFile('expansion_tile.ink_splash.drawn_on_top_of_background_color.png'),
+    );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  }, skip: kIsWeb); // [intended] ink_sparkle_test.dart also skips on web.
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
@@ -1081,6 +1138,57 @@ void main() {
 
       expect(getIconColor(), theme.colorScheme.primary);
       expect(getTextColor(), theme.colorScheme.primary);
+    });
+
+    testWidgetsWithLeakTracking('Material2 - ExpansionTile draws inkwell splash on top of background color', (WidgetTester tester) async {
+      const Key expansionTileKey = Key('expansionTileKey');
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const ShapeBorder shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      );
+      const ShapeBorder collapsedShape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      );
+      const Color collapsedBackgroundColor = Color(0xff00ff00);
+      const Color backgroundColor = Color(0xffff0000);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              child: ExpansionTile(
+                key: expansionTileKey,
+                shape: shape,
+                collapsedBackgroundColor: collapsedBackgroundColor,
+                backgroundColor: backgroundColor,
+                collapsedShape: collapsedShape,
+                clipBehavior: Clip.hardEdge,
+                title: TestText('title'),
+                trailing: TestIcon(),
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      // Tap and hold the ExpansionTile to trigger ink splash.
+      final Offset center = tester.getCenter(find.byKey(expansionTileKey));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pump(); // start the splash animation
+      await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+
+      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      // Check if the ink splash is drawn on top of the background color.
+      expect(inkFeatures, paints..path(color: collapsedBackgroundColor)..circle(color: theme.splashColor));
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
   });
 
