@@ -344,6 +344,7 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
+    presubmit: false
     timeout: 30
     properties:
       tags: >
@@ -3474,7 +3475,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
       tags: >
@@ -3983,7 +3984,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
