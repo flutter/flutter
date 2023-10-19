@@ -13,7 +13,6 @@ import 'browser_detection.dart';
 import 'dom.dart';
 import 'key_map.g.dart';
 import 'platform_dispatcher.dart';
-import 'raw_keyboard.dart';
 import 'semantics.dart';
 
 typedef _VoidCallback = void Function();
@@ -105,12 +104,9 @@ class KeyboardBinding {
     _addEventListener('keydown', (DomEvent domEvent) {
       final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
       _converter.handleEvent(event);
-      RawKeyboard.instance?.handleHtmlEvent(domEvent);
     });
-    _addEventListener('keyup', (DomEvent domEvent) {
-      final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
-      _converter.handleEvent(event);
-      RawKeyboard.instance?.handleHtmlEvent(domEvent);
+    _addEventListener('keyup', (DomEvent event) {
+      _converter.handleEvent(FlutterHtmlKeyboardEvent(event as DomKeyboardEvent));
     });
   }
 
@@ -213,7 +209,6 @@ class FlutterHtmlKeyboardEvent {
 
   bool getModifierState(String key) => _event.getModifierState(key);
   void preventDefault() => _event.preventDefault();
-  void stopPropagation() => _event.stopPropagation();
   bool get defaultPrevented => _event.defaultPrevented;
 }
 

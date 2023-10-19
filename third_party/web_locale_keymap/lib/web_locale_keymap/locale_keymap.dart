@@ -41,9 +41,6 @@ class LocaleKeymap {
       return eventKeyCode;
     }
     if (result == null) {
-      if ((eventCode ?? '').isEmpty && (eventKey ?? '').isEmpty) {
-        return null;
-      }
       final int? heuristicResult = heuristicMapper(eventCode ?? '', eventKey ?? '');
       if (heuristicResult != null) {
         return heuristicResult;
