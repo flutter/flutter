@@ -62,16 +62,17 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 - (FlutterRendererConfig)createRendererConfig {
   FlutterRendererConfig config = {
       .type = FlutterRendererType::kMetal,
-      .metal.struct_size = sizeof(FlutterMetalRendererConfig),
-      .metal.device = (__bridge FlutterMetalDeviceHandle)_device,
-      .metal.present_command_queue = (__bridge FlutterMetalCommandQueueHandle)_commandQueue,
-      .metal.get_next_drawable_callback =
-          reinterpret_cast<FlutterMetalTextureCallback>(OnGetNextDrawable),
-      .metal.present_drawable_callback =
-          reinterpret_cast<FlutterMetalPresentCallback>(OnPresentDrawable),
-      .metal.external_texture_frame_callback =
-          reinterpret_cast<FlutterMetalTextureFrameCallback>(OnAcquireExternalTexture),
-  };
+      .metal = {
+          .struct_size = sizeof(FlutterMetalRendererConfig),
+          .device = (__bridge FlutterMetalDeviceHandle)_device,
+          .present_command_queue = (__bridge FlutterMetalCommandQueueHandle)_commandQueue,
+          .get_next_drawable_callback =
+              reinterpret_cast<FlutterMetalTextureCallback>(OnGetNextDrawable),
+          .present_drawable_callback =
+              reinterpret_cast<FlutterMetalPresentCallback>(OnPresentDrawable),
+          .external_texture_frame_callback =
+              reinterpret_cast<FlutterMetalTextureFrameCallback>(OnAcquireExternalTexture),
+      }};
   return config;
 }
 
