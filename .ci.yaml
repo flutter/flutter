@@ -179,7 +179,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"},
           {"dependency": "apple_signing", "version": "none"}
         ]
       os: Mac-12
@@ -2954,7 +2954,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -3404,7 +3404,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -3474,7 +3474,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       shard: tool_host_cross_arch_tests
       tags: >
@@ -3492,7 +3492,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       shard: tool_host_cross_arch_tests
       tags: >
@@ -3983,7 +3983,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3999,7 +3999,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4086,7 +4086,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4144,7 +4144,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4157,7 +4157,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4470,7 +4470,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4506,7 +4506,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
