@@ -107,7 +107,10 @@ class ScrollBehavior {
   /// impossible to select text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
-  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer}
+  /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
+  ///
+  /// By default, [MultitouchDragStrategy.trackLatestActivePointer] is configured to
+  /// create drag gestures for all platforms.
   MultitouchDragStrategy get multitouchDragStrategy => MultitouchDragStrategy.trackLatestActivePointer;
 
   /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in

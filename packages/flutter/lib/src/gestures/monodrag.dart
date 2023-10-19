@@ -74,7 +74,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.multitouchDragStrategy = MultitouchDragStrategy.trackLatestActivePointer,
+    this.multitouchDragStrategy = MultitouchDragStrategy.trackAllActivePointers,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
@@ -112,7 +112,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// position (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
 
-  /// {@template flutter.gestures.monodrag.DragGestureRecognizer}
+  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
   /// Configuration the multi-finger drag strategy on the multi-touch devices.
   ///
   /// If set to [MultitouchDragStrategy.trackLatestActivePointer], the drag gesture recognizer
@@ -120,9 +120,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// appears to be only one finger dragging. If set to [MultitouchDragStrategy.trackAllActivePointers],
   /// all active pointers will be tracked individually and every finger drag
   /// will take effect.
-  ///
-  /// By default, the strategy is [MultitouchDragStrategy.trackLatestActivePointer].
   /// {@endtemplate}
+  ///
+  /// By default, the strategy is [MultitouchDragStrategy.trackAllActivePointers].
   ///
   /// See also:
   ///
