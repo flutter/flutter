@@ -105,10 +105,10 @@ TEST(AccessibilityBridgeMacTest, SendsAccessibilityCreateNotificationToWindowOfF
 
   bridge->OnAccessibilityEvent(targeted_event);
 
-  EXPECT_EQ(bridge->actual_notifications.size(), 1u);
-  EXPECT_EQ(
-      bridge->actual_notifications.find([NSAccessibilityCreatedNotification UTF8String])->second,
-      expectedTarget);
+  ASSERT_EQ(bridge->actual_notifications.size(), 1u);
+  auto target = bridge->actual_notifications.find([NSAccessibilityCreatedNotification UTF8String]);
+  ASSERT_NE(target, bridge->actual_notifications.end());
+  EXPECT_EQ(target->second, expectedTarget);
   [engine shutDownEngine];
 }
 
