@@ -47,22 +47,7 @@ typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
   required Stream<BuildResult> buildResults,
   required ConnectionProvider chromeConnection,
-  required LoadStrategy loadStrategy,
-  required bool enableDebugging,
-  ExpressionCompiler? expressionCompiler,
-  bool enableDebugExtension,
-  String hostname,
-  bool useSseForDebugProxy,
-  bool useSseForDebugBackend,
-  bool useSseForInjectedClient,
-  UrlEncoder? urlEncoder,
-  bool spawnDds,
-  bool enableDevtoolsLaunch,
-  DevtoolsLauncher? devtoolsLauncher,
-  bool launchDevToolsInNewWindow,
-  bool emitDebugEvents,
-  bool isInternalBuild,
-  Future<bool> Function()? isFlutterApp,
+  required ToolConfiguration toolConfiguration,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -283,19 +268,13 @@ class WebAssetServer implements AssetReader {
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
-      enableDebugExtension: true,
       buildResults: const Stream<BuildResult>.empty(),
       chromeConnection: () async {
         final Chromium chromium = await chromiumLauncher!.connectedInstance;
         return chromium.chromeConnection;
       },
-      hostname: hostname,
-      urlEncoder: urlTunneller,
-      enableDebugging: true,
-      useSseForDebugProxy: useSseForDebugProxy,
-      useSseForDebugBackend: useSseForDebugBackend,
-      useSseForInjectedClient: useSseForInjectedClient,
-      loadStrategy: FrontendServerRequireStrategyProvider(
+      toolConfiguration: ToolConfiguration(
+        loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
         PackageUriMapper(packageConfig),
@@ -304,8 +283,17 @@ class WebAssetServer implements AssetReader {
           globals.fs.file(entrypoint).absolute.uri,
         ),
       ).strategy,
-      expressionCompiler: expressionCompiler,
-      spawnDds: enableDds,
+        debugSettings: DebugSettings(
+          enableDebugExtension: true,
+          urlEncoder: urlTunneller,
+          useSseForDebugProxy: useSseForDebugProxy,
+          useSseForDebugBackend: useSseForDebugBackend,
+          useSseForInjectedClient: useSseForInjectedClient,
+          expressionCompiler: expressionCompiler,
+          spawnDds: enableDds,
+        ),
+        appMetadata: AppMetadata(hostname: hostname),
+      ),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
