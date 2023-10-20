@@ -17,9 +17,8 @@ namespace impeller {
 class ContextMTL;
 
 /// @brief Approximate the GPU frame time by computing a difference between the
-/// smallest
-///        GPUStartTime and largest GPUEndTime for all cmd buffers submitted in
-///        a frame workload.
+///        smallest GPUStartTime and largest GPUEndTime for all command buffers
+///        submitted in a frame workload.
 class GPUTracerMTL : public std::enable_shared_from_this<GPUTracerMTL> {
  public:
   GPUTracerMTL() = default;
@@ -27,13 +26,11 @@ class GPUTracerMTL : public std::enable_shared_from_this<GPUTracerMTL> {
   ~GPUTracerMTL() = default;
 
   /// @brief Record that the current frame has ended. Any additional cmd buffers
-  /// will be
-  ///        attributed to the "next" frame.
+  ///        will be attributed to the "next" frame.
   void MarkFrameEnd();
 
   /// @brief Record the current cmd buffer GPU execution timestamps into an
-  /// aggregate
-  ///        frame workload metric.
+  ///        aggregate frame workload metric.
   void RecordCmdBuffer(id<MTLCommandBuffer> buffer);
 
  private:
