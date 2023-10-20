@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1632,7 +1633,20 @@ void main() {
         children: renderBoxes,
       );
       _applyParentData(renderBoxes, editable.text!);
+      // Intrinsics can be computed without doing layout.
+      expect(editable.computeMaxIntrinsicWidth(fixedHeight),
+        2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
+        reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
+      );
+      expect(editable.computeMinIntrinsicWidth(fixedHeight),
+        math.max(math.max(2.0 * 10.0 * 4, 14.0 * 3), 14.0 * 3),
+        reason: "intrinsic width = max(scale factor * width of 'test', width of 'one', width of 'two')",
+      );
+      expect(editable.computeMaxIntrinsicHeight(fixedHeight), 40.0);
+      expect(editable.computeMinIntrinsicHeight(fixedHeight), 40.0);
+
       layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
+      // Intrinsics can be computed after layout.
       expect(editable.computeMaxIntrinsicWidth(fixedHeight),
         2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
         reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
