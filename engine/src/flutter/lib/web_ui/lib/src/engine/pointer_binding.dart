@@ -197,7 +197,6 @@ class _Listener {
     required this.event,
     required this.target,
     required this.handler,
-    required this.useCapture,
     required this.isNative,
   });
 
@@ -206,17 +205,15 @@ class _Listener {
     required String event,
     required DomEventTarget target,
     required DartDomEventListener handler,
-    bool capture = false,
   }) {
     final DomEventListener jsHandler = createDomEventListener(handler);
     final _Listener listener = _Listener._(
       event: event,
       target: target,
       handler: jsHandler,
-      useCapture: capture,
       isNative: false,
     );
-    target.addEventListener(event, jsHandler, capture);
+    target.addEventListener(event, jsHandler);
     return listener;
   }
 
@@ -225,18 +222,15 @@ class _Listener {
     required String event,
     required DomEventTarget target,
     required DomEventListener jsHandler,
-    bool capture = false,
     bool passive = false,
   }) {
     final Map<String, Object> eventOptions = <String, Object>{
-      'capture': capture,
       'passive': passive,
     };
     final _Listener listener = _Listener._(
       event: event,
       target: target,
       handler: jsHandler,
-      useCapture: capture,
       isNative: true,
     );
     target.addEventListenerWithOptions(event, jsHandler, eventOptions);
@@ -248,15 +242,10 @@ class _Listener {
   final DomEventTarget target;
   final DomEventListener handler;
 
-  final bool useCapture;
   final bool isNative;
 
   void unregister() {
-    if (isNative) {
-      target.removeEventListener(event, handler, useCapture);
-    } else {
-      target.removeEventListener(event, handler, useCapture);
-    }
+    target.removeEventListener(event, handler);
   }
 }
 
@@ -297,18 +286,11 @@ abstract class _BaseAdapter {
   /// as the [target], while move and up events should use [domWindow]
   /// instead, because the browser doesn't fire the latter two for DOM elements
   /// when the pointer is outside the window.
-  ///
-  /// If [useCapture] is set to false, the event will be handled in the
-  /// bubbling phase instead of the capture phase.
-  /// See [DOM Level 3 Events][events] for a detailed explanation.
-  ///
-  /// [events]: https://www.w3.org/TR/DOM-Level-3-Events/#event-flow
   void addEventListener(
     DomEventTarget target,
     String eventName,
-    DartDomEventListener handler, {
-    bool useCapture = true,
-  }) {
+    DartDomEventListener handler,
+  ) {
     JSVoid loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
         if (domInstanceOfString(event, 'PointerEvent')) {
@@ -332,7 +314,6 @@ abstract class _BaseAdapter {
       event: eventName,
       target: target,
       handler: loggedHandler,
-      capture: useCapture,
     ));
   }
 
@@ -720,7 +701,6 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     DomEventTarget target,
     String eventName,
     _PointerEventListener handler, {
-    bool useCapture = true,
     bool checkModifiers = true,
   }) {
     addEventListener(target, eventName, (DomEvent event) {
@@ -729,7 +709,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _checkModifiersState(event);
       }
       handler(pointerEvent);
-    }, useCapture: useCapture);
+    });
   }
 
   void _checkModifiersState(DomPointerEvent event) {
@@ -788,7 +768,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(pointerData);
       }
-    }, useCapture: false, checkModifiers: false);
+    }, checkModifiers: false);
 
     // TODO(dit): This must happen in the flutterViewElement, https://github.com/flutter/flutter/issues/116561
     _addPointerEventListener(domWindow, 'pointerup', (DomPointerEvent event) {
@@ -1075,7 +1055,6 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     DomEventTarget target,
     String eventName,
     _MouseEventListener handler, {
-    bool useCapture = true,
     bool checkModifiers = true,
   }) {
     addEventListener(target, eventName, (DomEvent event) {
@@ -1084,7 +1063,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _checkModifiersState(event);
       }
       handler(mouseEvent);
-    }, useCapture: useCapture);
+    });
   }
 
   void _checkModifiersState(DomMouseEvent event) {
@@ -1134,7 +1113,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(pointerData);
       }
-    }, useCapture: false);
+    });
 
     // TODO(dit): This must happen in the flutterViewElement, https://github.com/flutter/flutter/issues/116561
     _addMouseEventListener(domWindow, 'mouseup', (DomMouseEvent event) {
