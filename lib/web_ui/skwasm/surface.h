@@ -70,13 +70,15 @@ class Surface {
   std::unique_ptr<TextureSourceWrapper> createTextureSourceWrapper(
       SkwasmObject textureSource);
 
+  // Worker thread
+  void renderPictureOnWorker(SkPicture* picture, uint32_t callbackId);
+
  private:
   void _runWorker();
   void _init();
   void _dispose();
   void _resizeCanvasToFit(int width, int height);
   void _recreateSurface();
-  void _renderPicture(const SkPicture* picture, uint32_t callbackId);
   void _rasterizeImage(SkImage* image,
                        ImageByteFormat format,
                        uint32_t callbackId);
@@ -99,9 +101,6 @@ class Surface {
   pthread_t _thread;
 
   static void fDispose(Surface* surface);
-  static void fRenderPicture(Surface* surface,
-                             SkPicture* picture,
-                             uint32_t callbackId);
   static void fOnRenderComplete(Surface* surface,
                                 uint32_t callbackId,
                                 SkwasmObject imageBitmap);

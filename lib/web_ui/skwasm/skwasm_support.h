@@ -4,6 +4,7 @@
 
 #include <emscripten/threading.h>
 #include <cinttypes>
+#include "third_party/skia/include/core/SkPicture.h"
 
 namespace Skwasm {
 class Surface;
@@ -19,6 +20,10 @@ extern SkwasmObject skwasm_getAssociatedObject(void* pointer);
 extern void skwasm_disposeAssociatedObjectOnThread(unsigned long threadId,
                                                    void* pointer);
 extern void skwasm_registerMessageListener(pthread_t threadId);
+extern void skwasm_dispatchRenderPicture(unsigned long threadId,
+                                         Skwasm::Surface* surface,
+                                         SkPicture* picture,
+                                         uint32_t callbackId);
 extern uint32_t skwasm_createOffscreenCanvas(int width, int height);
 extern void skwasm_resizeCanvas(uint32_t contextHandle, int width, int height);
 extern void skwasm_captureImageBitmap(Skwasm::Surface* surfaceHandle,
