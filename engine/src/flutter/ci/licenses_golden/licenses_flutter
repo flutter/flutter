@@ -2086,6 +2086,8 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/gles/device_buffer_gles.h + .
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/formats_gles.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/formats_gles.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/gles.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/gles/gpu_tracer_gles.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/gles/gpu_tracer_gles.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/handle_gles.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/handle_gles.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/pipeline_gles.cc + ../../../flutter/LICENSE
@@ -4855,6 +4857,8 @@ FILE: ../../../flutter/impeller/renderer/backend/gles/device_buffer_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/formats_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/formats_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/gles.h
+FILE: ../../../flutter/impeller/renderer/backend/gles/gpu_tracer_gles.cc
+FILE: ../../../flutter/impeller/renderer/backend/gles/gpu_tracer_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/handle_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/handle_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/pipeline_gles.cc

@@ -45,7 +45,8 @@ TEST(AndroidContextGLImpeller, MSAAFirstAttempt) {
       .WillOnce(Return(ByMove(std::move(second_result))));
   ON_CALL(*display, ChooseConfig(_))
       .WillByDefault(Return(ByMove(std::unique_ptr<Config>())));
-  auto context = std::make_unique<AndroidContextGLImpeller>(std::move(display));
+  auto context =
+      std::make_unique<AndroidContextGLImpeller>(std::move(display), true);
   ASSERT_TRUE(context);
 }
 
@@ -76,7 +77,8 @@ TEST(AndroidContextGLImpeller, FallbackForEmulator) {
       .WillOnce(Return(ByMove(std::move(third_result))));
   ON_CALL(*display, ChooseConfig(_))
       .WillByDefault(Return(ByMove(std::unique_ptr<Config>())));
-  auto context = std::make_unique<AndroidContextGLImpeller>(std::move(display));
+  auto context =
+      std::make_unique<AndroidContextGLImpeller>(std::move(display), true);
   ASSERT_TRUE(context);
 }
 }  // namespace testing

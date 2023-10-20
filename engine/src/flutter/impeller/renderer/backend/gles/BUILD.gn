@@ -16,6 +16,7 @@ impeller_component("gles_unittests") {
   sources = [
     "test/capabilities_unittests.cc",
     "test/formats_gles_unittests.cc",
+    "test/gpu_tracer_gles_unittests.cc",
     "test/mock_gles.cc",
     "test/mock_gles.h",
     "test/mock_gles_unittests.cc",
@@ -51,6 +52,8 @@ impeller_component("gles") {
     "formats_gles.cc",
     "formats_gles.h",
     "gles.h",
+    "gpu_tracer_gles.cc",
+    "gpu_tracer_gles.h",
     "handle_gles.cc",
     "handle_gles.h",
     "pipeline_gles.cc",

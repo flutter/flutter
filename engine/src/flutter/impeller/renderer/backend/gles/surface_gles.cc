@@ -60,6 +60,10 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
   render_target_desc.SetColorAttachment(color0, 0u);
   render_target_desc.SetStencilAttachment(stencil0);
 
+#ifdef IMPELLER_DEBUG
+  gl_context.GetGPUTracer()->RecordRasterThread();
+#endif  // IMPELLER_DEBUG
+
   return std::unique_ptr<SurfaceGLES>(
       new SurfaceGLES(std::move(swap_callback), render_target_desc));
 }

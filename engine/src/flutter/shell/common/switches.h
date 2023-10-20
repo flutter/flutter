@@ -275,6 +275,10 @@ DEF_SWITCH(EnableVulkanValidation,
            "Enable loading Vulkan validation layers. The layers must be "
            "available to the application and loadable. On non-Vulkan backends, "
            "this flag does nothing.")
+DEF_SWITCH(EnableOpenGLGPUTracing,
+           "enable-opengl-gpu-tracing",
+           "Enable tracing of GPU execution time when using the Impeller "
+           "OpenGLES backend.")
 DEF_SWITCH(LeakVM,
            "leak-vm",
            "When the last shell shuts down, the shared VM is leaked by default "

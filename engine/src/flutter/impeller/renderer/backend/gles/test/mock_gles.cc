@@ -112,6 +112,53 @@ void mockPushDebugGroupKHR(GLenum source,
 static_assert(CheckSameSignature<decltype(mockPushDebugGroupKHR),  //
                                  decltype(glPushDebugGroupKHR)>::value);
 
+void mockGenQueriesEXT(GLsizei n, GLuint* ids) {
+  RecordGLCall("glGenQueriesEXT");
+  for (auto i = 0; i < n; i++) {
+    ids[i] = i + 1;
+  }
+}
+
+static_assert(CheckSameSignature<decltype(mockGenQueriesEXT),  //
+                                 decltype(glGenQueriesEXT)>::value);
+
+void mockBeginQueryEXT(GLenum target, GLuint id) {
+  RecordGLCall("glBeginQueryEXT");
+}
+
+static_assert(CheckSameSignature<decltype(mockBeginQueryEXT),  //
+                                 decltype(glBeginQueryEXT)>::value);
+
+void mockEndQueryEXT(GLuint id) {
+  RecordGLCall("glEndQueryEXT");
+}
+
+static_assert(CheckSameSignature<decltype(mockEndQueryEXT),  //
+                                 decltype(glEndQueryEXT)>::value);
+
+void mockGetQueryObjectuivEXT(GLuint id, GLenum target, GLuint* result) {
+  RecordGLCall("glGetQueryObjectuivEXT");
+  *result = GL_TRUE;
+}
+
+static_assert(CheckSameSignature<decltype(mockGetQueryObjectuivEXT),  //
+                                 decltype(glGetQueryObjectuivEXT)>::value);
+
+void mockGetQueryObjectui64vEXT(GLuint id, GLenum target, GLuint64* result) {
+  RecordGLCall("glGetQueryObjectui64vEXT");
+  *result = 1000u;
+}
+
+static_assert(CheckSameSignature<decltype(mockGetQueryObjectui64vEXT),  //
+                                 decltype(glGetQueryObjectui64vEXT)>::value);
+
+void mockDeleteQueriesEXT(GLsizei size, const GLuint* queries) {
+  RecordGLCall("glDeleteQueriesEXT");
+}
+
+static_assert(CheckSameSignature<decltype(mockDeleteQueriesEXT),  //
+                                 decltype(glDeleteQueriesEXT)>::value);
+
 std::shared_ptr<MockGLES> MockGLES::Init(
     const std::optional<std::vector<const unsigned char*>>& extensions) {
   // If we cannot obtain a lock, MockGLES is already being used elsewhere.
@@ -136,6 +183,18 @@ const ProcTableGLES::Resolver kMockResolver = [](const char* name) {
     return reinterpret_cast<void*>(&mockGetIntegerv);
   } else if (strcmp(name, "glGetError") == 0) {
     return reinterpret_cast<void*>(&mockGetError);
+  } else if (strcmp(name, "glGenQueriesEXT") == 0) {
+    return reinterpret_cast<void*>(&mockGenQueriesEXT);
+  } else if (strcmp(name, "glBeginQueryEXT") == 0) {
+    return reinterpret_cast<void*>(&mockBeginQueryEXT);
+  } else if (strcmp(name, "glEndQueryEXT") == 0) {
+    return reinterpret_cast<void*>(&mockEndQueryEXT);
+  } else if (strcmp(name, "glDeleteQueriesEXT") == 0) {
+    return reinterpret_cast<void*>(&mockDeleteQueriesEXT);
+  } else if (strcmp(name, "glGetQueryObjectui64vEXT") == 0) {
+    return reinterpret_cast<void*>(mockGetQueryObjectui64vEXT);
+  } else if (strcmp(name, "glGetQueryObjectuivEXT") == 0) {
+    return reinterpret_cast<void*>(mockGetQueryObjectuivEXT);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

@@ -13,8 +13,8 @@ namespace flutter {
 
 class AndroidContextGLImpeller : public AndroidContext {
  public:
-  explicit AndroidContextGLImpeller(
-      std::unique_ptr<impeller::egl::Display> display);
+  AndroidContextGLImpeller(std::unique_ptr<impeller::egl::Display> display,
+                           bool enable_gpu_tracing);
 
   ~AndroidContextGLImpeller();
 
