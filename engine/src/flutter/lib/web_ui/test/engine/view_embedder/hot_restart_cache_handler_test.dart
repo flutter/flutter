@@ -5,31 +5,58 @@
 @TestOn('browser')
 library;
 
+import 'dart:js_interop';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/view_embedder/hot_restart_cache_handler.dart';
+
+@JS('window.__flutterState')
+external JSArray? get _jsHotRestartStore;
+
+@JS('window.__flutterState')
+external set _jsHotRestartStore(JSArray? nodes);
 
 void main() {
   internalBootstrapBrowserTest(() => doTests);
 }
 
 void doTests() {
-  group('Constructor', () {
-    test('Creates a cache in the JS environment', () async {
-      final HotRestartCacheHandler cache = HotRestartCacheHandler();
+  tearDown(() {
+    _jsHotRestartStore = null;
+  });
 
-      expect(cache, isNotNull);
+  group('registerElementForCleanup', () {
+    test('stores elements in a global cache', () async {
+      final DomElement toBeCached = createDomElement('some-element-to-cache');
+      final DomElement other = createDomElement('other-element-to-cache');
+      final DomElement another = createDomElement('another-element-to-cache');
 
-      final List<Object?>? domCache = hotRestartStore;
+      registerElementForCleanup(toBeCached);
+      registerElementForCleanup(other);
+      registerElementForCleanup(another);
 
-      expect(domCache, isNotNull);
-      expect(domCache, isEmpty);
+      expect(_jsHotRestartStore!.toDart, <DomElement>[
+        toBeCached,
+        other,
+        another,
+      ]);
     });
   });
 
-  group('registerElement', () {
-    HotRestartCacheHandler? cache;
+  group('HotRestartCacheHandler Constructor', () {
+    test('Creates a cache in the JS environment', () async {
+      HotRestartCacheHandler();
+
+      expect(_jsHotRestartStore, isNotNull);
+      // For dart2wasm, we have to check the length this way.
+      expect(_jsHotRestartStore!.length, 0.toJS);
+    });
+  });
+
+  group('HotRestartCacheHandler.registerElement', () {
+    late HotRestartCacheHandler cache;
 
     setUp(() {
       cache = HotRestartCacheHandler();
@@ -37,22 +64,18 @@ void doTests() {
 
     test('Registers an element in the DOM cache', () async {
       final DomElement element = createDomElement('for-test');
-      cache!.registerElement(element);
+      cache.registerElement(element);
 
-      final List<Object?>? domCache = hotRestartStore;
-      expect(domCache, hasLength(1));
-      expect(domCache!.last, element);
+      expect(_jsHotRestartStore!.toDart, <DomElement>[element]);
     });
 
     test('Registers elements in the DOM cache', () async {
       final DomElement element = createDomElement('for-test');
       domDocument.body!.append(element);
 
-      cache!.registerElement(element);
+      cache.registerElement(element);
 
-      final List<Object?>? domCache = hotRestartStore;
-      expect(domCache, hasLength(1));
-      expect(domCache!.last, element);
+      expect(_jsHotRestartStore!.toDart, <DomElement>[element]);
     });
 
     test('Clears registered elements from the DOM and the cache upon restart',
@@ -62,7 +85,7 @@ void doTests() {
       domDocument.body!.append(element);
       domDocument.body!.append(element2);
 
-      cache!.registerElement(element);
+      cache.registerElement(element);
 
       expect(element.isConnected, isTrue);
       expect(element2.isConnected, isTrue);
@@ -70,8 +93,8 @@ void doTests() {
       // Simulate a hot restart...
       cache = HotRestartCacheHandler();
 
-      final List<Object?>? domCache = hotRestartStore;
-      expect(domCache, hasLength(0));
+      // For dart2wasm, we have to check the length this way.
+      expect(_jsHotRestartStore!.length, 0.toJS);
       expect(element.isConnected, isFalse); // Removed
       expect(element2.isConnected, isTrue);
     });
