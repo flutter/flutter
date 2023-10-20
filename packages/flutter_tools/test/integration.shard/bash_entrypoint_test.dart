@@ -73,7 +73,7 @@ Future<void> main() async {
       final File updateDartSdk = tempDir.childDirectory('bin').childDirectory('internal').childFile('update_dart_sdk.sh')..writeAsStringSync('''
 #!/usr/bin/env bash
 
-exit 0
+echo downloaded dart sdk
 ''');
       makeExecutable(updateDartSdk);
 
@@ -86,13 +86,18 @@ exit 0
           .childFile('dart');
       dartBin.writeAsStringSync('''
 #!/usr/bin/env bash
-echo you ran dart
+
+echo executed dart binary
 ''');
       makeExecutable(dartBin);
 
       result = await processManager.run(<String>[fakeDartBash.path]);
-      // Verify we ran dartBin
-      expect(result, const ProcessResultMatcher(stdoutPattern: 'you ran dart'));
+      expect(result, const ProcessResultMatcher());
+      expect(
+        (result.stdout as String).split('\n'),
+        // verify we ran updateDartSdk and dartBin
+        containsAll(<String>['downloaded dart sdk', 'executed dart binary']),
+      );
 
       // Verify we did not try to compile the flutter_tool
       expect(result.stderr, isNot(contains('Building flutter tool...')));
