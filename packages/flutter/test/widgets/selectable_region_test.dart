@@ -1898,6 +1898,95 @@ void main() {
     );
 
     testWidgetsWithLeakTracking(
+      'select word event can select inline widget', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final UniqueKey innerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text.rich(
+                TextSpan(
+                    children: <InlineSpan>[
+                      TextSpan(text: 'How are\n you?'),
+                      WidgetSpan(child: Text('Good, and you?', key: innerText,)),
+                      TextSpan(text: 'Fine, thank you.'),
+                    ],
+                ),
+                key: outerText,
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      final RenderParagraph innerParagraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(innerText), matching: find.byType(RichText)).first);
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerText)), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      // Should select "and".
+      expect(paragraph.selections.isEmpty, isTrue);
+      expect(innerParagraph.selections[0], const TextSelection(baseOffset: 6, extentOffset: 9));
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
+      'select word event should not crash when its position is at an unselectable inline element', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      final UniqueKey flutterLogo = UniqueKey();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text.rich(
+                  TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text:
+                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        ),
+                        WidgetSpan(child: FlutterLogo(key: flutterLogo)),
+                        TextSpan(text: 'Hello, world.'),
+                      ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset gestureOffset = tester.getCenter(find.byKey(flutterLogo).first);
+
+      // Right click on unseletable element.
+      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      // Should not crash.
+      expect(tester.takeException(), isNull);
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
       'can select word when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/127076.
       final UniqueKey outerText = UniqueKey();
