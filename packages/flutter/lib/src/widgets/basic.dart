@@ -5873,13 +5873,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// widgets.
   final Color? selectionColor;
 
-  /// {@template flutter.widgets.RichText.isInlineWidget}
   /// Whether this widget is placed in the middle of an [InlineSpan] tree.
   ///
   /// This is ignored if [selectionRegistrar] is null.
-  ///
-  /// This is used by the underlying [RenderParagraph].
-  /// {@endtemplate}
   final bool? isInlineWidget;
 
   @override

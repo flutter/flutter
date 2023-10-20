@@ -606,7 +606,10 @@ class Text extends StatelessWidget {
   /// (semi-transparent grey).
   final Color? selectionColor;
 
-  /// {@macro flutter.widgets.RichText.isInlineWidget}
+  /// Whether this widget is placed in the middle of an [InlineSpan] tree.
+  ///
+  /// This is ignored if [SelectionContainer.maybeOf] returns null
+  /// in the [BuildContext] of the [Text] widget.
   final bool? isInlineWidget;
 
   @override

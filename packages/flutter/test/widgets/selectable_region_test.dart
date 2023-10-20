@@ -1913,9 +1913,14 @@ void main() {
               child: Text.rich(
                 TextSpan(
                     children: <InlineSpan>[
-                      TextSpan(text: 'How are\n you?'),
-                      WidgetSpan(child: Text('Good, and you?', key: innerText,)),
-                      TextSpan(text: 'Fine, thank you.'),
+                      const TextSpan(text: 'How are\n you?'),
+                      WidgetSpan(
+                        child: Text(
+                          'Good, and you?',
+                          key: innerText,
+                        ),
+                      ),
+                      const TextSpan(text: 'Fine, thank you.'),
                     ],
                 ),
                 key: outerText,
@@ -1956,12 +1961,12 @@ void main() {
                 child: Text.rich(
                   TextSpan(
                       children: <InlineSpan>[
-                        TextSpan(
+                        const TextSpan(
                           text:
                               'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                         ),
                         WidgetSpan(child: FlutterLogo(key: flutterLogo)),
-                        TextSpan(text: 'Hello, world.'),
+                        const TextSpan(text: 'Hello, world.'),
                       ],
                   ),
                 ),
