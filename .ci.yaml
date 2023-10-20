@@ -130,7 +130,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
@@ -165,7 +165,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
@@ -179,7 +179,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
       os: Mac-12
@@ -2919,7 +2919,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
 
@@ -2937,7 +2937,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -2955,7 +2955,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -2976,7 +2976,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
@@ -2994,7 +2994,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
@@ -3012,7 +3012,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
@@ -3030,7 +3030,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
@@ -3045,7 +3045,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       task_name: complex_layout_macos__start_up
 
@@ -3056,7 +3056,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
 
@@ -3077,7 +3077,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3095,7 +3095,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       task_name: flutter_gallery_macos__compile
 
@@ -3106,7 +3106,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       task_name: flutter_gallery_macos__start_up
 
@@ -3174,7 +3174,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:33v6"}
         ]
@@ -3253,7 +3253,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "mac"]
@@ -3320,7 +3320,7 @@ targets:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3369,7 +3369,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3386,7 +3386,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3405,7 +3405,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -3441,7 +3441,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3458,7 +3458,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3475,7 +3475,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       shard: tool_host_cross_arch_tests
       tags: >
@@ -3493,7 +3493,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       shard: tool_host_cross_arch_tests
       tags: >
@@ -3515,7 +3515,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
@@ -3539,7 +3539,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
@@ -3563,7 +3563,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
@@ -3587,7 +3587,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
@@ -3984,7 +3984,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4000,7 +4000,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4074,7 +4074,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4087,7 +4087,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4145,7 +4145,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4158,7 +4158,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4195,7 +4195,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4343,7 +4343,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4420,7 +4420,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4437,7 +4437,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4454,7 +4454,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4471,7 +4471,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
@@ -4489,7 +4489,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4507,7 +4507,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "ruby", "version": "UrTZReapz6nnVYM4QAA0INeiknw8PsaPhk3xtTRbjiQC"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
