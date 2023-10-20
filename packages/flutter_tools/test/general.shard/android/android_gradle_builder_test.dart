@@ -914,7 +914,7 @@ Gradle Crashed
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
-    testUsingContext('can call custom gradle task getApplicationIdForVariant and parse the result', () async {
+    testUsingContext('can call custom gradle task outputFreeDebugAppLinkSettings and parse the result', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         java: FakeJava(),
         logger: logger,
@@ -931,6 +931,7 @@ Gradle Crashed
         command: <String>[
           'gradlew',
           '-q',
+          '-PoutputPath=/build/deeplink_data/app-link-settings-freeDebug.json',
           'outputFreeDebugAppLinkSettings',
         ],
       ));
