@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../dom.dart';
 import '../platform_views/slots.dart';
 import 'semantics.dart';
 
@@ -30,13 +29,13 @@ class PlatformViewRoleManager extends PrimaryRoleManager {
 
     if (semanticsObject.isPlatformView) {
       if (semanticsObject.isPlatformViewIdDirty) {
-        semanticsObject.element.setAttribute(
+        setAttribute(
           'aria-owns',
           getPlatformViewDomId(semanticsObject.platformViewId),
         );
       }
     } else {
-      semanticsObject.element.removeAttribute('aria-owns');
+      removeAttribute('aria-owns');
     }
   }
 }

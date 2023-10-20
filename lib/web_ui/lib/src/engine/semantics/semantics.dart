@@ -24,6 +24,7 @@ import 'focusable.dart';
 import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
+import 'link.dart';
 import 'live_region.dart';
 import 'platform_view.dart';
 import 'scrollable.dart';
@@ -382,6 +383,9 @@ enum PrimaryRole {
   ///
   /// Provides a label or a value.
   generic,
+
+  /// Contains a link.
+  link,
 }
 
 /// Identifies one of the secondary [RoleManager]s of a [PrimaryRoleManager].
@@ -437,6 +441,8 @@ abstract class PrimaryRoleManager {
   /// management intereferes with the widget's functionality.
   PrimaryRoleManager.blank(this.role, this.semanticsObject);
 
+  late final DomElement element = _initElement(createElement(), semanticsObject);
+
   /// The primary role identifier.
   final PrimaryRole role;
 
@@ -453,29 +459,82 @@ abstract class PrimaryRoleManager {
   @visibleForTesting
   List<Role> get debugSecondaryRoles => _secondaryRoleManagers?.map((RoleManager manager) => manager.role).toList() ?? const <Role>[];
 
+  @protected
+  DomElement createElement() => domDocument.createElement('flt-semantics');
+
+  static DomElement _initElement(DomElement element, SemanticsObject semanticsObject) {
+    // DOM nodes created for semantics objects are positioned absolutely using
+    // transforms.
+    element.style.position = 'absolute';
+    element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
+
+    // The root node has some properties that other nodes do not.
+    if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
+      // Make all semantics transparent. Use `filter` instead of `opacity`
+      // attribute because `filter` is stronger. `opacity` does not apply to
+      // some elements, particularly on iOS, such as the slider thumb and track.
+      //
+      // Use transparency instead of "visibility:hidden" or "display:none"
+      // so that a screen reader does not ignore these elements.
+      element.style.filter = 'opacity(0%)';
+
+      // Make text explicitly transparent to signal to the browser that no
+      // rasterization needs to be done.
+      element.style.color = 'rgba(0,0,0,0)';
+    }
+
+    // Make semantic elements visible for debugging by outlining them using a
+    // green border. Do not use `border` attribute because it affects layout
+    // (`outline` does not).
+    if (configuration.debugShowSemanticsNodes) {
+      element.style.outline = '1px solid green';
+    }
+    return element;
+  }
+
+  /// Sets the `role` ARIA attribute.
+  void setAriaRole(String ariaRoleName) {
+    setAttribute('role', ariaRoleName);
+  }
+
+  /// Sets the `role` ARIA attribute.
+  void setAttribute(String name, Object value) {
+    element.setAttribute(name, value);
+  }
+
+  void append(DomElement child) {
+    element.append(child);
+  }
+
+  void removeAttribute(String name) => element.removeAttribute(name);
+
+  void addEventListener(String type, DomEventListener? listener, [bool? useCapture]) => element.addEventListener(type, listener, useCapture);
+
+  void removeEventListener(String type, DomEventListener? listener, [bool? useCapture]) => element.removeEventListener(type, listener, useCapture);
+
   /// Adds generic focus management features.
   void addFocusManagement() {
-    addSecondaryRole(Focusable(semanticsObject));
+    addSecondaryRole(Focusable(semanticsObject, this));
   }
 
   /// Adds generic live region features.
   void addLiveRegion() {
-    addSecondaryRole(LiveRegion(semanticsObject));
+    addSecondaryRole(LiveRegion(semanticsObject, this));
   }
 
   /// Adds generic route name features.
   void addRouteName() {
-    addSecondaryRole(RouteName(semanticsObject));
+    addSecondaryRole(RouteName(semanticsObject, this));
   }
 
   /// Adds generic label features.
   void addLabelAndValue() {
-    addSecondaryRole(LabelAndValue(semanticsObject));
+    addSecondaryRole(LabelAndValue(semanticsObject, this));
   }
 
   /// Adds generic functionality for handling taps and clicks.
   void addTappable() {
-    addSecondaryRole(Tappable(semanticsObject));
+    addSecondaryRole(Tappable(semanticsObject, this));
   }
 
   /// Adds a secondary role to this primary role manager.
@@ -525,7 +584,7 @@ abstract class PrimaryRoleManager {
   /// gesture mode changes.
   @mustCallSuper
   void dispose() {
-    semanticsObject.element.removeAttribute('role');
+    removeAttribute('role');
     _isDisposed = true;
   }
 }
@@ -566,11 +625,11 @@ final class GenericRole extends PrimaryRoleManager {
     //   Flutter renders into canvas, so the focus ring looks wrong.
     // - Read out the same label multiple times.
     if (semanticsObject.hasChildren) {
-      semanticsObject.setAriaRole('group');
+      setAriaRole('group');
     } else if (semanticsObject.hasFlag(ui.SemanticsFlag.isHeader)) {
-      semanticsObject.setAriaRole('heading');
+      setAriaRole('heading');
     } else {
-      semanticsObject.setAriaRole('text');
+      setAriaRole('text');
     }
   }
 }
@@ -588,13 +647,15 @@ abstract class RoleManager {
   /// Initializes a secondary role for [semanticsObject].
   ///
   /// A single role object manages exactly one [SemanticsObject].
-  RoleManager(this.role, this.semanticsObject);
+  RoleManager(this.role, this.semanticsObject, this.owner);
 
   /// Role identifier.
   final Role role;
 
   /// The semantics object managed by this role.
   final SemanticsObject semanticsObject;
+
+  final PrimaryRoleManager owner;
 
   /// Called immediately after the [semanticsObject] updates some of its fields.
   ///
@@ -627,34 +688,7 @@ abstract class RoleManager {
 /// information to the browser.
 class SemanticsObject {
   /// Creates a semantics tree node with the given [id] and [owner].
-  SemanticsObject(this.id, this.owner) {
-    // DOM nodes created for semantics objects are positioned absolutely using
-    // transforms.
-    element.style.position = 'absolute';
-    element.setAttribute('id', 'flt-semantic-node-$id');
-
-    // The root node has some properties that other nodes do not.
-    if (id == 0 && !configuration.debugShowSemanticsNodes) {
-      // Make all semantics transparent. Use `filter` instead of `opacity`
-      // attribute because `filter` is stronger. `opacity` does not apply to
-      // some elements, particularly on iOS, such as the slider thumb and track.
-      //
-      // Use transparency instead of "visibility:hidden" or "display:none"
-      // so that a screen reader does not ignore these elements.
-      element.style.filter = 'opacity(0%)';
-
-      // Make text explicitly transparent to signal to the browser that no
-      // rasterization needs to be done.
-      element.style.color = 'rgba(0,0,0,0)';
-    }
-
-    // Make semantic elements visible for debugging by outlining them using a
-    // green border. Do not use `border` attribute because it affects layout
-    // (`outline` does not).
-    if (configuration.debugShowSemanticsNodes) {
-      element.style.outline = '1px solid green';
-    }
-  }
+  SemanticsObject(this.id, this.owner);
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   int get flags => _flags;
@@ -981,9 +1015,6 @@ class SemanticsObject {
   /// Controls the semantics tree that this node participates in.
   final EngineSemanticsOwner owner;
 
-  /// The DOM element used to convey semantics information to the browser.
-  final DomElement element = domDocument.createElement('flt-semantics');
-
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -995,6 +1026,9 @@ class SemanticsObject {
 
   /// Whether the field corresponding to the [fieldIndex] has been updated.
   bool _isDirty(int fieldIndex) => (_dirtyFields & fieldIndex) != 0;
+
+  /// The dom element of this semantics object.
+  DomElement get element => primaryRole!.element;
 
   /// Returns the HTML element that contains the HTML elements of direct
   /// children of this object.
@@ -1078,6 +1112,9 @@ class SemanticsObject {
 
   /// Whether this object represents an editable text field.
   bool get isTextField => hasFlag(ui.SemanticsFlag.isTextField);
+
+    /// Whether this object represents an editable text field.
+  bool get isLink => hasFlag(ui.SemanticsFlag.isLink);
 
   /// Whether this object needs screen readers attention right away.
   bool get isLiveRegion =>
@@ -1456,11 +1493,6 @@ class SemanticsObject {
     _currentChildrenInRenderOrder = childrenInRenderOrder;
   }
 
-  /// Sets the `role` ARIA attribute.
-  void setAriaRole(String ariaRoleName) {
-    element.setAttribute('role', ariaRoleName);
-  }
-
   /// The primary role of this node.
   ///
   /// The primary role is assigned by [updateSelf] based on the combination of
@@ -1485,6 +1517,8 @@ class SemanticsObject {
       return PrimaryRole.scrollable;
     } else if (scopesRoute) {
       return PrimaryRole.dialog;
+    } else if (isLink) {
+      return PrimaryRole.link;
     } else {
       return PrimaryRole.generic;
     }
@@ -1500,6 +1534,7 @@ class SemanticsObject {
       PrimaryRole.dialog => Dialog(this),
       PrimaryRole.image => ImageRoleManager(this),
       PrimaryRole.platformView => PlatformViewRoleManager(this),
+      PrimaryRole.link => Link(this),
       PrimaryRole.generic => GenericRole(this),
     };
   }
@@ -1509,6 +1544,7 @@ class SemanticsObject {
   void _updateRoles() {
     PrimaryRoleManager? currentPrimaryRole = primaryRole;
     final PrimaryRole roleId = _getPrimaryRoleIdentifier();
+    final DomElement? previousElement = primaryRole?.element;
 
     if (currentPrimaryRole != null) {
       if (currentPrimaryRole.role == roleId) {
@@ -1534,6 +1570,19 @@ class SemanticsObject {
       currentPrimaryRole = _createPrimaryRole(roleId);
       primaryRole = currentPrimaryRole;
       currentPrimaryRole.update();
+    }
+
+    // Reparent element.
+    if (previousElement != element) {
+      final DomElement? container = _childContainerElement;
+      if (container != null) {
+        element.append(container);
+      }
+      final DomElement? parent = previousElement?.parent;
+      if (parent != null) {
+        parent.insertBefore(element, previousElement);
+        previousElement!.remove();
+      }
     }
   }
 

@@ -13,7 +13,6 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
 import 'semantics.dart';
 
 /// The specific type of checkable control.
@@ -63,18 +62,18 @@ class Checkable extends PrimaryRoleManager {
     if (semanticsObject.isFlagsDirty) {
       switch (_kind) {
         case _CheckableKind.checkbox:
-          semanticsObject.setAriaRole('checkbox');
+          setAriaRole('checkbox');
         case _CheckableKind.radio:
-          semanticsObject.setAriaRole('radio');
+          setAriaRole('radio');
         case _CheckableKind.toggle:
-          semanticsObject.setAriaRole('switch');
+          setAriaRole('switch');
       }
 
       /// Adding disabled and aria-disabled attribute to notify the assistive
       /// technologies of disabled elements.
       _updateDisabledAttribute();
 
-      semanticsObject.element.setAttribute(
+      setAttribute(
         'aria-checked',
         (semanticsObject.hasFlag(ui.SemanticsFlag.isChecked) ||
                 semanticsObject.hasFlag(ui.SemanticsFlag.isToggled))
@@ -92,17 +91,15 @@ class Checkable extends PrimaryRoleManager {
 
   void _updateDisabledAttribute() {
     if (semanticsObject.enabledState() == EnabledState.disabled) {
-      final DomElement element = semanticsObject.element;
-      element
-        ..setAttribute('aria-disabled', 'true')
-        ..setAttribute('disabled', 'true');
+      setAttribute('aria-disabled', 'true');
+      setAttribute('disabled', 'true');
     } else {
       _removeDisabledAttribute();
     }
   }
 
   void _removeDisabledAttribute() {
-    final DomElement element = semanticsObject.element;
-    element..removeAttribute('aria-disabled')..removeAttribute('disabled');
+    removeAttribute('aria-disabled');
+    removeAttribute('disabled');
   }
 }
