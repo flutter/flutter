@@ -42,7 +42,7 @@ void ImageExternalTexture::Paint(PaintContext& context,
         flutter::DlCanvas::SrcRectConstraint::kStrict  // enforce edges
     );
   } else {
-    FML_LOG(ERROR) << "No DlImage available for ImageExternalTexture to paint.";
+    FML_LOG(INFO) << "No DlImage available for ImageExternalTexture to paint.";
   }
 }
 
