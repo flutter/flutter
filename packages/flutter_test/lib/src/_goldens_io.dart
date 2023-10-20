@@ -96,11 +96,14 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       await getGoldenBytes(golden),
     );
 
-    if (!result.passed) {
-      final String error = await generateFailureOutput(result, golden, basedir);
-      throw FlutterError(error);
+    if (result.passed) {
+      result.dispose();
+      return true;
     }
-    return result.passed;
+
+    final String error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
+    throw FlutterError(error);
   }
 
   @override

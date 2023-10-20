@@ -56,7 +56,7 @@ void main() {
     expect(tester.getRect(find.byType(Container)), const Rect.fromLTRB(0, 44, 800, 600));
   });
 
-  testWidgets('dark mode and obstruction work', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('dark mode and obstruction work', (WidgetTester tester) async {
     const Color dynamicColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFFF8F8F8),
       darkColor: Color(0xEE333333),

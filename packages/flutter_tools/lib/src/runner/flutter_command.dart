@@ -59,6 +59,16 @@ abstract class DotEnvRegex {
   static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
 }
 
+abstract class _HttpRegex {
+  // https://datatracker.ietf.org/doc/html/rfc7230#section-3.2
+  static const String _vchar = r'\x21-\x7E';
+  static const String _spaceOrTab = r'\x20\x09';
+  static const String _nonDelimiterVchar = r'\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x39\x41-\x5A\x5E-\x7A\x7C\x7E';
+
+  // --web-header is provided as key=value for consistency with --dart-define
+  static final RegExp httpHeader = RegExp('^([$_nonDelimiterVchar]+)' r'\s*=\s*' '([$_vchar$_spaceOrTab]+)' r'$');
+}
+
 enum ExitStatus {
   success,
   warning,
@@ -218,6 +228,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebOptions({ required bool verboseHelp }) {
+    argParser.addMultiOption('web-header',
+      help: 'Additional key-value pairs that will added by the web server '
+            'as headers to all responses. Multiple headers can be passed by '
+            'repeating "--web-header" multiple times.',
+      valueHelp: 'X-Custom-Header=header-value',
+      splitCommas: false,
+      hide: !verboseHelp,
+    );
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help:
@@ -638,10 +656,10 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    useDartDefineFromFileOption();
+    _usesDartDefineFromFileOption();
   }
 
-  void useDartDefineFromFileOption() {
+  void _usesDartDefineFromFileOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
       help:
@@ -1286,7 +1304,6 @@ abstract class FlutterCommand extends Command<void> {
       dartExperiments: experiments,
       webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
-      dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
@@ -1423,9 +1440,10 @@ abstract class FlutterCommand extends Command<void> {
             dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions
-              .kDartDefineFromFileOption}=$path" format err, '
-              'please fix first! format err:\n$err');
+          throwToolExit('Unable to parse the file at path "$path" due to a formatting error. '
+            'Ensure that the file contains valid JSON.\n'
+            'Error details: $err'
+          );
         }
       }
     }
@@ -1519,6 +1537,31 @@ abstract class FlutterCommand extends Command<void> {
     }
     dartDefinesSet.addAll(webRenderer.dartDefines);
     return dartDefinesSet.toList();
+  }
+
+
+  Map<String, String> extractWebHeaders() {
+    final Map<String, String> webHeaders = <String, String>{};
+
+    if (argParser.options.containsKey('web-header')) {
+      final List<String> candidates = stringsArg('web-header');
+      final List<String> invalidHeaders = <String>[];
+      for (final String candidate in candidates) {
+        final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
+          if (keyValueMatch == null) {
+            invalidHeaders.add(candidate);
+            continue;
+          }
+
+          webHeaders[keyValueMatch.group(1)!] = keyValueMatch.group(2)!;
+      }
+
+      if (invalidHeaders.isNotEmpty) {
+        throwToolExit('Invalid web headers: ${invalidHeaders.join(', ')}');
+      }
+    }
+
+    return webHeaders;
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
