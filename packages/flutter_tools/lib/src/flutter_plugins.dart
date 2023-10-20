@@ -948,12 +948,6 @@ Future<void> writeWindowsPluginFiles(
     'ffiPlugins': windowsFfiPlugins,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windows),
   };
-  print('all plugins: ${plugins.map((Plugin p) => p.name).toList()}');
-  print('methodChannelPlugins: ${methodChannelPlugins.map((Plugin p) => p.name).toList()}');
-  print('win32plugins: ${win32Plugins.map((Plugin p) => p.name).toList()}');
-  print('ffiPlugins: ${ffiPlugins.map((Plugin p) => p.name).toList()}');
-  print('windowsFfiPlugins: ${windowsFfiPlugins.map((Map<String, Object?> map) => map.keys).toList()}');
-  throwToolExit('foo');
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context, templateRenderer);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context, templateRenderer);
 }
