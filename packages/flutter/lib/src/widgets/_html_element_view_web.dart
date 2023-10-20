@@ -42,7 +42,9 @@ extension HtmlElementViewImpl on HtmlElementView {
     final FlutterView flutterView = View.of(context);
     return PlatformViewLink(
       viewType: viewType,
-      onCreatePlatformView: (PlatformViewCreationParams params) => _createController(params, flutterView.viewId),
+      onCreatePlatformView: (PlatformViewCreationParams params) {
+        return _createController(params, flutterView.viewId);
+      },
       surfaceFactory: (BuildContext context, PlatformViewController controller) {
         return PlatformViewSurface(
           controller: controller,
@@ -93,6 +95,8 @@ class _HtmlElementViewController extends PlatformViewController {
 
   @override
   int get viewId => platformViewId;
+
+  /// The unique identifier for the platform view.
   final int platformViewId;
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
@@ -108,7 +112,7 @@ class _HtmlElementViewController extends PlatformViewController {
   bool _initialized = false;
 
   Future<void> _initialize() async {
-    final Map<String, dynamic> args = <String, dynamic>{
+    final Map<String, Object?> args = <String, Object?>{
       'platformViewId': platformViewId,
       'platformViewType': platformViewType,
       'params': creationParams,
@@ -133,8 +137,8 @@ class _HtmlElementViewController extends PlatformViewController {
   @override
   Future<void> dispose() async {
     if (_initialized) {
-      final Map<String, dynamic> args = <String, dynamic>{
-        'platformViewId': viewId,
+      final Map<String, Object?> args = <String, Object?>{
+        'platformViewId': platformViewId,
         'viewId': flutterViewId,
       };
       await SystemChannels.platform_views.invokeMethod<void>('dispose', args);
