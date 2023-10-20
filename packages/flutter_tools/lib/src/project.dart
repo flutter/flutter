@@ -329,7 +329,10 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
-  Future<void> regeneratePlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
+  Future<void> regeneratePlatformSpecificTooling({
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    Iterable<String>? allowedPlugins,
+  }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
@@ -340,6 +343,7 @@ class FlutterProject {
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
+      allowedPlugins: allowedPlugins,
     );
   }
 
@@ -353,6 +357,7 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    Iterable<String>? allowedPlugins,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
@@ -383,6 +388,7 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
+      allowedPlugins: allowedPlugins,
     );
   }
 

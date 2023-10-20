@@ -920,8 +920,24 @@ List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, P
 }
 
 @visibleForTesting
-Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
+Future<void> writeWindowsPluginFiles(
+  FlutterProject project,
+  List<Plugin> plugins,
+  TemplateRenderer templateRenderer, {
+  Iterable<String>? allowedPlugins,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, WindowsPlugin.kConfigKey);
+  if (allowedPlugins != null) {
+    final List<Plugin> disallowedPlugins = methodChannelPlugins
+        .toList()
+        ..removeWhere((Plugin plugin) => allowedPlugins.contains(plugin.name));
+    if (disallowedPlugins.isNotEmpty) {
+      throwToolExit(
+        'The Flutter Preview device does not support plugins with method channels: '
+        '${disallowedPlugins.map((Plugin p) => p.name).toList()}',
+      );
+    }
+  }
   final List<Plugin> win32Plugins = _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.win32);
   final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
   final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
@@ -932,6 +948,12 @@ Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugin
     'ffiPlugins': windowsFfiPlugins,
     'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windows),
   };
+  print('all plugins: ${plugins.map((Plugin p) => p.name).toList()}');
+  print('methodChannelPlugins: ${methodChannelPlugins.map((Plugin p) => p.name).toList()}');
+  print('win32plugins: ${win32Plugins.map((Plugin p) => p.name).toList()}');
+  print('ffiPlugins: ${ffiPlugins.map((Plugin p) => p.name).toList()}');
+  print('windowsFfiPlugins: ${windowsFfiPlugins.map((Map<String, Object?> map) => map.keys).toList()}');
+  throwToolExit('foo');
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context, templateRenderer);
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context, templateRenderer);
 }
@@ -1156,6 +1178,7 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
+  Iterable<String>? allowedPlugins,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1173,7 +1196,7 @@ Future<void> injectPlugins(
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (windowsPlatform) {
-    await writeWindowsPluginFiles(project, plugins, globals.templateRenderer);
+    await writeWindowsPluginFiles(project, plugins, globals.templateRenderer, allowedPlugins: allowedPlugins);
   }
   if (!project.isModule) {
     final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[
