@@ -44,8 +44,21 @@ class App extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => HomePageState();
+}
+
+class HomePageState extends State<HomePage> {
+  final ScrollController scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 
   Widget _buildUseCaseItem(int index, UseCase useCase) {
     return Padding(
@@ -69,6 +82,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(title: const Text('Accessibility Assessments')),
       body: Center(
         child: ListView(
+          controller: scrollController,
           children: List<Widget>.generate(
             useCases.length,
             (int index) => _buildUseCaseItem(index, useCases[index]),
