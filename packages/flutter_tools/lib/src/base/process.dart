@@ -623,6 +623,9 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
 
   final Completer<void> completer = Completer<void>();
 
+  // Allow any pending analytics events to send and close the http connection
+  globals.analytics.close();
+
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
     try {
