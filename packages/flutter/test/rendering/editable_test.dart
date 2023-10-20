@@ -1632,7 +1632,14 @@ void main() {
         children: renderBoxes,
       );
       _applyParentData(renderBoxes, editable.text!);
+      // Intrinsics can be computed without doing layout.
+      expect(editable.computeMaxIntrinsicWidth(fixedHeight),
+        2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
+        reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
+      );
+
       layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
+      // Intrinsics can be computed after layout.
       expect(editable.computeMaxIntrinsicWidth(fixedHeight),
         2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
         reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
