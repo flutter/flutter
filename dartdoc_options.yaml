@@ -34,7 +34,7 @@ dartdoc:
     - not-implemented
     - orphaned-file
     - reexported-private-api-across-packages
-    # - unknown-directive  # Disabled due to https://github.com/dart-lang/dartdoc/issues/2353
+    - unknown-directive
     - unknown-file
     - unknown-macro
     - unresolved-doc-reference
