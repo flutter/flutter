@@ -28,9 +28,9 @@ import 'semantics.dart';
 ///
 ///   * https://developer.mozilla.org/en-US/docs/Web/Accessibility/Keyboard-navigable_JavaScript_widgets
 class Focusable extends RoleManager {
-  Focusable(SemanticsObject semanticsObject)
+  Focusable(SemanticsObject semanticsObject, PrimaryRoleManager owner)
       : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
-        super(Role.focusable, semanticsObject);
+        super(Role.focusable, semanticsObject, owner);
 
   final AccessibilityFocusManager _focusManager;
 
@@ -38,7 +38,7 @@ class Focusable extends RoleManager {
   void update() {
     if (semanticsObject.isFocusable) {
       if (!_focusManager.isManaging) {
-        _focusManager.manage(semanticsObject.id, semanticsObject.element);
+        _focusManager.manage(semanticsObject.id, owner.element);
       }
       _focusManager.changeFocus(semanticsObject.hasFocus && (!semanticsObject.hasEnabledState || semanticsObject.isEnabled));
     } else {

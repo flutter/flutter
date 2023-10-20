@@ -15,8 +15,8 @@ import 'semantics.dart';
 /// label of the element. See [LabelAndValue]. If there is no label provided
 /// no content will be read.
 class LiveRegion extends RoleManager {
-  LiveRegion(SemanticsObject semanticsObject)
-      : super(Role.liveRegion, semanticsObject);
+  LiveRegion(SemanticsObject semanticsObject, PrimaryRoleManager owner)
+      : super(Role.liveRegion, semanticsObject, owner);
 
   String? _lastAnnouncement;
 

@@ -30,7 +30,7 @@ class Scrollable extends PrimaryRoleManager {
       ..transformOrigin = '0 0 0'
       // Ignore pointer events since this is a dummy element.
       ..pointerEvents = 'none';
-    semanticsObject.element.append(_scrollOverflowElement);
+    append(_scrollOverflowElement);
   }
 
   /// Disables browser-driven scrolling in the presence of pointer events.
@@ -112,7 +112,7 @@ class Scrollable extends PrimaryRoleManager {
       // This is effective only in Chrome. Safari does not implement this
       // CSS property. In Safari the `PointerBinding` uses `preventDefault`
       // to prevent browser scrolling.
-      semanticsObject.element.style.touchAction = 'none';
+      element.style.touchAction = 'none';
       _gestureModeDidChange();
 
       // Memoize the tear-off because Dart does not guarantee that two
@@ -126,17 +126,17 @@ class Scrollable extends PrimaryRoleManager {
       _scrollListener = createDomEventListener((_) {
         _recomputeScrollPosition();
       });
-      semanticsObject.element.addEventListener('scroll', _scrollListener);
+      addEventListener('scroll', _scrollListener);
     }
   }
 
   /// The value of "scrollTop" or "scrollLeft", depending on the scroll axis.
   int get _domScrollPosition {
     if (semanticsObject.isVerticalScrollContainer) {
-      return semanticsObject.element.scrollTop.toInt();
+      return element.scrollTop.toInt();
     } else {
       assert(semanticsObject.isHorizontalScrollContainer);
-      return semanticsObject.element.scrollLeft.toInt();
+      return element.scrollLeft.toInt();
     }
   }
 
@@ -153,7 +153,6 @@ class Scrollable extends PrimaryRoleManager {
   void _neutralizeDomScrollPosition() {
     // This value is arbitrary.
     const int canonicalNeutralScrollPosition = 10;
-    final DomElement element = semanticsObject.element;
     final ui.Rect? rect = semanticsObject.rect;
     if (rect == null) {
       printWarning('Warning! the rect attribute of semanticsObject is null');
@@ -197,7 +196,6 @@ class Scrollable extends PrimaryRoleManager {
   }
 
   void _gestureModeDidChange() {
-    final DomElement element = semanticsObject.element;
     switch (semanticsObject.owner.gestureMode) {
       case GestureMode.browserGestures:
         // overflow:scroll will cause the browser report "scroll" events when
@@ -227,13 +225,13 @@ class Scrollable extends PrimaryRoleManager {
   @override
   void dispose() {
     super.dispose();
-    final DomCSSStyleDeclaration style = semanticsObject.element.style;
+    final DomCSSStyleDeclaration style = element.style;
     assert(_gestureModeListener != null);
     style.removeProperty('overflowY');
     style.removeProperty('overflowX');
     style.removeProperty('touch-action');
     if (_scrollListener != null) {
-      semanticsObject.element.removeEventListener('scroll', _scrollListener);
+      removeEventListener('scroll', _scrollListener);
     }
     semanticsObject.owner.removeGestureModeListener(_gestureModeListener);
     _gestureModeListener = null;

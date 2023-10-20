@@ -49,14 +49,14 @@ class ImageRoleManager extends PrimaryRoleManager {
             ..height = '${semanticsObject.rect!.height}px';
         }
         _auxiliaryImageElement!.style.fontSize = '6px';
-        semanticsObject.element.append(_auxiliaryImageElement!);
+        append(_auxiliaryImageElement!);
       }
 
       _auxiliaryImageElement!.setAttribute('role', 'img');
       _setLabel(_auxiliaryImageElement);
     } else if (semanticsObject.isVisualOnly) {
-      semanticsObject.setAriaRole('img');
-      _setLabel(semanticsObject.element);
+      setAriaRole('img');
+      _setLabel(element);
       _cleanUpAuxiliaryElement();
     } else {
       _cleanUpAuxiliaryElement();
@@ -78,7 +78,7 @@ class ImageRoleManager extends PrimaryRoleManager {
   }
 
   void _cleanupElement() {
-    semanticsObject.element.removeAttribute('aria-label');
+    removeAttribute('aria-label');
   }
 
   @override

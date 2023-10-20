@@ -29,7 +29,7 @@ class Incrementable extends PrimaryRoleManager {
     addRouteName();
     addLabelAndValue();
 
-    semanticsObject.element.append(_element);
+    append(_element);
     _element.type = 'range';
     _element.setAttribute('role', 'slider');
 

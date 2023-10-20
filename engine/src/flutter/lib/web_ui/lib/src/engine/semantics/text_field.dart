@@ -275,7 +275,7 @@ class TextField extends PrimaryRoleManager {
       ..left = '0'
       ..width = '${semanticsObject.rect!.width}px'
       ..height = '${semanticsObject.rect!.height}px';
-    semanticsObject.element.append(activeEditableElement);
+    append(activeEditableElement);
   }
 
   void _setupDomElement() {
@@ -336,22 +336,21 @@ class TextField extends PrimaryRoleManager {
       return;
     }
 
-    semanticsObject.element
-      ..setAttribute('role', 'textbox')
-      ..setAttribute('contenteditable', 'false')
-      ..setAttribute('tabindex', '0');
+    setAttribute('role', 'textbox');
+    setAttribute('contenteditable', 'false');
+    setAttribute('tabindex', '0');
 
     num? lastPointerDownOffsetX;
     num? lastPointerDownOffsetY;
 
-    semanticsObject.element.addEventListener('pointerdown',
+    addEventListener('pointerdown',
         createDomEventListener((DomEvent event) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
           lastPointerDownOffsetX = pointerEvent.clientX;
           lastPointerDownOffsetY = pointerEvent.clientY;
         }), true);
 
-    semanticsObject.element.addEventListener('pointerup',
+    addEventListener('pointerup',
         createDomEventListener((DomEvent event) {
       final DomPointerEvent pointerEvent = event as DomPointerEvent;
 
@@ -399,17 +398,17 @@ class TextField extends PrimaryRoleManager {
     // represent the same text field. It will confuse VoiceOver, so `role` needs to
     // be assigned and removed, based on whether or not editableElement exists.
     activeEditableElement.focus();
-    semanticsObject.element.removeAttribute('role');
+    removeAttribute('role');
 
     activeEditableElement.addEventListener('blur',
         createDomEventListener((DomEvent event) {
-      semanticsObject.element.setAttribute('role', 'textbox');
+      setAttribute('role', 'textbox');
       activeEditableElement.remove();
       SemanticsTextEditingStrategy._instance?.deactivate(this);
 
       // Focus on semantics element before removing the editable element, so that
       // the user can continue navigating the page with the assistive technology.
-      semanticsObject.element.focus();
+      element.focus();
       editableElement = null;
     }));
   }
@@ -447,7 +446,7 @@ class TextField extends PrimaryRoleManager {
       }
     }
 
-    final DomElement element = editableElement ?? semanticsObject.element;
+    final DomElement element = editableElement ?? this.element;
     if (semanticsObject.hasLabel) {
       element.setAttribute(
         'aria-label',

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../dom.dart';
 import 'semantics.dart';
 
 /// Renders [SemanticsObject.label] and/or [SemanticsObject.value] to the semantics DOM.
@@ -26,8 +25,8 @@ import 'semantics.dart';
 /// This role manager does not manage images and text fields. See
 /// [ImageRoleManager] and [TextField].
 class LabelAndValue extends RoleManager {
-  LabelAndValue(SemanticsObject semanticsObject)
-      : super(Role.labelAndValue, semanticsObject);
+  LabelAndValue(SemanticsObject semanticsObject, PrimaryRoleManager owner)
+      : super(Role.labelAndValue, semanticsObject, owner);
 
   @override
   void update() {
@@ -62,12 +61,11 @@ class LabelAndValue extends RoleManager {
       combinedValue.write(semanticsObject.value);
     }
 
-    semanticsObject.element
-        .setAttribute('aria-label', combinedValue.toString());
+    owner.setAttribute('aria-label', combinedValue.toString());
   }
 
   void _cleanUpDom() {
-    semanticsObject.element.removeAttribute('aria-label');
+    owner.removeAttribute('aria-label');
   }
 
   @override
