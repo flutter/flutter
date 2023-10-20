@@ -61,7 +61,6 @@ FlutterViewController* CreateTestViewController() {
 TEST(AccessibilityBridgeMacTest, SendsAccessibilityCreateNotificationToWindowOfFlutterView) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
-  [viewController loadView];
 
   NSWindow* expectedTarget = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                          styleMask:NSBorderlessWindowMask
@@ -122,7 +121,6 @@ TEST(AccessibilityBridgeMacTest, SendsAccessibilityCreateNotificationToWindowOfF
 TEST(AccessibilityBridgeMacTest, NonZeroRootNodeId) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
-  [viewController loadView];
 
   NSWindow* expectedTarget = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                          styleMask:NSBorderlessWindowMask
@@ -192,7 +190,7 @@ TEST(AccessibilityBridgeMacTest, NonZeroRootNodeId) {
 TEST(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhenHeadless) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
-  [viewController loadView];
+
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
   engine.semanticsEnabled = YES;
@@ -238,7 +236,6 @@ TEST(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhenH
 TEST(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhenNoWindow) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
-  [viewController loadView];
 
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
