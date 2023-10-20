@@ -4,10 +4,13 @@
 
 #pragma once
 
+#include <thread>
+#include <unordered_map>
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/gles/allocator_gles.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
+#include "impeller/renderer/backend/gles/gpu_tracer_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_library_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/sampler_library_gles.h"
@@ -23,7 +26,8 @@ class ContextGLES final : public Context,
  public:
   static std::shared_ptr<ContextGLES> Create(
       std::unique_ptr<ProcTableGLES> gl,
-      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries);
+      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
+      bool enable_gpu_tracing);
 
   // |Context|
   ~ContextGLES() override;
@@ -38,12 +42,16 @@ class ContextGLES final : public Context,
 
   bool RemoveReactorWorker(ReactorGLES::WorkerID id);
 
+  std::shared_ptr<GPUTracerGLES> GetGPUTracer() const { return gpu_tracer_; }
+
  private:
   ReactorGLES::Ref reactor_;
   std::shared_ptr<ShaderLibraryGLES> shader_library_;
   std::shared_ptr<PipelineLibraryGLES> pipeline_library_;
   std::shared_ptr<SamplerLibraryGLES> sampler_library_;
   std::shared_ptr<AllocatorGLES> resource_allocator_;
+  std::shared_ptr<GPUTracerGLES> gpu_tracer_;
+
   // Note: This is stored separately from the ProcTableGLES CapabilitiesGLES
   // in order to satisfy the Context::GetCapabilities signature which returns
   // a reference.
@@ -52,7 +60,8 @@ class ContextGLES final : public Context,
 
   ContextGLES(
       std::unique_ptr<ProcTableGLES> gl,
-      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries);
+      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
+      bool enable_gpu_tracing);
 
   // |Context|
   std::string DescribeGpuModel() const override;

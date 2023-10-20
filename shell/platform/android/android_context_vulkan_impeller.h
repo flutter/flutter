@@ -14,7 +14,7 @@ namespace flutter {
 
 class AndroidContextVulkanImpeller : public AndroidContext {
  public:
-  AndroidContextVulkanImpeller(bool enable_validation);
+  explicit AndroidContextVulkanImpeller(bool enable_validation);
 
   ~AndroidContextVulkanImpeller();
 
