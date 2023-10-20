@@ -5771,6 +5771,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textHeightBehavior,
     this.selectionRegistrar,
     this.selectionColor,
+    this.isInlineWidget,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
        assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
@@ -5872,10 +5873,20 @@ class RichText extends MultiChildRenderObjectWidget {
   /// widgets.
   final Color? selectionColor;
 
+  /// {@template flutter.widgets.RichText.isInlineWidget}
+  /// Whether this widget is placed in the middle of an [InlineSpan] tree.
+  ///
+  /// This is ignored if [selectionRegistrar] is null.
+  ///
+  /// This is used by the underlying [RenderParagraph].
+  /// {@endtemplate}
+  final bool? isInlineWidget;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
-    return RenderParagraph(text,
+    return RenderParagraph(
+      text,
       textAlign: textAlign,
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
@@ -5888,6 +5899,7 @@ class RichText extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
+      isInlineWidget: isInlineWidget,
     );
   }
 
@@ -5907,7 +5919,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textHeightBehavior = textHeightBehavior
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
-      ..selectionColor = selectionColor;
+      ..selectionColor = selectionColor
+      ..isInlineWidget = isInlineWidget;
   }
 
   @override

@@ -438,6 +438,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.isInlineWidget,
   }) : textSpan = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -474,6 +475,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.isInlineWidget,
   }) : data = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -604,6 +606,9 @@ class Text extends StatelessWidget {
   /// (semi-transparent grey).
   final Color? selectionColor;
 
+  /// {@macro flutter.widgets.RichText.isInlineWidget}
+  final bool? isInlineWidget;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -635,6 +640,7 @@ class Text extends StatelessWidget {
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       selectionRegistrar: registrar,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+      isInlineWidget: isInlineWidget,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

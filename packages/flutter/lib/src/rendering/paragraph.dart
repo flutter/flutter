@@ -277,6 +277,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
+    bool? isInlineWidget,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -286,6 +287,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
        _softWrap = softWrap,
        _overflow = overflow,
        _selectionColor = selectionColor,
+       _isInlineWidget = isInlineWidget,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -419,6 +421,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
             range: TextRange(start: start, end: end),
             fullText: plainText,
             isFollowedByInlineElement: currentFragmentFollowedByInlineElement,
+            isInlineWidget: isInlineWidget,
           ),
         );
         start = end;
@@ -628,6 +631,19 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
       markNeedsPaint();
     }
+  }
+
+  /// Whether this [RenderParagraph] is an inline widget inside of an [InlineSpan]
+  /// tree.
+  ///
+  /// Ignored if the text is not selectable (e.g. if [registrar] is null).
+  bool? get isInlineWidget => _isInlineWidget;
+  bool? _isInlineWidget;
+  set isInlineWidget(bool? value) {
+    if (_isInlineWidget == value) {
+      return;
+    }
+    _isInlineWidget = value;
   }
 
   Offset _getOffsetForPosition(TextPosition position) {
@@ -1331,17 +1347,20 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.fullText,
     required this.range,
     required this.isFollowedByInlineElement,
-  }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
-    if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
-    }
-    _selectionGeometry = _getSelectionGeometry();
-  }
+    bool? isInlineWidget,
+  }) : isInlineWidget = isInlineWidget ?? false,
+       assert(range.isValid && !range.isCollapsed && range.isNormalized) {
+         if (kFlutterMemoryAllocationsEnabled) {
+           ChangeNotifier.maybeDispatchObjectCreation(this);
+         }
+         _selectionGeometry = _getSelectionGeometry();
+       }
 
   final TextRange range;
   final RenderParagraph paragraph;
   final String fullText;
   final bool isFollowedByInlineElement;
+  final bool isInlineWidget;
 
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
@@ -1738,7 +1757,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
-    if (!_rect.contains(localPosition)) {
+    if (!_rect.contains(localPosition) && (isFollowedByInlineElement || isInlineWidget)) {
       // Open question: Should we always do this or only when the fragment is followed
       // by an inline element. If so we would need to add some flag to `Text` widget
       // to control this. `Text.rich`/`RichText` does not need this flag since the
