@@ -249,5 +249,7 @@ DomElement _defaultFactory(
 }) {
   params!;
   params as Map<Object?, Object?>;
-  return domDocument.createElement(params.readString('tagName'));
+  return domDocument.createElement(params.readString('tagName'))
+    ..style.width = '100%'
+    ..style.height = '100%';
 }
