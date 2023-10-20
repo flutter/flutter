@@ -51,13 +51,14 @@ void testMain() {
 
       test('forgets viewIds after clearing them', () {
         contentManager.registerFactory(viewType, (int id) => createDomHTMLDivElement());
-        contentManager.renderContent(viewType, viewId, null);
+        final DomElement view = contentManager.renderContent(viewType, viewId, null);
 
         expect(contentManager.knowsViewId(viewId), isTrue);
 
         contentManager.clearPlatformView(viewId);
 
         expect(contentManager.knowsViewId(viewId), isFalse);
+        expect(view.parentNode, isNull);
       });
     });
 
