@@ -92,6 +92,9 @@ void runSemanticsTests() {
   group('focusable', () {
     _testFocusable();
   });
+  group('link', () {
+    _testLink();
+  });
 }
 
 void _testRoleManagerLifecycle() {
@@ -337,7 +340,11 @@ void _testEngineSemanticsOwner() {
     expect(placeholder.isConnected, isFalse);
   });
 
-  void renderSemantics({String? label, String? tooltip}) {
+  void renderSemantics({String? label, String? tooltip, Set<ui.SemanticsFlag> flags = const <ui.SemanticsFlag>{}}) {
+    int flagValues = 0;
+    for (final ui.SemanticsFlag flag in flags) {
+      flagValues = flagValues | flag.index;
+    }
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
@@ -351,6 +358,7 @@ void _testEngineSemanticsOwner() {
       id: 1,
       label: label ?? '',
       tooltip: tooltip ?? '',
+      flags: flagValues,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
     );
@@ -400,6 +408,45 @@ void _testEngineSemanticsOwner() {
     <sem></sem>
   </sem-c>
 </sem>''');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('can switch role', () async {
+    semantics().semanticsEnabled = true;
+
+    // Create
+    renderSemantics(label: 'Hello');
+
+    Map<int, SemanticsObject> tree = semantics().debugSemanticsTree!;
+    expect(tree.length, 2);
+    expect(tree[1]!.element.tagName.toLowerCase(), 'flt-semantics');
+    expect(tree[1]!.id, 1);
+    expect(tree[1]!.label, 'Hello');
+    final DomElement existingParent = tree[1]!.element.parent!;
+
+    expectSemanticsTree('''
+<sem style="$rootSemanticStyle">
+  <sem-c>
+    <sem aria-label="Hello"></sem>
+  </sem-c>
+</sem>''');
+
+    // Update
+    renderSemantics(label: 'Hello', flags: <ui.SemanticsFlag>{ ui.SemanticsFlag.isLink });
+
+    tree = semantics().debugSemanticsTree!;
+    expect(tree.length, 2);
+    expect(tree[1]!.id, 1);
+    expect(tree[1]!.label, 'Hello');
+    expect(tree[1]!.element.tagName.toLowerCase(), 'a');
+    expectSemanticsTree('''
+<sem style="$rootSemanticStyle">
+  <sem-c>
+    <a aria-label="Hello" role="button" style="display: block;"></a>
+  </sem-c>
+</sem>''');
+    expect(existingParent, tree[1]!.element.parent);
 
     semantics().semanticsEnabled = false;
   });
@@ -2889,6 +2936,28 @@ void _testFocusable() {
     expect(domDocument.activeElement, element);
 
     semantics().semanticsEnabled = false;
+  });
+}
+
+void _testLink() {
+  test('nodes with link: true creates anchor tag', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(semantics());
+      tester.updateNode(
+        id: 0,
+        isLink: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.element.tagName.toLowerCase(), 'a');
   });
 }
 

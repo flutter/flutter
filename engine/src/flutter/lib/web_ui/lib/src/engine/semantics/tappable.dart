@@ -11,7 +11,7 @@ import 'semantics.dart';
 /// Sets the "button" ARIA role.
 class Button extends PrimaryRoleManager {
   Button(SemanticsObject semanticsObject) : super.withBasics(PrimaryRole.button, semanticsObject) {
-    semanticsObject.setAriaRole('button');
+    setAriaRole('button');
   }
 
   @override
@@ -19,9 +19,9 @@ class Button extends PrimaryRoleManager {
     super.update();
 
     if (semanticsObject.enabledState() == EnabledState.disabled) {
-      semanticsObject.element.setAttribute('aria-disabled', 'true');
+      setAttribute('aria-disabled', 'true');
     } else {
-      semanticsObject.element.removeAttribute('aria-disabled');
+      removeAttribute('aria-disabled');
     }
   }
 }
@@ -33,26 +33,28 @@ class Button extends PrimaryRoleManager {
 /// the browser may not send us pointer events. In that mode we forward HTML
 /// click as [ui.SemanticsAction.tap].
 class Tappable extends RoleManager {
-  Tappable(SemanticsObject semanticsObject)
-      : super(Role.tappable, semanticsObject);
+  Tappable(SemanticsObject semanticsObject, PrimaryRoleManager owner)
+      : super(Role.tappable, semanticsObject, owner);
 
   DomEventListener? _clickListener;
 
   @override
   void update() {
-    if (!semanticsObject.isTappable || semanticsObject.enabledState() == EnabledState.disabled) {
-      _stopListening();
-    } else {
-      if (_clickListener == null) {
-        _clickListener = createDomEventListener((DomEvent event) {
-          if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
-            return;
-          }
-          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-              semanticsObject.id, ui.SemanticsAction.tap, null);
-        });
-        semanticsObject.element.addEventListener('click', _clickListener);
-      }
+    if (_clickListener == null) {
+      _clickListener = createDomEventListener((DomEvent event) {
+        // Stop dom from reacting since it will be handled entirely on the
+        // flutter side.
+        event.preventDefault();
+        if (!semanticsObject.isTappable || semanticsObject.enabledState() == EnabledState.disabled) {
+          return;
+        }
+        if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
+          return;
+        }
+        EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+            semanticsObject.id, ui.SemanticsAction.tap, null);
+      });
+      owner.addEventListener('click', _clickListener);
     }
   }
 
@@ -61,7 +63,7 @@ class Tappable extends RoleManager {
       return;
     }
 
-    semanticsObject.element.removeEventListener('click', _clickListener);
+    owner.removeEventListener('click', _clickListener);
     _clickListener = null;
   }
 
