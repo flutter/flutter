@@ -53,7 +53,8 @@ enum SelectionResult {
   /// [SelectAllSelectionEvent], [ClearSelectionEvent], and
   /// [SelectWordSelectionEvent].
   none,
-  /// TODO(Renzo-Olivares): Document.
+  /// The selection may begin in this [Selectable], further selection should
+  /// continue to next [Selectable] in screen order.
   forward,
 }
 
