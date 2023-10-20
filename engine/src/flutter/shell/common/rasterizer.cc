@@ -254,6 +254,7 @@ DrawStatus Rasterizer::Draw(const std::shared_ptr<FramePipeline>& pipeline) {
 
   bool should_resubmit_frame = ShouldResubmitFrame(draw_result);
   if (should_resubmit_frame) {
+    FML_CHECK(draw_result.resubmitted_item);
     auto front_continuation = pipeline->ProduceIfEmpty();
     PipelineProduceResult pipeline_result =
         front_continuation.Complete(std::move(draw_result.resubmitted_item));

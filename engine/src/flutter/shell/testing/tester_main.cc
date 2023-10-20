@@ -49,17 +49,16 @@
 
 static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
   return {
-    std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
-                                           impeller_entity_shaders_vk_length),
-        std::make_shared<fml::NonOwnedMapping>(
-            impeller_modern_shaders_vk_data, impeller_modern_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
+                                             impeller_entity_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_vk_data,
+                                             impeller_modern_shaders_vk_length),
 #if IMPELLER_ENABLE_3D
-        std::make_shared<fml::NonOwnedMapping>(
-            impeller_scene_shaders_vk_data, impeller_scene_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_vk_data,
+                                             impeller_scene_shaders_vk_length),
 #endif  // IMPELLER_ENABLE_3D
-        std::make_shared<fml::NonOwnedMapping>(
-            impeller_compute_shaders_vk_data,
-            impeller_compute_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_compute_shaders_vk_data, impeller_compute_shaders_vk_length),
   };
 }
 
