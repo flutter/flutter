@@ -21,6 +21,9 @@ ui.VoidCallback? scheduleFrameCallback;
 typedef HighContrastListener = void Function(bool enabled);
 typedef _KeyDataResponseCallback = void Function(bool handled);
 
+const StandardMethodCodec standardCodec = StandardMethodCodec();
+const JSONMethodCodec jsonCodec = JSONMethodCodec();
+
 /// Determines if high contrast is enabled using media query 'forced-colors: active' for Windows
 class HighContrastSupport {
   static HighContrastSupport instance = HighContrastSupport();
@@ -129,13 +132,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// The current list of windows.
   @override
-  Iterable<ui.FlutterView> get views => viewData.values;
-  final Map<int, ui.FlutterView> viewData = <int, ui.FlutterView>{};
+  Iterable<EngineFlutterView> get views => viewData.values;
+  final Map<int, EngineFlutterView> viewData = <int, EngineFlutterView>{};
 
   /// Returns the [FlutterView] with the provided ID if one exists, or null
   /// otherwise.
   @override
-  ui.FlutterView? view({required int id}) => viewData[id];
+  EngineFlutterView? view({required int id}) => viewData[id];
 
   /// A map of opaque platform window identifiers to window configurations.
   ///
@@ -470,8 +473,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       /// This should be in sync with shell/common/shell.cc
       case 'flutter/skia':
-        const MethodCodec codec = JSONMethodCodec();
-        final MethodCall decoded = codec.decodeMethodCall(data);
+        final MethodCall decoded = jsonCodec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'Skia.setResourceCacheMaxBytes':
             if (renderer is CanvasKitRenderer) {
@@ -486,7 +488,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             // Also respond in HTML mode. Otherwise, apps would have to detect
             // CanvasKit vs HTML before invoking this method.
             replyToPlatformMessage(
-                callback, codec.encodeSuccessEnvelope(<bool>[true]));
+                callback, jsonCodec.encodeSuccessEnvelope(<bool>[true]));
         }
         return;
 
@@ -496,8 +498,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         return;
 
       case 'flutter/platform':
-        const MethodCodec codec = JSONMethodCodec();
-        final MethodCall decoded = codec.decodeMethodCall(data);
+        final MethodCall decoded = jsonCodec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'SystemNavigator.pop':
             // TODO(a-wallen): As multi-window support expands, the pop call
@@ -505,13 +506,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             // supported.
             implicitView!.browserHistory.exit().then((_) {
               replyToPlatformMessage(
-                  callback, codec.encodeSuccessEnvelope(true));
+                  callback, jsonCodec.encodeSuccessEnvelope(true));
             });
             return;
           case 'HapticFeedback.vibrate':
             final String? type = decoded.arguments as String?;
             vibrate(_getHapticFeedbackDuration(type));
-            replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setApplicationSwitcherDescription':
             final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
@@ -520,24 +521,24 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             final int primaryColor = arguments['primaryColor'] as int? ?? 0xFF000000;
             domDocument.title = label;
             setThemeColor(ui.Color(primaryColor));
-            replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setSystemUIOverlayStyle':
             final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
             final int? statusBarColor = arguments['statusBarColor'] as int?;
             setThemeColor(statusBarColor == null ? null : ui.Color(statusBarColor));
-            replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setPreferredOrientations':
             final List<dynamic> arguments = decoded.arguments as List<dynamic>;
             ScreenOrientation.instance.setPreferredOrientation(arguments).then((bool success) {
               replyToPlatformMessage(
-                  callback, codec.encodeSuccessEnvelope(success));
+                  callback, jsonCodec.encodeSuccessEnvelope(success));
             });
             return;
           case 'SystemSound.play':
             // There are no default system sounds on web.
-            replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
             ClipboardMessageHandler().setDataMethodCall(decoded, callback);
@@ -560,23 +561,21 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         return;
 
       case 'flutter/contextmenu':
-        const MethodCodec codec = JSONMethodCodec();
-        final MethodCall decoded = codec.decodeMethodCall(data);
+        final MethodCall decoded = jsonCodec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'enableContextMenu':
             implicitView!.contextMenu.enable();
-            replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'disableContextMenu':
             implicitView!.contextMenu.disable();
-            replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
         }
         return;
 
       case 'flutter/mousecursor':
-        const MethodCodec codec = StandardMethodCodec();
-        final MethodCall decoded = codec.decodeMethodCall(data);
+        final MethodCall decoded = standardCodec.decodeMethodCall(data);
         final Map<dynamic, dynamic> arguments = decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
@@ -585,15 +584,21 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         return;
 
       case 'flutter/web_test_e2e':
-        const MethodCodec codec = JSONMethodCodec();
         replyToPlatformMessage(
             callback,
-            codec.encodeSuccessEnvelope(
-                _handleWebTestEnd2EndMessage(codec, data)));
+            jsonCodec.encodeSuccessEnvelope(
+                _handleWebTestEnd2EndMessage(jsonCodec, data)));
         return;
 
       case 'flutter/platform_views':
-        implicitView!.platformViewMessageHandler.handlePlatformViewCall(data, callback!);
+        final MethodCall(:String method, :dynamic arguments) = standardCodec.decodeMethodCall(data);
+        final int? flutterViewId = tryViewId(arguments);
+        if (flutterViewId == null) {
+          implicitView!.platformViewMessageHandler.handleLegacyPlatformViewCall(method, arguments, callback!);
+          return;
+        }
+        arguments as Map<dynamic, dynamic>;
+        viewData[flutterViewId]!.platformViewMessageHandler.handlePlatformViewCall(method, arguments, callback!);
         return;
 
       case 'flutter/accessibility':
@@ -609,8 +614,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         // supported.
         implicitView!.handleNavigationMessage(data).then((bool handled) {
           if (handled) {
-            const MethodCodec codec = JSONMethodCodec();
-            replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
           } else {
             callback?.call(null);
           }
@@ -1350,7 +1354,7 @@ class ViewConfiguration {
   });
 
   ViewConfiguration copyWith({
-    ui.FlutterView? view,
+    EngineFlutterView? view,
     double? devicePixelRatio,
     ui.Rect? geometry,
     bool? visible,
@@ -1375,7 +1379,7 @@ class ViewConfiguration {
     );
   }
 
-  final ui.FlutterView? view;
+  final EngineFlutterView? view;
   final double devicePixelRatio;
   final ui.Rect geometry;
   final bool visible;
