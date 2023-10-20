@@ -5,13 +5,14 @@
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/util.dart' show setElementStyle;
 
+import '../hot_restart_cache_handler.dart' show registerElementForCleanup;
 import 'embedding_strategy.dart';
 
 /// An [EmbeddingStrategy] that takes over the whole web page.
 ///
 /// This strategy takes over the <body> element, modifies the viewport meta-tag,
 /// and ensures that the root Flutter view covers the whole screen.
-class FullPageEmbeddingStrategy extends EmbeddingStrategy {
+class FullPageEmbeddingStrategy implements EmbeddingStrategy {
   @override
   void initialize({
     Map<String, String>? hostElementAttributes,

@@ -3591,3 +3591,10 @@ extension DomFinalizationRegistryExtension on DomFinalizationRegistry {
 /// Whether the current browser supports `FinalizationRegistry`.
 bool browserSupportsFinalizationRegistry =
     _finalizationRegistryConstructor != null;
+
+@JS()
+@staticInterop
+extension JSArrayExtension on JSArray {
+  external void push(JSAny value);
+  external JSNumber get length;
+}

@@ -11,7 +11,6 @@ import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/custom_element_embedding_strategy.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/embedding_strategy.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/full_page_embedding_strategy.dart';
-import 'package:ui/src/engine/view_embedder/hot_restart_cache_handler.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => doTests);
@@ -33,26 +32,6 @@ void doTests() {
       );
 
       expect(strategy, isA<CustomElementEmbeddingStrategy>());
-    });
-  });
-
-  group('registerElementForCleanup', () {
-    test('stores elements in a global domCache', () async {
-      final EmbeddingStrategy strategy = EmbeddingStrategy.create();
-
-      final DomElement toBeCached = createDomElement('some-element-to-cache');
-      final DomElement other = createDomElement('other-element-to-cache');
-      final DomElement another = createDomElement('another-element-to-cache');
-
-      strategy.registerElementForCleanup(toBeCached);
-      strategy.registerElementForCleanup(other);
-      strategy.registerElementForCleanup(another);
-
-      final List<Object?> cache = hotRestartStore!;
-
-      expect(cache, hasLength(3));
-      expect(cache.first, toBeCached);
-      expect(cache.last, another);
     });
   });
 }

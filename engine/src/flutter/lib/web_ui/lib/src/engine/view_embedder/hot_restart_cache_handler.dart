@@ -4,6 +4,7 @@
 
 import 'dart:js_interop';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 
 import '../dom.dart';
@@ -12,59 +13,61 @@ import '../dom.dart';
 /// to clear.  Delay removal of old visible state to make the
 /// transition appear smooth.
 @JS('window.__flutterState')
-external JSArray? get _hotRestartStore;
-List<Object?>? get hotRestartStore =>
-    _hotRestartStore?.toObjectShallow as List<Object?>?;
+external JSArray? get _jsHotRestartStore;
 
 @JS('window.__flutterState')
-external set _hotRestartStore(JSArray? nodes);
-set hotRestartStore(List<Object?>? nodes) =>
-    _hotRestartStore = nodes?.toJSAnyShallow as JSArray?;
+external set _jsHotRestartStore(JSArray? nodes);
 
 /// Handles [DomElement]s that need to be removed after a hot-restart.
 ///
-/// Elements are stored in an [_elements] list, backed by a global JS variable,
-/// named [defaultCacheName].
+/// This class shouldn't be used directly. It's only made public for testing
+/// purposes. Instead, use [registerElementForCleanup].
+///
+/// Elements are stored in a [JSArray] stored globally at `window.__flutterState`.
 ///
 /// When the app hot-restarts (and a new instance of this class is created),
-/// everything in [_elements] is removed from the DOM.
+/// all elements in the global [JSArray] is removed from the DOM.
 class HotRestartCacheHandler {
+  @visibleForTesting
   HotRestartCacheHandler() {
-    if (_elements.isNotEmpty) {
+    _resetHotRestartStore();
+  }
+
+  /// Removes every element that was registered prior to the hot-restart from
+  /// the DOM.
+  void _resetHotRestartStore() {
+    final JSArray? jsStore = _jsHotRestartStore;
+
+    if (jsStore != null) {
       // We are in a post hot-restart world, clear the elements now.
-      _clearAllElements();
-    }
-  }
-
-  /// The js-interop layer backing [_elements].
-  ///
-  /// Elements are stored in a JS global array named [defaultCacheName].
-  late List<Object?>? _jsElements;
-
-  /// The elements that need to be cleaned up after hot-restart.
-  List<Object?> get _elements {
-    _jsElements = hotRestartStore;
-    if (_jsElements == null) {
-      _jsElements = <Object>[];
-      hotRestartStore = _jsElements;
-    }
-    return _jsElements!;
-  }
-
-  /// Removes every element from [_elements] and empties the list.
-  void _clearAllElements() {
-    for (final Object? element in _elements) {
-      if (element is DomElement) {
-        element.remove();
+      final List<Object?> store = jsStore.toObjectShallow as List<Object?>;
+      for (final Object? element in store) {
+        if (element != null) {
+          (element as DomElement).remove();
+        }
       }
     }
-    hotRestartStore = <Object>[];
+    _jsHotRestartStore = JSArray();
   }
 
   /// Registers a [DomElement] to be removed after hot-restart.
+  @visibleForTesting
   void registerElement(DomElement element) {
-    final List<Object?> elements = _elements;
-    elements.add(element);
-    hotRestartStore = elements;
+    _jsHotRestartStore!.push(element);
   }
+}
+
+final HotRestartCacheHandler? _hotRestartCache = () {
+  // In release mode, we don't need a hot restart cache, so we leave it null.
+  HotRestartCacheHandler? cache;
+  assert(() {
+    cache = HotRestartCacheHandler();
+    return true;
+  }());
+  return cache;
+}();
+
+/// Registers a [DomElement] to be cleaned up after hot restart.
+void registerElementForCleanup(DomElement element) {
+  _hotRestartCache?.registerElement(element);
 }
