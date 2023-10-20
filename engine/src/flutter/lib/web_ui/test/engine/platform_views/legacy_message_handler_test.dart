@@ -20,8 +20,8 @@ typedef PlatformViewFactoryCall = ({int viewId, Object? params});
 void testMain() {
   group('PlatformViewMessageHandler', () {
     group('handlePlatformViewCall', () {
-      const String platformViewType = 'forTest';
-      const int platformViewId = 6;
+      const String viewType = 'forTest';
+      const int viewId = 6;
       late PlatformViewManager contentManager;
       late Completer<ByteData?> completer;
 
@@ -37,64 +37,52 @@ void testMain() {
             platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
-          final Map<dynamic, dynamic> arguments = _getCreateArguments(
-            platformViewType: platformViewType,
-            platformViewId: platformViewId,
-            viewId: kImplicitViewId,
-          );
+          final Map<dynamic, dynamic> arguments = _getCreateArguments(viewType, viewId);
 
-          messageHandler.handlePlatformViewCall('create', arguments, completer.complete);
+          messageHandler.handleLegacyPlatformViewCall('create', arguments, completer.complete);
 
           final ByteData? response = await completer.future;
           try {
             codec.decodeEnvelope(response!);
           } on PlatformException catch (e) {
             expect(e.code, 'unregistered_view_type');
-            expect(e.message, contains(platformViewType));
+            expect(e.message, contains(viewType));
             expect(e.details, contains('registerViewFactory'));
           }
         });
 
         test('duplicate viewId, fails with descriptive exception', () async {
           contentManager.registerFactory(
-              platformViewType, (int id) => createDomHTMLDivElement());
-          contentManager.renderContent(platformViewType, platformViewId, null);
+              viewType, (int id) => createDomHTMLDivElement());
+          contentManager.renderContent(viewType, viewId, null);
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
             platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
-          final Map<dynamic, dynamic> arguments = _getCreateArguments(
-            platformViewType: platformViewType,
-            platformViewId: platformViewId,
-            viewId: kImplicitViewId,
-          );
+          final Map<dynamic, dynamic> arguments = _getCreateArguments(viewType, viewId);
 
-          messageHandler.handlePlatformViewCall('create', arguments, completer.complete);
+          messageHandler.handleLegacyPlatformViewCall('create', arguments, completer.complete);
 
           final ByteData? response = await completer.future;
           try {
             codec.decodeEnvelope(response!);
           } on PlatformException catch (e) {
             expect(e.code, 'recreating_view');
-            expect(e.details, contains('$platformViewId'));
+            expect(e.details, contains('$viewId'));
           }
         });
 
         test('returns a successEnvelope when the view is created normally',
             () async {
           contentManager.registerFactory(
-              platformViewType, (int id) => createDomHTMLDivElement()..id = 'success');
+              viewType, (int id) => createDomHTMLDivElement()..id = 'success');
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
             platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
-          final Map<dynamic, dynamic> arguments = _getCreateArguments(
-            platformViewType: platformViewType,
-            platformViewId: platformViewId,
-            viewId: kImplicitViewId,
-          );
+          final Map<dynamic, dynamic> arguments = _getCreateArguments(viewType, viewId);
 
-          messageHandler.handlePlatformViewCall('create', arguments, completer.complete);
+          messageHandler.handleLegacyPlatformViewCall('create', arguments, completer.complete);
 
           final ByteData? response = await completer.future;
           expect(codec.decodeEnvelope(response!), isNull,
@@ -106,18 +94,14 @@ void testMain() {
             () async {
           final DomElement platformViewsContainer = createDomElement('pv-container');
           contentManager.registerFactory(
-              platformViewType, (int id) => createDomHTMLDivElement()..id = 'success');
+              viewType, (int id) => createDomHTMLDivElement()..id = 'success');
           final PlatformViewMessageHandler messageHandler = PlatformViewMessageHandler(
             platformViewsContainer: platformViewsContainer,
             contentManager: contentManager,
           );
-          final Map<dynamic, dynamic> arguments = _getCreateArguments(
-            platformViewType: platformViewType,
-            platformViewId: platformViewId,
-            viewId: kImplicitViewId,
-          );
+          final Map<dynamic, dynamic> arguments = _getCreateArguments(viewType, viewId);
 
-          messageHandler.handlePlatformViewCall('create', arguments, completer.complete);
+          messageHandler.handleLegacyPlatformViewCall('create', arguments, completer.complete);
 
           final ByteData? response = await completer.future;
 
@@ -141,7 +125,7 @@ void testMain() {
 
         test('passes creation params to the factory', () async {
           final List<PlatformViewFactoryCall> factoryCalls = <PlatformViewFactoryCall>[];
-          contentManager.registerFactory(platformViewType, (int viewId, {Object? params}) {
+          contentManager.registerFactory(viewType, (int viewId, {Object? params}) {
             factoryCalls.add((viewId: viewId, params: params));
             return createDomHTMLDivElement();
           });
@@ -153,49 +137,30 @@ void testMain() {
           final List<Completer<ByteData?>> completers = <Completer<ByteData?>>[];
 
           completers.add(Completer<ByteData?>());
-          messageHandler.handlePlatformViewCall(
+          messageHandler.handleLegacyPlatformViewCall(
             'create',
-            _getCreateArguments(
-              platformViewType: platformViewType,
-              platformViewId: 111,
-              viewId: kImplicitViewId,
-            ),
+            _getCreateArguments(viewType, 111),
             completers.last.complete,
           );
 
           completers.add(Completer<ByteData?>());
-          messageHandler.handlePlatformViewCall(
+          messageHandler.handleLegacyPlatformViewCall(
             'create',
-            _getCreateArguments(
-              platformViewType: platformViewType,
-              platformViewId: 222,
-              viewId: kImplicitViewId,
-              params: <dynamic, dynamic>{'foo': 'bar'},
-            ),
+            _getCreateArguments(viewType, 222, <dynamic, dynamic>{'foo': 'bar'}),
             completers.last.complete,
           );
 
           completers.add(Completer<ByteData?>());
-          messageHandler.handlePlatformViewCall(
+          messageHandler.handleLegacyPlatformViewCall(
             'create',
-            _getCreateArguments(
-              platformViewType: platformViewType,
-              platformViewId: 333,
-              viewId: kImplicitViewId,
-              params: 'foobar',
-            ),
+            _getCreateArguments(viewType, 333, 'foobar'),
             completers.last.complete,
           );
 
           completers.add(Completer<ByteData?>());
-          messageHandler.handlePlatformViewCall(
+          messageHandler.handleLegacyPlatformViewCall(
             'create',
-            _getCreateArguments(
-              platformViewType: platformViewType,
-              platformViewId: 444,
-              viewId: kImplicitViewId,
-              params: <dynamic>[1, null, 'str'],
-            ),
+            _getCreateArguments(viewType, 444, <dynamic>[1, null, 'str']),
             completers.last.complete,
           );
 
@@ -223,7 +188,7 @@ void testMain() {
         });
 
         test('fails if the factory returns a non-DOM object', () async {
-          contentManager.registerFactory(platformViewType, (int viewId) {
+          contentManager.registerFactory(viewType, (int viewId) {
             // Return an object that's not a DOM element.
             return Object();
           });
@@ -232,14 +197,10 @@ void testMain() {
             platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
-          final Map<dynamic, dynamic> arguments = _getCreateArguments(
-            platformViewType: platformViewType,
-            platformViewId: platformViewId,
-            viewId: kImplicitViewId,
-          );
+          final Map<dynamic, dynamic> arguments = _getCreateArguments(viewType, viewId);
 
           expect(() {
-            messageHandler.handlePlatformViewCall('create', arguments, (_) {});
+            messageHandler.handleLegacyPlatformViewCall('create', arguments, (_) {});
           }, throwsA(isA<TypeError>()));
         });
       });
@@ -256,12 +217,8 @@ void testMain() {
             platformViewsContainer: createDomElement('div'),
             contentManager: contentManager,
           );
-          final Map<dynamic, dynamic> arguments = _getDisposeArguments(
-            platformViewId: platformViewId,
-            viewId: kImplicitViewId,
-          );
 
-          messageHandler.handlePlatformViewCall('dispose', arguments, completer.complete);
+          messageHandler.handleLegacyPlatformViewCall('dispose', viewId, completer.complete);
 
           final ByteData? response = await completer.future;
           expect(codec.decodeEnvelope(response!), isNull,
@@ -274,15 +231,11 @@ void testMain() {
             platformViewsContainer: createDomElement('div'),
             contentManager: _FakePlatformViewManager(viewIdCompleter.complete),
           );
-          final Map<dynamic, dynamic> arguments = _getDisposeArguments(
-            platformViewId: platformViewId,
-            viewId: kImplicitViewId,
-          );
 
-          messageHandler.handlePlatformViewCall('dispose', arguments, completer.complete);
+          messageHandler.handleLegacyPlatformViewCall('dispose', viewId, completer.complete);
 
           final int disposedViewId = await viewIdCompleter.future;
-          expect(disposedViewId, platformViewId,
+          expect(disposedViewId, viewId,
               reason:
                   'The viewId to dispose should be passed to the contentManager');
         });
@@ -303,26 +256,10 @@ class _FakePlatformViewManager extends PlatformViewManager {
   }
 }
 
-Map<dynamic, dynamic> _getCreateArguments({
-  required String platformViewType,
-  required int platformViewId,
-  required int viewId,
-  Object? params,
-}) {
+Map<dynamic, dynamic> _getCreateArguments(String viewType, int viewId, [Object? params]) {
   return <String, dynamic>{
-    'platformViewId': platformViewId,
-    'platformViewType': platformViewType,
+    'id': viewId,
+    'viewType': viewType,
     if (params != null) 'params': params,
-    'viewId': viewId,
-  };
-}
-
-Map<dynamic, dynamic> _getDisposeArguments({
-  required int platformViewId,
-  required int viewId,
-}) {
-  return <dynamic, dynamic>{
-    'platformViewId': platformViewId,
-    'viewId': viewId,
   };
 }
