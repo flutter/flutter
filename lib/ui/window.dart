@@ -362,12 +362,12 @@ class FlutterView {
       return true;
     }());
     if (validRender) {
-      _render(viewId, scene as _NativeScene);
+      _render(scene as _NativeScene);
     }
   }
 
-  @Native<Void Function(Int64, Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::Render')
-  external static void _render(int viewId, _NativeScene scene);
+  @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::Render')
+  external static void _render(_NativeScene scene);
 
   /// Change the retained semantics data about this [FlutterView].
   ///
