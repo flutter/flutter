@@ -4,9 +4,7 @@
 
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../dom.dart';
-import '../embedder.dart';
 import '../util.dart';
 import 'slots.dart';
 
@@ -161,38 +159,11 @@ class PlatformViewManager {
 
   /// Removes a PlatformView by its `viewId` from the manager, and from the DOM.
   ///
-  /// Once a view has been cleared, calls [knowsViewId] will fail, as if it had
+  /// Once a view has been cleared, calls to [knowsViewId] will fail, as if it had
   /// never been rendered before.
   void clearPlatformView(int viewId) {
     // Remove from our cache, and then from the DOM...
-    final DomElement? element = _contents.remove(viewId);
-    _safelyRemoveSlottedElement(element);
-  }
-
-  // We need to remove slotted elements like this because of a Safari bug that
-  // gets triggered when a slotted element is removed in a JS event different
-  // than its slot (after the slot is removed).
-  //
-  // TODO(web): Cleanup https://github.com/flutter/flutter/issues/85816
-  void _safelyRemoveSlottedElement(DomElement? element) {
-    if (element == null) {
-      return;
-    }
-    if (browserEngine != BrowserEngine.webkit) {
-      element.remove();
-      return;
-    }
-    final String tombstoneName = "tombstone-${element.getAttribute('slot')}";
-    // Create and inject a new slot in the shadow root
-    final DomElement slot = domDocument.createElement('slot')
-      ..style.display = 'none'
-      ..setAttribute('name', tombstoneName);
-    flutterViewEmbedder.glassPaneShadow.append(slot);
-    // Link the element to the new slot
-    element.setAttribute('slot', tombstoneName);
-    // Delete both the element, and the new slot
-    element.remove();
-    slot.remove();
+    _contents.remove(viewId)?.remove();
   }
 
   /// Attempt to ensure that the contents of the user-supplied DOM element will
