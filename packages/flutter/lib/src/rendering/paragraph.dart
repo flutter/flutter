@@ -1758,26 +1758,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (!_rect.contains(localPosition) && (isFollowedByInlineElement || isInlineWidget)) {
-      // Open question: Should we always do this or only when the fragment is followed
-      // by an inline element. If so we would need to add some flag to `Text` widget
-      // to control this. `Text.rich`/`RichText` does not need this flag since the
-      // user provides an inline span tree instead of a flat string and we can
-      // parse and detect inline elements.
-      //
-      // It could be safe to always do this since `handleSelectWord` of the delegate 
-      // already only dispatches events to selectables whose global rect includes
-      // the global position, except in the case added in this pr of having received
-      // a `SelectionResult.forward` which tells `_handleSelectWord` to dispatch to the
-      // next selectable even if the position is not contained within its rect.
       return SelectionResult.forward;
     }
 
-    // This gives us a position even when the global position is not inside the rect.
-    // This is troublesome when we have a tree of text spans broken by a widget span
-    // and the widget span is a text widget. We will be given the start/end position
-    // as the result even when the globalPosition is not within the rect, and some
-    // unexpected text is selected as a result. A potential solution might be to check if
-    // the rect contains the local position.
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
       return SelectionResult.end;
