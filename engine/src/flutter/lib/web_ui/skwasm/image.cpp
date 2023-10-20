@@ -101,6 +101,10 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
 
     auto backendTexture = GrBackendTextures::MakeGL(
         fInfo.width(), fInfo.height(), mipmapped, glInfo);
+
+    // In order to bind the image source to the texture, makeTexture has changed
+    // which texture is "in focus" for the WebGL context.
+    GrAsDirectContext(context)->resetContext(kTextureBinding_GrGLBackendState);
     return std::make_unique<ExternalWebGLTexture>(
         backendTexture, glInfo.fID, emscripten_webgl_get_current_context());
   }

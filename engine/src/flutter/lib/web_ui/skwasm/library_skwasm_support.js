@@ -27,6 +27,9 @@ mergeInto(LibraryManager.library, {
           return;
         }
         switch (skwasmMessage) {
+          case 'renderPicture':
+            _surface_renderPictureOnWorker(data.surface, data.picture, data.callbackId);
+            return;
           case 'onRenderComplete':
             _surface_onRenderComplete(data.surface, data.callbackId, data.imageBitmap);
             return;
@@ -50,6 +53,14 @@ mergeInto(LibraryManager.library, {
       } else {
         PThread.pthreads[threadId].addEventListener("message", eventListener);
       }
+    };
+    _skwasm_dispatchRenderPicture = function(threadId, surfaceHandle, pictureHandle, callbackId) {
+      PThread.pthreads[threadId].postMessage({
+        skwasmMessage: 'renderPicture',
+        surface: surfaceHandle,
+        picture: pictureHandle,
+        callbackId,
+      });
     };
     _skwasm_createOffscreenCanvas = function(width, height) {
       const canvas = new OffscreenCanvas(width, height);
@@ -114,6 +125,8 @@ mergeInto(LibraryManager.library, {
   skwasm_disposeAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
   skwasm_registerMessageListener: function() {},
   skwasm_registerMessageListener__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchRenderPicture: function() {},
+  skwasm_dispatchRenderPicture__deps: ['$skwasm_support_setup'],
   skwasm_createOffscreenCanvas: function () {},
   skwasm_createOffscreenCanvas__deps: ['$skwasm_support_setup'],
   skwasm_resizeCanvas: function () {},

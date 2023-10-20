@@ -43,9 +43,7 @@ uint32_t Surface::renderPicture(SkPicture* picture) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
   picture->ref();
-  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VIII,
-                                reinterpret_cast<void*>(fRenderPicture),
-                                nullptr, this, picture, callbackId);
+  skwasm_dispatchRenderPicture(_thread, this, picture, callbackId);
   return callbackId;
 }
 
@@ -138,7 +136,7 @@ void Surface::_recreateSurface() {
 }
 
 // Worker thread only
-void Surface::_renderPicture(const SkPicture* picture, uint32_t callbackId) {
+void Surface::renderPictureOnWorker(SkPicture* picture, uint32_t callbackId) {
   SkRect pictureRect = picture->cullRect();
   SkIRect roundedOutRect;
   pictureRect.roundOut(&roundedOutRect);
@@ -195,13 +193,6 @@ void Surface::fDispose(Surface* surface) {
   surface->_dispose();
 }
 
-void Surface::fRenderPicture(Surface* surface,
-                             SkPicture* picture,
-                             uint32_t callbackId) {
-  surface->_renderPicture(picture, callbackId);
-  picture->unref();
-}
-
 void Surface::fOnRasterizeComplete(Surface* surface,
                                    SkData* imageData,
                                    uint32_t callbackId) {
@@ -237,6 +228,13 @@ SKWASM_EXPORT void surface_destroy(Surface* surface) {
 SKWASM_EXPORT uint32_t surface_renderPicture(Surface* surface,
                                              SkPicture* picture) {
   return surface->renderPicture(picture);
+}
+
+SKWASM_EXPORT void surface_renderPictureOnWorker(Surface* surface,
+                                                 SkPicture* picture,
+                                                 uint32_t callbackId) {
+  surface->renderPictureOnWorker(picture, callbackId);
+  picture->unref();
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
