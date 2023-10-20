@@ -189,7 +189,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   }) {
     node.requestFocus();
     Scrollable.ensureVisible(
-      node.context!, alignment: alignment ?? 1.0,
+      node.context!,
+      alignment: alignment ?? 1,
       alignmentPolicy: alignmentPolicy ?? ScrollPositionAlignmentPolicy.explicit,
       duration: duration ?? Duration.zero,
       curve: curve ?? Curves.ease,
@@ -463,7 +464,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       groups[key]!.members.addAll(sortedMembers);
     }
 
-
     // Traverse the group tree, adding the children of members in the order they
     // appear in the member lists.
     final List<FocusNode> sortedDescendants = <FocusNode>[];
@@ -500,9 +500,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         // The scope.traversalDescendants will not contain currentNode if it
         // skips traversal or not focusable.
         assert(
-         difference.length == 1 && difference.contains(currentNode),
-         'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
-         'These are the different nodes: ${difference.where((FocusNode node) => node != currentNode)}',
+         difference.isEmpty || (difference.length == 1 && difference.contains(currentNode)),
+         'Difference between sorted descendants and FocusScopeNode.traversalDescendants contains '
+         'something other than the current skipped node. This is the difference: $difference',
         );
         return true;
       }
