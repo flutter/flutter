@@ -31,6 +31,7 @@ class FrameTimingsRecorder {
  public:
   /// Various states that the recorder can be in. When created the recorder is
   /// in an unitialized state and transtions in sequential order of the states.
+  // After adding an item to this enum, modify StateToString accordingly.
   enum class State : uint32_t {
     kUninitialized,
     kVsync,
@@ -121,6 +122,8 @@ class FrameTimingsRecorder {
   ///
   /// Instead of adding a `GetState` method and asserting on the result, this
   /// method prevents other logic from relying on the state.
+  ///
+  /// In opt builds, this call is a no-op.
   void AssertInState(State state) const;
 
  private:
