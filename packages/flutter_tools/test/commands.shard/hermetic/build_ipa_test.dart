@@ -606,10 +606,12 @@ void main() {
 
   testUsingContext('ipa build invokes xcode build without disablePortPublication', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
