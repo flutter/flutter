@@ -5290,7 +5290,7 @@ class Expanded extends Flexible {
 /// creates a new _run_ adjacent to the existing children in the cross axis.
 ///
 /// To cause a child to expand to fill the remaining space in the current run,
-/// wrap the child in a [TightWrap] widget and size it according to the give
+/// wrap the child in a [Wrapped] widget and size it according to the give
 /// constraints.
 ///
 /// After all the children have been allocated to runs, the children within the
@@ -5335,7 +5335,7 @@ class Expanded extends Flexible {
 ///
 /// See also:
 ///
-///  * [TightWrap], to indicate children that should be placed in the current
+///  * [Wrapped], to indicate children that should be placed in the current
 ///    run, if their minimal intrinsic size in the [Wrap.direction] allows it.
 ///  * [Row], which places children in one line, and gives control over their
 ///    alignment and spacing.
@@ -5547,32 +5547,37 @@ class Wrap extends MultiChildRenderObjectWidget {
 
 /// A widget that controls how a child of a [Wrap] is layed out.
 ///
-/// Using a [TightWrap] widget gives a child of a [Wrap] the flexibility to
+/// Using a [Wrapped] widget gives a child of a [Wrap] the flexibility to
 /// either layout in the current run or layout in the next run, depending on the
 /// child's minimal intrinsic size ([RenderBox.getMinIntrinsicWidth] or
 /// [RenderBox.getMinIntrinsicHeight] depending on the [Wrap.direction]).
 ///
-/// A [TightWrap] widget must be a descendant of a [Wrap], and the path from the
-/// [TightWrap] widget to its enclosing [Wrap] must contain only
+/// A [Wrapped] widget must be a descendant of a [Wrap], and the path from the
+/// [Wrapped] widget to its enclosing [Wrap] must contain only
 /// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
 /// [RenderObjectWidget]s).
 ///
 /// See also:
-///  * [Wrap], which is the typical parent of [TightWrap]
+///  * [Wrap], which is the typical parent of [Wrapped]
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class TightWrap extends ParentDataWidget<WrapParentData>{
+class Wrapped extends ParentDataWidget<WrapParentData>{
   /// Creates a widget that controlls how a child of a [Wrap] is layed out.
-  const TightWrap({
+  const Wrapped({
     super.key,
+    this.fit = WrapFit.runTight,
     required super.child,
   });
+
+  /// How a wrapped child is inscribed into the available space of the current
+  /// or an empty run.
+  final WrapFit fit;
 
   @override
   void applyParentData(RenderObject renderObject) {
     assert (renderObject.parentData is WrapParentData);
     final WrapParentData parentData = renderObject.parentData! as WrapParentData;
-    if(!parentData.tightConstraints){
-      parentData.tightConstraints = true;
+    if(parentData.fit != fit){
+      parentData.fit = fit;
       final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
@@ -5582,6 +5587,12 @@ class TightWrap extends ParentDataWidget<WrapParentData>{
 
   @override
   Type get debugTypicalAncestorWidgetClass => Wrap;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<WrapFit>('fit', fit));
+  }
 }
 
 /// A widget that sizes and positions children efficiently, according to the
