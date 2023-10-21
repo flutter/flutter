@@ -2035,6 +2035,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   void didUpdateWidget(CupertinoTimerPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    _hourScrollController?.jumpToItem(selectedHour!);
+    _minuteScrollController?.jumpToItem(selectedMinute ~/ widget.minuteInterval);
+    _secondScrollController?.jumpToItem(selectedSecond! ~/ widget.secondInterval);
+
     assert(
       oldWidget.mode == widget.mode,
       "The CupertinoTimerPicker's mode cannot change once it's built",
