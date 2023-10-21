@@ -40,6 +40,7 @@ class BackgroundCommandPoolVK final {
     if (!recycler) {
       return;
     }
+    buffers_.clear();
 
     recycler->Reclaim(std::move(pool_));
   }
@@ -55,8 +56,6 @@ class BackgroundCommandPoolVK final {
   std::vector<vk::UniqueCommandBuffer> buffers_;
   std::weak_ptr<CommandPoolRecyclerVK> recycler_;
 };
-
-static bool kResetOnBackgroundThread = false;
 
 CommandPoolVK::~CommandPoolVK() {
   if (!pool_) {
@@ -75,10 +74,8 @@ CommandPoolVK::~CommandPoolVK() {
   auto reset_pool_when_dropped = BackgroundCommandPoolVK(
       std::move(pool_), std::move(collected_buffers_), recycler);
 
-  if (kResetOnBackgroundThread) {
-    UniqueResourceVKT<BackgroundCommandPoolVK> pool(
-        context->GetResourceManager(), std::move(reset_pool_when_dropped));
-  }
+  UniqueResourceVKT<BackgroundCommandPoolVK> pool(
+      context->GetResourceManager(), std::move(reset_pool_when_dropped));
 }
 
 // TODO(matanlurey): Return a status_or<> instead of {} when we have one.
