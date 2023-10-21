@@ -400,17 +400,20 @@ targets:
       firebase_project: ""
       release_ref: ""
       tags: >
-        ["framework","hostonly", "linux"]
+        ["framework", "hostonly", "linux"]
       validation: docs
       validation_name: Docs
     runIf:
+      - bin/**
       - dev/**
       - packages/flutter/**
-      - packages/flutter_test/**
       - packages/flutter_drive/**
       - packages/flutter_localizations/**
-      - bin/**
+      - packages/flutter_test/**
+      - packages/flutter_web_plugins/**
+      - packages/integration_test/**
       - .ci.yaml
+      - dartdoc_options.yaml
 
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone

@@ -81,11 +81,12 @@ class NativeAssets extends Target {
 
       switch (targetPlatform) {
         case TargetPlatform.ios:
-          final String? iosArchsEnvironment = environment.defines[kIosArchs];
-          if (iosArchsEnvironment == null) {
-            throw MissingDefineException(kIosArchs, name);
-          }
-          final List<DarwinArch> iosArchs = iosArchsEnvironment.split(' ').map(getDarwinArchForName).toList();
+          final List<DarwinArch> iosArchs =
+            _emptyToNull(environment.defines[kIosArchs])
+            ?.split(' ')
+            .map(getIOSArchForName)
+            .toList()
+            ?? <DarwinArch>[DarwinArch.arm64];
           final String? environmentBuildMode = environment.defines[kBuildMode];
           if (environmentBuildMode == null) {
             throw MissingDefineException(kBuildMode, name);
@@ -107,11 +108,12 @@ class NativeAssets extends Target {
             yamlParentDirectory: environment.buildDir.uri,
           );
         case TargetPlatform.darwin:
-          final String? darwinArchsEnvironment = environment.defines[kDarwinArchs];
-          if (darwinArchsEnvironment == null) {
-            throw MissingDefineException(kDarwinArchs, name);
-          }
-          final List<DarwinArch> darwinArchs = darwinArchsEnvironment.split(' ').map(getDarwinArchForName).toList();
+          final List<DarwinArch> darwinArchs =
+            _emptyToNull(environment.defines[kDarwinArchs])
+            ?.split(' ')
+            .map(getDarwinArchForName)
+            .toList()
+            ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
           final String? environmentBuildMode = environment.defines[kBuildMode];
           if (environmentBuildMode == null) {
             throw MissingDefineException(kBuildMode, name);
@@ -248,4 +250,11 @@ class NativeAssets extends Target {
   List<Source> get outputs => const <Source>[
     Source.pattern('{BUILD_DIR}/native_assets.yaml'),
   ];
+}
+
+String? _emptyToNull(String? input) {
+  if (input == null || input.isEmpty) {
+    return null;
+  }
+  return input;
 }
