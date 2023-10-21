@@ -504,18 +504,18 @@ class RenderWrap extends RenderBox
   Size _computeDryLayout(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
     final BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
-    final double Function(RenderBox child, double crossAxisSize) computeChildMinIntrinsicMainAxisExtent;
+    final double Function(RenderBox child, double crossAxisSize) getChildMinIntrinsicMainAxisExtent;
     final BoxConstraints Function(double runMainAxisExtent) childConstraintsFittingInRun;
     switch (direction) {
       case Axis.horizontal:
         childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
         mainAxisLimit = constraints.maxWidth;
-        computeChildMinIntrinsicMainAxisExtent = (RenderBox child, double crossAxisSize) => child.computeMinIntrinsicWidth(crossAxisSize);
+        getChildMinIntrinsicMainAxisExtent = (RenderBox child, double crossAxisSize) => child.getMinIntrinsicWidth(crossAxisSize);
         childConstraintsFittingInRun = (double runMainAxisExtent) => BoxConstraints(maxWidth: mainAxisLimit - runMainAxisExtent - spacing);
       case Axis.vertical:
         childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
         mainAxisLimit = constraints.maxHeight;
-        computeChildMinIntrinsicMainAxisExtent = (RenderBox child, double crossAxisSize) => child.computeMinIntrinsicHeight(crossAxisSize);
+        getChildMinIntrinsicMainAxisExtent = (RenderBox child, double crossAxisSize) => child.getMinIntrinsicHeight(crossAxisSize);
         childConstraintsFittingInRun = (double runMainAxisExtent) => BoxConstraints(maxHeight: mainAxisLimit - runMainAxisExtent - spacing);
     }
 
@@ -530,7 +530,7 @@ class RenderWrap extends RenderBox
 
       final WrapParentData childParentData = child.parentData! as WrapParentData;
       if(childParentData.tightConstraints){
-        final double childIntrinsicMainAxisExtent = computeChildMinIntrinsicMainAxisExtent(child, double.infinity);
+        final double childIntrinsicMainAxisExtent = getChildMinIntrinsicMainAxisExtent(child, double.infinity);
         if(runMainAxisExtent + childIntrinsicMainAxisExtent + spacing <= mainAxisLimit){
           childSize = layoutChild(child, childConstraintsFittingInRun(runMainAxisExtent));
         }
