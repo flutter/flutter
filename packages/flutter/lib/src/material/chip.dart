@@ -659,6 +659,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       elevation: elevation,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
+      iconTheme: iconTheme,
     );
   }
 }
@@ -1219,7 +1220,10 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
-      ? IconTheme(data: iconTheme, child: widget.avatar!)
+      ? IconTheme.merge(
+          data: theme.useMaterial3 ? chipDefaults.iconTheme!.merge(iconTheme) : iconTheme,
+          child: widget.avatar!,
+        )
       : widget.avatar;
 
     Widget result = Material(

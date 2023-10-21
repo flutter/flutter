@@ -552,12 +552,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.text('18')));
     await tester.pumpAndSettle();
     expect(inkFeatures, paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(<MaterialState>{})));
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/136036
-    notDisposedAllowList: <String, int?> {'AnnotatedRegionLayer<SystemUiOverlayStyle>': 2},
-  ));
+  });
 
   testWidgetsWithLeakTracking('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
     Future<void> showPicker(WidgetTester tester, Size size) async {
@@ -902,10 +897,5 @@ void main() {
           ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
       );
     }
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/136036
-    notDisposedAllowList: <String, int?> {'AnnotatedRegionLayer<SystemUiOverlayStyle>': 2},
-  ));
+  });
 }
