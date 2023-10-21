@@ -48,7 +48,14 @@ dependencies:
   http_multi_server: 3.2.1
   convert: 3.1.1
   async: 2.11.0
-  unified_analytics: 4.0.1
+  # unified_analytics: 4.0.1
+  # unified_analytics:
+  #   path: /Users/eliasyishak/Desktop/tools/pkgs/unified_analytics
+  unified_analytics:
+    git:
+      url: git@github.com:eliasyishak/tools.git
+      path: pkgs/unified_analytics
+      ref: add-doctor-events-for-flutter
 
   cli_config: 0.1.2
   graphs: 2.3.1
