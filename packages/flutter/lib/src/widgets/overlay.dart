@@ -1414,7 +1414,7 @@ class OverlayPortalController {
       : _zOrderIndex != null;
   }
 
-  /// Conventience method for toggling the current [isShowing] status.
+  /// Convenience method for toggling the current [isShowing] status.
   ///
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.

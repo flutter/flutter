@@ -399,17 +399,20 @@ targets:
       firebase_project: ""
       release_ref: ""
       tags: >
-        ["framework","hostonly", "linux"]
+        ["framework", "hostonly", "linux"]
       validation: docs
       validation_name: Docs
     runIf:
+      - bin/**
       - dev/**
       - packages/flutter/**
-      - packages/flutter_test/**
       - packages/flutter_drive/**
       - packages/flutter_localizations/**
-      - bin/**
+      - packages/flutter_test/**
+      - packages/flutter_web_plugins/**
+      - packages/integration_test/**
       - .ci.yaml
+      - dartdoc_options.yaml
 
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
@@ -445,21 +448,22 @@ targets:
       task_name: abstract_method_smoke_test
       physical_devices: >-
         [
+          "--device", "model=shiba,version=34",
           "--device", "model=panther,version=33",
           "--device", "model=redfin,version=30"
         ]
       # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25",
-      # TODO(flutter/flutter#135784): This device is flaking.
-      # "--device", "model=NexusLowRes,version=29",
+      # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
           "--device", "model=Nexus5,version=21",
           "--device", "model=Nexus5,version=22",
           "--device", "model=Nexus5,version=23",
           "--device", "model=Nexus5,version=24",
+          "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27"
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
         ]
 
   - name: Linux firebase_android_embedding_v2_smoke_test
@@ -476,20 +480,21 @@ targets:
       task_name: android_embedding_v2_smoke_test
       physical_devices: >-
         [
+          "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
       # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25",
-      # TODO(flutter/flutter#135784): This device is flaking.
-      # "--device", "model=NexusLowRes,version=29",
+      # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
           "--device", "model=Nexus5,version=21",
           "--device", "model=Nexus5,version=22",
           "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27"
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
         ]
 
   - name: Linux firebase_release_smoke_test
@@ -506,20 +511,21 @@ targets:
       task_name: release_smoke_test
       physical_devices: >-
         [
+          "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
       # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25",
-      # TODO(flutter/flutter#135784): This device is flaking.
-      # "--device", "model=NexusLowRes,version=29",
+      # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
           "--device", "model=Nexus5,version=21",
           "--device", "model=Nexus5,version=22",
           "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27"
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
         ]
 
   - name: Linux flutter_packaging_test
@@ -2536,7 +2542,6 @@ targets:
       task_name: slider_perf_android
 
   - name: Linux_android platform_channels_benchmarks
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/135105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
