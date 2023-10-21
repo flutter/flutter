@@ -158,6 +158,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.requestFocusOnTap,
     this.expandedInsets,
     this.searchCallback,
+    this.isExpanded,
     required this.dropdownMenuEntries,
   });
 
@@ -310,6 +311,15 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
+
+  /// Set the dropdown's inner contents to horizontally fill its parent.
+  ///
+  /// By default this button's inner width is the minimum size of its contents.
+  /// If [isExpanded] is true, the inner width is expanded to fill its
+  /// surrounding container.
+  ///
+  /// Defaults to null.
+  final bool? isExpanded;
 
   /// When  [DropdownMenu.enableSearch] is true, this callback is used to compute
   /// the index of the search result to be highlighted.
@@ -495,10 +505,17 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         ?? Theme.of(context).colorScheme.onSurface;
 
       Widget label = entry.labelWidget ?? Text(entry.label);
+      final double? anchorWidth = getWidth(_anchorKey);
       if (widget.width != null) {
         final double horizontalPadding = padding + _kDefaultHorizontalPadding;
         label = ConstrainedBox(
           constraints: BoxConstraints(maxWidth: widget.width! - horizontalPadding),
+          child: label,
+        );
+      } else if (widget.isExpanded == true && anchorWidth != null) {
+        final double horizontalPadding = padding + _kDefaultHorizontalPadding;
+        label = ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: anchorWidth - horizontalPadding),
           child: label,
         );
       }
