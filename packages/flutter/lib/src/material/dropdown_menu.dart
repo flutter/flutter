@@ -512,7 +512,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           constraints: BoxConstraints(maxWidth: widget.width! - horizontalPadding),
           child: label,
         );
-      } else if (widget.isExpanded == true && anchorWidth != null) {
+      } else if ((widget.isExpanded ?? false) && anchorWidth != null) {
         final double horizontalPadding = padding + _kDefaultHorizontalPadding;
         label = ConstrainedBox(
           constraints: BoxConstraints(maxWidth: anchorWidth - horizontalPadding),
