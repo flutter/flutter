@@ -5289,6 +5289,10 @@ class Expanded extends Flexible {
 /// space in between. If there is not enough space to fit the child, [Wrap]
 /// creates a new _run_ adjacent to the existing children in the cross axis.
 ///
+/// To cause a child to expand to fill the remaining space in the current run,
+/// wrap the child in a [TightWrap] widget and size it according to the give
+/// constraints.
+///
 /// After all the children have been allocated to runs, the children within the
 /// runs are positioned according to the [alignment] in the main axis and
 /// according to the [crossAxisAlignment] in the cross axis.
@@ -5331,6 +5335,8 @@ class Expanded extends Flexible {
 ///
 /// See also:
 ///
+///  * [TightWrap], to indicate children that should be placed in the current
+///    run, if their minimal intrinsic size in the [Wrap.direction] allows it.
 ///  * [Row], which places children in one line, and gives control over their
 ///    alignment and spacing.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
@@ -5539,7 +5545,23 @@ class Wrap extends MultiChildRenderObjectWidget {
   }
 }
 
+/// A widget that controls how a child of a [Wrap] is layed out.
+///
+/// Using a [TightWrap] widget gives a child of a [Wrap] the flexibility to
+/// either layout in the current run or layout in the next run, depending on the
+/// child's minimal intrinsic size ([RenderBox.getMinIntrinsicWidth] or
+/// [RenderBox.getMinIntrinsicHeight] depending on the [Wrap.direction]).
+///
+/// A [TightWrap] widget must be a descendant of a [Wrap], and the path from the
+/// [TightWrap] widget to its enclosing [Wrap] must contain only
+/// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
+/// [RenderObjectWidget]s).
+///
+/// See also:
+///  * [Wrap], which is the typical parent of [TightWrap]
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class TightWrap extends ParentDataWidget<WrapParentData>{
+  /// Creates a widget that controlls how a child of a [Wrap] is layed out.
   const TightWrap({
     super.key,
     required super.child,
