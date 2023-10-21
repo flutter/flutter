@@ -559,6 +559,11 @@ mixin SchedulerBinding on BindingBase {
   /// Adds the given callback to the list of frame callbacks and ensures that a
   /// frame is scheduled.
   ///
+  /// If this is called during the frame's animation phase (when transient frame
+  /// callbacks are still being invoked), a new frame will be scheduled, and
+  /// `callback` will be called in the newly scheduled frame, not in the current
+  /// frame.
+  ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
   /// If this is a callback that will be re-registered each time it fires, then
@@ -573,6 +578,12 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where transient frame
+  ///    callbacks fit into those phases).
   int scheduleFrameCallback(FrameCallback callback, { bool rescheduling = false }) {
     scheduleFrame();
     _nextFrameCallbackId += 1;
@@ -725,6 +736,12 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Persistent frame callbacks cannot be unregistered. Once registered, they
   /// are called for every frame for the lifetime of the application.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where persistent frame
+  ///    callbacks fit into those phases).
   void addPersistentFrameCallback(FrameCallback callback) {
     _persistentCallbacks.add(callback);
   }
@@ -752,6 +769,9 @@ mixin SchedulerBinding on BindingBase {
   ///
   ///  * [scheduleFrameCallback], which registers a callback for the start of
   ///    the next frame.
+  ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
+  ///    for those apps that use Flutter widgets (and where post frame
+  ///    callbacks fit into those phases).
   void addPostFrameCallback(FrameCallback callback) {
     _postFrameCallbacks.add(callback);
   }

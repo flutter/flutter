@@ -316,12 +316,7 @@ void main() {
         'replace': false,
       }),
     ]);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134205
-    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
-  ));
+  });
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);

@@ -310,15 +310,12 @@ class _SearchAnchorState extends State<SearchAnchor> {
   bool _anchorIsVisible = true;
   final GlobalKey _anchorKey = GlobalKey();
   bool get _viewIsOpen => !_anchorIsVisible;
-  late SearchController? _internalSearchController;
-  SearchController get _searchController => widget.searchController ?? _internalSearchController!;
+  SearchController? _internalSearchController;
+  SearchController get _searchController => widget.searchController ?? (_internalSearchController ??= SearchController());
 
   @override
   void initState() {
     super.initState();
-    if (widget.searchController == null) {
-      _internalSearchController = SearchController();
-    }
     _searchController._attach(this);
   }
 
@@ -335,10 +332,20 @@ class _SearchAnchorState extends State<SearchAnchor> {
   }
 
   @override
+  void didUpdateWidget(SearchAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchController != widget.searchController) {
+      oldWidget.searchController?._detach(this);
+      _searchController._attach(this);
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
-    _searchController._detach(this);
-    _internalSearchController = null;
+    widget.searchController?._detach(this);
+    _internalSearchController?._detach(this);
+    _internalSearchController?.dispose();
   }
 
   void _openView() {
@@ -681,12 +688,6 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   @override
-  void dispose(){
-    _controller.removeListener(updateSuggestions);
-    super.dispose();
-  }
-
-  @override
   void didUpdateWidget(covariant _ViewContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.viewRect != oldWidget.viewRect) {
@@ -708,6 +709,13 @@ class _ViewContentState extends State<_ViewContent> {
       }
     }
     unawaited(updateSuggestions());
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(updateSuggestions);
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
@@ -949,15 +957,18 @@ class SearchController extends TextEditingController {
   // it controls.
   _SearchAnchorState? _anchor;
 
+  /// Whether this controller has associated search anchor.
+  bool get isAttached => _anchor != null;
+
   /// Whether or not the associated search view is currently open.
   bool get isOpen {
-    assert(_anchor != null);
+    assert(isAttached);
     return _anchor!._viewIsOpen;
   }
 
   /// Opens the search view that this controller is associated with.
   void openView() {
-    assert(_anchor != null);
+    assert(isAttached);
     _anchor!._openView();
   }
 
@@ -966,7 +977,7 @@ class SearchController extends TextEditingController {
   /// If `selectedText` is given, then the text value of the controller is set to
   /// `selectedText`.
   void closeView(String? selectedText) {
-    assert(_anchor != null);
+    assert(isAttached);
     _anchor!._closeView(selectedText);
   }
 
@@ -1166,7 +1177,8 @@ class SearchBar extends StatefulWidget {
 
 class _SearchBarState extends State<SearchBar> {
   late final MaterialStatesController _internalStatesController;
-  late final FocusNode _focusNode;
+  FocusNode? _internalFocusNode;
+  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -1175,15 +1187,12 @@ class _SearchBarState extends State<SearchBar> {
     _internalStatesController.addListener(() {
       setState(() {});
     });
-    _focusNode = widget.focusNode ?? FocusNode();
   }
 
   @override
   void dispose() {
     _internalStatesController.dispose();
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
+    _internalFocusNode?.dispose();
     super.dispose();
   }
 

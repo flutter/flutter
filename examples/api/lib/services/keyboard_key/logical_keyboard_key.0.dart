@@ -46,7 +46,7 @@ class _MyKeyExampleState extends State<MyKeyExample> {
 
   // Handles the key events from the Focus widget and updates the
   // _message.
-  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     setState(() {
       if (event.logicalKey == LogicalKeyboardKey.keyQ) {
         _message = 'Pressed the "Q" key!';
@@ -73,7 +73,7 @@ class _MyKeyExampleState extends State<MyKeyExample> {
         style: textTheme.headlineMedium!,
         child: Focus(
           focusNode: _focusNode,
-          onKey: _handleKeyEvent,
+          onKeyEvent: _handleKeyEvent,
           child: ListenableBuilder(
             listenable: _focusNode,
             builder: (BuildContext context, Widget? child) {

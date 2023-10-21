@@ -56,9 +56,10 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 
   // TODO(pbo-linaro): Add support for windows-arm64 platform, https://github.com/flutter/flutter/issues/129807
   const TargetPlatform targetPlatform = TargetPlatform.windows_x64;
-  final Directory buildDirectory = globals.fs.directory(
-    getWindowsBuildDirectory(targetPlatform)
-  );
+  final Directory buildDirectory = globals.fs.directory(globals.fs.path.join(
+    projectPath,
+    getWindowsBuildDirectory(targetPlatform),
+  ));
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
