@@ -149,7 +149,7 @@
   "expandedHint": "Sutraukta",
   "collapsedHint": "Išskleista",
   "menuDismissLabel": "Atsisakyti meniu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Ieškoti",
+  "searchWebButtonLabel": "Ieškoti žiniatinklyje",
+  "shareButtonLabel": "Bendrinti..."
 }

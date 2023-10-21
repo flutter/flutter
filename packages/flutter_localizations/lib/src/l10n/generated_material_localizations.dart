@@ -330,7 +330,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensies';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Kyk op';
 
   @override
   String get menuBarMenuLabel => 'Kieslysbalkkieslys';
@@ -438,7 +438,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Soek';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Deursoek web';
 
   @override
   String get selectAllButtonLabel => 'Kies alles';
@@ -465,7 +465,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Deel …';
 
   @override
   String get showAccountsLabel => 'Wys rekeninge';
@@ -820,7 +820,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ፈቃዶች';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ይመልከቱ';
 
   @override
   String get menuBarMenuLabel => 'የምናሌ አሞሌ ምናሌ';
@@ -928,7 +928,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ይፈልጉ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ድርን ፈልግ';
 
   @override
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
@@ -955,7 +955,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'አጋራ...';
 
   @override
   String get showAccountsLabel => 'መለያዎችን አሳይ';
@@ -1310,7 +1310,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'التراخيص';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'النظر إلى أعلى';
 
   @override
   String get menuBarMenuLabel => 'قائمة شريط القوائم';
@@ -1418,7 +1418,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'بحث';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'البحث على الويب';
 
   @override
   String get selectAllButtonLabel => 'اختيار الكل';
@@ -1445,7 +1445,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'لم يتم اختيار أي عنصر';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'مشاركة…';
 
   @override
   String get showAccountsLabel => 'إظهار الحسابات';
@@ -1800,7 +1800,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
 
   @override
   String get menuBarMenuLabel => 'মেনু বাৰ মেনু';
@@ -1908,7 +1908,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'সন্ধান কৰক';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ৱেবত সন্ধান কৰক';
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
@@ -1935,7 +1935,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'শ্বেয়াৰ কৰক…';
 
   @override
   String get showAccountsLabel => 'একাউণ্টসমূহ দেখুৱাওক';
@@ -2290,7 +2290,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenziyalar';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Axtarın';
 
   @override
   String get menuBarMenuLabel => 'Menyu paneli menyusu';
@@ -2398,7 +2398,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Axtarın';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Vebdə axtarın';
 
   @override
   String get selectAllButtonLabel => 'Hamısını seçin';
@@ -2425,7 +2425,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Paylaşın...';
 
   @override
   String get showAccountsLabel => 'Hesabları göstərin';
@@ -2780,7 +2780,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Ліцэнзіі';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Знайсці';
 
   @override
   String get menuBarMenuLabel => 'Меню "Панэль меню"';
@@ -2888,7 +2888,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Пошук';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пошук у сетцы';
 
   @override
   String get selectAllButtonLabel => 'Выбраць усе';
@@ -2915,7 +2915,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Абагуліць...';
 
   @override
   String get showAccountsLabel => 'Паказаць уліковыя запісы';
@@ -3378,7 +3378,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Търсене';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Търсене в мрежата';
 
   @override
   String get selectAllButtonLabel => 'Избиране на всички';
@@ -3405,7 +3405,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Споделяне...';
 
   @override
   String get showAccountsLabel => 'Показване на профилите';
@@ -3760,7 +3760,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'লাইসেন্স';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'লুক-আপ';
 
   @override
   String get menuBarMenuLabel => 'মেনু বার মেনু';
@@ -3868,7 +3868,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'খুঁজুন';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ওয়েবে সার্চ করুন';
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
@@ -3895,7 +3895,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'শেয়ার করুন...';
 
   @override
   String get showAccountsLabel => 'অ্যাকাউন্টগুলি দেখান';
@@ -4250,7 +4250,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
-  String get lookUpButtonLabel => 'Pogled prema gore';
+  String get lookUpButtonLabel => 'Pogled nagore';
 
   @override
   String get menuBarMenuLabel => 'Meni trake menija';
@@ -4358,7 +4358,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Pretražite';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pretraži Web';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
@@ -4385,7 +4385,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Dijeli...';
 
   @override
   String get showAccountsLabel => 'Prikaži račune';
@@ -4740,7 +4740,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Llicències';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Mira amunt';
 
   @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
@@ -4848,7 +4848,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Cerca';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Cerca al web';
 
   @override
   String get selectAllButtonLabel => 'Selecciona-ho tot';
@@ -4875,7 +4875,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Comparteix...';
 
   @override
   String get showAccountsLabel => 'Mostra els comptes';
@@ -5230,7 +5230,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Vyhledat';
 
   @override
   String get menuBarMenuLabel => 'Nabídka na liště s nabídkou';
@@ -5338,7 +5338,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Hledat';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Vyhledávat na webu';
 
   @override
   String get selectAllButtonLabel => 'Vybrat vše';
@@ -5365,7 +5365,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Sdílet…';
 
   @override
   String get showAccountsLabel => 'Zobrazit účty';
@@ -5720,7 +5720,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Trwyddedau';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Chwilio';
 
   @override
   String get menuBarMenuLabel => 'Dewislen bar dewislen';
@@ -5828,7 +5828,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Chwilio';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "Chwilio'r We";
 
   @override
   String get selectAllButtonLabel => 'Dewis y Cyfan';
@@ -5855,7 +5855,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => "Nid oes unrhyw eitemau wedi'u dewis";
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Rhannu...';
 
   @override
   String get showAccountsLabel => 'Dangos cyfrifon';
@@ -6210,7 +6210,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå op';
 
   @override
   String get menuBarMenuLabel => 'Menuen for menulinjen';
@@ -6318,7 +6318,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søg';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søg på nettet';
 
   @override
   String get selectAllButtonLabel => 'Markér alt';
@@ -6345,7 +6345,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get showAccountsLabel => 'Vis konti';
@@ -6700,7 +6700,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizenzen';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
@@ -6808,7 +6808,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Suchen';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Im Web suchen';
 
   @override
   String get selectAllButtonLabel => 'Alle auswählen';
@@ -6835,7 +6835,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Keine Objekte ausgewählt';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Teilen…';
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -7362,7 +7362,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Αναζήτηση';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Αναζήτηση στον ιστό';
 
   @override
   String get selectAllButtonLabel => 'Επιλογή όλων';
@@ -7389,7 +7389,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Κοινοποίηση…';
 
   @override
   String get showAccountsLabel => 'Εμφάνιση λογαριασμών';
@@ -9031,7 +9031,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencias';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Buscador visual';
 
   @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
@@ -9139,7 +9139,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Buscar';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buscar en la Web';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
@@ -9166,7 +9166,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'No se han seleccionado elementos';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Compartir...';
 
   @override
   String get showAccountsLabel => 'Mostrar cuentas';
@@ -9228,6 +9228,9 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -9420,6 +9423,9 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -9608,6 +9614,9 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -9800,6 +9809,9 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -9988,6 +10000,9 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -10180,6 +10195,9 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -10368,6 +10386,9 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -10560,6 +10581,9 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -10748,6 +10772,9 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -10940,6 +10967,9 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -11128,6 +11158,9 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -11320,6 +11353,9 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -11508,6 +11544,9 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -11700,6 +11739,9 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -11888,6 +11930,9 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -12080,6 +12125,9 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -12270,6 +12318,9 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -12458,6 +12509,9 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -12653,6 +12707,9 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   });
 
   @override
+  String get shareButtonLabel => 'Compartir…';
+
+  @override
   String get scanTextButtonLabel => 'Analizar texto';
 
   @override
@@ -12841,6 +12898,9 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get scanTextButtonLabel => 'Analizar texto';
@@ -13432,7 +13492,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Otsing';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Otsi veebist';
 
   @override
   String get selectAllButtonLabel => 'Vali kõik';
@@ -13459,7 +13519,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Jaga …';
 
   @override
   String get showAccountsLabel => 'Kuva kontod';
@@ -13814,7 +13874,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizentziak';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Bilatu';
 
   @override
   String get menuBarMenuLabel => 'Menu-barraren menua';
@@ -13922,7 +13982,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Bilatu';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Bilatu sarean';
 
   @override
   String get selectAllButtonLabel => 'Hautatu guztiak';
@@ -13949,7 +14009,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Partekatu...';
 
   @override
   String get showAccountsLabel => 'Erakutsi kontuak';
@@ -14304,7 +14364,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'پروانه‌ها';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'جستجو';
 
   @override
   String get menuBarMenuLabel => 'منوی نوار منو';
@@ -14412,7 +14472,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'جستجو';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'جستجو در وب';
 
   @override
   String get selectAllButtonLabel => 'انتخاب همه';
@@ -14439,7 +14499,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'هم‌رسانی…';
 
   @override
   String get showAccountsLabel => 'نشان دادن حساب‌ها';
@@ -14794,7 +14854,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenssit';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Hae';
 
   @override
   String get menuBarMenuLabel => 'Valikkopalkki';
@@ -14902,7 +14962,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Haku';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Hae verkosta';
 
   @override
   String get selectAllButtonLabel => 'Valitse kaikki';
@@ -14929,7 +14989,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Jaa…';
 
   @override
   String get showAccountsLabel => 'Näytä tilit';
@@ -15392,7 +15452,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Maghanap';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Maghanap sa Web';
 
   @override
   String get selectAllButtonLabel => 'Piliin lahat';
@@ -15419,7 +15479,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ibahagi...';
 
   @override
   String get showAccountsLabel => 'Ipakita ang mga account';
@@ -15774,7 +15834,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Recherche visuelle';
 
   @override
   String get menuBarMenuLabel => 'Menu de la barre de menu';
@@ -15882,7 +15942,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Rechercher';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Rechercher sur le Web';
 
   @override
   String get selectAllButtonLabel => 'Tout sélectionner';
@@ -15909,7 +15969,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Aucun élément sélectionné';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Partager…';
 
   @override
   String get showAccountsLabel => 'Afficher les comptes';
@@ -15971,6 +16031,9 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get lookUpButtonLabel => 'Regarder en haut';
 
   @override
   String get scanTextButtonLabel => 'Balayer un texte';
@@ -16529,7 +16592,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Buscar';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buscar na Web';
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
@@ -16556,7 +16619,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Non se seleccionaron elementos';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Compartir…';
 
   @override
   String get showAccountsLabel => 'Mostrar contas';
@@ -16911,7 +16974,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizenzen';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
@@ -17019,7 +17082,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Suchen';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Im Web suchen';
 
   @override
   String get selectAllButtonLabel => 'Alle auswählen';
@@ -17046,7 +17109,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Teilen…';
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -17401,7 +17464,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'લાઇસન્સ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'શોધો';
 
   @override
   String get menuBarMenuLabel => 'મેનૂ બાર મેનૂ';
@@ -17509,7 +17572,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'શોધો';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'વેબ પર શોધો';
 
   @override
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
@@ -17536,7 +17599,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'શેર કરો…';
 
   @override
   String get showAccountsLabel => 'એકાઉન્ટ બતાવો';
@@ -17891,7 +17954,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'רישיונות';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'חיפוש';
 
   @override
   String get menuBarMenuLabel => 'תפריט בסרגל התפריטים';
@@ -17999,7 +18062,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'חיפוש';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'חיפוש באינטרנט';
 
   @override
   String get selectAllButtonLabel => 'בחירת הכול';
@@ -18026,7 +18089,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'שיתוף…';
 
   @override
   String get showAccountsLabel => 'הצגת החשבונות';
@@ -18381,7 +18444,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'लाइसेंस';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'लुक अप बटन';
 
   @override
   String get menuBarMenuLabel => 'मेन्यू बार का मेन्यू';
@@ -18489,7 +18552,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'खोजें';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेब पर खोजें';
 
   @override
   String get selectAllButtonLabel => 'सभी को चुनें';
@@ -18516,7 +18579,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'शेयर करें…';
 
   @override
   String get showAccountsLabel => 'खाते दिखाएं';
@@ -18979,7 +19042,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Pretražite';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pretraži web';
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
@@ -19006,7 +19069,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Dijeli...';
 
   @override
   String get showAccountsLabel => 'Prikažite račune';
@@ -19469,7 +19532,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Keresés';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Keresés az interneten';
 
   @override
   String get selectAllButtonLabel => 'Összes kijelölése';
@@ -19496,7 +19559,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Megosztás…';
 
   @override
   String get showAccountsLabel => 'Fiókok megjelenítése';
@@ -19851,7 +19914,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Արտոնագրեր';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Փնտրել';
 
   @override
   String get menuBarMenuLabel => 'Ընտրացանկի գոտու ընտրացանկ';
@@ -19959,7 +20022,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Որոնել';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Որոնել համացանցում';
 
   @override
   String get selectAllButtonLabel => 'Նշել բոլորը';
@@ -19986,7 +20049,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Տողերը ընտրված չեն';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Կիսվել...';
 
   @override
   String get showAccountsLabel => 'Ցույց տալ հաշիվները';
@@ -20341,7 +20404,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensi';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Cari';
 
   @override
   String get menuBarMenuLabel => 'Menu panel menu';
@@ -20449,7 +20512,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Telusuri';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Telusuri di Web';
 
   @override
   String get selectAllButtonLabel => 'Pilih semua';
@@ -20476,7 +20539,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Bagikan...';
 
   @override
   String get showAccountsLabel => 'Tampilkan akun';
@@ -20939,7 +21002,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Leit';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Leita á vefnum';
 
   @override
   String get selectAllButtonLabel => 'Velja allt';
@@ -20966,7 +21029,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Deila...';
 
   @override
   String get showAccountsLabel => 'Sýna reikninga';
@@ -21429,7 +21492,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Cerca';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Cerca sul web';
 
   @override
   String get selectAllButtonLabel => 'Seleziona tutto';
@@ -21456,7 +21519,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Condividi…';
 
   @override
   String get showAccountsLabel => 'Mostra account';
@@ -21919,10 +21982,10 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '検索';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ウェブを検索';
 
   @override
-  String get selectAllButtonLabel => 'すべて選択';
+  String get selectAllButtonLabel => 'すべてを選択';
 
   @override
   String get selectYearSemanticsLabel => '年を選択';
@@ -21946,7 +22009,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '共有...';
 
   @override
   String get showAccountsLabel => 'アカウントを表示';
@@ -22301,7 +22364,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ლიცენზიები';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
 
   @override
   String get menuBarMenuLabel => 'მენიუს ზოლის მენიუ';
@@ -22409,7 +22472,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ძიება';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ვებში ძიება';
 
   @override
   String get selectAllButtonLabel => 'ყველას არჩევა';
@@ -22436,7 +22499,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'გაზიარება...';
 
   @override
   String get showAccountsLabel => 'ანგარიშების ჩვენება';
@@ -22791,7 +22854,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензиялар';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Іздеу';
 
   @override
   String get menuBarMenuLabel => 'Мәзір жолағының мәзірі';
@@ -22899,7 +22962,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Іздеу';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Интернеттен іздеу';
 
   @override
   String get selectAllButtonLabel => 'Барлығын таңдау';
@@ -22926,7 +22989,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Тармақ таңдалмаған';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Бөлісу…';
 
   @override
   String get showAccountsLabel => 'Аккаунттарды көрсету';
@@ -23389,7 +23452,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ស្វែងរក';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ស្វែងរក​លើបណ្ដាញ';
 
   @override
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
@@ -23416,7 +23479,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ចែករំលែក...';
 
   @override
   String get showAccountsLabel => 'បង្ហាញគណនី';
@@ -23771,7 +23834,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
 
   @override
   String get menuBarMenuLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{cac}\u{cbe}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
@@ -23879,7 +23942,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
@@ -23906,7 +23969,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}\u{2e}\u{2e}\u{2e}';
 
   @override
   String get showAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -24261,7 +24324,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '라이선스';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '찾기';
 
   @override
   String get menuBarMenuLabel => '메뉴 바 메뉴';
@@ -24369,7 +24432,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '검색';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '웹 검색';
 
   @override
   String get selectAllButtonLabel => '전체 선택';
@@ -24396,7 +24459,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '공유...';
 
   @override
   String get showAccountsLabel => '계정 표시';
@@ -24751,7 +24814,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Уруксаттамалар';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Издөө';
 
   @override
   String get menuBarMenuLabel => 'Меню тилкеси менюсу';
@@ -24859,7 +24922,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Издөө';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Интернеттен издөө';
 
   @override
   String get selectAllButtonLabel => 'Баарын тандоо';
@@ -24886,7 +24949,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Бөлүшүү…';
 
   @override
   String get showAccountsLabel => 'Аккаунттарды көрсөтүү';
@@ -25241,7 +25304,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
 
   @override
   String get menuBarMenuLabel => 'ເມນູແຖບເມນູ';
@@ -25349,7 +25412,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ຊອກຫາ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ຊອກຫາຢູ່ອິນເຕີເນັດ';
 
   @override
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
@@ -25376,7 +25439,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ແບ່ງປັນ...';
 
   @override
   String get showAccountsLabel => 'ສະແດງບັນຊີ';
@@ -25731,7 +25794,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencijos';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Ieškoti';
 
   @override
   String get menuBarMenuLabel => 'Meniu juostos meniu';
@@ -25839,7 +25902,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Paieška';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Ieškoti žiniatinklyje';
 
   @override
   String get selectAllButtonLabel => 'Pasirinkti viską';
@@ -25866,7 +25929,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Bendrinti...';
 
   @override
   String get showAccountsLabel => 'Rodyti paskyras';
@@ -26221,7 +26284,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licences';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Meklēt';
 
   @override
   String get menuBarMenuLabel => 'Izvēļņu joslas izvēlne';
@@ -26329,7 +26392,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Meklēt';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Meklēt tīmeklī';
 
   @override
   String get selectAllButtonLabel => 'Atlasīt visu';
@@ -26356,7 +26419,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Nav atlasītu vienumu';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Kopīgot…';
 
   @override
   String get showAccountsLabel => 'Rādīt kontus';
@@ -26711,7 +26774,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценци';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Погледнете нагоре';
 
   @override
   String get menuBarMenuLabel => 'Мени на лентата со мени';
@@ -26819,7 +26882,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Пребарувајте';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пребарајте на интернет';
 
   @override
   String get selectAllButtonLabel => 'Избери ги сите';
@@ -26846,7 +26909,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Споделете...';
 
   @override
   String get showAccountsLabel => 'Прикажи сметки';
@@ -27309,7 +27372,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'തിരയുക';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'വെബിൽ തിരയുക';
 
   @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
@@ -27336,7 +27399,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'പങ്കിടുക...';
 
   @override
   String get showAccountsLabel => 'അക്കൗണ്ടുകൾ കാണിക്കുക';
@@ -27691,7 +27754,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценз';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Дээшээ харах';
 
   @override
   String get menuBarMenuLabel => 'Цэсний талбарын цэс';
@@ -27799,7 +27862,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Хайх';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Вебээс хайх';
 
   @override
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
@@ -27826,7 +27889,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Бичлэг сонгоогүй байна';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Хуваалцах...';
 
   @override
   String get showAccountsLabel => 'Бүртгэлүүдийг харуулах';
@@ -28181,7 +28244,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'परवाने';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'शोध घ्या';
 
   @override
   String get menuBarMenuLabel => 'मेनू बार मेनू';
@@ -28289,7 +28352,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'शोध';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेबवर शोधा';
 
   @override
   String get selectAllButtonLabel => 'सर्व निवडा';
@@ -28316,7 +28379,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'कोणतेही आयटम निवडलेले नाहीत';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'शेअर करा...';
 
   @override
   String get showAccountsLabel => 'खाती दर्शवा';
@@ -28779,7 +28842,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Cari';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Buat carian pada Web';
 
   @override
   String get selectAllButtonLabel => 'Pilih semua';
@@ -28806,7 +28869,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Tiada item dipilih';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Kongsi...';
 
   @override
   String get showAccountsLabel => 'Tunjukkan akaun';
@@ -29161,7 +29224,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'လိုင်စင်များ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
 
   @override
   String get menuBarMenuLabel => 'မီနူးဘား မီနူး';
@@ -29269,7 +29332,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ရှာဖွေရန်';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ဝဘ်တွင်ရှာရန်';
 
   @override
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
@@ -29296,7 +29359,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'မျှဝေရန်...';
 
   @override
   String get showAccountsLabel => 'အကောင့်များကို ပြရန်';
@@ -29651,7 +29714,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå opp';
 
   @override
   String get menuBarMenuLabel => 'Meny med menylinje';
@@ -29759,7 +29822,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søk';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søk på nettet';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
@@ -29786,7 +29849,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get showAccountsLabel => 'Vis kontoer';
@@ -30141,7 +30204,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'इजाजतपत्रहरू';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
 
   @override
   String get menuBarMenuLabel => '"मेनु बार" मेनु';
@@ -30249,7 +30312,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'खोज्नुहोस्';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'वेबमा खोज्नुहोस्';
 
   @override
   String get selectAllButtonLabel => 'सबै बटनहरू चयन गर्नुहोस्';
@@ -30276,7 +30339,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'सेयर गर्नुहोस्...';
 
   @override
   String get showAccountsLabel => 'खाताहरू देखाउनुहोस्';
@@ -30631,7 +30694,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenties';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Opzoeken';
 
   @override
   String get menuBarMenuLabel => 'Menu van menubalk';
@@ -30739,7 +30802,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Zoeken';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Op internet zoeken';
 
   @override
   String get selectAllButtonLabel => 'Alles selecteren';
@@ -30766,7 +30829,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Delen...';
 
   @override
   String get showAccountsLabel => 'Accounts tonen';
@@ -31121,7 +31184,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Slå opp';
 
   @override
   String get menuBarMenuLabel => 'Meny med menylinje';
@@ -31229,7 +31292,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Søk';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Søk på nettet';
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
@@ -31256,7 +31319,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Del…';
 
   @override
   String get showAccountsLabel => 'Vis kontoer';
@@ -31611,7 +31674,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
 
   @override
   String get menuBarMenuLabel => 'ମେନୁ ବାର ମେନୁ';
@@ -31719,7 +31782,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ';
 
   @override
   String get selectAllButtonLabel => 'ସବୁ ଚୟନ କରନ୍ତୁ';
@@ -31746,7 +31809,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ସେୟାର୍ କରନ୍ତୁ...';
 
   @override
   String get showAccountsLabel => 'ଆକାଉଣ୍ଟ ଦେଖାନ୍ତୁ';
@@ -32101,7 +32164,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ਖੋਜੋ';
 
   @override
   String get menuBarMenuLabel => 'ਮੀਨੂ ਬਾਰ ਮੀਨੂ';
@@ -32209,7 +32272,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ਖੋਜੋ';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "ਵੈੱਬ 'ਤੇ ਖੋਜੋ";
 
   @override
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
@@ -32236,7 +32299,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'ਸਾਂਝਾ ਕਰੋ...';
 
   @override
   String get showAccountsLabel => 'ਖਾਤੇ ਦਿਖਾਓ';
@@ -32699,7 +32762,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Szukaj';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Szukaj w internecie';
 
   @override
   String get selectAllButtonLabel => 'Zaznacz wszystko';
@@ -32726,7 +32789,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Udostępnij…';
 
   @override
   String get showAccountsLabel => 'Pokaż konta';
@@ -33679,7 +33742,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Pesquisa';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Pesquisar na Web';
 
   @override
   String get selectAllButtonLabel => 'Selecionar tudo';
@@ -33706,7 +33769,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Compartilhar…';
 
   @override
   String get showAccountsLabel => 'Mostrar contas';
@@ -33768,6 +33831,9 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Partilhar…';
 
   @override
   String get lookUpButtonLabel => 'Procurar';
@@ -34236,7 +34302,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licențe';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Privire în sus';
 
   @override
   String get menuBarMenuLabel => 'Bară de meniu';
@@ -34344,7 +34410,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Căutați';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Căutați pe web';
 
   @override
   String get selectAllButtonLabel => 'Selectați tot';
@@ -34371,7 +34437,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Nu există elemente selectate';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Trimiteți…';
 
   @override
   String get showAccountsLabel => 'Afișați conturile';
@@ -34726,7 +34792,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензии';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Найти';
 
   @override
   String get menuBarMenuLabel => 'Строка меню';
@@ -34834,7 +34900,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Поиск';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Искать в интернете';
 
   @override
   String get selectAllButtonLabel => 'Выбрать все';
@@ -34861,7 +34927,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Строки не выбраны';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Поделиться';
 
   @override
   String get showAccountsLabel => 'Показать аккаунты';
@@ -35216,7 +35282,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'බලපත්‍ර';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'උඩ බලන්න';
 
   @override
   String get menuBarMenuLabel => 'මෙනු තීරු මෙනුව';
@@ -35324,7 +35390,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'සෙවීම';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'වෙබය සොයන්න';
 
   @override
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
@@ -35351,7 +35417,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'බෙදා ගන්න...';
 
   @override
   String get showAccountsLabel => 'ගිණුම් පෙන්වන්න';
@@ -35706,7 +35772,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencie';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Pohľad nahor';
 
   @override
   String get menuBarMenuLabel => 'Ponuka panela s ponukami';
@@ -35814,7 +35880,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Hľadať';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Hľadať na webe';
 
   @override
   String get selectAllButtonLabel => 'Vybrať všetko';
@@ -35841,7 +35907,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Zdieľať…';
 
   @override
   String get showAccountsLabel => 'Zobraziť účty';
@@ -36196,7 +36262,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Pogled gor';
 
   @override
   String get menuBarMenuLabel => 'Meni menijske vrstice';
@@ -36304,7 +36370,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Iskanje';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Iskanje v spletu';
 
   @override
   String get selectAllButtonLabel => 'Izberi vse';
@@ -36331,7 +36397,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Deli …';
 
   @override
   String get showAccountsLabel => 'Prikaz računov';
@@ -36686,7 +36752,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencat';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Kërko';
 
   @override
   String get menuBarMenuLabel => 'Menyja e shiritit të menysë';
@@ -36794,7 +36860,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Kërko';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Kërko në ueb';
 
   @override
   String get selectAllButtonLabel => 'Zgjidh të gjitha';
@@ -36821,7 +36887,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ndaj...';
 
   @override
   String get showAccountsLabel => 'Shfaq llogaritë';
@@ -37176,7 +37242,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценце';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Поглед нагоре';
 
   @override
   String get menuBarMenuLabel => 'Мени трака менија';
@@ -37284,7 +37350,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Претражите';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Претражи веб';
 
   @override
   String get selectAllButtonLabel => 'Изабери све';
@@ -37311,7 +37377,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Дели…';
 
   @override
   String get showAccountsLabel => 'Прикажи налоге';
@@ -37547,6 +37613,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Pogled nagore';
+
+  @override
   String get menuBarMenuLabel => 'Meni traka menija';
 
   @override
@@ -37640,6 +37709,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get searchFieldLabel => 'Pretražite';
 
   @override
+  String get searchWebButtonLabel => 'Pretraži veb';
+
+  @override
   String get selectAllButtonLabel => 'Izaberi sve';
 
   @override
@@ -37653,6 +37725,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
 
   @override
   String get selectedRowCountTitleOther => r'Izabrano je $selectedRowCount stavki';
+
+  @override
+  String get shareButtonLabel => 'Deli…';
 
   @override
   String get showAccountsLabel => 'Prikaži naloge';
@@ -38004,7 +38079,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Titta upp';
 
   @override
   String get menuBarMenuLabel => 'Menyrad';
@@ -38112,7 +38187,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Sök';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Sök på webben';
 
   @override
   String get selectAllButtonLabel => 'Markera allt';
@@ -38139,7 +38214,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Dela …';
 
   @override
   String get showAccountsLabel => 'Visa konton';
@@ -38494,7 +38569,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Leseni';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Tafuta';
 
   @override
   String get menuBarMenuLabel => 'Menyu ya upau wa menyu';
@@ -38602,7 +38677,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Tafuta';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Tafuta kwenye Wavuti';
 
   @override
   String get selectAllButtonLabel => 'Chagua vyote';
@@ -38629,7 +38704,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Hamna kilicho chaguliwa';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Shiriki...';
 
   @override
   String get showAccountsLabel => 'Onyesha akaunti';
@@ -38984,7 +39059,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'உரிமங்கள்';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'தேடு';
 
   @override
   String get menuBarMenuLabel => 'மெனு பட்டியின் மெனு';
@@ -39092,7 +39167,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'தேடல்';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'இணையத்தில் தேடு';
 
   @override
   String get selectAllButtonLabel => 'அனைத்தையும் தேர்ந்தெடு';
@@ -39119,7 +39194,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'எந்த வரிசையும் தேர்ந்தெடுக்கவில்லை';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'பகிர்...';
 
   @override
   String get showAccountsLabel => 'கணக்குகளைக் காட்டும்';
@@ -39474,7 +39549,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'లైసెన్స్‌లు';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'వెతకండి';
 
   @override
   String get menuBarMenuLabel => 'మెనూ బార్ మెనూ';
@@ -39582,7 +39657,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'వెతకండి';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'వెబ్‌లో సెర్చ్ చేయండి';
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
@@ -39609,7 +39684,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'షేర్ చేయండి...';
 
   @override
   String get showAccountsLabel => 'ఖాతాలను చూపు';
@@ -39964,7 +40039,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ใบอนุญาต';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'ค้นหา';
 
   @override
   String get menuBarMenuLabel => 'เมนูในแถบเมนู';
@@ -40072,7 +40147,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'ค้นหา';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ค้นหาบนอินเทอร์เน็ต';
 
   @override
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
@@ -40099,7 +40174,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'แชร์...';
 
   @override
   String get showAccountsLabel => 'แสดงบัญชี';
@@ -40562,7 +40637,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Maghanap';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Maghanap sa Web';
 
   @override
   String get selectAllButtonLabel => 'Piliin lahat';
@@ -40589,7 +40664,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ibahagi...';
 
   @override
   String get showAccountsLabel => 'Ipakita ang mga account';
@@ -40944,7 +41019,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisanslar';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Ara';
 
   @override
   String get menuBarMenuLabel => 'Menü çubuğu menüsü';
@@ -41052,7 +41127,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Ara';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => "Web'de Ara";
 
   @override
   String get selectAllButtonLabel => 'Tümünü seç';
@@ -41079,7 +41154,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Paylaş...';
 
   @override
   String get showAccountsLabel => 'Hesapları göster';
@@ -41434,7 +41509,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Ліцензії';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Шукати';
 
   @override
   String get menuBarMenuLabel => 'Панель меню';
@@ -41542,7 +41617,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Пошук';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Пошук в Інтернеті';
 
   @override
   String get selectAllButtonLabel => 'Вибрати всі';
@@ -41569,7 +41644,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Поділитися…';
 
   @override
   String get showAccountsLabel => 'Показати облікові записи';
@@ -41924,7 +41999,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'لائسنسز';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'تفصیل دیکھیں';
 
   @override
   String get menuBarMenuLabel => 'مینیو بار کا مینیو';
@@ -42032,7 +42107,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'تلاش';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'ویب تلاش کریں';
 
   @override
   String get selectAllButtonLabel => 'سبھی کو منتخب کریں';
@@ -42059,7 +42134,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'اشتراک کریں...';
 
   @override
   String get showAccountsLabel => 'اکاؤنٹس دکھائیں';
@@ -42522,7 +42597,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Qidirish';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Internetdan qidirish';
 
   @override
   String get selectAllButtonLabel => 'Hammasi';
@@ -42549,7 +42624,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Ulashish…';
 
   @override
   String get showAccountsLabel => 'Hisoblarni koʻrsatish';
@@ -42904,7 +42979,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Giấy phép';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Tra cứu';
 
   @override
   String get menuBarMenuLabel => 'Trình đơn của thanh trình đơn';
@@ -43012,7 +43087,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Tìm kiếm';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Tìm kiếm trên web';
 
   @override
   String get selectAllButtonLabel => 'Chọn tất cả';
@@ -43039,7 +43114,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Chia sẻ...';
 
   @override
   String get showAccountsLabel => 'Hiển thị tài khoản';
@@ -43211,7 +43286,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get firstPageTooltip => '第一页';
 
   @override
-  String get hideAccountsLabel => '隐藏帐号';
+  String get hideAccountsLabel => '隐藏账号';
 
   @override
   String get inputDateModeButtonLabel => '切换到输入模式';
@@ -43394,7 +43469,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '许可';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => '向上看';
 
   @override
   String get menuBarMenuLabel => '菜单栏的菜单';
@@ -43502,7 +43577,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '搜索';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => '在网络上搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
@@ -43529,10 +43604,10 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => '分享…';
 
   @override
-  String get showAccountsLabel => '显示帐号';
+  String get showAccountsLabel => '显示账号';
 
   @override
   String get showMenuTooltip => '显示菜单';
@@ -43912,6 +43987,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get searchFieldLabel => '搜尋';
 
   @override
+  String get searchWebButtonLabel => '搜尋網頁';
+
+  @override
   String get selectAllButtonLabel => '全部選取';
 
   @override
@@ -43996,6 +44074,9 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get searchWebButtonLabel => '在網路上搜尋';
 
   @override
   String get scanTextButtonLabel => '掃描文字';
@@ -44419,7 +44500,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Amalayisense';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Bheka Phezulu';
 
   @override
   String get menuBarMenuLabel => 'Imenyu yebha yemenyu';
@@ -44527,7 +44608,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get searchFieldLabel => 'Sesha';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Sesha Iwebhu';
 
   @override
   String get selectAllButtonLabel => 'Khetha konke';
@@ -44554,7 +44635,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Yabelana...';
 
   @override
   String get showAccountsLabel => 'Bonisa ama-akhawunti';

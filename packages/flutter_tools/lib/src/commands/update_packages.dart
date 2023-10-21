@@ -36,6 +36,10 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'material_color_utilities': '0.5.0',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
+  // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker': '9.0.8',
+  // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker_flutter_testing': '1.0.6',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

@@ -143,7 +143,7 @@
   "expandedHint": "Đã thu gọn",
   "collapsedHint": "Đã mở rộng",
   "menuDismissLabel": "Đóng trình đơn",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Tra cứu",
+  "searchWebButtonLabel": "Tìm kiếm trên web",
+  "shareButtonLabel": "Chia sẻ..."
 }

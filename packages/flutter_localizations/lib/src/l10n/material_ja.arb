@@ -28,7 +28,7 @@
   "scanTextButtonLabel": "テキストをスキャン",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "貼り付け",
-  "selectAllButtonLabel": "すべて選択",
+  "selectAllButtonLabel": "すべてを選択",
   "viewLicensesButtonLabel": "ライセンスを表示",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
@@ -144,6 +144,6 @@
   "collapsedHint": "開きました",
   "menuDismissLabel": "メニューを閉じる",
   "lookUpButtonLabel": "調べる",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "ウェブを検索",
+  "shareButtonLabel": "共有..."
 }

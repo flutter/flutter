@@ -5,9 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
     _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
 
@@ -39,7 +40,12 @@ void main() {
     expect(find.text('Current config: /foo'), findsOneWidget);
     expect(delegate().newRoutePaths, isEmpty);
     expect(delegate().restoredRoutePaths, <String>['/foo', '/foo']);
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134205
+    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 2},
+  ));
 
   testWidgets('Router state restoration with RouteInformationProvider', (WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
@@ -152,22 +158,37 @@ class _TestRouteInformationProvider extends RouteInformationProvider with Change
   }
 }
 
-class _TestWidget extends StatelessWidget {
+class _TestWidget extends StatefulWidget {
   const _TestWidget({this.withInformationProvider = false, this.routerKey});
 
   final bool withInformationProvider;
   final Key? routerKey;
 
   @override
+  State<_TestWidget> createState() => _TestWidgetState();
+}
+
+class _TestWidgetState extends State<_TestWidget> {
+  final _TestRouterDelegate _delegate = _TestRouterDelegate();
+  final _TestRouteInformationProvider _routeInformationProvider = _TestRouteInformationProvider();
+
+  @override
+  void dispose() {
+    _delegate.dispose();
+    _routeInformationProvider.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RootRestorationScope(
       restorationId: 'root',
       child: Router<String>(
-        key: routerKey,
+        key: widget.routerKey,
         restorationScopeId: 'router',
-        routerDelegate: _TestRouterDelegate(),
+        routerDelegate: _delegate,
         routeInformationParser: _TestRouteInformationParser(),
-        routeInformationProvider: withInformationProvider ? _TestRouteInformationProvider() : null,
+        routeInformationProvider: widget.withInformationProvider ? _routeInformationProvider : null,
       ),
     );
   }

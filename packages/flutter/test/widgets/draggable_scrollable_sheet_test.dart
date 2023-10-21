@@ -1681,7 +1681,9 @@ void main() {
 
   testWidgetsWithLeakTracking('DraggableScrollableSheet controller can be changed while animating', (WidgetTester tester) async {
     final DraggableScrollableController controller1 = DraggableScrollableController();
+    addTearDown(controller1.dispose);
     final DraggableScrollableController controller2 = DraggableScrollableController();
+    addTearDown(controller2.dispose);
 
     DraggableScrollableController controller = controller1;
     await tester.pumpWidget(MaterialApp(
@@ -1732,5 +1734,12 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     expect(controller1.isAttached, false);
     expect(controller2.isAttached, false);
+  });
+
+  testWidgetsWithLeakTracking('$DraggableScrollableController dispatches creation in constructor.', (WidgetTester widgetTester) async {
+    await expectLater(
+      await memoryEvents(() async => DraggableScrollableController().dispose(), DraggableScrollableController),
+      areCreateAndDispose,
+    );
   });
 }

@@ -1183,6 +1183,75 @@ void main() {
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
   });
+
+  testWidgetsWithLeakTracking('RefreshProgressIndicator using fields correctly', (WidgetTester tester) async {
+    Future<void> pumpIndicator(RefreshProgressIndicator indicator) {
+      return tester.pumpWidget(Theme(data: theme, child: indicator));
+    }
+
+    // With default values.
+    await pumpIndicator(const RefreshProgressIndicator());
+    Material material = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material),
+      ),
+    );
+    Container container = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Container),
+      ),
+    );
+    Padding padding = tester.widget(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(material.elevation, 2.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(padding.padding, const EdgeInsets.all(12.0));
+
+    // With values provided.
+    const double testElevation = 1.0;
+    const EdgeInsetsGeometry testIndicatorMargin = EdgeInsets.all(6.0);
+    const EdgeInsetsGeometry testIndicatorPadding = EdgeInsets.all(10.0);
+    await pumpIndicator(
+      const RefreshProgressIndicator(
+        elevation: testElevation,
+        indicatorMargin: testIndicatorMargin,
+        indicatorPadding: testIndicatorPadding,
+      ),
+    );
+    material = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material),
+      ),
+    );
+    container = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Container),
+      ),
+    );
+    padding = tester.widget(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(material.elevation, testElevation);
+    expect(container.margin, testIndicatorMargin);
+    expect(padding.padding, testIndicatorPadding);
+  });
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {

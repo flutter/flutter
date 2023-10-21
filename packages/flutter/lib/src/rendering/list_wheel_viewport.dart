@@ -1121,11 +1121,15 @@ class RenderListWheelViewport
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    Axis? axis, // Unused, only Axis.vertical supported by this viewport.
+  }) {
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.
-
     rect ??= target.paintBounds;
 
     // `child` will be the last RenderObject before the viewport when walking up from `target`.

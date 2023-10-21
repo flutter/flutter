@@ -1265,4 +1265,39 @@ void main() {
     // Check the stretch factor in the first element of the transform matrix.
     expect(transform.transform.storage.first, 1.0);
   });
+
+  testWidgetsWithLeakTracking('PageController onAttach, onDetach', (WidgetTester tester) async {
+    int attach = 0;
+    int detach = 0;
+    final PageController controller = PageController(
+      onAttach: (_) { attach++; },
+      onDetach: (_) { detach++; },
+    );
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Center(
+        child: PageView(
+          controller: controller,
+          physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+          children: const <Widget>[
+            Center(child: Text('First Page')),
+            Center(child: Text('Second Page')),
+            Center(child: Text('Third Page')),
+          ],
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(attach, 1);
+    expect(detach, 0);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpAndSettle();
+
+    expect(attach, 1);
+    expect(detach, 1);
+  });
 }

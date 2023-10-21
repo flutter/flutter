@@ -28,7 +28,7 @@ dependencies:
   fake_async: 1.3.1
   stack_trace: 1.11.1
   usage: 4.1.1
-  webdriver: 3.0.2
+  webdriver: 3.0.3
   webkit_inspection_protocol: 1.2.1
   xml: 6.4.2
   yaml: 3.1.2
@@ -48,12 +48,12 @@ dependencies:
   http_multi_server: 3.2.1
   convert: 3.1.1
   async: 2.11.0
-  unified_analytics: 4.0.0
+  unified_analytics: 4.0.1
 
-  cli_config: 0.1.1
+  cli_config: 0.1.2
   graphs: 2.3.1
-  native_assets_builder: 0.2.3
-  native_assets_cli: 0.2.0
+  native_assets_builder: 0.3.0
+  native_assets_cli: 0.3.0
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -112,4 +112,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 887b
+# PUBSPEC CHECKSUM: 177d

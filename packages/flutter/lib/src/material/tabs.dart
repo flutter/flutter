@@ -1867,6 +1867,13 @@ class _TabBarViewState extends State<TabBarView> {
       _currentIndex = _controller!.index;
       _jumpToPage(_currentIndex!);
     }
+    if (widget.viewportFraction != oldWidget.viewportFraction) {
+      _pageController?.dispose();
+      _pageController = PageController(
+        initialPage: _currentIndex!,
+        viewportFraction: widget.viewportFraction,
+      );
+    }
     // While a warp is under way, we stop updating the tab page contents.
     // This is tracked in https://github.com/flutter/flutter/issues/31269.
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0) {

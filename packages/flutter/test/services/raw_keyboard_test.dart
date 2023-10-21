@@ -19,7 +19,7 @@ class _ModifierCheck {
 void main() {
   group('RawKeyboard', () {
     testWidgetsWithLeakTracking('The correct character is produced', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         String character = '';
         void handleKey(RawKeyEvent event) {
           expect(event.character, equals(character), reason: 'on $platform');
@@ -34,7 +34,7 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('No character is produced for non-printables', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web', 'ios']) {
         void handleKey(RawKeyEvent event) {
           expect(event.character, isNull, reason: 'on $platform');
         }
