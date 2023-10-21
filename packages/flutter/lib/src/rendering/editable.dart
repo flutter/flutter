@@ -367,6 +367,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _hasFocus = hasFocus ?? false {
     assert(!_showCursor.value || cursorColor != null);
 
+    _internalShowCursor = showCursor == null ? _showCursor : null;
+
     _selectionPainter.highlightColor = selectionColor;
     _selectionPainter.highlightedRange = selection;
     _selectionPainter.selectionHeightStyle = selectionHeightStyle;
@@ -405,6 +407,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionPainter.dispose();
     _caretPainter.dispose();
     _textPainter.dispose();
+    _internalShowCursor?.dispose();
     super.dispose();
   }
 
@@ -882,6 +885,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Whether to paint the cursor.
   ValueNotifier<bool> get showCursor => _showCursor;
   ValueNotifier<bool> _showCursor;
+  ValueNotifier<bool>? _internalShowCursor;
   set showCursor(ValueNotifier<bool> value) {
     if (_showCursor == value) {
       return;
