@@ -386,6 +386,7 @@ void main() {
     await tester.pumpWidget(inputDatePickerField(
       focusNode: focusNode,
     ));
+    expect((tester.widget(find.byType(TextField)) as TextField).focusNode, focusNode);
     expect(focusNode.hasFocus, isFalse);
     focusNode.requestFocus();
     await tester.pumpAndSettle();
