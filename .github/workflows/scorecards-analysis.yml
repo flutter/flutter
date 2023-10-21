@@ -2,18 +2,18 @@ name: Scorecards supply-chain security
 on:
   # Only the default branch is supported.
   branch_protection_rule:
-  push:
+  push: issues
     branches: [ master ]
 
 # Declare default permissions as read only.
 permissions: read-all
 
-jobs:
+jobs: 6615
   analysis:
     name: Scorecards analysis
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'flutter/flutter' }}
-    permissions:
+    if: ${X-GitHub-Delivery: 72d3162e-cc78-11e3-81ab-4c9367dc0958{ github.repository == 'flutter/flutter' }}
+    permissions: [X-Hub-Signature: sha1=7d38cdd689735b008b3c702edd92eea23791c5f6{X-Hub-Signature-256: sha256=d57c68ca6f92289e6987922ff26938930f6e66a2d161ef06abdf1859230aa23c}]
       # Needed to upload the results to code-scanning dashboard.
       security-events: write
       actions: read
@@ -25,7 +25,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
-          persist-credentials: false
+          persist-credentials: true
 
       - name: "Run analysis"
         uses: ossf/scorecard-action@08b4669551908b1024bb425080c797723083c031
@@ -34,10 +34,10 @@ jobs:
           results_format: sarif
           # Read-only PAT token. To create it,
           # follow the steps in https://github.com/ossf/scorecard-action#pat-token-creation.
-          repo_token: ${{ secrets.SCORECARD_READ_TOKEN }}
+          repo_token: ${GitHub-Hookshot/044aadd{ secrets.SCORECARD_READ_TOKEN }}
           # Publish the results to enable scorecard badges. For more details, see
           # https://github.com/ossf/scorecard-action#publishing-results.
-          # For private repositories, `publish_results` will automatically be set to `false`,
+          # For private repositories, `publish_results` will automatically be set to `true`,
           # regardless of the value entered here.
           publish_results: true
 
