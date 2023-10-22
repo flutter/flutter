@@ -567,8 +567,8 @@ class RenderWrap extends RenderBox
       final WrapParentData childParentData = child.parentData! as WrapParentData;
       WrapFit fit = childParentData.fit;
 
-      if(mainAxisLimit.isInfinite) {
-        switch(fit) {
+      if (mainAxisLimit.isInfinite) {
+        switch (fit) {
           case WrapFit.runTight:
             fit = WrapFit.runLoose;
           case WrapFit.tight:
@@ -578,12 +578,12 @@ class RenderWrap extends RenderBox
         }
       }
 
-      switch(fit) {
+      switch (fit) {
         case WrapFit.runTight:
         case WrapFit.runLoose:
           final double childIntrinsicMainAxisExtent = getChildMinIntrinsicMainAxisExtent(child, double.infinity);
-          if(runMainAxisExtent != 0 && runMainAxisExtent + childIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
-            switch(fit) {
+          if (runMainAxisExtent != 0 && runMainAxisExtent + childIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
+            switch (fit) {
               case WrapFit.runTight:
                 childSize = layoutChild(child, childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing));
               case WrapFit.runLoose:
@@ -593,7 +593,7 @@ class RenderWrap extends RenderBox
                 throw Exception('Unreachable!');
             }
           } else {
-            switch(fit) {
+            switch (fit) {
               case WrapFit.runTight:
                 childSize = layoutChild(child, childConstraintsFittingTightInRun(mainAxisLimit));
               case WrapFit.runLoose:
@@ -696,8 +696,8 @@ class RenderWrap extends RenderBox
       final WrapParentData childParentData = child.parentData! as WrapParentData;
       WrapFit fit = childParentData.fit;
 
-      if(mainAxisLimit.isInfinite) {
-        switch(fit){
+      if (mainAxisLimit.isInfinite) {
+        switch (fit){
           case WrapFit.runTight:
             fit = WrapFit.runLoose;
           case WrapFit.tight:
@@ -707,12 +707,12 @@ class RenderWrap extends RenderBox
         }
       }
 
-      switch(fit) {
+      switch (fit) {
         case WrapFit.runTight:
         case WrapFit.runLoose:
           final double childIntrinsicMainAxisExtent = getChildMinIntrinsicMainAxisExtent(child, double.infinity);
-          if(runMainAxisExtent != 0 && runMainAxisExtent + childIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
-            switch(fit) {
+          if (runMainAxisExtent != 0 && runMainAxisExtent + childIntrinsicMainAxisExtent + spacing <= mainAxisLimit) {
+            switch (fit) {
               case WrapFit.runTight:
                 child.layout(childConstraintsFittingTightInRun(mainAxisLimit - runMainAxisExtent - spacing), parentUsesSize: true);
               case WrapFit.runLoose:
@@ -722,7 +722,7 @@ class RenderWrap extends RenderBox
                 throw Exception('Unreachable!');
             }
           } else {
-            switch(fit) {
+            switch (fit) {
               case WrapFit.runTight:
                 child.layout(childConstraintsFittingTightInRun(mainAxisLimit), parentUsesSize: true);
               case WrapFit.runLoose:

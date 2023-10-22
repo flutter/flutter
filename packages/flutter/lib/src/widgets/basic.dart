@@ -5576,7 +5576,7 @@ class Wrapped extends ParentDataWidget<WrapParentData>{
   void applyParentData(RenderObject renderObject) {
     assert (renderObject.parentData is WrapParentData);
     final WrapParentData parentData = renderObject.parentData! as WrapParentData;
-    if(parentData.fit != fit) {
+    if (parentData.fit != fit) {
       parentData.fit = fit;
       final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
