@@ -1132,7 +1132,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Wrapped', (WidgetTester tester) async {
 
-    expect(const Wrapped(child: SizedBox()).fit, WrapFit.loose);
+    expect(const Wrapped(child: SizedBox()).fit, WrapFit.runTight);
 
     WrapParentData getParentData(){
       return tester.renderObject(find.byType(SizedBox)).parentData! as WrapParentData;
