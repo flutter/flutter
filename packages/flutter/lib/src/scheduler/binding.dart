@@ -1233,7 +1233,7 @@ mixin SchedulerBinding on BindingBase {
   /// Two requests are said to be in conflict if they are not of the same [DartPerformanceMode] type,
   /// and an explicit request for a performance mode has been made prior.
   ///
-  /// Requestor is responsible for calling [PerformanceModeRequestHandle.dispose] when it no longer
+  /// Requester is responsible for calling [PerformanceModeRequestHandle.dispose] when it no longer
   /// requires the performance mode.
   PerformanceModeRequestHandle? requestPerformanceMode(DartPerformanceMode mode) {
     // conflicting requests are not allowed.

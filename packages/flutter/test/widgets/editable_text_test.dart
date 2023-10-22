@@ -6061,7 +6061,7 @@ void main() {
     await tester.pump();
 
     expect((renderEditable.text! as TextSpan).children, isNull);
-    // Everything's just formated the same way now.
+    // Everything's just formatted the same way now.
     expect((renderEditable.text! as TextSpan).text, 'text composing text');
     expect(renderEditable.text!.style!.decoration, isNull);
   });
@@ -13257,7 +13257,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/120794.
     // This is only reproducible on Android platform because it is the only
     // platform where composing changes are saved in the editing history.
-    testWidgetsWithLeakTracking('Can undo as intented when adding a delay between undos', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can undo as intended when adding a delay between undos', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
