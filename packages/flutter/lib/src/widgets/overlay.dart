@@ -177,7 +177,7 @@ class OverlayEntry implements Listenable {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         overlay._markDirty();
-      });
+      }, debugLabel: 'OverlayEntry.markDirty');
     } else {
       overlay._markDirty();
     }

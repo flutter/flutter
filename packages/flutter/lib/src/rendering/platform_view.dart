@@ -202,7 +202,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
         // Schedule a new post frame callback.
         _setOffset();
       }
-    });
+    }, debugLabel: 'RenderAndroidView.setOffset');
   }
 
   @override

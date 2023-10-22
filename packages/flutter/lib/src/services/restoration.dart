@@ -268,7 +268,7 @@ class RestorationManager extends ChangeNotifier {
     if (_isReplacing) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _isReplacing = false;
-      });
+      }, debugLabel: 'RestorationManager.resetIsReplacing');
     }
 
     final RestorationBucket? oldRoot = _rootBucket;
@@ -349,7 +349,10 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_serializationScheduled) {
       _serializationScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration _) => _doSerialization(),
+        debugLabel: 'RestorationManager.doSerialization'
+      );
     }
   }
 
