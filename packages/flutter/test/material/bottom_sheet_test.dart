@@ -911,7 +911,7 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet uses fallback values in material3',
+  testWidgetsWithLeakTracking('Material3 - BottomSheet uses fallback values',
       (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;
@@ -951,7 +951,7 @@ void main() {
     expect(tester.getSize(finder).width, 640);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet has transparent shadow in material3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - BottomSheet has transparent shadow', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -975,7 +975,7 @@ void main() {
     expect(material.shadowColor, Colors.transparent);
   });
 
-  testWidgetsWithLeakTracking('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Modal BottomSheet with ScrollController has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -1048,12 +1048,89 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('modal BottomSheet with drag handle has semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Modal BottomSheet with ScrollController has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light(useMaterial3: true),
+      theme: ThemeData(useMaterial3: true),
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return SingleChildScrollView(
+              controller: controller,
+              child: const Text('BottomSheet'),
+            );
+          },
+        );
+      },
+    );
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Dialog',
+                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'BottomSheet',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Scrim',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Modal BottomSheet with drag handle has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body')),
@@ -1123,7 +1200,7 @@ void main() {
     const Color hoveringColor=Colors.green;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light(useMaterial3: true).copyWith(
+      theme: ThemeData.light().copyWith(
         bottomSheetTheme:  BottomSheetThemeData(
           dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
             if (states.contains(MaterialState.hovered)) {
@@ -1138,7 +1215,6 @@ void main() {
         body: const Center(child: Text('body')),
       ),
     ));
-
 
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
@@ -1182,7 +1258,6 @@ void main() {
 
   testWidgetsWithLeakTracking('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
           return const _TestPage();
@@ -1207,7 +1282,8 @@ void main() {
 
     // Bottom sheet is displayed in correct position within the inner navigator
     // and above the BottomNavigationBar.
-    expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 544.0);
+    final double tabBarHeight = tester.getSize(find.byType(BottomNavigationBar)).height;
+    expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600 - tabBarHeight);
   });
 
   testWidgetsWithLeakTracking('showModalBottomSheet uses root Navigator when specified', (WidgetTester tester) async {
@@ -1790,10 +1866,10 @@ void main() {
   });
 
   group('constraints', () {
-    testWidgetsWithLeakTracking('default constraints are max width 640 in material 3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material3 - Default constraints are max width 640', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light(useMaterial3: true),
+          theme: ThemeData(useMaterial3: true),
           home: const MediaQuery(
             data: MediaQueryData(size: Size(1000, 1000)),
             child: Scaffold(
@@ -1806,8 +1882,9 @@ void main() {
       expect(tester.getSize(find.byType(Placeholder)).width, 640);
     });
 
-    testWidgetsWithLeakTracking('No constraints by default for bottomSheet property', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - No constraints by default for bottomSheet property', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
+        // This test is specific to Material2 because Material3 sets constraints by default for BottomSheet.
         theme: ThemeData(useMaterial3: false),
         home: const Scaffold(
           body: Center(child: Text('body')),
@@ -1823,6 +1900,7 @@ void main() {
 
     testWidgetsWithLeakTracking('No constraints by default for showBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
+        // This test is specific to Material2 because Material3 sets constraints by default for BottomSheet.
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -1851,6 +1929,7 @@ void main() {
 
     testWidgetsWithLeakTracking('No constraints by default for showModalBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
+        // This test is specific to Material2 because Material3 sets constraints by default for BottomSheet.
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(builder: (BuildContext context) {
@@ -1878,7 +1957,35 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Theme constraints used for bottomSheet property', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material3 - Theme constraints used for bottomSheet property', (WidgetTester tester) async {
+      const double sheetMaxWidth = 80.0;
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          bottomSheetTheme: const BottomSheetThemeData(
+            constraints: BoxConstraints(maxWidth: sheetMaxWidth),
+          ),
+        ),
+        home: Scaffold(
+          body: const Center(child: Text('body')),
+          bottomSheet: const Text('BottomSheet'),
+          floatingActionButton: FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+        ),
+      ));
+      expect(find.text('BottomSheet'), findsOneWidget);
+
+      // Should be centered and only 80dp wide.
+      final Rect bottomSheetRect = tester.getRect(find.text('BottomSheet'));
+      expect(bottomSheetRect.left, 800 / 2 - sheetMaxWidth / 2);
+      expect(bottomSheetRect.width, sheetMaxWidth);
+
+      // Ensure the FAB is overlapping the top of the sheet.
+      expect(find.byIcon(Icons.add), findsOneWidget);
+      final Rect iconRect = tester.getRect(find.byIcon(Icons.add));
+      expect(iconRect.top, bottomSheetRect.top - iconRect.height / 2);
+    });
+
+    testWidgetsWithLeakTracking('Material2 - Theme constraints used for bottomSheet property', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
@@ -1907,11 +2014,11 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('Theme constraints used for showBottomSheet', (WidgetTester tester) async {
+      const double sheetMaxWidth = 80.0;
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
-          useMaterial3: false,
           bottomSheetTheme: const BottomSheetThemeData(
-            constraints: BoxConstraints(maxWidth: 80),
+            constraints: BoxConstraints(maxWidth: sheetMaxWidth),
           ),
         ),
         home: Scaffold(
@@ -1933,19 +2040,19 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      // Should be centered and only 80dp wide
-      expect(
-        tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600),
-      );
+
+      // Should be centered and only 80dp wide.
+      final Rect bottomSheetRect = tester.getRect(find.text('BottomSheet'));
+      expect(bottomSheetRect.left, 800 / 2 - sheetMaxWidth / 2);
+      expect(bottomSheetRect.width, sheetMaxWidth);
     });
 
     testWidgetsWithLeakTracking('Theme constraints used for showModalBottomSheet', (WidgetTester tester) async {
+      const double sheetMaxWidth = 80.0;
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
-          useMaterial3: false,
           bottomSheetTheme: const BottomSheetThemeData(
-            constraints: BoxConstraints(maxWidth: 80),
+            constraints: BoxConstraints(maxWidth: sheetMaxWidth),
           ),
         ),
         home: Scaffold(
@@ -1968,17 +2075,17 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      // Should be centered and only 80dp wide
-      expect(
-        tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(360, 558, 440, 600),
-      );
+
+      // Should be centered and only 80dp wide.
+      final Rect bottomSheetRect = tester.getRect(find.text('BottomSheet'));
+      expect(bottomSheetRect.left, 800 / 2 - sheetMaxWidth / 2);
+      expect(bottomSheetRect.width, sheetMaxWidth);
     });
 
     testWidgetsWithLeakTracking('constraints param overrides theme for showBottomSheet', (WidgetTester tester) async {
+      const double sheetMaxWidth = 100.0;
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
-          useMaterial3: false,
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
           ),
@@ -1991,7 +2098,7 @@ void main() {
                 onPressed: () {
                   Scaffold.of(context).showBottomSheet<void>(
                     (BuildContext context) => const Text('BottomSheet'),
-                    constraints: const BoxConstraints(maxWidth: 100),
+                    constraints: const BoxConstraints(maxWidth: sheetMaxWidth),
                   );
                 },
               ),
@@ -2003,17 +2110,17 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      // Should be centered and only 100dp wide instead of 80dp wide
-      expect(
-        tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(350, 572, 450, 600),
-      );
+
+      // Should be centered and only 80dp wide.
+      final Rect bottomSheetRect = tester.getRect(find.text('BottomSheet'));
+      expect(bottomSheetRect.left, 800 / 2 - sheetMaxWidth / 2);
+      expect(bottomSheetRect.width, sheetMaxWidth);
     });
 
     testWidgetsWithLeakTracking('constraints param overrides theme for showModalBottomSheet', (WidgetTester tester) async {
+      const double sheetMaxWidth = 100.0;
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
-          useMaterial3: false,
           bottomSheetTheme: const BottomSheetThemeData(
             constraints: BoxConstraints(maxWidth: 80),
           ),
@@ -2027,7 +2134,7 @@ void main() {
                   showModalBottomSheet<void>(
                     context: context,
                     builder: (BuildContext context) => const Text('BottomSheet'),
-                    constraints: const BoxConstraints(maxWidth: 100),
+                    constraints: const BoxConstraints(maxWidth: sheetMaxWidth),
                   );
                 },
               ),
@@ -2039,11 +2146,11 @@ void main() {
       await tester.tap(find.text('Press me'));
       await tester.pumpAndSettle();
       expect(find.text('BottomSheet'), findsOneWidget);
-      // Should be centered and only 100dp instead of 80dp wide
-      expect(
-        tester.getRect(find.text('BottomSheet')),
-        const Rect.fromLTRB(350, 572, 450, 600),
-      );
+
+      // Should be centered and only 80dp wide.
+      final Rect bottomSheetRect = tester.getRect(find.text('BottomSheet'));
+      expect(bottomSheetRect.left, 800 / 2 - sheetMaxWidth / 2);
+      expect(bottomSheetRect.width, sheetMaxWidth);
     });
 
     group('scrollControlDisabledMaxHeightRatio', () {

@@ -82,7 +82,7 @@ void main() {
         '-S',
         fileSystem.path.absolute(fileSystem.path.dirname(buildFilePath)),
         '-B',
-        r'build\windows\x64',
+        r'C:\build\windows\x64',
         '-G',
         generator,
         '-A',
@@ -103,7 +103,7 @@ void main() {
       command: <String>[
         _cmakePath,
         '--build',
-        r'build\windows\x64',
+        r'C:\build\windows\x64',
         '--config',
         buildMode,
         ...<String>['--target', 'INSTALL'],

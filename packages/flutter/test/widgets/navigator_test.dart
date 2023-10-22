@@ -1489,29 +1489,34 @@ void main() {
         return result;
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    final List<String> expected = <String>['building page 1 - false'];
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 2 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expected.add('building page 2 - false');
+    expected.add('building page 1 - false'); // page 1 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 150));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 3 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expected.add('building page 3 - false');
+    expected.add('building page 2 - false'); // page 2 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expect(log, expected);
   });
 
   testWidgetsWithLeakTracking('route semantics', (WidgetTester tester) async {

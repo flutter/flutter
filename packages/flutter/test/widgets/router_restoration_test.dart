@@ -40,12 +40,7 @@ void main() {
     expect(find.text('Current config: /foo'), findsOneWidget);
     expect(delegate().newRoutePaths, isEmpty);
     expect(delegate().restoredRoutePaths, <String>['/foo', '/foo']);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134205
-    notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 2},
-  ));
+  });
 
   testWidgets('Router state restoration with RouteInformationProvider', (WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
