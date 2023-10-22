@@ -51,7 +51,6 @@
   "reorderItemRight": "右に移動",
   "expandedIconTapHint": "折りたたむ",
   "collapsedIconTapHint": "展開",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "残り 1 文字（半角相当）",
   "remainingTextFieldCharacterCountOther": "残り $remainingCount 文字（半角相当）",
   "refreshIndicatorSemanticLabel": "更新",

@@ -75,7 +75,7 @@ void main() {
     final double currentOffset = controller.offset;
 
     // Start a hold activity by putting one pointer down.
-    await tester.startGesture(tester.getTopLeft(find.byKey(outerContainer)) + const Offset(50.0, 50.0));
+    final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byKey(outerContainer)) + const Offset(50.0, 50.0));
     await tester.pumpAndSettle(); // This shouldn't change the scroll offset because of the down event above.
     expect(controller.offset, currentOffset);
 
@@ -87,5 +87,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(controller.hasClients, isFalse);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }
