@@ -99,7 +99,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           final ParentDataElement<KeepAliveParentDataMixin>? childElement = _getChildElement();
           assert(childElement != null);
           _updateParentDataOfChild(childElement!);
-        });
+        }, debugLabel: 'AutomaticKeepAlive.updateParentData');
       }
     }
     return false;

@@ -48,6 +48,20 @@ bool debugPrintEndFrameBanner = false;
 /// [debugPrintScheduleBuildForStacks].
 bool debugPrintScheduleFrameStacks = false;
 
+/// Record timeline trace events for post-frame callbacks.
+///
+/// When this flag is set to false (the default), the developer timeline
+/// records when post-frame callbacks are running, but it does not tell you any
+/// information about how that time is spent within specific callbacks:
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/scheduler/debug_trace_post_frame_callbacks_off.png)
+///
+/// When this flag is set to true, timeline events will be recorded for each
+/// post-frame callback that runs, like so:
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/scheduler/debug_trace_post_frame_callbacks_on.png)
+bool debugTracePostFrameCallbacks = false;
+
 /// Returns true if none of the scheduler library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables

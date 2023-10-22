@@ -1007,7 +1007,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         final int position = minCheck ? positionDouble.ceil() : positionDouble.floor();
         _animateColumnControllerToItem(minuteController, position);
       }
-    });
+    }, debugLabel: 'DatePicker.scrollToDate');
   }
 
   @override
@@ -1401,7 +1401,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       if (selectedDay != newDate.day) {
         _animateColumnControllerToItem(dayController, newDate.day - 1);
       }
-    });
+    }, debugLabel: 'DatePicker.scrollToDate');
   }
 
   @override
@@ -1725,7 +1725,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
       if (selectedMonth != newDate.month) {
         _animateColumnControllerToItem(monthController, newDate.month - 1);
       }
-    });
+    }, debugLabel: 'DatePicker.scrollToDate');
   }
 
   @override

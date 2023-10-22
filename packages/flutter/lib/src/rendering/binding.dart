@@ -46,7 +46,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
-      addPostFrameCallback(_handleWebFirstFrame);
+      addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
     }
     rootPipelineOwner.attach(_manifold);
   }
@@ -463,7 +463,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         return true;
       }());
       _mouseTracker!.updateAllDevices();
-    });
+    }, debugLabel: 'RendererBinding.mouseTrackerUpdate');
   }
 
   int _firstFrameDeferredCount = 0;

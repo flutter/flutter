@@ -423,7 +423,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
-    });
+    }, debugLabel: 'DropdownMenu.refreshLeadingPadding');
   }
 
   void scrollToHighlight() {
@@ -432,7 +432,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       if (highlightContext != null) {
         Scrollable.ensureVisible(highlightContext);
       }
-    });
+    }, debugLabel: 'DropdownMenu.scrollToHighlight');
   }
 
   double? getWidth(GlobalKey key) {

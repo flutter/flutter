@@ -583,7 +583,7 @@ _MenuAnchorState? get _previousFocusableSibling {
     } else if (!inDispose) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         _overlayController.hide();
-      });
+      }, debugLabel: 'MenuAnchor.hide');
     }
     if (!inDispose) {
       // Notify that _childIsOpen changed state, but only if not
@@ -1150,7 +1150,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       FocusManager.instance.applyFocusChangesIfNeeded();
       widget.onPressed?.call();
-    });
+    }, debugLabel: 'MenuAnchor.onPressed');
   }
 
   void _createInternalFocusNodeIfNeeded() {
@@ -1902,7 +1902,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           SchedulerBinding.instance.addPostFrameCallback((_) {
             _menuController._anchor?._focusButton();
             _waitingToFocusMenu = false;
-          });
+          }, debugLabel: 'MenuAnchor.focus');
           _waitingToFocusMenu = true;
         }
         setState(() { /* Rebuild with updated controller.isOpen value */ });

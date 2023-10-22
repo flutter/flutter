@@ -2390,7 +2390,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
     clipboardStatus.update();
@@ -2430,7 +2430,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
   }
@@ -2818,7 +2818,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _flagInternalFocus();
           FocusScope.of(context).autofocus(widget.focusNode);
         }
-      });
+      }, debugLabel: 'EditableText.autofocus');
     }
 
     // Restart or stop the blinking cursor when TickerMode changes.
@@ -2889,7 +2889,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // See https://github.com/flutter/flutter/issues/126312
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _openInputConnection();
-      });
+      }, debugLabel: 'EditableText.openInputConnection');
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -3721,7 +3721,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           rect: caretPadding.inflateRect(rectToReveal),
         );
       }
-    });
+    }, debugLabel: 'EditableText.showCaret');
   }
 
   late double _lastBottomViewInset;
@@ -3735,7 +3735,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_lastBottomViewInset != view.viewInsets.bottom) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
-      });
+      }, debugLabel: 'EditableText.updateForScroll');
       if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
@@ -4038,7 +4038,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateSelectionRects();
     _updateComposingRectIfNeeded();
     _updateCaretRectIfNeeded();
-    SchedulerBinding.instance.addPostFrameCallback(_schedulePeriodicPostFrameCallbacks);
+    SchedulerBinding.instance.addPostFrameCallback(
+      _schedulePeriodicPostFrameCallbacks,
+      debugLabel: 'EditableText.postFrameCallbacks'
+    );
   }
   _ScribbleCacheKey? _scribbleCacheKey;
 

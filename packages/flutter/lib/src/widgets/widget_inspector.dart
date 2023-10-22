@@ -2371,7 +2371,7 @@ mixin WidgetInspectorService {
 
   void _onFrameStart(Duration timeStamp) {
     _frameStart = timeStamp;
-    SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd);
+    SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd, debugLabel: 'WidgetInspector.onFrameStart');
   }
 
   void _onFrameEnd(Duration timeStamp) {

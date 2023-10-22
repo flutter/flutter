@@ -1454,7 +1454,7 @@ class SelectionOverlay {
         } else if (_spellCheckToolbarController.isShown) {
           _spellCheckToolbarController.markNeedsBuild();
         }
-      });
+      }, debugLabel: 'SelectionOverlay.markNeedsBuild');
     } else {
       if (_handles != null) {
         _handles!.start.markNeedsBuild();

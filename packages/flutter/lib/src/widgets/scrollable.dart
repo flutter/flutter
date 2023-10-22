@@ -1167,7 +1167,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       }
       _scheduledLayoutChange = false;
       layoutDidChange();
-    });
+    }, debugLabel: 'ScrollableSelectionContainer.layoutDidChange');
   }
 
   /// Stores the scroll offset when a scrollable receives the last

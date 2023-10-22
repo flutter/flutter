@@ -94,7 +94,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
           // The generation of the _SemanticsDebuggerListener has changed.
         });
       }
-    });
+    }, debugLabel: 'SemanticsDebugger.update');
   }
 
   Offset? _lastPointerDownLocation;
