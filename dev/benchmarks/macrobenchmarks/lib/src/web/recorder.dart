@@ -83,8 +83,6 @@ Future<void> _dummyAsyncVoidCallback() async {}
 @sealed
 class Runner {
   /// Creates a runner for the [recorder].
-  ///
-  /// All arguments must not be null.
   Runner({
     required this.recorder,
     this.setUpAllDidRun = _dummyAsyncVoidCallback,

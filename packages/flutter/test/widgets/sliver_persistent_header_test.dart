@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/rendering/sliver_persistent_header.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets(
+  testWidgetsWithLeakTracking(
       '_SliverScrollingPersistentHeader should update stretchConfiguration',
       (WidgetTester tester) async {
     for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
@@ -37,7 +38,7 @@ void main() {
     expect(render.stretchConfiguration?.stretchTriggerOffset, 20);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
       '_SliverPinnedPersistentHeader should update stretchConfiguration',
       (WidgetTester tester) async {
     for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
@@ -68,7 +69,7 @@ void main() {
     expect(render.stretchConfiguration?.stretchTriggerOffset, 20);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
       '_SliverPinnedPersistentHeader should update showOnScreenConfiguration',
       (WidgetTester tester) async {
     for (final double maxShowOnScreenExtent in <double>[1000, 2000]) {

@@ -51,8 +51,6 @@ class InlineSpanSemanticsInformation {
   /// Constructs an object that holds the text and semantics label values of an
   /// [InlineSpan].
   ///
-  /// The text parameter must not be null.
-  ///
   /// Use [InlineSpanSemanticsInformation.placeholder] instead of directly setting
   /// [isPlaceholder].
   const InlineSpanSemanticsInformation(

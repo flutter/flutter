@@ -133,9 +133,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch? activeArch,
   bool codesign = true,
   String? deviceID,
-  bool isCoreDevice = false,
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
+  bool disablePortPublication = false,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -242,7 +242,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
-    usingCoreDevice: isCoreDevice,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
   if (configOnly) {
@@ -383,6 +382,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       '-resultBundleVersion',
       _kResultBundleVersion,
     ]);
+
+    // Adds a setting which xcode_backend.dart will use to skip adding Bonjour
+    // service settings to the Info.plist.
+    if (disablePortPublication) {
+      buildCommands.add('DISABLE_PORT_PUBLICATION=YES');
+    }
 
     // Don't log analytics for downstream Flutter commands.
     // e.g. `flutter build bundle`.

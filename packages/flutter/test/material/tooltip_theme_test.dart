@@ -13,23 +13,6 @@ import '../widgets/semantics_tester.dart';
 const String tooltipText = 'TIP';
 const double _customPaddingValue = 10.0;
 
-void _ensureTooltipVisible(GlobalKey key) {
-  // This function uses "as dynamic"to defeat the static analysis. In general
-  // you want to avoid using this style in your code, as it will cause the
-  // analyzer to be unable to help you catch errors.
-  //
-  // In this case, we do it because we are trying to call internal methods of
-  // the tooltip code in order to test it. Normally, the state of a tooltip is a
-  // private class, but by using a GlobalKey we can get a handle to that object
-  // and by using "as dynamic" we can bypass the analyzer's type checks and call
-  // methods that we aren't supposed to be able to know about.
-  //
-  // It's ok to do this in tests, but you really don't want to do it in
-  // production code.
-  // ignore: avoid_dynamic_calls
-  (key.currentState as dynamic).ensureTooltipVisible();
-}
-
 void main() {
   test('TooltipThemeData copyWith, ==, hashCode basics', () {
     expect(const TooltipThemeData(), const TooltipThemeData().copyWith());
@@ -113,7 +96,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
@@ -152,7 +135,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -172,7 +155,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
 
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
@@ -211,7 +194,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -231,7 +214,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
 
@@ -271,7 +254,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -302,7 +285,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
 
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
@@ -341,7 +324,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -372,7 +355,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
@@ -411,7 +394,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pumpAndSettle(); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -430,7 +413,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
 
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
@@ -469,7 +452,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pumpAndSettle(); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -488,7 +471,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip margin - ThemeData', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
 
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
@@ -519,7 +502,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
@@ -547,7 +530,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip margin - TooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
 
@@ -575,7 +558,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent!.parent! as RenderBox;
@@ -603,7 +586,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip message textStyle - ThemeData.tooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         tooltipTheme: const TooltipThemeData(
@@ -623,7 +606,7 @@ void main() {
         ),
       ),
     ));
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -633,7 +616,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip message textStyle - TooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       home: TooltipTheme(
         data: const TooltipThemeData(),
@@ -652,7 +635,7 @@ void main() {
         ),
       ),
     ));
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
@@ -701,7 +684,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
       color: Color(0x80800000),
@@ -734,7 +717,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
@@ -745,7 +728,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
       color: Color(0x80800000),
@@ -778,7 +761,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent!.parent!.parent!.parent! as RenderBox;
@@ -789,7 +772,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     const double customTooltipHeight = 100.0;
     const double customPaddingVal = 20.0;
 
@@ -821,7 +804,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pumpAndSettle();
 
     final RenderBox tip = tester.renderObject(find.ancestor(
@@ -839,7 +822,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Tooltip height and padding - TooltipTheme', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> key = GlobalKey<TooltipState>();
     const double customTooltipHeight = 100.0;
     const double customPaddingValue = 20.0;
     late final OverlayEntry entry;
@@ -868,7 +851,7 @@ void main() {
         ),
       ),
     );
-    _ensureTooltipVisible(key);
+    key.currentState!.ensureTooltipVisible();
     await tester.pumpAndSettle();
 
     final RenderBox tip = tester.renderObject(find.ancestor(

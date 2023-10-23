@@ -263,17 +263,23 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'ios':
-        await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
-          if (!await runXcodeTests(
-            platformDirectory: path.join(rootPath, 'ios'),
-            destination: 'id=$deviceId',
-            configuration: 'Debug',
-            testName: 'native_plugin_unit_tests_ios',
-            skipCodesign: true,
-          )) {
-            throw TaskResult.failure('Platform unit tests failed');
-          }
-        });
+        String? simulatorDeviceId;
+        try {
+          await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+            simulatorDeviceId = deviceId;
+            if (!await runXcodeTests(
+              platformDirectory: path.join(rootPath, 'ios'),
+              destination: 'id=$deviceId',
+              configuration: 'Debug',
+              testName: 'native_plugin_unit_tests_ios',
+              skipCodesign: true,
+            )) {
+              throw TaskResult.failure('Platform unit tests failed');
+            }
+          });
+        } finally {
+          await removeIOSSimulator(simulatorDeviceId);
+        }
       case 'linux':
         if (await exec(
           path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_test'),

@@ -400,7 +400,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// Creates insets that match the given view padding.
   ///
   /// If you need the current system padding or view insets in the context of a
-  /// widget, consider using [MediaQuery.of] to obtain these values rather than
+  /// widget, consider using [MediaQuery.paddingOf] to obtain these values rather than
   /// using the value from a [FlutterView] directly, so that you get notified of
   /// changes.
   EdgeInsets.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio)

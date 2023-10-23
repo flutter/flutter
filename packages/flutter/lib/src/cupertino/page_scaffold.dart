@@ -75,7 +75,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
   /// prevents widgets inside the body from being obscured by the keyboard.
   ///
-  /// Defaults to true and cannot be null.
+  /// Defaults to true.
   final bool resizeToAvoidBottomInset;
 
   @override

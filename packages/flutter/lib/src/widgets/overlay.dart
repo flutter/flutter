@@ -177,7 +177,7 @@ class OverlayEntry implements Listenable {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         overlay._markDirty();
-      });
+      }, debugLabel: 'OverlayEntry.markDirty');
     } else {
       overlay._markDirty();
     }
@@ -384,6 +384,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
 ///
+/// For widgets drawn in an [OverlayEntry], do not assume that the size of the
+/// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
+/// have different sizes.
+///
 /// {@tool dartpad}
 /// This example shows how to use the [Overlay] to highlight the [NavigationBar]
 /// destination.
@@ -431,7 +435,7 @@ class Overlay extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// The [OverlayState] from the closest instance of [Overlay] that encloses
@@ -1011,7 +1015,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -1031,27 +1035,35 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   void _addDeferredChild(_RenderDeferredLayoutBox child) {
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
-
     adoptChild(child);
-    // When child has never been laid out before, mark its layout surrogate as
-    // needing layout so it's reachable via tree walk.
-    child._layoutSurrogate.markNeedsLayout();
+    // The Overlay still needs repainting when a deferred child is added. Usually
+    // `markNeedsLayout` implies `markNeedsPaint`, but here `markNeedsLayout` is
+    // skipped when the `_skipMarkNeedsLayout` flag is set.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
+
+    // After adding `child` to the render tree, we want to make sure it will be
+    // laid out in the same frame. This is done by calling markNeedsLayout on the
+    // layout surrgate. This ensures `child` is reachable via tree walk (see
+    // _RenderLayoutSurrogateProxyBox.performLayout).
+    child._layoutSurrogate.markNeedsLayout();
   }
 
   void _removeDeferredChild(_RenderDeferredLayoutBox child) {
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
     dropChild(child);
+    // The Overlay still needs repainting when a deferred child is dropped. See
+    // the comment in `_addDeferredChild`.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
   }
 
   @override
   void markNeedsLayout() {
-    if (_skipMarkNeedsLayout) {
-      return;
+    if (!_skipMarkNeedsLayout) {
+      super.markNeedsLayout();
     }
-    super.markNeedsLayout();
   }
 
   RenderBox? get _firstOnstageChild {
@@ -1402,7 +1414,7 @@ class OverlayPortalController {
       : _zOrderIndex != null;
   }
 
-  /// Conventience method for toggling the current [isShowing] status.
+  /// Convenience method for toggling the current [isShowing] status.
   ///
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
@@ -2088,7 +2100,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
   RenderObject? get debugLayoutParent => _layoutSurrogate;
 
   void layoutByLayoutSurrogate() {
-    assert(!_parentDoingLayout);
+    assert(!_theaterDoingThisLayout);
     final _RenderTheater? theater = parent as _RenderTheater?;
     if (theater == null || !attached) {
       assert(false, '$this is not attached to parent');
@@ -2097,25 +2109,26 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     super.layout(BoxConstraints.tight(theater.constraints.biggest));
   }
 
-  bool _parentDoingLayout = false;
+  bool _theaterDoingThisLayout = false;
   @override
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(_needsLayout == debugNeedsLayout);
     // Only _RenderTheater calls this implementation.
     assert(parent != null);
     final bool scheduleDeferredLayout = _needsLayout || this.constraints != constraints;
-    assert(!_parentDoingLayout);
-    _parentDoingLayout = true;
+    assert(!_theaterDoingThisLayout);
+    _theaterDoingThisLayout = true;
     super.layout(constraints, parentUsesSize: parentUsesSize);
-    assert(_parentDoingLayout);
-    _parentDoingLayout = false;
+    assert(_theaterDoingThisLayout);
+    _theaterDoingThisLayout = false;
     _needsLayout = false;
     assert(!debugNeedsLayout);
     if (scheduleDeferredLayout) {
       final _RenderTheater parent = this.parent! as _RenderTheater;
       // Invoking markNeedsLayout as a layout callback allows this node to be
-      // merged back to the `PipelineOwner` if it's not already dirty. Otherwise
-      // this may cause some dirty descendants to performLayout a second time.
+      // merged back to the `PipelineOwner`'s dirty list in the right order, if
+      // it's not already dirty. Otherwise this may cause some dirty descendants
+      // to performLayout a second time.
       parent.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
     }
   }
@@ -2129,7 +2142,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
   @override
   void performLayout() {
     assert(!_debugMutationsLocked);
-    if (_parentDoingLayout) {
+    if (_theaterDoingThisLayout) {
       _needsLayout = false;
       return;
     }

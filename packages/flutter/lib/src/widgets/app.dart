@@ -31,6 +31,7 @@ import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
+import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
@@ -263,8 +264,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
-  ///
-  /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
   /// Most callers will want to use the [home] or [routes] parameters, or both.
   /// The [home] parameter is a convenience for the following [routes] map:
@@ -1191,13 +1190,22 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, forces the widget inspector to be visible.
   ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
   /// Used by the `debugShowWidgetInspector` debugging extension.
   ///
-  /// The inspector allows you to select a location on your device or emulator
+  /// The inspector allows the selection of a location on your device or emulator
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
-  static bool debugShowWidgetInspectorOverride = false;
+  static bool get debugShowWidgetInspectorOverride {
+    return _debugShowWidgetInspectorOverrideNotifier.value;
+  }
+  static set debugShowWidgetInspectorOverride(bool value) {
+    _debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
+
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1745,12 +1753,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
 
     assert(() {
-      if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
-        result = WidgetInspector(
-          selectButtonBuilder: widget.inspectorSelectButtonBuilder,
-          child: result,
-        );
-      }
+      result = ValueListenableBuilder<bool>(
+        valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
+        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
+          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
+            return WidgetInspector(
+              selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+              child: child!,
+            );
+          }
+          return child!;
+        },
+        child: result,
+      );
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = CheckedModeBanner(
           child: result,

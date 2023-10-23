@@ -2023,7 +2023,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(

@@ -1,4 +1,7 @@
 {
+  "lookUpButtonLabel": "Pogled nagore",
+  "searchWebButtonLabel": "Pretraži veb",
+  "shareButtonLabel": "Deli…",
   "scanTextButtonLabel": "Skeniraj tekst",
   "menuDismissLabel": "Odbacite meni",
   "expansionTileExpandedHint": "dvaput dodirnite da biste skupili",
@@ -141,7 +144,6 @@
   "reorderItemRight": "Pomerite udesno",
   "expandedIconTapHint": "Skupi",
   "collapsedIconTapHint": "Proširi",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Preostao je 1 znak",
   "remainingTextFieldCharacterCountOther": "Preostalo je $remainingCount znakova",
   "refreshIndicatorSemanticLabel": "Osveži"

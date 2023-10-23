@@ -93,8 +93,6 @@ class IconData {
 /// [DiagnosticsProperty] that has an [IconData] as value.
 class IconDataProperty extends DiagnosticsProperty<IconData> {
   /// Create a diagnostics property for [IconData].
-  ///
-  /// The [showName], [style], and [level] arguments must not be null.
   IconDataProperty(
     String super.name,
     super.value, {

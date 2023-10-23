@@ -155,7 +155,7 @@ class RestorationManager extends ChangeNotifier {
   /// with the engine to get restoration messages (by calling [initChannels]).
   RestorationManager() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     initChannels();
   }
@@ -268,7 +268,7 @@ class RestorationManager extends ChangeNotifier {
     if (_isReplacing) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _isReplacing = false;
-      });
+      }, debugLabel: 'RestorationManager.resetIsReplacing');
     }
 
     final RestorationBucket? oldRoot = _rootBucket;
@@ -349,7 +349,10 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_serializationScheduled) {
       _serializationScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration _) => _doSerialization(),
+        debugLabel: 'RestorationManager.doSerialization'
+      );
     }
   }
 
@@ -495,8 +498,6 @@ class RestorationBucket {
   /// claiming a child from a parent via [claimChild]. If no parent bucket is
   /// available, [RestorationManager.rootBucket] may be used as a parent.
   /// {@endtemplate}
-  ///
-  /// The `restorationId` must not be null.
   RestorationBucket.empty({
     required String restorationId,
     required Object? debugOwner,
@@ -529,8 +530,6 @@ class RestorationBucket {
   /// ```
   ///
   /// {@macro flutter.services.RestorationBucket.empty.bucketCreation}
-  ///
-  /// The `manager` argument must not be null.
   RestorationBucket.root({
     required RestorationManager manager,
     required Map<Object?, Object?>? rawData,
@@ -551,8 +550,6 @@ class RestorationBucket {
   /// [RestorationBucket.empty] and have the parent adopt it via [adoptChild].
   ///
   /// {@macro flutter.services.RestorationBucket.empty.bucketCreation}
-  ///
-  /// The `restorationId` and `parent` argument must not be null.
   RestorationBucket.child({
     required String restorationId,
     required RestorationBucket parent,

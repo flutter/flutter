@@ -694,7 +694,7 @@ void main() {
     expect(find.text('5 of 10'), findsOneWidget);
   });
 
-  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('readonly text form field will hide cursor by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -801,6 +801,31 @@ void main() {
           child: Center(
             child: TextFormField(
               initialValue: 'initialValue',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'changedValue');
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.reset();
+
+    expect(find.text('changedValue'), findsNothing);
+    expect(find.text('initialValue'), findsOneWidget);
+  });
+
+  testWidgetsWithLeakTracking('reset resets the text fields value to the controller initial value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'initialValue');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              controller: controller,
             ),
           ),
         ),
@@ -1233,7 +1258,7 @@ void main() {
     expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
   });
 
-  testWidgets('Passes undoController to undoController TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes undoController to undoController TextField', (WidgetTester tester) async {
     final UndoHistoryController undoController = UndoHistoryController(value: UndoHistoryValue.empty);
     addTearDown(undoController.dispose);
 
@@ -1477,5 +1502,42 @@ void main() {
     final EditableText textField = tester.widget(find.byType(EditableText).first);
     await tester.pump();
     expect(textField.cursorColor, errorColor);
+  });
+
+  testWidgetsWithLeakTracking('TextFormField onChanged is called when the form is reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123009.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String value = 'initialValue';
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Form(
+          key: formKey,
+          child: TextFormField(
+            key: stateKey,
+            initialValue: value,
+            onChanged: (String newValue) {
+              value = newValue;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Initial value is 'initialValue'.
+    expect(stateKey.currentState!.value, 'initialValue');
+    expect(value, 'initialValue');
+
+    // Change value to 'changedValue'.
+    await tester.enterText(find.byType(TextField), 'changedValue');
+    expect(stateKey.currentState!.value,'changedValue');
+    expect(value, 'changedValue');
+
+    // Should be back to 'initialValue' when the form is reset.
+    formKey.currentState!.reset();
+    await tester.pump();
+    expect(stateKey.currentState!.value,'initialValue');
+    expect(value, 'initialValue');
   });
 }

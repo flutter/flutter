@@ -3352,7 +3352,7 @@ void main() {
                 itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
                   PopupMenuItem<int>(
                     onTap: () {
-                      showModalBottomSheet(
+                      showModalBottomSheet<void>(
                         context: context,
                         builder: (BuildContext context) {
                           return const SizedBox(
@@ -3741,7 +3741,7 @@ void main() {
     expect(_labelStyle(tester, 'Item 1')!.fontStyle, customTextStyle.fontStyle);
   });
 
-  testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(
       TestApp(

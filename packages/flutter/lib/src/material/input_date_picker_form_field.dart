@@ -42,9 +42,6 @@ class InputDatePickerFormField extends StatefulWidget {
   /// for [initialDate].
   ///
   /// [firstDate] must be on or before [lastDate].
-  ///
-  /// [firstDate], [lastDate], and [autofocus] must be non-null.
-  ///
   InputDatePickerFormField({
     super.key,
     DateTime? initialDate,
@@ -177,7 +174,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
           _selectedDate = widget.initialDate;
           _updateValueForSelectedDate();
         });
-      });
+      }, debugLabel: 'InputDatePickerFormField.update');
     }
   }
 
