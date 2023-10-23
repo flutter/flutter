@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -44,7 +45,7 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       testUsage = TestUsage();
-      fileSystem = MemoryFileSystem.test(style: io.Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
+      fileSystem = MemoryFileSystem.test();
       Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -917,7 +918,7 @@ Gradle Crashed
     });
 
     testUsingContext('can call custom gradle task outputFreeDebugAppLinkSettings and parse the result', () async {
-      final String expectedOutputPath = fileSystem.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
+      final String expectedOutputPath = path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         java: FakeJava(),
         logger: logger,
