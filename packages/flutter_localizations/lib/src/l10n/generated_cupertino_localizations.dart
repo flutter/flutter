@@ -11069,7 +11069,7 @@ class CupertinoLocalizationRw extends GlobalCupertinoLocalizations {
   String get menuDismissLabel => 'Kuraho meni';
 
   @override
-  String get modalBarrierDismissLabel => 'Byirengagize';
+  String get modalBarrierDismissLabel => 'Kuraho';
 
   @override
   String get noSpellCheckReplacementsLabel => 'Nta gisimbura ihari';

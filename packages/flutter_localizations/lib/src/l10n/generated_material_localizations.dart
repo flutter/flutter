@@ -34991,130 +34991,130 @@ class MaterialLocalizationRw extends GlobalMaterialLocalizations {
   });
 
   @override
-  String get aboutListTileTitleRaw => r'About $applicationName';
+  String get aboutListTileTitleRaw => r'Ibyerekeye $applicationName';
 
   @override
-  String get alertDialogLabel => 'Alert';
+  String get alertDialogLabel => 'Imenyesha';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonTooltip => 'Back';
+  String get backButtonTooltip => 'Subira inyuma';
 
   @override
   String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
-  String get calendarModeButtonLabel => 'Switch to calendar';
+  String get calendarModeButtonLabel => 'Hindura kuri kalendari';
 
   @override
-  String get cancelButtonLabel => 'Cancel';
+  String get cancelButtonLabel => 'Bireke';
 
   @override
-  String get closeButtonLabel => 'Close';
+  String get closeButtonLabel => 'Funga';
 
   @override
-  String get closeButtonTooltip => 'Close';
+  String get closeButtonTooltip => 'Funga';
 
   @override
-  String get collapsedHint => 'Expanded';
+  String get collapsedHint => 'Byaguwe';
 
   @override
-  String get collapsedIconTapHint => 'Expand';
+  String get collapsedIconTapHint => 'Agura';
 
   @override
-  String get continueButtonLabel => 'Continue';
+  String get continueButtonLabel => 'Komeza';
 
   @override
-  String get copyButtonLabel => 'Copy';
+  String get copyButtonLabel => 'Kopiya';
 
   @override
-  String get currentDateLabel => 'Today';
+  String get currentDateLabel => 'Uyu munsi';
 
   @override
-  String get cutButtonLabel => 'Cut';
+  String get cutButtonLabel => 'Kata';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
-  String get dateInputLabel => 'Enter Date';
+  String get dateInputLabel => 'Injiza itariki';
 
   @override
-  String get dateOutOfRangeLabel => 'Out of range.';
+  String get dateOutOfRangeLabel => 'Intera irarenga.';
 
   @override
-  String get datePickerHelpText => 'Select date';
+  String get datePickerHelpText => 'Hitamo itariki';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'End date $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Itariki yanyuma $fullDate';
 
   @override
-  String get dateRangeEndLabel => 'End Date';
+  String get dateRangeEndLabel => 'Itariki yanyuma';
 
   @override
-  String get dateRangePickerHelpText => 'Select range';
+  String get dateRangePickerHelpText => 'Hitamo intera';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Start date $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw => r'Itariki itangira $fullDate';
 
   @override
-  String get dateRangeStartLabel => 'Start Date';
+  String get dateRangeStartLabel => 'Itariki itangira';
 
   @override
   String get dateSeparator => '/';
 
   @override
-  String get deleteButtonTooltip => 'Delete';
+  String get deleteButtonTooltip => 'Siba';
 
   @override
-  String get dialModeButtonLabel => 'Switch to dial picker mode';
+  String get dialModeButtonLabel => 'Hindura mu buryo bwo guhitamo';
 
   @override
-  String get dialogLabel => 'Dialog';
+  String get dialogLabel => 'Akadirishya';
 
   @override
-  String get drawerLabel => 'Navigation menu';
+  String get drawerLabel => 'Meni';
 
   @override
-  String get expandedHint => 'Collapsed';
+  String get expandedHint => 'Byakuweho';
 
   @override
-  String get expandedIconTapHint => 'Collapse';
+  String get expandedIconTapHint => 'Kuraho';
 
   @override
-  String get expansionTileCollapsedHint => 'double tap to expand';
+  String get expansionTileCollapsedHint => 'kanda inshuro ebyiri wagure';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Expand for more details';
+  String get expansionTileCollapsedTapHint => 'Agura kubindi bisobanuro';
 
   @override
-  String get expansionTileExpandedHint => 'double tap to collapse';
+  String get expansionTileExpandedHint => 'kanda inshuro ebyiri ukureho';
 
   @override
-  String get expansionTileExpandedTapHint => 'Collapse';
+  String get expansionTileExpandedTapHint => 'Kuraho';
 
   @override
-  String get firstPageTooltip => 'First page';
+  String get firstPageTooltip => 'Paji yambere';
 
   @override
-  String get hideAccountsLabel => 'Hide accounts';
+  String get hideAccountsLabel => 'Hisha amakonti';
 
   @override
-  String get inputDateModeButtonLabel => 'Switch to input';
+  String get inputDateModeButtonLabel => 'Hindura ku byo winjiza';
 
   @override
-  String get inputTimeModeButtonLabel => 'Switch to text input mode';
+  String get inputTimeModeButtonLabel => 'Hindura muburyo bwo kwandika';
 
   @override
-  String get invalidDateFormatLabel => 'Invalid format.';
+  String get invalidDateFormatLabel => 'Imiterere ntiyemewe.';
 
   @override
-  String get invalidDateRangeLabel => 'Invalid range.';
+  String get invalidDateRangeLabel => 'Intera ntiyemewe.';
 
   @override
-  String get invalidTimeLabel => 'Enter a valid time';
+  String get invalidTimeLabel => 'Injiza isaha yemewe';
 
   @override
   String get keyboardKeyAlt => 'Alt';
@@ -35240,7 +35240,7 @@ class MaterialLocalizationRw extends GlobalMaterialLocalizations {
   String get keyboardKeyPower => 'Power';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Zimya';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -35258,7 +35258,7 @@ class MaterialLocalizationRw extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
-  String get lastPageTooltip => 'Last page';
+  String get lastPageTooltip => 'Paji yanyuma';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -35267,70 +35267,70 @@ class MaterialLocalizationRw extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextMany => null;
 
   @override
-  String? get licensesPackageDetailTextOne => '1 license';
+  String? get licensesPackageDetailTextOne => 'Uruhushya 1';
 
   @override
-  String get licensesPackageDetailTextOther => r'$licenseCount licenses';
+  String get licensesPackageDetailTextOther => r'Impushya $licenseCount';
 
   @override
   String? get licensesPackageDetailTextTwo => null;
 
   @override
-  String? get licensesPackageDetailTextZero => 'No licenses';
+  String? get licensesPackageDetailTextZero => 'Nta mpushya';
 
   @override
-  String get licensesPageTitle => 'Licenses';
+  String get licensesPageTitle => 'Impushya';
 
   @override
-  String get lookUpButtonLabel => 'Look Up';
+  String get lookUpButtonLabel => 'Shakisha';
 
   @override
   String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Kuraho meni';
 
   @override
-  String get modalBarrierDismissLabel => 'Dismiss';
+  String get modalBarrierDismissLabel => 'Byirengagize';
 
   @override
-  String get moreButtonTooltip => 'More';
+  String get moreButtonTooltip => 'Ibindi';
 
   @override
-  String get nextMonthTooltip => 'Next month';
+  String get nextMonthTooltip => 'Ukwezi gutaha';
 
   @override
-  String get nextPageTooltip => 'Next page';
+  String get nextPageTooltip => 'Paji ikurikira';
 
   @override
   String get okButtonLabel => 'OK';
 
   @override
-  String get openAppDrawerTooltip => 'Open navigation menu';
+  String get openAppDrawerTooltip => 'Fungura meni';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow of $rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow muri $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow of about $rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow hafi muri $rowCount';
 
   @override
-  String get pasteButtonLabel => 'Paste';
+  String get pasteButtonLabel => 'Koporora';
 
   @override
-  String get popupMenuLabel => 'Popup menu';
+  String get popupMenuLabel => 'Meni';
 
   @override
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get previousMonthTooltip => 'Previous month';
+  String get previousMonthTooltip => 'Ukwezi gushize';
 
   @override
-  String get previousPageTooltip => 'Previous page';
+  String get previousPageTooltip => 'Paji ibanza';
 
   @override
-  String get refreshIndicatorSemanticLabel => 'Refresh';
+  String get refreshIndicatorSemanticLabel => 'Subiramo';
 
   @override
   String? get remainingTextFieldCharacterCountFew => null;
@@ -35339,64 +35339,64 @@ class MaterialLocalizationRw extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String? get remainingTextFieldCharacterCountOne => '1 character remaining';
+  String? get remainingTextFieldCharacterCountOne => 'inyuguti 1 isigaye';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
+  String get remainingTextFieldCharacterCountOther => r'hasigaye inyuguti $remainingCount';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'No characters remaining';
+  String? get remainingTextFieldCharacterCountZero => 'Nta nyuguti zisigaye';
 
   @override
-  String get reorderItemDown => 'Move down';
+  String get reorderItemDown => 'Imurira hasi';
 
   @override
-  String get reorderItemLeft => 'Move left';
+  String get reorderItemLeft => 'Imurira ibumoso';
 
   @override
-  String get reorderItemRight => 'Move right';
+  String get reorderItemRight => 'Imurira iburyo';
 
   @override
-  String get reorderItemToEnd => 'Move to the end';
+  String get reorderItemToEnd => 'Imurira ku iherezo';
 
   @override
-  String get reorderItemToStart => 'Move to the start';
+  String get reorderItemToStart => 'Imurira kuntangiriro';
 
   @override
-  String get reorderItemUp => 'Move up';
+  String get reorderItemUp => 'Imurira hejuru';
 
   @override
-  String get rowsPerPageTitle => 'Rows per page:';
+  String get rowsPerPageTitle => 'Imirongo kuri paji:';
 
   @override
-  String get saveButtonLabel => 'Save';
+  String get saveButtonLabel => 'Byemeze';
 
   @override
-  String get scanTextButtonLabel => 'Scan text';
+  String get scanTextButtonLabel => 'Sikana amagambo';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Close $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Funga $modalRouteContentName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  String get searchFieldLabel => 'Search';
+  String get searchFieldLabel => 'Shakisha';
 
   @override
-  String get searchWebButtonLabel => 'Search Web';
+  String get searchWebButtonLabel => 'Shakisha kurubuga';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => 'Hitamo byose';
 
   @override
-  String get selectYearSemanticsLabel => 'Select year';
+  String get selectYearSemanticsLabel => 'Hitamo umwaka';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -35405,61 +35405,61 @@ class MaterialLocalizationRw extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
-  String? get selectedRowCountTitleOne => '1 item selected';
+  String? get selectedRowCountTitleOne => 'Ikintu 1 cyatoranijwe';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount items selected';
+  String get selectedRowCountTitleOther => r'Ibintu $selectedRowCount byatoranyijwe';
 
   @override
   String? get selectedRowCountTitleTwo => null;
 
   @override
-  String? get selectedRowCountTitleZero => 'No items selected';
+  String? get selectedRowCountTitleZero => 'Nta kintu cyatoranijwe';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Sangiza...';
 
   @override
-  String get showAccountsLabel => 'Show accounts';
+  String get showAccountsLabel => 'Erekana amakonti';
 
   @override
-  String get showMenuTooltip => 'Show menu';
+  String get showMenuTooltip => 'Erekana meni';
 
   @override
-  String get signedInLabel => 'Signed in';
+  String get signedInLabel => 'Winjiye';
 
   @override
-  String get tabLabelRaw => r'Tab $tabIndex of $tabCount';
+  String get tabLabelRaw => r'Paji ya $tabIndex muri $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
-  String get timePickerDialHelpText => 'Select time';
+  String get timePickerDialHelpText => 'Hitamo isaha';
 
   @override
-  String get timePickerHourLabel => 'Hour';
+  String get timePickerHourLabel => 'Isaha';
 
   @override
-  String get timePickerHourModeAnnouncement => 'Select hours';
+  String get timePickerHourModeAnnouncement => 'Hitamo amasaha';
 
   @override
-  String get timePickerInputHelpText => 'Enter time';
+  String get timePickerInputHelpText => 'Injiza isaha';
 
   @override
-  String get timePickerMinuteLabel => 'Minute';
+  String get timePickerMinuteLabel => 'Umunota';
 
   @override
-  String get timePickerMinuteModeAnnouncement => 'Select minutes';
+  String get timePickerMinuteModeAnnouncement => 'Hitamo iminota';
 
   @override
-  String get unspecifiedDate => 'Date';
+  String get unspecifiedDate => 'Itariki';
 
   @override
-  String get unspecifiedDateRange => 'Date Range';
+  String get unspecifiedDateRange => "Intera y'amatariki";
 
   @override
-  String get viewLicensesButtonLabel => 'View licenses';
+  String get viewLicensesButtonLabel => 'Reba impushya';
 }
 
 /// The translations for Sinhala Sinhalese (`si`).

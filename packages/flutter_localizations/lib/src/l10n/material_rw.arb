@@ -11,62 +11,62 @@
     "x-flutter-type": "icuShortTimePattern"
   },
 
-  "openAppDrawerTooltip": "Open navigation menu",
+  "openAppDrawerTooltip": "Fungura meni",
   "@openAppDrawerTooltip": {
     "description": "The tooltip for the leading app bar menu (aka 'hamburger') button."
   },
 
-  "backButtonTooltip": "Back",
+  "backButtonTooltip": "Subira inyuma",
   "@backButtonTooltip": {
     "description": "The tooltip for the back button, which closes the current page and returns to the previous one."
   },
 
-  "closeButtonTooltip": "Close",
+  "closeButtonTooltip": "Funga",
   "@closeButtonTooltip": {
     "description": "The tooltip for the close button, which closes the current page and returns to the previous one."
   },
 
-  "deleteButtonTooltip": "Delete",
+  "deleteButtonTooltip": "Siba",
   "@deleteButtonTooltip": {
     "description": "The tooltip for the delete button of chips."
   },
 
-  "moreButtonTooltip": "More",
+  "moreButtonTooltip": "Ibindi",
   "@moreButtonTooltip": {
     "description": "The tooltip for the more button in the text selection menu, which shows the overflowing menu items."
   },
 
-  "nextMonthTooltip": "Next month",
+  "nextMonthTooltip": "Ukwezi gutaha",
   "@nextMonthTooltip": {
     "description": "The tooltip for the month picker's 'next month' button."
   },
 
-  "previousMonthTooltip": "Previous month",
+  "previousMonthTooltip": "Ukwezi gushize",
   "@previousMonthTooltip": {
     "description": "The tooltip for the month picker's 'previous month' button."
   },
 
-  "nextPageTooltip": "Next page",
+  "nextPageTooltip": "Paji ikurikira",
   "@nextPageTooltip": {
     "description": "The tooltip for the button that sends the user to the next page of a paginated data table."
   },
 
-  "previousPageTooltip": "Previous page",
+  "previousPageTooltip": "Paji ibanza",
   "@previousPageTooltip": {
     "description": "The tooltip for the button that sends the user to the previous page of a paginated data table."
   },
 
-  "firstPageTooltip": "First page",
+  "firstPageTooltip": "Paji yambere",
   "@firstPageTooltip": {
     "description": "The tooltip for the button that sends the user to the first page of a paginated data table."
   },
 
-  "lastPageTooltip": "Last page",
+  "lastPageTooltip": "Paji yanyuma",
   "@lastPageTooltip": {
     "description": "The tooltip for the button that sends the user to the last page of a paginated data table."
   },
 
-  "showMenuTooltip": "Show menu",
+  "showMenuTooltip": "Erekana meni",
   "@showMenuTooltip": {
     "description": "The tooltip for the button that shows a popup menu."
   },
@@ -81,28 +81,28 @@
     "description": "The label for a BottomSheet."
   },
 
-  "scrimOnTapHint": "Close $modalRouteContentName",
+  "scrimOnTapHint": "Funga $modalRouteContentName",
   "@scrimOnTapHint": {
     "description": "The onTapHint for the scrim rendered underneath the content of a modal route (especially a bottom sheet) which users can tap to dismiss the content.",
     "parameters": "modalRouteContentName"
   },
 
-  "aboutListTileTitle": "About $applicationName",
+  "aboutListTileTitle": "Ibyerekeye $applicationName",
   "@aboutListTileTitle": {
     "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
     "parameters": "applicationName"
   },
 
-  "licensesPageTitle": "Licenses",
+  "licensesPageTitle": "Impushya",
   "@licensesPageTitle": {
     "description": "The title for the Flutter licenses page."
   },
 
-  "licensesPackageDetailTextZero": "No licenses",
+  "licensesPackageDetailTextZero": "Nta mpushya",
   "@licensesPackageDetailTextZero": {
     "optional": true
   },
-  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOne": "Uruhushya 1",
   "@licensesPackageDetailTextOne": {
     "optional": true
   },
@@ -115,40 +115,40 @@
   "@licensesPackageDetailTextMany": {
     "optional": true
   },
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
+  "licensesPackageDetailTextOther": "Impushya $licenseCount",
   "@licensesPackageDetailText": {
     "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has.",
     "plural": "licenseCount"
   },
 
-  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
+  "pageRowsInfoTitle": "$firstRow–$lastRow muri $rowCount",
   "@pageRowsInfoTitle": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
 
-  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow hafi muri $rowCount",
   "@pageRowsInfoTitleApproximate": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
 
-  "rowsPerPageTitle": "Rows per page:",
+  "rowsPerPageTitle": "Imirongo kuri paji:",
   "@rowsPerPageTitle": {
     "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
   },
 
-  "tabLabel": "Tab $tabIndex of $tabCount",
+  "tabLabel": "Paji ya $tabIndex muri $tabCount",
   "@tabLabel": {
     "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'Tab 1 of 2'. All values are greater than or equal to one.",
     "parameters": "tabIndex, tabCount"
   },
 
-  "selectedRowCountTitleZero": "No items selected",
+  "selectedRowCountTitleZero": "Nta kintu cyatoranijwe",
   "@selectedRowCountTitleZero": {
     "optional": true
   },
-  "selectedRowCountTitleOne": "1 item selected",
+  "selectedRowCountTitleOne": "Ikintu 1 cyatoranijwe",
   "@selectedRowCountTitleOne": {
     "optional": true
   },
@@ -161,53 +161,53 @@
   "@selectedRowCountTitleMany": {
     "optional": true
   },
-  "selectedRowCountTitleOther": "$selectedRowCount items selected",
+  "selectedRowCountTitleOther": "Ibintu $selectedRowCount byatoranyijwe",
   "@selectedRowCountTitle": {
     "description": "The title for the header of a paginated data table when the user is selecting rows. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
     "plural": "selectedRowCount"
   },
 
-  "cancelButtonLabel": "Cancel",
+  "cancelButtonLabel": "Bireke",
   "@cancelButtonLabel": {
     "description": "The label for cancel buttons and menu items."
   },
 
-  "closeButtonLabel": "Close",
+  "closeButtonLabel": "Funga",
   "@closeButtonLabel": {
     "description": "The label for close buttons and menu items."
   },
 
-  "continueButtonLabel": "Continue",
+  "continueButtonLabel": "Komeza",
   "@continueButtonLabel": {
     "description": "The label for continue buttons and menu items."
   },
 
-  "copyButtonLabel": "Copy",
+  "copyButtonLabel": "Kopiya",
   "@copyButtonLabel": {
     "description": "The label for copy buttons and menu items."
   },
 
-  "cutButtonLabel": "Cut",
+  "cutButtonLabel": "Kata",
   "@cutButtonLabel": {
     "description": "The label for cut buttons and menu items."
   },
 
-  "scanTextButtonLabel": "Scan text",
+  "scanTextButtonLabel": "Sikana amagambo",
   "@scanTextButtonLabel": {
     "description": "The label for scan text buttons and menu items for starting the insertion of text via OCR."
   },
 
-  "lookUpButtonLabel": "Look Up",
+  "lookUpButtonLabel": "Shakisha",
   "@lookUpButtonLabel": {
     "description": "The label for the Look Up button and menu items on iOS."
   },
 
-  "searchWebButtonLabel": "Search Web",
+  "searchWebButtonLabel": "Shakisha kurubuga",
   "@searchWebButtonLabel": {
     "description": "The label for the Search Web button and menu items on iOS."
   },
 
-  "shareButtonLabel": "Share...",
+  "shareButtonLabel": "Sangiza...",
   "@shareButtonLabel": {
     "description": "The label for the Share button and menu items on iOS."
   },
@@ -217,17 +217,17 @@
     "description": "The label for OK buttons and menu items."
   },
 
-  "pasteButtonLabel": "Paste",
+  "pasteButtonLabel": "Koporora",
   "@pasteButtonLabel": {
     "description": "The label for paste buttons and menu items."
   },
 
-  "selectAllButtonLabel": "Select all",
+  "selectAllButtonLabel": "Hitamo byose",
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items."
   },
 
-  "viewLicensesButtonLabel": "View licenses",
+  "viewLicensesButtonLabel": "Reba impushya",
   "@viewLicensesButtonLabel": {
     "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
   },
@@ -242,22 +242,22 @@
     "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
   },
 
-  "timePickerHourModeAnnouncement": "Select hours",
+  "timePickerHourModeAnnouncement": "Hitamo amasaha",
   "@timePickerHourModeAnnouncement": {
     "description": "The audio announcement made when the time picker dialog is set to hour mode."
   },
 
-  "timePickerMinuteModeAnnouncement": "Select minutes",
+  "timePickerMinuteModeAnnouncement": "Hitamo iminota",
   "@timePickerMinuteModeAnnouncement": {
     "description": "The audio announcement made when the time picker dialog is set to minute mode."
   },
 
-  "modalBarrierDismissLabel": "Dismiss",
+  "modalBarrierDismissLabel": "Byirengagize",
   "@modalBarrierDismissLabel": {
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
   },
 
-  "menuDismissLabel": "Dismiss menu",
+  "menuDismissLabel": "Kuraho meni",
   "@menuDismissLabel": {
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
   },
@@ -267,144 +267,144 @@
     "description": "The character string used to separate the parts of a compact date format. For example 'mm/dd/yyyy' has a separator of '/'."
   },
 
-  "dateHelpText": "mm/dd/yyyy",
+  "dateHelpText": "dd/mm/yyyy",
   "@dateHelpText": {
     "description": "The help text used on an empty text input date field to indicate the date format being asked for."
   },
 
-  "selectYearSemanticsLabel": "Select year",
+  "selectYearSemanticsLabel": "Hitamo umwaka",
   "@selectYearSemanticsLabel": {
     "description": "The accessibility label used to announce when the user has entered the year selection mode in the date picker."
   },
 
-  "unspecifiedDate": "Date",
+  "unspecifiedDate": "Itariki",
   "@unspecifiedDate": {
     "description": "The label used to indicate a date that has not been entered or selected in the date picker."
   },
 
-  "unspecifiedDateRange": "Date Range",
+  "unspecifiedDateRange": "Intera y'amatariki",
   "@unspecifiedDateRange": {
     "description": "The label used to indicate a date range that has not been entered or selected in the date range picker."
   },
 
-  "dateInputLabel": "Enter Date",
+  "dateInputLabel": "Injiza itariki",
   "@dateInputLabel": {
     "description": "The label used to describe the input text field used in the date picker."
   },
 
-  "dateRangeStartLabel": "Start Date",
+  "dateRangeStartLabel": "Itariki itangira",
   "@dateRangeStartLabel": {
     "description": "The label used to describe the starting date input text field used in the date range picker."
   },
 
-  "dateRangeEndLabel": "End Date",
+  "dateRangeEndLabel": "Itariki yanyuma",
   "@dateRangeEndLabel": {
     "description": "The label used to describe the ending date input text field used in the date range picker."
   },
 
-  "dateRangeStartDateSemanticLabel": "Start date $fullDate",
+  "dateRangeStartDateSemanticLabel": "Itariki itangira $fullDate",
   "@dateRangeStartDateSemanticLabel": {
     "description": "Accessibility announcement that is used when the user navigates to the selected start date in the date range picker.",
     "parameters": "$fullDate"
   },
 
-  "dateRangeEndDateSemanticLabel": "End date $fullDate",
+  "dateRangeEndDateSemanticLabel": "Itariki yanyuma $fullDate",
   "@dateRangeEndDateSemanticLabel": {
     "description": "Accessibility announcement that is used when the user navigates to the selected end date in the date range picker.",
     "parameters": "$fullDate"
   },
 
-  "invalidDateFormatLabel": "Invalid format.",
+  "invalidDateFormatLabel": "Imiterere ntiyemewe.",
   "@invalidDateFormatLabel": {
     "description": "Error message displayed to the user when they have entered a text string in an input field of the date picker that is not in a valid date format."
   },
 
-  "invalidDateRangeLabel": "Invalid range.",
+  "invalidDateRangeLabel": "Intera ntiyemewe.",
   "@invalidDateRangeLabel": {
     "description": "Error message displayed to the user when they have entered an invalid date range in the input fields of the date range picker."
   },
 
-  "dateOutOfRangeLabel": "Out of range.",
+  "dateOutOfRangeLabel": "Intera irarenga.",
   "@dateOutOfRangeLabel": {
     "description": "Error message displayed to the user when they have entered a date that is outside the valid range for the date picker."
   },
 
-  "saveButtonLabel": "Save",
+  "saveButtonLabel": "Byemeze",
   "@saveButtonLabel": {
     "description": "Label for a 'Save' button used in full screen dialogs."
   },
 
-  "datePickerHelpText": "Select date",
+  "datePickerHelpText": "Hitamo itariki",
   "@datePickerHelpText": {
     "description": "Label used in the header of the date picker dialog"
   },
 
-  "dateRangePickerHelpText": "Select range",
+  "dateRangePickerHelpText": "Hitamo intera",
   "@dateRangePickerHelpText": {
     "description": "Label used in the header of the date range picker dialog."
   },
 
-  "calendarModeButtonLabel": "Switch to calendar",
+  "calendarModeButtonLabel": "Hindura kuri kalendari",
   "@calendarModeButtonLabel": {
     "description": "Tooltip used for the calendar mode button of the date pickers."
   },
 
-  "inputDateModeButtonLabel": "Switch to input",
+  "inputDateModeButtonLabel": "Hindura ku byo winjiza",
   "@inputDateModeButtonLabel": {
     "description": "Tooltip used for the text input mode button of the date pickers."
   },
 
-  "timePickerDialHelpText": "Select time",
+  "timePickerDialHelpText": "Hitamo isaha",
   "@timePickerDialHelpText": {
     "description": "Label used in the header of the time picker dialog when using the clock dial to select a time."
   },
 
-  "timePickerInputHelpText": "Enter time",
+  "timePickerInputHelpText": "Injiza isaha",
   "@timePickerInputHelpText": {
     "description": "Label used in the header of the time picker dialog when using the text input to enter a time."
   },
 
-  "timePickerHourLabel": "Hour",
+  "timePickerHourLabel": "Isaha",
   "@timePickerHourLabel": {
     "description": "Label indicating the text field for inputting an hour when entering a time."
   },
 
-  "timePickerMinuteLabel": "Minute",
+  "timePickerMinuteLabel": "Umunota",
   "@timePickerMinuteLabel": {
     "description": "Label indicating the text field for inputting a minute when entering a time."
   },
 
-  "invalidTimeLabel": "Enter a valid time",
+  "invalidTimeLabel": "Injiza isaha yemewe",
   "@invalidTimeLabel": {
     "description": "Error message displayed to the user when they have entered an invalid time."
   },
 
-  "dialModeButtonLabel": "Switch to dial picker mode",
+  "dialModeButtonLabel": "Hindura mu buryo bwo guhitamo",
   "@dialModeButtonLabel": {
     "description": "Tooltip used for the clock dial mode button of the time picker."
   },
 
-  "inputTimeModeButtonLabel": "Switch to text input mode",
+  "inputTimeModeButtonLabel": "Hindura muburyo bwo kwandika",
   "@inputTimeModeButtonLabel": {
     "description": "Tooltip used for the text input mode button of the time picker."
   },
 
-  "signedInLabel": "Signed in",
+  "signedInLabel": "Winjiye",
   "@signedInLabel": {
     "description": "The accessibility label used to indicate which account is signed in, in a UserAccountsDrawerHeader, when the accessibility user navigates the UI. This phrase serves as an adjective with respect to the user. The phrase indicates that the user is currently signed in."
   },
 
-  "hideAccountsLabel": "Hide accounts",
+  "hideAccountsLabel": "Hisha amakonti",
   "@hideAccountsLabel": {
     "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that hides the list of accounts."
   },
 
-  "showAccountsLabel": "Show accounts",
+  "showAccountsLabel": "Erekana amakonti",
   "@showAccountsLabel": {
     "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that shows the list of accounts."
   },
 
-  "drawerLabel": "Navigation menu",
+  "drawerLabel": "Meni",
   "@drawerLabel": {
     "description": "The audio announcement made when the Drawer is opened."
   },
@@ -414,106 +414,106 @@
     "description": "The audio announcement made when a MenuBarMenu is opened."
   },
 
-  "popupMenuLabel": "Popup menu",
+  "popupMenuLabel": "Meni",
   "@popupMenuLabel": {
     "description": "The audio announcement made when a PopupMenu is opened."
   },
 
-  "dialogLabel": "Dialog",
+  "dialogLabel": "Akadirishya",
   "@dialogLabel": {
     "description": "The audio announcement made when a Dialog is opened."
   },
 
-  "alertDialogLabel": "Alert",
+  "alertDialogLabel": "Imenyesha",
   "@alertDialogLabel": {
     "description": "The audio announcement made when an AlertDialog is opened."
   },
 
-  "searchFieldLabel": "Search",
+  "searchFieldLabel": "Shakisha",
   "@searchFieldLabel": {
     "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
   },
 
-  "currentDateLabel": "Today",
+  "currentDateLabel": "Uyu munsi",
   "@currentDateLabel": {
     "description": "Label indicating that the focused date is the current date."
   },
 
-  "reorderItemToStart": "Move to the start",
+  "reorderItemToStart": "Imurira kuntangiriro",
   "@reorderItemToStart": {
     "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
   },
 
-  "reorderItemToEnd": "Move to the end",
+  "reorderItemToEnd": "Imurira ku iherezo",
   "@reorderItemToEnd": {
     "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
   },
 
-  "reorderItemUp": "Move up",
+  "reorderItemUp": "Imurira hejuru",
   "@reorderItemUp": {
     "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
   },
 
-  "reorderItemDown": "Move down",
+  "reorderItemDown": "Imurira hasi",
   "@reorderItemDown": {
     "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
   },
 
-  "reorderItemLeft": "Move left",
+  "reorderItemLeft": "Imurira ibumoso",
   "@reorderItemLeft": {
     "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
   },
 
-  "reorderItemRight": "Move right",
+  "reorderItemRight": "Imurira iburyo",
   "@reorderItemRight": {
     "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
   },
 
-  "expandedIconTapHint": "Collapse",
+  "expandedIconTapHint": "Kuraho",
   "@expandedIconTapHint": {
     "description": "The verb which describes what happens when an expanded ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
   },
 
-  "collapsedIconTapHint": "Expand",
+  "collapsedIconTapHint": "Agura",
   "@collapsedIconTapHint": {
     "description": "The verb which describes what happens when a collapsed ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand.' The exact phrasing of the hint will vary based on locale"
   },
 
-  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileExpandedHint": "kanda inshuro ebyiri ukureho",
   "@expansionTileExpandedHint": {
     "description": "The verb which describes the tap action on an expanded ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the collapsedHint string which describes the action to be performed on an expanded ExpansionTile. In the case of US english, this would be 'Expanded\n double tap to collapse.' The exact phrasing of the hint will vary based on locale"
   },
 
-  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileCollapsedHint": "kanda inshuro ebyiri wagure",
   "@expansionTileCollapsedHint": {
     "description": "The verb which describes the tap action on a collapsed ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed ExpansionTile. In the case of US english, this would be 'Collapsed\n double tap to expand.' The exact phrasing of the hint will vary based on locale"
   },
 
-  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileExpandedTapHint": "Kuraho",
   "@expansionTileExpandedTapHint": {
     "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
   },
 
-  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expansionTileCollapsedTapHint": "Agura kubindi bisobanuro",
   "@expansionTileCollapsedTapHint": {
     "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand for more details.' The exact phrasing of the hint will vary based on locale"
   },
 
-  "expandedHint": "Collapsed",
+  "expandedHint": "Byakuweho",
   "@expandedHint": {
     "description": "The verb which describes the ExpansionTile state when an expanded ExpansionTile is pressed."
   },
 
-  "collapsedHint": "Expanded",
+  "collapsedHint": "Byaguwe",
   "@collapsedHint": {
     "description": "The verb which describes the ExpansionTile state when a collapsed ExpansionTile is pressed."
   },
 
-  "remainingTextFieldCharacterCountZero": "No characters remaining",
+  "remainingTextFieldCharacterCountZero": "Nta nyuguti zisigaye",
   "@remainingTextFieldCharacterCountZero": {
     "optional": true
   },
-  "remainingTextFieldCharacterCountOne": "1 character remaining",
+  "remainingTextFieldCharacterCountOne": "inyuguti 1 isigaye",
   "@remainingTextFieldCharacterCountOne": {
     "optional": true
   },
@@ -526,13 +526,13 @@
   "@remainingTextFieldCharacterCountMany": {
     "optional": true
   },
-  "remainingTextFieldCharacterCountOther": "$remainingCount characters remaining",
+  "remainingTextFieldCharacterCountOther": "hasigaye inyuguti $remainingCount",
   "@remainingTextFieldCharacterCount": {
     "description": "The label for the TextField's character counter. remainingCharacters is a integer representing how many more characters the user can type into the text field before using up a given budget. All values are greater than or equal to zero.",
     "plural": "remainingCount"
   },
 
-  "refreshIndicatorSemanticLabel": "Refresh",
+  "refreshIndicatorSemanticLabel": "Subiramo",
   "@refreshIndicatorSemanticLabel": {
     "description": "The verb which describes what happens when a RefreshIndicator is displayed on screen.  This is used by TalkBack on Android to announce that a refresh is happening."
   },
@@ -742,7 +742,7 @@
     "description": "Part of a keyboard shortcut label for the keyboard key 'Power' (power) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. The key typically turns the computer off and on."
   },
 
-  "keyboardKeyPowerOff": "Power Off",
+  "keyboardKeyPowerOff": "Zimya",
   "@keyboardKeyPowerOff": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Power Off' (powerOff) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. The key typically turns off the computer."
   },
