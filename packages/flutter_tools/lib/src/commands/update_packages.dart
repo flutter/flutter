@@ -37,11 +37,11 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
   // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker': '9.0.9',
+  'leak_tracker': '9.0.10',
     // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_testing': '1.0.5',
   // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_flutter_testing': '1.0.7',
+  'leak_tracker_flutter_testing': '1.0.8',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
