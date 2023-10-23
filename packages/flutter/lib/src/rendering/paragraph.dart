@@ -1702,16 +1702,15 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // we do not need to look up the word boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
-    _WordBoundaryRecord? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
-    if (wordBoundary != null) {
-      if (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset <= range.start
-          || wordBoundary.wordStart.offset >= range.end && wordBoundary.wordEnd.offset > range.end) {
-        // When the position is located at a placeholder inside of the text, then we may compute
-        // a word boundary that does not belong to the current selectable fragment. In this case
-        // we should invalidate the word boundary so that it is not taken into account when
-        // computing the target position.
-        wordBoundary = null;
-      }
+    _WordBoundaryRecord? wordBoundary = _rect.contains(localPosition) ? _getWordBoundaryAtPosition(position) : null;
+    if (wordBoundary != null
+        && (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset <= range.start
+        || wordBoundary.wordStart.offset >= range.end && wordBoundary.wordEnd.offset > range.end)) {
+      // When the position is located at a placeholder inside of the text, then we may compute
+      // a word boundary that does not belong to the current selectable fragment. In this case
+      // we should invalidate the word boundary so that it is not taken into account when
+      // computing the target position.
+      wordBoundary = null;
     }
     final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByWord(wordBoundary, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByWord(wordBoundary, position, existingSelectionStart, existingSelectionEnd));
 
