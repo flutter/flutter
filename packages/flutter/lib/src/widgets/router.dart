@@ -628,7 +628,10 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     }
     assert(_currentIntentionToReport != null);
     _routeInformationReportingTaskScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback(_reportRouteInformation);
+    SchedulerBinding.instance.addPostFrameCallback(
+      _reportRouteInformation,
+      debugLabel: 'Router.reportRouteInfo',
+    );
   }
 
   void _reportRouteInformation(Duration timestamp) {
