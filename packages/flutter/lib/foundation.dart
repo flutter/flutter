@@ -47,3 +47,16 @@ export 'src/foundation/stack_frame.dart';
 export 'src/foundation/synchronous_future.dart';
 export 'src/foundation/timeline.dart';
 export 'src/foundation/unicode.dart';
+
+/// This is a List<int>.
+const String foo = 'hello';
+
+/// This is a `List<int>`.
+const String bar = 'hello';
+
+/// This is a
+///
+/// ```dart
+/// List<int> foo = [];
+/// ```
+const String baz = 'hello';
