@@ -455,10 +455,16 @@ class ColorScheme with Diagnosticable {
        _inversePrimary = inversePrimary,
        _surfaceTint = surfaceTint;
 
-  /// Create a color scheme from a [MaterialColor] swatch.
+  /// Creates a color scheme from a [MaterialColor] swatch.
   ///
-  /// This constructor is used by [ThemeData] to create its default
-  /// color scheme.
+  /// In Material 3, this constructor is ignored by [ThemeData] when creating
+  /// its default color scheme. Instead, [ThemeData] uses [ ColorScheme.fromSeed]
+  /// to create its default color scheme. This constructor shouldn't be used
+  /// to update the Material 3 color scheme. It will be phased out gradually;
+  /// see https://github.com/flutter/flutter/issues/91772 for more details.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then this constructor is used by
+  /// [ThemeData] to create its default color scheme.
   factory ColorScheme.fromSwatch({
     MaterialColor primarySwatch = Colors.blue,
     Color? accentColor,
@@ -467,7 +473,6 @@ class ColorScheme with Diagnosticable {
     Color? errorColor,
     Brightness brightness = Brightness.light,
   }) {
-
     final bool isDark = brightness == Brightness.dark;
     final bool primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;
     final Color secondary = accentColor ?? (isDark ? Colors.tealAccent[200]! : primarySwatch);
