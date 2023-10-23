@@ -50,6 +50,7 @@ void main() {
       disabledThumbColor: Color(0xFF000013),
       overlayColor: Color(0xFF000014),
       valueIndicatorColor: Color(0xFF000015),
+      valueIndicatorStrokeColor: Color(0xFF000015),
       overlayShape: RoundSliderOverlayShape(),
       tickMarkShape: RoundSliderTickMarkShape(),
       thumbShape: RoundSliderThumbShape(),
@@ -87,6 +88,7 @@ void main() {
       'disabledThumbColor: Color(0xff000013)',
       'overlayColor: Color(0xff000014)',
       'valueIndicatorColor: Color(0xff000015)',
+      'valueIndicatorStrokeColor: Color(0xff000015)',
       "overlayShape: Instance of 'RoundSliderOverlayShape'",
       "tickMarkShape: Instance of 'RoundSliderTickMarkShape'",
       "thumbShape: Instance of 'RoundSliderThumbShape'",
@@ -630,6 +632,7 @@ void main() {
     expect(sliderTheme.disabledThumbColor, equals(customColor2.withAlpha(0x52)));
     expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x1f)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
+    expect(sliderTheme.valueIndicatorStrokeColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.valueIndicatorTextStyle!.color, equals(customColor4));
   });
 
@@ -688,6 +691,7 @@ void main() {
     expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
     expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorStrokeColor, equals(middleGrey.withAlpha(0xff)));
     expect(lerp.valueIndicatorTextStyle!.color, equals(middleGrey.withAlpha(0xff)));
   });
 
@@ -2078,9 +2082,6 @@ void main() {
           ..rrect(color: const Color(0xff6750a4))
           ..rrect(color: const Color(0xffe7e0ec))
           ..path(color: Color(theme.colorScheme.primary.value))
-          ..rrect(
-            color: Color(theme.colorScheme.primary.value),
-          )
       );
 
       // Finish gesture to release resources.
@@ -2089,6 +2090,349 @@ void main() {
     } finally {
       debugDisableShadows = true;
     }
+  });
+
+  testWidgetsWithLeakTracking('RectangularSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: RectangularSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('PaddleSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('DropSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: DropSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      )
+    );
+
+    RangeValues values = const RangeValues(0, 0.5);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              values: values,
+              labels: RangeLabels(
+                values.start.toString(),
+                values.end.toString(),
+              ),
+              onChanged: (RangeValues val) {
+                values = val;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+    );
+
+    await gesture.up();
+  });
+
+  testWidgetsWithLeakTracking('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+        overlappingShapeStrokeColor: Color(0xff000003),
+      )
+    );
+
+    RangeValues values = const RangeValues(0.0, 0.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              values: values,
+              labels: RangeLabels(
+                values.start.toString(),
+                values.end.toString(),
+              ),
+              onChanged: (RangeValues val) {
+                values = val;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+        ..path(color: theme.sliderTheme.overlappingShapeStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+    );
+
+    await gesture.up();
+  });
+
+  testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+      )
+    );
+
+    RangeValues values = const RangeValues(0, 0.5);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              values: values,
+              labels: RangeLabels(
+                values.start.toString(),
+                values.end.toString(),
+              ),
+              onChanged: (RangeValues val) {
+                values = val;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+    );
+
+    await gesture.up();
+  });
+
+  testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: Color(0xff000001),
+        valueIndicatorStrokeColor: Color(0xff000002),
+        overlappingShapeStrokeColor: Color(0xff000003),
+      )
+    );
+
+    RangeValues values = const RangeValues(0, 0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              values: values,
+              labels: RangeLabels(
+                values.start.toString(),
+                values.end.toString(),
+              ),
+              onChanged: (RangeValues val) {
+                values = val;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..path(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+        ..path(color: theme.sliderTheme.overlappingShapeStrokeColor)
+        ..path(color: theme.sliderTheme.valueIndicatorColor)
+    );
+
+    await gesture.up();
   });
 
   group('Material 2', () {

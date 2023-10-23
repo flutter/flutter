@@ -76,9 +76,6 @@ class SemanticsController {
   /// if no semantics are found or are not enabled.
   SemanticsNode find(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
-    if (!_controller.binding.semanticsEnabled) {
-      throw StateError('Semantics are not enabled.');
-    }
     final Iterable<Element> candidates = finder.evaluate();
     if (candidates.isEmpty) {
       throw StateError('Finder returned no matching elements.');
@@ -102,21 +99,21 @@ class SemanticsController {
   /// Simulates a traversal of the currently visible semantics tree as if by
   /// assistive technologies.
   ///
-  /// Starts at the node for `start`. If `start` is not provided, then the
-  /// traversal begins with the first accessible node in the tree. If `start`
-  /// finds zero elements or more than one element, a [StateError] will be
-  /// thrown.
+  /// Starts at the node for `startNode`. If `startNode` is not provided, then
+  /// the traversal begins with the first accessible node in the tree. If
+  /// `startNode` finds zero elements or more than one element, a [StateError]
+  /// will be thrown.
   ///
-  /// Ends at the node for `end`, inclusive. If `end` is not provided, then the
-  /// traversal ends with the last accessible node in the currently available
-  /// tree. If `end` finds zero elements or more than one element, a
-  /// [StateError] will be thrown.
+  /// Ends at the node for `endNode`, inclusive. If `endNode` is not provided,
+  /// then the traversal ends with the last accessible node in the currently
+  /// available tree. If `endNode` finds zero elements or more than one element,
+  /// a [StateError] will be thrown.
   ///
-  /// If provided, the nodes for `end` and `start` must be part of the same
-  /// semantics tree, i.e. they must be part of the same view.
+  /// If provided, the nodes for `endNode` and `startNode` must be part of the
+  /// same semantics tree, i.e. they must be part of the same view.
   ///
-  /// If neither `start` or `end` is provided, `view` can be provided to specify
-  /// the semantics tree to traverse. If `view` is left unspecified,
+  /// If neither `startNode` or `endNode` is provided, `view` can be provided to
+  /// specify the semantics tree to traverse. If `view` is left unspecified,
   /// [WidgetTester.view] is traversed by default.
   ///
   /// Since the order is simulated, edge cases that differ between platforms
@@ -149,10 +146,30 @@ class SemanticsController {
   ///   parts of the traversal.
   /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
   ///   match the order of the traversal.
-  Iterable<SemanticsNode> simulatedAccessibilityTraversal({finders.FinderBase<Element>? start, finders.FinderBase<Element>? end, FlutterView? view}) {
+  Iterable<SemanticsNode> simulatedAccessibilityTraversal({
+    @Deprecated(
+      'Use startNode instead. '
+      'This method was originally created before semantics finders were available. '
+      'Semantics finders avoid edge cases where some nodes are not discoverable by widget finders and should be preferred for semantics testing. '
+      'This feature was deprecated after v3.15.0-15.2.pre.'
+    )
+    finders.FinderBase<Element>? start,
+    @Deprecated(
+      'Use endNode instead. '
+      'This method was originally created before semantics finders were available. '
+      'Semantics finders avoid edge cases where some nodes are not discoverable by widget finders and should be preferred for semantics testing. '
+      'This feature was deprecated after v3.15.0-15.2.pre.'
+    )
+    finders.FinderBase<Element>? end,
+    finders.FinderBase<SemanticsNode>? startNode,
+    finders.FinderBase<SemanticsNode>? endNode,
+    FlutterView? view,
+  }) {
     TestAsyncUtils.guardSync();
+    assert(start == null || startNode == null, 'Cannot provide both start and startNode. Prefer startNode as start is deprecated.');
+    assert(end == null || endNode == null, 'Cannot provide both end and endNode. Prefer endNode as end is deprecated.');
+
     FlutterView? startView;
-    FlutterView? endView;
     if (start != null) {
       startView = _controller.viewOf(start);
       if (view != null && startView != view) {
@@ -164,6 +181,23 @@ class SemanticsController {
         );
       }
     }
+    if (startNode != null) {
+      final SemanticsOwner owner = startNode.evaluate().single.owner!;
+      final RenderView renderView = _controller.binding.renderViews.firstWhere(
+        (RenderView render) => render.owner!.semanticsOwner == owner,
+      );
+      startView = renderView.flutterView;
+      if (view != null && startView != view) {
+        throw StateError(
+          'The end node is not part of the provided view.\n'
+          'Finder: ${startNode.toString(describeSelf: true)}\n'
+          'View of end node: $startView\n'
+          'Specified view: $view'
+        );
+      }
+    }
+
+    FlutterView? endView;
     if (end != null) {
       endView = _controller.viewOf(end);
       if (view != null && endView != view) {
@@ -175,6 +209,22 @@ class SemanticsController {
         );
       }
     }
+    if (endNode != null) {
+      final SemanticsOwner owner = endNode.evaluate().single.owner!;
+      final RenderView renderView = _controller.binding.renderViews.firstWhere(
+        (RenderView render) => render.owner!.semanticsOwner == owner,
+      );
+      endView = renderView.flutterView;
+      if (view != null && endView != view) {
+        throw StateError(
+          'The end node is not part of the provided view.\n'
+          'Finder: ${endNode.toString(describeSelf: true)}\n'
+          'View of end node: $endView\n'
+          'Specified view: $view'
+        );
+      }
+    }
+
     if (endView != null && startView != null && endView != startView) {
       throw StateError(
         'The start and end node are in different views.\n'
@@ -189,7 +239,10 @@ class SemanticsController {
     final RenderView renderView = _controller.binding.renderViews.firstWhere((RenderView r) => r.flutterView == actualView);
 
     final List<SemanticsNode> traversal = <SemanticsNode>[];
-    _traverse(renderView.owner!.semanticsOwner!.rootSemanticsNode!, traversal);
+    _accessibilityTraversal(
+      renderView.owner!.semanticsOwner!.rootSemanticsNode!,
+      traversal,
+    );
 
     int startIndex = 0;
     int endIndex = traversal.length - 1;
@@ -223,14 +276,14 @@ class SemanticsController {
 
   /// Recursive depth first traversal of the specified `node`, adding nodes
   /// that are important for semantics to the `traversal` list.
-  void _traverse(SemanticsNode node, List<SemanticsNode> traversal){
+  void _accessibilityTraversal(SemanticsNode node, List<SemanticsNode> traversal){
     if (_isImportantForAccessibility(node)) {
       traversal.add(node);
     }
 
     final List<SemanticsNode> children = node.debugListChildrenInOrder(DebugSemanticsDumpOrder.traversalOrder);
     for (final SemanticsNode child in children) {
-      _traverse(child, traversal);
+      _accessibilityTraversal(child, traversal);
     }
   }
 
@@ -270,6 +323,331 @@ class SemanticsController {
     }
 
     return false;
+  }
+
+  /// Performs the given [SemanticsAction] on the [SemanticsNode] found by `finder`.
+  ///
+  /// If `args` are provided, they will be passed unmodified with the `action`.
+  /// The `checkForAction` argument allows for attempting to perform `action` on
+  /// `node` even if it doesn't report supporting that action. This is useful
+  /// for implicitly supported actions such as [SemanticsAction.showOnScreen].
+  void performAction(
+    finders.FinderBase<SemanticsNode> finder,
+    SemanticsAction action, {
+    Object? args,
+    bool checkForAction = true
+  }) {
+    final SemanticsNode node = finder.evaluate().single;
+    if (checkForAction && !node.getSemanticsData().hasAction(action)){
+      throw StateError(
+        'The given node does not support $action. If the action is implicitly '
+        'supported or an unsupported action is being tested for this node, '
+        'set `checkForAction` to false.\n'
+        'Node: $node'
+      );
+    }
+
+    node.owner!.performAction(node.id, action, args);
+  }
+
+  /// Performs a [SemanticsAction.tap] action on the [SemanticsNode] found
+  /// by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.tap].
+  void tap(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.tap);
+  }
+
+  /// Performs a [SemanticsAction.longPress] action on the [SemanticsNode] found
+  /// by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.longPress].
+  void longPress(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.longPress);
+  }
+
+  /// Performs a [SemanticsAction.scrollLeft] action on the [SemanticsNode]
+  /// found by `scrollable` or the first scrollable node in the default
+  /// semantics tree if no `scrollable` is provided.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `scrollable` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `scrollable` does not support
+  ///   [SemanticsAction.scrollLeft].
+  void scrollLeft({finders.FinderBase<SemanticsNode>? scrollable}) {
+    performAction(scrollable ?? finders.find.semantics.scrollable(), SemanticsAction.scrollLeft);
+  }
+
+  /// Performs a [SemanticsAction.scrollRight] action on the [SemanticsNode]
+  /// found by `scrollable` or the first scrollable node in the default
+  /// semantics tree if no `scrollable` is provided.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `scrollable` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `scrollable` does not support
+  ///   [SemanticsAction.scrollRight].
+  void scrollRight({finders.FinderBase<SemanticsNode>? scrollable}) {
+    performAction(scrollable ?? finders.find.semantics.scrollable(), SemanticsAction.scrollRight);
+  }
+
+  /// Performs a [SemanticsAction.scrollUp] action on the [SemanticsNode] found
+  /// by `scrollable` or the first scrollable node in the default semantics
+  /// tree if no `scrollable` is provided.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `scrollable` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `scrollable` does not support
+  ///   [SemanticsAction.scrollUp].
+  void scrollUp({finders.FinderBase<SemanticsNode>? scrollable}) {
+    performAction(scrollable ?? finders.find.semantics.scrollable(), SemanticsAction.scrollUp);
+  }
+
+  /// Performs a [SemanticsAction.scrollDown] action on the [SemanticsNode]
+  /// found by `scrollable` or the first scrollable node in the default
+  /// semantics tree if no `scrollable` is provided.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `scrollable` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `scrollable` does not support
+  ///   [SemanticsAction.scrollDown].
+  void scrollDown({finders.FinderBase<SemanticsNode>? scrollable}) {
+    performAction(scrollable ?? finders.find.semantics.scrollable(), SemanticsAction.scrollDown);
+  }
+
+  /// Performs a [SemanticsAction.increase] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.increase].
+  void increase(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.increase);
+  }
+
+  /// Performs a [SemanticsAction.decrease] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.decrease].
+  void decrease(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.decrease);
+  }
+
+  /// Performs a [SemanticsAction.showOnScreen] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.showOnScreen].
+  void showOnScreen(finders.FinderBase<SemanticsNode> finder) {
+    performAction(
+      finder,
+      SemanticsAction.showOnScreen,
+      checkForAction: false,
+    );
+  }
+
+  /// Performs a [SemanticsAction.moveCursorForwardByCharacter] action on the
+  /// [SemanticsNode] found by `finder`.
+  ///
+  /// If `shouldModifySelection` is true, then the cursor will begin or extend
+  /// a selection.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.moveCursorForwardByCharacter].
+  void moveCursorForwardByCharacter(
+    finders.FinderBase<SemanticsNode> finder, {
+    bool shouldModifySelection = false
+  }) {
+    performAction(
+      finder,
+      SemanticsAction.moveCursorForwardByCharacter,
+      args: shouldModifySelection
+    );
+  }
+
+  /// Performs a [SemanticsAction.moveCursorForwardByWord] action on the
+  /// [SemanticsNode] found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.moveCursorForwardByWord].
+  void moveCursorForwardByWord(
+    finders.FinderBase<SemanticsNode> finder, {
+    bool shouldModifySelection = false
+  }) {
+    performAction(
+      finder,
+      SemanticsAction.moveCursorForwardByWord,
+      args: shouldModifySelection
+    );
+  }
+
+  /// Performs a [SemanticsAction.moveCursorBackwardByCharacter] action on the
+  /// [SemanticsNode] found by `finder`.
+  ///
+  /// If `shouldModifySelection` is true, then the cursor will begin or extend
+  /// a selection.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.moveCursorBackwardByCharacter].
+  void moveCursorBackwardByCharacter(
+    finders.FinderBase<SemanticsNode> finder, {
+    bool shouldModifySelection = false
+  }) {
+    performAction(
+      finder,
+      SemanticsAction.moveCursorBackwardByCharacter,
+      args: shouldModifySelection
+    );
+  }
+
+  /// Performs a [SemanticsAction.moveCursorBackwardByWord] action on the
+  /// [SemanticsNode] found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.moveCursorBackwardByWord].
+  void moveCursorBackwardByWord(
+    finders.FinderBase<SemanticsNode> finder, {
+    bool shouldModifySelection = false
+  }) {
+    performAction(
+      finder,
+      SemanticsAction.moveCursorBackwardByWord,
+      args: shouldModifySelection
+    );
+  }
+
+  /// Performs a [SemanticsAction.setText] action on the [SemanticsNode]
+  /// found by `finder` using the given `text`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.setText].
+  void setText(finders.FinderBase<SemanticsNode> finder, String text) {
+    performAction(finder, SemanticsAction.setText, args: text);
+  }
+
+  /// Performs a [SemanticsAction.setSelection] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// The `base` parameter is the start index of selection, and the `extent`
+  /// parameter is the length of the selection. Each value should be limited
+  /// between 0 and the length of the found [SemanticsNode]'s `value`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.setSelection].
+  void setSelection(
+    finders.FinderBase<SemanticsNode> finder, {
+    required int base,
+    required int extent
+  }) {
+    performAction(
+      finder,
+      SemanticsAction.setSelection,
+      args: <String, int>{'base': base, 'extent': extent},
+    );
+  }
+
+  /// Performs a [SemanticsAction.copy] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.copy].
+  void copy(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.copy);
+  }
+
+  /// Performs a [SemanticsAction.cut] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.cut].
+  void cut(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.cut);
+  }
+
+  /// Performs a [SemanticsAction.paste] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.paste].
+  void paste(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.paste);
+  }
+
+  /// Performs a [SemanticsAction.didGainAccessibilityFocus] action on the
+  /// [SemanticsNode] found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.didGainAccessibilityFocus].
+  void didGainAccessibilityFocus(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.didGainAccessibilityFocus);
+  }
+
+  /// Performs a [SemanticsAction.didLoseAccessibilityFocus] action on the
+  /// [SemanticsNode] found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.didLoseAccessibilityFocus].
+  void didLoseAccessibilityFocus(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.didLoseAccessibilityFocus);
+  }
+
+  /// Performs a [SemanticsAction.customAction] action on the
+  /// [SemanticsNode] found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.customAction].
+  void customAction(finders.FinderBase<SemanticsNode> finder, CustomSemanticsAction action) {
+    performAction(
+      finder,
+      SemanticsAction.customAction,
+      args: CustomSemanticsAction.getIdentifier(action)
+    );
+  }
+
+  /// Performs a [SemanticsAction.dismiss] action on the [SemanticsNode]
+  /// found by `finder`.
+  ///
+  /// Throws a [StateError] if:
+  /// * The given `finder` returns zero or more than one result.
+  /// * The [SemanticsNode] found with `finder` does not support
+  ///   [SemanticsAction.dismiss].
+  void dismiss(finders.FinderBase<SemanticsNode> finder) {
+    performAction(finder, SemanticsAction.dismiss);
   }
 }
 
