@@ -207,13 +207,7 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
     ..height = '1000';
   domDocument.body!.appendChild(iframe);
 
-  // Use this to communicate securely with the iframe.
-  final DomMessageChannel channel = createDomMessageChannel();
   final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
-
-  // Use this to avoid sending a message to the iframe before it's sent a
-  // message to us. This ensures that no messages get dropped on the floor.
-  final Completer<dynamic> readyCompleter = Completer<dynamic>();
 
   final List<DomSubscription> domSubscriptions = <DomSubscription>[];
   final List<StreamSubscription<dynamic>> streamSubscriptions = <StreamSubscription<dynamic>>[];
@@ -229,20 +223,35 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
     if (message.origin != domWindow.location.origin) {
       return;
     }
-
-    if (message.data['href'] != iframe.src) {
+    if (message.source.location?.href != iframe.src) {
       return;
     }
 
     message.stopPropagation();
 
-    if (message.data['ready'] == true) {
+    if (message.data == 'port') {
+      final DomMessagePort port = message.ports.first;
+      domSubscriptions.add(
+          DomSubscription(port, 'message',(DomEvent event) {
+        controller.local.sink.add((event as DomMessageEvent).data);
+      }));
+      port.start();
+      streamSubscriptions.add(controller.local.stream.listen(port.postMessage));
+    } else if (message.data['ready'] == true) {
       // This message indicates that the iframe is actively listening for
       // events, so the message channel's second port can now be transferred.
+      final DomMessageChannel channel = createDomMessageChannel();
+      channel.port1.start();
       channel.port2.start();
-      iframe.contentWindow.postMessage('port', domWindow.location.origin,
-          <DomMessagePort>[channel.port2]);
-      readyCompleter.complete();
+      iframe.contentWindow.postMessage(
+          'port', domWindow.location.origin, <DomMessagePort>[channel.port2]);
+      domSubscriptions
+          .add(DomSubscription(channel.port1, 'message', (DomEvent message) {
+        controller.local.sink.add((message as DomMessageEvent).data['data']);
+      }));
+
+      streamSubscriptions
+          .add(controller.local.stream.listen(channel.port1.postMessage));
     } else if (message.data['exception'] == true) {
       // This message from `dart.js` indicates that an exception occurred
       // loading the test.
@@ -250,16 +259,6 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
     }
   }));
 
-  channel.port1.start();
-  domSubscriptions.add(DomSubscription(channel.port1, 'message',
-          (DomEvent message) {
-    controller.local.sink.add((message as DomMessageEvent).data['data']);
-  }));
-
-  streamSubscriptions.add(controller.local.stream.listen((dynamic message) async {
-    await readyCompleter.future;
-    channel.port1.postMessage(message);
-  }));
 
   return controller.foreign;
 }

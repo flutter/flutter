@@ -3027,6 +3027,31 @@ extension DomMessageEventExtension on DomMessageEvent {
   @JS('origin')
   external JSString get _origin;
   String get origin => _origin.toDart;
+
+  /// The source may be a `WindowProxy`, a `MessagePort`, or a `ServiceWorker`.
+  ///
+  /// When a message is sent from an iframe through `window.parent.postMessage`
+  /// the source will be a `WindowProxy` which has the same methods as [Window].
+  DomMessageEventSource get source => js_util.getProperty(this, 'source');
+
+  List<DomMessagePort> get ports =>
+      js_util.getProperty<List<Object?>>(this, 'ports').cast<DomMessagePort>();
+}
+
+@JS()
+@staticInterop
+class DomMessageEventSource {}
+
+extension DomMEssageEventSourceExtension on DomMessageEventSource {
+  external DomMessageEventLocation? get location;
+}
+
+@JS()
+@staticInterop
+class DomMessageEventLocation {}
+
+extension DomMessageEventSourceExtension on DomMessageEventLocation {
+  external String? get href;
 }
 
 @JS()
