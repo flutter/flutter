@@ -428,10 +428,6 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
   const auto& context = ContextVK::Cast(*context_strong);
   const auto& sync = synchronizers_[current_frame_];
 
-  /// Record the approximate end of the GPU workload. This is intentionally
-  /// done before creating the final cmd buffer as that is not tracked.
-  context.GetGPUTracer()->MarkFrameEnd();
-
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
   ///
@@ -480,6 +476,8 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
       return false;
     }
   }
+
+  context.GetGPUTracer()->MarkFrameEnd();
 
   auto task = [&, index, current_frame = current_frame_] {
     auto context_strong = context_.lock();
