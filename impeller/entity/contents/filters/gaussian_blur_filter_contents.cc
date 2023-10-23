@@ -26,8 +26,8 @@ namespace impeller {
 DirectionalGaussianBlurFilterContents::DirectionalGaussianBlurFilterContents() =
     default;
 
-DirectionalGaussianBlurFilterContents::
-    ~DirectionalGaussianBlurFilterContents() = default;
+DirectionalGaussianBlurFilterContents::~
+DirectionalGaussianBlurFilterContents() = default;
 
 void DirectionalGaussianBlurFilterContents::SetSigma(Sigma sigma) {
   blur_sigma_ = sigma;

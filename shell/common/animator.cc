@@ -60,6 +60,10 @@ void Animator::EnqueueTraceFlowId(uint64_t trace_flow_id) {
 
 void Animator::BeginFrame(
     std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) {
+  // Both frame_timings_recorder_ and layer_trees_tasks_ must be empty if not
+  // between BeginFrame and EndFrame.
+  FML_DCHECK(frame_timings_recorder_ == nullptr);
+  FML_DCHECK(layer_trees_tasks_.empty());
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending",
                          frame_request_number_);
   frame_request_number_++;
@@ -112,6 +116,33 @@ void Animator::BeginFrame(
   dart_frame_deadline_ = frame_target_time.ToEpochDelta();
   uint64_t frame_number = frame_timings_recorder_->GetFrameNumber();
   delegate_.OnAnimatorBeginFrame(frame_target_time, frame_number);
+}
+
+void Animator::EndFrame() {
+  FML_CHECK(frame_timings_recorder_ != nullptr);
+  if (!layer_trees_tasks_.empty()) {
+    // The build is completed in OnAnimatorBeginFrame.
+    frame_timings_recorder_->RecordBuildEnd(fml::TimePoint::Now());
+
+    delegate_.OnAnimatorUpdateLatestFrameTargetTime(
+        frame_timings_recorder_->GetVsyncTargetTime());
+
+    // Commit the pending continuation.
+    PipelineProduceResult result =
+        producer_continuation_.Complete(std::make_unique<FrameItem>(
+            std::move(layer_trees_tasks_), std::move(frame_timings_recorder_)));
+
+    if (!result.success) {
+      FML_DLOG(INFO) << "Failed to commit to the pipeline";
+    } else if (!result.is_first_item) {
+      // Do nothing. It has been successfully pushed to the pipeline but not as
+      // the first item. Eventually the 'Rasterizer' will consume it, so we
+      // don't need to notify the delegate.
+    } else {
+      delegate_.OnAnimatorDraw(layer_tree_pipeline_);
+    }
+  }
+  frame_timings_recorder_ = nullptr;  // Ensure it's cleared.
 
   if (!frame_scheduled_ && has_rendered_) {
     // Wait a tad more than 3 60hz frames before reporting a big idle period.
@@ -139,52 +170,33 @@ void Animator::BeginFrame(
         },
         kNotifyIdleTaskWaitTime);
   }
+  // Both frame_timings_recorder_ and layer_trees_tasks_ must be empty if not
+  // between BeginFrame and EndFrame.
+  FML_DCHECK(layer_trees_tasks_.empty());
+  FML_DCHECK(frame_timings_recorder_ == nullptr);
 }
 
-void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree,
+void Animator::Render(int64_t view_id,
+                      std::unique_ptr<flutter::LayerTree> layer_tree,
                       float device_pixel_ratio) {
-  has_rendered_ = true;
-
-  if (!frame_timings_recorder_) {
-    // Framework can directly call render with a built scene.
-    frame_timings_recorder_ = std::make_unique<FrameTimingsRecorder>();
-    const fml::TimePoint placeholder_time = fml::TimePoint::Now();
-    frame_timings_recorder_->RecordVsync(placeholder_time, placeholder_time);
-    frame_timings_recorder_->RecordBuildStart(placeholder_time);
+  // Animator::Render should be called between BeginFrame and EndFrame,
+  // which is indicated by frame_timings_recorder_ being non-null.
+  // This might happen on release build, and is guarded by PlatformDispatcher on
+  // debug build.
+  // TODO(dkwingsmt): We should change this skip into an assertion.
+  // https://github.com/flutter/flutter/issues/137073
+  if (frame_timings_recorder_ == nullptr) {
+    return;
   }
+
+  has_rendered_ = true;
 
   TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder_, "flutter",
                                 "Animator::Render", /*flow_id_count=*/0,
                                 /*flow_ids=*/nullptr);
-  frame_timings_recorder_->RecordBuildEnd(fml::TimePoint::Now());
 
-  delegate_.OnAnimatorUpdateLatestFrameTargetTime(
-      frame_timings_recorder_->GetVsyncTargetTime());
-
-  // TODO(dkwingsmt): Currently only supports a single window.
-  // See https://github.com/flutter/flutter/issues/135530, item 2.
-  int64_t view_id = kFlutterImplicitViewId;
-  std::vector<std::unique_ptr<LayerTreeTask>> layer_trees_tasks;
-  layer_trees_tasks.push_back(std::make_unique<LayerTreeTask>(
+  layer_trees_tasks_.push_back(std::make_unique<LayerTreeTask>(
       view_id, std::move(layer_tree), device_pixel_ratio));
-  // Commit the pending continuation.
-  PipelineProduceResult result =
-      producer_continuation_.Complete(std::make_unique<FrameItem>(
-          std::move(layer_trees_tasks), std::move(frame_timings_recorder_)));
-
-  if (!result.success) {
-    FML_DLOG(INFO) << "No pending continuation to commit";
-    return;
-  }
-
-  if (!result.is_first_item) {
-    // It has been successfully pushed to the pipeline but not as the first
-    // item. Eventually the 'Rasterizer' will consume it, so we don't need to
-    // notify the delegate.
-    return;
-  }
-
-  delegate_.OnAnimatorDraw(layer_tree_pipeline_);
 }
 
 const std::weak_ptr<VsyncWaiter> Animator::GetVsyncWaiter() const {
@@ -256,6 +268,7 @@ void Animator::AwaitVSync() {
             self->DrawLastLayerTrees(std::move(frame_timings_recorder));
           } else {
             self->BeginFrame(std::move(frame_timings_recorder));
+            self->EndFrame();
           }
         }
       });
