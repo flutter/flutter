@@ -24,7 +24,7 @@ class EdgeEnvironment implements BrowserEnvironment {
   }
 
   @override
-  Runtime get packageTestRuntime => Runtime.internetExplorer;
+  Runtime get packageTestRuntime => Runtime.edge;
 
   @override
   Future<void> prepare() async {
