@@ -821,7 +821,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       directory.absolute.path,
       'app-link-settings-$buildVariant.json',
     );
-    print('outputPath $outputPath, directory.path ${directory.path},directory.absolute.path ${directory.absolute.path}, app-link-settings-$buildVariant.json');
     final Stopwatch sw = Stopwatch()
       ..start();
     final RunResult result = await _runGradleTask(

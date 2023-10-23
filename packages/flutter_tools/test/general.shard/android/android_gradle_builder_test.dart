@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -42,7 +44,7 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       testUsage = TestUsage();
-      fileSystem = MemoryFileSystem.test();
+      fileSystem = MemoryFileSystem.test(style: io.Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
       Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
