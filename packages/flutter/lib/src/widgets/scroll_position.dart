@@ -468,7 +468,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     notifyListeners();
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       _impliedVelocity = 0;
-    });
+    }, debugLabel: 'ScrollPosition.resetVelocity');
   }
 
   /// Called whenever scrolling ends, to store the current scroll offset in a
