@@ -11,28 +11,19 @@
 
 namespace impeller {
 
+class GPUProbe;
+
 /// @brief A class that uses timestamp queries to record the approximate GPU
 /// execution time.
-class GPUTracerVK {
+class GPUTracerVK : public std::enable_shared_from_this<GPUTracerVK> {
  public:
   explicit GPUTracerVK(const std::shared_ptr<DeviceHolder>& device_holder);
 
   ~GPUTracerVK() = default;
 
-  /// @brief Record a timestamp query into the provided cmd buffer to record
-  ///        start time.
-  void RecordCmdBufferStart(const vk::CommandBuffer& buffer);
-
-  /// @brief Record a timestamp query into the provided cmd buffer to record end
-  ///        time.
-  ///
-  ///        Returns the index that should be passed to [OnFenceComplete].
-  std::optional<size_t> RecordCmdBufferEnd(const vk::CommandBuffer& buffer);
-
-  /// @brief Signal that the cmd buffer is completed.
-  ///
-  ///        If [frame_index] is std::nullopt, this frame recording is ignored.
-  void OnFenceComplete(std::optional<size_t> frame_index, bool success);
+  /// @brief Create a GPUProbe to trace the execution of a command buffer on the
+  ///        GPU.
+  std::unique_ptr<GPUProbe> CreateGPUProbe();
 
   /// @brief Signal the start of a frame workload.
   ///
@@ -47,20 +38,34 @@ class GPUTracerVK {
   bool IsEnabled() const;
 
  private:
+  friend class GPUProbe;
+
+  static const constexpr size_t kTraceStatesSize = 32u;
+
+  /// @brief Signal that the cmd buffer is completed.
+  ///
+  ///        If [frame_index] is std::nullopt, this frame recording is ignored.
+  void OnFenceComplete(size_t frame);
+
+  /// @brief Record a timestamp query into the provided cmd buffer to record
+  ///        start time.
+  void RecordCmdBufferStart(const vk::CommandBuffer& buffer, GPUProbe& probe);
+
+  /// @brief Record a timestamp query into the provided cmd buffer to record end
+  ///        time.
+  void RecordCmdBufferEnd(const vk::CommandBuffer& buffer, GPUProbe& probe);
+
   const std::shared_ptr<DeviceHolder> device_holder_;
 
   struct GPUTraceState {
     size_t current_index = 0;
     size_t pending_buffers = 0;
-    // If a cmd buffer submission fails for any reason, this field is used
-    // to indicate that the query pool results may be incomplete and this
-    // frame should be discarded.
-    bool contains_failure = false;
     vk::UniqueQueryPool query_pool;
   };
 
   mutable Mutex trace_state_mutex_;
-  GPUTraceState trace_states_[16] IPLR_GUARDED_BY(trace_state_mutex_);
+  GPUTraceState trace_states_[kTraceStatesSize] IPLR_GUARDED_BY(
+      trace_state_mutex_);
   size_t current_state_ IPLR_GUARDED_BY(trace_state_mutex_) = 0u;
 
   // The number of nanoseconds for each timestamp unit.
@@ -79,6 +84,30 @@ class GPUTracerVK {
   // that are not guaranteed to start/end according to frame boundaries.
   std::thread::id raster_thread_id_;
   bool enabled_ = false;
+};
+
+class GPUProbe {
+ public:
+  explicit GPUProbe(const std::weak_ptr<GPUTracerVK>& tracer);
+
+  GPUProbe(GPUProbe&&) = delete;
+  GPUProbe& operator=(GPUProbe&&) = delete;
+
+  ~GPUProbe();
+
+  /// @brief Record a timestamp query into the provided cmd buffer to record
+  ///        start time.
+  void RecordCmdBufferStart(const vk::CommandBuffer& buffer);
+
+  /// @brief Record a timestamp query into the provided cmd buffer to record end
+  ///        time.
+  void RecordCmdBufferEnd(const vk::CommandBuffer& buffer);
+
+ private:
+  friend class GPUTracerVK;
+
+  std::weak_ptr<GPUTracerVK> tracer_;
+  std::optional<size_t> index_ = std::nullopt;
 };
 
 }  // namespace impeller
