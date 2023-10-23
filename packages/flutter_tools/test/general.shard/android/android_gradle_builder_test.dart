@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -22,7 +24,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -916,7 +917,13 @@ Gradle Crashed
     });
 
     testUsingContext('can call custom gradle task outputFreeDebugAppLinkSettings and parse the result', () async {
-      final String expectedOutputPath = path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
+      final String expectedOutputPath;
+      if (io.Platform.isWindows) {
+        final FileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+        expectedOutputPath = fs.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
+      } else {
+        expectedOutputPath = fileSystem.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
+      }
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         java: FakeJava(),
         logger: logger,
