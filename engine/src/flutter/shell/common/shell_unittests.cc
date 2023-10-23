@@ -2709,6 +2709,47 @@ TEST_F(ShellTest, OnServiceProtocolRenderFrameWithRasterStatsWorks) {
   DestroyShell(std::move(shell));
 }
 
+#if defined(FML_OS_MACOSX)
+TEST_F(ShellTest, OnServiceProtocolRenderFrameWithRasterStatsDisableImpeller) {
+  auto settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .rendering_backend =
+              ShellTestPlatformView::BackendType::kMetalBackend,
+      }),
+  });
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("scene_with_red_box");
+
+  RunEngine(shell.get(), std::move(configuration));
+  PumpOneFrame(shell.get());
+
+  ServiceProtocol::Handler::ServiceProtocolMap empty_params;
+  rapidjson::Document document;
+  OnServiceProtocol(
+      shell.get(), ServiceProtocolEnum::kRenderFrameWithRasterStats,
+      shell->GetTaskRunners().GetRasterTaskRunner(), empty_params, &document);
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  document.Accept(writer);
+  std::string actual_json = buffer.GetString();
+  std::string expected_json =
+      "{\"code\":-32000,\"message\":\"Raster status not supported on Impeller "
+      "backend.\"}";
+
+  ASSERT_EQ(actual_json, expected_json);
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell));
+}
+#endif  // FML_OS_MACOSX
+
 // TODO(https://github.com/flutter/flutter/issues/100273): Disabled due to
 // flakiness.
 // TODO(https://github.com/flutter/flutter/issues/100299): Fix it when
