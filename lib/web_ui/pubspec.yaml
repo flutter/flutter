@@ -27,7 +27,7 @@ dev_dependencies:
   http: 1.1.0
   http_multi_server: any
   image: 3.0.1
-  matcher: 0.12.14
+  matcher: 0.12.16
   package_config: any
   path: 1.8.0
   pool: any
@@ -38,7 +38,7 @@ dev_dependencies:
   shelf_web_socket: any
   stack_trace: any
   stream_channel: 2.1.1
-  test: 1.22.1
+  test: 1.24.8
   test_api: any
   test_core: any
   typed_data: any
