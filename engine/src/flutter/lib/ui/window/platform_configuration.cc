@@ -449,10 +449,9 @@ void PlatformConfiguration::CompletePlatformMessageResponse(
   response->Complete(std::make_unique<fml::DataMapping>(std::move(data)));
 }
 
-void PlatformConfigurationNativeApi::Render(int64_t view_id, Scene* scene) {
+void PlatformConfigurationNativeApi::Render(Scene* scene) {
   UIDartState::ThrowIfUIOperationsProhibited();
-  UIDartState::Current()->platform_configuration()->client()->Render(view_id,
-                                                                     scene);
+  UIDartState::Current()->platform_configuration()->client()->Render(scene);
 }
 
 void PlatformConfigurationNativeApi::SetNeedsReportTimings(bool value) {
