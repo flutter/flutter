@@ -9,7 +9,6 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' as test_package;
@@ -117,17 +116,6 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
-/// The argument [experimentalLeakTracking] is experimental and is not recommended
-/// for use outside of Flutter Framework.
-/// When [experimentalLeakTracking] is set, it is used to configure leak tracking.
-/// Otherwise [LeakTrackingForTests.settings] is used.
-/// You can adjust [LeakTrackingForTests.settings] in flutter_test_config.dart for your
-/// package or folders, or in `setUpAll` for a test library or group.
-/// If you set it for a group, remember the original value to a local variable
-/// and restore it in `tearDownAll` for the group.
-/// To turn off leak tracking just for one test, set [experimentalLeakTracking] to
-/// `LeakTrackingForTests.ignore()`.
-///
 /// ## Sample code
 ///
 /// ```dart
@@ -147,9 +135,7 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   int? retry,
-  LeakTesting? leakTesting,
 }) {
-  // TODO(polina-c): enable leak tracking based on the value of `leakTesting`.
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
