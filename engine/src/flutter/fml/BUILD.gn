@@ -69,6 +69,8 @@ source_set("fml") {
     "shared_thread_merger.cc",
     "shared_thread_merger.h",
     "size.h",
+    "status.h",
+    "status_or.h",
     "synchronization/atomic_object.h",
     "synchronization/count_down_latch.cc",
     "synchronization/count_down_latch.h",
