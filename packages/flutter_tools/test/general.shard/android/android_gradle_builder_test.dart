@@ -915,6 +915,7 @@ Gradle Crashed
     });
 
     testUsingContext('can call custom gradle task outputFreeDebugAppLinkSettings and parse the result', () async {
+      final String expectedOutputPath = fileSystem.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         java: FakeJava(),
         logger: logger,
@@ -927,11 +928,11 @@ Gradle Crashed
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager.addCommand(FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
-          '-PoutputPath=/build/deeplink_data/app-link-settings-freeDebug.json',
+          '-PoutputPath=$expectedOutputPath',
           'outputFreeDebugAppLinkSettings',
         ],
       ));
