@@ -21,7 +21,7 @@ dependencies:
   shelf_static: 1.1.2
   stack_trace: 1.11.1
   vm_service: 11.10.0
-  web: 0.2.1-beta
+  web: 0.3.0
   webkit_inspection_protocol: 1.2.1
   xml: 6.4.2
 

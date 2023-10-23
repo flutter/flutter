@@ -12,7 +12,7 @@ dependencies:
   material_color_utilities: 0.5.0
   meta: 1.10.0
   vector_math: 2.1.4
-  web: 0.2.1-beta
+  web: 0.3.0
   sky_engine:
     sdk: flutter
 
