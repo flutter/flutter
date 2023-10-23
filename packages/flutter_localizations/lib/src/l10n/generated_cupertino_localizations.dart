@@ -10991,6 +10991,168 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get todayLabel => 'Сегодня';
 }
 
+/// The translations for Kinyarwanda (`rw`).
+class CupertinoLocalizationRw extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Kinyarwanda.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationRw({
+    super.localeName = 'rw',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'Imenyesha';
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get copyButtonLabel => 'Kopiya';
+
+  @override
+  String get cutButtonLabel => 'Kata';
+
+  @override
+  String get datePickerDateOrderString => 'mdy';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'$hour zuzuye';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour zuzuye';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => 'Umunota 1';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'Iminota $minute';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Shakisha';
+
+  @override
+  String get menuDismissLabel => 'Kuraho meni';
+
+  @override
+  String get modalBarrierDismissLabel => 'Byirengagize';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'Nta gisimbura ihari';
+
+  @override
+  String get pasteButtonLabel => 'Koporora';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'Shakisha';
+
+  @override
+  String get searchWebButtonLabel => 'Shakisha kurubuga';
+
+  @override
+  String get selectAllButtonLabel => 'Hitamo byose';
+
+  @override
+  String get shareButtonLabel => 'Sangiza...';
+
+  @override
+  String get tabSemanticsLabelRaw => r'Paji ya $tabIndex muri $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => null;
+
+  @override
+  String? get timerPickerHourLabelMany => null;
+
+  @override
+  String? get timerPickerHourLabelOne => 'isaha';
+
+  @override
+  String get timerPickerHourLabelOther => 'amasaha';
+
+  @override
+  String? get timerPickerHourLabelTwo => null;
+
+  @override
+  String? get timerPickerHourLabelZero => null;
+
+  @override
+  String? get timerPickerMinuteLabelFew => null;
+
+  @override
+  String? get timerPickerMinuteLabelMany => null;
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'umun.';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'imin.';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => null;
+
+  @override
+  String? get timerPickerMinuteLabelZero => null;
+
+  @override
+  String? get timerPickerSecondLabelFew => null;
+
+  @override
+  String? get timerPickerSecondLabelMany => null;
+
+  @override
+  String? get timerPickerSecondLabelOne => 'iseg.';
+
+  @override
+  String get timerPickerSecondLabelOther => 'amaseg.';
+
+  @override
+  String? get timerPickerSecondLabelTwo => null;
+
+  @override
+  String? get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'Uyumunsi';
+}
+
 /// The translations for Sinhala Sinhalese (`si`).
 class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Sinhala Sinhalese.
@@ -14276,6 +14438,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'pt', // Portuguese
   'ro', // Romanian Moldavian Moldovan
   'ru', // Russian
+  'rw', // Kinyarwanda
   'si', // Sinhala Sinhalese
   'sk', // Slovak
   'sl', // Slovenian
@@ -14366,6 +14529,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `pt` - Portuguese (plus one country variation)
 ///  * `ro` - Romanian Moldavian Moldovan
 ///  * `ru` - Russian
+///  * `rw` - Kinyarwanda
 ///  * `si` - Sinhala Sinhalese
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
@@ -14597,6 +14761,8 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
       return CupertinoLocalizationRo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ru':
       return CupertinoLocalizationRu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'rw':
+      return CupertinoLocalizationRw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'si':
       return CupertinoLocalizationSi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sk':

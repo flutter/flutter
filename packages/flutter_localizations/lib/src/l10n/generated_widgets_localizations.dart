@@ -1969,6 +1969,32 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Переместить вверх';
 }
 
+/// The translations for Kinyarwanda (`rw`).
+class WidgetsLocalizationRw extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Kinyarwanda.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationRw() : super(TextDirection.ltr);
+
+  @override
+  String get reorderItemDown => 'Imurira hasi';
+
+  @override
+  String get reorderItemLeft => 'Imurira ibumoso';
+
+  @override
+  String get reorderItemRight => 'Imurira iburyo';
+
+  @override
+  String get reorderItemToEnd => 'Imurira ku iherezo';
+
+  @override
+  String get reorderItemToStart => 'Imurira kuntangiriro';
+
+  @override
+  String get reorderItemUp => 'Imurira hejuru';
+}
+
 /// The translations for Sinhala Sinhalese (`si`).
 class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Sinhala Sinhalese.
@@ -2600,6 +2626,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'pt', // Portuguese
   'ro', // Romanian Moldavian Moldovan
   'ru', // Russian
+  'rw', // Kinyarwanda
   'si', // Sinhala Sinhalese
   'sk', // Slovak
   'sl', // Slovenian
@@ -2691,6 +2718,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `pt` - Portuguese (plus one country variation)
 ///  * `ro` - Romanian Moldavian Moldovan
 ///  * `ru` - Russian
+///  * `rw` - Kinyarwanda
 ///  * `si` - Sinhala Sinhalese
 ///  * `sk` - Slovak
 ///  * `sl` - Slovenian
@@ -2916,6 +2944,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationRo();
     case 'ru':
       return const WidgetsLocalizationRu();
+    case 'rw':
+      return const WidgetsLocalizationRw();
     case 'si':
       return const WidgetsLocalizationSi();
     case 'sk':
