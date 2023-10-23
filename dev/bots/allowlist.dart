@@ -31,6 +31,8 @@ const Set<String> kCorePackageAllowList = <String>{
   'fuchsia_remote_debug_protocol',
   'integration_test',
   'intl',
+  'leak_tracker',
+  'leak_tracker_flutter_testing',
   'matcher',
   'material_color_utilities',
   'meta',
