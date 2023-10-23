@@ -547,3 +547,24 @@ void testReportViewWidths() {
     nativeReportViewWidthsCallback(getCurrentViewWidths());
   };
 }
+
+@pragma('vm:entry-point')
+void onBeginFrameRendersMultipleViews() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration beginTime) {
+    for (final FlutterView view in PlatformDispatcher.instance.views) {
+      final SceneBuilder builder = SceneBuilder();
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+      final Picture picture = recorder.endRecording();
+      builder.addPicture(Offset.zero, picture);
+
+      final Scene scene = builder.build();
+      view.render(scene);
+
+      scene.dispose();
+      picture.dispose();
+    }
+  };
+  notifyNative();
+}

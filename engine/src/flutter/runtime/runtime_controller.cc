@@ -341,15 +341,14 @@ void RuntimeController::ScheduleFrame() {
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::Render(Scene* scene) {
-  // TODO(dkwingsmt): Currently only supports a single window.
-  int64_t view_id = kFlutterImplicitViewId;
+void RuntimeController::Render(int64_t view_id, Scene* scene) {
   const ViewportMetrics* view_metrics =
       UIDartState::Current()->platform_configuration()->GetMetrics(view_id);
   if (view_metrics == nullptr) {
     return;
   }
-  client_.Render(scene->takeLayerTree(view_metrics->physical_width,
+  client_.Render(view_id,
+                 scene->takeLayerTree(view_metrics->physical_width,
                                       view_metrics->physical_height),
                  view_metrics->device_pixel_ratio);
 }
