@@ -381,8 +381,9 @@ void main() {
     });
   });
 
-  testWidgets('FocusNode can request focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FocusNode can request focus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(inputDatePickerField(
       focusNode: focusNode,
     ));

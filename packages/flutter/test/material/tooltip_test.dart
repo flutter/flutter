@@ -1480,16 +1480,18 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Tooltip semantics does not merge into child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip semantics does not merge into child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return ListView(
                   children: <Widget>[
