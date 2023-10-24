@@ -130,6 +130,17 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 
   @override
+  Future<void> moveToFlutterView(int flutterViewId) async {
+    if (_initialized) {
+      final Map<String, Object?> args = <String, Object?>{
+        'platformViewId': platformViewId,
+        'viewId': flutterViewId,
+      };
+      await SystemChannels.platform_views.invokeMethod<void>('moveToFlutterView', args);
+    }
+  }
+
+  @override
   Future<void> dispose() async {
     if (_initialized) {
       final Map<String, Object?> args = <String, Object?>{

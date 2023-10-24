@@ -908,6 +908,19 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 ///  * [PlatformViewLink], which links a platform view with the Flutter framework.
 typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformViewCreationParams params);
 
+enum _PlatformViewState {
+  /// The initial state of a platform view.
+  ///
+  /// The platform view hasn't been created nor disposed at this point.
+  uninitialized,
+
+  /// The platform view has been created but not disposed yet.
+  created,
+
+  /// The platform view has been disposed.
+  disposed,
+}
+
 /// Links a platform view with the Flutter framework.
 ///
 /// Provides common functionality for embedding a platform view (e.g an android.view.View on Android)
@@ -971,38 +984,51 @@ class PlatformViewLink extends StatefulWidget {
 class _PlatformViewLinkState extends State<PlatformViewLink> {
   int? _id;
   PlatformViewController? _controller;
-  bool _platformViewCreated = false;
+  _PlatformViewState _platformViewState = _PlatformViewState.uninitialized;
   Widget? _surface;
   FocusNode? _focusNode;
+  int? _flutterViewId;
 
   @override
   Widget build(BuildContext context) {
-    final PlatformViewController? controller = _controller;
-    if (controller == null) {
-      return const SizedBox.expand();
+    switch (_platformViewState) {
+      case _PlatformViewState.uninitialized:
+        _initialize();
+        return _PlatformViewPlaceHolder(onLayout: (Size size, Offset position) {
+          if (_controller!.awaitingCreation && !size.isEmpty) {
+            _controller!.create(size: size, position: position);
+          }
+        });
+
+      case _PlatformViewState.created:
+        _surface ??= widget._surfaceFactory(context, _controller!);
+        return Focus(
+          focusNode: _focusNode,
+          onFocusChange: _handleFrameworkFocusChanged,
+          child: _surface!,
+        );
+
+      case _PlatformViewState.disposed:
+        return const SizedBox.expand();
     }
-    if (!_platformViewCreated) {
-      // Depending on the implementation, the first non-empty size can be used
-      // to size the platform view.
-      return _PlatformViewPlaceHolder(onLayout: (Size size, Offset position) {
-        if (controller.awaitingCreation && !size.isEmpty) {
-          controller.create(size: size, position: position);
-        }
-      });
-    }
-    _surface ??= widget._surfaceFactory(context, controller);
-    return Focus(
-      focusNode: _focusNode,
-      onFocusChange: _handleFrameworkFocusChanged,
-      child: _surface!,
-    );
   }
 
   @override
   void initState() {
     _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)');
-    _initialize();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final int newViewId = View.of(context).viewId;
+
+    if (newViewId != _flutterViewId) {
+      _flutterViewId = newViewId;
+      _controller?.moveToFlutterView(newViewId);
+    }
   }
 
   @override
@@ -1019,12 +1045,13 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   }
 
   void _initialize() {
+    _flutterViewId = View.of(context).viewId;
     _id = platformViewsRegistry.getNextPlatformViewId();
     _controller = widget._onCreatePlatformView(
       PlatformViewCreationParams._(
         id: _id!,
         viewType: widget.viewType,
-        flutterViewId: View.of(context).viewId,
+        flutterViewId: _flutterViewId!,
         onPlatformViewCreated: _onPlatformViewCreated,
         onFocusChanged: _handlePlatformFocusChanged,
       ),
@@ -1034,7 +1061,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void _onPlatformViewCreated(int id) {
     if (mounted) {
       setState(() {
-        _platformViewCreated = true;
+        _platformViewState = _PlatformViewState.created;
       });
     }
   }
@@ -1057,6 +1084,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   @override
   void dispose() {
+    _platformViewState = _PlatformViewState.disposed;
     _controller?.dispose();
     _controller = null;
     _focusNode?.dispose();

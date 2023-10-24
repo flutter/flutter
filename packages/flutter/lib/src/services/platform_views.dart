@@ -1480,6 +1480,9 @@ abstract class PlatformViewController {
   /// an initial position.
   Future<void> create({Size? size, Offset? position}) async {}
 
+  /// Moves the platform view to a new [FlutterView].
+  Future<void> moveToFlutterView(int flutterViewId) async {}
+
   /// Disposes the platform view.
   ///
   /// The [PlatformViewController] is unusable after calling dispose.
