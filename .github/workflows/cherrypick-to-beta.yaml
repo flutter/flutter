@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-name: cherrypick
+name: Cherry-pick Labeled PR to Beta Branch
 
 on:
   pull_request:
@@ -12,8 +12,8 @@ on:
 permissions: write-all
 
 jobs:
-  cp_beta:
-    name: cp_beta
+  cherrypick_to_beta:
+    name: cherrypick_to_beta
     runs-on: ubuntu-latest
     # https://github.com/actions/runner/issues/1019
     # Note: don't add ${{ }} to the if statement below. For some reasons it causes the booleans to be evaluated incorrectly.
