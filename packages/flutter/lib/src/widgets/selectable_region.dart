@@ -677,7 +677,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         _scheduledSelectionEndEdgeUpdate = false;
         _triggerSelectionEndEdgeUpdate(textGranularity: textGranularity);
-      });
+      }, debugLabel: 'SelectableRegion.endEdgeUpdate');
       return;
     }
  }
@@ -731,7 +731,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         _scheduledSelectionStartEdgeUpdate = false;
         _triggerSelectionStartEdgeUpdate(textGranularity: textGranularity);
-      });
+      }, debugLabel: 'SelectableRegion.startEdgeUpdate');
       return;
     }
   }
@@ -1716,7 +1716,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         // safely updated in the same frame in this case.
         scheduleMicrotask(runScheduledTask);
       } else {
-        SchedulerBinding.instance.addPostFrameCallback(runScheduledTask);
+        SchedulerBinding.instance.addPostFrameCallback(
+          runScheduledTask,
+          debugLabel: 'SelectionContainer.runScheduledTask',
+        );
       }
     }
   }
