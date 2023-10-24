@@ -73,7 +73,7 @@ const String _kFlutterKeyDataChannel = 'flutter/keydata';
 
 @pragma('vm:entry-point')
 ByteData? _wrapUnmodifiableByteData(ByteData? byteData) =>
-    byteData == null ? null : UnmodifiableByteDataView(byteData);
+    byteData?.asUnmodifiableView();
 
 /// A token that represents a root isolate.
 class RootIsolateToken {
