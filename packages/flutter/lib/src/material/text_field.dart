@@ -311,7 +311,6 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-    this.onTapOutsideRequiresFocus = false,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -780,9 +779,6 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
-
-  /// {@macro flutter.widgets.editableText.onTapOutsideRequiresFocus}
-  final bool onTapOutsideRequiresFocus;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
@@ -1441,7 +1437,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           contextMenuBuilder: widget.contextMenuBuilder,
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
-          onTapOutsideRequiresFocus: widget.onTapOutsideRequiresFocus,
         ),
       ),
     );
