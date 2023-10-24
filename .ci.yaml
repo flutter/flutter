@@ -1099,6 +1099,21 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux realm_checker
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      shard: realm_checker
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
     presubmit: false

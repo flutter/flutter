@@ -262,6 +262,7 @@ Future<void> main(List<String> args) async {
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
+      'realm_checker': _runRealmCheckerTest,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -1566,6 +1567,13 @@ Future<void> _runSkpGeneratorTests() async {
     <String>[ ],
     workingDirectory: path.join(checkout.path, 'skp_generator'),
   );
+}
+
+Future<void> _runRealmCheckerTest() async {
+  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
+  if (engineRealm.isNotEmpty) {
+    foundError(<String>['The checked-in engine.realm file must be empty.']);
+  }
 }
 
 // The `chromedriver` process created by this test.
