@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -387,7 +386,6 @@ class Doctor {
     // This timestamp will be used on the backend of GA4 to group each of the events that
     // were sent for each doctor validator and its result
     final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
-    final List<Future<http.Response>?> analyticsFutures = <Future<http.Response>?>[];
 
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
@@ -423,22 +421,22 @@ class Doctor {
             final DoctorValidator subValidator = validator.subValidators[i];
             final ValidationResult subResult = validator.subResults[i];
 
-            analyticsFutures.add(_analytics.send(Event.doctorValidatorResult(
+            _analytics.send(Event.doctorValidatorResult(
               validatorName: subValidator.title,
               result: subResult.typeStr,
               statusInfo: subResult.statusInfo,
               partOfGroupedValidator: true,
               doctorInvocationId: analyticsTimestamp,
-            )));
+            ));
           }
         } else {
-          analyticsFutures.add(_analytics.send(Event.doctorValidatorResult(
+          _analytics.send(Event.doctorValidatorResult(
             validatorName: validator.title,
             result: result.typeStr,
             statusInfo: result.statusInfo,
             partOfGroupedValidator: false,
             doctorInvocationId: analyticsTimestamp,
-          )));
+          ));
         }
         // TODO(eliasyishak): remove this after migrating from package:usage
         DoctorResultEvent(validator: validator, result: result).send();
@@ -486,10 +484,6 @@ class Doctor {
       _logger.printStatus('${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
         ' No issues found!', hangingIndent: 2);
     }
-
-    // Await any validator events that need to be sent, without awaiting, some events
-    // won't get sent to GA4
-    await Future.wait<http.Response>(analyticsFutures.whereType<Future<http.Response>>());
 
     return doctorResult;
   }

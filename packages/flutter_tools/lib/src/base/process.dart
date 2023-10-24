@@ -624,7 +624,10 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
   final Completer<void> completer = Completer<void>();
 
   // Allow any pending analytics events to send and close the http connection
-  globals.analytics.close();
+  //
+  // By default, we will wait 250 ms before canceling any pending events, we
+  // can change the [delayDuration] in the close method if it needs to be changed
+  await globals.analytics.close();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
