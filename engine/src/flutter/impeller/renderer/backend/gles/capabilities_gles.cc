@@ -106,6 +106,19 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
       gl.GetDescription()->HasExtension(kOESTextureBorderClampExt)) {
     supports_decal_sampler_address_mode_ = true;
   }
+
+  if (gl.GetDescription()->HasExtension(
+          "GL_EXT_multisampled_render_to_texture") &&
+      // The current implementation of MSAA support in Impeller GLES requires
+      // the use of glBlitFramebuffer, which is not available on all GLES
+      // implementations. We can't use MSAA on these platforms yet.
+      gl.BlitFramebuffer.IsAvailable()) {
+    // We hard-code 4x MSAA, so let's make sure it's supported.
+    GLint value = 0;
+    gl.GetIntegerv(GL_MAX_SAMPLES_EXT, &value);
+
+    supports_offscreen_msaa_ = value >= 4;
+  }
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
@@ -124,7 +137,7 @@ size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
 }
 
 bool CapabilitiesGLES::SupportsOffscreenMSAA() const {
-  return false;
+  return supports_offscreen_msaa_;
 }
 
 bool CapabilitiesGLES::SupportsSSBO() const {
