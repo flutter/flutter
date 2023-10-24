@@ -2051,7 +2051,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// in its [performLayout] implementation.
   ///
   /// This method is used to implement an assert that ensures the render subtree
-  /// actively performing layout can not get accidently mutated. It's only
+  /// actively performing layout can not get accidentally mutated. It's only
   /// implemented in debug mode and always returns null in release mode.
   ///
   /// The default implementation returns [parent] and overriding is rarely

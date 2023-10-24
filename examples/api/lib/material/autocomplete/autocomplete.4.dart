@@ -60,7 +60,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
   // Whether to consider the fake network to be offline.
   bool _networkEnabled = true;
 
-  // A network error was recieved on the most recent query.
+  // A network error was received on the most recent query.
   bool _networkError = false;
 
   // Calls the "remote" API to search with the given query. Returns null when
