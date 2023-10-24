@@ -168,7 +168,7 @@ void main() {
     final Iterable<RenderClipRRect> renderClips = tester.allRenderObjects.whereType<RenderClipRRect>();
     expect(renderClips, isEmpty);
   });
-  
+
   testWidgetsWithLeakTracking('Does not double up padding on header', (WidgetTester tester) async {
     const Widget header = Text('Header');
 

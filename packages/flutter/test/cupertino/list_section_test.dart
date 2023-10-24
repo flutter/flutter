@@ -223,7 +223,7 @@ void main() {
       }
     }
   });
-  
+
   testWidgetsWithLeakTracking('does not show margin by default', (WidgetTester tester) async {
     const Widget child = CupertinoListTile(title: Text('CupertinoListTile'));
 
