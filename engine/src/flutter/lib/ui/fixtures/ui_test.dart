@@ -273,9 +273,16 @@ void platformMessagePortResponseTest() async {
 @pragma('vm:entry-point')
 void platformMessageResponseTest() {
   _callPlatformMessageResponseDart((ByteData? result) {
-    if (result is UnmodifiableByteDataView &&
-        result.lengthInBytes == 100) {
-      _finishCallResponse(true);
+    if (result is ByteData && result.lengthInBytes == 100) {
+      int value = result.getInt8(0);
+      bool didThrowOnModify = false;
+      try {
+        result.setInt8(0, value);
+      } catch (e) {
+        didThrowOnModify = true;
+      }
+      // This should be a read only buffer.
+      _finishCallResponse(didThrowOnModify);
     } else {
       _finishCallResponse(false);
     }
