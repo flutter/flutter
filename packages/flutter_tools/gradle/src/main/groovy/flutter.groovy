@@ -390,7 +390,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Configures the Flutter plugin dependencies.
      *
      * The plugins are added to pubspec.yaml. Then, upon running `flutter pub get`,
-     * the tool generates a `.flutter-plugins` file, which contains a 1:1 map to each plugin location.
+     * the tool generates a `.flutter-plugins-dependencies` file, which contains a map to each plugin location.
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins() {
@@ -399,10 +399,12 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /** Adds the plugin project dependency to the app project. */
-    private void configurePluginProject(String pluginName, String _) {
-        Project pluginProject = project.rootProject.findProject(":$pluginName")
+    private void configurePluginProject(Object pluginObject) {
+        assert pluginObject.name instanceof String
+        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
+
         if (pluginProject == null) {
-            project.logger.error("Plugin project :$pluginName not found. Please update settings.gradle.")
+            project.logger.error("Plugin project :${pluginObject.name} not found. Please update settings.gradle.")
             return
         }
         // Add plugin dependency to the app project.
@@ -441,7 +443,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
+                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
                 project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
 
@@ -493,8 +495,9 @@ class FlutterPlugin implements Plugin<Project> {
             String maxPluginNdkVersion = projectNdkVersion
             int numProcessedPlugins = getPluginList().size()
 
-            getPluginList().each { plugin ->
-                Project pluginProject = project.rootProject.findProject(plugin.key)
+            getPluginList().each { pluginObject ->
+                assert pluginObject.name instanceof String
+                Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
                 if (pluginProject == null) {
                     return
                 }
@@ -549,16 +552,16 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /** Gets the list of plugins that support the Android platform. */
-    private Properties getPluginList() {
+    private List getPluginList() {
         Map meta = getDependenciesMetadata()
-        Properties androidPlugins = new Properties()
+        List androidPlugins = []
         if (meta == null) {
             return androidPlugins
         }
         assert meta.plugins instanceof Map
         assert meta.plugins.android instanceof List
 
-        // This logic must be kept in sync with the logic in app_plugin_loader.gradle.
+        // This logic must be kept in sync with the logic in app_plugin_loader.groovy.
         meta.plugins.android.each { androidPlugin ->
             assert androidPlugin.name instanceof String
             assert androidPlugin.path instanceof String
@@ -568,7 +571,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (!needsBuild) {
                 return
             }
-            androidPlugins.setProperty(androidPlugin.name, androidPlugin.path)
+            androidPlugins.add(androidPlugin)
         }
         return androidPlugins
     }
@@ -591,7 +594,7 @@ class FlutterPlugin implements Plugin<Project> {
         //         "dependencies": []'
         //       }
         //     ]
-        //  }
+        // }
         //
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
