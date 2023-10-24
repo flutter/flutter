@@ -119,6 +119,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// The argument [experimentalLeakTesting] is experimental and is not recommended
 /// for use outside of Flutter Framework.
+/// The description of [experimentalLeakTesting] below is a draft,
+/// for now [experimentalLeakTesting] is noop.
 /// When [experimentalLeakTesting] is set, it is used to configure leak tracking.
 /// Otherwise [LeakTesting.settings] is used.
 /// You can adjust [LeakTesting.settings] in flutter_test_config.dart for your
@@ -150,6 +152,7 @@ void testWidgets(
   LeakTesting? experimentalLeakTesting,
 }) {
   // TODO(polina-c): enable leak tracking based on the value of `leakTesting`.
+  // https://github.com/flutter/flutter/issues/135856
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
