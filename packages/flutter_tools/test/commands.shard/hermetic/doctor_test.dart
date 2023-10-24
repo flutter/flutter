@@ -843,7 +843,7 @@ void main() {
       await doctor.diagnose(verbose: false);
 
       expect(fakeAnalytics.sentEvents.length, 3);
-      
+
       // The event that should have been fired off during the doctor invocation
       final Event eventToFind = Event.doctorValidatorResult(
         validatorName: 'Passing Validator',
@@ -853,7 +853,6 @@ void main() {
         statusInfo: 'with statusInfo',
       );
       expect(fakeAnalytics.sentEvents, contains(eventToFind));
-
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
     });

@@ -114,7 +114,7 @@ void main() {
       expect(analyticsOverride.okToSend, true);
       analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
       expect(analyticsOverride.sentEvents, hasLength(1));
-      
+
       analyticsOverride.suppressTelemetry();
       expect(analyticsOverride.okToSend, false);
       analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
