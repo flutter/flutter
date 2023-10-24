@@ -137,9 +137,9 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   //
   // If/when more task runners are exposed, this mask will need to be updated.
   thread_host_config.SetUIConfig(MakeThreadConfig(
-      ThreadHost::Type::UI, fml::Thread::ThreadPriority::DISPLAY));
+      ThreadHost::Type::UI, fml::Thread::ThreadPriority::kDisplay));
   thread_host_config.SetIOConfig(MakeThreadConfig(
-      ThreadHost::Type::IO, fml::Thread::ThreadPriority::BACKGROUND));
+      ThreadHost::Type::IO, fml::Thread::ThreadPriority::kBackground));
 
   auto platform_task_runner_pair = CreateEmbedderTaskRunner(
       SAFE_ACCESS(custom_task_runners, platform_task_runner, nullptr));
@@ -157,7 +157,7 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   // created.
   if (!render_task_runner_pair.second) {
     thread_host_config.SetRasterConfig(MakeThreadConfig(
-        ThreadHost::Type::RASTER, fml::Thread::ThreadPriority::RASTER));
+        ThreadHost::Type::RASTER, fml::Thread::ThreadPriority::kRaster));
   }
 
   // If both the platform task runner and the raster task runner are specified
@@ -227,11 +227,11 @@ EmbedderThreadHost::CreateEngineManagedThreadHost(
   // Crate a thraed host config, and specified the thread name and priority.
   auto thread_host_config = ThreadHost::ThreadHostConfig(config_setter);
   thread_host_config.SetUIConfig(MakeThreadConfig(
-      flutter::ThreadHost::UI, fml::Thread::ThreadPriority::DISPLAY));
+      flutter::ThreadHost::UI, fml::Thread::ThreadPriority::kDisplay));
   thread_host_config.SetRasterConfig(MakeThreadConfig(
-      flutter::ThreadHost::RASTER, fml::Thread::ThreadPriority::RASTER));
+      flutter::ThreadHost::RASTER, fml::Thread::ThreadPriority::kRaster));
   thread_host_config.SetIOConfig(MakeThreadConfig(
-      flutter::ThreadHost::IO, fml::Thread::ThreadPriority::BACKGROUND));
+      flutter::ThreadHost::IO, fml::Thread::ThreadPriority::kBackground));
 
   // Create a thread host with the current thread as the platform thread and all
   // other threads managed.
