@@ -235,8 +235,13 @@ class ColorScheme with Diagnosticable {
     );
   }
 
-  /// Create a ColorScheme based on a purple primary color that matches the
-  /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  /// Create a light ColorScheme based on a purple primary color that matches the
+  /// [baseline Material 2 color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
   const ColorScheme.light({
     this.brightness = Brightness.light,
     this.primary = const Color(0xff6200ee),
@@ -290,8 +295,15 @@ class ColorScheme with Diagnosticable {
        _inversePrimary = inversePrimary,
        _surfaceTint = surfaceTint;
 
-  /// Create the recommended dark color scheme that matches the
-  /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  /// Create the dark color scheme that matches the
+  /// [baseline Material 2 color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
+  /// Override the `brightness` property of [ColorScheme.fromSeed] to create a
+  /// dark color scheme.
   const ColorScheme.dark({
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffbb86fc),
@@ -346,7 +358,12 @@ class ColorScheme with Diagnosticable {
        _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on a purple primary color that
-  /// matches the [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  /// matches the [baseline Material 2 color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
   const ColorScheme.highContrastLight({
     this.brightness = Brightness.light,
     this.primary = const Color(0xff0000ba),
@@ -401,7 +418,14 @@ class ColorScheme with Diagnosticable {
        _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on the dark
-  /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  /// [baseline Material 2 color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
+  /// Override the `brightness` property of [ColorScheme.fromSeed] to create a
+  /// dark color scheme.
   const ColorScheme.highContrastDark({
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffefb7ff),
@@ -458,10 +482,10 @@ class ColorScheme with Diagnosticable {
   /// Creates a color scheme from a [MaterialColor] swatch.
   ///
   /// In Material 3, this constructor is ignored by [ThemeData] when creating
-  /// its default color scheme. Instead, [ThemeData] uses [ ColorScheme.fromSeed]
+  /// its default color scheme. Instead, [ThemeData] uses [ColorScheme.fromSeed]
   /// to create its default color scheme. This constructor shouldn't be used
   /// to update the Material 3 color scheme. It will be phased out gradually;
-  /// see https://github.com/flutter/flutter/issues/91772 for more details.
+  /// see https://github.com/flutter/flutter/issues/120064 for more details.
   ///
   /// If [ThemeData.useMaterial3] is false, then this constructor is used by
   /// [ThemeData] to create its default color scheme.
