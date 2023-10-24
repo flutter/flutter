@@ -2153,6 +2153,8 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/android_hardware_buffe
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/android_hardware_buffer_texture_source_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/barrier_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/barrier_vk.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/binding_helpers_vk.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/binding_helpers_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.cc + ../../../flutter/LICENSE
@@ -4925,6 +4927,8 @@ FILE: ../../../flutter/impeller/renderer/backend/vulkan/android_hardware_buffer_
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/android_hardware_buffer_texture_source_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/barrier_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/barrier_vk.h
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/binding_helpers_vk.cc
+FILE: ../../../flutter/impeller/renderer/backend/vulkan/binding_helpers_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.cc
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk.h
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/blit_pass_vk.cc
