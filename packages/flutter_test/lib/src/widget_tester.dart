@@ -117,15 +117,15 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
-/// The argument [experimentalLeakTracking] is experimental and is not recommended
+/// The argument [experimentalLeakTesting] is experimental and is not recommended
 /// for use outside of Flutter Framework.
-/// When [experimentalLeakTracking] is set, it is used to configure leak tracking.
-/// Otherwise [LeakTrackingForTests.settings] is used.
-/// You can adjust [LeakTrackingForTests.settings] in flutter_test_config.dart for your
+/// When [experimentalLeakTesting] is set, it is used to configure leak tracking.
+/// Otherwise [LeakTesting.settings] is used.
+/// You can adjust [LeakTesting.settings] in flutter_test_config.dart for your
 /// package or folders, or in `setUpAll` for a test library or group.
 /// If you set it for a group, remember the original value to a local variable
 /// and restore it in `tearDownAll` for the group.
-/// To turn off leak tracking just for one test, set [experimentalLeakTracking] to
+/// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
 /// `LeakTrackingForTests.ignore()`.
 ///
 /// ## Sample code
@@ -147,7 +147,7 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   int? retry,
-  LeakTesting? leakTesting,
+  LeakTesting? experimentalLeakTesting,
 }) {
   // TODO(polina-c): enable leak tracking based on the value of `leakTesting`.
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
