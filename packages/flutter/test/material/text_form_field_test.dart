@@ -794,6 +794,7 @@ void main() {
     expect(tapOutsideCount, 3);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/134341.
   testWidgetsWithLeakTracking('onTapOutside is not called upon tap outside when field is not focused', (WidgetTester tester) async {
     int tapOutsideCount = 0;
     await tester.pumpWidget(
