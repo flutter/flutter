@@ -33,7 +33,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
   // Keep pinned to latest until 1.0.0.
-  'material_color_utilities': '0.5.0',
+  'material_color_utilities': '0.8.0',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
   // https://github.com/flutter/devtools/issues/3951
