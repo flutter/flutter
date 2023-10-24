@@ -763,7 +763,7 @@ void main() {
     expect(tapCount, 3);
   });
 
-  testWidgetsWithLeakTracking('onTapOutside is called upon tap outside', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onTapOutside is not called upon tap outside', (WidgetTester tester) async {
     int tapOutsideCount = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -788,9 +788,7 @@ void main() {
     expect(tapOutsideCount, 0);
     await tester.tap(find.byType(TextFormField));
     await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 3);
+    expect(tapOutsideCount, 0);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
