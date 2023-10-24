@@ -5,7 +5,6 @@
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 
 #include "flutter/fml/trace_event.h"
-#include "impeller/base/allocation.h"
 #include "impeller/base/validation.h"
 
 namespace impeller {
@@ -19,17 +18,23 @@ DescriptorPoolVK::DescriptorPoolVK(
 DescriptorPoolVK::~DescriptorPoolVK() = default;
 
 static vk::UniqueDescriptorPool CreatePool(const vk::Device& device,
-                                           uint32_t pool_count) {
+                                           uint32_t image_count,
+                                           uint32_t buffer_count) {
   TRACE_EVENT0("impeller", "CreateDescriptorPool");
-  std::vector<vk::DescriptorPoolSize> pools = {
-      {vk::DescriptorType::eCombinedImageSampler, pool_count},
-      {vk::DescriptorType::eUniformBuffer, pool_count},
-      {vk::DescriptorType::eStorageBuffer, pool_count}};
-
+  std::vector<vk::DescriptorPoolSize> pools = {};
+  if (image_count > 0) {
+    pools.emplace_back(vk::DescriptorPoolSize{
+        vk::DescriptorType::eCombinedImageSampler, image_count});
+  }
+  if (buffer_count > 0) {
+    pools.emplace_back(vk::DescriptorPoolSize{
+        vk::DescriptorType::eUniformBuffer, buffer_count});
+    pools.emplace_back(vk::DescriptorPoolSize{
+        vk::DescriptorType::eStorageBuffer, buffer_count});
+  }
   vk::DescriptorPoolCreateInfo pool_info;
-  pool_info.setMaxSets(pools.size() * pool_count);
+  pool_info.setMaxSets(image_count + buffer_count);
   pool_info.setPoolSizes(pools);
-
   auto [result, pool] = device.createDescriptorPoolUnique(pool_info);
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Unable to create a descriptor pool";
@@ -37,61 +42,36 @@ static vk::UniqueDescriptorPool CreatePool(const vk::Device& device,
   return std::move(pool);
 }
 
-std::optional<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSet(
-    const vk::DescriptorSetLayout& layout,
-    size_t command_count) {
-  if (pools_.empty()) {
-    pool_size_ = command_count;
-  }
-  return AllocateDescriptorSet(layout);
-}
-
-std::optional<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSet(
-    const vk::DescriptorSetLayout& layout) {
-  auto pool = GetDescriptorPool();
-  if (!pool) {
-    return std::nullopt;
-  }
-  vk::DescriptorSetAllocateInfo set_info;
-  set_info.setDescriptorPool(pool.value());
-  set_info.setSetLayouts(layout);
+fml::StatusOr<std::vector<vk::DescriptorSet>>
+DescriptorPoolVK::AllocateDescriptorSets(
+    uint32_t buffer_count,
+    uint32_t sampler_count,
+    const std::vector<vk::DescriptorSetLayout>& layouts) {
   std::shared_ptr<const DeviceHolder> strong_device = device_holder_.lock();
   if (!strong_device) {
-    return std::nullopt;
+    return fml::Status(fml::StatusCode::kUnknown, "No device");
   }
+
+  auto new_pool =
+      CreatePool(strong_device->GetDevice(), sampler_count, buffer_count);
+  if (!new_pool) {
+    return fml::Status(fml::StatusCode::kUnknown,
+                       "Failed to create descriptor pool");
+  }
+  pool_ = std::move(new_pool);
+
+  vk::DescriptorSetAllocateInfo set_info;
+  set_info.setDescriptorPool(pool_.get());
+  set_info.setSetLayouts(layouts);
+
   auto [result, sets] =
       strong_device->GetDevice().allocateDescriptorSets(set_info);
-  if (result == vk::Result::eErrorOutOfPoolMemory) {
-    return GrowPool() ? AllocateDescriptorSet(layout) : std::nullopt;
-  }
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not allocate descriptor sets: "
                    << vk::to_string(result);
-    return std::nullopt;
+    return fml::Status(fml::StatusCode::kUnknown, "");
   }
-  return sets[0];
-}
-
-std::optional<vk::DescriptorPool> DescriptorPoolVK::GetDescriptorPool() {
-  if (pools_.empty()) {
-    return GrowPool() ? GetDescriptorPool() : std::nullopt;
-  }
-  return *pools_.back();
-}
-
-bool DescriptorPoolVK::GrowPool() {
-  const auto new_pool_size = Allocation::NextPowerOfTwoSize(pool_size_ + 1u);
-  std::shared_ptr<const DeviceHolder> strong_device = device_holder_.lock();
-  if (!strong_device) {
-    return false;
-  }
-  auto new_pool = CreatePool(strong_device->GetDevice(), new_pool_size);
-  if (!new_pool) {
-    return false;
-  }
-  pool_size_ = new_pool_size;
-  pools_.push(std::move(new_pool));
-  return true;
+  return sets;
 }
 
 }  // namespace impeller

@@ -8,22 +8,20 @@
 #include <cstdint>
 #include <vector>
 
-#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/sampler.h"
-#include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
+#include "impeller/renderer/backend/vulkan/binding_helpers_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
-#include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "vulkan/vulkan_handles.hpp"
 #include "vulkan/vulkan_to_string.hpp"
 
 namespace impeller {
@@ -323,142 +321,6 @@ static bool UpdateBindingLayouts(const std::vector<Command>& commands,
   return true;
 }
 
-static bool AllocateAndBindDescriptorSets(const ContextVK& context,
-                                          const Command& command,
-                                          CommandEncoderVK& encoder,
-                                          const PipelineVK& pipeline,
-                                          size_t command_count) {
-  auto desc_set =
-      pipeline.GetDescriptor().GetVertexDescriptor()->GetDescriptorSetLayouts();
-  auto vk_desc_set = encoder.AllocateDescriptorSet(
-      pipeline.GetDescriptorSetLayout(), command_count);
-  if (!vk_desc_set) {
-    return false;
-  }
-
-  auto& allocator = *context.GetResourceAllocator();
-
-  std::vector<vk::DescriptorImageInfo> images;
-  std::vector<vk::DescriptorBufferInfo> buffers;
-  std::vector<vk::WriteDescriptorSet> writes;
-  writes.reserve(command.vertex_bindings.buffers.size() +
-                 command.fragment_bindings.buffers.size() +
-                 command.fragment_bindings.sampled_images.size());
-  images.reserve(command.fragment_bindings.sampled_images.size());
-  buffers.reserve(command.vertex_bindings.buffers.size() +
-                  command.fragment_bindings.buffers.size());
-
-  auto bind_images = [&encoder,     //
-                      &images,      //
-                      &writes,      //
-                      &vk_desc_set  //
-  ](const Bindings& bindings) -> bool {
-    for (const auto& [index, data] : bindings.sampled_images) {
-      auto texture = data.texture.resource;
-      const auto& texture_vk = TextureVK::Cast(*texture);
-      const SamplerVK& sampler = SamplerVK::Cast(*data.sampler.resource);
-
-      if (!encoder.Track(texture) ||
-          !encoder.Track(sampler.GetSharedSampler())) {
-        return false;
-      }
-
-      const SampledImageSlot& slot = data.slot;
-
-      vk::DescriptorImageInfo image_info;
-      image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-      image_info.sampler = sampler.GetSampler();
-      image_info.imageView = texture_vk.GetImageView();
-      images.push_back(image_info);
-
-      vk::WriteDescriptorSet write_set;
-      write_set.dstSet = vk_desc_set.value();
-      write_set.dstBinding = slot.binding;
-      write_set.descriptorCount = 1u;
-      write_set.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-      write_set.pImageInfo = &images.back();
-
-      writes.push_back(write_set);
-    }
-
-    return true;
-  };
-
-  auto bind_buffers = [&allocator,   //
-                       &encoder,     //
-                       &buffers,     //
-                       &writes,      //
-                       &desc_set,    //
-                       &vk_desc_set  //
-  ](const Bindings& bindings) -> bool {
-    for (const auto& [buffer_index, data] : bindings.buffers) {
-      const auto& buffer_view = data.view.resource.buffer;
-
-      auto device_buffer = buffer_view->GetDeviceBuffer(allocator);
-      if (!device_buffer) {
-        VALIDATION_LOG << "Failed to get device buffer for vertex binding";
-        return false;
-      }
-
-      auto buffer = DeviceBufferVK::Cast(*device_buffer).GetBuffer();
-      if (!buffer) {
-        return false;
-      }
-
-      if (!encoder.Track(device_buffer)) {
-        return false;
-      }
-
-      uint32_t offset = data.view.resource.range.offset;
-
-      vk::DescriptorBufferInfo buffer_info;
-      buffer_info.buffer = buffer;
-      buffer_info.offset = offset;
-      buffer_info.range = data.view.resource.range.length;
-      buffers.push_back(buffer_info);
-
-      const ShaderUniformSlot& uniform = data.slot;
-      auto layout_it = std::find_if(desc_set.begin(), desc_set.end(),
-                                    [&uniform](DescriptorSetLayout& layout) {
-                                      return layout.binding == uniform.binding;
-                                    });
-      if (layout_it == desc_set.end()) {
-        VALIDATION_LOG << "Failed to get descriptor set layout for binding "
-                       << uniform.binding;
-        return false;
-      }
-      auto layout = *layout_it;
-
-      vk::WriteDescriptorSet write_set;
-      write_set.dstSet = vk_desc_set.value();
-      write_set.dstBinding = uniform.binding;
-      write_set.descriptorCount = 1u;
-      write_set.descriptorType = ToVKDescriptorType(layout.descriptor_type);
-      write_set.pBufferInfo = &buffers.back();
-
-      writes.push_back(write_set);
-    }
-    return true;
-  };
-
-  if (!bind_buffers(command.vertex_bindings) ||
-      !bind_buffers(command.fragment_bindings) ||
-      !bind_images(command.fragment_bindings)) {
-    return false;
-  }
-
-  context.GetDevice().updateDescriptorSets(writes, {});
-
-  encoder.GetCommandBuffer().bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics,   // bind point
-      pipeline.GetPipelineLayout(),       // layout
-      0,                                  // first set
-      {vk::DescriptorSet{*vk_desc_set}},  // sets
-      nullptr                             // offsets
-  );
-  return true;
-}
-
 static void SetViewportAndScissor(const Command& command,
                                   const vk::CommandBuffer& cmd_buffer,
                                   PassBindingsCache& cmd_buffer_cache,
@@ -488,7 +350,7 @@ static bool EncodeCommand(const Context& context,
                           CommandEncoderVK& encoder,
                           PassBindingsCache& command_buffer_cache,
                           const ISize& target_size,
-                          size_t command_count) {
+                          const vk::DescriptorSet vk_desc_set) {
   if (command.vertex_count == 0u || command.instance_count == 0u) {
     return true;
   }
@@ -504,17 +366,15 @@ static bool EncodeCommand(const Context& context,
 #endif  // IMPELLER_DEBUG
 
   const auto& cmd_buffer = encoder.GetCommandBuffer();
-
   const auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
 
-  if (!AllocateAndBindDescriptorSets(ContextVK::Cast(context),  //
-                                     command,                   //
-                                     encoder,                   //
-                                     pipeline_vk,               //
-                                     command_count              //
-                                     )) {
-    return false;
-  }
+  encoder.GetCommandBuffer().bindDescriptorSets(
+      vk::PipelineBindPoint::eGraphics,  // bind point
+      pipeline_vk.GetPipelineLayout(),   // layout
+      0,                                 // first set
+      {vk::DescriptorSet{vk_desc_set}},  // sets
+      nullptr                            // offsets
+  );
 
   command_buffer_cache.BindPipeline(
       cmd_buffer, vk::PipelineBindPoint::eGraphics, pipeline_vk.GetPipeline());
@@ -661,6 +521,13 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
       static_cast<uint32_t>(target_size.height);
   pass_info.setClearValues(clear_values);
 
+  auto desc_sets_result =
+      AllocateAndBindDescriptorSets(vk_context, encoder, commands_);
+  if (!desc_sets_result.ok()) {
+    return false;
+  }
+  auto desc_sets = desc_sets_result.value();
+
   {
     TRACE_EVENT0("impeller", "EncodeRenderPassCommands");
     cmd_buffer.beginRenderPass(pass_info, vk::SubpassContents::eInline);
@@ -668,15 +535,13 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
     fml::ScopedCleanupClosure end_render_pass(
         [cmd_buffer]() { cmd_buffer.endRenderPass(); });
 
+    auto desc_index = 0u;
     for (const auto& command : commands_) {
-      if (!command.pipeline) {
-        continue;
-      }
-
       if (!EncodeCommand(context, command, *encoder, pass_bindings_cache_,
-                         target_size, commands_.size())) {
+                         target_size, desc_sets[desc_index])) {
         return false;
       }
+      desc_index += 1;
     }
   }
 

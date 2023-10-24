@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 
-#include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 
 namespace impeller {
