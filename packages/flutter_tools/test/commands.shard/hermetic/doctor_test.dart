@@ -822,7 +822,8 @@ void main() {
   group('Doctor events with unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
-    final SystemClock fakeSystemClock = SystemClock.fixed(DateTime(1995, 3, 3));
+    final DateTime fakeDate = DateTime(1995, 3, 3);
+    final SystemClock fakeSystemClock = SystemClock.fixed(fakeDate);
 
     setUp(() {
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -866,26 +867,26 @@ void main() {
               validatorName: 'Passing Validator',
               result: 'installed',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
               statusInfo: 'with statusInfo',
             ),
             Event.doctorValidatorResult(
               validatorName: 'Partial Validator with only a Hint',
               result: 'partial',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Partial Validator with Errors',
               result: 'partial',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Another Passing Validator',
               result: 'installed',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
               statusInfo: 'with statusInfo',
             ),
       ]));
@@ -903,32 +904,32 @@ void main() {
               validatorName: 'Passing Validator',
               result: 'installed',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
               statusInfo: 'with statusInfo',
             ),
             Event.doctorValidatorResult(
               validatorName: 'Missing Validator',
               result: 'missing',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Not Available Validator',
               result: 'notAvailable',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Partial Validator with only a Hint',
               result: 'partial',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Partial Validator with Errors',
               result: 'partial',
               partOfGroupedValidator: false,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
       ]));
     }, overrides: <Type, Generator>{
@@ -945,25 +946,25 @@ void main() {
               validatorName: 'Category 1',
               result: 'installed',
               partOfGroupedValidator: true,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Category 1',
               result: 'installed',
               partOfGroupedValidator: true,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Category 2',
               result: 'installed',
               partOfGroupedValidator: true,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
             Event.doctorValidatorResult(
               validatorName: 'Category 2',
               result: 'missing',
               partOfGroupedValidator: true,
-              doctorInvocationId: 794206800000,
+              doctorInvocationId: fakeDate.millisecondsSinceEpoch,
             ),
       ]));
     }, overrides: <Type, Generator>{
