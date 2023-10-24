@@ -1013,7 +1013,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          # TODO(godofredoc): Fix directory structure in CIPD package (https://github.com/flutter/flutter/issues/136666)
+          {"dependency": "android_sdk", "version": "YyHqKywwmWB1TcrgeBrtF5SN_-S0WnvcTaYlLwRzV5cC"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -5122,7 +5123,8 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          # TODO(godofredoc): Fix directory structure in CIPD package (https://github.com/flutter/flutter/issues/136666)
+          {"dependency": "android_sdk", "version": "I6FCj-k7_7QuLihm9MzbX4GdG9A_MooNbBnt1Yn0bMsC"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
