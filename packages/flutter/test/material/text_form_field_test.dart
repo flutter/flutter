@@ -784,7 +784,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pump(); // Wait for autofocus to take effect.
 
     expect(tapOutsideCount, 0);
     await tester.tap(find.byType(TextFormField));
