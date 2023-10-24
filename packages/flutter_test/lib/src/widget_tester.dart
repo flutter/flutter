@@ -151,7 +151,7 @@ void testWidgets(
   int? retry,
   LeakTesting? experimentalLeakTesting,
 }) {
-  // TODO(polina-c): enable leak tracking based on the value of `leakTesting`.
+  // TODO(polina-c): enable leak tracking and update doc comment for `experimentalLeakTesting`.
   // https://github.com/flutter/flutter/issues/135856
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
