@@ -122,12 +122,12 @@ struct TexImage2DData {
         external_format = GL_RGBA;
         type = GL_HALF_FLOAT;
         break;
-      // TODO(matanlurey): This is a combined depth stencil format (like
-      // kD24UnormS8Uint below). We should find a way to use a stencil-only
-      // format instead.
-      //
-      // See https://github.com/flutter/flutter/issues/137094.
       case PixelFormat::kS8UInt:
+        // Pure stencil textures are only available in OpenGL 4.4+, which is
+        // ~0% of mobile devices. Instead, we use a depth-stencil texture and
+        // only use the stencil component.
+        //
+        // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
         internal_format = GL_DEPTH_STENCIL;
         external_format = GL_DEPTH_STENCIL;
         type = GL_UNSIGNED_INT_24_8;
