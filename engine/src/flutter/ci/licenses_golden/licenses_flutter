@@ -2333,6 +2333,11 @@ ORIGIN: ../../../flutter/impeller/scene/shaders/unlit.frag + ../../../flutter/LI
 ORIGIN: ../../../flutter/impeller/scene/shaders/unskinned.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/skin.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/skin.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive.fbs + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive_writer.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive_writer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive.fbs + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive.h + ../../../flutter/LICENSE
@@ -5109,6 +5114,11 @@ FILE: ../../../flutter/impeller/scene/shaders/unlit.frag
 FILE: ../../../flutter/impeller/scene/shaders/unskinned.vert
 FILE: ../../../flutter/impeller/scene/skin.cc
 FILE: ../../../flutter/impeller/scene/skin.h
+FILE: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive.cc
+FILE: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive.fbs
+FILE: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive.h
+FILE: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive_writer.cc
+FILE: ../../../flutter/impeller/shader_archive/multi_arch_shader_archive_writer.h
 FILE: ../../../flutter/impeller/shader_archive/shader_archive.cc
 FILE: ../../../flutter/impeller/shader_archive/shader_archive.fbs
 FILE: ../../../flutter/impeller/shader_archive/shader_archive.h

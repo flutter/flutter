@@ -10,6 +10,7 @@
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"
+#include "impeller/shader_archive/multi_arch_shader_archive.h"
 #include "impeller/shader_archive/shader_archive.h"
 
 namespace impeller {
@@ -74,12 +75,13 @@ ShaderLibraryGLES::ShaderLibraryGLES(
     return true;
   };
   for (auto library : shader_libraries) {
-    auto blob_library = ShaderArchive{std::move(library)};
-    if (!blob_library.IsValid()) {
-      VALIDATION_LOG << "Could not construct blob library for shaders.";
+    auto gles_archive = MultiArchShaderArchive::CreateArchiveFromMapping(
+        std::move(library), ArchiveRenderingBackend::kOpenGLES);
+    if (!gles_archive || !gles_archive->IsValid()) {
+      VALIDATION_LOG << "Could not construct shader library.";
       return;
     }
-    blob_library.IterateAllShaders(iterator);
+    gles_archive->IterateAllShaders(iterator);
   }
 
   functions_ = functions;
