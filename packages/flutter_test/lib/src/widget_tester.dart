@@ -151,8 +151,11 @@ void testWidgets(
 }) {
   // TODO(polina-c): enable leak tracking based on the value of `leakTesting`.
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
+
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
+  callback = _maybeWrapWithLeakTracking(callback, experimentalLeakTesting);
+
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
     // IDEs may make assumptions about the format of this suffix in order to
@@ -196,6 +199,15 @@ void testWidgets(
     );
   }
 }
+
+WidgetTesterCallback _maybeWrapWithLeakTracking(
+  WidgetTesterCallback callback,
+  LeakTesting? leakTesting,
+) {
+  leakTesting = leakTesting ?? LeakTesting.settings;
+  return callback;
+}
+
 
 /// An abstract base class for describing test environment variants.
 ///
