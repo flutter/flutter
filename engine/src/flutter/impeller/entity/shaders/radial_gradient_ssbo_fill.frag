@@ -27,7 +27,6 @@ uniform FragInfo {
   vec4 decal_border_color;
   float alpha;
   int colors_length;
-  bool dither;
 }
 frag_info;
 
@@ -60,9 +59,7 @@ void main() {
       }
     }
   }
-  frag_color = IPPremultiply(result_color) * frag_info.alpha;
 
-  if (frag_info.dither) {
-    frag_color = IPOrderedDither8x8(frag_color, v_position);
-  }
+  frag_color = IPPremultiply(result_color) * frag_info.alpha;
+  frag_color = IPOrderedDither8x8(frag_color, v_position);
 }
