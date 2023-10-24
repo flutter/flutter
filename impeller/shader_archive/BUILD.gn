@@ -11,13 +11,20 @@ config("shader_archive_config") {
 }
 
 flatbuffers("shader_archive_flatbuffers") {
-  flatbuffers = [ "shader_archive.fbs" ]
+  flatbuffers = [
+    "shader_archive.fbs",
+    "multi_arch_shader_archive.fbs",
+  ]
   public_configs = [ ":shader_archive_config" ]
   public_deps = [ "//third_party/flatbuffers" ]
 }
 
 impeller_component("shader_archive") {
   sources = [
+    "multi_arch_shader_archive.cc",
+    "multi_arch_shader_archive.h",
+    "multi_arch_shader_archive_writer.cc",
+    "multi_arch_shader_archive_writer.h",
     "shader_archive.cc",
     "shader_archive.h",
     "shader_archive_types.h",

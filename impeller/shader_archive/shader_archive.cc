@@ -25,7 +25,7 @@ constexpr ArchiveShaderType ToShaderType(fb::Stage stage) {
   FML_UNREACHABLE();
 }
 
-ShaderArchive::ShaderArchive(std::shared_ptr<fml::Mapping> payload)
+ShaderArchive::ShaderArchive(std::shared_ptr<const fml::Mapping> payload)
     : payload_(std::move(payload)) {
   if (!payload_ || payload_->GetMapping() == nullptr) {
     VALIDATION_LOG << "Shader mapping was absent.";
@@ -33,7 +33,7 @@ ShaderArchive::ShaderArchive(std::shared_ptr<fml::Mapping> payload)
   }
 
   if (!fb::ShaderArchiveBufferHasIdentifier(payload_->GetMapping())) {
-    VALIDATION_LOG << "Invalid shader magic.";
+    VALIDATION_LOG << "Invalid shader archive magic.";
     return;
   }
 
