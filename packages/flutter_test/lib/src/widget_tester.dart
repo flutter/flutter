@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
@@ -122,7 +123,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// When [experimentalLeakTesting] is set, it is used to configure leak tracking.
 /// Otherwise [LeakTesting.settings] is used.
 /// You can adjust [LeakTesting.settings] in flutter_test_config.dart for your
-/// package or folders, or in `setUpAll` for a test library or group.
+/// package or folders, or in `setUpAll` for a test file or group.
 /// If you set it for a group, remember the original value to a local variable
 /// and restore it in `tearDownAll` for the group.
 /// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
@@ -210,7 +211,6 @@ WidgetTesterCallback _maybeWrapWithLeakTracking(
 
   return callback;
 }
-
 
 /// An abstract base class for describing test environment variants.
 ///
