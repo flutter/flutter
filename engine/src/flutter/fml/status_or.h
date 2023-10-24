@@ -7,6 +7,7 @@
 
 #include <optional>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/status.h"
 
 namespace fml {

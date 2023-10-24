@@ -5,6 +5,8 @@
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 
 #include "flutter/fml/closure.h"
+#include "fml/status.h"
+#include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
@@ -294,15 +296,17 @@ bool CommandEncoderVK::IsTracking(
   return tracked_objects_->IsTracking(source);
 }
 
-std::optional<vk::DescriptorSet> CommandEncoderVK::AllocateDescriptorSet(
-    const vk::DescriptorSetLayout& layout,
-    size_t command_count) {
+fml::StatusOr<std::vector<vk::DescriptorSet>>
+CommandEncoderVK::AllocateDescriptorSets(
+    uint32_t buffer_count,
+    uint32_t sampler_count,
+    const std::vector<vk::DescriptorSetLayout>& layouts) {
   if (!IsValid()) {
-    return std::nullopt;
+    return fml::Status(fml::StatusCode::kUnknown, "command encoder invalid");
   }
 
-  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSet(
-      layout, command_count);
+  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(
+      buffer_count, sampler_count, layouts);
 }
 
 void CommandEncoderVK::PushDebugGroup(const char* label) const {

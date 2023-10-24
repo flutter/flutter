@@ -8,9 +8,6 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/pass_bindings_cache.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
-#include "impeller/renderer/backend/vulkan/texture_vk.h"
-#include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 
