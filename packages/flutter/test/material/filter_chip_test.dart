@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'feedback_tester.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -721,5 +724,199 @@ void main() {
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
 
     expect(getIconData(tester).color, const Color(0xff00ff00));
+  });
+
+  testWidgetsWithLeakTracking('Material3 - FilterChip supports delete button', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip(
+              onDeleted: () { },
+              onSelected: (bool valueChanged) { },
+              label: const Text('FilterChip'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test the chip size with delete button.
+    expect(find.text('FilterChip'), findsOneWidget);
+    expect(tester.getSize(find.byType(FilterChip)), const Size(195.0, 48.0));
+
+    // Test the delete button icon.
+    expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
+    expect(getIconData(tester).color, theme.colorScheme.onSecondaryContainer);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip.elevated(
+              onDeleted: () { },
+              onSelected: (bool valueChanged) { },
+              label: const Text('Elevated FilterChip'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test the elevated chip size with delete button.
+    expect(find.text('Elevated FilterChip'), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(FilterChip)),
+      within(distance: 0.001, from: const Size(321.9, 48.0)),
+    );
+
+    // Test the delete button icon.
+    expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
+    expect(getIconData(tester).color, theme.colorScheme.onSecondaryContainer);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgetsWithLeakTracking('Material2 - FilterChip supports delete button', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip(
+              onDeleted: () { },
+              onSelected: (bool valueChanged) { },
+              label: const Text('FilterChip'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test the chip size with delete button.
+    expect(find.text('FilterChip'), findsOneWidget);
+    expect(tester.getSize(find.byType(FilterChip)), const Size(188.0, 48.0));
+
+    // Test the delete button icon.
+    expect(tester.getSize(find.byIcon(Icons.cancel)), const Size(18.0, 18.0));
+    expect(getIconData(tester).color, theme.iconTheme.color?.withAlpha(0xde));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip.elevated(
+              onDeleted: () { },
+              onSelected: (bool valueChanged) { },
+              label: const Text('Elevated FilterChip'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test the elevated chip size with delete button.
+    expect(find.text('Elevated FilterChip'), findsOneWidget);
+    expect(tester.getSize(find.byType(FilterChip)), const Size(314.0, 48.0));
+
+    // Test the delete button icon.
+    expect(tester.getSize(find.byIcon(Icons.cancel)), const Size(18.0, 18.0));
+    expect(getIconData(tester).color, theme.iconTheme.color?.withAlpha(0xde));
+  });
+
+  testWidgetsWithLeakTracking('Customize FilterChip delete button', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    Widget buildChip({
+      Widget? deleteIcon,
+      Color? deleteIconColor,
+      String? deleteButtonTooltipMessage,
+    }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip(
+              deleteIcon: deleteIcon,
+              deleteIconColor: deleteIconColor,
+              deleteButtonTooltipMessage: deleteButtonTooltipMessage,
+              onDeleted: () { },
+              onSelected: (bool valueChanged) { },
+              label: const Text('FilterChip'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test the custom delete icon.
+    await tester.pumpWidget(buildChip(deleteIcon: const Icon(Icons.delete)));
+
+    expect(find.byIcon(Icons.clear), findsNothing);
+    expect(find.byIcon(Icons.delete), findsOneWidget);
+
+    // Test the custom delete icon color.
+    await tester.pumpWidget(buildChip(
+      deleteIcon: const Icon(Icons.delete),
+      deleteIconColor: const Color(0xff00ff00)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.clear), findsNothing);
+    expect(find.byIcon(Icons.delete), findsOneWidget);
+    expect(getIconData(tester).color, const Color(0xff00ff00));
+
+    // Test the custom delete button tooltip message.
+    await tester.pumpWidget(buildChip(deleteButtonTooltipMessage: 'Delete FilterChip'));
+    await tester.pumpAndSettle();
+
+    // Hover over the delete icon of the chip
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byIcon(Icons.clear)));
+
+    await tester.pumpAndSettle();
+
+    // Verify the tooltip message is set.
+    expect(find.widgetWithText(Tooltip, 'Delete FilterChip'), findsOneWidget);
+
+    await gesture.up();
+  });
+
+  testWidgetsWithLeakTracking('FilterChip delete button control test', (WidgetTester tester) async {
+    final FeedbackTester feedback = FeedbackTester();
+    final List<String> deletedButtonStrings = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: FilterChip(
+              onDeleted: () {
+                deletedButtonStrings.add('A');
+               },
+              onSelected: (bool valueChanged) { },
+              label: const Text('FilterChip'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(feedback.clickSoundCount, 0);
+
+    expect(deletedButtonStrings, isEmpty);
+    await tester.tap(find.byIcon(Icons.clear));
+    expect(deletedButtonStrings, equals(<String>['A']));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 1);
+
+    await tester.tap(find.byIcon(Icons.clear));
+    expect(deletedButtonStrings, equals(<String>['A', 'A']));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 2);
+
+    feedback.dispose();
   });
 }

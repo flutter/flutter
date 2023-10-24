@@ -639,6 +639,26 @@ class CommonSemanticsFinders {
     );
   }
 
+  /// Finds any [SemanticsNode]s that can scroll in at least one direction.
+  ///
+  /// If `axis` is provided, then the search will be limited to scrollable nodes
+  /// that can scroll in the given axis. If `axis` is not provided, then both
+  /// horizontal and vertical scrollable nodes will be found.
+  ///
+  /// {@macro flutter_test.finders.CommonSemanticsFinders.viewParameter}
+  SemanticsFinder scrollable({Axis? axis, FlutterView? view}) {
+    return byAnyAction(<SemanticsAction>[
+      if (axis == null || axis == Axis.vertical) ...<SemanticsAction>[
+        SemanticsAction.scrollUp,
+        SemanticsAction.scrollDown,
+      ],
+      if (axis == null || axis == Axis.horizontal) ...<SemanticsAction>[
+        SemanticsAction.scrollLeft,
+        SemanticsAction.scrollRight,
+      ],
+    ]);
+  }
+
   bool _matchesPattern(String target, Pattern pattern) {
     if (pattern is RegExp) {
       return pattern.hasMatch(target);
