@@ -24,7 +24,7 @@ typedef DragTargetWillAccept<T> = bool Function(T? data);
 /// based on provided information.
 ///
 /// Used by [DragTarget.onWillAcceptWithDetails].
-typedef DragTargetWillAcceptWithDetails<T> = bool Function(DragTargetDetails<T> details);
+typedef DragTargetWillAcceptWithDetails<T> = bool Function(DragTargetDetails<T>? details);
 
 /// Signature for causing a [DragTarget] to accept the given data.
 ///
@@ -34,7 +34,7 @@ typedef DragTargetAccept<T> = void Function(T data);
 /// Signature for determining information about the acceptance by a [DragTarget].
 ///
 /// Used by [DragTarget.onAcceptWithDetails].
-typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> details);
+typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T>? details);
 
 /// Signature for building children of a [DragTarget].
 ///
@@ -645,6 +645,8 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// either [onAccept] and [onAcceptWithDetails], if the data is dropped, or
   /// [onLeave], if the drag leaves the target.
   ///
+  /// Called with `null` details, if [Draggable.data] is null.
+  ///
   /// Equivalent to [onWillAccept], but with information, including the data,
   /// in a [DragTargetDetails].
   ///
@@ -657,6 +659,8 @@ class DragTarget<T extends Object> extends StatefulWidget {
   final DragTargetAccept<T>? onAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
+  ///
+  /// Called with `null` details, if [Draggable.data] is null.
   ///
   /// Equivalent to [onAccept], but with information, including the data, in a
   /// [DragTargetDetails].
@@ -707,7 +711,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
                                     (widget.onWillAccept != null &&
                                     widget.onWillAccept!(avatar.data as T?)) ||
                                     (widget.onWillAcceptWithDetails != null &&
-                                    widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
+                                    widget.onWillAcceptWithDetails!(avatar.data == null ? null : DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
     if (resolvedWillAccept) {
       setState(() {
         _candidateAvatars.add(avatar);
@@ -742,7 +746,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
     });
     widget.onAccept?.call(avatar.data! as T);
-    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onAcceptWithDetails?.call(avatar.data == null ? null : DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   void didMove(_DragAvatar<Object> avatar) {

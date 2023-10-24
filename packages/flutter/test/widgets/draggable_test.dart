@@ -21,7 +21,7 @@ import 'semantics_tester.dart';
 void main() {
   testWidgetsWithLeakTracking('Drag and drop - control test', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     int dragStartedCount = 0;
     int moveCount = 0;
 
@@ -85,7 +85,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -425,7 +425,7 @@ void main() {
                 onAccept: (int? data) {
                   events.add('drop');
                 },
-                onAcceptWithDetails: (DragTargetDetails<int> _) {
+                onAcceptWithDetails: (DragTargetDetails<int>? _) {
                   events.add('details');
                 },
               ),
@@ -513,7 +513,7 @@ void main() {
             onAccept: (int? data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails<int> _) {
+            onAcceptWithDetails: (DragTargetDetails<int>? _) {
               events.add('details');
             },
           ),
@@ -564,7 +564,7 @@ void main() {
             onAccept: (int? data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails<int> _) {
+            onAcceptWithDetails: (DragTargetDetails<int>? _) {
               events.add('details');
             },
           ),
@@ -613,7 +613,7 @@ void main() {
             onAccept: (int? data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails<int> _) {
+            onAcceptWithDetails: (DragTargetDetails<int>? _) {
               events.add('details');
             },
           ),
@@ -660,7 +660,7 @@ void main() {
             onAccept: (int? data) {
               events.add('drop $data');
             },
-            onAcceptWithDetails: (DragTargetDetails<int> _) {
+            onAcceptWithDetails: (DragTargetDetails<int>? _) {
               events.add('details');
             },
           ),
@@ -771,7 +771,7 @@ void main() {
             onAccept: (int? data) {
               events.add('drop $data');
             },
-            onAcceptWithDetails: (DragTargetDetails<int> _) {
+            onAcceptWithDetails: (DragTargetDetails<int>? _) {
               events.add('details');
             },
           ),
@@ -881,7 +881,7 @@ void main() {
               onAccept: (int? data) {
                 events.add('drop $data');
               },
-              onAcceptWithDetails: (DragTargetDetails<int> _) {
+              onAcceptWithDetails: (DragTargetDetails<int>? _) {
                 events.add('details');
               },
             ),
@@ -1151,7 +1151,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDraggableCanceledCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -1210,7 +1210,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -1219,7 +1219,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDraggableCanceledCalled = false;
     late Velocity onDraggableCanceledVelocity;
     late Offset onDraggableCanceledOffset;
@@ -1296,7 +1296,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with details', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDraggableCanceledCalled = false;
     late Velocity onDraggableCanceledVelocity;
     late Offset onDraggableCanceledOffset;
@@ -1321,7 +1321,7 @@ void main() {
                 child: Text('Target'),
               );
             },
-            onWillAcceptWithDetails: (DragTargetDetails<int> details) => false,
+            onWillAcceptWithDetails: (DragTargetDetails<int>? details) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -1373,7 +1373,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDraggableCanceledCalled = false;
     late Velocity onDraggableCanceledVelocity;
     late Offset onDraggableCanceledOffset;
@@ -1425,7 +1425,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDragEnd not called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(MaterialApp(
@@ -1501,7 +1501,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDragEnd not called if dropped on non-accepting target with details', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(MaterialApp(
@@ -1520,7 +1520,7 @@ void main() {
             builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
-            onWillAcceptWithDetails: (DragTargetDetails<int> data) => false,
+            onWillAcceptWithDetails: (DragTargetDetails<int>? data) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -1713,7 +1713,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDragCompleted not called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragCompletedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -1784,7 +1784,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDragCompleted not called if dropped on non-accepting target with details', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragCompletedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -1805,7 +1805,7 @@ void main() {
                 child: Text('Target'),
               );
             },
-            onWillAcceptWithDetails: (DragTargetDetails<int> data) => false,
+            onWillAcceptWithDetails: (DragTargetDetails<int>? data) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -1855,7 +1855,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(MaterialApp(
@@ -1918,7 +1918,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -1951,7 +1951,7 @@ void main() {
             onAccept: (int? data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails<int> _) {
+            onAcceptWithDetails: (DragTargetDetails<int>? _) {
               events.add('details');
             },
           ),
@@ -1997,7 +1997,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragCompletedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -2056,7 +2056,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2065,9 +2065,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - allow pass through of unaccepted data test', (WidgetTester tester) async {
     final List<int> acceptedInts = <int>[];
-    final List<DragTargetDetails<int>> acceptedIntsDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedIntsDetails = <DragTargetDetails<int>?>[];
     final List<double> acceptedDoubles = <double>[];
-    final List<DragTargetDetails<double>> acceptedDoublesDetails = <DragTargetDetails<double>>[];
+    final List<DragTargetDetails<double>?> acceptedDoublesDetails = <DragTargetDetails<double>?>[];
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -2157,7 +2157,7 @@ void main() {
     expect(acceptedIntsDetails, isEmpty);
     expect(acceptedDoubles, equals(<double>[1.0]));
     expect(acceptedDoublesDetails, hasLength(1));
-    expect(acceptedDoublesDetails.first.offset, const Offset(112.0, 122.0));
+    expect(acceptedDoublesDetails.first!.offset, const Offset(112.0, 122.0));
     expect(find.text('IntDragging'), findsNothing);
     expect(find.text('DoubleDragging'), findsNothing);
 
@@ -2190,7 +2190,7 @@ void main() {
 
     expect(acceptedInts, equals(<int>[1]));
     expect(acceptedIntsDetails, hasLength(1));
-    expect(acceptedIntsDetails.first.offset, const Offset(184.0, 122.0));
+    expect(acceptedIntsDetails.first!.offset, const Offset(184.0, 122.0));
     expect(acceptedDoubles, isEmpty);
     expect(acceptedDoublesDetails, isEmpty);
     expect(find.text('IntDragging'), findsNothing);
@@ -2199,9 +2199,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - allow pass through of unaccepted data twice test', (WidgetTester tester) async {
     final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
-    final List<DragTargetDetails<DragTargetData>> acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>>[];
+    final List<DragTargetDetails<DragTargetData>?> acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>?>[];
     final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
-    final List<DragTargetDetails<ExtendedDragTargetData>> acceptedExtendedDragTargetDataDetails = <DragTargetDetails<ExtendedDragTargetData>>[];
+    final List<DragTargetDetails<ExtendedDragTargetData>?> acceptedExtendedDragTargetDataDetails = <DragTargetDetails<ExtendedDragTargetData>?>[];
     final DragTargetData dragTargetData = DragTargetData();
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -2255,7 +2255,7 @@ void main() {
 
       expect(acceptedDragTargetDatas, equals(<DragTargetData>[dragTargetData]));
       expect(acceptedDragTargetDataDetails, hasLength(1));
-      expect(acceptedDragTargetDataDetails.first.offset, const Offset(256.0, 74.0));
+      expect(acceptedDragTargetDataDetails.first!.offset, const Offset(256.0, 74.0));
       expect(acceptedExtendedDragTargetDatas, isEmpty);
       expect(acceptedExtendedDragTargetDataDetails, isEmpty);
 
@@ -2267,7 +2267,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - maxSimultaneousDrags', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
 
     Widget build(int maxSimultaneousDrags) {
       return MaterialApp(
@@ -2364,7 +2364,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
@@ -2374,8 +2374,8 @@ void main() {
 
     expect(accepted, equals(<int>[1, 1]));
     expect(acceptedDetails, hasLength(2));
-    expect(acceptedDetails[0].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[1].offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails[0]!.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails[1]!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2385,8 +2385,8 @@ void main() {
 
     expect(accepted, equals(<int>[1, 1]));
     expect(acceptedDetails, hasLength(2));
-    expect(acceptedDetails[0].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[1].offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails[0]!.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails[1]!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2490,7 +2490,7 @@ void main() {
             onAccept: (int? data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails<int> _) {
+            onAcceptWithDetails: (DragTargetDetails<int>? _) {
               events.add('details');
             },
           ),
@@ -2535,7 +2535,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Drag and drop - remove draggable', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -2607,7 +2607,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 26.0));
+    expect(acceptedDetails.first!.offset, const Offset(256.0, 26.0));
     expect(find.text('Source'), findsNothing);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2639,7 +2639,7 @@ void main() {
 
   testWidgetsWithLeakTracking('long-press draggable calls onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
 
@@ -2713,7 +2713,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, expectedDropOffset);
+    expect(acceptedDetails.first!.offset, expectedDropOffset);
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2726,7 +2726,7 @@ void main() {
 
   testWidgetsWithLeakTracking('long-press draggable calls onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
     bool onDragCompletedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -2793,7 +2793,7 @@ void main() {
     await tester.pump();
 
     expect(accepted, equals(<int>[1]));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first!.offset, const Offset(256.0, 74.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -3492,9 +3492,88 @@ void main() {
         return const SizedBox(height: 100.0, child: Text('Target'));
       },
       onWillAccept: (int? data) => true,
-      onWillAcceptWithDetails: (DragTargetDetails<int> details) => false,
+      onWillAcceptWithDetails: (DragTargetDetails<int>? details) => false,
     ), throwsAssertionError);
  });
+
+  testWidgetsWithLeakTracking('DragTarget onAcceptWithDetails does not throw error when data is null', (WidgetTester tester) async {
+    bool isOnAcceptWithDetailsCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            feedback: Text('Dragging'),
+            child: Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target'));
+            },
+            onAcceptWithDetails: (DragTargetDetails<int>? details) {
+              isOnAcceptWithDetailsCalled = true;
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(isOnAcceptWithDetailsCalled, isTrue);
+  });
+
+  testWidgetsWithLeakTracking('DragTarget onWillAcceptWithDetails does not throw error when data is null', (WidgetTester tester) async {
+    bool isOnWillAcceptWithDetailsCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            feedback: Text('Dragging'),
+            child: Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target'));
+            },
+            onWillAcceptWithDetails: (DragTargetDetails<int>? details) {
+              isOnWillAcceptWithDetailsCalled = true;
+              return true;
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(isOnWillAcceptWithDetailsCalled, isTrue);
+  });
 }
 
 Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester tester, required bool hapticFeedbackOnStart, required int expectedHapticFeedbackCount }) async {
@@ -3546,7 +3625,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
 
 Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
   final List<int> accepted = <int>[];
-  final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+  final List<DragTargetDetails<int>?> acceptedDetails = <DragTargetDetails<int>?>[];
   int dragStartedCount = 0;
 
   await tester.pumpWidget(
