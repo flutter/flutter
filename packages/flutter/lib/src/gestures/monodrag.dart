@@ -555,6 +555,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
+
+    // Add an artificial delay to trigger a flake in velocity_tracker.dart
+    //
+    // To reproduce the flake, run this command:
+    //
+    // flutter test --plain-name='Verify that a back button resets a persistent BottomSheet' test/material/persistent_bottom_sheet_test.dart
+    final Stopwatch sw = Stopwatch()..start();
+    while (sw.elapsedMilliseconds < 50) {}
+    sw.stop();
+
     final VelocityEstimate? estimate = tracker.getVelocityEstimate();
 
     DragEndDetails? details;
