@@ -140,46 +140,57 @@ Future<void> buildMacOS({
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = DarwinArch.x86_64.name;
-    final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('snapshot.$arch.json');
-    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('trace.$arch.json');
-
-    // This analysis is only supported for release builds.
-    // Attempt to guess the correct .app by picking the first one.
-    final Directory candidateDirectory = globals.fs.directory(
-      globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
-    );
-    final Directory appDirectory = candidateDirectory.listSync()
-      .whereType<Directory>()
-      .firstWhere((Directory directory) {
-      return globals.fs.path.extension(directory.path) == '.app';
-    });
-    final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
-      aotSnapshot: aotSnapshot,
-      precompilerTrace: precompilerTrace,
-      outputDirectory: appDirectory,
-      type: 'macos',
-      excludePath: 'Versions', // Avoid double counting caused by symlinks
-    );
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs
-        .directory(globals.fsUtils.homeDirPath)
-        .childDirectory('.flutter-devtools'), 'macos-code-size-analysis', 'json',
-    )..writeAsStringSync(jsonEncode(output));
-    // This message is used as a sentinel in analyze_apk_size_test.dart
-    globals.printStatus(
-      'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
-    );
-
-    // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
-    globals.printStatus(
-      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'dart devtools --appSizeBase=$relativeAppSizePath'
-    );
-  }
+  await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+}
+
+/// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.
+///
+/// Size analysis will be run for release builds where the --analyze-size
+/// option has been specified. By default, size analysis JSON output is written
+/// to ~/.flutter-devtools/macos-code-size-analysis_NN.json.
+Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnalyzer) async {
+  // Bail out if the size analysis option was not specified.
+  if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
+    return;
+  }
+  final String arch = DarwinArch.x86_64.name;
+  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('snapshot.$arch.json');
+  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
+    .childFile('trace.$arch.json');
+
+  // This analysis is only supported for release builds.
+  // Attempt to guess the correct .app by picking the first one.
+  final Directory candidateDirectory = globals.fs.directory(
+    globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+  );
+  final Directory appDirectory = candidateDirectory.listSync()
+    .whereType<Directory>()
+    .firstWhere((Directory directory) {
+    return globals.fs.path.extension(directory.path) == '.app';
+  });
+  final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
+    aotSnapshot: aotSnapshot,
+    precompilerTrace: precompilerTrace,
+    outputDirectory: appDirectory,
+    type: 'macos',
+    excludePath: 'Versions', // Avoid double counting caused by symlinks
+  );
+  final File outputFile = globals.fsUtils.getUniqueFile(
+    globals.fs
+      .directory(globals.fsUtils.homeDirPath)
+      .childDirectory('.flutter-devtools'), 'macos-code-size-analysis', 'json',
+  )..writeAsStringSync(jsonEncode(output));
+  // This message is used as a sentinel in analyze_apk_size_test.dart
+  globals.printStatus(
+    'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
+  );
+
+  // DevTools expects a file path relative to the .flutter-devtools/ dir.
+  final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+  globals.printStatus(
+    '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+    'dart devtools --appSizeBase=$relativeAppSizePath'
+  );
 }
