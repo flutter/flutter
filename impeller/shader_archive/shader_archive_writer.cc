@@ -2,33 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/blobcat/blob_writer.h"
+#include "impeller/shader_archive/shader_archive_writer.h"
 
 #include <array>
 #include <filesystem>
 #include <optional>
 
-#include "impeller/blobcat/blob_flatbuffers.h"
+#include "impeller/shader_archive/shader_archive_flatbuffers.h"
 
 namespace impeller {
 
-BlobWriter::BlobWriter() = default;
+ShaderArchiveWriter::ShaderArchiveWriter() = default;
 
-BlobWriter::~BlobWriter() = default;
+ShaderArchiveWriter::~ShaderArchiveWriter() = default;
 
-std::optional<BlobShaderType> InferShaderTypefromFileExtension(
+std::optional<ArchiveShaderType> InferShaderTypefromFileExtension(
     const std::filesystem::path& path) {
   if (path == ".vert") {
-    return BlobShaderType::kVertex;
+    return ArchiveShaderType::kVertex;
   } else if (path == ".frag") {
-    return BlobShaderType::kFragment;
+    return ArchiveShaderType::kFragment;
   } else if (path == ".comp") {
-    return BlobShaderType::kCompute;
+    return ArchiveShaderType::kCompute;
   }
   return std::nullopt;
 }
 
-bool BlobWriter::AddBlobAtPath(const std::string& std_path) {
+bool ShaderArchiveWriter::AddShaderAtPath(const std::string& std_path) {
   std::filesystem::path path(std_path);
 
   if (path.stem().empty()) {
@@ -68,50 +68,50 @@ bool BlobWriter::AddBlobAtPath(const std::string& std_path) {
     return false;
   }
 
-  return AddBlob(shader_type.value(), shader_name, std::move(file_mapping));
+  return AddShader(shader_type.value(), shader_name, std::move(file_mapping));
 }
 
-bool BlobWriter::AddBlob(BlobShaderType type,
-                         std::string name,
-                         std::shared_ptr<fml::Mapping> mapping) {
+bool ShaderArchiveWriter::AddShader(ArchiveShaderType type,
+                                    std::string name,
+                                    std::shared_ptr<fml::Mapping> mapping) {
   if (name.empty() || !mapping || mapping->GetMapping() == nullptr) {
     return false;
   }
 
-  blob_descriptions_.emplace_back(
-      BlobDescription{type, std::move(name), std::move(mapping)});
+  shader_descriptions_.emplace_back(
+      ShaderDescription{type, std::move(name), std::move(mapping)});
   return true;
 }
 
-constexpr fb::Stage ToStage(BlobShaderType type) {
+constexpr fb::Stage ToStage(ArchiveShaderType type) {
   switch (type) {
-    case BlobShaderType::kVertex:
+    case ArchiveShaderType::kVertex:
       return fb::Stage::kVertex;
-    case BlobShaderType::kFragment:
+    case ArchiveShaderType::kFragment:
       return fb::Stage::kFragment;
-    case BlobShaderType::kCompute:
+    case ArchiveShaderType::kCompute:
       return fb::Stage::kCompute;
   }
   FML_UNREACHABLE();
 }
 
-std::shared_ptr<fml::Mapping> BlobWriter::CreateMapping() const {
-  fb::BlobLibraryT blobs;
-  for (const auto& blob_description : blob_descriptions_) {
-    auto mapping = blob_description.mapping;
+std::shared_ptr<fml::Mapping> ShaderArchiveWriter::CreateMapping() const {
+  fb::ShaderArchiveT shader_archive;
+  for (const auto& shader_description : shader_descriptions_) {
+    auto mapping = shader_description.mapping;
     if (!mapping) {
       return nullptr;
     }
-    auto desc = std::make_unique<fb::BlobT>();
-    desc->name = blob_description.name;
-    desc->stage = ToStage(blob_description.type);
+    auto desc = std::make_unique<fb::ShaderBlobT>();
+    desc->name = shader_description.name;
+    desc->stage = ToStage(shader_description.type);
     desc->mapping = {mapping->GetMapping(),
                      mapping->GetMapping() + mapping->GetSize()};
-    blobs.items.emplace_back(std::move(desc));
+    shader_archive.items.emplace_back(std::move(desc));
   }
   auto builder = std::make_shared<flatbuffers::FlatBufferBuilder>();
-  builder->Finish(fb::BlobLibrary::Pack(*builder.get(), &blobs),
-                  fb::BlobLibraryIdentifier());
+  builder->Finish(fb::ShaderArchive::Pack(*builder.get(), &shader_archive),
+                  fb::ShaderArchiveIdentifier());
   return std::make_shared<fml::NonOwnedMapping>(builder->GetBufferPointer(),
                                                 builder->GetSize(),
                                                 [builder](auto, auto) {});

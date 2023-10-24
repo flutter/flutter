@@ -112,7 +112,7 @@ impeller_component("vulkan") {
 
   public_deps = [
     "../../:renderer",
-    "../../../blobcat:blobcat_lib",
+    "../../../shader_archive",
     "//flutter/flutter_vma",
     "//flutter/fml",
     "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",

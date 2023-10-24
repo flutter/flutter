@@ -6,8 +6,8 @@
 
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
-#include "impeller/blobcat/blob_library.h"
-#include "impeller/blobcat/blob_writer.h"
+#include "impeller/shader_archive/shader_archive.h"
+#include "impeller/shader_archive/shader_archive_writer.h"
 
 namespace impeller {
 namespace testing {
@@ -25,30 +25,30 @@ const std::string CreateStringFromMapping(const fml::Mapping& mapping) {
                      mapping.GetSize()};
 }
 
-TEST(BlobTest, CanReadAndWriteBlobs) {
-  BlobWriter writer;
-  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kVertex, "Hello",
-                             CreateMappingFromString("World")));
-  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kFragment, "Foo",
-                             CreateMappingFromString("Bar")));
-  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kVertex, "Baz",
-                             CreateMappingFromString("Bang")));
-  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kVertex, "Ping",
-                             CreateMappingFromString("Pong")));
-  ASSERT_TRUE(writer.AddBlob(BlobShaderType::kFragment, "Pang",
-                             CreateMappingFromString("World")));
+TEST(ShaderArchiveTest, CanReadAndWriteBlobs) {
+  ShaderArchiveWriter writer;
+  ASSERT_TRUE(writer.AddShader(ArchiveShaderType::kVertex, "Hello",
+                               CreateMappingFromString("World")));
+  ASSERT_TRUE(writer.AddShader(ArchiveShaderType::kFragment, "Foo",
+                               CreateMappingFromString("Bar")));
+  ASSERT_TRUE(writer.AddShader(ArchiveShaderType::kVertex, "Baz",
+                               CreateMappingFromString("Bang")));
+  ASSERT_TRUE(writer.AddShader(ArchiveShaderType::kVertex, "Ping",
+                               CreateMappingFromString("Pong")));
+  ASSERT_TRUE(writer.AddShader(ArchiveShaderType::kFragment, "Pang",
+                               CreateMappingFromString("World")));
 
   auto mapping = writer.CreateMapping();
   ASSERT_NE(mapping, nullptr);
 
-  BlobLibrary library(mapping);
+  ShaderArchive library(mapping);
   ASSERT_TRUE(library.IsValid());
   ASSERT_EQ(library.GetShaderCount(), 5u);
 
   // Wrong type.
-  ASSERT_EQ(library.GetMapping(BlobShaderType::kFragment, "Hello"), nullptr);
+  ASSERT_EQ(library.GetMapping(ArchiveShaderType::kFragment, "Hello"), nullptr);
 
-  auto hello_vtx = library.GetMapping(BlobShaderType::kVertex, "Hello");
+  auto hello_vtx = library.GetMapping(ArchiveShaderType::kVertex, "Hello");
   ASSERT_NE(hello_vtx, nullptr);
   ASSERT_EQ(CreateStringFromMapping(*hello_vtx), "World");
 }

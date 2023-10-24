@@ -492,14 +492,14 @@ template("_impeller_shaders_metal") {
   }
 }
 
-template("blobcat_library") {
+template("shader_archive") {
   assert(defined(invoker.shaders),
          "The shaders to build the library from must be specified.")
   assert(defined(invoker.deps), "Target dependencies must be specified.")
 
-  output_file = "$target_gen_dir/$target_name.shaderblob"
+  output_file = "$target_gen_dir/$target_name.shar"
   compiled_action(target_name) {
-    tool = "//flutter/impeller/blobcat"
+    tool = "//flutter/impeller/shader_archive:shader_archiver"
     inputs = invoker.shaders
     outputs = [ output_file ]
     output_path_rebased = rebase_path(output_file, root_build_dir)
@@ -565,7 +565,7 @@ template("_impeller_shaders_gles") {
   }
 
   gles_lib = "genlib_$target_name"
-  blobcat_library(gles_lib) {
+  shader_archive(gles_lib) {
     shaders = gles_shaders
     deps = [ ":$impellerc_gles" ]
   }
@@ -641,7 +641,7 @@ template("_impeller_shaders_vk") {
   }
 
   vk_lib = "genlib_$target_name"
-  blobcat_library(vk_lib) {
+  shader_archive(vk_lib) {
     shaders = vk_shaders
     deps = [ ":$impellerc_vk" ]
   }

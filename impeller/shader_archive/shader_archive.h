@@ -11,38 +11,38 @@
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "impeller/blobcat/blob_types.h"
+#include "impeller/shader_archive/shader_archive_types.h"
 
 namespace impeller {
 
-class BlobLibrary {
+class ShaderArchive {
  public:
-  explicit BlobLibrary(std::shared_ptr<fml::Mapping> payload);
+  explicit ShaderArchive(std::shared_ptr<fml::Mapping> payload);
 
-  BlobLibrary(BlobLibrary&&);
+  ShaderArchive(ShaderArchive&&);
 
-  ~BlobLibrary();
+  ~ShaderArchive();
 
   bool IsValid() const;
 
   size_t GetShaderCount() const;
 
-  std::shared_ptr<fml::Mapping> GetMapping(BlobShaderType type,
+  std::shared_ptr<fml::Mapping> GetMapping(ArchiveShaderType type,
                                            std::string name) const;
 
-  size_t IterateAllBlobs(
-      const std::function<bool(BlobShaderType type,
+  size_t IterateAllShaders(
+      const std::function<bool(ArchiveShaderType type,
                                const std::string& name,
                                const std::shared_ptr<fml::Mapping>& mapping)>&)
       const;
 
  private:
-  struct BlobKey {
-    BlobShaderType type = BlobShaderType::kFragment;
+  struct ShaderKey {
+    ArchiveShaderType type = ArchiveShaderType::kFragment;
     std::string name;
 
     struct Hash {
-      size_t operator()(const BlobKey& key) const {
+      size_t operator()(const ShaderKey& key) const {
         return fml::HashCombine(
             static_cast<std::underlying_type_t<decltype(key.type)>>(key.type),
             key.name);
@@ -50,22 +50,22 @@ class BlobLibrary {
     };
 
     struct Equal {
-      bool operator()(const BlobKey& lhs, const BlobKey& rhs) const {
+      bool operator()(const ShaderKey& lhs, const ShaderKey& rhs) const {
         return lhs.type == rhs.type && lhs.name == rhs.name;
       }
     };
   };
 
-  using Blobs = std::unordered_map<BlobKey,
-                                   std::shared_ptr<fml::Mapping>,
-                                   BlobKey::Hash,
-                                   BlobKey::Equal>;
+  using Shaders = std::unordered_map<ShaderKey,
+                                     std::shared_ptr<fml::Mapping>,
+                                     ShaderKey::Hash,
+                                     ShaderKey::Equal>;
 
   std::shared_ptr<fml::Mapping> payload_;
-  Blobs blobs_;
+  Shaders shaders_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(BlobLibrary);
+  FML_DISALLOW_COPY_AND_ASSIGN(ShaderArchive);
 };
 
 }  // namespace impeller
