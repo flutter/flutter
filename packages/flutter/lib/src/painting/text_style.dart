@@ -518,10 +518,10 @@ class TextStyle with Diagnosticable {
   /// Otherwise, the combining is allowed, and the returned [TextStyle] inherits
   /// the [inherit] value from the method receiver.
   ///
-  /// This property has no effect on [TextSpan]'s text style cascading: in a
-  /// [TextSpan] tree, a [TextSpan]'s text style can be combined with that of an
-  /// ancestor [TextSpan] if it has unspecified fields, regardless of its
-  /// [inherit] value.
+  /// This property does not affect the text style inheritance in an [InlineSpan]
+  /// tree: an [InlineSpan]'s text style is merged with that of an ancestor
+  /// [InlineSpan] if it has unspecified fields, regardless of its [inherit]
+  /// value.
   ///
   /// Properties that don't have explicit values or other default values to fall
   /// back to will revert to the defaults: white in color, a font size of 14
