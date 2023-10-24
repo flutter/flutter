@@ -83,13 +83,13 @@ impeller_component("impeller_unittests") {
   deps = [
     "archivist:archivist_unittests",
     "base:base_unittests",
-    "blobcat:blobcat_unittests",
     "compiler:compiler_unittests",
     "core:allocator_unittests",
     "display_list:skia_conversions_unittests",
     "geometry:geometry_unittests",
     "runtime_stage:runtime_stage_unittests",
     "scene/importer:importer_unittests",
+    "shader_archive:shader_archive_unittests",
     "tessellator:tessellator_unittests",
   ]
 

@@ -10,15 +10,15 @@ enum Stage:byte {
   kCompute,
 }
 
-table Blob {
+table ShaderBlob {
   stage: Stage;
   name: string;
   mapping: [ubyte];
 }
 
-table BlobLibrary {
-  items: [Blob];
+table ShaderArchive {
+  items: [ShaderBlob];
 }
 
-root_type BlobLibrary;
-file_identifier "BCAT";
+root_type ShaderArchive;
+file_identifier "SHAR";

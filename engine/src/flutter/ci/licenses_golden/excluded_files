@@ -127,7 +127,6 @@
 ../../../flutter/impeller/archivist/archivist_unittests.cc
 ../../../flutter/impeller/base/README.md
 ../../../flutter/impeller/base/base_unittests.cc
-../../../flutter/impeller/blobcat/blobcat_unittests.cc
 ../../../flutter/impeller/compiler/README.md
 ../../../flutter/impeller/compiler/compiler_unittests.cc
 ../../../flutter/impeller/compiler/switches_unittests.cc
@@ -175,6 +174,7 @@
 ../../../flutter/impeller/scene/README.md
 ../../../flutter/impeller/scene/importer/importer_unittests.cc
 ../../../flutter/impeller/scene/scene_unittests.cc
+../../../flutter/impeller/shader_archive/shader_archive_unittests.cc
 ../../../flutter/impeller/tessellator/dart/.dart_tool
 ../../../flutter/impeller/tessellator/dart/pubspec.lock
 ../../../flutter/impeller/tessellator/dart/pubspec.yaml

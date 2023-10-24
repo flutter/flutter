@@ -93,7 +93,7 @@ impeller_component("gles") {
 
   public_deps = [
     "../../:renderer",
-    "../../../blobcat:blobcat_lib",
+    "../../../shader_archive",
     "//flutter/fml",
   ]
 }

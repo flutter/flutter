@@ -6,12 +6,12 @@
 #include <iostream>
 
 #include "flutter/fml/command_line.h"
-#include "impeller/blobcat/blob_writer.h"
+#include "impeller/shader_archive/shader_archive_writer.h"
 
 namespace impeller {
 
 bool Main(const fml::CommandLine& command_line) {
-  BlobWriter writer;
+  ShaderArchiveWriter writer;
 
   std::string output;
   if (!command_line.GetOptionValue("output", &output)) {
@@ -20,15 +20,15 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   for (const auto& input : command_line.GetOptionValues("input")) {
-    if (!writer.AddBlobAtPath(std::string{input})) {
-      std::cerr << "Could not add blob at path: " << input << std::endl;
+    if (!writer.AddShaderAtPath(std::string{input})) {
+      std::cerr << "Could not add shader at path: " << input << std::endl;
       return false;
     }
   }
 
-  auto blob = writer.CreateMapping();
-  if (!blob) {
-    std::cerr << "Could not create combined shader blob." << std::endl;
+  auto archive = writer.CreateMapping();
+  if (!archive) {
+    std::cerr << "Could not create shader archive." << std::endl;
     return false;
   }
 
@@ -38,8 +38,9 @@ bool Main(const fml::CommandLine& command_line) {
   auto output_path =
       std::filesystem::absolute(std::filesystem::current_path() / output);
   if (!fml::WriteAtomically(current_directory, output_path.string().c_str(),
-                            *blob)) {
-    std::cerr << "Could not write shader blob to path " << output << std::endl;
+                            *archive)) {
+    std::cerr << "Could not write shader archive to path " << output
+              << std::endl;
     return false;
   }
 
