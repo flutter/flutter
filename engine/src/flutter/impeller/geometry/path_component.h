@@ -47,9 +47,13 @@ struct LinearPathComponent {
   std::optional<Vector2> GetEndDirection() const;
 };
 
+// A component that represets a Quadratic Bézier curve.
 struct QuadraticPathComponent {
+  // Start point.
   Point p1;
+  // Control point.
   Point cp;
+  // End point.
   Point p2;
 
   QuadraticPathComponent() {}
@@ -87,10 +91,15 @@ struct QuadraticPathComponent {
   std::optional<Vector2> GetEndDirection() const;
 };
 
+// A component that represets a Cubic Bézier curve.
 struct CubicPathComponent {
+  // Start point.
   Point p1;
+  // The first control point.
   Point cp1;
+  // The second control point.
   Point cp2;
+  // End point.
   Point p2;
 
   CubicPathComponent() {}
