@@ -48,18 +48,18 @@ static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& confi
 
   // set thread priority
   switch (config.priority) {
-    case fml::Thread::ThreadPriority::BACKGROUND: {
+    case fml::Thread::ThreadPriority::kBackground: {
       pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
       [[NSThread currentThread] setThreadPriority:0];
       break;
     }
-    case fml::Thread::ThreadPriority::NORMAL: {
+    case fml::Thread::ThreadPriority::kNormal: {
       pthread_set_qos_class_self_np(QOS_CLASS_DEFAULT, 0);
       [[NSThread currentThread] setThreadPriority:0.5];
       break;
     }
-    case fml::Thread::ThreadPriority::RASTER:
-    case fml::Thread::ThreadPriority::DISPLAY: {
+    case fml::Thread::ThreadPriority::kRaster:
+    case fml::Thread::ThreadPriority::kDisplay: {
       pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
       [[NSThread currentThread] setThreadPriority:1.0];
       sched_param param;
@@ -805,17 +805,17 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   host_config.ui_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
                                     flutter::ThreadHost::Type::UI, threadLabel.UTF8String),
-                                fml::Thread::ThreadPriority::DISPLAY);
+                                fml::Thread::ThreadPriority::kDisplay);
 
   host_config.raster_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
                                     flutter::ThreadHost::Type::RASTER, threadLabel.UTF8String),
-                                fml::Thread::ThreadPriority::RASTER);
+                                fml::Thread::ThreadPriority::kRaster);
 
   host_config.io_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
                                     flutter::ThreadHost::Type::IO, threadLabel.UTF8String),
-                                fml::Thread::ThreadPriority::NORMAL);
+                                fml::Thread::ThreadPriority::kNormal);
 
   return (flutter::ThreadHost){host_config};
 }

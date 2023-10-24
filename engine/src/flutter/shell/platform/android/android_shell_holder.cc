@@ -41,21 +41,21 @@ static void AndroidPlatformThreadConfigSetter(
   fml::Thread::SetCurrentThreadName(config);
   // set thread priority
   switch (config.priority) {
-    case fml::Thread::ThreadPriority::BACKGROUND: {
+    case fml::Thread::ThreadPriority::kBackground: {
       fml::RequestAffinity(fml::CpuAffinity::kEfficiency);
       if (::setpriority(PRIO_PROCESS, 0, 10) != 0) {
         FML_LOG(ERROR) << "Failed to set IO task runner priority";
       }
       break;
     }
-    case fml::Thread::ThreadPriority::DISPLAY: {
+    case fml::Thread::ThreadPriority::kDisplay: {
       fml::RequestAffinity(fml::CpuAffinity::kPerformance);
       if (::setpriority(PRIO_PROCESS, 0, -1) != 0) {
         FML_LOG(ERROR) << "Failed to set UI task runner priority";
       }
       break;
     }
-    case fml::Thread::ThreadPriority::RASTER: {
+    case fml::Thread::ThreadPriority::kRaster: {
       fml::RequestAffinity(fml::CpuAffinity::kPerformance);
       // Android describes -8 as "most important display threads, for
       // compositing the screen and retrieving input events". Conservatively
@@ -97,15 +97,15 @@ AndroidShellHolder::AndroidShellHolder(
   host_config.ui_config = fml::Thread::ThreadConfig(
       flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
           flutter::ThreadHost::Type::UI, thread_label),
-      fml::Thread::ThreadPriority::DISPLAY);
+      fml::Thread::ThreadPriority::kDisplay);
   host_config.raster_config = fml::Thread::ThreadConfig(
       flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
           flutter::ThreadHost::Type::RASTER, thread_label),
-      fml::Thread::ThreadPriority::RASTER);
+      fml::Thread::ThreadPriority::kRaster);
   host_config.io_config = fml::Thread::ThreadConfig(
       flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
           flutter::ThreadHost::Type::IO, thread_label),
-      fml::Thread::ThreadPriority::NORMAL);
+      fml::Thread::ThreadPriority::kNormal);
 
   thread_host_ = std::make_shared<ThreadHost>(host_config);
 

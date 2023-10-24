@@ -21,13 +21,13 @@ class Thread {
   /// Valid values for priority of Thread.
   enum class ThreadPriority : int {
     /// Suitable for threads that shouldn't disrupt high priority work.
-    BACKGROUND,
+    kBackground,
     /// Default priority level.
-    NORMAL,
+    kNormal,
     /// Suitable for threads which generate data for the display.
-    DISPLAY,
+    kDisplay,
     /// Suitable for thread which raster data.
-    RASTER,
+    kRaster,
   };
 
   /// The ThreadConfig is the thread info include thread name, thread priority.
@@ -36,9 +36,9 @@ class Thread {
         : name(name), priority(priority) {}
 
     explicit ThreadConfig(const std::string& name)
-        : ThreadConfig(name, ThreadPriority::NORMAL) {}
+        : ThreadConfig(name, ThreadPriority::kNormal) {}
 
-    ThreadConfig() : ThreadConfig("", ThreadPriority::NORMAL) {}
+    ThreadConfig() : ThreadConfig("", ThreadPriority::kNormal) {}
 
     std::string name;
     ThreadPriority priority;
