@@ -62,7 +62,7 @@ static void MockThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
   struct sched_param param;
   int policy = SCHED_OTHER;
   switch (config.priority) {
-    case fml::Thread::ThreadPriority::DISPLAY:
+    case fml::Thread::ThreadPriority::kDisplay:
       param.sched_priority = 10;
       break;
     default:
@@ -77,7 +77,7 @@ TEST(Thread, ThreadPriorityCreatedWithConfig) {
 
   fml::Thread thread(MockThreadConfigSetter,
                      fml::Thread::ThreadConfig(
-                         thread1_name, fml::Thread::ThreadPriority::NORMAL));
+                         thread1_name, fml::Thread::ThreadPriority::kNormal));
   bool done = false;
 
   struct sched_param param;
@@ -95,7 +95,7 @@ TEST(Thread, ThreadPriorityCreatedWithConfig) {
 
   fml::Thread thread2(MockThreadConfigSetter,
                       fml::Thread::ThreadConfig(
-                          thread2_name, fml::Thread::ThreadPriority::DISPLAY));
+                          thread2_name, fml::Thread::ThreadPriority::kDisplay));
   thread2.GetTaskRunner()->PostTask([&]() {
     done = true;
     char thread_name[8];

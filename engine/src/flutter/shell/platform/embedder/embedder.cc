@@ -1978,16 +1978,16 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     }
     FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
     switch (config.priority) {
-      case fml::Thread::ThreadPriority::BACKGROUND:
+      case fml::Thread::ThreadPriority::kBackground:
         priority = FlutterThreadPriority::kBackground;
         break;
-      case fml::Thread::ThreadPriority::NORMAL:
+      case fml::Thread::ThreadPriority::kNormal:
         priority = FlutterThreadPriority::kNormal;
         break;
-      case fml::Thread::ThreadPriority::DISPLAY:
+      case fml::Thread::ThreadPriority::kDisplay:
         priority = FlutterThreadPriority::kDisplay;
         break;
-      case fml::Thread::ThreadPriority::RASTER:
+      case fml::Thread::ThreadPriority::kRaster:
         priority = FlutterThreadPriority::kRaster;
         break;
     }

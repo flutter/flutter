@@ -108,16 +108,16 @@ void SetThreadConfig(
   // the role naming scheme.
   std::string role;
   switch (config.priority) {
-    case fml::Thread::ThreadPriority::BACKGROUND:
+    case fml::Thread::ThreadPriority::kBackground:
       role = name_prefix + ".thread.background";
       break;
-    case fml::Thread::ThreadPriority::DISPLAY:
+    case fml::Thread::ThreadPriority::kDisplay:
       role = name_prefix + ".thread.display";
       break;
-    case fml::Thread::ThreadPriority::RASTER:
+    case fml::Thread::ThreadPriority::kRaster:
       role = name_prefix + ".thread.raster";
       break;
-    case fml::Thread::ThreadPriority::NORMAL:
+    case fml::Thread::ThreadPriority::kNormal:
       role = name_prefix + ".thread.normal";
       break;
     default:
@@ -186,15 +186,15 @@ flutter::ThreadHost Engine::CreateThreadHost(
   thread_host_config.SetRasterConfig(
       {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
            flutter::ThreadHost::Type::RASTER, name_prefix),
-       fml::Thread::ThreadPriority::RASTER});
+       fml::Thread::ThreadPriority::kRaster});
   thread_host_config.SetUIConfig(
       {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
            flutter::ThreadHost::Type::UI, name_prefix),
-       fml::Thread::ThreadPriority::DISPLAY});
+       fml::Thread::ThreadPriority::kDisplay});
   thread_host_config.SetIOConfig(
       {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
            flutter::ThreadHost::Type::IO, name_prefix),
-       fml::Thread::ThreadPriority::NORMAL});
+       fml::Thread::ThreadPriority::kNormal});
 
   return flutter::ThreadHost(thread_host_config);
 }

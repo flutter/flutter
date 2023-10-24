@@ -2577,7 +2577,7 @@ static void MockThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
   struct sched_param param;
   int policy = SCHED_OTHER;
   switch (config.priority) {
-    case fml::Thread::ThreadPriority::DISPLAY:
+    case fml::Thread::ThreadPriority::kDisplay:
       param.sched_priority = 10;
       break;
     default:
