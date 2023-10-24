@@ -149,7 +149,6 @@ void testWidgets(
   int? retry,
   LeakTesting? experimentalLeakTesting,
 }) {
-  // TODO(polina-c): enable leak tracking based on the value of `leakTesting`.
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
 
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
