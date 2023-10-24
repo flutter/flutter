@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/reporting/unified_analytics.dart';
+import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
@@ -108,6 +109,18 @@ void main() {
         reason: 'The client ID should match the NoOp client id',
       );
       expect(analytics, isA<NoOpAnalytics>());
+    });
+
+    testWithoutContext('Suppression prevents events from being sent', () {
+      expect(analyticsOverride.okToSend, true);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+      expect(analyticsOverride.sentEvents, hasLength(1));
+      
+      analyticsOverride.suppressTelemetry();
+      expect(analyticsOverride.okToSend, false);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+
+      expect(analyticsOverride.sentEvents, hasLength(1));
     });
   });
 }
