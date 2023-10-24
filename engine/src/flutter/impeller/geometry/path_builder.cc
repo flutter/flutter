@@ -187,9 +187,9 @@ PathBuilder& PathBuilder::AddRect(Rect rect) {
   auto tr = rect.origin + Point{rect.size.width, 0.0};
 
   MoveTo(tl);
-  prototype_.AddLinearComponent(tl, tr)
-      .AddLinearComponent(tr, br)
-      .AddLinearComponent(br, bl);
+  LineTo(tr);
+  LineTo(br);
+  LineTo(bl);
   Close();
 
   return *this;

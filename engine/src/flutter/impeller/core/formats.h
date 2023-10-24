@@ -325,11 +325,33 @@ enum class IndexType {
   kNone,
 };
 
+/// Decides how backend draws pixels based on input vertices.
 enum class PrimitiveType {
+  /// Draws a triage for each separate set of three vertices.
+  ///
+  /// Vertices [A, B, C, D, E, F] will produce triages
+  /// [ABC, DEF].
   kTriangle,
+
+  /// Draws a triage for every adjacent three vertices.
+  ///
+  /// Vertices [A, B, C, D, E, F] will produce triages
+  /// [ABC, BCD, CDE, DEF].
   kTriangleStrip,
+
+  /// Draws a line for each separate set of two vertices.
+  ///
+  /// Vertices [A, B, C] will produce discontinued line
+  /// [AB, BC].
   kLine,
+
+  /// Draws a continuous line that connect every input vertices
+  ///
+  /// Vertices [A, B, C] will produce one continuous line
+  /// [ABC].
   kLineStrip,
+
+  /// Draws a point at each input vertex.
   kPoint,
   // Triangle fans are implementation dependent and need extra extensions
   // checks. Hence, they are not supported here.
