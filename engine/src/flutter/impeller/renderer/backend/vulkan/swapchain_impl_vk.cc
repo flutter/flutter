@@ -522,7 +522,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
   if (context.GetSyncPresentation()) {
     task();
   } else {
-    context.GetConcurrentWorkerTaskRunner()->PostTask(task);
+    context.GetQueueSubmitRunner()->PostTask(task);
   }
   return true;
 }

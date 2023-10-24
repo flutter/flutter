@@ -16,7 +16,7 @@
 
 namespace impeller {
 
-static constexpr uint32_t kPoolSize = 64u;
+static constexpr uint32_t kPoolSize = 1024u;
 
 GPUTracerVK::GPUTracerVK(const std::shared_ptr<DeviceHolder>& device_holder)
     : device_holder_(device_holder) {
