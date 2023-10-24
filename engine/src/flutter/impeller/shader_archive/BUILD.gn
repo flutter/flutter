@@ -5,51 +5,52 @@
 import("//third_party/flatbuffers/flatbuffers.gni")
 import("../tools/impeller.gni")
 
-config("blobcat_config") {
+config("shader_archive_config") {
   configs = [ "//flutter/impeller:impeller_public_config" ]
   include_dirs = [ "$root_gen_dir/flutter" ]
 }
 
-flatbuffers("blobcat_flatbuffers") {
-  flatbuffers = [ "blob.fbs" ]
-  public_configs = [ ":blobcat_config" ]
+flatbuffers("shader_archive_flatbuffers") {
+  flatbuffers = [ "shader_archive.fbs" ]
+  public_configs = [ ":shader_archive_config" ]
   public_deps = [ "//third_party/flatbuffers" ]
 }
 
-impeller_component("blobcat_lib") {
+impeller_component("shader_archive") {
   sources = [
-    "blob_library.cc",
-    "blob_library.h",
-    "blob_writer.cc",
-    "blob_writer.h",
+    "shader_archive.cc",
+    "shader_archive.h",
+    "shader_archive_types.h",
+    "shader_archive_writer.cc",
+    "shader_archive_writer.h",
   ]
 
   public_deps = [
-    ":blobcat_flatbuffers",
+    ":shader_archive_flatbuffers",
     "../base",
     "//flutter/fml",
   ]
 }
 
-impeller_component("blobcat") {
+impeller_component("shader_archiver") {
   target_type = "executable"
 
-  sources = [ "blobcat_main.cc" ]
+  sources = [ "shader_archive_main.cc" ]
 
   deps = [
-    ":blobcat_lib",
+    ":shader_archive",
     "../base",
     "//flutter/fml",
   ]
 }
 
-impeller_component("blobcat_unittests") {
+impeller_component("shader_archive_unittests") {
   testonly = true
 
-  sources = [ "blobcat_unittests.cc" ]
+  sources = [ "shader_archive_unittests.cc" ]
 
   deps = [
-    ":blobcat_lib",
+    ":shader_archive",
     "//flutter/fml",
     "//flutter/testing",
   ]
