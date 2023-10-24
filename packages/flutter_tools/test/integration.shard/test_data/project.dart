@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
@@ -59,11 +58,9 @@ abstract class Project {
     }
     deferredComponents?.setUpIn(dir);
 
-    final File flutterJsFile = Artifacts.test().getHostArtifact(HostArtifact.flutterJs) as File;
-
     // Setup for different flutter web initializations
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), flutterJsFile.readAsStringSync());
+    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
     writePackages(dir.path);
     await getPackages(dir.path);
