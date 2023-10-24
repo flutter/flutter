@@ -60,8 +60,9 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   Future<void> buildForDevice({
-    String? mainPath,
     required BuildInfo buildInfo,
+    required covariant LinuxApp package,
+    String? mainPath,
   }) async {
     await buildLinux(
       FlutterProject.current().linux,

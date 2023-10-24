@@ -118,6 +118,7 @@ abstract class DesktopDevice extends Device {
     if (!prebuiltApplication) {
       await buildForDevice(
         buildInfo: debuggingOptions.buildInfo,
+        package: package,
         mainPath: mainPath,
       );
     }
@@ -198,6 +199,7 @@ abstract class DesktopDevice extends Device {
   /// Builds the current project for this device, with the given options.
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
+    required ApplicationPackage package,
     String? mainPath,
   });
 

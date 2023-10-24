@@ -406,6 +406,9 @@ class FakeDesktopDevice extends DesktopDevice {
   /// The [buildInfo] last passed to [buildForDevice].
   BuildInfo? lastBuildInfo;
 
+  /// The [package] last passed to [buildForDevice].
+  FakeApplicationPackage? lastPackage;
+
   final bool nullExecutablePathForDevice;
 
   @override
@@ -422,11 +425,13 @@ class FakeDesktopDevice extends DesktopDevice {
 
   @override
   Future<void> buildForDevice({
+    required BuildInfo buildInfo,
+    required covariant FakeApplicationPackage package,
     String? mainPath,
-    BuildInfo? buildInfo,
   }) async {
-    lastBuiltMainPath = mainPath;
     lastBuildInfo = buildInfo;
+    lastPackage = package;
+    lastBuiltMainPath = mainPath;
   }
 
   // Dummy implementation that just returns the build mode name.

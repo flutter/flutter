@@ -79,8 +79,9 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   Future<void> buildForDevice({
-    String? mainPath,
     required BuildInfo buildInfo,
+    required covariant ApplicationPackage package,
+    String? mainPath,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');

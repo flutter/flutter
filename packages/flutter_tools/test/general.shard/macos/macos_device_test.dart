@@ -239,6 +239,46 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
+
+  testWithoutContext('unquarantineApp unquarantines the package executable', () async {
+    bool unquarantined = false;
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['xattr', '-d', 'com.apple.quarantine', 'path/to/executable'],
+          onRun: () { unquarantined = true; },
+        ),
+      ]),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    await device.unquarantineApp('path/to/executable');
+    expect(unquarantined, true);
+  });
+
+  testWithoutContext('unquarantineApp does not throw toolExit on failure', () async {
+    // Ensure that failing to un-quarantine an app isn't a fatal error. The
+    // result of failing to un-quarantine an app is that the user is forced to
+    // manually click-through a warning dialog, but the app still works.
+    bool unquarantined = false;
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['xattr', '-d', 'com.apple.quarantine', 'path/to/executable'],
+          onRun: () { unquarantined = true; },
+          exitCode: 1,
+        ),
+      ]),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    await device.unquarantineApp('path/to/executable');
+    expect(unquarantined, true);
+  });
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {

@@ -50,8 +50,9 @@ class WindowsDevice extends DesktopDevice {
 
   @override
   Future<void> buildForDevice({
-    String? mainPath,
     required BuildInfo buildInfo,
+    required covariant WindowsApp package,
+    String? mainPath,
   }) async {
     await buildWindows(
       FlutterProject.current().windows,

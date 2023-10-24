@@ -26,6 +26,7 @@ class MacOSDevice extends DesktopDevice {
     required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
+       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
        super(
         'macos',
@@ -39,6 +40,7 @@ class MacOSDevice extends DesktopDevice {
 
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
@@ -66,6 +68,7 @@ class MacOSDevice extends DesktopDevice {
   @override
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
+    required covariant MacOSApp package,
     String? mainPath,
   }) async {
     await buildMacOS(
@@ -74,6 +77,26 @@ class MacOSDevice extends DesktopDevice {
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
     );
+    final String? executablePath = executablePathForDevice(package, buildInfo);
+    if (executablePath != null) {
+      final String appPath = _fileSystem.path.join(executablePath);
+      await unquarantineApp(appPath);
+    }
+  }
+
+  /// Marks the specified application as unquarantined.
+  ///
+  /// As of macOS 14 (Sonoma), macOS marks newly-compiled binaries as
+  /// quarantined, and displays a warning about running an unsigned app before
+  /// launching them. Since these binaries are compiled and run at the
+  /// developers request, the author is aware that they're unsigned, mark them
+  /// as unquarantined.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/136888
+  Future<void> unquarantineApp(String applicationPath) async {
+    // Ignore exit status. If the command fails, the user can still run the app,
+    // but will get a warning popup.
+    await _processManager.run(<String>['xattr', '-d', 'com.apple.quarantine', applicationPath]);
   }
 
   @override
