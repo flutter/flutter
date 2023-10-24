@@ -171,7 +171,24 @@ states of completion:
   necessary. It is possible for callers to perform reflection at runtime but
   there are no Impeller components that do this currently.
 
-![Shader Compilation Pipeline](docs/assets/shader_pipeline.png)
+```mermaid
+flowchart TD
+    glsl_460[GLSL ES 4.60] -- Stage 1 Compiler --> spirv[SPIRV]
+
+    spirv -- SPIRV Optimizer --> optimized_spirv[Optimized SPIRV]
+
+    optimized_spirv -- Metal Stage 2 Compiler --> metal_sources[Metal Shader Sources]
+    metal_sources -- Metal Linker --> metal_library[Metal Library]
+
+    optimized_spirv -- Vulkan Stage 2 Compiler --> vulkan_spirv[Vulkan SPIRV]
+    vulkan_spirv -- Shader Archiver --> vulkan_shader_archive[Vulkan Shader Archive]
+
+    optimized_spirv -- GLSL ES Stage 2 Compiler --> glsl_es_100[GLSL ES 1.00]
+    glsl_es_100 -- Shader Archiver --> gles_shader_archive[OpenGL ES Shader Archive]
+
+    spirv -- Reflector --> cxx_sources[C++ Sources]
+    cxx_sources -- Ninja Build --> cxx_library[C++ Library]
+```
 
 ## Try Impeller in Flutter
 
