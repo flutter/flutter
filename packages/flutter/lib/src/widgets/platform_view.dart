@@ -14,6 +14,7 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'view.dart';
 
 // Examples can assume:
 // PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
@@ -860,6 +861,7 @@ class PlatformViewCreationParams {
   const PlatformViewCreationParams._({
     required this.id,
     required this.viewType,
+    required this.flutterViewId,
     required this.onPlatformViewCreated,
     required this.onFocusChanged,
   });
@@ -874,6 +876,9 @@ class PlatformViewCreationParams {
   /// This viewType is used to tell the platform which type of view to
   /// associate with the [id].
   final String viewType;
+
+  /// The ID of the [FlutterView] that this platform view is rendererd into.
+  final int flutterViewId;
 
   /// Callback invoked after the platform view has been created.
   final PlatformViewCreatedCallback onPlatformViewCreated;
@@ -1019,6 +1024,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       PlatformViewCreationParams._(
         id: _id!,
         viewType: widget.viewType,
+        flutterViewId: View.of(context).viewId,
         onPlatformViewCreated: _onPlatformViewCreated,
         onFocusChanged: _handlePlatformFocusChanged,
       ),

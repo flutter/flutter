@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 
 import 'framework.dart';
 import 'platform_view.dart';
-import 'view.dart';
 
 /// The platform-specific implementation of [HtmlElementView].
 extension HtmlElementViewImpl on HtmlElementView {
@@ -39,12 +38,9 @@ extension HtmlElementViewImpl on HtmlElementView {
   /// The implementation on Flutter Web builds an HTML platform view and handles
   /// its lifecycle.
   Widget buildImpl(BuildContext context) {
-    final FlutterView flutterView = View.of(context);
     return PlatformViewLink(
       viewType: viewType,
-      onCreatePlatformView: (PlatformViewCreationParams params) {
-        return _createController(params, flutterView.viewId);
-      },
+      onCreatePlatformView: _createController,
       surfaceFactory: (BuildContext context, PlatformViewController controller) {
         return PlatformViewSurface(
           controller: controller,
@@ -58,13 +54,12 @@ extension HtmlElementViewImpl on HtmlElementView {
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createController(
     PlatformViewCreationParams params,
-    int viewId,
   ) {
     final _HtmlElementViewController controller = _HtmlElementViewController(
       params.id,
       viewType,
       creationParams,
-      viewId,
+      params.flutterViewId,
     );
     controller._initialize().then((_) {
       params.onPlatformViewCreated(params.id);
