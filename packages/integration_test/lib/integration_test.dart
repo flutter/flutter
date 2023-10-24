@@ -14,10 +14,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
-import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
-import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
-import 'common.dart';
+import 'src/_callback_io.dart' if (dart.library.html) 'src/_callback_web.dart' as driver_actions;
+import 'src/_extension_io.dart' if (dart.library.html) 'src/_extension_web.dart';
 import 'src/channel.dart';
+import 'src/common.dart';
+
+export 'src/common.dart';
 
 const String _success = 'success';
 
