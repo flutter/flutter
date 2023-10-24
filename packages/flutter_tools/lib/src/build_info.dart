@@ -920,7 +920,7 @@ const String kIosArchs = 'IosArchs';
 /// The define to control what macOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not
-/// provided, defaults to x86_64.
+/// provided, defaults to x86_64 and arm64.
 ///
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';

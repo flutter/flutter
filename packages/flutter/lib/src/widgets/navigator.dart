@@ -3509,7 +3509,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             return;
           }
           notification.dispatch(context);
-        });
+        }, debugLabel: 'Navigator.dispatchNotification');
     }
   }
 
@@ -3716,7 +3716,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                   );
                 }
               }
-            });
+            }, debugLabel: 'Navigator.checkHeroControllerOwnership');
           }
           return true;
         }());
