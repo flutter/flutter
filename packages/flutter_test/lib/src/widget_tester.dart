@@ -205,6 +205,10 @@ WidgetTesterCallback _maybeWrapWithLeakTracking(
   LeakTesting? leakTesting,
 ) {
   leakTesting = leakTesting ?? LeakTesting.settings;
+  if (leakTesting.ignore) {
+    return callback;
+  }
+
   return callback;
 }
 
