@@ -4,6 +4,7 @@
 
 // This script generates `android/build.gradle` for each directory specify in the stdin.
 // Then it generate the lockfiles for each Gradle project.
+// Prereiqusite: make sure `flutter doctor -v` outputs the same version of java as `java --version`.
 // To regenerate these files, run `find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart`
 
 import 'dart:io';
