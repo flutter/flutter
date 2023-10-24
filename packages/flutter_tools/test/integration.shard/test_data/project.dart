@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_js.dart';
 
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
@@ -60,13 +59,11 @@ abstract class Project {
     }
     deferredComponents?.setUpIn(dir);
 
-    final String fileGeneratorsPath =
-        Artifacts.test().getArtifactPath(Artifact.flutterToolsFileGenerators);
-    final String flutterJsContents = generateFlutterJsFile(fileGeneratorsPath);
+    final File flutterJsFile = Artifacts.test().getHostArtifact(HostArtifact.flutterJs) as File;
 
     // Setup for different flutter web initializations
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), flutterJsContents);
+    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), flutterJsFile.readAsStringSync());
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
     writePackages(dir.path);
     await getPackages(dir.path);

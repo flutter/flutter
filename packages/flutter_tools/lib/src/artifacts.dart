@@ -81,6 +81,9 @@ enum HostArtifact {
   /// The libraries JSON file for web release builds.
   flutterWebLibrariesJson,
 
+  // The flutter.js bootstrapping file provided by the engine.
+  flutterJs,
+
   /// Folder that contains platform dill files for the web sdk.
   webPlatformKernelFolder,
 
@@ -232,6 +235,8 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
   switch (artifact) {
     case HostArtifact.flutterWebSdk:
       return '';
+    case HostArtifact.flutterJs:
+      return 'flutter.js';
     case HostArtifact.iosDeploy:
       return 'ios-deploy';
     case HostArtifact.idevicesyslog:
@@ -438,6 +443,7 @@ class CachedArtifacts implements Artifacts {
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
       case HostArtifact.flutterWebLibrariesJson:
+      case HostArtifact.flutterJs:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPlatformKernelFolder:
@@ -891,6 +897,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
       case HostArtifact.flutterWebLibrariesJson:
+      case HostArtifact.flutterJs:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPlatformKernelFolder:
@@ -1198,6 +1205,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
       case HostArtifact.flutterWebLibrariesJson:
+      case HostArtifact.flutterJs:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
       case HostArtifact.webPlatformKernelFolder:

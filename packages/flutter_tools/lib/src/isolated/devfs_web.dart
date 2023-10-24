@@ -40,7 +40,6 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
@@ -838,10 +837,9 @@ class WebDevFS implements DevFS {
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
-      final String fileGeneratorsPath = globals.artifacts!
-          .getArtifactPath(Artifact.flutterToolsFileGenerators);
       webAssetServer.writeFile(
-          'flutter.js', flutter_js.generateFlutterJsFile(fileGeneratorsPath));
+          'flutter.js',
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterJs).path);
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
