@@ -1,4 +1,4 @@
-Signature: 4353b249b85afc14d6035334b2a9a520
+Signature: ad9f5291b9ab154745c0ef2e1f2d7683
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8793,12 +8793,14 @@ ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/EventQueueInter
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Int96.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Point.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Segment.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/SweepLine.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/BentleyOttmann1.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/BruteForceCrossings.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/EventQueue.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Int96.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/SweepLine.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBezierCurves.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkCubics.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkCubics.h + ../../../third_party/skia/LICENSE
@@ -9064,12 +9066,14 @@ FILE: ../../../third_party/skia/modules/bentleyottmann/include/EventQueueInterfa
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/Int96.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/Point.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/Segment.h
+FILE: ../../../third_party/skia/modules/bentleyottmann/include/SweepLine.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/BentleyOttmann1.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/BruteForceCrossings.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/EventQueue.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Int96.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp
+FILE: ../../../third_party/skia/modules/bentleyottmann/src/SweepLine.cpp
 FILE: ../../../third_party/skia/src/base/SkBezierCurves.h
 FILE: ../../../third_party/skia/src/base/SkCubics.cpp
 FILE: ../../../third_party/skia/src/base/SkCubics.h
