@@ -510,11 +510,7 @@ void main() {
 
     testUsingContext('PII separated, events only sent once', () async {
       final Doctor fakeDoctor = FakePiiDoctor(logger);
-      final DoctorText doctorText = DoctorText(
-        logger,
-        doctor: fakeDoctor,
-        clock: const SystemClock(),
-      );
+      final DoctorText doctorText = DoctorText(logger,doctor: fakeDoctor);
       const String expectedPiiText = '[✓] PII Validator\n'
           '    • Contains PII path/to/username\n'
           '\n'
@@ -548,11 +544,7 @@ void main() {
 
     testUsingContext('without PII has same text and PII-stripped text', () async {
       final Doctor fakeDoctor = FakePassingDoctor(logger);
-      final DoctorText doctorText = DoctorText(
-        logger,
-        doctor: fakeDoctor,
-        clock: const SystemClock(),
-      );
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
       final String piiText = await doctorText.text;
       expect(piiText, isNotEmpty);
       expect(piiText, await doctorText.piiStrippedText);

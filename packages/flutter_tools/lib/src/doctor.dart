@@ -762,9 +762,9 @@ class DeviceValidator extends DoctorValidator {
 class DoctorText {
   DoctorText(
     BufferLogger logger, {
-    required SystemClock clock,
+    SystemClock? clock,
     @visibleForTesting Doctor? doctor,
-  })  : _doctor = doctor ?? Doctor(logger: logger, clock: clock),
+  })  : _doctor = doctor ?? Doctor(logger: logger, clock: clock ?? globals.systemClock),
         _logger = logger;
 
   final BufferLogger _logger;
