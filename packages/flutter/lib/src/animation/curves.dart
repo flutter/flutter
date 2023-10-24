@@ -364,7 +364,7 @@ class Cubic extends Curve {
 /// The [ThreePointCubic] class implements third-order Bézier curves, where two
 /// curves share an interior [midpoint] that the curve passes through. If the
 /// control points surrounding the middle point ([b1], and [a2]) are not
-/// colinear with the middle point, then the curve's derivative will have a
+/// collinear with the middle point, then the curve's derivative will have a
 /// discontinuity (a cusp) at the shared middle point.
 ///
 /// See also:
@@ -398,7 +398,7 @@ class ThreePointCubic extends Curve {
   /// The coordinates of the middle shared point.
   ///
   /// The curve will go through this point. If the control points surrounding
-  /// this middle point ([b1], and [a2]) are not colinear with this point, then
+  /// this middle point ([b1], and [a2]) are not collinear with this point, then
   /// the curve's derivative will have a discontinuity (a cusp) at this point.
   final Offset midpoint;
 
