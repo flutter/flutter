@@ -12,4 +12,10 @@ enum class ArchiveShaderType {
   kCompute,
 };
 
+enum class ArchiveRenderingBackend {
+  kMetal,
+  kVulkan,
+  kOpenGLES,
+};
+
 }  // namespace impeller

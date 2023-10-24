@@ -6,7 +6,12 @@
 
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
+#include "impeller/base/validation.h"
+#include "impeller/shader_archive/multi_arch_shader_archive.h"
+#include "impeller/shader_archive/multi_arch_shader_archive_flatbuffers.h"
+#include "impeller/shader_archive/multi_arch_shader_archive_writer.h"
 #include "impeller/shader_archive/shader_archive.h"
+#include "impeller/shader_archive/shader_archive_flatbuffers.h"
 #include "impeller/shader_archive/shader_archive_writer.h"
 
 namespace impeller {
@@ -41,16 +46,50 @@ TEST(ShaderArchiveTest, CanReadAndWriteBlobs) {
   auto mapping = writer.CreateMapping();
   ASSERT_NE(mapping, nullptr);
 
-  ShaderArchive library(mapping);
-  ASSERT_TRUE(library.IsValid());
-  ASSERT_EQ(library.GetShaderCount(), 5u);
+  MultiArchShaderArchiveWriter multi_writer;
+
+  ASSERT_TRUE(multi_writer.RegisterShaderArchive(
+      ArchiveRenderingBackend::kOpenGLES, mapping));
+
+  {
+    ScopedValidationDisable no_val;
+    // Can't add the same backend again.
+    ASSERT_FALSE(multi_writer.RegisterShaderArchive(
+        ArchiveRenderingBackend::kOpenGLES, mapping));
+  }
+
+  auto multi_mapping = multi_writer.CreateMapping();
+  ASSERT_TRUE(multi_mapping);
+
+  {
+    ScopedValidationDisable no_val;
+    auto no_library = MultiArchShaderArchive::CreateArchiveFromMapping(
+        multi_mapping, ArchiveRenderingBackend::kVulkan);
+    ASSERT_EQ(no_library, nullptr);
+  }
+
+  auto library = MultiArchShaderArchive::CreateArchiveFromMapping(
+      multi_mapping, ArchiveRenderingBackend::kOpenGLES);
+  ASSERT_EQ(library->GetShaderCount(), 5u);
 
   // Wrong type.
-  ASSERT_EQ(library.GetMapping(ArchiveShaderType::kFragment, "Hello"), nullptr);
+  ASSERT_EQ(library->GetMapping(ArchiveShaderType::kFragment, "Hello"),
+            nullptr);
 
-  auto hello_vtx = library.GetMapping(ArchiveShaderType::kVertex, "Hello");
+  auto hello_vtx = library->GetMapping(ArchiveShaderType::kVertex, "Hello");
   ASSERT_NE(hello_vtx, nullptr);
   ASSERT_EQ(CreateStringFromMapping(*hello_vtx), "World");
+}
+
+TEST(ShaderArchiveTest, ArchiveAndMultiArchiveHaveDifferentIdentifiers) {
+  // The unarchiving process depends on these identifiers to check to see if its
+  // a standalone archive or a multi-archive. Things will get nutty if these are
+  // ever the same.
+  auto archive_id = fb::ShaderArchiveIdentifier();
+  auto multi_archive_id = fb::MultiArchShaderArchiveIdentifier();
+  ASSERT_EQ(std::strlen(archive_id), std::strlen(multi_archive_id));
+  ASSERT_NE(std::strncmp(archive_id, multi_archive_id, std::strlen(archive_id)),
+            0);
 }
 
 }  // namespace testing

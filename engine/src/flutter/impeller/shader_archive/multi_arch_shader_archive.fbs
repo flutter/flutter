@@ -1,0 +1,25 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+namespace impeller.fb;
+
+enum RenderingBackend:byte {
+  kOpenGLES,
+  kVulkan,
+  kMetal,
+}
+
+table ShaderArchiveBlob {
+  rendering_backend: RenderingBackend;
+  mapping: [ubyte];
+}
+
+table MultiArchShaderArchive {
+  // We could have just as easily used the existing `ShaderArchive` table here.
+  // However, those tables aren't used by Metal.
+  items: [ShaderArchiveBlob];
+}
+
+root_type MultiArchShaderArchive;
+file_identifier "MARC";
