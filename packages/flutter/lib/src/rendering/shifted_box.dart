@@ -205,7 +205,8 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     _resolve();
     assert(_resolvedPadding != null);
     if (child == null) {
@@ -408,7 +409,28 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  double computeMinIntrinsicWidth(double height) {
+    return super.computeMinIntrinsicWidth(height) * (_widthFactor ?? 1);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return super.computeMaxIntrinsicWidth(height) * (_widthFactor ?? 1);
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return super.computeMinIntrinsicHeight(width)  * (_heightFactor ?? 1);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return super.computeMaxIntrinsicHeight(width)  * (_heightFactor ?? 1);
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
     final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;
     if (child != null) {
@@ -617,7 +639,8 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   bool get sizedByParent => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -752,7 +775,8 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     final Size? childSize = child?.getDryLayout(constraintsTransform(constraints));
     return childSize == null ? constraints.smallest : constraints.constrain(childSize);
   }
@@ -920,7 +944,8 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.constrain(_requestedSize);
   }
 
@@ -1069,7 +1094,8 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child != null) {
       final Size childSize = child!.getDryLayout(_getInnerConstraints(constraints));
       return constraints.constrain(childSize);
@@ -1268,7 +1294,8 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _getSize(constraints);
   }
 
@@ -1335,7 +1362,8 @@ class RenderBaseline extends RenderShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child != null) {
       assert(debugCannotComputeDryLayout(
         reason: 'Baseline metrics are only available after a full layout.',

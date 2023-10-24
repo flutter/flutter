@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 // THIS TEST IS SENSITIVE TO LINE NUMBERS AT THE TOP OF THIS FILE
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class RenderFoo extends RenderShiftedBox {
   RenderFoo({ RenderBox? child }) : super(child);
@@ -32,7 +32,7 @@ class Foo extends SingleChildRenderObjectWidget {
 // END OF SENSITIVE SECTION
 
 void main() {
-  testWidgets('Stack parsing in non-normalized constraints error', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Stack parsing in non-normalized constraints error', (WidgetTester tester) async {
     await tester.pumpWidget(const Foo(child: Placeholder()), Duration.zero, EnginePhase.layout);
     final Object? exception = tester.takeException();
     final String text = exception.toString();
