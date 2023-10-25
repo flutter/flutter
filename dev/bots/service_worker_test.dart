@@ -61,6 +61,7 @@ Future<void> main() async {
   await runWebServiceWorkerTestWithGeneratedEntrypoint(headless: false);
   await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
   await runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: false);
+  await runWebServiceWorkerTestWithCustomBaseHref(headless: false);
 
   if (hasError) {
     reportErrorsAndExit('${bold}One or more tests failed.$reset');
@@ -128,7 +129,7 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
   return indexFile;
 }
 
-Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType testType, required String target }) async {
+Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType testType, required String target, String? baseHref, String? output }) async {
   await _setAppVersion(version);
   await runCommand(
     _flutter,
@@ -145,7 +146,17 @@ Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType 
   );
   await runCommand(
     _flutter,
-    <String>['build', 'web', '--web-resources-cdn', '--profile', '-t', target],
+    <String>[
+      'build', 'web', '--web-resources-cdn', '--profile', '-t', target,
+      if (baseHref != null) ...<String>[
+        '--base-href',
+        baseHref,
+      ],
+      if(output != null) ...<String>[
+        '--output',
+        output,
+      ],
+    ],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
@@ -515,6 +526,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
   );
 
   final bool shouldExpectFlutterJs = testType != ServiceWorkerTestType.withoutFlutterJs;
+  final String faviconExt = testType == ServiceWorkerTestType.generatedEntrypoint ? 'png' : 'ico';
 
   print('BEGIN runWebServiceWorkerTestWithCachingResources(headless: $headless, testType: $testType)');
 
@@ -547,7 +559,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       if (!headless)
         ...<String, int>{
           'manifest.json': 1,
-          'favicon.ico': 1,
+          'favicon.$faviconExt': 1,
         },
     });
 
@@ -605,7 +617,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
       if (!headless)
         ...<String, int>{
-          'favicon.ico': 1,
+          'favicon.$faviconExt': 1,
         },
     });
   } finally {
@@ -841,4 +853,112 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({
     await server?.stop();
   }
   print('END runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: $headless)');
+}
+
+/// Regression test for https://github.com/flutter/flutter/issues/111866.
+Future<void> runWebServiceWorkerTestWithCustomBaseHref({
+  required bool headless,
+}) async {
+  const String baseHref = 'sub';
+  await _generateEntrypoint();
+  final Map<String, int> requestedPathCounts = <String, int>{};
+  void expectRequestCounts(Map<String, int> expectedCounts) =>
+      _expectRequestCounts(expectedCounts, requestedPathCounts);
+
+  AppServer? server;
+  Future<void> waitForAppToLoad(Map<String, int> waitForCounts) async =>
+      _waitForAppToLoad(waitForCounts, requestedPathCounts, server);
+
+  Future<void> startAppServer({
+    required String cacheControl,
+  }) async {
+    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
+    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
+    server = await AppServer.start(
+      headless: headless,
+      cacheControl: cacheControl,
+      // TODO(yjbanov): use a better port disambiguation strategy than trying
+      //                to guess what ports other tests use.
+      appUrl: 'http://localhost:$serverPort/$baseHref/index.html',
+      serverPort: serverPort,
+      browserDebugPort: browserDebugPort,
+      appDirectory: _appBuildDirectory,
+      additionalRequestHandlers: <Handler>[
+        (Request request) {
+          final String requestedPath = request.url.path;
+          requestedPathCounts.putIfAbsent(requestedPath, () => 0);
+          requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
+          if (requestedPath == '$baseHref/CLOSE') {
+            return Response.ok('OK');
+          }
+          return Response.notFound('');
+        },
+      ],
+    );
+  }
+
+  // Preserve old index.html as index_og.html so we can restore it later for other tests
+  await runCommand(
+    'mv',
+    <String>[
+      'index.html',
+      'index_og.html',
+    ],
+    workingDirectory: _testAppWebDirectory,
+  );
+
+  print('BEGIN runWebServiceWorkerTestWithCustomBaseHref(headless: $headless)');
+
+  try {
+    await _rebuildApp(
+      version: 1,
+      testType: ServiceWorkerTestType.generatedEntrypoint,
+      target: _target,
+      baseHref: '/$baseHref/',
+      output: './build/web/$baseHref'
+    );
+    await startAppServer(cacheControl: 'max-age=3600');
+    await waitForAppToLoad(<String, int>{
+      '$baseHref/CLOSE': 1,
+      '$baseHref/flutter_service_worker.js': 1,
+      '$baseHref/assets/fonts/MaterialIcons-Regular.otf': 1,
+    });
+
+    expectRequestCounts(<String, int>{
+      '$baseHref/index.html': 2,
+      '$baseHref/flutter.js': 1,
+      '$baseHref/main.dart.js': 1,
+      '$baseHref/flutter_service_worker.js': 1,
+      '$baseHref/CLOSE': 1,
+      '$baseHref/assets/FontManifest.json': 1,
+      '$baseHref/assets/AssetManifest.json': 1,
+      '$baseHref/assets/fonts/MaterialIcons-Regular.otf': 1,
+      // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
+      if (!headless) ...<String, int>{
+        '$baseHref/manifest.json': 1,
+        '$baseHref/favicon.png': 1,
+      },
+    });
+
+    print('Test page reload');
+    await server!.chrome.reloadPage();
+    await waitForAppToLoad(<String, int>{
+      '$baseHref/CLOSE': 1,
+    });
+    expectRequestCounts(<String, int>{
+      '$baseHref/CLOSE': 1,
+    });
+  } finally {
+    await runCommand(
+      'mv',
+      <String>[
+        'index_og.html',
+        'index.html',
+      ],
+      workingDirectory: _testAppWebDirectory,
+    );
+    await server?.stop();
+  }
+
+  print('END runWebServiceWorkerTestWithCustomBaseHref(headless: $headless)');
 }

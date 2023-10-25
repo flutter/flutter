@@ -44,12 +44,8 @@ self.addEventListener("activate", function(event) {
         return;
       }
       var oldManifest = await manifest.json();
-      var origin = self.location.origin;
       for (var request of await contentCache.keys()) {
-        var key = request.url.substring(origin.length + 1);
-        if (key == "") {
-          key = "/";
-        }
+        const key = getKey(request.url);
         // If a resource from the old manifest is not in the new cache, or if
         // the MD5 sum has changed, delete it. Otherwise the resource is left
         // in the cache and can be reused by the new service worker.
@@ -84,15 +80,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
-  var origin = self.location.origin;
-  var key = event.request.url.substring(origin.length + 1);
-  // Redirect URLs to the index.html
-  if (key.indexOf('?v=') != -1) {
-    key = key.split('?v=')[0];
-  }
-  if (event.request.url == origin || event.request.url.startsWith(origin + '/#') || key == '') {
-    key = '/';
-  }
+  const key = getKey(event.request.url);
   // If the URL is not the RESOURCE list then return to signal that the
   // browser should take over.
   if (!RESOURCES[key]) {
@@ -129,6 +117,36 @@ self.addEventListener('message', (event) => {
     return;
   }
 });
+
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+function removeTrailingSlash(url) {
+  if (url == "") {
+    return url;
+  }
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+}
+
+/**
+ * Extracts resource key from url
+ * @param {string} url
+ * @returns {string}
+ */
+function getKey(url) {
+  const scope = removeTrailingSlash(self.registration.scope);
+  let key = url.substring(scope.length + 1);
+  // Redirect URLs to the index.html
+  if (key.indexOf('?v=') != -1) {
+    key = key.split('?v=')[0];
+  }
+  if (url == scope || url.startsWith(scope + '/#') || key == '') {
+    key = '/';
+  }
+  return key
+}
+
 // Download offline will check the RESOURCES for all files not in the cache
 // and populate them.
 async function downloadOffline() {
@@ -136,10 +154,7 @@ async function downloadOffline() {
   var contentCache = await caches.open(CACHE_NAME);
   var currentContent = {};
   for (var request of await contentCache.keys()) {
-    var key = request.url.substring(origin.length + 1);
-    if (key == "") {
-      key = "/";
-    }
+    const key = getKey(request.url);
     currentContent[key] = true;
   }
   for (var resourceKey of Object.keys(RESOURCES)) {
