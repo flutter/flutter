@@ -370,14 +370,12 @@ class KeyboardTester {
   explicit KeyboardTester(WindowsTestContext& context)
       : callback_handler_(RespondValue(false)),
         map_virtual_key_layout_(LayoutDefault) {
-    std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine(context);
-
-    engine_ = engine.get();
+    engine_ = GetTestEngine(context);
     view_ = std::make_unique<TestFlutterWindowsView>(
         // The WindowBindingHandler is used for window size and such, and
         // doesn't affect keyboard.
         std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>());
-    view_->SetEngine(std::move(engine));
+    view_->SetEngine(engine_.get());
     window_ = std::make_unique<MockKeyboardManagerDelegate>(
         view_.get(), [this](UINT virtual_key) -> SHORT {
           return map_virtual_key_layout_(virtual_key, MAPVK_VK_TO_CHAR);
@@ -388,7 +386,7 @@ class KeyboardTester {
   MockKeyboardManagerDelegate& GetWindow() { return *window_; }
 
   // Reset the keyboard by invoking the engine restart handler.
-  void ResetKeyboard() { EngineModifier{engine_}.Restart(); }
+  void ResetKeyboard() { EngineModifier{engine_.get()}.Restart(); }
 
   // Set all events to be handled (true) or unhandled (false).
   void Responding(bool response) { callback_handler_ = RespondValue(response); }
@@ -454,7 +452,7 @@ class KeyboardTester {
   }
 
  private:
-  FlutterWindowsEngine* engine_;
+  std::unique_ptr<FlutterWindowsEngine> engine_;
   std::unique_ptr<TestFlutterWindowsView> view_;
   std::unique_ptr<MockKeyboardManagerDelegate> window_;
   MockKeyResponseController::EmbedderCallbackHandler callback_handler_;

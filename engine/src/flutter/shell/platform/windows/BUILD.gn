@@ -69,6 +69,7 @@ source_set("flutter_windows_source") {
     "flutter_windows_texture_registrar.h",
     "flutter_windows_view.cc",
     "flutter_windows_view.h",
+    "flutter_windows_view_controller.h",
     "keyboard_handler_base.h",
     "keyboard_key_channel_handler.cc",
     "keyboard_key_channel_handler.h",

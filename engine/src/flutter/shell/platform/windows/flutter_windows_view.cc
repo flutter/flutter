@@ -58,9 +58,11 @@ FlutterWindowsView::~FlutterWindowsView() {
   DestroyRenderSurface();
 }
 
-void FlutterWindowsView::SetEngine(
-    std::unique_ptr<FlutterWindowsEngine> engine) {
-  engine_ = std::move(engine);
+void FlutterWindowsView::SetEngine(FlutterWindowsEngine* engine) {
+  FML_DCHECK(engine_ == nullptr);
+  FML_DCHECK(engine != nullptr);
+
+  engine_ = engine;
 
   engine_->SetView(this);
 
@@ -628,7 +630,7 @@ PlatformWindow FlutterWindowsView::GetPlatformWindow() const {
 }
 
 FlutterWindowsEngine* FlutterWindowsView::GetEngine() {
-  return engine_.get();
+  return engine_;
 }
 
 void FlutterWindowsView::AnnounceAlert(const std::wstring& text) {
