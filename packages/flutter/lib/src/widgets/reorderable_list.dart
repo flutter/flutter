@@ -730,6 +730,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _registerItem(_ReorderableItemState item) {
+    if (_dragInfo != null && _items[item.index] != item) {
+      item.updateForGap(_dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
+    }
     _items[item.index] = item;
     if (item.index == _dragInfo?.index) {
       item.dragging = true;
