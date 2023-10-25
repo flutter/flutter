@@ -2556,14 +2556,12 @@
 ../../../third_party/perfetto/ui/src/test
 ../../../third_party/pkg/archive
 ../../../third_party/pkg/equatable
-../../../third_party/pkg/file
 ../../../third_party/pkg/flutter_packages
 ../../../third_party/pkg/gcloud
 ../../../third_party/pkg/googleapis
 ../../../third_party/pkg/platform
 ../../../third_party/pkg/process
 ../../../third_party/pkg/process_runner
-../../../third_party/pkg/quiver
 ../../../third_party/pkg/vector_math
 ../../../third_party/protobuf
 ../../../third_party/pyyaml

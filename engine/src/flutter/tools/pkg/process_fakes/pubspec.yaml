@@ -25,7 +25,7 @@ dependencies:
 
 dependency_overrides:
   file:
-    path: ../../../../third_party/pkg/file/packages/file
+    path: ../../../../third_party/dart/third_party/pkg/file/packages/file
   meta:
     path: ../../../../third_party/dart/pkg/meta
   path:

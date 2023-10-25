@@ -644,9 +644,6 @@ deps = {
   'src/third_party/pkg/equatable':
   Var('github_git') + '/felangel/equatable.git' + '@' + '0ba67c72db8bed75877fc1caafa74112ee0bd921', # 2.0.2
 
-  'src/third_party/pkg/file':
-  Var('dart_git') + '/external/github.com/google/file.dart.git' + '@' + 'b2e31cb6ef40b223701dbfa0b907fe58468484d7', # 6.1.4
-
   'src/third_party/pkg/flutter_packages':
   Var('flutter_git') + '/mirrors/packages' + '@' + '25454e63851fe7933f04d025606e68c1eac4fe0f', # various
 
@@ -664,9 +661,6 @@ deps = {
 
   'src/third_party/pkg/process_runner':
   Var('github_git') + '/google/process_runner.git' + '@' + 'f24c69efdcaf109168f23d381fa281453d2bc9b1', # 4.1.2
-
-  'src/third_party/pkg/quiver':
-  Var('chromium_git') + '/external/github.com/google/quiver-dart' + '@' + '90b92bee895e507d435012356a8b5c5f17eafa52', # 3.2.1
 
   'src/third_party/pkg/vector_math':
   Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0

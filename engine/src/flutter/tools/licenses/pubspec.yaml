@@ -20,7 +20,7 @@ environment:
 dependencies:
   archive: any
   args: any
-  collection: ^1.16.0
+  collection: any
   crypto: any
   meta: any
   path: any
