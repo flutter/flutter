@@ -22,6 +22,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'characters',
   'clock',
   'collection',
+  'crypto',
   'fake_async',
   'file',
   'flutter',
@@ -48,8 +49,10 @@ const Set<String> kCorePackageAllowList = <String>{
   'sync_http',
   'term_glyph',
   'test_api',
+  'typed_data',
   'vector_math',
   'vm_service',
   'web',
   'webdriver',
+  'web_socket_channel',
 };
