@@ -2728,7 +2728,7 @@ FlutterEngineResult FlutterEngineReloadSystemFonts(
 
 void FlutterEngineTraceEventDurationBegin(const char* name) {
   fml::tracing::TraceEvent0("flutter", name, /*flow_id_count=*/0,
-                            /*flow_id=*/nullptr);
+                            /*flow_ids=*/nullptr);
 }
 
 void FlutterEngineTraceEventDurationEnd(const char* name) {
@@ -2737,7 +2737,7 @@ void FlutterEngineTraceEventDurationEnd(const char* name) {
 
 void FlutterEngineTraceEventInstant(const char* name) {
   fml::tracing::TraceEventInstant0("flutter", name, /*flow_id_count=*/0,
-                                   /*flow_id=*/nullptr);
+                                   /*flow_ids=*/nullptr);
 }
 
 FlutterEngineResult FlutterEnginePostRenderThreadTask(

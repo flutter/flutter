@@ -2,6 +2,7 @@
 
 # Prefix check with "-" to ignore.
 Checks: >-
+  bugprone-argument-comment,
   bugprone-use-after-move,
   bugprone-unchecked-optional-access,
   clang-analyzer-*,

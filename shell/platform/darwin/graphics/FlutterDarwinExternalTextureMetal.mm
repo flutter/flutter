@@ -297,7 +297,7 @@ FLUTTER_ASSERT_ARC
   skiaBackendTextures[0] = GrBackendTexture(/*width=*/width,
                                             /*height=*/height,
                                             /*mipMapped=*/skgpu::Mipmapped::kNo,
-                                            /*textureInfo=*/ySkiaTextureInfo);
+                                            /*mtlInfo=*/ySkiaTextureInfo);
 
   GrMtlTextureInfo uvSkiaTextureInfo;
   uvSkiaTextureInfo.fTexture = sk_cfp<const void*>{(__bridge_retained const void*)uvTex};
@@ -305,7 +305,7 @@ FLUTTER_ASSERT_ARC
   skiaBackendTextures[1] = GrBackendTexture(/*width=*/width,
                                             /*height=*/height,
                                             /*mipMapped=*/skgpu::Mipmapped::kNo,
-                                            /*textureInfo=*/uvSkiaTextureInfo);
+                                            /*mtlInfo=*/uvSkiaTextureInfo);
   SkYUVAInfo yuvaInfo(skiaBackendTextures[0].dimensions(), SkYUVAInfo::PlaneConfig::kY_UV,
                       SkYUVAInfo::Subsampling::k444, colorSpace);
   GrYUVABackendTextures yuvaBackendTextures(yuvaInfo, skiaBackendTextures,
@@ -326,11 +326,11 @@ FLUTTER_ASSERT_ARC
   GrBackendTexture skiaBackendTexture(/*width=*/width,
                                       /*height=*/height,
                                       /*mipMapped=*/skgpu::Mipmapped ::kNo,
-                                      /*textureInfo=*/skiaTextureInfo);
+                                      /*mtlInfo=*/skiaTextureInfo);
 
   return SkImages::BorrowTextureFrom(grContext, skiaBackendTexture, kTopLeft_GrSurfaceOrigin,
                                      kBGRA_8888_SkColorType, kPremul_SkAlphaType,
-                                     /*imageColorSpace=*/nullptr, /*releaseProc*/ nullptr,
+                                     /*colorSpace=*/nullptr, /*releaseProc*/ nullptr,
                                      /*releaseContext*/ nullptr);
 }
 @end

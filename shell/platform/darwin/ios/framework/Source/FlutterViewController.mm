@@ -2398,7 +2398,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       // Only send the event if it occured before the expected natural end of gesture momentum.
       // If received after the deadline, it's not likely the event is from a user-initiated cancel.
       auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-      packet->SetPointerData(/*index=*/0, pointer_data);
+      packet->SetPointerData(/*i=*/0, pointer_data);
       [_engine.get() dispatchPointerDataPacket:std::move(packet)];
       _scrollInertiaEventAppKitDeadline = 0;
     }
@@ -2449,17 +2449,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     // is received with the same position as the previous one, it can only be from a finger
     // making or breaking contact with the trackpad surface.
     auto packet = std::make_unique<flutter::PointerDataPacket>(2);
-    packet->SetPointerData(/*index=*/0, pointer_data);
+    packet->SetPointerData(/*i=*/0, pointer_data);
     flutter::PointerData inertia_cancel = pointer_data;
     inertia_cancel.device = reinterpret_cast<int64_t>(_continuousScrollingPanGestureRecognizer);
     inertia_cancel.kind = flutter::PointerData::DeviceKind::kTrackpad;
     inertia_cancel.signal_kind = flutter::PointerData::SignalKind::kScrollInertiaCancel;
-    packet->SetPointerData(/*index=*/1, inertia_cancel);
+    packet->SetPointerData(/*i=*/1, inertia_cancel);
     [_engine.get() dispatchPointerDataPacket:std::move(packet)];
     _scrollInertiaEventStartline = DBL_MAX;
   } else {
     auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-    packet->SetPointerData(/*index=*/0, pointer_data);
+    packet->SetPointerData(/*i=*/0, pointer_data);
     [_engine.get() dispatchPointerDataPacket:std::move(packet)];
   }
 }
@@ -2489,7 +2489,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-  packet->SetPointerData(/*index=*/0, pointer_data);
+  packet->SetPointerData(/*i=*/0, pointer_data);
   [_engine.get() dispatchPointerDataPacket:std::move(packet)];
 }
 
@@ -2540,7 +2540,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-  packet->SetPointerData(/*index=*/0, pointer_data);
+  packet->SetPointerData(/*i=*/0, pointer_data);
   [_engine.get() dispatchPointerDataPacket:std::move(packet)];
 }
 
@@ -2569,7 +2569,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-  packet->SetPointerData(/*index=*/0, pointer_data);
+  packet->SetPointerData(/*i=*/0, pointer_data);
   [_engine.get() dispatchPointerDataPacket:std::move(packet)];
 }
 
