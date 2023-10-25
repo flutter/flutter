@@ -374,7 +374,7 @@ struct RenderPassData {
       return false;
     }
 
-    const auto& vertex_desc_gles = pipeline.GetBufferBindings();
+    auto vertex_desc_gles = pipeline.GetBufferBindings();
 
     //--------------------------------------------------------------------------
     /// Bind vertex and index buffers.
