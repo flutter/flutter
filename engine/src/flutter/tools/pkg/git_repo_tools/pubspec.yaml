@@ -41,7 +41,7 @@ dependency_overrides:
   expect:
     path: ../../../../third_party/dart/pkg/expect
   file:
-    path: ../../../../third_party/pkg/file/packages/file
+    path: ../../../../third_party/dart/third_party/pkg/file/packages/file
   litetest:
     path: ../../../testing/litetest
   meta:
