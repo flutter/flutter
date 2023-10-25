@@ -1620,7 +1620,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 33
+    compileSdk 34
 
     defaultConfig {
         applicationId '$id'
@@ -1637,7 +1637,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
 }
 ''';
 }

@@ -42,7 +42,7 @@ void main() {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
       // write a build.gradle with compileSdkVersion as `android-Tiramisu` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion "android-Tiramisu"'),
+        buildGradleFile.readAsStringSync().replaceFirst('compileSdk flutter.compileSdkVersion', 'compileSdkVersion "android-Tiramisu"'),
         flush: true
       );
       expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion "android-Tiramisu"'));
@@ -70,7 +70,7 @@ void main() {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
       // write a build.gradle with compileSdkPreview as `Tiramisu` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkPreview "Tiramisu"'),
+        buildGradleFile.readAsStringSync().replaceFirst('compileSdk flutter.compileSdkVersion', 'compileSdkPreview "Tiramisu"'),
         flush: true
       );
       expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview "Tiramisu"'));
