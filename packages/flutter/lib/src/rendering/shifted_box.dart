@@ -533,6 +533,20 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 }
 
+/// How much space should be occupied by the [OverflowBox] if there is no
+/// overflow.
+enum OverflowBoxFit {
+  /// The widget will size itself to be as large as the parent allows.
+  max,
+
+  /// The widget will follow the child's size.
+  ///
+  /// More specifically, the render object will size itself to match the size of
+  /// its child within the constraints of its parent, or as small as the
+  /// parent allows if no child is set.
+  deferToChild,
+}
+
 /// A render object that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
@@ -571,12 +585,14 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
+    OverflowBoxFit fit = OverflowBoxFit.max,
     super.alignment,
     super.textDirection,
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
        _minHeight = minHeight,
-       _maxHeight = maxHeight;
+       _maxHeight = maxHeight,
+       _fit = fit;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -626,6 +642,24 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     markNeedsLayout();
   }
 
+  /// The way to size the render object.
+  ///
+  /// This only affects scenario when the child does not indeed overflow.
+  /// If set to [OverflowBoxFit.deferToChild], the render object will size
+  /// itself to match the size of its child within the constraints of its
+  /// parent, or as small as the parent allows if no child is set.
+  /// If set to [OverflowBoxFit.max] (the default), the
+  /// render object will size itself to be as large as the parent allows.
+  OverflowBoxFit get fit => _fit;
+  OverflowBoxFit _fit;
+  set fit(OverflowBoxFit value) {
+    if (_fit == value) {
+      return;
+    }
+    _fit = value;
+    markNeedsLayoutForSizedByParentChange();
+  }
+
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: _minWidth ?? constraints.minWidth,
@@ -636,19 +670,46 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  bool get sizedByParent => true;
+  bool get sizedByParent {
+    switch (fit) {
+      case OverflowBoxFit.max:
+        return true;
+      case OverflowBoxFit.deferToChild:
+        // If deferToChild, the size will be as small as its child when non-overflowing,
+        // thus it cannot be sizedByParent.
+        return false;
+    }
+  }
 
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    return constraints.biggest;
+    switch (fit) {
+      case OverflowBoxFit.max:
+        return constraints.biggest;
+      case OverflowBoxFit.deferToChild:
+        return child?.getDryLayout(constraints) ?? constraints.smallest;
+    }
   }
 
   @override
   void performLayout() {
     if (child != null) {
-      child?.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+      child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+      switch (fit) {
+        case OverflowBoxFit.max:
+          assert(sizedByParent);
+        case OverflowBoxFit.deferToChild:
+          size = constraints.constrain(child!.size);
+      }
       alignChild();
+    } else {
+      switch (fit) {
+        case OverflowBoxFit.max:
+          assert(sizedByParent);
+        case OverflowBoxFit.deferToChild:
+          size = constraints.smallest;
+      }
     }
   }
 
@@ -659,6 +720,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     properties.add(DoubleProperty('maxWidth', maxWidth, ifNull: 'use parent maxWidth constraint'));
     properties.add(DoubleProperty('minHeight', minHeight, ifNull: 'use parent minHeight constraint'));
     properties.add(DoubleProperty('maxHeight', maxHeight, ifNull: 'use parent maxHeight constraint'));
+    properties.add(EnumProperty<OverflowBoxFit>('fit', fit));
   }
 }
 
