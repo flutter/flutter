@@ -119,16 +119,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// The argument [experimentalLeakTesting] is experimental and is not recommended
 /// for use outside of Flutter Framework.
-/// The description of [experimentalLeakTesting] below is a draft,
-/// for now [experimentalLeakTesting] is noop.
-/// When [experimentalLeakTesting] is set, it is used to configure leak tracking.
-/// Otherwise [LeakTesting.settings] is used.
-/// You can adjust [LeakTesting.settings] in flutter_test_config.dart for your
-/// package or folders, or in `setUpAll` for a test library or group.
-/// If you set it for a group, remember the original value to a local variable
-/// and restore it in `tearDownAll` for the group.
-/// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
-/// `LeakTrackingForTests.ignore()`.
+/// [experimentalLeakTesting] is noop.
+/// Use the method `testWidgetsWithLeakTracking` for leak free tests.
 ///
 /// ## Sample code
 ///
