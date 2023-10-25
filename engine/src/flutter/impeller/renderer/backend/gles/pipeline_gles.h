@@ -28,7 +28,7 @@ class PipelineGLES final
 
   [[nodiscard]] bool UnbindProgram() const;
 
-  const BufferBindingsGLES* GetBufferBindings() const;
+  BufferBindingsGLES* GetBufferBindings() const;
 
   [[nodiscard]] bool BuildVertexDescriptor(const ProcTableGLES& gl,
                                            GLuint program);
