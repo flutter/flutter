@@ -19,12 +19,12 @@ import 'common.dart';
 CallbackManager get callbackManager => _singletonCallbackManager;
 
 /// IOCallbackManager singleton.
-final IOCallbackManager _singletonCallbackManager = IOCallbackManager();
+final _IOCallbackManager _singletonCallbackManager = _IOCallbackManager();
 
 /// Manages communication between `integration_tests` and the `driver_tests`.
 ///
 /// This is the dart:io implementation.
-class IOCallbackManager implements CallbackManager {
+class _IOCallbackManager implements CallbackManager {
   @override
   Future<Map<String, dynamic>> callback(
       Map<String, String> params, IntegrationTestResults testRunner) async {
