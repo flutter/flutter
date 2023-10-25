@@ -6,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  FlutterErrorDetails? flutterErrorDetails;
+  final Map<String, FlutterErrorDetails> errors = <String, FlutterErrorDetails>{};
   reportTestException = (FlutterErrorDetails details, String testDescription) {
-    flutterErrorDetails = details;
+    errors[testDescription] = details;
   };
 
   tearDownAll(() async {
@@ -17,7 +17,7 @@ void main() {
       throw 'test error';
     }, () {});
 
-    print(flutterErrorDetails == null ? 'null!!!' : 'got it!');
+    //print(flutterErrorDetails == null ? 'null!!!' : 'got it!');
     binding.postTest();
   });
 
