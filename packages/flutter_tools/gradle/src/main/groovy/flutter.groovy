@@ -65,7 +65,7 @@ class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's build.gradle is under android/app.
      */
-    String source
+    String source = '../..'
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
@@ -495,6 +495,9 @@ class FlutterPlugin implements Plugin<Project> {
 
             getPluginList().each { plugin ->
                 Project pluginProject = project.rootProject.findProject(plugin.key)
+                if (pluginProject == null) {
+                    return
+                }
                 pluginProject.afterEvaluate {
                     int pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
@@ -516,14 +519,6 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Returns `true` if the given path contains an `android/build.gradle` file.
-     */
-    private Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
-        return editableAndroidProject.exists()
-    }
-
-    /**
      * Add the dependencies on other plugin projects to the plugin project.
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
      * making the Gradle plugin project A depend on the Gradle plugin project B.
@@ -531,8 +526,7 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginDependencies(Object dependencyObject) {
         assert dependencyObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
-        if (pluginProject == null ||
-            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
+        if (pluginProject == null) {
             return
         }
         assert dependencyObject.dependencies instanceof List
@@ -542,8 +536,7 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null ||
-                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
+            if (dependencyProject == null) {
                 return
             }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
@@ -555,17 +548,27 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    /** Gets the list of plugins that support the Android platform. */
     private Properties getPluginList() {
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-        Properties allPlugins = readPropertiesIfExist(pluginsFile)
+        Map meta = getDependenciesMetadata()
         Properties androidPlugins = new Properties()
-        allPlugins.each { name, path ->
-            if (doesSupportAndroidPlatform(path)) {
-                androidPlugins.setProperty(name, path)
+        if (meta == null) {
+            return androidPlugins
+        }
+        assert meta.plugins instanceof Map
+        assert meta.plugins.android instanceof List
+
+        // This logic must be kept in sync with the logic in app_plugin_loader.gradle.
+        meta.plugins.android.each { androidPlugin ->
+            assert androidPlugin.name instanceof String
+            assert androidPlugin.path instanceof String
+            // Skip plugins that have no native build (such as a Dart-only implementation
+            // of a federated plugin).
+            def needsBuild = androidPlugin.containsKey('native_build') ? androidPlugin['native_build'] : true
+            if (!needsBuild) {
+                return
             }
-            // TODO(amirh): log an error if this plugin was specified to be an Android
-            // plugin according to the new schema, and was missing a build.gradle file.
-            // https://github.com/flutter/flutter/issues/40784
+            androidPlugins.setProperty(androidPlugin.name, androidPlugin.path)
         }
         return androidPlugins
     }
@@ -593,14 +596,31 @@ class FlutterPlugin implements Plugin<Project> {
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        File pluginsDependencyFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins-dependencies')
+        Map meta = getDependenciesMetadata()
+        if (meta == null) {
+            return []
+        }
+        assert meta.dependencyGraph instanceof List
+        return meta.dependencyGraph
+    }
+
+    private Map parsedFlutterPluginsDependencies
+
+    /**
+     * Parses <project-src>/.flutter-plugins-dependencies
+     */
+    private Map getDependenciesMetadata() {
+        if (parsedFlutterPluginsDependencies) {
+            return parsedFlutterPluginsDependencies
+        }
+        File pluginsDependencyFile = new File(getFlutterSourceDirectory(), '.flutter-plugins-dependencies')
         if (pluginsDependencyFile.exists()) {
             def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
             assert object instanceof Map
-            assert object.dependencyGraph instanceof List
-            return object.dependencyGraph
+            parsedFlutterPluginsDependencies = object
+            return object
         }
-        return []
+        return null
     }
 
     private static String toCamelCase(List<String> parts) {

@@ -23,6 +23,7 @@ class FlutterAppPluginLoaderPlugin implements Plugin<Settings> {
         assert object instanceof Map
         assert object.plugins instanceof Map
         assert object.plugins.android instanceof List
+        // This logic must be kept in sync with the logic in flutter.groovy.
         // Includes the Flutter plugins that support the Android platform.
         object.plugins.android.each { androidPlugin ->
             assert androidPlugin.name instanceof String
