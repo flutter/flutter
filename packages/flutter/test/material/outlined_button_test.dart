@@ -120,7 +120,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor,const Color(0xff000000));
+    expect(material.shadowColor, const Color(0xff000000));
 
     expect(material.shape, RoundedRectangleBorder(
       side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
@@ -168,11 +168,13 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Material3 - OutlinedButton, OutlinedButton.icon defaults', (WidgetTester tester) async {
-    final ColorScheme colorScheme = ThemeData().colorScheme;
+    final ThemeData theme = ThemeData();
+    final ColorScheme colorScheme = theme.colorScheme;
 
     // Enabled OutlinedButton
     await tester.pumpWidget(
       MaterialApp(
+        theme: theme,
         home: Center(
           child: OutlinedButton(
             onPressed: () { },
@@ -243,6 +245,7 @@ void main() {
     final Key iconButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
+        theme: theme,
         home: Center(
           child: OutlinedButton.icon(
             key: iconButtonKey,
@@ -278,8 +281,9 @@ void main() {
 
     // Disabled OutlinedButton.
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
+      MaterialApp(
+        theme: theme,
+        home: const Center(
           child: OutlinedButton(
             onPressed: null,
             child: Text('button'),
