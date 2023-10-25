@@ -2195,7 +2195,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // Important if the app/user takes an action that could repeatedly show a
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
-  PersistentBottomSheetController<dynamic>? _currentBottomSheet;
+  PersistentBottomSheetController<void>? _currentBottomSheet;
   final GlobalKey _currentBottomSheetKey = GlobalKey();
   LocalHistoryEntry? _persistentSheetHistoryEntry;
 
@@ -2233,7 +2233,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         assert(_dismissedBottomSheets.isEmpty);
       }
 
-      _currentBottomSheet = _buildBottomSheet<void>(
+      _currentBottomSheet = _buildBottomSheet(
         (BuildContext context) {
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: persistentBottomSheetExtentChanged,
@@ -2491,7 +2491,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _closeCurrentBottomSheet();
     final AnimationController controller = (transitionAnimationController ?? BottomSheet.createAnimationController(this))..forward();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(
+      _currentBottomSheet = _buildBottomSheet(
         builder,
         isPersistent: false,
         animationController: controller,
@@ -2504,7 +2504,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
-    return _currentBottomSheet! as PersistentBottomSheetController<T>;
+    return _currentBottomSheet!;
   }
 
   // Floating Action Button API
