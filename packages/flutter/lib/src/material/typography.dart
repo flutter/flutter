@@ -538,13 +538,13 @@ class Typography with Diagnosticable {
     headlineSmall: TextStyle(debugLabel: 'whiteCupertino headlineSmall', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
     titleLarge: TextStyle(debugLabel: 'whiteCupertino titleLarge', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
     titleMedium: TextStyle(debugLabel: 'whiteCupertino titleMedium', fontFamily: 'CupertinoSystemText', color: Colors.white, decoration: TextDecoration.none),
-    titleSmall: TextStyle(debugLabel: 'whiteCupertino titleSmall', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
-    bodyLarge: TextStyle(debugLabel: 'whiteCupertino bodyLarge', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
-    bodyMedium: TextStyle(debugLabel: 'whiteCupertino bodyMedium', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
-    bodySmall: TextStyle(debugLabel: 'whiteCupertino bodySmall', fontFamily: 'CupertinoSystemDisplay', color: Colors.white70, decoration: TextDecoration.none),
-    labelLarge: TextStyle(debugLabel: 'whiteCupertino labelLarge', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
-    labelMedium: TextStyle(debugLabel: 'whiteCupertino labelMedium', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
-    labelSmall: TextStyle(debugLabel: 'whiteCupertino labelSmall', fontFamily: 'CupertinoSystemDisplay', color: Colors.white, decoration: TextDecoration.none),
+    titleSmall: TextStyle(debugLabel: 'whiteCupertino titleSmall', fontFamily: 'CupertinoSystemText', color: Colors.white, decoration: TextDecoration.none),
+    bodyLarge: TextStyle(debugLabel: 'whiteCupertino bodyLarge', fontFamily: 'CupertinoSystemText', color: Colors.white, decoration: TextDecoration.none),
+    bodyMedium: TextStyle(debugLabel: 'whiteCupertino bodyMedium', fontFamily: 'CupertinoSystemText', color: Colors.white, decoration: TextDecoration.none),
+    bodySmall: TextStyle(debugLabel: 'whiteCupertino bodySmall', fontFamily: 'CupertinoSystemText', color: Colors.white70, decoration: TextDecoration.none),
+    labelLarge: TextStyle(debugLabel: 'whiteCupertino labelLarge', fontFamily: 'CupertinoSystemText', color: Colors.white, decoration: TextDecoration.none),
+    labelMedium: TextStyle(debugLabel: 'whiteCupertino labelMedium', fontFamily: 'CupertinoSystemText', color: Colors.white, decoration: TextDecoration.none),
+    labelSmall: TextStyle(debugLabel: 'whiteCupertino labelSmall', fontFamily: 'CupertinoSystemText', color: Colors.white, decoration: TextDecoration.none),
   );
 
   /// A Material Design text theme with dark glyphs based on San Francisco.

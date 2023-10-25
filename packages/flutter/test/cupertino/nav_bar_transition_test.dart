@@ -1122,7 +1122,7 @@ void main() {
     expect(bottomLargeTitle.text.style!.color, const Color(0xff000306));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w700);
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemDisplay');
-    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.38890619069337845));
+    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // The top back label is styled exactly the same way.
     final RenderParagraph topBackLabel =
@@ -1130,19 +1130,19 @@ void main() {
     expect(topBackLabel.text.style!.color, const Color(0xff000306));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w700);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemDisplay');
-    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.38890619069337845));
+    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomLargeTitle.text.style!.color, const Color(0xff005ec5));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w500);
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemText');
-    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
+    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
 
     expect(topBackLabel.text.style!.color, const Color(0xff005ec5));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w500);
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
-    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
+    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
   });
 
   testWidgetsWithLeakTracking('Top middle fades in and slides in from the right', (WidgetTester tester) async {

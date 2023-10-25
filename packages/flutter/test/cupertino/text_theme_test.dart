@@ -44,7 +44,7 @@ void main() {
     // NavLargeTitle Bold 34 0.41
     expect(theme.navLargeTitleTextStyle.fontSize, 34);
     expect(theme.navLargeTitleTextStyle.fontFamily, 'CupertinoSystemDisplay');
-    expect(theme.navLargeTitleTextStyle.letterSpacing, 0.41);
+    expect(theme.navLargeTitleTextStyle.letterSpacing, 0.38);
     expect(theme.navLargeTitleTextStyle.fontWeight, bold);
 
     // Picker Regular 21 -0.6
@@ -56,7 +56,7 @@ void main() {
     // DateTimePicker Normal 21
     expect(theme.dateTimePickerTextStyle.fontSize, 21);
     expect(theme.dateTimePickerTextStyle.fontFamily, 'CupertinoSystemDisplay');
-    expect(theme.dateTimePickerTextStyle.letterSpacing, null);
+    expect(theme.dateTimePickerTextStyle.letterSpacing, 0.4);
     expect(theme.dateTimePickerTextStyle.fontWeight, normal);
   });
 }
