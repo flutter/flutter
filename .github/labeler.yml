@@ -13,6 +13,11 @@
   - '**/animation/*'
   - '**/*animation*'
 
+'a: desktop':
+  - '**/linux/**/*'
+  - '**/macos/**/*'
+  - '**/windows/**/*'
+
 'a: internationalization':
   - packages/flutter_localizations/**/*
 
@@ -72,6 +77,7 @@ framework:
   - packages/flutter_goldens_client/**/*
   - packages/flutter_test/**/*
   - packages/integration_test/**/*
+  - examples/api/**/*
 
 'f: integration_test':
   - packages/integration_test/**/*
@@ -79,21 +85,10 @@ framework:
 platform-ios:
   - packages/flutter_tools/lib/src/ios/**/*
 
-team:
-  - '**/pubspec.yaml'
-  - '**/fix_data.yaml'
-  - '**/*.expect'
-  - '**/*test_fixes*'
-  - .github/**/*
-  - dev/**/*
-  - examples/**/*
-  - packages/flutter_goldens/**/*
-  - packages/flutter_goldens_client/**/*
-
 'customer: gallery':
   - examples/flutter_gallery/**/*
 
-tech-debt:
+'c: tech-debt':
   - '**/fix_data.yaml'
   - '**/*.expect'
   - '**/*test_fixes*'

@@ -71,14 +71,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return NavigatorPopHandler(
+      onPop: () {
         final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
-        if (!navigator.canPop()) {
-          return true;
-        }
         navigator.pop();
-        return false;
       },
       child: Scaffold(
         body: SafeArea(
@@ -178,7 +174,7 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
-                showDialog(
+                showDialog<void>(
                   context: context,
                   useRootNavigator: false,
                   builder: _buildDialog,
@@ -190,9 +186,9 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
-                showDialog(
+                showDialog<void>(
                   context: context,
-                  useRootNavigator: true,
+                  useRootNavigator: true, // ignore: avoid_redundant_argument_values
                   builder: _buildDialog,
                 );
               },
@@ -204,7 +200,7 @@ class RootPage extends StatelessWidget {
                 return ElevatedButton(
                   style: buttonStyle,
                   onPressed: () {
-                    showBottomSheet(
+                    showBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
                         return Container(

@@ -5,9 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('SizedBox constructors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedBox constructors', (WidgetTester tester) async {
     const SizedBox a = SizedBox();
     expect(a.width, isNull);
     expect(a.height, isNull);
@@ -37,7 +38,7 @@ void main() {
     expect(g.height, 0.0);
   });
 
-  testWidgets('SizedBox - no child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedBox - no child', (WidgetTester tester) async {
     final GlobalKey patient = GlobalKey();
 
     await tester.pumpWidget(
@@ -109,7 +110,7 @@ void main() {
     expect(patient.currentContext!.size, equals(Size.zero));
   });
 
-  testWidgets('SizedBox - container child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedBox - container child', (WidgetTester tester) async {
     final GlobalKey patient = GlobalKey();
 
     await tester.pumpWidget(
@@ -188,7 +189,7 @@ void main() {
     expect(patient.currentContext!.size, equals(Size.zero));
   });
 
-  testWidgets('SizedBox.square tests', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedBox.square tests', (WidgetTester tester) async {
     await tester.pumpWidget(
         const SizedBox.square(
           dimension: 100,

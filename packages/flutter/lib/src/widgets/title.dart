@@ -23,7 +23,6 @@ class Title extends StatelessWidget {
   }) : assert(color.alpha == 0xFF);
 
   /// A one-line description of this app for use in the window manager.
-  /// Must not be null.
   final String title;
 
   /// A color that the window manager should use to identify this app. Must be

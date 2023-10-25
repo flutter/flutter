@@ -503,6 +503,10 @@ abstract final class SystemChannels {
   ///    represents a pressed keyboard key. The entry key is the physical
   ///    key ID and the entry value is the logical key ID.
   ///
+  ///    Both the framework and the engine maintain a state of the current
+  ///    pressed keys. There are edge cases, related to startup and restart,
+  ///    where the framework needs to resynchronize its keyboard state.
+  ///
   /// See also:
   ///
   ///  * [HardwareKeyboard.syncKeyboardState], which uses this channel to synchronize

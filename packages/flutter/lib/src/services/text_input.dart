@@ -566,7 +566,7 @@ class TextInputConfiguration {
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
   /// true. On Android autocorrection and suggestion are controlled separately.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -580,7 +580,7 @@ class TextInputConfiguration {
   /// change is sent through semantics actions and is directly disabled from
   /// the widget side.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   final bool enableInteractiveSelection;
 
   /// What text to display in the text input control's action button.
@@ -612,7 +612,7 @@ class TextInputConfiguration {
   ///
   /// This flag only affects Android. On iOS, there is no equivalent flag.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -684,7 +684,7 @@ class TextInputConfiguration {
   ///  * If [TextInputClient] is implemented then updates for the editing
   ///    state will come through [TextInputClient.updateEditingValue].
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   final bool enableDeltaModel;
 
   /// Returns a representation of this object as a JSON object.
@@ -761,9 +761,6 @@ class TextEditingValue {
   ///
   /// The selection and composing range must be within the text. This is not
   /// checked during construction, and must be guaranteed by the caller.
-  ///
-  /// The [text], [selection], and [composing] arguments must not be null but
-  /// each have default values.
   ///
   /// The default value of [selection] is `TextSelection.collapsed(offset: -1)`.
   /// This indicates that there is no selection at all.
@@ -1038,17 +1035,26 @@ mixin TextSelectionDelegate {
   /// input.
   void bringIntoView(TextPosition position);
 
-  /// Whether cut is enabled, must not be null.
+  /// Whether cut is enabled.
   bool get cutEnabled => true;
 
-  /// Whether copy is enabled, must not be null.
+  /// Whether copy is enabled.
   bool get copyEnabled => true;
 
-  /// Whether paste is enabled, must not be null.
+  /// Whether paste is enabled.
   bool get pasteEnabled => true;
 
-  /// Whether select all is enabled, must not be null.
+  /// Whether select all is enabled.
   bool get selectAllEnabled => true;
+
+  /// Whether look up is enabled.
+  bool get lookUpEnabled => true;
+
+  /// Whether search web is enabled.
+  bool get searchWebEnabled => true;
+
+  /// Whether share is enabled.
+  bool get shareEnabled => true;
 
   /// Whether Live Text input is enabled.
   ///
@@ -1389,8 +1395,8 @@ class TextInputConnection {
   /// Send the smallest rect that covers the text in the client that's currently
   /// being composed.
   ///
-  /// The given `rect` can not be null. If any of the 4 coordinates of the given
-  /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
+  /// If any of the 4 coordinates of the given [Rect] is not finite, a [Rect] of
+  /// size (-1, -1) will be sent instead.
   ///
   /// This information is used for positioning the IME candidates menu on each
   /// platform.

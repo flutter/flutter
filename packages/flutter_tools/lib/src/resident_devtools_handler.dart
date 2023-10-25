@@ -79,19 +79,19 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       return;
     }
     if (devToolsServerAddress != null) {
-      _devToolsLauncher!.devToolsUrl = devToolsServerAddress;
+      _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
-      await _devToolsLauncher!.serve();
+      await _devToolsLauncher.serve();
       _served = true;
     }
-    await _devToolsLauncher!.ready;
+    await _devToolsLauncher.ready;
     // Do not attempt to print debugger list if the connection has failed or if we're shutting down.
-    if (_devToolsLauncher!.activeDevToolsServer == null || _shutdown) {
+    if (_devToolsLauncher.activeDevToolsServer == null || _shutdown) {
       assert(!_readyToAnnounce);
       return;
     }
 
-    final Uri? devToolsUrl = _devToolsLauncher!.devToolsUrl;
+    final Uri? devToolsUrl = _devToolsLauncher.devToolsUrl;
     if (devToolsUrl != null) {
       for (final FlutterDevice? device in flutterDevices) {
         if (device == null) {
@@ -130,7 +130,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
 
     _readyToAnnounce = true;
-    assert(_devToolsLauncher!.activeDevToolsServer != null);
+    assert(_devToolsLauncher.activeDevToolsServer != null);
     if (_residentRunner.reportedDebuggers) {
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
@@ -148,9 +148,9 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return false;
     }
-    if (_devToolsLauncher!.devToolsUrl == null) {
+    if (_devToolsLauncher.devToolsUrl == null) {
       _logger.startProgress('Waiting for Flutter DevTools to be served...');
-      unawaited(_devToolsLauncher!.ready.then((_) {
+      unawaited(_devToolsLauncher.ready.then((_) {
         _launchDevToolsForDevices(flutterDevices);
       }));
     } else {
@@ -294,7 +294,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
     _shutdown = true;
     _readyToAnnounce = false;
-    await _devToolsLauncher!.close();
+    await _devToolsLauncher.close();
   }
 }
 

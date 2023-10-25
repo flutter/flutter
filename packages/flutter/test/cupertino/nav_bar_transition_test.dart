@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Future<void> startTransitionBetween(
   WidgetTester tester, {
@@ -131,7 +132,7 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
 }
 
 void main() {
-  testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle moves between middle and back label', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -146,20 +147,20 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 342.547737105096302912 : 342.33420100808144,
+        342.547737105096302912,
         13.5,
       ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 342.547737105096302912 : 342.33420100808144,
+        342.547737105096302912,
         13.5,
       ),
     );
   });
 
-  testWidgets('Bottom middle moves between middle and back label RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle moves between middle and back label RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -173,20 +174,20 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 357.912261979376353338 : 357.66579899191856,
+        357.912261979376353338,
         13.5,
       ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 357.912261979376353338 : 357.66579899191856,
+        357.912261979376353338,
         13.5,
       ),
     );
   });
 
-  testWidgets('Bottom middle never changes size during the animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle never changes size during the animation', (WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
     addTearDown(() async {
       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
@@ -207,7 +208,7 @@ void main() {
     }
   });
 
-  testWidgets('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -251,7 +252,7 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
-  testWidgets('Font transitions respect themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Font transitions respect themes', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -299,7 +300,7 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
-  testWidgets('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -333,7 +334,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
 
-  testWidgets('Turning off transition works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Turning off transition works', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoNavigationBar(
@@ -357,7 +358,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
 
-  testWidgets('Popping mid-transition is symmetrical', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popping mid-transition is symmetrical', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -372,7 +373,7 @@ void main() {
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).first),
         const Offset(
-          bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 342.547737105096302912 : 342.33420100808144,
+          342.547737105096302912,
           13.5,
         ),
       );
@@ -385,7 +386,7 @@ void main() {
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).last),
         const Offset(
-          bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 342.547737105096302912 : 342.33420100808144,
+          342.547737105096302912,
           13.5,
         ),
       );
@@ -405,7 +406,7 @@ void main() {
     checkColorAndPositionAt50ms();
   });
 
-  testWidgets('Popping mid-transition is symmetrical RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popping mid-transition is symmetrical RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -423,7 +424,7 @@ void main() {
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).first),
         const Offset(
-          bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 357.912261979376353338 : 357.66579899191856,
+          357.912261979376353338,
           13.5,
         ),
       );
@@ -436,7 +437,7 @@ void main() {
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).last),
         const Offset(
-          bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 357.912261979376353338 : 357.66579899191856,
+          357.912261979376353338,
           13.5,
         ),
       );
@@ -456,7 +457,7 @@ void main() {
     checkColorAndPositionAt50ms();
   });
 
-  testWidgets('There should be no global keys in the hero flight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('There should be no global keys in the hero flight', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -471,7 +472,7 @@ void main() {
     );
   });
 
-  testWidgets('DartPerformanceMode is latency mid-animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DartPerformanceMode is latency mid-animation', (WidgetTester tester) async {
     DartPerformanceMode? mode;
 
     // before the animation starts, no requests are active.
@@ -491,7 +492,7 @@ void main() {
     expect(mode, isNull);
   });
 
-  testWidgets('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -566,7 +567,7 @@ void main() {
     expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Transition box grows to large title size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transition box grows to large title size', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -590,7 +591,7 @@ void main() {
     checkBackgroundBoxHeight(tester, 84.33018499612808);
   });
 
-  testWidgets('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -614,7 +615,7 @@ void main() {
     checkBackgroundBoxHeight(tester, 55.66981500387192);
   });
 
-  testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hero flight removed at the end of page transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -629,7 +630,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 1')), throwsAssertionError);
   });
 
-  testWidgets('Exact widget is reused to build inside the transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Exact widget is reused to build inside the transition', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -645,7 +646,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
-  testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -662,9 +663,10 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsNothing);
   });
 
-  testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -710,7 +712,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
-  testWidgets('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: scaffoldForNavBar(null),
@@ -737,19 +739,19 @@ void main() {
     // Come in from the right and fade in.
     checkOpacity(tester, backChevron, 0.0);
     expect(tester.getTopLeft(backChevron), const Offset(
-      bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 87.2460581221158690823 : 88.04496401548386,
+      87.2460581221158690823,
       7.0,
     ));
 
     await tester.pump(const Duration(milliseconds: 200));
     checkOpacity(tester, backChevron, 0.09497911669313908);
     expect(tester.getTopLeft(backChevron), const Offset(
-      bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 30.8718595298545324113 : 31.055883467197418,
+      30.8718595298545324113,
       7.0,
     ));
   });
 
-  testWidgets('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         builder: (BuildContext context, Widget? navigator) {
@@ -785,7 +787,7 @@ void main() {
     expect(
       tester.getTopRight(backChevron),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 687.163941725296126606 : 685.9550359845161,
+        687.163941725296126606,
         7.0,
       ),
     );
@@ -795,13 +797,13 @@ void main() {
     expect(
       tester.getTopRight(backChevron),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 743.538140317557690651 : 742.9441165328026,
+        743.538140317557690651,
         7.0,
       ),
     );
   });
 
-  testWidgets('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -827,7 +829,7 @@ void main() {
     expect(tester.getTopLeft(backChevrons.last), const Offset(14.0, 7.0));
   });
 
-  testWidgets('Bottom middle just fades if top page has a custom leading', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom middle just fades if top page has a custom leading', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -858,7 +860,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom leading fades in place', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom leading fades in place', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(leading: Text('custom')),
@@ -884,7 +886,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom trailing fades in place', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom trailing fades in place', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(trailing: Text('custom')),
@@ -900,7 +902,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('custom'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 684.459999084472656250 : 684.0,
+        684.459999084472656250,
         13.5,
       ),
     );
@@ -910,13 +912,13 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('custom'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 684.459999084472656250 : 684.0,
+        684.459999084472656250,
         13.5,
       ),
     );
   });
 
-  testWidgets('Bottom back label fades and slides to the left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom back label fades and slides to the left', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -942,7 +944,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 41.3003370761871337891 : 41.71033692359924,
+        41.3003370761871337891,
         13.5,
       ),
     );
@@ -952,13 +954,13 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? -258.642192125320434570 : -258.2321922779083,
+        -258.642192125320434570,
         13.5,
       ),
     );
   });
 
-  testWidgets('Bottom back label fades and slides to the right in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom back label fades and slides to the right in RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -985,7 +987,7 @@ void main() {
     expect(
       tester.getTopRight(flying(tester, find.text('Page 1'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 758.699662923812866211 : 758.2896630764008,
+        758.699662923812866211,
         13.5,
       ),
     );
@@ -996,13 +998,13 @@ void main() {
       tester.getTopRight(flying(tester, find.text('Page 1'))),
       // >1000. It's now off the screen.
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 1058.64219212532043457 : 1058.2321922779083,
+        1058.64219212532043457,
         13.5,
       ),
     );
   });
 
-  testWidgets('Bottom large title moves to top back label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom large title moves to top back label', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1022,14 +1024,14 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 16.9155227761479522997 : 16.926069676876068,
+        16.9155227761479522997,
         52.73951627314091,
       ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 16.9155227761479522997 : 16.926069676876068,
+        16.9155227761479522997,
         52.73951627314091,
       ),
     );
@@ -1041,20 +1043,20 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 43.6029094262710827934 : 43.92089730501175,
+        43.6029094262710827934,
         22.49655644595623,
       ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 43.6029094262710827934 : 43.92089730501175,
+        43.6029094262710827934,
         22.49655644595623,
       ),
     );
   });
 
-  testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Long title turns into the word back mid transition', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1073,14 +1075,14 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('A title too long to fit'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 16.9155227761479522997 : 16.926069676876068,
+        16.9155227761479522997,
         52.73951627314091,
       ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Back'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 16.9155227761479522997 : 16.926069676876068,
+        16.9155227761479522997,
         52.73951627314091,
       ),
     );
@@ -1091,20 +1093,20 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('A title too long to fit'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 43.6029094262710827934 : 43.92089730501175,
+        43.6029094262710827934,
         22.49655644595623,
       ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Back'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 43.6029094262710827934 : 43.92089730501175,
+        43.6029094262710827934,
         22.49655644595623,
       ),
     );
   });
 
-  testWidgets('Bottom large title and top back label transitions their font', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bottom large title and top back label transitions their font', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1143,7 +1145,7 @@ void main() {
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
   });
 
-  testWidgets('Top middle fades in and slides in from the right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top middle fades in and slides in from the right', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1157,7 +1159,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 739.940336465835571289 : 739.7103369235992,
+        739.940336465835571289,
         13.5,
       ),
     );
@@ -1168,13 +1170,13 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 504.880443334579467773 : 504.65044379234314,
+        504.880443334579467773,
         13.5,
       ),
     );
   });
 
-  testWidgets('Top middle never changes size during the animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top middle never changes size during the animation', (WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
     addTearDown(() async {
       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
@@ -1198,7 +1200,7 @@ void main() {
     }
   });
 
-  testWidgets('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1213,7 +1215,7 @@ void main() {
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 60.0596635341644287109 : 60.28966307640076,
+        60.0596635341644287109,
         13.5,
       ),
     );
@@ -1224,13 +1226,13 @@ void main() {
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 295.119556665420532227 : 295.34955620765686,
+        295.119556665420532227,
         13.5,
       ),
     );
   });
 
-  testWidgets('Top large title fades in and slides in from the right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top large title fades in and slides in from the right', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1256,7 +1258,7 @@ void main() {
     );
   });
 
-  testWidgets('Top large title fades in and slides in from the left in RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Top large title fades in and slides in from the left in RTL', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1283,7 +1285,7 @@ void main() {
     );
   });
 
-  testWidgets('Components are not unnecessarily rebuilt during transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Components are not unnecessarily rebuilt during transitions', (WidgetTester tester) async {
     int bottomBuildTimes = 0;
     int topBuildTimes = 0;
     await startTransitionBetween(
@@ -1328,7 +1330,7 @@ void main() {
     expect(topBuildTimes, 3);
   });
 
-  testWidgets('Back swipe gesture transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back swipe gesture transitions', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -1351,7 +1353,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 353.810205429792404175 : 353.5802058875561,
+        353.810205429792404175,
         13.5,
       ),
     );
@@ -1369,7 +1371,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 655.435583114624023438 : 655.2055835723877,
+        655.435583114624023438,
         13.5,
       ),
     );
@@ -1377,7 +1379,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 749.863556146621704102 : 749.6335566043854,
+        749.863556146621704102,
         13.5,
       ),
     );
@@ -1391,7 +1393,7 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1', textScale: 99);
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -1399,7 +1401,7 @@ void main() {
     expect(tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaleFactor, 1);
   });
 
-  testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -1410,7 +1412,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     // Start the gesture at the edge of the screen.
-    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
     // Trigger the swipe.
     await gesture.moveBy(const Offset(100.0, 0.0));
 
@@ -1422,7 +1424,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 353.810205429792404175 : 353.5802058875561,
+        353.810205429792404175,
         13.5,
       ),
     );
@@ -1434,7 +1436,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 353.810205429792404175 : 353.5802058875561,
+        353.810205429792404175,
         13.5,
       ),
     );
@@ -1442,7 +1444,7 @@ void main() {
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(
-        bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 350.231143206357955933 : 350.0011436641216,
+        350.231143206357955933,
         13.5,
       ),
     );

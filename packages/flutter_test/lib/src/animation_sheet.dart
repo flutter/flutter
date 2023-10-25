@@ -9,6 +9,36 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+// A Future<ui.Image> that stores the resolved result.
+class _AsyncImage {
+  _AsyncImage(Future<ui.Image> task) {
+    _task = task.then((ui.Image image) {
+      _result = image;
+    });
+  }
+
+  // Returns the resolved image.
+  Future<ui.Image> result() async {
+    if (_result != null) {
+      return _result!;
+    }
+    await _task;
+    assert(_result != null);
+    return _result!;
+  }
+
+  late final Future<void> _task;
+  ui.Image? _result;
+
+  // Wait for a list of `_AsyncImage` and returns the list of its resolved
+  // images.
+  static Future<List<ui.Image>> resolveList(List<_AsyncImage> targets) {
+    final Iterable<Future<ui.Image>> images = targets.map<Future<ui.Image>>(
+        (_AsyncImage target) => target.result());
+    return Future.wait<ui.Image>(images);
+  }
+}
+
 /// Records the frames of an animating widget, and later displays the frames as a
 /// grid in an animation sheet.
 ///
@@ -20,6 +50,7 @@ import 'package:flutter/widgets.dart';
 /// Using this class includes the following steps:
 ///
 ///  * Create an instance of this class.
+///  * Register [dispose] to the test's tear down callbacks.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
 ///  * Acquire the output image with [collate] and compare against the golden
@@ -33,6 +64,7 @@ import 'package:flutter/widgets.dart';
 /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
 ///   // Create instance
 ///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(48, 24));
+///   addTearDown(animationSheet.dispose);
 ///
 ///   final Widget target = Material(
 ///     child: Directionality(
@@ -55,14 +87,14 @@ import 'package:flutter/widgets.dart';
 ///   // Start recording (`recording` is true)
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
-///     recording: true,
+///     recording: true, // ignore: avoid_redundant_argument_values
 ///   ), const Duration(seconds: 1));
 ///
 ///   await gesture.up();
 ///
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
-///     recording: true,
+///     recording: true, // ignore: avoid_redundant_argument_values
 ///   ), const Duration(seconds: 1));
 ///
 ///   // Compare against golden file
@@ -90,6 +122,24 @@ class AnimationSheetBuilder {
     this.allLayers = false,
   }) : assert(!kIsWeb);
 
+  /// Dispose all recorded frames and result images.
+  ///
+  /// This method must be called before the test case ends (usually as a tear
+  /// down callback) to properly deallocate the images.
+  ///
+  /// After this method is called, there will be no frames to [collate].
+  Future<void> dispose() async {
+    final List<_AsyncImage> targets = <_AsyncImage>[
+      ..._recordedFrames,
+      ..._results,
+    ];
+    _recordedFrames.clear();
+    _results.clear();
+    for (final ui.Image image in await _AsyncImage.resolveList(targets)) {
+      image.dispose();
+    }
+  }
+
   /// The size of the child to be recorded.
   ///
   /// This size is applied as a tight layout constraint for the child, and is
@@ -112,20 +162,7 @@ class AnimationSheetBuilder {
   /// Defaults to false.
   final bool allLayers;
 
-  final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
-  Future<List<ui.Image>> get _frames async {
-    final List<ui.Image> frames = await Future.wait<ui.Image>(_recordedFrames, eagerError: true);
-    assert(() {
-      for (final ui.Image frame in frames) {
-        assert(frame.width == frameSize.width && frame.height == frameSize.height,
-          'Unexpected size mismatch: frame has (${frame.width}, ${frame.height}) '
-          'while `frameSize` is $frameSize.'
-        );
-      }
-      return true;
-    }());
-    return frames;
-  }
+  final List<_AsyncImage> _recordedFrames = <_AsyncImage>[];
 
   /// Returns a widget that renders a widget in a box that can be recorded.
   ///
@@ -137,8 +174,6 @@ class AnimationSheetBuilder {
   /// painted result of each frame will be stored and later available for
   /// [collate]. If neither condition is met, the frames are not recorded, which
   /// is useful during setup phases.
-  ///
-  /// The `child` must not be null.
   ///
   /// See also:
   ///
@@ -152,22 +187,41 @@ class AnimationSheetBuilder {
       key: key,
       size: frameSize,
       allLayers: allLayers,
-      handleRecorded: recording ? _recordedFrames.add : null,
+      handleRecorded: !recording ? null : (Future<ui.Image> futureImage) {
+        _recordedFrames.add(_AsyncImage(() async {
+          final ui.Image image = await futureImage;
+          assert(image.width == frameSize.width && image.height == frameSize.height,
+            'Unexpected size mismatch: frame has (${image.width}, ${image.height}) '
+            'while `frameSize` is $frameSize.'
+          );
+          return image;
+        }()));
+      },
       child: child,
     );
   }
 
+  // The result images generated by `collate`.
+  //
+  // They're stored here to be disposed by [dispose].
+  final List<_AsyncImage> _results = <_AsyncImage>[];
+
   /// Returns an result image by putting all frames together in a table.
   ///
-  /// This method returns a table of captured frames, `cellsPerRow` images
-  /// per row, from left to right, top to bottom.
+  /// This method returns an image that arranges the captured frames in a table,
+  /// which has `cellsPerRow` images per row with the order from left to right,
+  /// top to bottom.
+  ///
+  /// The result image of this method is managed by [AnimationSheetBuilder],
+  /// and should not be disposed by the caller.
   ///
   /// An example of using this method can be found at [AnimationSheetBuilder].
   Future<ui.Image> collate(int cellsPerRow) async {
-    final List<ui.Image> frames = await _frames;
-    assert(frames.isNotEmpty,
+    assert(_recordedFrames.isNotEmpty,
       'No frames are collected. Have you forgot to set `recording` to true?');
-    return _collateFrames(frames, frameSize, cellsPerRow);
+    final _AsyncImage result = _AsyncImage(_collateFrames(_recordedFrames, frameSize, cellsPerRow));
+    _results.add(result);
+    return result.result();
   }
 }
 
@@ -281,7 +335,8 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 }
 
-Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cellsPerRow) async {
+Future<ui.Image> _collateFrames(List<_AsyncImage> futureFrames, Size frameSize, int cellsPerRow) async {
+  final List<ui.Image> frames = await _AsyncImage.resolveList(futureFrames);
   final int rowNum = (frames.length / cellsPerRow).ceil();
 
   final ui.PictureRecorder recorder = ui.PictureRecorder();

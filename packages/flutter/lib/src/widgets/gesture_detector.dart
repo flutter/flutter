@@ -91,8 +91,6 @@ typedef GestureRecognizerFactoryInitializer<T extends GestureRecognizer> = void 
 /// Used by [RawGestureDetector.gestures].
 class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends GestureRecognizerFactory<T> {
   /// Creates a gesture recognizer factory with the given callbacks.
-  ///
-  /// The arguments must not be null.
   const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer);
 
   final GestureRecognizerFactoryConstructor<T> _constructor;

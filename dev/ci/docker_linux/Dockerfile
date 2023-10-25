@@ -12,7 +12,7 @@
 
 # Last manual update 2021-09-24 (changing this comment will re-build image)
 
-FROM ubuntu:focal@sha256:f8f658407c35733471596f25fdb4ed748b80e545ab57e84efbdb1dbbb01bd70e
+FROM ubuntu:focal@sha256:33a5cc25d22c45900796a1aca487ad7a7cb09f09ea00b779e3b2026b4fc2faba
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
 ENV TZ=America/Los_Angeles
@@ -48,14 +48,9 @@ RUN apt-get update && apt-get install -y google-cloud-sdk && \
     gcloud config set core/disable_usage_reporting true && \
     gcloud config set component_manager/disable_update_check true
 
-# Add repo for OpenJDK from JFrog.io
-RUN wget -q -O - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
-RUN echo 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb bullseye main' | \
-    tee /etc/apt/sources.list.d/adoptopenjdk.list
-
 # Install the dependencies needed for the rest of the build.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  adoptopenjdk-11-hotspot \
+  openjdk-17-jdk \
   build-essential \
   default-jdk-headless \
   gcc \
@@ -70,7 +65,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ruby-dev && \
   apt-get clean
 
-ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
+ENV JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
 
 # Install the Android SDK Dependency.
 # In the event of an update you can visit this page: https://developer.android.com/studio and scroll to the bottom to find

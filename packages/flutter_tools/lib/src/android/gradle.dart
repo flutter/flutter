@@ -35,6 +35,7 @@ import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
+import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
 
@@ -51,31 +52,8 @@ final RegExp _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRege
 const String _kBuildVariantRegexGroupName = 'variant';
 const String _kBuildVariantTaskName = 'printBuildVariants';
 
-/// The regex to grab variant names from print${BuildVariant}ApplicationId gradle task
-///
-/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
-///
-/// The expected output from the task should be similar to:
-///
-/// ApplicationId: com.example.my_id
-final RegExp _kApplicationIdRegex = RegExp('^ApplicationId: (?<$_kApplicationIdRegexGroupName>.*)\$');
-const String _kApplicationIdRegexGroupName = 'applicationId';
-String _getPrintApplicationIdTaskFor(String buildVariant) {
-  return _taskForBuildVariant('print', buildVariant, 'ApplicationId');
-}
-
-/// The regex to grab app link domains from print${BuildVariant}AppLinkDomains gradle task
-///
-/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
-///
-/// The expected output from the task should be similar to:
-///
-/// Domain: domain.com
-/// Domain: another-domain.dev
-final RegExp _kAppLinkDomainsRegex = RegExp('^Domain: (?<$_kAppLinkDomainsGroupName>.*)\$');
-const String _kAppLinkDomainsGroupName = 'domain';
-String _getPrintAppLinkDomainsTaskFor(String buildVariant) {
-  return _taskForBuildVariant('print', buildVariant, 'AppLinkDomains');
+String _getOutputAppLinkSettingsTaskFor(String buildVariant) {
+  return _taskForBuildVariant('output', buildVariant, 'AppLinkSettings');
 }
 
 /// The directory where the APK artifact is generated.
@@ -330,8 +308,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       AndroidStudioJavaGradleConflictMigration(_logger,
           project: project.android,
           androidStudio: _androidStudio,
-          java: globals.java)
-      ,
+          java: globals.java),
+      MinSdkVersionMigration(project.android, _logger),
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);
@@ -389,19 +367,20 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
     if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineInfo.engineOutPath,
+        engineOutPath: localEngineInfo.targetOutPath,
         androidBuildInfo: androidBuildInfo,
         fileSystem: _fileSystem,
       );
       _logger.printTrace(
-          'Using local engine: ${localEngineInfo.engineOutPath}\n'
+          'Using local engine: ${localEngineInfo.targetOutPath}\n'
               'Local Maven repo: ${localEngineRepo.path}'
       );
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-      command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
+      command.add('-Plocal-engine-out=${localEngineInfo.targetOutPath}');
+      command.add('-Plocal-engine-host-out=${localEngineInfo.hostOutPath}');
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-          localEngineInfo.engineOutPath)}');
+          localEngineInfo.targetOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo
           .targetArchs
@@ -714,17 +693,18 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
     if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineInfo.engineOutPath,
+        engineOutPath: localEngineInfo.targetOutPath,
         androidBuildInfo: androidBuildInfo,
         fileSystem: _fileSystem,
       );
       _logger.printTrace(
-        'Using local engine: ${localEngineInfo.engineOutPath}\n'
+        'Using local engine: ${localEngineInfo.targetOutPath}\n'
         'Local Maven repo: ${localEngineRepo.path}'
       );
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-      command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
+      command.add('-Plocal-engine-out=${localEngineInfo.targetOutPath}');
+      command.add('-Plocal-engine-host-out=${localEngineInfo.hostOutPath}');
 
       // Copy the local engine repo in the output directory.
       try {
@@ -739,7 +719,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         );
       }
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-          localEngineInfo.engineOutPath)}');
+          localEngineInfo.targetOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
           .map((AndroidArch e) => e.platformName).join(',');
@@ -814,11 +794,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
   }
 
   @override
-  Future<String> getApplicationIdForVariant(
+  Future<void> outputsAppLinkSettings(
     String buildVariant, {
     required FlutterProject project,
   }) async {
-    final String taskName = _getPrintApplicationIdTaskFor(buildVariant);
+    final String taskName = _getOutputAppLinkSettingsTaskFor(buildVariant);
     final Stopwatch sw = Stopwatch()
       ..start();
     final RunResult result = await _runGradleTask(
@@ -826,50 +806,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
       options: const <String>['-q'],
       project: project,
     );
-    _usage.sendTiming('print', 'application id', sw.elapsed);
+    _usage.sendTiming('outputs', 'app link settings', sw.elapsed);
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
       _logger.printError(result.stderr, wrap: false);
-      return '';
     }
-    for (final String line in LineSplitter.split(result.stdout)) {
-      final RegExpMatch? match = _kApplicationIdRegex.firstMatch(line);
-      if (match != null) {
-        return match.namedGroup(_kApplicationIdRegexGroupName)!;
-      }
-    }
-    return '';
-  }
-
-  @override
-  Future<List<String>> getAppLinkDomainsForVariant(
-    String buildVariant, {
-    required FlutterProject project,
-  }) async {
-    final String taskName = _getPrintAppLinkDomainsTaskFor(buildVariant);
-    final Stopwatch sw = Stopwatch()
-      ..start();
-    final RunResult result = await _runGradleTask(
-      taskName,
-      options: const <String>['-q'],
-      project: project,
-    );
-    _usage.sendTiming('print', 'application id', sw.elapsed);
-
-    if (result.exitCode != 0) {
-      _logger.printStatus(result.stdout, wrap: false);
-      _logger.printError(result.stderr, wrap: false);
-      return const <String>[];
-    }
-    final List<String> domains = <String>[];
-    for (final String line in LineSplitter.split(result.stdout)) {
-      final RegExpMatch? match = _kAppLinkDomainsRegex.firstMatch(line);
-      if (match != null) {
-        domains.add(match.namedGroup(_kAppLinkDomainsGroupName)!);
-      }
-    }
-    return domains;
   }
 }
 

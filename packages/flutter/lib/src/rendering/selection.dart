@@ -375,26 +375,44 @@ class SelectWordSelectionEvent extends SelectionEvent {
 ///
 /// The [globalPosition] contains the new offset of the edge.
 ///
-/// This event is dispatched when the framework detects [DragStartDetails] in
+/// The [granularity] contains the granularity that the selection edge should move by.
+/// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
+///
+/// This event is dispatched when the framework detects [TapDragStartDetails] in
 /// [SelectionArea]'s gesture recognizers for mouse devices, or the selection
 /// handles have been dragged to new locations.
 class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// Creates a selection start edge update event.
   ///
   /// The [globalPosition] contains the location of the selection start edge.
+  ///
+  /// The [granularity] contains the granularity which the selection edge should move by.
+  /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forStart({
-    required this.globalPosition
-  }) : super._(SelectionEventType.startEdgeUpdate);
+    required this.globalPosition,
+    TextGranularity? granularity
+  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
+  ///
+  /// The [granularity] contains the granularity which the selection edge should move by.
+  /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forEnd({
-    required this.globalPosition
-  }) : super._(SelectionEventType.endEdgeUpdate);
+    required this.globalPosition,
+    TextGranularity? granularity
+  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
+
+  /// The granularity for which the selection moves.
+  ///
+  /// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
+  ///
+  /// Defaults to [TextGranularity.character].
+  final TextGranularity granularity;
 }
 
 /// Extends the start or end of the selection by a given [TextGranularity].
@@ -403,8 +421,6 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
 /// [isEnd], according to the [granularity].
 class GranularlyExtendSelectionEvent extends SelectionEvent {
   /// Creates a [GranularlyExtendSelectionEvent].
-  ///
-  /// All parameters are required and must not be null.
   const GranularlyExtendSelectionEvent({
     required this.forward,
     required this.isEnd,
@@ -481,8 +497,6 @@ enum SelectionExtendDirection {
 /// move to when moving to across lines.
 class DirectionallyExtendSelectionEvent extends SelectionEvent {
   /// Creates a [DirectionallyExtendSelectionEvent].
-  ///
-  /// All parameters are required and must not be null.
   const DirectionallyExtendSelectionEvent({
     required this.dx,
     required this.isEnd,
@@ -686,10 +700,8 @@ class SelectionGeometry {
 
 /// The geometry information of a selection point.
 @immutable
-class SelectionPoint {
+class SelectionPoint with Diagnosticable {
   /// Creates a selection point object.
-  ///
-  /// All properties must not be null.
   const SelectionPoint({
     required this.localPosition,
     required this.lineHeight,
@@ -729,6 +741,14 @@ class SelectionPoint {
       lineHeight,
       handleType,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DoubleProperty('lineHeight', lineHeight));
+    properties.add(EnumProperty<TextSelectionHandleType>('handleType', handleType));
   }
 }
 

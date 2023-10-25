@@ -951,22 +951,13 @@ class _AppBarState extends State<AppBar> {
 
     Widget? title = widget.title;
     if (title != null) {
-      bool? namesRoute;
-      switch (theme.platform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          namesRoute = true;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          break;
-      }
-
       title = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
-          namesRoute: namesRoute,
+          namesRoute: switch (theme.platform) {
+            TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.linux || TargetPlatform.windows => true,
+            TargetPlatform.iOS || TargetPlatform.macOS => null,
+          },
           header: true,
           child: title,
         );
@@ -982,16 +973,9 @@ class _AppBarState extends State<AppBar> {
       // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
       // title to keep the visual hierarchy the same even with larger font
       // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
-      // with [MediaQueryData.textScaleFactor] set to
-      // `MediaQuery.textScaleFactorOf(context)`.
-      final MediaQueryData mediaQueryData = MediaQuery.of(context);
-      title = MediaQuery(
-        data: mediaQueryData.copyWith(
-          textScaleFactor: math.min(
-            mediaQueryData.textScaleFactor,
-            _kMaxTitleTextScaleFactor,
-          ),
-        ),
+      // with a different `TextScaler`.
+      title = MediaQuery.withClampedTextScaling(
+        maxScaleFactor: _kMaxTitleTextScaleFactor,
         child: title,
       );
     }
@@ -1277,6 +1261,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
       toolbarOpacity: toolbarOpacity,
       isScrolledUnder: isScrolledUnder,
+      hasLeading: leading != null || automaticallyImplyLeading,
       child: AppBar(
         clipBehavior: clipBehavior,
         leading: leading,
@@ -1451,9 +1436,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * <https://material.io/design/components/app-bars-top.html>
 class SliverAppBar extends StatefulWidget {
   /// Creates a Material Design app bar that can be placed in a [CustomScrollView].
-  ///
-  /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
-  /// and [automaticallyImplyLeading] must not be null.
   const SliverAppBar({
     super.key,
     this.leading,
@@ -2098,7 +2080,6 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   Widget build(BuildContext context) {
     late final AppBarTheme appBarTheme = AppBarTheme.of(context);
     late final AppBarTheme defaults = Theme.of(context).useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
-    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), _kMaxTitleTextScaleFactor); // TODO(tahatesser): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final _ScrollUnderFlexibleConfig config = configBuilder(context);
     assert(
@@ -2125,10 +2106,10 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
     // title to keep the visual hierarchy the same even with larger font
     // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
-    // with [MediaQueryData.textScaleFactor] set to
-    // `MediaQuery.textScaleFactorOf(context)`.
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+    // with a different TextScaler.
+    // TODO(tahatesser): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: _kMaxTitleTextScaleFactor,
       // This column will assume the full height of the parent Stack.
       child: Column(
         children: <Widget>[

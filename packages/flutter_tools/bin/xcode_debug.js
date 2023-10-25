@@ -346,7 +346,6 @@ function debugApp(xcode, args) {
   if (destinationResult.error != null) {
     return new FunctionResult(null, destinationResult.error)
   }
-
   try {
     // Documentation from the Xcode Script Editor dictionary indicates that the
     // `debug` function has a parameter called `runDestinationSpecifier` which

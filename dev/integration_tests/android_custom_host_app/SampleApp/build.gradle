@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId "io.flutter.add2app"
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
