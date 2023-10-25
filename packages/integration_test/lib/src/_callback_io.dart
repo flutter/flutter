@@ -7,9 +7,9 @@ import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../common.dart';
 
 import 'channel.dart';
-import 'common.dart';
 
 /// The dart:io implementation of [CallbackManager].
 ///

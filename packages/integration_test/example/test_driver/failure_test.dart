@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:integration_test/integration_test.dart';
+import 'package:integration_test/common.dart' as common;
 import 'package:test/test.dart';
 
 /// This file is only used for testing of `package:integration_test` – do not
@@ -14,7 +14,7 @@ Future<void> main() async {
     final FlutterDriver driver = await FlutterDriver.connect();
     final String jsonResult =
         await driver.requestData(null, timeout: const Duration(minutes: 1));
-    final Response response = Response.fromJson(jsonResult);
+    final common.Response response = common.Response.fromJson(jsonResult);
     await driver.close();
     expect(response.allTestsPassed, isFalse);
     expect(response.failureDetails, hasLength(2));
