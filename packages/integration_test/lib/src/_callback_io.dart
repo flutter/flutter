@@ -8,8 +8,8 @@ import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'common.dart';
-import 'src/channel.dart';
+import '../common.dart';
+import 'channel.dart';
 
 /// The dart:io implementation of [CallbackManager].
 ///
@@ -19,12 +19,12 @@ import 'src/channel.dart';
 CallbackManager get callbackManager => _singletonCallbackManager;
 
 /// IOCallbackManager singleton.
-final IOCallbackManager _singletonCallbackManager = IOCallbackManager();
+final _IOCallbackManager _singletonCallbackManager = _IOCallbackManager();
 
 /// Manages communication between `integration_tests` and the `driver_tests`.
 ///
 /// This is the dart:io implementation.
-class IOCallbackManager implements CallbackManager {
+class _IOCallbackManager implements CallbackManager {
   @override
   Future<Map<String, dynamic>> callback(
       Map<String, String> params, IntegrationTestResults testRunner) async {
