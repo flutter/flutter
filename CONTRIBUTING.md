@@ -136,9 +136,12 @@ on the wiki's home page. They are more or less listed in order of importance.
 
 ### DevTools
 
-Contributing code to Dart & Flutter DevTools may be a good place to start if you are looking to dip your toes into contributing with a relatively low-cost setup or if you are generally excited about improving the Dart & Flutter developer experience.
+Contributing code to Dart & Flutter DevTools may be a good place to start if you are
+looking to dip your toes into contributing with a relatively low-cost setup or if you
+are generally excited about improving the Dart & Flutter developer experience.
 
-Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md) guide to get started.
+Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
+guide to get started.
 
 Outreach
 --------
