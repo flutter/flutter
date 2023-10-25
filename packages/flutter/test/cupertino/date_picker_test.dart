@@ -599,7 +599,7 @@ void main() {
           home: Center(
             child: SizedBox(
               height: 400.0,
-              width: 400.0,
+              width: 450.0,
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.time,
                 onDateTimeChanged: (_) { },
