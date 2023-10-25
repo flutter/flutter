@@ -41,7 +41,9 @@ class Renderer {
   std::shared_ptr<Context> context_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Renderer);
+  Renderer(const Renderer&) = delete;
+
+  Renderer& operator=(const Renderer&) = delete;
 };
 
 }  // namespace impeller

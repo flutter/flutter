@@ -42,7 +42,9 @@ class DescriptionGLES {
   std::set<std::string> extensions_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DescriptionGLES);
+  DescriptionGLES(const DescriptionGLES&) = delete;
+
+  DescriptionGLES& operator=(const DescriptionGLES&) = delete;
 };
 
 }  // namespace impeller

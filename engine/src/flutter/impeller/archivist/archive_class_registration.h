@@ -43,7 +43,9 @@ class ArchiveClassRegistration {
   MemberColumnMap column_map_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ArchiveClassRegistration);
+  ArchiveClassRegistration(const ArchiveClassRegistration&) = delete;
+
+  ArchiveClassRegistration& operator=(const ArchiveClassRegistration&) = delete;
 };
 
 }  // namespace impeller

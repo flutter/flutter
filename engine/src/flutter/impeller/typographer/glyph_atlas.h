@@ -133,7 +133,9 @@ class GlyphAtlas {
 
   std::unordered_map<ScaledFont, FontGlyphAtlas> font_atlas_map_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlas);
+  GlyphAtlas(const GlyphAtlas&) = delete;
+
+  GlyphAtlas& operator=(const GlyphAtlas&) = delete;
 };
 
 //------------------------------------------------------------------------------
@@ -169,7 +171,9 @@ class GlyphAtlasContext {
   ISize atlas_size_;
   std::shared_ptr<RectanglePacker> rect_packer_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlasContext);
+  GlyphAtlasContext(const GlyphAtlasContext&) = delete;
+
+  GlyphAtlasContext& operator=(const GlyphAtlasContext&) = delete;
 };
 
 //------------------------------------------------------------------------------
@@ -194,7 +198,9 @@ class FontGlyphAtlas {
   friend class GlyphAtlas;
   std::unordered_map<Glyph, Rect> positions_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FontGlyphAtlas);
+  FontGlyphAtlas(const FontGlyphAtlas&) = delete;
+
+  FontGlyphAtlas& operator=(const FontGlyphAtlas&) = delete;
 };
 
 }  // namespace impeller

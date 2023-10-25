@@ -35,7 +35,9 @@ class EntityPlayground : public PlaygroundTest {
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EntityPlayground);
+  EntityPlayground(const EntityPlayground&) = delete;
+
+  EntityPlayground& operator=(const EntityPlayground&) = delete;
 };
 
 }  // namespace impeller

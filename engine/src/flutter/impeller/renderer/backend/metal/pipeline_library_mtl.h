@@ -44,7 +44,9 @@ class PipelineLibraryMTL final : public PipelineLibrary {
   void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryMTL);
+  PipelineLibraryMTL(const PipelineLibraryMTL&) = delete;
+
+  PipelineLibraryMTL& operator=(const PipelineLibraryMTL&) = delete;
 };
 
 }  // namespace impeller

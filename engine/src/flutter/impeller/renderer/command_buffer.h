@@ -130,7 +130,9 @@ class CommandBuffer {
   virtual std::shared_ptr<ComputePass> OnCreateComputePass() = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
+  CommandBuffer(const CommandBuffer&) = delete;
+
+  CommandBuffer& operator=(const CommandBuffer&) = delete;
 };
 
 }  // namespace impeller

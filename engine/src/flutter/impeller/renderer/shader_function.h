@@ -34,7 +34,9 @@ class ShaderFunction : public Comparable<ShaderFunction> {
   std::string name_;
   ShaderStage stage_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderFunction);
+  ShaderFunction(const ShaderFunction&) = delete;
+
+  ShaderFunction& operator=(const ShaderFunction&) = delete;
 };
 
 }  // namespace impeller

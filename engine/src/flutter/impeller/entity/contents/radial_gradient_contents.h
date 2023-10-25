@@ -63,7 +63,9 @@ class RadialGradientContents final : public ColorSourceContents {
   Entity::TileMode tile_mode_;
   Color decal_border_color_ = Color::BlackTransparent();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RadialGradientContents);
+  RadialGradientContents(const RadialGradientContents&) = delete;
+
+  RadialGradientContents& operator=(const RadialGradientContents&) = delete;
 };
 
 }  // namespace impeller

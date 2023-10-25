@@ -48,7 +48,9 @@ class ColorFilterContents : public FilterContents {
   AbsorbOpacity absorb_opacity_ = AbsorbOpacity::kNo;
   std::optional<Scalar> alpha_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ColorFilterContents);
+  ColorFilterContents(const ColorFilterContents&) = delete;
+
+  ColorFilterContents& operator=(const ColorFilterContents&) = delete;
 };
 
 }  // namespace impeller

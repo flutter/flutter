@@ -166,7 +166,9 @@ class ArchiveLocation {
             const ArchiveDef& otherDef,
             Archivable& other);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ArchiveLocation);
+  ArchiveLocation(const ArchiveLocation&) = delete;
+
+  ArchiveLocation& operator=(const ArchiveLocation&) = delete;
 };
 
 }  // namespace impeller

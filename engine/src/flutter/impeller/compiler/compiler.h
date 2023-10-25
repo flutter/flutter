@@ -57,7 +57,9 @@ class Compiler {
 
   std::string GetDependencyNames(const std::string& separator) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Compiler);
+  Compiler(const Compiler&) = delete;
+
+  Compiler& operator=(const Compiler&) = delete;
 };
 
 }  // namespace compiler

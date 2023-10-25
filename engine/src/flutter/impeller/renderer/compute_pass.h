@@ -74,7 +74,9 @@ class ComputePass {
   ISize grid_size_ = ISize(32, 32);
   ISize thread_group_size_ = ISize(32, 32);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputePass);
+  ComputePass(const ComputePass&) = delete;
+
+  ComputePass& operator=(const ComputePass&) = delete;
 };
 
 }  // namespace impeller

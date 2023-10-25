@@ -28,7 +28,9 @@ class YUVToRGBFilterContents final : public FilterContents {
 
   YUVColorSpace yuv_color_space_ = YUVColorSpace::kBT601LimitedRange;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(YUVToRGBFilterContents);
+  YUVToRGBFilterContents(const YUVToRGBFilterContents&) = delete;
+
+  YUVToRGBFilterContents& operator=(const YUVToRGBFilterContents&) = delete;
 };
 
 }  // namespace impeller

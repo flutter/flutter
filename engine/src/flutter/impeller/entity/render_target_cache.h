@@ -39,7 +39,9 @@ class RenderTargetCache : public RenderTargetAllocator {
 
   std::vector<TextureData> texture_data_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RenderTargetCache);
+  RenderTargetCache(const RenderTargetCache&) = delete;
+
+  RenderTargetCache& operator=(const RenderTargetCache&) = delete;
 };
 
 }  // namespace impeller

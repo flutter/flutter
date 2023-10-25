@@ -179,7 +179,9 @@ class FilterContents : public Contents {
   FilterInput::Vector inputs_;
   Matrix effect_transform_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FilterContents);
+  FilterContents(const FilterContents&) = delete;
+
+  FilterContents& operator=(const FilterContents&) = delete;
 };
 
 }  // namespace impeller

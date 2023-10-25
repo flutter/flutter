@@ -107,7 +107,9 @@ class ColorSourceContents : public Contents {
   Scalar opacity_ = 1.0;
   Scalar inherited_opacity_ = 1.0;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ColorSourceContents);
+  ColorSourceContents(const ColorSourceContents&) = delete;
+
+  ColorSourceContents& operator=(const ColorSourceContents&) = delete;
 };
 
 }  // namespace impeller

@@ -47,7 +47,11 @@ class AndroidHardwareBufferTextureSourceVK final : public TextureSourceVK {
 
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AndroidHardwareBufferTextureSourceVK);
+  AndroidHardwareBufferTextureSourceVK(
+      const AndroidHardwareBufferTextureSourceVK&) = delete;
+
+  AndroidHardwareBufferTextureSourceVK& operator=(
+      const AndroidHardwareBufferTextureSourceVK&) = delete;
 };
 
 }  // namespace impeller

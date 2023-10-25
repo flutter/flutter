@@ -41,7 +41,9 @@ class PlaygroundImplGLES::ReactorWorker final : public ReactorGLES::Worker {
   mutable RWMutex mutex_;
   std::map<std::thread::id, bool> reactions_allowed_ IPLR_GUARDED_BY(mutex_);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ReactorWorker);
+  ReactorWorker(const ReactorWorker&) = delete;
+
+  ReactorWorker& operator=(const ReactorWorker&) = delete;
 };
 
 void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {

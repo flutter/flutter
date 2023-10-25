@@ -40,7 +40,9 @@ class TypefaceSTB final : public Typeface,
   std::unique_ptr<stbtt_fontinfo> font_info_;
   bool is_valid_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TypefaceSTB);
+  TypefaceSTB(const TypefaceSTB&) = delete;
+
+  TypefaceSTB& operator=(const TypefaceSTB&) = delete;
 };
 
 }  // namespace impeller

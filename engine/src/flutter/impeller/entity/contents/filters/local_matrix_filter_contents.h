@@ -32,7 +32,10 @@ class LocalMatrixFilterContents final : public FilterContents {
 
   Matrix matrix_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(LocalMatrixFilterContents);
+  LocalMatrixFilterContents(const LocalMatrixFilterContents&) = delete;
+
+  LocalMatrixFilterContents& operator=(const LocalMatrixFilterContents&) =
+      delete;
 };
 
 }  // namespace impeller

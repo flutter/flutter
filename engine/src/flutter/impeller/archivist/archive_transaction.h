@@ -43,7 +43,9 @@ class ArchiveTransaction {
                      ArchiveStatement& endStatement,
                      ArchiveStatement& rollbackStatement);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ArchiveTransaction);
+  ArchiveTransaction(const ArchiveTransaction&) = delete;
+
+  ArchiveTransaction& operator=(const ArchiveTransaction&) = delete;
 };
 
 }  // namespace impeller

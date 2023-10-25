@@ -41,7 +41,9 @@ class RenderPassMTL final : public RenderPass {
   bool EncodeCommands(const std::shared_ptr<Allocator>& transients_allocator,
                       id<MTLRenderCommandEncoder> pass) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RenderPassMTL);
+  RenderPassMTL(const RenderPassMTL&) = delete;
+
+  RenderPassMTL& operator=(const RenderPassMTL&) = delete;
 };
 
 }  // namespace impeller

@@ -128,7 +128,9 @@ class Node final {
 
   std::unique_ptr<Skin> skin_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Node);
+  Node(const Node&) = delete;
+
+  Node& operator=(const Node&) = delete;
 
   friend Scene;
 };

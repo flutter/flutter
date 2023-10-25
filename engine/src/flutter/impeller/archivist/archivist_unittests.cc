@@ -47,7 +47,9 @@ class Sample : public Archivable {
   uint64_t some_data_;
   PrimaryKey name_ = ++LastSample;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Sample);
+  Sample(const Sample&) = delete;
+
+  Sample& operator=(const Sample&) = delete;
 };
 
 const ArchiveDef Sample::kArchiveDefinition = {
@@ -95,7 +97,9 @@ class SampleWithVector : public Archivable {
 
  private:
   std::vector<Sample> samples_;
-  FML_DISALLOW_COPY_AND_ASSIGN(SampleWithVector);
+  SampleWithVector(const SampleWithVector&) = delete;
+
+  SampleWithVector& operator=(const SampleWithVector&) = delete;
 };
 
 const ArchiveDef SampleWithVector::kArchiveDefinition = {

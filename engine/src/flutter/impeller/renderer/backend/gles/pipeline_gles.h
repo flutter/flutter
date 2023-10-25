@@ -48,7 +48,9 @@ class PipelineGLES final
                std::weak_ptr<PipelineLibrary> library,
                const PipelineDescriptor& desc);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineGLES);
+  PipelineGLES(const PipelineGLES&) = delete;
+
+  PipelineGLES& operator=(const PipelineGLES&) = delete;
 };
 
 }  // namespace impeller

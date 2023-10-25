@@ -49,7 +49,9 @@ class MockFence final {
  private:
   std::atomic<vk::Result> result_ = vk::Result::eSuccess;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(MockFence);
+  MockFence(const MockFence&) = delete;
+
+  MockFence& operator=(const MockFence&) = delete;
 };
 
 class MockVulkanContextBuilder {

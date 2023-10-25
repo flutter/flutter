@@ -43,7 +43,13 @@ class WaitSetEntry {
       : fence_(std::move(p_fence)),
         callback_(fml::ScopedCleanupClosure{p_callback}) {}
 
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(WaitSetEntry);
+  WaitSetEntry(const WaitSetEntry&) = delete;
+
+  WaitSetEntry(WaitSetEntry&&) = delete;
+
+  WaitSetEntry& operator=(const WaitSetEntry&) = delete;
+
+  WaitSetEntry& operator=(WaitSetEntry&&) = delete;
 };
 
 FenceWaiterVK::FenceWaiterVK(std::weak_ptr<DeviceHolder> device_holder)

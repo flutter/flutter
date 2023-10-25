@@ -74,7 +74,9 @@ class Tessellator {
  private:
   CTessellator c_tessellator_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Tessellator);
+  Tessellator(const Tessellator&) = delete;
+
+  Tessellator& operator=(const Tessellator&) = delete;
 };
 
 }  // namespace impeller

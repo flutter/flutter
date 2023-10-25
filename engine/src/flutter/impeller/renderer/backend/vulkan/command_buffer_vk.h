@@ -55,7 +55,9 @@ class CommandBufferVK final
   // |CommandBuffer|
   std::shared_ptr<ComputePass> OnCreateComputePass() override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferVK);
+  CommandBufferVK(const CommandBufferVK&) = delete;
+
+  CommandBufferVK& operator=(const CommandBufferVK&) = delete;
 };
 
 }  // namespace impeller

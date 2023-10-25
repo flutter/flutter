@@ -51,7 +51,9 @@ class ClipContents final : public Contents {
   std::unique_ptr<Geometry> geometry_;
   Entity::ClipOperation clip_op_ = Entity::ClipOperation::kIntersect;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ClipContents);
+  ClipContents(const ClipContents&) = delete;
+
+  ClipContents& operator=(const ClipContents&) = delete;
 };
 
 class ClipRestoreContents final : public Contents {
@@ -92,7 +94,9 @@ class ClipRestoreContents final : public Contents {
  private:
   std::optional<Rect> restore_coverage_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ClipRestoreContents);
+  ClipRestoreContents(const ClipRestoreContents&) = delete;
+
+  ClipRestoreContents& operator=(const ClipRestoreContents&) = delete;
 };
 
 }  // namespace impeller

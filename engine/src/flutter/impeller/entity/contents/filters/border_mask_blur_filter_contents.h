@@ -44,7 +44,10 @@ class BorderMaskBlurFilterContents final : public FilterContents {
   bool inner_blur_factor_ = true;
   bool outer_blur_factor_ = true;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(BorderMaskBlurFilterContents);
+  BorderMaskBlurFilterContents(const BorderMaskBlurFilterContents&) = delete;
+
+  BorderMaskBlurFilterContents& operator=(const BorderMaskBlurFilterContents&) =
+      delete;
 };
 
 }  // namespace impeller

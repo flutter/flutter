@@ -50,7 +50,9 @@ class FenceWaiterVK {
   bool Wait();
   void WaitUntilEmpty();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FenceWaiterVK);
+  FenceWaiterVK(const FenceWaiterVK&) = delete;
+
+  FenceWaiterVK& operator=(const FenceWaiterVK&) = delete;
 };
 
 }  // namespace impeller

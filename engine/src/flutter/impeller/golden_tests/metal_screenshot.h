@@ -31,7 +31,9 @@ class MetalScreenshot {
  private:
   friend class MetalScreenshotter;
   explicit MetalScreenshot(CGImageRef cgImage);
-  FML_DISALLOW_COPY_AND_ASSIGN(MetalScreenshot);
+  MetalScreenshot(const MetalScreenshot&) = delete;
+
+  MetalScreenshot& operator=(const MetalScreenshot&) = delete;
   CGImageRef cg_image_;
   CFDataRef pixel_data_;
 };

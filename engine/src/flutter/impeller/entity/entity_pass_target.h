@@ -37,7 +37,7 @@ class EntityPassTarget {
 
   friend InlinePassContext;
 
-  FML_DISALLOW_ASSIGN(EntityPassTarget);
+  EntityPassTarget& operator=(const EntityPassTarget&) = delete;
 };
 
 }  // namespace impeller

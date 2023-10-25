@@ -29,7 +29,9 @@ class VertexDescriptorMTL {
  private:
   MTLVertexDescriptor* descriptor_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptorMTL);
+  VertexDescriptorMTL(const VertexDescriptorMTL&) = delete;
+
+  VertexDescriptorMTL& operator=(const VertexDescriptorMTL&) = delete;
 };
 
 }  // namespace impeller

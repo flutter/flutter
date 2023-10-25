@@ -47,7 +47,9 @@ struct ArchiveDatabase::Handle {
  private:
   ::sqlite3* handle_ = nullptr;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Handle);
+  Handle(const Handle&) = delete;
+
+  Handle& operator=(const Handle&) = delete;
 };
 
 ArchiveDatabase::ArchiveDatabase(const std::string& filename)

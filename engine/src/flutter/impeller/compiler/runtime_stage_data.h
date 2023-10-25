@@ -51,7 +51,9 @@ class RuntimeStageData {
   std::shared_ptr<fml::Mapping> shader_;
   std::shared_ptr<fml::Mapping> sksl_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RuntimeStageData);
+  RuntimeStageData(const RuntimeStageData&) = delete;
+
+  RuntimeStageData& operator=(const RuntimeStageData&) = delete;
 };
 
 }  // namespace compiler

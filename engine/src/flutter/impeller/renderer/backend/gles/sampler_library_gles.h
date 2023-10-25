@@ -29,7 +29,9 @@ class SamplerLibraryGLES final : public SamplerLibrary {
 
   bool supports_decal_sampler_address_mode_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SamplerLibraryGLES);
+  SamplerLibraryGLES(const SamplerLibraryGLES&) = delete;
+
+  SamplerLibraryGLES& operator=(const SamplerLibraryGLES&) = delete;
 };
 
 }  // namespace impeller

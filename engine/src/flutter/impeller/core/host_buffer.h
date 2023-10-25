@@ -134,7 +134,9 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
 
   HostBuffer();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(HostBuffer);
+  HostBuffer(const HostBuffer&) = delete;
+
+  HostBuffer& operator=(const HostBuffer&) = delete;
 };
 
 }  // namespace impeller

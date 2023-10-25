@@ -61,7 +61,9 @@ class Allocator {
       const TextureDescriptor& desc) = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(Allocator);
+  Allocator(const Allocator&) = delete;
+
+  Allocator& operator=(const Allocator&) = delete;
 };
 
 }  // namespace impeller

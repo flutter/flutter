@@ -24,7 +24,9 @@ class WorkingDirectory {
   const std::string& GetPath() const { return path_; }
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(WorkingDirectory);
+  WorkingDirectory(const WorkingDirectory&) = delete;
+
+  WorkingDirectory& operator=(const WorkingDirectory&) = delete;
   WorkingDirectory();
   static WorkingDirectory* instance_;
   std::string path_;

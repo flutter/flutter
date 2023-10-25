@@ -61,7 +61,9 @@ class BlitPassVK final : public BlitPass {
   bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                std::string label) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(BlitPassVK);
+  BlitPassVK(const BlitPassVK&) = delete;
+
+  BlitPassVK& operator=(const BlitPassVK&) = delete;
 };
 
 }  // namespace impeller

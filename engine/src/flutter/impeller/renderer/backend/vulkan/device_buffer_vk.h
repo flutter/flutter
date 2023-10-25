@@ -46,7 +46,9 @@ class DeviceBufferVK final : public DeviceBuffer,
       std::swap(o.info, info);
     }
 
-    FML_DISALLOW_COPY_AND_ASSIGN(BufferResource);
+    BufferResource(const BufferResource&) = delete;
+
+    BufferResource& operator=(const BufferResource&) = delete;
   };
 
   std::weak_ptr<Context> context_;
@@ -66,7 +68,9 @@ class DeviceBufferVK final : public DeviceBuffer,
   // |DeviceBuffer|
   bool SetLabel(const std::string& label, Range range) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DeviceBufferVK);
+  DeviceBufferVK(const DeviceBufferVK&) = delete;
+
+  DeviceBufferVK& operator=(const DeviceBufferVK&) = delete;
 };
 
 }  // namespace impeller

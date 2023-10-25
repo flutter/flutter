@@ -35,7 +35,9 @@ class ComputePipelineMTL final
   // |Pipeline|
   bool IsValid() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputePipelineMTL);
+  ComputePipelineMTL(const ComputePipelineMTL&) = delete;
+
+  ComputePipelineMTL& operator=(const ComputePipelineMTL&) = delete;
 };
 
 }  // namespace impeller

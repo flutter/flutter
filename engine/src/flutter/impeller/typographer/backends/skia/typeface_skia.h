@@ -33,7 +33,9 @@ class TypefaceSkia final : public Typeface,
  private:
   sk_sp<SkTypeface> typeface_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TypefaceSkia);
+  TypefaceSkia(const TypefaceSkia&) = delete;
+
+  TypefaceSkia& operator=(const TypefaceSkia&) = delete;
 };
 
 }  // namespace impeller

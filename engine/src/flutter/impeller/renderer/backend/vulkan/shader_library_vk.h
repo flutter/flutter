@@ -51,7 +51,9 @@ class ShaderLibraryVK final : public ShaderLibrary {
   // |ShaderLibrary|
   void UnregisterFunction(std::string name, ShaderStage stage) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryVK);
+  ShaderLibraryVK(const ShaderLibraryVK&) = delete;
+
+  ShaderLibraryVK& operator=(const ShaderLibraryVK&) = delete;
 };
 
 }  // namespace impeller

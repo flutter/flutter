@@ -28,7 +28,9 @@ class TypographerContextSkia : public TypographerContext {
       const FontGlyphMap& font_glyph_map) const override;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(TypographerContextSkia);
+  TypographerContextSkia(const TypographerContextSkia&) = delete;
+
+  TypographerContextSkia& operator=(const TypographerContextSkia&) = delete;
 };
 
 }  // namespace impeller

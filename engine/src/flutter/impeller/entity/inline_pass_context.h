@@ -44,7 +44,9 @@ class InlinePassContext {
   // Whether this context is collapsed into a parent entity pass.
   bool is_collapsed_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(InlinePassContext);
+  InlinePassContext(const InlinePassContext&) = delete;
+
+  InlinePassContext& operator=(const InlinePassContext&) = delete;
 };
 
 }  // namespace impeller

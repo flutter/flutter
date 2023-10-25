@@ -72,7 +72,9 @@ class CuboidGeometry final : public Geometry {
  private:
   Vector3 size_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CuboidGeometry);
+  CuboidGeometry(const CuboidGeometry&) = delete;
+
+  CuboidGeometry& operator=(const CuboidGeometry&) = delete;
 };
 
 class UnskinnedVertexBufferGeometry final : public Geometry {
@@ -98,7 +100,10 @@ class UnskinnedVertexBufferGeometry final : public Geometry {
  private:
   VertexBuffer vertex_buffer_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(UnskinnedVertexBufferGeometry);
+  UnskinnedVertexBufferGeometry(const UnskinnedVertexBufferGeometry&) = delete;
+
+  UnskinnedVertexBufferGeometry& operator=(
+      const UnskinnedVertexBufferGeometry&) = delete;
 };
 
 class SkinnedVertexBufferGeometry final : public Geometry {
@@ -128,7 +133,10 @@ class SkinnedVertexBufferGeometry final : public Geometry {
   VertexBuffer vertex_buffer_;
   std::shared_ptr<Texture> joints_texture_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SkinnedVertexBufferGeometry);
+  SkinnedVertexBufferGeometry(const SkinnedVertexBufferGeometry&) = delete;
+
+  SkinnedVertexBufferGeometry& operator=(const SkinnedVertexBufferGeometry&) =
+      delete;
 };
 
 }  // namespace scene

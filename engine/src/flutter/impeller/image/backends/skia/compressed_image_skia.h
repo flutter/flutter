@@ -22,7 +22,9 @@ class CompressedImageSkia final : public CompressedImage {
   DecompressedImage Decode() const override;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(CompressedImageSkia);
+  CompressedImageSkia(const CompressedImageSkia&) = delete;
+
+  CompressedImageSkia& operator=(const CompressedImageSkia&) = delete;
 };
 
 }  // namespace impeller

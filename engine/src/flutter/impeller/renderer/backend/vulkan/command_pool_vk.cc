@@ -46,7 +46,9 @@ class BackgroundCommandPoolVK final {
   }
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(BackgroundCommandPoolVK);
+  BackgroundCommandPoolVK(const BackgroundCommandPoolVK&) = delete;
+
+  BackgroundCommandPoolVK& operator=(const BackgroundCommandPoolVK&) = delete;
 
   vk::UniqueCommandPool pool_;
 

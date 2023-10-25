@@ -39,7 +39,9 @@ class EntityPassDelegate {
       const Matrix& effect_transform) const = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(EntityPassDelegate);
+  EntityPassDelegate(const EntityPassDelegate&) = delete;
+
+  EntityPassDelegate& operator=(const EntityPassDelegate&) = delete;
 };
 
 }  // namespace impeller

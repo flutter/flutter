@@ -268,7 +268,9 @@ class UniqueIncluder final : public shaderc::CompileOptions::IncluderInterface {
     FML_CHECK(includer_);
   }
 
-  FML_DISALLOW_COPY_AND_ASSIGN(UniqueIncluder);
+  UniqueIncluder(const UniqueIncluder&) = delete;
+
+  UniqueIncluder& operator=(const UniqueIncluder&) = delete;
 };
 
 shaderc::CompileOptions SPIRVCompilerOptions::BuildShadercOptions() const {

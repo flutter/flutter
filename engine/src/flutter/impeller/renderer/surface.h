@@ -36,7 +36,9 @@ class Surface {
 
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Surface);
+  Surface(const Surface&) = delete;
+
+  Surface& operator=(const Surface&) = delete;
 };
 
 }  // namespace impeller

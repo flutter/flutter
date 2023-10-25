@@ -45,7 +45,9 @@ class AnimationPlayer final {
 
   std::optional<TimePoint> previous_time_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AnimationPlayer);
+  AnimationPlayer(const AnimationPlayer&) = delete;
+
+  AnimationPlayer& operator=(const AnimationPlayer&) = delete;
 };
 
 }  // namespace scene

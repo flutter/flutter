@@ -58,7 +58,9 @@ class SolidColorContents final : public ColorSourceContents {
  private:
   Color color_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SolidColorContents);
+  SolidColorContents(const SolidColorContents&) = delete;
+
+  SolidColorContents& operator=(const SolidColorContents&) = delete;
 };
 
 }  // namespace impeller

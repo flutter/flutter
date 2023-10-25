@@ -64,7 +64,9 @@ class ConicalGradientContents final : public ColorSourceContents {
   std::optional<Point> focus_;
   Scalar focus_radius_ = 0.0f;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ConicalGradientContents);
+  ConicalGradientContents(const ConicalGradientContents&) = delete;
+
+  ConicalGradientContents& operator=(const ConicalGradientContents&) = delete;
 };
 
 }  // namespace impeller

@@ -38,7 +38,9 @@ class RectGeometry : public Geometry {
 
   Rect rect_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RectGeometry);
+  RectGeometry(const RectGeometry&) = delete;
+
+  RectGeometry& operator=(const RectGeometry&) = delete;
 };
 
 }  // namespace impeller

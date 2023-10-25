@@ -34,7 +34,9 @@ class ShaderFunctionGLES final
                      std::string name,
                      std::shared_ptr<const fml::Mapping> mapping);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderFunctionGLES);
+  ShaderFunctionGLES(const ShaderFunctionGLES&) = delete;
+
+  ShaderFunctionGLES& operator=(const ShaderFunctionGLES&) = delete;
 };
 
 }  // namespace impeller

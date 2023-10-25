@@ -139,7 +139,9 @@ class ContextMTL final : public Context,
 
   void FlushTasksAwaitingGPU();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ContextMTL);
+  ContextMTL(const ContextMTL&) = delete;
+
+  ContextMTL& operator=(const ContextMTL&) = delete;
 };
 
 }  // namespace impeller

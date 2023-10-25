@@ -54,7 +54,9 @@ class SolidRRectBlurContents final : public Contents {
 
   Color color_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SolidRRectBlurContents);
+  SolidRRectBlurContents(const SolidRRectBlurContents&) = delete;
+
+  SolidRRectBlurContents& operator=(const SolidRRectBlurContents&) = delete;
 };
 
 }  // namespace impeller

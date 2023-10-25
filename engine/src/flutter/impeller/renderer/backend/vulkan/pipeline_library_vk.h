@@ -73,7 +73,9 @@ class PipelineLibraryVK final
 
   void PersistPipelineCacheToDisk();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryVK);
+  PipelineLibraryVK(const PipelineLibraryVK&) = delete;
+
+  PipelineLibraryVK& operator=(const PipelineLibraryVK&) = delete;
 };
 
 }  // namespace impeller

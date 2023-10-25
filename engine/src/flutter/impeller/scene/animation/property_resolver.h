@@ -87,7 +87,10 @@ class TranslationTimelineResolver final : public TimelineResolver {
 
   std::vector<Vector3> values_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TranslationTimelineResolver);
+  TranslationTimelineResolver(const TranslationTimelineResolver&) = delete;
+
+  TranslationTimelineResolver& operator=(const TranslationTimelineResolver&) =
+      delete;
 
   friend PropertyResolver;
 };
@@ -106,7 +109,9 @@ class RotationTimelineResolver final : public TimelineResolver {
 
   std::vector<Quaternion> values_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RotationTimelineResolver);
+  RotationTimelineResolver(const RotationTimelineResolver&) = delete;
+
+  RotationTimelineResolver& operator=(const RotationTimelineResolver&) = delete;
 
   friend PropertyResolver;
 };
@@ -125,7 +130,9 @@ class ScaleTimelineResolver final : public TimelineResolver {
 
   std::vector<Vector3> values_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ScaleTimelineResolver);
+  ScaleTimelineResolver(const ScaleTimelineResolver&) = delete;
+
+  ScaleTimelineResolver& operator=(const ScaleTimelineResolver&) = delete;
 
   friend PropertyResolver;
 };

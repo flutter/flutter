@@ -106,7 +106,9 @@ class Capabilities {
  protected:
   Capabilities();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Capabilities);
+  Capabilities(const Capabilities&) = delete;
+
+  Capabilities& operator=(const Capabilities&) = delete;
 };
 
 class CapabilitiesBuilder {
@@ -161,7 +163,9 @@ class CapabilitiesBuilder {
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CapabilitiesBuilder);
+  CapabilitiesBuilder(const CapabilitiesBuilder&) = delete;
+
+  CapabilitiesBuilder& operator=(const CapabilitiesBuilder&) = delete;
 };
 
 }  // namespace impeller

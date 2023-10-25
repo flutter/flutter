@@ -50,7 +50,9 @@ class PipelineVK final
   // |Pipeline|
   bool IsValid() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineVK);
+  PipelineVK(const PipelineVK&) = delete;
+
+  PipelineVK& operator=(const PipelineVK&) = delete;
 };
 
 }  // namespace impeller

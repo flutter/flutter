@@ -69,7 +69,9 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   std::vector<ShaderStageBufferLayout> layouts_;
   std::vector<DescriptorSetLayout> desc_set_layouts_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VertexDescriptor);
+  VertexDescriptor(const VertexDescriptor&) = delete;
+
+  VertexDescriptor& operator=(const VertexDescriptor&) = delete;
 };
 
 }  // namespace impeller

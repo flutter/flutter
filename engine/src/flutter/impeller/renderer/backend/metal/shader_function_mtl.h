@@ -31,7 +31,9 @@ class ShaderFunctionMTL final
                     std::string name,
                     ShaderStage stage);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderFunctionMTL);
+  ShaderFunctionMTL(const ShaderFunctionMTL&) = delete;
+
+  ShaderFunctionMTL& operator=(const ShaderFunctionMTL&) = delete;
 };
 
 }  // namespace impeller

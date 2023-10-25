@@ -46,7 +46,9 @@ class CommandBufferGLES final : public CommandBuffer {
   // |CommandBuffer|
   std::shared_ptr<ComputePass> OnCreateComputePass() override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferGLES);
+  CommandBufferGLES(const CommandBufferGLES&) = delete;
+
+  CommandBufferGLES& operator=(const CommandBufferGLES&) = delete;
 };
 
 }  // namespace impeller

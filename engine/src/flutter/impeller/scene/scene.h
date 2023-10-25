@@ -36,7 +36,9 @@ class Scene {
   std::shared_ptr<SceneContext> scene_context_;
   Node root_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Scene);
+  Scene(const Scene&) = delete;
+
+  Scene& operator=(const Scene&) = delete;
 };
 
 }  // namespace scene

@@ -37,7 +37,9 @@ class AllocatorGLES final : public Allocator {
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AllocatorGLES);
+  AllocatorGLES(const AllocatorGLES&) = delete;
+
+  AllocatorGLES& operator=(const AllocatorGLES&) = delete;
 };
 
 }  // namespace impeller

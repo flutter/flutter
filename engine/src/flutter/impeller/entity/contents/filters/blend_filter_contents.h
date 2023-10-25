@@ -95,7 +95,9 @@ class BlendFilterContents : public ColorFilterContents {
   AdvancedBlendProc advanced_blend_proc_;
   std::optional<Color> foreground_color_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(BlendFilterContents);
+  BlendFilterContents(const BlendFilterContents&) = delete;
+
+  BlendFilterContents& operator=(const BlendFilterContents&) = delete;
 };
 
 }  // namespace impeller

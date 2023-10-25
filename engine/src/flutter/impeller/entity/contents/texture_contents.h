@@ -88,7 +88,9 @@ class TextureContents final : public Contents {
   Scalar inherited_opacity_ = 1.0f;
   bool defer_applying_opacity_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TextureContents);
+  TextureContents(const TextureContents&) = delete;
+
+  TextureContents& operator=(const TextureContents&) = delete;
 };
 
 }  // namespace impeller

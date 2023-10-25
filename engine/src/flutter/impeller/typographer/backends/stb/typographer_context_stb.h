@@ -30,7 +30,9 @@ class TypographerContextSTB : public TypographerContext {
       const FontGlyphMap& font_glyph_map) const override;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(TypographerContextSTB);
+  TypographerContextSTB(const TypographerContextSTB&) = delete;
+
+  TypographerContextSTB& operator=(const TypographerContextSTB&) = delete;
 };
 
 }  // namespace impeller

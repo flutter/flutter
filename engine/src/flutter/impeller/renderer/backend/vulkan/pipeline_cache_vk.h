@@ -42,7 +42,9 @@ class PipelineCacheVK {
 
   std::shared_ptr<fml::Mapping> CopyPipelineCacheData() const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineCacheVK);
+  PipelineCacheVK(const PipelineCacheVK&) = delete;
+
+  PipelineCacheVK& operator=(const PipelineCacheVK&) = delete;
 };
 
 }  // namespace impeller

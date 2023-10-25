@@ -66,7 +66,9 @@ class SweepGradientContents final : public ColorSourceContents {
   Entity::TileMode tile_mode_;
   Color decal_border_color_ = Color::BlackTransparent();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SweepGradientContents);
+  SweepGradientContents(const SweepGradientContents&) = delete;
+
+  SweepGradientContents& operator=(const SweepGradientContents&) = delete;
 };
 
 }  // namespace impeller

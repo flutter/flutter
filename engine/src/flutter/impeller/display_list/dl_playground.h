@@ -32,7 +32,9 @@ class DlPlayground : public PlaygroundTest {
   SkFont CreateTestFont();
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(DlPlayground);
+  DlPlayground(const DlPlayground&) = delete;
+
+  DlPlayground& operator=(const DlPlayground&) = delete;
 };
 
 }  // namespace impeller

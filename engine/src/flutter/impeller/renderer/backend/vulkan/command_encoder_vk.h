@@ -40,7 +40,9 @@ class CommandEncoderFactoryVK {
   std::weak_ptr<const ContextVK> context_;
   std::optional<std::string> label_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CommandEncoderFactoryVK);
+  CommandEncoderFactoryVK(const CommandEncoderFactoryVK&) = delete;
+
+  CommandEncoderFactoryVK& operator=(const CommandEncoderFactoryVK&) = delete;
 };
 
 class CommandEncoderVK {
@@ -95,7 +97,9 @@ class CommandEncoderVK {
 
   void Reset();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CommandEncoderVK);
+  CommandEncoderVK(const CommandEncoderVK&) = delete;
+
+  CommandEncoderVK& operator=(const CommandEncoderVK&) = delete;
 };
 
 }  // namespace impeller

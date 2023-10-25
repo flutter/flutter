@@ -258,7 +258,9 @@ class ProcTableGLES {
   std::shared_ptr<const CapabilitiesGLES> capabilities_;
   GLint debug_label_max_length_ = 0;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ProcTableGLES);
+  ProcTableGLES(const ProcTableGLES&) = delete;
+
+  ProcTableGLES& operator=(const ProcTableGLES&) = delete;
 };
 
 }  // namespace impeller

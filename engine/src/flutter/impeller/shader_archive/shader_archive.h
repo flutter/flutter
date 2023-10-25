@@ -69,7 +69,9 @@ class ShaderArchive {
 
   explicit ShaderArchive(std::shared_ptr<const fml::Mapping> payload);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderArchive);
+  ShaderArchive(const ShaderArchive&) = delete;
+
+  ShaderArchive& operator=(const ShaderArchive&) = delete;
 };
 
 }  // namespace impeller

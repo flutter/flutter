@@ -33,7 +33,9 @@ class CompilerTest : public ::testing::TestWithParam<TargetPlatform> {
  private:
   fml::UniqueFD intermediates_directory_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CompilerTest);
+  CompilerTest(const CompilerTest&) = delete;
+
+  CompilerTest& operator=(const CompilerTest&) = delete;
 };
 
 }  // namespace testing

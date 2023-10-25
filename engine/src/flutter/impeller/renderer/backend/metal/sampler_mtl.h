@@ -34,7 +34,9 @@ class SamplerMTL final : public Sampler,
   // |Sampler|
   bool IsValid() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SamplerMTL);
+  SamplerMTL(const SamplerMTL&) = delete;
+
+  SamplerMTL& operator=(const SamplerMTL&) = delete;
 };
 
 }  // namespace impeller

@@ -52,7 +52,9 @@ class ComputePlaygroundTest
  private:
   fml::TimeDelta start_time_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputePlaygroundTest);
+  ComputePlaygroundTest(const ComputePlaygroundTest&) = delete;
+
+  ComputePlaygroundTest& operator=(const ComputePlaygroundTest&) = delete;
 };
 
 #define INSTANTIATE_COMPUTE_SUITE(playground)                              \

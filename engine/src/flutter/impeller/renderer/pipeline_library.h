@@ -51,7 +51,9 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   PipelineLibrary();
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibrary);
+  PipelineLibrary(const PipelineLibrary&) = delete;
+
+  PipelineLibrary& operator=(const PipelineLibrary&) = delete;
 };
 
 }  // namespace impeller

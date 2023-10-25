@@ -52,7 +52,9 @@ class VerticesContents final : public Contents {
   BlendMode blend_mode_ = BlendMode::kSource;
   std::shared_ptr<Contents> src_contents_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VerticesContents);
+  VerticesContents(const VerticesContents&) = delete;
+
+  VerticesContents& operator=(const VerticesContents&) = delete;
 };
 
 class VerticesColorContents final : public Contents {
@@ -75,7 +77,9 @@ class VerticesColorContents final : public Contents {
   const VerticesContents& parent_;
   Scalar alpha_ = 1.0;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VerticesColorContents);
+  VerticesColorContents(const VerticesColorContents&) = delete;
+
+  VerticesColorContents& operator=(const VerticesColorContents&) = delete;
 };
 
 class VerticesUVContents final : public Contents {
@@ -98,7 +102,9 @@ class VerticesUVContents final : public Contents {
   const VerticesContents& parent_;
   Scalar alpha_ = 1.0;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VerticesUVContents);
+  VerticesUVContents(const VerticesUVContents&) = delete;
+
+  VerticesUVContents& operator=(const VerticesUVContents&) = delete;
 };
 
 }  // namespace impeller

@@ -32,7 +32,9 @@ class GoldenDigest {
   bool Write(WorkingDirectory* working_directory);
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(GoldenDigest);
+  GoldenDigest(const GoldenDigest&) = delete;
+
+  GoldenDigest& operator=(const GoldenDigest&) = delete;
   GoldenDigest();
   struct Entry {
     std::string test_name;

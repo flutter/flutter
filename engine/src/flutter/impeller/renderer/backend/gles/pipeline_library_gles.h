@@ -40,7 +40,9 @@ class PipelineLibraryGLES final : public PipelineLibrary {
   void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryGLES);
+  PipelineLibraryGLES(const PipelineLibraryGLES&) = delete;
+
+  PipelineLibraryGLES& operator=(const PipelineLibraryGLES&) = delete;
 };
 
 }  // namespace impeller

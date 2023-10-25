@@ -51,7 +51,9 @@ class PointFieldGeometry : public Geometry {
   Scalar radius_;
   bool round_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PointFieldGeometry);
+  PointFieldGeometry(const PointFieldGeometry&) = delete;
+
+  PointFieldGeometry& operator=(const PointFieldGeometry&) = delete;
 };
 
 }  // namespace impeller

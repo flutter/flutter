@@ -42,7 +42,9 @@ class AiksInspector {
   CaptureElement* selected_element_ = nullptr;
   std::optional<Picture> last_picture_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AiksInspector);
+  AiksInspector(const AiksInspector&) = delete;
+
+  AiksInspector& operator=(const AiksInspector&) = delete;
 };
 
 };  // namespace impeller

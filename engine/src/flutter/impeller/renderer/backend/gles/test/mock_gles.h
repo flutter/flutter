@@ -53,7 +53,9 @@ class MockGLES final {
   const ProcTableGLES proc_table_;
   std::vector<std::string> captured_calls_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(MockGLES);
+  MockGLES(const MockGLES&) = delete;
+
+  MockGLES& operator=(const MockGLES&) = delete;
 };
 
 }  // namespace testing
