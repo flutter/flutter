@@ -1390,7 +1390,7 @@ TEST_P(DisplayListTest, DrawVerticesSolidColorTrianglesWithoutIndices) {
 
   auto vertices = flutter::DlVertices::Make(
       flutter::DlVertexMode::kTriangles, 3, positions.data(),
-      /*texture_coorindates=*/nullptr, colors.data());
+      /*texture_coordinates=*/nullptr, colors.data());
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
@@ -1409,7 +1409,7 @@ TEST_P(DisplayListTest, DrawVerticesLinearGradientWithoutIndices) {
 
   auto vertices = flutter::DlVertices::Make(
       flutter::DlVertexMode::kTriangles, 3, positions.data(),
-      /*texture_coorindates=*/nullptr, /*colors=*/nullptr);
+      /*texture_coordinates=*/nullptr, /*colors=*/nullptr);
 
   std::vector<flutter::DlColor> colors = {flutter::DlColor::kBlue(),
                                           flutter::DlColor::kRed()};
@@ -1519,7 +1519,7 @@ TEST_P(DisplayListTest, DrawVerticesSolidColorTrianglesWithIndices) {
 
   auto vertices = flutter::DlVertices::Make(
       flutter::DlVertexMode::kTriangles, 6, positions.data(),
-      /*texture_coorindates=*/nullptr, /*colors=*/nullptr, 6, indices.data());
+      /*texture_coordinates=*/nullptr, /*colors=*/nullptr, 6, indices.data());
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
@@ -1540,7 +1540,7 @@ TEST_P(DisplayListTest, DrawVerticesPremultipliesColors) {
 
   auto vertices = flutter::DlVertices::Make(
       flutter::DlVertexMode::kTriangles, 6, positions.data(),
-      /*texture_coorindates=*/nullptr, colors.data(), 6, indices.data());
+      /*texture_coordinates=*/nullptr, colors.data(), 6, indices.data());
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
@@ -1668,7 +1668,7 @@ TEST_P(DisplayListTest, DrawVerticesBlendModes) {
 
     auto vertices = flutter::DlVertices::Make(
         flutter::DlVertexMode::kTriangles, 3, positions.data(),
-        /*texture_coorindates=*/nullptr, colors.data());
+        /*texture_coordinates=*/nullptr, colors.data());
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;

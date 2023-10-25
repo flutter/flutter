@@ -79,7 +79,7 @@ void AndroidExternalViewEmbedder::SubmitFrame(
 
   // Restore the clip context after exiting this method since it's changed
   // below.
-  DlAutoCanvasRestore save(background_canvas, /*doSave=*/true);
+  DlAutoCanvasRestore save(background_canvas, /*do_save=*/true);
 
   for (size_t i = 0; i < current_frame_view_count; i++) {
     int64_t view_id = composition_order_[i];
