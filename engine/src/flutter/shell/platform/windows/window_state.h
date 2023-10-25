@@ -16,15 +16,7 @@
 
 namespace flutter {
 struct FlutterWindowsEngine;
-struct FlutterWindowsView;
 }  // namespace flutter
-
-// Wrapper to distinguish the view controller ref from the view ref given out
-// in the C API.
-struct FlutterDesktopViewControllerState {
-  // The view that backs this state object.
-  std::unique_ptr<flutter::FlutterWindowsView> view;
-};
 
 // Wrapper to distinguish the plugin registrar ref from the engine ref given out
 // in the C API.

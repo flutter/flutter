@@ -31,14 +31,14 @@ using EnginePtr = std::unique_ptr<FlutterDesktopEngine, EngineDeleter>;
 // Deleter for FlutterViewControllerRef objects.
 struct ViewControllerDeleter {
   typedef FlutterDesktopViewControllerRef pointer;
-  void operator()(FlutterDesktopViewControllerRef engine) {
-    FlutterDesktopViewControllerDestroy(engine);
+  void operator()(FlutterDesktopViewControllerRef controller) {
+    FlutterDesktopViewControllerDestroy(controller);
   }
 };
 
 // Unique pointer wrapper for FlutterDesktopViewControllerRef.
 using ViewControllerPtr =
-    std::unique_ptr<FlutterDesktopViewControllerState, ViewControllerDeleter>;
+    std::unique_ptr<FlutterDesktopViewController, ViewControllerDeleter>;
 
 // Test configuration builder for WindowsTests.
 //
