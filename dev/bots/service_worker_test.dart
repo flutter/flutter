@@ -152,7 +152,7 @@ Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType 
         '--base-href',
         baseHref,
       ],
-      if(output != null) ...<String>[
+      if (output != null) ...<String>[
         '--output',
         output,
       ],
