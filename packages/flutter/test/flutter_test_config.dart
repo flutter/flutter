@@ -25,9 +25,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   WidgetController.hitTestWarningShouldBeFatal = true;
 
   LeakTracking.warnForUnsupportedPlatforms = false;
-  setLeakTrackingTestSettings(
-    LeakTrackingTestSettings(switches: const Switches(disableNotGCed: true))
-  );
+  LeakTesting.settings = LeakTesting.settings.withTrackedAll().withIgnored(allNotGCed: true);
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
