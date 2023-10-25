@@ -3927,6 +3927,7 @@ targets:
       task_name: flavors_test_ios
 
   - name: Mac_ios flutter_gallery_ios__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/137233
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
