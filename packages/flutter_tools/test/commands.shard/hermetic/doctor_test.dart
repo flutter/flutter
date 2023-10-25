@@ -975,7 +975,8 @@ void main() {
     testUsingContext('sending events can be skipped', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
       expect(fakeAnalytics.sentEvents, isEmpty);
-    });
+    }
+    ,overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
   });
 }
 
