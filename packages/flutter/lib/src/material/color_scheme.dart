@@ -242,6 +242,22 @@ class ColorScheme with Diagnosticable {
   ///
   /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
   /// from a single seed color based on the Material 3 color system.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.light]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff6200ee)).copyWith(
+  ///   primaryContainer: const Color(0xff6200ee),
+  ///   onPrimaryContainer: Colors.white,
+  ///   secondaryContainer: const Color(0xff03dac6),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xffb00020),
+  ///   onError: Colors.white,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.light({
     this.brightness = Brightness.light,
     this.primary = const Color(0xff6200ee),
@@ -304,6 +320,25 @@ class ColorScheme with Diagnosticable {
   /// from a single seed color based on the Material 3 color system.
   /// Override the `brightness` property of [ColorScheme.fromSeed] to create a
   /// dark color scheme.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.dark]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(
+  ///   seedColor: const Color(0xffbb86fc),
+  ///   brightness: Brightness.dark,
+  /// ).copyWith(
+  ///   primaryContainer: const Color(0xffbb86fc),
+  ///   onPrimaryContainer: Colors.black,
+  ///   secondaryContainer: const Color(0xff03dac6),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xffcf6679),
+  ///   onError: Colors.black,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.dark({
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffbb86fc),
@@ -364,6 +399,22 @@ class ColorScheme with Diagnosticable {
   ///
   /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
   /// from a single seed color based on the Material 3 color system.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastLight]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff0000ba)).copyWith(
+  ///   primaryContainer: const Color(0xff0000ba),
+  ///   onPrimaryContainer: Colors.white,
+  ///   secondaryContainer: const Color(0xff66fff9),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xff790000),
+  ///   onError: Colors.white,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.highContrastLight({
     this.brightness = Brightness.light,
     this.primary = const Color(0xff0000ba),
@@ -426,6 +477,25 @@ class ColorScheme with Diagnosticable {
   /// from a single seed color based on the Material 3 color system.
   /// Override the `brightness` property of [ColorScheme.fromSeed] to create a
   /// dark color scheme.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastDark]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(
+  ///   seedColor: const Color(0xffefb7ff),
+  ///   brightness: Brightness.dark,
+  /// ).copyWith(
+  ///   primaryContainer: const Color(0xffefb7ff),
+  ///   onPrimaryContainer: Colors.black,
+  ///   secondaryContainer: const Color(0xff66fff9),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xff9b374d),
+  ///   onError: Colors.white,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.highContrastDark({
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffefb7ff),
