@@ -228,4 +228,4 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-13", "cpu=x86"]
+        ["device_os=iOS-16","os=Mac-13", "cpu=arm64"]
