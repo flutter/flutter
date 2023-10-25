@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' as test_package;
@@ -120,7 +121,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// The argument [experimentalLeakTesting] is experimental and is not recommended
 /// for use outside of Flutter Framework.
-/// When [experimentalLeakTesting] is set, it is used to configure leak tracking.
+/// When [experimentalLeakTesting] is set, it is used for leak tracking.
 /// Otherwise [LeakTesting.settings] is used.
 /// You can adjust [LeakTesting.settings] in flutter_test_config.dart for your
 /// package or folders, or in `setUpAll` for a test file or group.
@@ -208,8 +209,45 @@ WidgetTesterCallback _maybeWrapWithLeakTracking(
   if (leakTesting.ignore) {
     return callback;
   }
+  if (!_isPlatformSupported) {
+    _mayBePrintPlatformWarning();
+    return callback;
+  }
+  tearDownAll(() async {
+    await _tearDownTestingWithLeakTracking();
+  });
+
+
 
   return callback;
+}
+
+bool _notSupportedWarningPrinted = false;
+bool get _isPlatformSupported => !kIsWeb;
+void _mayBePrintPlatformWarning() {
+  if (!LeakTracking.warnForUnsupportedPlatforms || _isPlatformSupported || _notSupportedWarningPrinted) {
+    return;
+  }
+  _notSupportedWarningPrinted = true;
+  debugPrint(
+    'Leak tracking is not supported on this platform.\n'
+    'To turn off this message, set `LeakTracking.warnForNotSupportedPlatforms` to false.',
+  );
+}
+
+void _dispatchFlutterEventToLeakTracker(ObjectEvent event) {
+  return LeakTracking.dispatchObjectEvent(event.toMap());
+}
+
+Future<void> _tearDownTestingWithLeakTracking() async {
+  MemoryAllocations.instance.removeListener(_dispatchFlutterEventToLeakTracker);
+
+  LeakTracking.declareNotDisposedObjectsAsLeaks();
+  await forceGC(fullGcCycles: defaultNumberOfGcCycles);
+  final Leaks leaks = await LeakTracking.collectLeaks();
+
+  LeakTracking.stop();
+  expect(leaks, isLeakFree);
 }
 
 /// An abstract base class for describing test environment variants.
