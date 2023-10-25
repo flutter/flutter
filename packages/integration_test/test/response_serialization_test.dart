@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:integration_test/common.dart';
 
 void main() {
