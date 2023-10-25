@@ -55,11 +55,22 @@ std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
     Sigma sigma_y,
     BlurStyle blur_style,
     Entity::TileMode tile_mode) {
-  auto x_blur = MakeDirectionalGaussianBlur(
-      input, sigma_x, Point(1, 0), BlurStyle::kNormal, tile_mode, false, {});
-  auto y_blur = MakeDirectionalGaussianBlur(FilterInput::Make(x_blur), sigma_y,
-                                            Point(0, 1), blur_style, tile_mode,
-                                            true, sigma_x);
+  std::shared_ptr<FilterContents> x_blur = MakeDirectionalGaussianBlur(
+      /*input=*/input,
+      /*sigma=*/sigma_x,
+      /*direction=*/Point(1, 0),
+      /*blur_style=*/BlurStyle::kNormal,
+      /*tile_mode=*/tile_mode,
+      /*is_second_pass=*/false,
+      /*secondary_sigma=*/{});
+  std::shared_ptr<FilterContents> y_blur = MakeDirectionalGaussianBlur(
+      /*input=*/FilterInput::Make(x_blur),
+      /*sigma=*/sigma_y,
+      /*direction=*/Point(0, 1),
+      /*blur_style=*/blur_style,
+      /*tile_mode=*/tile_mode,
+      /*is_second_pass=*/true,
+      /*secondary_sigma=*/sigma_x);
   return y_blur;
 }
 

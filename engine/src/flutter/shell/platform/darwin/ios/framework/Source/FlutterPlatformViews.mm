@@ -681,7 +681,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
 
   // Clipping the background canvas before drawing the picture recorders requires
   // saving and restoring the clip context.
-  DlAutoCanvasRestore save(background_canvas, /*doSave=*/true);
+  DlAutoCanvasRestore save(background_canvas, /*do_save=*/true);
 
   // Maps a platform view id to a vector of `FlutterPlatformViewLayer`.
   LayersMap platform_view_layers;
