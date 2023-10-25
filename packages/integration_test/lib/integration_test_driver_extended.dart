@@ -12,9 +12,7 @@ import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
 
-import 'src/common.dart';
-
-export 'src/common.dart';
+import 'common.dart';
 
 /// Flutter Driver test output directory.
 ///
