@@ -2289,7 +2289,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _currentBottomSheetKey.currentState!.setState(() {});
   }
 
-  PersistentBottomSheetController<T> _buildBottomSheet<T>(
+  PersistentBottomSheetController<void> _buildBottomSheet(
     WidgetBuilder builder, {
     required bool isPersistent,
     required AnimationController animationController,
@@ -2312,7 +2312,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       return true;
     }());
 
-    final Completer<T> completer = Completer<T>();
+    final Completer<void> completer = Completer<void>();
     final GlobalKey<_StandardBottomSheetState> bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
     late _StandardBottomSheet bottomSheet;
 
@@ -2407,7 +2407,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       ModalRoute.of(context)!.addLocalHistoryEntry(entry!);
     }
 
-    return PersistentBottomSheetController<T>._(
+    return PersistentBottomSheetController<void>._(
       bottomSheet,
       completer,
       entry != null
