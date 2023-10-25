@@ -47,7 +47,9 @@ class QueueVK {
   const QueueIndexVK index_;
   const vk::Queue queue_ IPLR_GUARDED_BY(queue_mutex_);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(QueueVK);
+  QueueVK(const QueueVK&) = delete;
+
+  QueueVK& operator=(const QueueVK&) = delete;
 };
 
 //------------------------------------------------------------------------------

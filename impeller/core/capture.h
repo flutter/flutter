@@ -188,7 +188,9 @@ class CapturePlaybackList {
   size_t cursor_ = 0;
   std::vector<std::shared_ptr<Type>> values_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CapturePlaybackList);
+  CapturePlaybackList(const CapturePlaybackList&) = delete;
+
+  CapturePlaybackList& operator=(const CapturePlaybackList&) = delete;
 };
 
 /// A document of capture data, containing a list of properties and a list
@@ -206,7 +208,9 @@ struct CaptureElement final : public CaptureCursorListElement<CaptureElement> {
  private:
   explicit CaptureElement(const std::string& label);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CaptureElement);
+  CaptureElement(const CaptureElement&) = delete;
+
+  CaptureElement& operator=(const CaptureElement&) = delete;
 };
 
 #ifdef IMPELLER_ENABLE_CAPTURE

@@ -35,7 +35,9 @@ class Skin final {
   std::vector<std::shared_ptr<Node>> joints_;
   std::vector<Matrix> inverse_bind_matrices_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Skin);
+  Skin(const Skin&) = delete;
+
+  Skin& operator=(const Skin&) = delete;
 };
 
 }  // namespace scene

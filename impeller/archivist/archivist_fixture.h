@@ -29,7 +29,9 @@ class ArchivistFixture : public ::testing::Test {
 
   void DeleteArchiveFile() const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ArchivistFixture);
+  ArchivistFixture(const ArchivistFixture&) = delete;
+
+  ArchivistFixture& operator=(const ArchivistFixture&) = delete;
 };
 
 }  // namespace testing

@@ -55,7 +55,9 @@ class DeviceBuffer : public Buffer,
                                 size_t offset) = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(DeviceBuffer);
+  DeviceBuffer(const DeviceBuffer&) = delete;
+
+  DeviceBuffer& operator=(const DeviceBuffer&) = delete;
 };
 
 }  // namespace impeller

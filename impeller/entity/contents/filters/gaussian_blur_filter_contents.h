@@ -51,7 +51,11 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
   Entity::TileMode tile_mode_ = Entity::TileMode::kDecal;
   bool is_second_pass_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DirectionalGaussianBlurFilterContents);
+  DirectionalGaussianBlurFilterContents(
+      const DirectionalGaussianBlurFilterContents&) = delete;
+
+  DirectionalGaussianBlurFilterContents& operator=(
+      const DirectionalGaussianBlurFilterContents&) = delete;
 };
 
 }  // namespace impeller

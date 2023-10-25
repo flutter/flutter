@@ -25,7 +25,10 @@ class SrgbToLinearFilterContents final : public ColorFilterContents {
       const Rect& coverage,
       const std::optional<Rect>& coverage_hint) const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SrgbToLinearFilterContents);
+  SrgbToLinearFilterContents(const SrgbToLinearFilterContents&) = delete;
+
+  SrgbToLinearFilterContents& operator=(const SrgbToLinearFilterContents&) =
+      delete;
 };
 
 }  // namespace impeller

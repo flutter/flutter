@@ -94,7 +94,9 @@ class TrackedObjectsVK {
   std::unique_ptr<GPUProbe> probe_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TrackedObjectsVK);
+  TrackedObjectsVK(const TrackedObjectsVK&) = delete;
+
+  TrackedObjectsVK& operator=(const TrackedObjectsVK&) = delete;
 };
 
 CommandEncoderFactoryVK::CommandEncoderFactoryVK(

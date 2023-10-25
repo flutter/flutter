@@ -24,7 +24,9 @@ class Image {
  private:
   const std::shared_ptr<Texture> texture_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Image);
+  Image(const Image&) = delete;
+
+  Image& operator=(const Image&) = delete;
 };
 
 }  // namespace impeller

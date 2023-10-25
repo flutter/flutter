@@ -115,7 +115,9 @@ class CapabilitiesVK final : public Capabilities,
 
   bool HasLayer(const std::string& layer) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CapabilitiesVK);
+  CapabilitiesVK(const CapabilitiesVK&) = delete;
+
+  CapabilitiesVK& operator=(const CapabilitiesVK&) = delete;
 };
 
 }  // namespace impeller

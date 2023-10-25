@@ -40,7 +40,9 @@ class Display {
  private:
   EGLDisplay display_ = EGL_NO_DISPLAY;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Display);
+  Display(const Display&) = delete;
+
+  Display& operator=(const Display&) = delete;
 };
 
 }  // namespace egl

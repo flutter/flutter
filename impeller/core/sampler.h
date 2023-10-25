@@ -23,7 +23,9 @@ class Sampler {
   explicit Sampler(SamplerDescriptor desc);
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(Sampler);
+  Sampler(const Sampler&) = delete;
+
+  Sampler& operator=(const Sampler&) = delete;
 };
 
 }  // namespace impeller

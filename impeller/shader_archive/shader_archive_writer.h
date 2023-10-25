@@ -37,7 +37,9 @@ class ShaderArchiveWriter {
 
   std::vector<ShaderDescription> shader_descriptions_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderArchiveWriter);
+  ShaderArchiveWriter(const ShaderArchiveWriter&) = delete;
+
+  ShaderArchiveWriter& operator=(const ShaderArchiveWriter&) = delete;
 };
 
 }  // namespace impeller

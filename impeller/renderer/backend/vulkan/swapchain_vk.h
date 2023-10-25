@@ -40,7 +40,9 @@ class SwapchainVK {
 
   explicit SwapchainVK(std::shared_ptr<SwapchainImplVK> impl);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SwapchainVK);
+  SwapchainVK(const SwapchainVK&) = delete;
+
+  SwapchainVK& operator=(const SwapchainVK&) = delete;
 };
 
 }  // namespace impeller

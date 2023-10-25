@@ -31,7 +31,9 @@ class GlyphAtlasContextSkia
  private:
   std::shared_ptr<SkBitmap> bitmap_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlasContextSkia);
+  GlyphAtlasContextSkia(const GlyphAtlasContextSkia&) = delete;
+
+  GlyphAtlasContextSkia& operator=(const GlyphAtlasContextSkia&) = delete;
 };
 
 }  // namespace impeller

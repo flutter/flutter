@@ -195,7 +195,9 @@ class Contents {
   std::optional<Rect> coverage_hint_;
   std::optional<Size> color_source_size_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Contents);
+  Contents(const Contents&) = delete;
+
+  Contents& operator=(const Contents&) = delete;
 };
 
 }  // namespace impeller

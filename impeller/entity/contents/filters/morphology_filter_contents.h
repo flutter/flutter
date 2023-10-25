@@ -43,7 +43,11 @@ class DirectionalMorphologyFilterContents final : public FilterContents {
   Vector2 direction_;
   MorphType morph_type_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DirectionalMorphologyFilterContents);
+  DirectionalMorphologyFilterContents(
+      const DirectionalMorphologyFilterContents&) = delete;
+
+  DirectionalMorphologyFilterContents& operator=(
+      const DirectionalMorphologyFilterContents&) = delete;
 };
 
 }  // namespace impeller

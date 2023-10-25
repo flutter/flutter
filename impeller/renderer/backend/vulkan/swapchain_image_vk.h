@@ -45,7 +45,9 @@ class SwapchainImageVK final : public TextureSourceVK {
   std::shared_ptr<Texture> msaa_tex_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SwapchainImageVK);
+  SwapchainImageVK(const SwapchainImageVK&) = delete;
+
+  SwapchainImageVK& operator=(const SwapchainImageVK&) = delete;
 };
 
 }  // namespace impeller

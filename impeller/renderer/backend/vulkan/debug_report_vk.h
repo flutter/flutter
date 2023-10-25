@@ -38,7 +38,9 @@ class DebugReportVK {
       const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
       void* user_data);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DebugReportVK);
+  DebugReportVK(const DebugReportVK&) = delete;
+
+  DebugReportVK& operator=(const DebugReportVK&) = delete;
 };
 
 }  // namespace impeller

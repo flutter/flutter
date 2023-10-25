@@ -34,7 +34,10 @@ class ColorMatrixFilterContents final : public ColorFilterContents {
 
   ColorMatrix matrix_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ColorMatrixFilterContents);
+  ColorMatrixFilterContents(const ColorMatrixFilterContents&) = delete;
+
+  ColorMatrixFilterContents& operator=(const ColorMatrixFilterContents&) =
+      delete;
 };
 
 }  // namespace impeller

@@ -34,7 +34,9 @@ class SamplerVK final : public Sampler, public BackendCast<SamplerVK, Sampler> {
   // |Sampler|
   bool IsValid() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SamplerVK);
+  SamplerVK(const SamplerVK&) = delete;
+
+  SamplerVK& operator=(const SamplerVK&) = delete;
 };
 
 }  // namespace impeller

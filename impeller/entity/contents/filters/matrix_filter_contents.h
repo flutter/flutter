@@ -45,7 +45,9 @@ class MatrixFilterContents final : public FilterContents {
   SamplerDescriptor sampler_descriptor_ = {};
   Entity::RenderingMode rendering_mode_ = Entity::RenderingMode::kDirect;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(MatrixFilterContents);
+  MatrixFilterContents(const MatrixFilterContents&) = delete;
+
+  MatrixFilterContents& operator=(const MatrixFilterContents&) = delete;
 };
 
 }  // namespace impeller

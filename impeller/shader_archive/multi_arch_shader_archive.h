@@ -38,7 +38,9 @@ class MultiArchShaderArchive {
       backend_mappings_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(MultiArchShaderArchive);
+  MultiArchShaderArchive(const MultiArchShaderArchive&) = delete;
+
+  MultiArchShaderArchive& operator=(const MultiArchShaderArchive&) = delete;
 };
 
 }  // namespace impeller

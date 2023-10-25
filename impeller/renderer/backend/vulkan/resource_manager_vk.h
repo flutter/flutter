@@ -96,7 +96,9 @@ class ResourceManagerVK final
   /// collected when the resource manager is collected.
   void Terminate();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ResourceManagerVK);
+  ResourceManagerVK(const ResourceManagerVK&) = delete;
+
+  ResourceManagerVK& operator=(const ResourceManagerVK&) = delete;
 };
 
 //------------------------------------------------------------------------------
@@ -127,7 +129,9 @@ class ResourceVKT : public ResourceVK {
 
   ResourceType resource_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ResourceVKT);
+  ResourceVKT(const ResourceVKT&) = delete;
+
+  ResourceVKT& operator=(const ResourceVKT&) = delete;
 };
 
 //------------------------------------------------------------------------------
@@ -198,7 +202,9 @@ class UniqueResourceVKT final {
   std::weak_ptr<ResourceManagerVK> resource_manager_;
   std::unique_ptr<ResourceVKT<ResourceType>> resource_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(UniqueResourceVKT);
+  UniqueResourceVKT(const UniqueResourceVKT&) = delete;
+
+  UniqueResourceVKT& operator=(const UniqueResourceVKT&) = delete;
 };
 
 }  // namespace impeller

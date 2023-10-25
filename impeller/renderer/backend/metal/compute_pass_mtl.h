@@ -42,7 +42,9 @@ class ComputePassMTL final : public ComputePass {
                       const ISize& grid_size,
                       const ISize& thread_group_size) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputePassMTL);
+  ComputePassMTL(const ComputePassMTL&) = delete;
+
+  ComputePassMTL& operator=(const ComputePassMTL&) = delete;
 };
 
 }  // namespace impeller

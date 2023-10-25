@@ -76,7 +76,9 @@ class TiledTextureContents final : public ColorSourceContents {
   Entity::TileMode y_tile_mode_ = Entity::TileMode::kClamp;
   ColorFilterProc color_filter_ = nullptr;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TiledTextureContents);
+  TiledTextureContents(const TiledTextureContents&) = delete;
+
+  TiledTextureContents& operator=(const TiledTextureContents&) = delete;
 };
 
 }  // namespace impeller

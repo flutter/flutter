@@ -38,7 +38,9 @@ class PlaygroundImpl {
   explicit PlaygroundImpl(PlaygroundSwitches switches);
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(PlaygroundImpl);
+  PlaygroundImpl(const PlaygroundImpl&) = delete;
+
+  PlaygroundImpl& operator=(const PlaygroundImpl&) = delete;
 };
 
 }  // namespace impeller

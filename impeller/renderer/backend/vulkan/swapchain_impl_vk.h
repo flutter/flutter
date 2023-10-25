@@ -82,7 +82,9 @@ class SwapchainImplVK final
 
   void WaitIdle() const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SwapchainImplVK);
+  SwapchainImplVK(const SwapchainImplVK&) = delete;
+
+  SwapchainImplVK& operator=(const SwapchainImplVK&) = delete;
 };
 
 }  // namespace impeller

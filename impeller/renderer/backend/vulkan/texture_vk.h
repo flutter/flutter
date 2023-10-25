@@ -59,7 +59,9 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   // |Texture|
   ISize GetSize() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TextureVK);
+  TextureVK(const TextureVK&) = delete;
+
+  TextureVK& operator=(const TextureVK&) = delete;
 };
 
 }  // namespace impeller

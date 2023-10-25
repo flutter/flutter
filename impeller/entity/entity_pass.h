@@ -299,7 +299,9 @@ class EntityPass {
   std::shared_ptr<EntityPassDelegate> delegate_ =
       EntityPassDelegate::MakeDefault();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
+  EntityPass(const EntityPass&) = delete;
+
+  EntityPass& operator=(const EntityPass&) = delete;
 };
 
 }  // namespace impeller

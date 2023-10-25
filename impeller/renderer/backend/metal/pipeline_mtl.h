@@ -38,7 +38,9 @@ class PipelineMTL final
   // |Pipeline|
   bool IsValid() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PipelineMTL);
+  PipelineMTL(const PipelineMTL&) = delete;
+
+  PipelineMTL& operator=(const PipelineMTL&) = delete;
 };
 
 }  // namespace impeller

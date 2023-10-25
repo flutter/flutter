@@ -90,7 +90,9 @@ class ContextGLES final : public Context,
   // |Context|
   void Shutdown() override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ContextGLES);
+  ContextGLES(const ContextGLES&) = delete;
+
+  ContextGLES& operator=(const ContextGLES&) = delete;
 };
 
 }  // namespace impeller

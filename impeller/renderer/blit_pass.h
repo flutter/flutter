@@ -157,7 +157,9 @@ class BlitPass {
                                        std::string label) = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(BlitPass);
+  BlitPass(const BlitPass&) = delete;
+
+  BlitPass& operator=(const BlitPass&) = delete;
 };
 
 }  // namespace impeller

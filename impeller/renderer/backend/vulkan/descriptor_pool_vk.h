@@ -37,7 +37,9 @@ class DescriptorPoolVK {
   std::weak_ptr<const DeviceHolder> device_holder_;
   vk::UniqueDescriptorPool pool_ = {};
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DescriptorPoolVK);
+  DescriptorPoolVK(const DescriptorPoolVK&) = delete;
+
+  DescriptorPoolVK& operator=(const DescriptorPoolVK&) = delete;
 };
 
 }  // namespace impeller

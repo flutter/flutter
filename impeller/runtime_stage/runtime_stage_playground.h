@@ -19,7 +19,9 @@ class RuntimeStagePlayground : public PlaygroundTest {
   bool RegisterStage(const RuntimeStage& stage);
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(RuntimeStagePlayground);
+  RuntimeStagePlayground(const RuntimeStagePlayground&) = delete;
+
+  RuntimeStagePlayground& operator=(const RuntimeStagePlayground&) = delete;
 };
 
 }  // namespace impeller

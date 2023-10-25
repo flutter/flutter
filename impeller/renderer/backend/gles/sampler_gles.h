@@ -30,7 +30,9 @@ class SamplerGLES final : public Sampler,
   // |Sampler|
   bool IsValid() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SamplerGLES);
+  SamplerGLES(const SamplerGLES&) = delete;
+
+  SamplerGLES& operator=(const SamplerGLES&) = delete;
 };
 
 }  // namespace impeller

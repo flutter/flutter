@@ -28,7 +28,10 @@ class MultiArchShaderArchiveWriter {
   std::map<ArchiveRenderingBackend, std::shared_ptr<const fml::Mapping>>
       archives_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(MultiArchShaderArchiveWriter);
+  MultiArchShaderArchiveWriter(const MultiArchShaderArchiveWriter&) = delete;
+
+  MultiArchShaderArchiveWriter& operator=(const MultiArchShaderArchiveWriter&) =
+      delete;
 };
 
 }  // namespace impeller

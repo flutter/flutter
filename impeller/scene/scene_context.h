@@ -127,7 +127,9 @@ class SceneContext {
   // Available for the lifetime of the scene context
   std::shared_ptr<Texture> placeholder_texture_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SceneContext);
+  SceneContext(const SceneContext&) = delete;
+
+  SceneContext& operator=(const SceneContext&) = delete;
 };
 
 }  // namespace scene

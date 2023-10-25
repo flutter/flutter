@@ -37,7 +37,9 @@ class FramebufferBlendContents final : public ColorSourceContents {
   BlendMode blend_mode_;
   std::shared_ptr<Contents> child_contents_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FramebufferBlendContents);
+  FramebufferBlendContents(const FramebufferBlendContents&) = delete;
+
+  FramebufferBlendContents& operator=(const FramebufferBlendContents&) = delete;
 };
 
 }  // namespace impeller

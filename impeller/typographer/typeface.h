@@ -25,7 +25,9 @@ class Typeface : public Comparable<Typeface> {
   virtual bool IsValid() const = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(Typeface);
+  Typeface(const Typeface&) = delete;
+
+  Typeface& operator=(const Typeface&) = delete;
 };
 
 }  // namespace impeller

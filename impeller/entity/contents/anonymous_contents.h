@@ -34,7 +34,9 @@ class AnonymousContents final : public Contents {
 
   AnonymousContents(RenderProc render_proc, CoverageProc coverage_proc);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AnonymousContents);
+  AnonymousContents(const AnonymousContents&) = delete;
+
+  AnonymousContents& operator=(const AnonymousContents&) = delete;
 };
 
 }  // namespace impeller

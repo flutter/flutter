@@ -65,7 +65,9 @@ class BufferBindingsGLES {
                     const Bindings& bindings,
                     ShaderStage stage) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(BufferBindingsGLES);
+  BufferBindingsGLES(const BufferBindingsGLES&) = delete;
+
+  BufferBindingsGLES& operator=(const BufferBindingsGLES&) = delete;
 };
 
 }  // namespace impeller
