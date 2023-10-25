@@ -29,12 +29,9 @@ Available examples include:
   channel](platform_channel) but the iOS version is in Swift and there is no
   Android version.
 
-## Notes
-
-Note on Gradle wrapper files in `.gitignore`:
-
-Gradle wrapper files should normally be checked into source control. The example
-projects don't do that to avoid having several copies of the wrapper binary in
-the Flutter repo. Instead, the Gradle wrapper is injected by Flutter tooling,
-and the wrapper files are .gitignore'd to avoid making the Flutter repository
-dirty as a side effect of running the examples.
+> Notes
+>>Note on Gradle wrapper files in `.gitignore`:
+>>> Gradle wrapper files should normally be checked into source control.
+>>> The exampleprojects don't do that to avoid having several copies of the wrapper binary in the Flutter repo.
+>>> Instead, the Gradle wrapper is injected by Flutter tooling,
+>>> and the wrapper files are .gitignore'd to avoid making the Flutter repository dirty as a side effect of running the examples.
