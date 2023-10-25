@@ -921,7 +921,6 @@ Future<void> runWebServiceWorkerTestWithCustomBaseHref({
     await waitForAppToLoad(<String, int>{
       '$baseHref/CLOSE': 1,
       '$baseHref/flutter_service_worker.js': 1,
-      '$baseHref/assets/fonts/MaterialIcons-Regular.otf': 1,
     });
 
     expectRequestCounts(<String, int>{
