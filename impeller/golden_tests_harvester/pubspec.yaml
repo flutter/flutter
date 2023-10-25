@@ -27,7 +27,7 @@ dependency_overrides:
   crypto:
     path: ../../../third_party/dart/third_party/pkg/crypto
   file:
-    path: ../../../third_party/pkg/file/packages/file
+    path: ../../../third_party/dart/third_party/pkg/file/packages/file
   meta:
     path: ../../../third_party/dart/pkg/meta
   path:

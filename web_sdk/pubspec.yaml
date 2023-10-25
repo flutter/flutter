@@ -31,7 +31,7 @@ dependency_overrides: # Must include all transitive dependencies from the "any" 
   dart_internal:
     path: ../../third_party/dart/pkg/dart_internal
   file:
-    path: ../../third_party/pkg/file/packages/file
+    path: ../../third_party/dart/third_party/pkg/file/packages/file
   glob:
     path: ../../third_party/dart/third_party/pkg/glob
   meta:
