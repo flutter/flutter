@@ -5283,7 +5283,6 @@ targets:
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
