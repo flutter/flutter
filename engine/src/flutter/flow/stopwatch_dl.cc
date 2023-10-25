@@ -50,10 +50,10 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
       auto const bar_height = height * sample_unit_height;
       auto const bar_left = x + width * sample_unit_width * i;
 
-      painter.DrawRect(SkRect::MakeLTRB(/*left=*/bar_left,
-                                        /*top=*/y + bar_height,
-                                        /*right=*/bar_left + bar_width,
-                                        /*bottom=*/bottom),
+      painter.DrawRect(SkRect::MakeLTRB(/*l=*/bar_left,
+                                        /*t=*/y + bar_height,
+                                        /*r=*/bar_left + bar_width,
+                                        /*b=*/bottom),
                        DlColor(0xAA0000FF));
     }
   }
@@ -75,10 +75,10 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
                                 max_unit_interval);
 
         // Draw a skinny rectangle (i.e. a line).
-        painter.DrawRect(SkRect::MakeLTRB(/*left=*/x,
-                                          /*top=*/y + frame_height,
-                                          /*right=*/width,
-                                          /*bottom=*/y + frame_height + 1),
+        painter.DrawRect(SkRect::MakeLTRB(/*l=*/x,
+                                          /*t=*/y + frame_height,
+                                          /*r=*/width,
+                                          /*b=*/y + frame_height + 1),
                          DlColor(0xCC000000));
       }
     }
