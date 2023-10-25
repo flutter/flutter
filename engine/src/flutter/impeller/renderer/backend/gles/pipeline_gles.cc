@@ -35,7 +35,7 @@ const HandleGLES& PipelineGLES::GetProgramHandle() const {
   return handle_;
 }
 
-const BufferBindingsGLES* PipelineGLES::GetBufferBindings() const {
+BufferBindingsGLES* PipelineGLES::GetBufferBindings() const {
   return buffer_bindings_.get();
 }
 
