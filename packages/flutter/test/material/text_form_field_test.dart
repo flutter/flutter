@@ -1481,27 +1481,64 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Error color for cursor while validating', (WidgetTester tester) async {
-    const Color errorColor = Color(0xff123456);
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        colorScheme: const ColorScheme.light(error: errorColor),
-      ),
-      home: Material(
-        child: Center(
-          child: TextFormField(
-            enabled: true,
-            autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
-              return 'Please enter value';
-            },
+    const Color themeErrorColor = Color(0xff111111);
+    const Color errorStyleColor = Color(0xff777777);
+    const Color cursorErrorColor = Color(0xffbbbbbb);
+
+    Widget buildWidget({Color? errorStyleColor, Color? cursorErrorColor}) {
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: const ColorScheme.light(error: themeErrorColor),
+        ),
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              enabled: true,
+              autovalidateMode: AutovalidateMode.always,
+              decoration: InputDecoration(
+                errorStyle: TextStyle(
+                  color: errorStyleColor,
+                ),
+              ),
+              cursorErrorColor: cursorErrorColor,
+              validator: (String? value) {
+                return 'Please enter value';
+              },
+            ),
           ),
         ),
+      );
+    }
+
+    Future<void> runTest(Widget widget, {required Color expectedColor}) async {
+      await tester.pumpWidget(widget);
+      await tester.enterText(find.byType(TextField), 'a');
+      final EditableText textField = tester.widget(
+        find.byType(EditableText).first,
+      );
+      await tester.pump();
+      expect(textField.cursorColor, expectedColor);
+    }
+
+    await runTest(
+      buildWidget(),
+      expectedColor: themeErrorColor,
+    );
+    await runTest(
+      buildWidget(errorStyleColor: errorStyleColor),
+      expectedColor: errorStyleColor,
+    );
+    await runTest(
+      buildWidget(cursorErrorColor: cursorErrorColor),
+      expectedColor: cursorErrorColor,
+    );
+    await runTest(
+      buildWidget(
+        errorStyleColor: errorStyleColor,
+        cursorErrorColor: cursorErrorColor,
       ),
-    ));
-    await tester.enterText(find.byType(TextField), 'a');
-    final EditableText textField = tester.widget(find.byType(EditableText).first);
-    await tester.pump();
-    expect(textField.cursorColor, errorColor);
+      expectedColor: cursorErrorColor,
+    );
   });
 
   testWidgetsWithLeakTracking('TextFormField onChanged is called when the form is reset', (WidgetTester tester) async {
