@@ -4575,7 +4575,6 @@ targets:
   - name: Windows build_tests_3_6
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
