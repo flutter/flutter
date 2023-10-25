@@ -898,6 +898,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _showHideCursor();
       _showCursor.addListener(_showHideCursor);
     }
+    _internalShowCursor?.dispose();
+    _internalShowCursor = null;
   }
 
   void _showHideCursor() {
