@@ -178,7 +178,7 @@ void main() {
 
     expect(find.byType(CupertinoPicker), paints..rrect(color: const Color.fromARGB(61,118, 118, 128)));
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
-  },leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed());
+  });
 
   testWidgetsWithLeakTracking('picker selectionOverlay', (WidgetTester tester) async {
     await tester.pumpWidget(
