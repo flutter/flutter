@@ -438,7 +438,7 @@ const double _kDefaultFontSize = 14.0;
 /// By default, fonts differ depending on the platform.
 ///
 ///  * The default font-family for `Android`,`Fuchsia` and `Linux` is `Roboto`.
-///  * The default font-family for `iOS` is `.SF UI Display`/`.SF UI Text`.
+///  * The default font-family for `iOS` is `SF Pro Display`/`SF Pro Text`.
 ///  * The default font-family for `MacOS` is `.AppleSystemUIFont`.
 ///  * The default font-family for `Windows` is `Segoe UI`.
 //
@@ -566,6 +566,12 @@ class TextStyle with Diagnosticable {
   /// first value in [fontFamilyFallback] acts as the preferred/first font
   /// family. When neither is provided, then the default platform font will
   /// be used.
+  ///
+  /// When running on Apple devices, the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used as proxies for the Apple system fonts.
+  /// They currently redirect to the equivilant of SF Pro Text and SF Pro Display
+  /// respectively. 'CupertinoSystemText' is designed for fonts below 20 point
+  /// size, and 'CupertinoSystemDisplay' is recommended for sizes 20 and above.
   final String? fontFamily;
 
   /// The ordered list of font families to fall back on when a glyph cannot be
