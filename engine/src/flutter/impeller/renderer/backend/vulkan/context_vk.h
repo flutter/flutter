@@ -204,7 +204,9 @@ class ContextVK final : public Context,
   std::unique_ptr<CommandEncoderFactoryVK> CreateGraphicsCommandEncoderFactory()
       const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ContextVK);
+  ContextVK(const ContextVK&) = delete;
+
+  ContextVK& operator=(const ContextVK&) = delete;
 };
 
 }  // namespace impeller

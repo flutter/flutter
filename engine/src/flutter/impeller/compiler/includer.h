@@ -52,7 +52,9 @@ class Includer final : public shaderc::CompileOptions::IncluderInterface {
   std::unique_ptr<fml::FileMapping> FindFirstMapping(
       const char* requested_source);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Includer);
+  Includer(const Includer&) = delete;
+
+  Includer& operator=(const Includer&) = delete;
 };
 
 }  // namespace compiler

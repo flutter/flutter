@@ -39,7 +39,9 @@ class LazyGlyphAtlas {
   mutable std::unordered_map<GlyphAtlas::Type, std::shared_ptr<GlyphAtlas>>
       atlas_map_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(LazyGlyphAtlas);
+  LazyGlyphAtlas(const LazyGlyphAtlas&) = delete;
+
+  LazyGlyphAtlas& operator=(const LazyGlyphAtlas&) = delete;
 };
 
 }  // namespace impeller

@@ -35,7 +35,9 @@ class AiksPlayground : public PlaygroundTest {
   std::shared_ptr<TypographerContext> typographer_context_;
   AiksInspector inspector_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AiksPlayground);
+  AiksPlayground(const AiksPlayground&) = delete;
+
+  AiksPlayground& operator=(const AiksPlayground&) = delete;
 };
 
 }  // namespace impeller

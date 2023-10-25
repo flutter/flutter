@@ -70,7 +70,9 @@ class MockDevice final {
   }
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(MockDevice);
+  MockDevice(const MockDevice&) = delete;
+
+  MockDevice& operator=(const MockDevice&) = delete;
 
   Mutex called_functions_mutex_;
   std::shared_ptr<std::vector<std::string>> called_functions_

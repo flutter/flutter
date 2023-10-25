@@ -36,7 +36,9 @@ class SurfaceGLES final : public Surface {
   // |Surface|
   bool Present() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SurfaceGLES);
+  SurfaceGLES(const SurfaceGLES&) = delete;
+
+  SurfaceGLES& operator=(const SurfaceGLES&) = delete;
 };
 
 }  // namespace impeller

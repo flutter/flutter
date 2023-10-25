@@ -42,7 +42,9 @@ class SceneEncoder {
 
   friend Scene;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SceneEncoder);
+  SceneEncoder(const SceneEncoder&) = delete;
+
+  SceneEncoder& operator=(const SceneEncoder&) = delete;
 };
 
 }  // namespace scene

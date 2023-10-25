@@ -39,7 +39,9 @@ class ShaderLibrary : public std::enable_shared_from_this<ShaderLibrary> {
   ShaderLibrary();
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibrary);
+  ShaderLibrary(const ShaderLibrary&) = delete;
+
+  ShaderLibrary& operator=(const ShaderLibrary&) = delete;
 };
 
 }  // namespace impeller

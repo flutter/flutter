@@ -47,7 +47,9 @@ class ComputePipelineVK final
   // |Pipeline|
   bool IsValid() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputePipelineVK);
+  ComputePipelineVK(const ComputePipelineVK&) = delete;
+
+  ComputePipelineVK& operator=(const ComputePipelineVK&) = delete;
 };
 
 }  // namespace impeller

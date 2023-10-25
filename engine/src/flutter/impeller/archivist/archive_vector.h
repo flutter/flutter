@@ -30,7 +30,9 @@ class ArchiveVector : public Archivable {
 
   ArchiveVector(std::vector<int64_t> keys);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ArchiveVector);
+  ArchiveVector(const ArchiveVector&) = delete;
+
+  ArchiveVector& operator=(const ArchiveVector&) = delete;
 };
 
 }  // namespace impeller

@@ -33,7 +33,9 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   std::unique_ptr<Surface> AcquireSurfaceFrame(
       std::shared_ptr<Context> context) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PlaygroundImplGLES);
+  PlaygroundImplGLES(const PlaygroundImplGLES&) = delete;
+
+  PlaygroundImplGLES& operator=(const PlaygroundImplGLES&) = delete;
 };
 
 }  // namespace impeller

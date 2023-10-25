@@ -58,7 +58,9 @@ class ShaderLibraryMTL final : public ShaderLibrary {
 
   void RegisterLibrary(id<MTLLibrary> library);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryMTL);
+  ShaderLibraryMTL(const ShaderLibraryMTL&) = delete;
+
+  ShaderLibraryMTL& operator=(const ShaderLibraryMTL&) = delete;
 };
 
 }  // namespace impeller

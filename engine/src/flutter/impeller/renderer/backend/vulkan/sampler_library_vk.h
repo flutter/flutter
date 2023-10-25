@@ -33,7 +33,9 @@ class SamplerLibraryVK final
   std::shared_ptr<const Sampler> GetSampler(
       SamplerDescriptor descriptor) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SamplerLibraryVK);
+  SamplerLibraryVK(const SamplerLibraryVK&) = delete;
+
+  SamplerLibraryVK& operator=(const SamplerLibraryVK&) = delete;
 };
 
 }  // namespace impeller

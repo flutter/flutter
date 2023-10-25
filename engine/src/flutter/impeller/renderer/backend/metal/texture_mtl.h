@@ -56,7 +56,9 @@ class TextureMTL final : public Texture,
   // |Texture|
   ISize GetSize() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TextureMTL);
+  TextureMTL(const TextureMTL&) = delete;
+
+  TextureMTL& operator=(const TextureMTL&) = delete;
 };
 
 }  // namespace impeller

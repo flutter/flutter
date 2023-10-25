@@ -70,7 +70,9 @@ class Animation final {
   std::vector<Channel> channels_;
   SecondsF end_time_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Animation);
+  Animation(const Animation&) = delete;
+
+  Animation& operator=(const Animation&) = delete;
 };
 
 }  // namespace scene

@@ -31,7 +31,9 @@ class AutoLogger {
  private:
   std::stringstream& logger_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AutoLogger);
+  AutoLogger(const AutoLogger&) = delete;
+
+  AutoLogger& operator=(const AutoLogger&) = delete;
 };
 
 #define COMPILER_ERROR(stream) \

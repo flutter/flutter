@@ -57,7 +57,9 @@ class CommandPoolVK final {
   void Destroy();
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(CommandPoolVK);
+  CommandPoolVK(const CommandPoolVK&) = delete;
+
+  CommandPoolVK& operator=(const CommandPoolVK&) = delete;
 
   Mutex pool_mutex_;
   vk::UniqueCommandPool pool_ IPLR_GUARDED_BY(pool_mutex_);
@@ -138,7 +140,9 @@ class CommandPoolRecyclerVK final
   /// @returns    Returns a |std::nullopt| if a pool was not available.
   std::optional<vk::UniqueCommandPool> Reuse();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CommandPoolRecyclerVK);
+  CommandPoolRecyclerVK(const CommandPoolRecyclerVK&) = delete;
+
+  CommandPoolRecyclerVK& operator=(const CommandPoolRecyclerVK&) = delete;
 };
 
 }  // namespace impeller

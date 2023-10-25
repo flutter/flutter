@@ -46,7 +46,9 @@ class ShaderLibraryGLES final : public ShaderLibrary {
   // |ShaderLibrary|
   void UnregisterFunction(std::string name, ShaderStage stage) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibraryGLES);
+  ShaderLibraryGLES(const ShaderLibraryGLES&) = delete;
+
+  ShaderLibraryGLES& operator=(const ShaderLibraryGLES&) = delete;
 };
 
 }  // namespace impeller

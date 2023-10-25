@@ -40,7 +40,9 @@ class Mesh final {
  private:
   std::vector<Primitive> primitives_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Mesh);
+  Mesh(const Mesh&) = delete;
+
+  Mesh& operator=(const Mesh&) = delete;
 };
 
 }  // namespace scene

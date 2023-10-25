@@ -81,7 +81,9 @@ class SurfaceMTL final : public Surface {
              bool requires_blit,
              std::optional<IRect> clip_rect);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SurfaceMTL);
+  SurfaceMTL(const SurfaceMTL&) = delete;
+
+  SurfaceMTL& operator=(const SurfaceMTL&) = delete;
 };
 
 }  // namespace impeller

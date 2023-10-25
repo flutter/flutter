@@ -32,7 +32,9 @@ class SharedObjectVKT : public SharedObjectVK {
  private:
   UniqueResource resource_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SharedObjectVKT);
+  SharedObjectVKT(const SharedObjectVKT&) = delete;
+
+  SharedObjectVKT& operator=(const SharedObjectVKT&) = delete;
 };
 
 template <class T>

@@ -58,7 +58,9 @@ class DlImageImpeller final : public flutter::DlImage {
   explicit DlImageImpeller(std::shared_ptr<Texture> texture,
                            OwningContext owning_context = OwningContext::kIO);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DlImageImpeller);
+  DlImageImpeller(const DlImageImpeller&) = delete;
+
+  DlImageImpeller& operator=(const DlImageImpeller&) = delete;
 };
 
 }  // namespace impeller

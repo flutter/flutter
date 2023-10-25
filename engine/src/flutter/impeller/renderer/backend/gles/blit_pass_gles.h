@@ -66,7 +66,9 @@ class BlitPassGLES final : public BlitPass,
   bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                std::string label) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(BlitPassGLES);
+  BlitPassGLES(const BlitPassGLES&) = delete;
+
+  BlitPassGLES& operator=(const BlitPassGLES&) = delete;
 };
 
 }  // namespace impeller

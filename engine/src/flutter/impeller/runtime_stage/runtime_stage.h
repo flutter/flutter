@@ -50,7 +50,9 @@ class RuntimeStage {
   bool is_valid_ = false;
   bool is_dirty_ = true;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RuntimeStage);
+  RuntimeStage(const RuntimeStage&) = delete;
+
+  RuntimeStage& operator=(const RuntimeStage&) = delete;
 };
 
 }  // namespace impeller

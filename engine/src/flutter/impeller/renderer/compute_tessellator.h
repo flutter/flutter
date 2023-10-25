@@ -78,7 +78,9 @@ class ComputeTessellator {
   Scalar cubic_accuracy_ = kDefaultCurveTolerance;
   Scalar quad_tolerance_ = .1f;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputeTessellator);
+  ComputeTessellator(const ComputeTessellator&) = delete;
+
+  ComputeTessellator& operator=(const ComputeTessellator&) = delete;
 };
 
 }  // namespace impeller

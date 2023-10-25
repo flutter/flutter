@@ -53,7 +53,9 @@ class GlyphAtlasContextSTB
  private:
   std::shared_ptr<BitmapSTB> bitmap_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlasContextSTB);
+  GlyphAtlasContextSTB(const GlyphAtlasContextSTB&) = delete;
+
+  GlyphAtlasContextSTB& operator=(const GlyphAtlasContextSTB&) = delete;
 };
 
 }  // namespace impeller

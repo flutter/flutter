@@ -38,7 +38,9 @@ class CoverGeometry : public Geometry {
                                      const Entity& entity,
                                      RenderPass& pass) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CoverGeometry);
+  CoverGeometry(const CoverGeometry&) = delete;
+
+  CoverGeometry& operator=(const CoverGeometry&) = delete;
 };
 
 }  // namespace impeller

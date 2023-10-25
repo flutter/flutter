@@ -34,7 +34,9 @@ class ShaderFunctionVK final
                    ShaderStage stage,
                    vk::UniqueShaderModule module);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ShaderFunctionVK);
+  ShaderFunctionVK(const ShaderFunctionVK&) = delete;
+
+  ShaderFunctionVK& operator=(const ShaderFunctionVK&) = delete;
 };
 
 }  // namespace impeller

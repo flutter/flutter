@@ -265,7 +265,9 @@ class ReactorGLES {
 
   void SetupDebugGroups();
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ReactorGLES);
+  ReactorGLES(const ReactorGLES&) = delete;
+
+  ReactorGLES& operator=(const ReactorGLES&) = delete;
 };
 
 }  // namespace impeller

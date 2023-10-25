@@ -772,7 +772,9 @@ class ContentContext {
                        ContentContextOptions::Equal>
         pipelines_;
 
-    FML_DISALLOW_COPY_AND_ASSIGN(Variants);
+    Variants(const Variants&) = delete;
+
+    Variants& operator=(const Variants&) = delete;
   };
 
   // These are mutable because while the prototypes are created eagerly, any
@@ -920,7 +922,9 @@ class ContentContext {
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   bool wireframe_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ContentContext);
+  ContentContext(const ContentContext&) = delete;
+
+  ContentContext& operator=(const ContentContext&) = delete;
 };
 
 }  // namespace impeller

@@ -39,7 +39,9 @@ class RenderPassGLES final
   // |RenderPass|
   bool OnEncodeCommands(const Context& context) const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RenderPassGLES);
+  RenderPassGLES(const RenderPassGLES&) = delete;
+
+  RenderPassGLES& operator=(const RenderPassGLES&) = delete;
 };
 
 }  // namespace impeller

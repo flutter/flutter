@@ -51,7 +51,9 @@ class DeviceBufferMTL final : public DeviceBuffer,
   // |DeviceBuffer|
   bool SetLabel(const std::string& label, Range range) override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DeviceBufferMTL);
+  DeviceBufferMTL(const DeviceBufferMTL&) = delete;
+
+  DeviceBufferMTL& operator=(const DeviceBufferMTL&) = delete;
 };
 
 }  // namespace impeller

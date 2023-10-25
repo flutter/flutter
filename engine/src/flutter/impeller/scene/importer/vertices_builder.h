@@ -91,7 +91,9 @@ class VerticesBuilder {
                   VerticesBuilder::AttributeProperties>
       kAttributeTypes;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VerticesBuilder);
+  VerticesBuilder(const VerticesBuilder&) = delete;
+
+  VerticesBuilder& operator=(const VerticesBuilder&) = delete;
 };
 
 //------------------------------------------------------------------------------
@@ -125,7 +127,9 @@ class UnskinnedVerticesBuilder final : public VerticesBuilder {
  private:
   std::vector<Vertex> vertices_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(UnskinnedVerticesBuilder);
+  UnskinnedVerticesBuilder(const UnskinnedVerticesBuilder&) = delete;
+
+  UnskinnedVerticesBuilder& operator=(const UnskinnedVerticesBuilder&) = delete;
 };
 
 //------------------------------------------------------------------------------
@@ -157,7 +161,9 @@ class SkinnedVerticesBuilder final : public VerticesBuilder {
  private:
   std::vector<Vertex> vertices_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SkinnedVerticesBuilder);
+  SkinnedVerticesBuilder(const SkinnedVerticesBuilder&) = delete;
+
+  SkinnedVerticesBuilder& operator=(const SkinnedVerticesBuilder&) = delete;
 };
 
 }  // namespace importer

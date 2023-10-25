@@ -42,7 +42,10 @@ class DefaultEntityPassDelegate final : public EntityPassDelegate {
   }
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(DefaultEntityPassDelegate);
+  DefaultEntityPassDelegate(const DefaultEntityPassDelegate&) = delete;
+
+  DefaultEntityPassDelegate& operator=(const DefaultEntityPassDelegate&) =
+      delete;
 };
 
 std::unique_ptr<EntityPassDelegate> EntityPassDelegate::MakeDefault() {

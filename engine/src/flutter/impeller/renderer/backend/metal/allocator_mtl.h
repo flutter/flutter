@@ -47,7 +47,9 @@ class AllocatorMTL final : public Allocator {
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AllocatorMTL);
+  AllocatorMTL(const AllocatorMTL&) = delete;
+
+  AllocatorMTL& operator=(const AllocatorMTL&) = delete;
 };
 
 }  // namespace impeller

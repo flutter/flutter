@@ -379,13 +379,17 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       std::swap(image_view, o.image_view);
     }
 
-    FML_DISALLOW_COPY_AND_ASSIGN(ImageResource);
+    ImageResource(const ImageResource&) = delete;
+
+    ImageResource& operator=(const ImageResource&) = delete;
   };
 
   UniqueResourceVKT<ImageResource> resource_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AllocatedTextureSourceVK);
+  AllocatedTextureSourceVK(const AllocatedTextureSourceVK&) = delete;
+
+  AllocatedTextureSourceVK& operator=(const AllocatedTextureSourceVK&) = delete;
 };
 
 // |Allocator|

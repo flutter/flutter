@@ -68,7 +68,9 @@ class Archive {
                             const UnarchiveStep& stepper,
                             PrimaryKey primary_key = std::nullopt);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Archive);
+  Archive(const Archive&) = delete;
+
+  Archive& operator=(const Archive&) = delete;
 };
 
 }  // namespace impeller

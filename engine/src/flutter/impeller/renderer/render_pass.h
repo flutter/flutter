@@ -79,7 +79,9 @@ class RenderPass {
   virtual bool OnEncodeCommands(const Context& context) const = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
+  RenderPass(const RenderPass&) = delete;
+
+  RenderPass& operator=(const RenderPass&) = delete;
 };
 
 }  // namespace impeller

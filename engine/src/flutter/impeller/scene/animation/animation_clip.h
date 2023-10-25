@@ -83,7 +83,9 @@ class AnimationClip final {
   bool playing_ = false;
   bool loop_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AnimationClip);
+  AnimationClip(const AnimationClip&) = delete;
+
+  AnimationClip& operator=(const AnimationClip&) = delete;
 
   friend AnimationPlayer;
 };

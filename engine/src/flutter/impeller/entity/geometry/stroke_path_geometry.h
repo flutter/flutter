@@ -88,7 +88,9 @@ class StrokePathGeometry : public Geometry {
   Cap stroke_cap_;
   Join stroke_join_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(StrokePathGeometry);
+  StrokePathGeometry(const StrokePathGeometry&) = delete;
+
+  StrokePathGeometry& operator=(const StrokePathGeometry&) = delete;
 };
 
 }  // namespace impeller

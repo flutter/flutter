@@ -67,7 +67,9 @@ class Config {
   const ConfigDescriptor desc_;
   EGLConfig config_ = nullptr;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Config);
+  Config(const Config&) = delete;
+
+  Config& operator=(const Config&) = delete;
 };
 
 }  // namespace egl

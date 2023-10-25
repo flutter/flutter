@@ -49,7 +49,9 @@ class Context {
 
   void DispatchLifecyleEvent(LifecycleEvent event) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Context);
+  Context(const Context&) = delete;
+
+  Context& operator=(const Context&) = delete;
 };
 
 }  // namespace egl

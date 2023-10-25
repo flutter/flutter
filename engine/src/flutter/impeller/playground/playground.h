@@ -107,7 +107,9 @@ class Playground {
 
   void SetCursorPosition(Point pos);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Playground);
+  Playground(const Playground&) = delete;
+
+  Playground& operator=(const Playground&) = delete;
 };
 
 }  // namespace impeller

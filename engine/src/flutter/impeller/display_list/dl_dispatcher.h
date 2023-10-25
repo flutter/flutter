@@ -229,7 +229,9 @@ class DlDispatcher final : public flutter::DlOpReceiver {
   CanvasType canvas_;
   Matrix initial_matrix_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DlDispatcher);
+  DlDispatcher(const DlDispatcher&) = delete;
+
+  DlDispatcher& operator=(const DlDispatcher&) = delete;
 };
 
 }  // namespace impeller

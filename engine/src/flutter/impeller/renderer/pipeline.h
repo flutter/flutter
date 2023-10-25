@@ -70,7 +70,9 @@ class Pipeline {
   const std::weak_ptr<PipelineLibrary> library_;
   const T desc_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
+  Pipeline(const Pipeline&) = delete;
+
+  Pipeline& operator=(const Pipeline&) = delete;
 };
 
 extern template class Pipeline<PipelineDescriptor>;
@@ -123,7 +125,9 @@ class RenderPipelineT {
   std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_;
   bool did_wait_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RenderPipelineT);
+  RenderPipelineT(const RenderPipelineT&) = delete;
+
+  RenderPipelineT& operator=(const RenderPipelineT&) = delete;
 };
 
 template <class ComputeShader_>
@@ -161,7 +165,9 @@ class ComputePipelineT {
   std::shared_ptr<Pipeline<ComputePipelineDescriptor>> pipeline_;
   bool did_wait_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputePipelineT);
+  ComputePipelineT(const ComputePipelineT&) = delete;
+
+  ComputePipelineT& operator=(const ComputePipelineT&) = delete;
 };
 
 }  // namespace impeller

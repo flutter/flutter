@@ -48,7 +48,9 @@ class ArchiveDatabase {
 
   ArchiveStatement CreateStatement(const std::string& statementString) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ArchiveDatabase);
+  ArchiveDatabase(const ArchiveDatabase&) = delete;
+
+  ArchiveDatabase& operator=(const ArchiveDatabase&) = delete;
 };
 
 }  // namespace impeller

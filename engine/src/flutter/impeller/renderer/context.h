@@ -205,7 +205,9 @@ class Context {
  private:
   mutable Pool<HostBuffer> host_buffer_pool_ = Pool<HostBuffer>(1'000'000);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(Context);
+  Context(const Context&) = delete;
+
+  Context& operator=(const Context&) = delete;
 };
 
 }  // namespace impeller

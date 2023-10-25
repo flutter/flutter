@@ -50,7 +50,9 @@ class PlaygroundTest : public Playground,
   fml::ScopedNSAutoreleasePool autorelease_pool_;
 #endif
 
-  FML_DISALLOW_COPY_AND_ASSIGN(PlaygroundTest);
+  PlaygroundTest(const PlaygroundTest&) = delete;
+
+  PlaygroundTest& operator=(const PlaygroundTest&) = delete;
 };
 
 #define INSTANTIATE_PLAYGROUND_SUITE(playground)                            \

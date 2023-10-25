@@ -49,7 +49,9 @@ class RenderPassVK final : public RenderPass {
       const ContextVK& context,
       const vk::RenderPass& pass) const;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RenderPassVK);
+  RenderPassVK(const RenderPassVK&) = delete;
+
+  RenderPassVK& operator=(const RenderPassVK&) = delete;
 };
 
 }  // namespace impeller
