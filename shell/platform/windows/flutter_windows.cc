@@ -22,6 +22,7 @@
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
 #include "flutter/shell/platform/windows/window_state.h"
 
@@ -37,6 +38,16 @@ static flutter::FlutterWindowsEngine* EngineFromHandle(
 static FlutterDesktopEngineRef HandleForEngine(
     flutter::FlutterWindowsEngine* engine) {
   return reinterpret_cast<FlutterDesktopEngineRef>(engine);
+}
+
+static flutter::FlutterWindowsViewController* ViewControllerFromHandle(
+    FlutterDesktopViewControllerRef ref) {
+  return reinterpret_cast<flutter::FlutterWindowsViewController*>(ref);
+}
+
+static FlutterDesktopViewControllerRef HandleForViewController(
+    flutter::FlutterWindowsViewController* view_controller) {
+  return reinterpret_cast<FlutterDesktopViewControllerRef>(view_controller);
 }
 
 // Returns the view corresponding to the given opaque API handle.
@@ -64,58 +75,65 @@ static FlutterDesktopTextureRegistrarRef HandleForTextureRegistrar(
 FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
     int width,
     int height,
-    FlutterDesktopEngineRef engine) {
+    FlutterDesktopEngineRef engine_ref) {
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
       std::make_unique<flutter::FlutterWindow>(width, height);
 
-  auto state = std::make_unique<FlutterDesktopViewControllerState>();
-  state->view =
+  auto engine = std::unique_ptr<flutter::FlutterWindowsEngine>(
+      EngineFromHandle(engine_ref));
+  auto view =
       std::make_unique<flutter::FlutterWindowsView>(std::move(window_wrapper));
-  // Take ownership of the engine, starting it if necessary.
-  state->view->SetEngine(
-      std::unique_ptr<flutter::FlutterWindowsEngine>(EngineFromHandle(engine)));
-  state->view->CreateRenderSurface();
-  if (!state->view->GetEngine()->running()) {
-    if (!state->view->GetEngine()->Run()) {
+  auto controller = std::make_unique<flutter::FlutterWindowsViewController>(
+      std::move(engine), std::move(view));
+
+  controller->view()->SetEngine(controller->engine());
+  controller->view()->CreateRenderSurface();
+  if (!controller->engine()->running()) {
+    if (!controller->engine()->Run()) {
       return nullptr;
     }
   }
 
   // Must happen after engine is running.
-  state->view->SendInitialBounds();
-  state->view->SendInitialAccessibilityFeatures();
-  return state.release();
+  controller->view()->SendInitialBounds();
+  controller->view()->SendInitialAccessibilityFeatures();
+
+  return HandleForViewController(controller.release());
 }
 
-void FlutterDesktopViewControllerDestroy(
-    FlutterDesktopViewControllerRef controller) {
+void FlutterDesktopViewControllerDestroy(FlutterDesktopViewControllerRef ref) {
+  auto controller = ViewControllerFromHandle(ref);
   delete controller;
 }
 
 FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
-    FlutterDesktopViewControllerRef controller) {
-  return HandleForEngine(controller->view->GetEngine());
+    FlutterDesktopViewControllerRef ref) {
+  auto controller = ViewControllerFromHandle(ref);
+  return HandleForEngine(controller->engine());
 }
 
 FlutterDesktopViewRef FlutterDesktopViewControllerGetView(
-    FlutterDesktopViewControllerRef controller) {
-  return HandleForView(controller->view.get());
+    FlutterDesktopViewControllerRef ref) {
+  auto controller = ViewControllerFromHandle(ref);
+  return HandleForView(controller->view());
 }
 
 void FlutterDesktopViewControllerForceRedraw(
-    FlutterDesktopViewControllerRef controller) {
-  controller->view->ForceRedraw();
+    FlutterDesktopViewControllerRef ref) {
+  auto controller = ViewControllerFromHandle(ref);
+  controller->view()->ForceRedraw();
 }
 
 bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
-    FlutterDesktopViewControllerRef controller,
+    FlutterDesktopViewControllerRef ref,
     HWND hwnd,
     UINT message,
     WPARAM wparam,
     LPARAM lparam,
     LRESULT* result) {
+  auto controller = ViewControllerFromHandle(ref);
   std::optional<LRESULT> delegate_result =
-      controller->view->GetEngine()
+      controller->engine()
           ->window_proc_delegate_manager()
           ->OnTopLevelWindowProc(hwnd, message, wparam, lparam);
   if (delegate_result) {
