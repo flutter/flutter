@@ -2623,6 +2623,7 @@ targets:
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_android platform_view__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/137236
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
