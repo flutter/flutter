@@ -32,4 +32,14 @@ LRESULT WindowsProcTable::GetThreadPreferredUILanguages(DWORD flags,
   return ::GetThreadPreferredUILanguages(flags, count, languages, length);
 }
 
+bool WindowsProcTable::GetHighContrastEnabled() {
+  HIGHCONTRAST high_contrast = {.cbSize = sizeof(HIGHCONTRAST)};
+  if (!::SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(HIGHCONTRAST),
+                               &high_contrast, 0)) {
+    return false;
+  }
+
+  return high_contrast.dwFlags & HCF_HIGHCONTRASTON;
+}
+
 }  // namespace flutter

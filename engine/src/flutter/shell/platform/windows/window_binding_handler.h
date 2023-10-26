@@ -98,9 +98,6 @@ class WindowBindingHandler {
   // coordinates.
   virtual PointerLocation GetPrimaryPointerLocation() = 0;
 
-  // Called to set the initial state of accessibility features
-  virtual void SendInitialAccessibilityFeatures() = 0;
-
   // Retrieve the delegate for the alert.
   virtual AlertPlatformNodeDelegate* GetAlertDelegate() = 0;
 

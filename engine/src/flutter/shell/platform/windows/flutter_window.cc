@@ -119,7 +119,7 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
 FlutterWindow::FlutterWindow(
     int width,
     int height,
-    std::unique_ptr<WindowsProcTable> windows_proc_table,
+    std::shared_ptr<WindowsProcTable> windows_proc_table,
     std::unique_ptr<TextInputManager> text_input_manager)
     : binding_handler_delegate_(nullptr),
       touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
@@ -356,12 +356,7 @@ PointerLocation FlutterWindow::GetPrimaryPointerLocation() {
 }
 
 void FlutterWindow::OnThemeChange() {
-  binding_handler_delegate_->UpdateHighContrastEnabled(
-      GetHighContrastEnabled());
-}
-
-void FlutterWindow::SendInitialAccessibilityFeatures() {
-  OnThemeChange();
+  binding_handler_delegate_->OnHighContrastChanged();
 }
 
 ui::AXFragmentRootDelegateWin* FlutterWindow::GetAxFragmentRootDelegate() {
@@ -948,19 +943,6 @@ UINT FlutterWindow::GetCurrentHeight() {
 
 float FlutterWindow::GetScrollOffsetMultiplier() {
   return scroll_offset_multiplier_;
-}
-
-bool FlutterWindow::GetHighContrastEnabled() {
-  HIGHCONTRAST high_contrast = {.cbSize = sizeof(HIGHCONTRAST)};
-  // API call is only supported on Windows 8+
-  if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(HIGHCONTRAST),
-                            &high_contrast, 0)) {
-    return high_contrast.dwFlags & HCF_HIGHCONTRASTON;
-  } else {
-    FML_LOG(INFO) << "Failed to get status of high contrast feature,"
-                  << "support only for Windows 8 + ";
-    return false;
-  }
 }
 
 LRESULT FlutterWindow::Win32DefWindowProc(HWND hWnd,

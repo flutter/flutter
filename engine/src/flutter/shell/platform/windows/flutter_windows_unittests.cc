@@ -10,6 +10,8 @@
 
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/testing/windows_test_config_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test_context.h"
@@ -97,6 +99,27 @@ TEST_F(WindowsTest, LaunchHeadlessEngine) {
   ASSERT_NE(engine, nullptr);
 
   ASSERT_TRUE(FlutterDesktopEngineRun(engine.get(), nullptr));
+}
+
+// Verify that accessibility features are initialized when a view is created.
+TEST_F(WindowsTest, LaunchRefreshesAccessibility) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.InitializeEngine()};
+  EngineModifier modifier{
+      reinterpret_cast<FlutterWindowsEngine*>(engine.get())};
+
+  auto called = false;
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures, ([&called](auto engine, auto flags) {
+        called = true;
+        return kSuccess;
+      }));
+
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(0, 0, engine.release())};
+
+  ASSERT_TRUE(called);
 }
 
 // Verify that engine fails to launch when a conflicting entrypoint in

@@ -38,7 +38,6 @@ class MockWindowBindingHandler : public WindowBindingHandler {
               (const void* allocation, size_t row_bytes, size_t height),
               (override));
   MOCK_METHOD(PointerLocation, GetPrimaryPointerLocation, (), (override));
-  MOCK_METHOD(void, SendInitialAccessibilityFeatures, (), (override));
   MOCK_METHOD(AlertPlatformNodeDelegate*, GetAlertDelegate, (), (override));
   MOCK_METHOD(ui::AXPlatformNodeWin*, GetAlert, (), (override));
   MOCK_METHOD(bool, NeedsVSync, (), (override));

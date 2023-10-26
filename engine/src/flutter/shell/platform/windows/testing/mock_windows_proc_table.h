@@ -28,6 +28,8 @@ class MockWindowsProcTable : public WindowsProcTable {
               (DWORD, PULONG, PZZWSTR, PULONG),
               (const, override));
 
+  MOCK_METHOD(bool, GetHighContrastEnabled, (), (override));
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsProcTable);
 };
