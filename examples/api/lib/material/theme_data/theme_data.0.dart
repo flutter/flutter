@@ -25,7 +25,7 @@ void main() {
 // they'll all be related to the seed color in both cases.
 //
 // Color scheme colors have been used where component defaults have
-// been overidden so that the app will look good and remain accessible
+// been overridden so that the app will look good and remain accessible
 // in both light and dark modes.
 //
 // Text styles are derived from the theme's textTheme (not the obsolete

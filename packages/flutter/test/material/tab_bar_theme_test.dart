@@ -1070,7 +1070,7 @@ void main() {
         );
       }
 
-      // Test tab bar with [TabBar.labeStyle] & [TabBar.unselectedLabelStyle].
+      // Test tab bar with [TabBar.labelStyle] & [TabBar.unselectedLabelStyle].
       await tester.pumpWidget(buildTabBar());
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
