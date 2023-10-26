@@ -459,11 +459,11 @@ class HardwareKeyboard {
 
   /// Returns true if the given [LogicalKeyboardKey] is pressed, according to
   /// the [HardwareKeyboard].
-  bool isLogicalKeyPressed(LogicalKeyboardKey key) => logicalKeysPressed.contains(key);
+  bool isLogicalKeyPressed(LogicalKeyboardKey key) => _pressedKeys.values.contains(key);
 
   /// Returns true if the given [PhysicalKeyboardKey] is pressed, according to
   /// the [HardwareKeyboard].
-  bool isPhysicalKeyPressed(PhysicalKeyboardKey key) => physicalKeysPressed.contains(key);
+  bool isPhysicalKeyPressed(PhysicalKeyboardKey key) => _pressedKeys.containsKey(key);
 
   /// Returns true if a logical CTRL modifier key is pressed, regardless of
   /// which side of the keyboard it is on.
