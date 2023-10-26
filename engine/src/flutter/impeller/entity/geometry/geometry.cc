@@ -147,4 +147,8 @@ bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {
   return false;
 }
 
+bool Geometry::IsAxisAlignedRect() const {
+  return false;
+}
+
 }  // namespace impeller

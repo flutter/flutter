@@ -3781,5 +3781,55 @@ TEST_P(AiksTest, EmptySaveLayerRendersWithClear) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, BlurredRectangleWithShader) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+
+  auto paint_lines = [&canvas](Scalar dx, Scalar dy, Paint paint) {
+    auto draw_line = [&canvas, &paint](Point a, Point b) {
+      canvas.DrawPath(PathBuilder{}.AddLine(a, b).TakePath(), paint);
+    };
+    paint.stroke_width = 5;
+    paint.style = Paint::Style::kStroke;
+    draw_line(Point(dx + 100, dy + 100), Point(dx + 200, dy + 200));
+    draw_line(Point(dx + 100, dy + 200), Point(dx + 200, dy + 100));
+    draw_line(Point(dx + 150, dy + 100), Point(dx + 200, dy + 150));
+    draw_line(Point(dx + 100, dy + 150), Point(dx + 150, dy + 200));
+  };
+
+  AiksContext renderer(GetContext(), nullptr);
+  Canvas recorder_canvas;
+  for (int x = 0; x < 5; ++x) {
+    for (int y = 0; y < 5; ++y) {
+      Rect rect = Rect::MakeXYWH(x * 20, y * 20, 20, 20);
+      Paint paint{.color =
+                      ((x + y) & 1) == 0 ? Color::Yellow() : Color::Blue()};
+      recorder_canvas.DrawRect(rect, paint);
+    }
+  }
+  Picture picture = recorder_canvas.EndRecordingAsPicture();
+  std::shared_ptr<Texture> texture =
+      picture.ToImage(renderer, ISize{100, 100})->GetTexture();
+
+  ColorSource image_source = ColorSource::MakeImage(
+      texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {}, {});
+  std::shared_ptr<ImageFilter> blur_filter = ImageFilter::MakeBlur(
+      Sigma(5), Sigma(5), FilterContents::BlurStyle::kNormal,
+      Entity::TileMode::kDecal);
+  canvas.DrawRect(Rect::MakeLTRB(0, 0, 300, 600),
+                  Paint{.color = Color::DarkGreen()});
+  canvas.DrawRect(Rect::MakeLTRB(100, 100, 200, 200),
+                  Paint{.color_source = image_source});
+  canvas.DrawRect(Rect::MakeLTRB(300, 0, 600, 600),
+                  Paint{.color = Color::Red()});
+  canvas.DrawRect(
+      Rect::MakeLTRB(400, 100, 500, 200),
+      Paint{.color_source = image_source, .image_filter = blur_filter});
+  paint_lines(0, 300, Paint{.color_source = image_source});
+  paint_lines(300, 300,
+              Paint{.color_source = image_source, .image_filter = blur_filter});
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

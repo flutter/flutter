@@ -101,6 +101,8 @@ class Geometry {
   ///           given `rect`. May return `false` in many undetected cases where
   ///           the transformed geometry does in fact cover the `rect`.
   virtual bool CoversArea(const Matrix& transform, const Rect& rect) const;
+
+  virtual bool IsAxisAlignedRect() const;
 };
 
 }  // namespace impeller
