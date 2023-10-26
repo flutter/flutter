@@ -3757,6 +3757,7 @@ TEST_P(AiksTest, BlurHasNoEdge) {
           },
   };
   canvas.DrawRect(Rect{300, 300, 200, 200}, blur);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_P(AiksTest, EmptySaveLayerIgnoresPaint) {
