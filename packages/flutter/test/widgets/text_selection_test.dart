@@ -1348,7 +1348,7 @@ void main() {
 
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
-    }, leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed());
+    });
 
     testWidgetsWithLeakTracking('can trigger selection handle onTap', (WidgetTester tester) async {
       bool selectionHandleTapped = false;
