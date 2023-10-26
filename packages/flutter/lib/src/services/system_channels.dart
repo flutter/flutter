@@ -144,6 +144,14 @@ abstract final class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A [MethodChannel] for handling text processing actions.
+  ///
+  /// This channel exposes the text processing feature for supported platforms.
+  /// Currently supported on Android only.
+  static const MethodChannel processText = OptionalMethodChannel(
+      'flutter/processtext',
+  );
+
   /// A JSON [MethodChannel] for handling text input.
   ///
   /// This channel exposes a system text input control for interacting with IMEs
