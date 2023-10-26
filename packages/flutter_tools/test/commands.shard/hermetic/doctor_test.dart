@@ -972,7 +972,7 @@ void main() {
       Analytics: () => fakeAnalytics,
     });
 
-    testUsingContext('grouped validator subresult and subvalidators different lengths', () async { 
+    testUsingContext('grouped validator subresult and subvalidators different lengths', () async {
       final FakeGroupedDoctorWithCrash fakeDoctor = FakeGroupedDoctorWithCrash(logger, clock: fakeSystemClock);
       await fakeDoctor.diagnose(verbose: false);
 
@@ -1343,7 +1343,7 @@ class FakeGroupedDoctorWithCrash extends Doctor {
 /// This extended grouped validator will have a list of sub validators
 /// provided in the constructor, but it will have no [subResults] in the
 /// list which simulates what happens if a validator crashes.
-/// 
+///
 /// Usually, the grouped validators have 2 lists, a [subValidators] and
 /// a [subResults] list, and if nothing crashes, those 2 lists will have the
 /// same length. This fake is simulating what happens when the validators
