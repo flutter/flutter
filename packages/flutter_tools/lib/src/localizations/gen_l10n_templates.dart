@@ -161,7 +161,7 @@ const String dateVariableTemplate = '''
     String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
 
 const String classFileTemplate = '''
-@(header)@(requiresIntlImport)import '@(fileName)';
+@(ignoreCode)@(header)@(requiresIntlImport)import '@(fileName)';
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {

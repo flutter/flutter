@@ -960,6 +960,8 @@ class LocalizationsGenerator {
     String header,
     final LocaleInfo locale,
   ) {
+    requiresIgnoreNoLeadingLocalVar = false;
+
     final Iterable<String> methods = _allMessages.map((Message message) {
       LocaleInfo localeWithFallback = locale;
       if (message.messages[locale] == null) {
@@ -977,22 +979,15 @@ class LocalizationsGenerator {
       );
     });
 
-    if (header.isNotEmpty) {
-      header = '$header\n\n';
-    }
-
-    if (requiresIgnoreNoLeadingLocalVar) {
-      header = '// ignore_for_file: no_leading_underscores_for_local_identifiers\n\n$header';
-    }
-
     return classFileTemplate
-      .replaceAll('@(header)', header)
+      .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
       .replaceAll('@(language)', describeLocale(locale.toString()))
       .replaceAll('@(baseClass)', className)
       .replaceAll('@(fileName)', fileName)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(localeName)', locale.toString())
       .replaceAll('@(methods)', methods.join('\n\n'))
+      .replaceAll('@(ignoreCode)', requiresIgnoreNoLeadingLocalVar ? '// ignore_for_file: no_leading_underscores_for_local_identifiers\n\n' : '')
       .replaceAll('@(requiresIntlImport)', requiresIntlImport ? "import 'package:intl/intl.dart' as intl;\n\n" : '');
   }
 
