@@ -538,15 +538,15 @@ class FlutterPlugin implements Plugin<Project> {
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
      * making the Gradle plugin project A depend on the Gradle plugin project B.
      */
-    private void configurePluginDependencies(Object dependencyObject) {
-        assert dependencyObject.name instanceof String
-        Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
+    private void configurePluginDependencies(Object pluginObject) {
+        assert pluginObject.name instanceof String
+        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
         if (pluginProject == null ||
             !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
             return
         }
-        assert dependencyObject.dependencies instanceof List
-        dependencyObject.dependencies.each { pluginDependencyName ->
+        assert pluginObject.dependencies instanceof List
+        pluginObject.dependencies.each { pluginDependencyName ->
             assert pluginDependencyName instanceof String
             if (pluginDependencyName.empty) {
                 return
@@ -590,6 +590,7 @@ class FlutterPlugin implements Plugin<Project> {
         return androidPlugins
     }
 
+    // TODO(gustl22): Remove in favor of using [getPluginList] only, see #48918
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List getPluginDependencies() {
         // Consider a `.flutter-plugins-dependencies` file with the following content:
