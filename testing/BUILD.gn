@@ -124,6 +124,19 @@ source_set("fixture_test") {
   }
 }
 
+if (is_mac || is_ios) {
+  source_set("autoreleasepool_test") {
+    testonly = true
+
+    sources = [ "autoreleasepool_test.h" ]
+
+    deps = [
+      "//flutter/fml",
+      "//third_party/googletest:gtest",
+    ]
+  }
+}
+
 if (enable_unittests && shell_enable_vulkan) {
   source_set("vulkan") {
     testonly = true
