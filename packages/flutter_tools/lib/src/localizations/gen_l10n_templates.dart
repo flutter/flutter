@@ -99,7 +99,7 @@ abstract class @(class) {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    @(supportedLocales)
+    @(supportedLocales),
   ];
 
 @(methods)}
