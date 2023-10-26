@@ -211,6 +211,7 @@ executable("flutter_desktop_darwin_unittests") {
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
+    "//flutter/testing:autoreleasepool_test",
     "//flutter/testing:dart",
     "//flutter/testing:skia",
     "//flutter/testing:testing_lib",
