@@ -1876,7 +1876,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
     for (final SemanticsNode child in newChildren) {
-      assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
+      assert(isPartOfNodeMerging || !child.rect.isEmpty, 'Child $child is invisible and should not be added as a child of $this.');
       child._dead = false;
     }
     bool sawChange = false;
