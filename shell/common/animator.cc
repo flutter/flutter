@@ -179,15 +179,7 @@ void Animator::EndFrame() {
 void Animator::Render(int64_t view_id,
                       std::unique_ptr<flutter::LayerTree> layer_tree,
                       float device_pixel_ratio) {
-  // Animator::Render should be called between BeginFrame and EndFrame,
-  // which is indicated by frame_timings_recorder_ being non-null.
-  // This might happen on release build, and is guarded by PlatformDispatcher on
-  // debug build.
-  // TODO(dkwingsmt): We should change this skip into an assertion.
-  // https://github.com/flutter/flutter/issues/137073
-  if (frame_timings_recorder_ == nullptr) {
-    return;
-  }
+  FML_CHECK(frame_timings_recorder_ != nullptr);
 
   has_rendered_ = true;
 
