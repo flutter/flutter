@@ -972,6 +972,23 @@ void main() {
       Analytics: () => fakeAnalytics,
     });
 
+    testUsingContext('grouped validator subresult and subvalidators different lengths', () async { 
+      final FakeGroupedDoctorWithCrash fakeDoctor = FakeGroupedDoctorWithCrash(logger, clock: fakeSystemClock);
+      await fakeDoctor.diagnose(verbose: false);
+
+      expect(fakeDoctor.validators, hasLength(1));
+      expect(fakeDoctor.validators.first.runtimeType == FakeGroupedValidatorWithCrash, true);
+      expect(fakeAnalytics.sentEvents, hasLength(0));
+
+      // Attempt to send a random event to ensure that the
+      // analytics package is still working, despite not sending
+      // above (as expected)
+      final Event testEvent = Event.analyticsCollectionEnabled(status: true);
+      fakeAnalytics.send(testEvent);
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+      expect(fakeAnalytics.sentEvents, contains(testEvent));
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+
     testUsingContext('sending events can be skipped', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
       expect(fakeAnalytics.sentEvents, isEmpty);
@@ -1306,6 +1323,37 @@ class FakeGroupedDoctor extends Doctor {
       MissingGroupedValidator('Category 2'),
     ]),
   ];
+}
+
+/// Fake grouped doctor that is intended to be used with [FakeGroupedValidatorWithCrash].
+class FakeGroupedDoctorWithCrash extends Doctor {
+  FakeGroupedDoctorWithCrash(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
+
+  @override
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    FakeGroupedValidatorWithCrash(<DoctorValidator>[
+      PassingGroupedValidator('Category 1'),
+      PassingGroupedValidator('Category 1'),
+    ]),
+  ];
+}
+
+
+/// This extended grouped validator will have a list of sub validators
+/// provided in the constructor, but it will have no [subResults] in the
+/// list which simulates what happens if a validator crashes.
+/// 
+/// Usually, the grouped validators have 2 lists, a [subValidators] and
+/// a [subResults] list, and if nothing crashes, those 2 lists will have the
+/// same length. This fake is simulating what happens when the validators
+/// crash and results in no results getting returned.
+class FakeGroupedValidatorWithCrash extends GroupedValidator {
+  FakeGroupedValidatorWithCrash(super.subValidators);
+
+  @override
+  List<ValidationResult> get subResults => <ValidationResult>[];
+
 }
 
 class FakeGroupedDoctorWithStatus extends Doctor {
