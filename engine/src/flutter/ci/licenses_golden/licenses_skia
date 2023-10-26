@@ -1,4 +1,4 @@
-Signature: 8a1941d6bb62620be6d75eee92c6c5a0
+Signature: c973a6c04f5c25276c1687a489453575
 
 ====================================================================================================
 LIBRARY: etc1
@@ -389,6 +389,7 @@ FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/base64.md
 FILE: ../../../third_party/skia/relnotes/font-default.md
 FILE: ../../../third_party/skia/relnotes/glbackendsemaphore.md
+FILE: ../../../third_party/skia/relnotes/graphite_borrow.md
 FILE: ../../../third_party/skia/relnotes/grsurface-info.md
 FILE: ../../../third_party/skia/relnotes/mesh.md
 FILE: ../../../third_party/skia/relnotes/readbuffer-deserial.md
