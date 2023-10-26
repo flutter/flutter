@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/reporting/unified_analytics.dart';
-import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
@@ -13,42 +12,17 @@ import '../src/fakes.dart';
 
 void main() {
   const String userBranch = 'abc123';
-  const String homeDirectoryName = 'home';
-  const DashTool tool = DashTool.flutterTool;
 
   late FileSystem fs;
-  late Directory home;
   late FakeAnalytics analyticsOverride;
 
   setUp(() {
     fs = MemoryFileSystem.test();
-    home = fs.directory(homeDirectoryName);
 
-    // Prepare the tests by "onboarding" the tool into the package
-    // by invoking the [clientShowedMessage] method for the provided
-    // [tool]
-    final FakeAnalytics initialAnalytics = FakeAnalytics(
-      tool: tool,
-      homeDirectory: home,
-      dartVersion: '3.0.0',
-      platform: DevicePlatform.macos,
+    analyticsOverride = getInitializedFakeAnalyticsInstance(
       fs: fs,
-      surveyHandler: SurveyHandler(
-        homeDirectory: home,
-        fs: fs,
-      ),
-    );
-    initialAnalytics.clientShowedMessage();
-
-    analyticsOverride = FakeAnalytics(
-      tool: tool,
-      homeDirectory: home,
-      dartVersion: '3.0.0',
-      platform: DevicePlatform.macos,
-      fs: fs,
-      surveyHandler: SurveyHandler(
-        homeDirectory: home,
-        fs: fs,
+      fakeFlutterVersion: FakeFlutterVersion(
+        branch: userBranch,
       ),
     );
   });
@@ -134,6 +108,18 @@ void main() {
         reason: 'The client ID should match the NoOp client id',
       );
       expect(analytics, isA<NoOpAnalytics>());
+    });
+
+    testWithoutContext('Suppression prevents events from being sent', () {
+      expect(analyticsOverride.okToSend, true);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+      expect(analyticsOverride.sentEvents, hasLength(1));
+
+      analyticsOverride.suppressTelemetry();
+      expect(analyticsOverride.okToSend, false);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+
+      expect(analyticsOverride.sentEvents, hasLength(1));
     });
   });
 }
