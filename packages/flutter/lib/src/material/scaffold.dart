@@ -2466,7 +2466,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
   ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
-  PersistentBottomSheetController<T> showBottomSheet<T>(
+  PersistentBottomSheetController<void> showBottomSheet(
     WidgetBuilder builder, {
     Color? backgroundColor,
     double? elevation,
