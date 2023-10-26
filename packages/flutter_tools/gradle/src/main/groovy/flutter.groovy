@@ -395,7 +395,7 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configurePlugins() {
         getPluginList().each this.&configurePluginProject
-        getPluginDependencies().each this.&configurePluginDependencies
+        getPluginList().each this.&configurePluginDependencies
     }
 
     /** Adds the plugin project dependency to the app project. */
@@ -567,6 +567,34 @@ class FlutterPlugin implements Plugin<Project> {
 
     /** Gets the list of plugins that support the Android platform. */
     private List getPluginList() {
+        // Consider a `.flutter-plugins-dependencies` file with the following content:
+        // {
+        //     "plugins": {
+        //       "android": [
+        //         {
+        //           "name": "plugin-a",
+        //           "path": "/path/to/plugin-a",
+        //           "dependencies": ["plugin-b", "plugin-c"],
+        //           "native_build": true,
+        //         },
+        //         {
+        //           "name": "plugin-b",
+        //           "path": "/path/to/plugin-b",
+        //           "dependencies": ["plugin-c"],
+        //           "native_build": true,
+        //         },
+        //         {
+        //           "name": "plugin-c",
+        //           "path": "/path/to/plugin-c",
+        //           "dependencies": [],
+        //           "native_build": true,
+        //         },
+        //       ],
+        //     },
+        // }
+        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
+        // `plugin-b` depends on `plugin-c`.
+        // `plugin-c` doesn't depend on anything.
         Map meta = getDependenciesMetadata()
         List androidPlugins = []
         if (meta == null) {
@@ -588,38 +616,6 @@ class FlutterPlugin implements Plugin<Project> {
             androidPlugins.add(androidPlugin)
         }
         return androidPlugins
-    }
-
-    // TODO(gustl22): Remove in favor of using [getPluginList] only, see #48918
-    /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    private List getPluginDependencies() {
-        // Consider a `.flutter-plugins-dependencies` file with the following content:
-        // {
-        //     "dependencyGraph": [
-        //       {
-        //         "name": "plugin-a",
-        //         "dependencies": ["plugin-b","plugin-c"]
-        //       },
-        //       {
-        //         "name": "plugin-b",
-        //         "dependencies": ["plugin-c"]
-        //       },
-        //       {
-        //         "name": "plugin-c",
-        //         "dependencies": []'
-        //       }
-        //     ]
-        // }
-        //
-        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
-        // `plugin-b` depends on `plugin-c`.
-        // `plugin-c` doesn't depend on anything.
-        Map meta = getDependenciesMetadata()
-        if (meta == null) {
-            return []
-        }
-        assert meta.dependencyGraph instanceof List
-        return meta.dependencyGraph
     }
 
     private Map parsedFlutterPluginsDependencies
