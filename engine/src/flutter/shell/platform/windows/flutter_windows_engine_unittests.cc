@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
+#include "flutter/shell/platform/windows/testing/mock_windows_proc_table.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h"
@@ -24,6 +25,8 @@
 
 namespace flutter {
 namespace testing {
+
+using ::testing::Return;
 
 class FlutterWindowsEngineTest : public WindowsTest {};
 
@@ -558,29 +561,41 @@ TEST_F(FlutterWindowsEngineTest, GetExecutableName) {
 // Ensure that after setting or resetting the high contrast feature,
 // the corresponding status flag can be retrieved from the engine.
 TEST_F(FlutterWindowsEngineTest, UpdateHighContrastFeature) {
+  auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
+  EXPECT_CALL(*windows_proc_table, GetHighContrastEnabled)
+      .WillOnce(Return(true))
+      .WillOnce(Return(false));
+
   FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetWindowsProcTable(windows_proc_table);
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
   EngineModifier modifier(engine.get());
 
-  bool called = false;
+  std::optional<FlutterAccessibilityFeature> engine_flags;
   modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
-      UpdateAccessibilityFeatures, ([&called](auto engine, auto flags) {
-        called = true;
+      UpdateAccessibilityFeatures, ([&engine_flags](auto engine, auto flags) {
+        engine_flags = flags;
         return kSuccess;
       }));
 
-  engine->UpdateHighContrastEnabled(true);
-  EXPECT_TRUE(
-      engine->EnabledAccessibilityFeatures() &
-      FlutterAccessibilityFeature::kFlutterAccessibilityFeatureHighContrast);
-  EXPECT_TRUE(engine->high_contrast_enabled());
-  EXPECT_TRUE(called);
+  // 1: High contrast is enabled.
+  engine->UpdateHighContrastMode();
 
-  engine->UpdateHighContrastEnabled(false);
-  EXPECT_FALSE(
-      engine->EnabledAccessibilityFeatures() &
+  EXPECT_TRUE(engine->high_contrast_enabled());
+  EXPECT_TRUE(engine_flags.has_value());
+  EXPECT_TRUE(
+      engine_flags.value() &
       FlutterAccessibilityFeature::kFlutterAccessibilityFeatureHighContrast);
+
+  // 2: High contrast is disabled.
+  engine_flags.reset();
+  engine->UpdateHighContrastMode();
+
   EXPECT_FALSE(engine->high_contrast_enabled());
+  EXPECT_TRUE(engine_flags.has_value());
+  EXPECT_FALSE(
+      engine_flags.value() &
+      FlutterAccessibilityFeature::kFlutterAccessibilityFeatureHighContrast);
 }
 
 TEST_F(FlutterWindowsEngineTest, PostRasterThreadTask) {

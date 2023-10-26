@@ -22,7 +22,7 @@ class WindowsProcTable {
   // Retrieves the pointer type for a specified pointer.
   //
   // Used to react differently to touch or pen inputs. Returns false on failure.
-  // Available in Windows 8 and newer, otherwise returns false.
+  // Available on Windows 8 and newer, otherwise returns false.
   virtual BOOL GetPointerType(UINT32 pointer_id,
                               POINTER_INPUT_TYPE* pointer_type);
 
@@ -34,6 +34,13 @@ class WindowsProcTable {
                                                 PULONG count,
                                                 PZZWSTR languages,
                                                 PULONG length) const;
+
+  // Get whether high contrast is enabled.
+  //
+  // Available on Windows 8 and newer, otherwise returns false.
+  // See
+  // https://learn.microsoft.com/windows/win32/winauto/high-contrast-parameter
+  virtual bool GetHighContrastEnabled();
 
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,
