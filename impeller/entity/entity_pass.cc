@@ -12,13 +12,10 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
-#include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/texture.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
@@ -28,10 +25,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path_builder.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/render_pass.h"
 
 #ifdef IMPELLER_DEBUG
 #include "impeller/entity/contents/checkerboard_contents.h"
@@ -704,6 +698,146 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
   return EntityPass::EntityResult::Success(element_entity);
 }
 
+bool EntityPass::RenderElement(Entity& element_entity,
+                               size_t clip_depth_floor,
+                               InlinePassContext& pass_context,
+                               int32_t pass_depth,
+                               ContentContext& renderer,
+                               ClipCoverageStack& clip_coverage_stack,
+                               Point global_pass_position) const {
+  auto result = pass_context.GetRenderPass(pass_depth);
+  if (!result.pass) {
+    // Failure to produce a render pass should be explained by specific errors
+    // in `InlinePassContext::GetRenderPass()`, so avoid log spam and don't
+    // append a validation log here.
+    return false;
+  }
+
+  // If the pass context returns a backdrop texture, we need to draw it to the
+  // current pass. We do this because it's faster and takes significantly less
+  // memory than storing/loading large MSAA textures. Also, it's not possible to
+  // blit the non-MSAA resolve texture of the previous pass to MSAA textures
+  // (let alone a transient one).
+  if (result.backdrop_texture) {
+    auto size_rect = Rect::MakeSize(result.pass->GetRenderTargetSize());
+    auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
+    msaa_backdrop_contents->SetStencilEnabled(false);
+    msaa_backdrop_contents->SetLabel("MSAA backdrop");
+    msaa_backdrop_contents->SetSourceRect(size_rect);
+    msaa_backdrop_contents->SetTexture(result.backdrop_texture);
+
+    Entity msaa_backdrop_entity;
+    msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
+    msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
+    if (!msaa_backdrop_entity.Render(renderer, *result.pass)) {
+      VALIDATION_LOG << "Failed to render MSAA backdrop filter entity.";
+      return false;
+    }
+  }
+
+  auto current_clip_coverage = clip_coverage_stack.back().coverage;
+  if (current_clip_coverage.has_value()) {
+    // Entity transforms are relative to the current pass position, so we need
+    // to check clip coverage in the same space.
+    current_clip_coverage->origin -= global_pass_position;
+  }
+
+  if (!element_entity.ShouldRender(current_clip_coverage)) {
+    return true;  // Nothing to render.
+  }
+
+  auto clip_coverage = element_entity.GetClipCoverage(current_clip_coverage);
+  if (clip_coverage.coverage.has_value()) {
+    clip_coverage.coverage->origin += global_pass_position;
+  }
+
+  // The coverage hint tells the rendered Contents which portion of the
+  // rendered output will actually be used, and so we set this to the current
+  // clip coverage (which is the max clip bounds). The contents may
+  // optionally use this hint to avoid unnecessary rendering work.
+  if (element_entity.GetContents()->GetCoverageHint().has_value()) {
+    // If the element already has a coverage hint (because its an advanced
+    // blend), then we need to intersect the clip coverage hint with the
+    // existing coverage hint.
+    element_entity.GetContents()->SetCoverageHint(
+        current_clip_coverage->Intersection(
+            element_entity.GetContents()->GetCoverageHint().value()));
+  } else {
+    element_entity.GetContents()->SetCoverageHint(current_clip_coverage);
+  }
+
+  switch (clip_coverage.type) {
+    case Contents::ClipCoverage::Type::kNoChange:
+      break;
+    case Contents::ClipCoverage::Type::kAppend: {
+      auto op = clip_coverage_stack.back().coverage;
+      clip_coverage_stack.push_back(
+          ClipCoverageLayer{.coverage = clip_coverage.coverage,
+                            .clip_depth = element_entity.GetClipDepth() + 1});
+      FML_DCHECK(clip_coverage_stack.back().clip_depth ==
+                 clip_coverage_stack.front().clip_depth +
+                     clip_coverage_stack.size() - 1);
+
+      if (!op.has_value()) {
+        // Running this append op won't impact the clip buffer because the
+        // whole screen is already being clipped, so skip it.
+        return true;
+      }
+    } break;
+    case Contents::ClipCoverage::Type::kRestore: {
+      if (clip_coverage_stack.back().clip_depth <=
+          element_entity.GetClipDepth()) {
+        // Drop clip restores that will do nothing.
+        return true;
+      }
+
+      auto restoration_index = element_entity.GetClipDepth() -
+                               clip_coverage_stack.front().clip_depth;
+      FML_DCHECK(restoration_index < clip_coverage_stack.size());
+
+      // We only need to restore the area that covers the coverage of the
+      // clip rect at target depth + 1.
+      std::optional<Rect> restore_coverage =
+          (restoration_index + 1 < clip_coverage_stack.size())
+              ? clip_coverage_stack[restoration_index + 1].coverage
+              : std::nullopt;
+      if (restore_coverage.has_value()) {
+        // Make the coverage rectangle relative to the current pass.
+        restore_coverage->origin -= global_pass_position;
+      }
+      clip_coverage_stack.resize(restoration_index + 1);
+
+      if (!clip_coverage_stack.back().coverage.has_value()) {
+        // Running this restore op won't make anything renderable, so skip it.
+        return true;
+      }
+
+      auto restore_contents =
+          static_cast<ClipRestoreContents*>(element_entity.GetContents().get());
+      restore_contents->SetRestoreCoverage(restore_coverage);
+
+    } break;
+  }
+
+#ifdef IMPELLER_ENABLE_CAPTURE
+  {
+    auto element_entity_coverage = element_entity.GetCoverage();
+    if (element_entity_coverage.has_value()) {
+      element_entity_coverage->origin += global_pass_position;
+      element_entity.GetCapture().AddRect("Coverage", *element_entity_coverage,
+                                          {.readonly = true});
+    }
+  }
+#endif
+
+  element_entity.SetClipDepth(element_entity.GetClipDepth() - clip_depth_floor);
+  if (!element_entity.Render(renderer, *result.pass)) {
+    VALIDATION_LOG << "Failed to render entity.";
+    return false;
+  }
+  return true;
+}
+
 bool EntityPass::OnRender(
     ContentContext& renderer,
     Capture& capture,
@@ -735,144 +869,6 @@ bool EntityPass::OnRender(
     pass_context.GetRenderPass(pass_depth);
   }
 
-  auto render_element = [&clip_depth_floor, &pass_context, &pass_depth,
-                         &renderer, &clip_coverage_stack,
-                         &global_pass_position](Entity& element_entity) {
-    auto result = pass_context.GetRenderPass(pass_depth);
-
-    if (!result.pass) {
-      // Failure to produce a render pass should be explained by specific errors
-      // in `InlinePassContext::GetRenderPass()`, so avoid log spam and don't
-      // append a validation log here.
-      return false;
-    }
-
-    // If the pass context returns a texture, we need to draw it to the current
-    // pass. We do this because it's faster and takes significantly less memory
-    // than storing/loading large MSAA textures.
-    // Also, it's not possible to blit the non-MSAA resolve texture of the
-    // previous pass to MSAA textures (let alone a transient one).
-    if (result.backdrop_texture) {
-      auto size_rect = Rect::MakeSize(result.pass->GetRenderTargetSize());
-      auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
-      msaa_backdrop_contents->SetStencilEnabled(false);
-      msaa_backdrop_contents->SetLabel("MSAA backdrop");
-      msaa_backdrop_contents->SetSourceRect(size_rect);
-      msaa_backdrop_contents->SetTexture(result.backdrop_texture);
-
-      Entity msaa_backdrop_entity;
-      msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
-      msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
-      if (!msaa_backdrop_entity.Render(renderer, *result.pass)) {
-        VALIDATION_LOG << "Failed to render MSAA backdrop filter entity.";
-        return false;
-      }
-    }
-
-    auto current_clip_coverage = clip_coverage_stack.back().coverage;
-    if (current_clip_coverage.has_value()) {
-      // Entity transforms are relative to the current pass position, so we need
-      // to check clip coverage in the same space.
-      current_clip_coverage->origin -= global_pass_position;
-    }
-
-    if (!element_entity.ShouldRender(current_clip_coverage)) {
-      return true;  // Nothing to render.
-    }
-
-    auto clip_coverage = element_entity.GetClipCoverage(current_clip_coverage);
-    if (clip_coverage.coverage.has_value()) {
-      clip_coverage.coverage->origin += global_pass_position;
-    }
-
-    // The coverage hint tells the rendered Contents which portion of the
-    // rendered output will actually be used, and so we set this to the current
-    // clip coverage (which is the max clip bounds). The contents may
-    // optionally use this hint to avoid unnecessary rendering work.
-    if (element_entity.GetContents()->GetCoverageHint().has_value()) {
-      // If the element already has a coverage hint (because its an advanced
-      // blend), then we need to intersect the clip coverage hint with the
-      // existing coverage hint.
-      element_entity.GetContents()->SetCoverageHint(
-          current_clip_coverage->Intersection(
-              element_entity.GetContents()->GetCoverageHint().value()));
-    } else {
-      element_entity.GetContents()->SetCoverageHint(current_clip_coverage);
-    }
-
-    switch (clip_coverage.type) {
-      case Contents::ClipCoverage::Type::kNoChange:
-        break;
-      case Contents::ClipCoverage::Type::kAppend: {
-        auto op = clip_coverage_stack.back().coverage;
-        clip_coverage_stack.push_back(
-            ClipCoverageLayer{.coverage = clip_coverage.coverage,
-                              .clip_depth = element_entity.GetClipDepth() + 1});
-        FML_DCHECK(clip_coverage_stack.back().clip_depth ==
-                   clip_coverage_stack.front().clip_depth +
-                       clip_coverage_stack.size() - 1);
-
-        if (!op.has_value()) {
-          // Running this append op won't impact the clip buffer because the
-          // whole screen is already being clipped, so skip it.
-          return true;
-        }
-      } break;
-      case Contents::ClipCoverage::Type::kRestore: {
-        if (clip_coverage_stack.back().clip_depth <=
-            element_entity.GetClipDepth()) {
-          // Drop clip restores that will do nothing.
-          return true;
-        }
-
-        auto restoration_index = element_entity.GetClipDepth() -
-                                 clip_coverage_stack.front().clip_depth;
-        FML_DCHECK(restoration_index < clip_coverage_stack.size());
-
-        // We only need to restore the area that covers the coverage of the
-        // clip rect at target depth + 1.
-        std::optional<Rect> restore_coverage =
-            (restoration_index + 1 < clip_coverage_stack.size())
-                ? clip_coverage_stack[restoration_index + 1].coverage
-                : std::nullopt;
-        if (restore_coverage.has_value()) {
-          // Make the coverage rectangle relative to the current pass.
-          restore_coverage->origin -= global_pass_position;
-        }
-        clip_coverage_stack.resize(restoration_index + 1);
-
-        if (!clip_coverage_stack.back().coverage.has_value()) {
-          // Running this restore op won't make anything renderable, so skip it.
-          return true;
-        }
-
-        auto restore_contents = static_cast<ClipRestoreContents*>(
-            element_entity.GetContents().get());
-        restore_contents->SetRestoreCoverage(restore_coverage);
-
-      } break;
-    }
-
-#ifdef IMPELLER_ENABLE_CAPTURE
-    {
-      auto element_entity_coverage = element_entity.GetCoverage();
-      if (element_entity_coverage.has_value()) {
-        element_entity_coverage->origin += global_pass_position;
-        element_entity.GetCapture().AddRect(
-            "Coverage", *element_entity_coverage, {.readonly = true});
-      }
-    }
-#endif
-
-    element_entity.SetClipDepth(element_entity.GetClipDepth() -
-                                clip_depth_floor);
-    if (!element_entity.Render(renderer, *result.pass)) {
-      VALIDATION_LOG << "Failed to render entity.";
-      return false;
-    }
-    return true;
-  };
-
   if (backdrop_filter_proc_) {
     if (!backdrop_filter_contents) {
       VALIDATION_LOG
@@ -889,7 +885,8 @@ bool EntityPass::OnRender(
         Matrix::MakeTranslation(Vector3(-local_pass_position)));
     backdrop_entity.SetClipDepth(clip_depth_floor);
 
-    render_element(backdrop_entity);
+    RenderElement(backdrop_entity, clip_depth_floor, pass_context, pass_depth,
+                  renderer, clip_coverage_stack, global_pass_position);
   }
 
   bool is_collapsing_clear_colors = !collapsed_parent_pass &&
@@ -983,8 +980,9 @@ bool EntityPass::OnRender(
     //--------------------------------------------------------------------------
     /// Render the Element.
     ///
-
-    if (!render_element(result.entity)) {
+    if (!RenderElement(result.entity, clip_depth_floor, pass_context,
+                       pass_depth, renderer, clip_coverage_stack,
+                       global_pass_position)) {
       // Specific validation logs are handled in `render_element()`.
       return false;
     }
