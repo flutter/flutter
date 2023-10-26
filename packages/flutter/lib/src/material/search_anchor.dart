@@ -159,6 +159,7 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    ValueChanged<String>? barOnSubmitted,
     Widget? viewLeading,
     Iterable<Widget>? viewTrailing,
     String? viewHintText,
@@ -928,6 +929,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    ValueChanged<String>? barOnSubmitted,
     super.viewLeading,
     super.viewTrailing,
     String? viewHintText,
@@ -961,6 +963,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         onChanged: (_) {
           controller.openView();
         },
+        onSubmitted: barOnSubmitted,
         hintText: barHintText,
         hintStyle: barHintStyle,
         textStyle: barTextStyle,

@@ -931,7 +931,8 @@ void main() {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     int onChangedCalled = 0;
-    int onSubmittedCalled = 0;
+    int viewOnSubmittedCalled = 0;
+    int barOnSubmittedCalled = 0;
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
@@ -939,6 +940,11 @@ void main() {
             child: Material(
               child: SearchAnchor.bar(
                 searchController: controller,
+                barOnSubmitted: (String value) {
+                  setState(() {
+                    barOnSubmittedCalled = barOnSubmittedCalled + 1;
+                  });
+                },
                 viewOnChanged: (String value) {
                   setState(() {
                     onChangedCalled = onChangedCalled + 1;
@@ -946,7 +952,7 @@ void main() {
                 },
                 viewOnSubmitted: (String value) {
                   setState(() {
-                    onSubmittedCalled = onSubmittedCalled + 1;
+                    viewOnSubmittedCalled = viewOnSubmittedCalled + 1;
                   });
                   controller.closeView(value);
                 },
@@ -973,8 +979,13 @@ void main() {
     expect(onChangedCalled, 2);
 
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    expect(onSubmittedCalled, 1);
+    expect(viewOnSubmittedCalled, 1); // View's onSubmitted is called.
+    expect(barOnSubmittedCalled, 0); // Bar's onSubmitted is not called.
     expect(controller.isOpen, false);
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(viewOnSubmittedCalled, 1); // View's onSubmitted is not called.
+    expect(barOnSubmittedCalled, 1); // Bar's onSubmitted is called.
   });
 
   testWidgetsWithLeakTracking('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
