@@ -256,6 +256,12 @@ class Context {
 
   // Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
   void addVmServiceBonjourService() {
+    // Skip adding Bonjour service settings when DISABLE_PORT_PUBLICATION is YES.
+    // These settings are not needed if port publication is disabled.
+    if (environment['DISABLE_PORT_PUBLICATION'] == 'YES') {
+      return;
+    }
+
     final String buildMode = parseFlutterBuildMode();
 
     // Debug and profile only.
@@ -402,6 +408,7 @@ class Context {
       '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
       '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
       '-dAction=${environment['ACTION'] ?? ''}',
+      '-dFrontendServerStarterPath=${environment['FRONTEND_SERVER_STARTER_PATH'] ?? ''}',
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',

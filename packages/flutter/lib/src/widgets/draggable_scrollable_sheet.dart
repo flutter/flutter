@@ -52,6 +52,13 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// fire when [pixels] changes without [size] changing. For example, if the
 /// constraints provided to an attached sheet change.
 class DraggableScrollableController extends ChangeNotifier {
+  /// Creates a controller for [DraggableScrollableSheet].
+  DraggableScrollableController() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   _DraggableScrollableSheetScrollController? _attachedController;
   final Set<AnimationController> _animationControllers = <AnimationController>{};
 
@@ -295,9 +302,6 @@ class DraggableScrollableController extends ChangeNotifier {
 /// {@end-tool}
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
-  ///
-  /// The [builder], [initialChildSize], [minChildSize], [maxChildSize] and
-  /// [expand] parameters must not be null.
   const DraggableScrollableSheet({
     super.key,
     this.initialChildSize = 0.5,
@@ -759,7 +763,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
             _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
           position.goBallistic(0);
         }
-      });
+      }, debugLabel: 'DraggableScrollableSheet.snap');
     }
   }
 
@@ -1031,8 +1035,6 @@ class DraggableScrollableActuator extends StatefulWidget {
 
   /// This child's [DraggableScrollableSheet] descendant will be reset when the
   /// [reset] method is applied to a context that includes it.
-  ///
-  /// Must not be null.
   final Widget child;
 
 
@@ -1074,7 +1076,7 @@ class _DraggableScrollableActuatorState extends State<DraggableScrollableActuato
 class _ResetNotifier extends ChangeNotifier {
   _ResetNotifier() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
   /// Whether someone called [sendReset] or not.
@@ -1098,8 +1100,6 @@ class _ResetNotifier extends ChangeNotifier {
 class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   /// Creates an [InheritedNotifier] that the [DraggableScrollableSheet] will
   /// listen to for an indication that it should reset itself back to [DraggableScrollableSheet.initialChildSize].
-  ///
-  /// The [child] and [notifier] properties must not be null.
   const _InheritedResetNotifier({
     required super.child,
     required _ResetNotifier super.notifier,

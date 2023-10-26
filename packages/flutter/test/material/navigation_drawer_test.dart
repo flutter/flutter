@@ -395,6 +395,57 @@ void main() {
     final NavigationDrawer drawer = tester.widget(find.byType(NavigationDrawer));
     expect(drawer.tilePadding, const EdgeInsets.symmetric(horizontal: 12.0));
   });
+
+  testWidgetsWithLeakTracking('Destinations respect their disabled state', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    int selectedIndex = 0;
+
+    widgetSetup(tester, 800);
+
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        children: const <Widget>[
+          NavigationDrawerDestination(
+            icon: Icon(Icons.ac_unit),
+            label: Text('AC'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.access_alarm),
+            label: Text('Alarm'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.accessible),
+            label: Text('Accessible'),
+            enabled: false,
+          ),
+        ],
+        onDestinationSelected: (int i) {
+          selectedIndex = i;
+        },
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump();
+
+    expect(find.text('AC'), findsOneWidget);
+    expect(find.text('Alarm'), findsOneWidget);
+    expect(find.text('Accessible'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Alarm'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Accessible'));
+    expect(selectedIndex, 1);
+
+    tester.pumpAndSettle();
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { bool? useMaterial3 }) {

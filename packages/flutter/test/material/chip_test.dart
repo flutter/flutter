@@ -290,12 +290,7 @@ void main() {
     expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134394
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{'OpacityLayer': 2},
-  ));
+  });
 
   testWidgetsWithLeakTracking('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
@@ -703,11 +698,13 @@ void main() {
     expect(calledDelete, isFalse);
   });
 
-  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
-        OverlayEntry(
+        entry = OverlayEntry(
           builder: (BuildContext context) {
             return Material(
               child: Chip(
@@ -879,14 +876,17 @@ void main() {
     expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
   });
 
-  testWidgets('Chip padding - LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
+
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
       wrapForChip(
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Material(
                   child: Center(
@@ -915,15 +915,19 @@ void main() {
     expect(tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
   });
 
-  testWidgets('Chip padding - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip padding - RTL', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
+
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       wrapForChip(
         textDirection: TextDirection.rtl,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Material(
                   child: Center(
@@ -1845,7 +1849,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
   });
 
-  testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -2592,7 +2596,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         useMaterial3: false,
@@ -2635,8 +2639,9 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
-  testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2723,8 +2728,9 @@ void main() {
     expect(textColor(), disabledColor);
   });
 
-  testWidgets('Chip uses stateful border side color in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2803,8 +2809,9 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgets('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2884,8 +2891,9 @@ void main() {
 
   });
 
-  testWidgets('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2973,8 +2981,9 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful shape in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     OutlinedBorder? getShape(Set<MaterialState> states) {
 
       if (states.contains(MaterialState.disabled)) {
@@ -3316,8 +3325,9 @@ void main() {
     expect(decoration.shape, shape);
   });
 
-  testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawChip');
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color backgroundColor = Color(0xff00ff00);
 
@@ -3439,7 +3449,7 @@ void main() {
     expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
   });
 
-  testWidgets('Delete button tap target area does not include label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete button tap target area does not include label', (WidgetTester tester) async {
     bool calledDelete = false;
     await tester.pumpWidget(
       wrapForChip(
@@ -3482,7 +3492,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/pull/133615.
-  testWidgets('Material3 - Custom shape without provided side uses default side', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Custom shape without provided side uses default side', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -3506,7 +3516,7 @@ void main() {
     );
   });
 
-  testWidgets("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
     Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -3560,12 +3570,46 @@ void main() {
     );
   });
 
+  testWidgetsWithLeakTracking('Material3 - Chip.iconTheme respects default iconTheme.size', (WidgetTester tester) async {
+    Widget buildChip({ IconThemeData? iconTheme }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: RawChip(
+                iconTheme: iconTheme,
+                avatar: const Icon(Icons.add),
+                label: const SizedBox(width: 100, height: 100),
+                onSelected: (bool newValue) { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff332211))));
+
+    // Icon should have the default chip iconSize.
+    expect(getIconData(tester).size, 18.0);
+    expect(getIconData(tester).color, const Color(0xff332211));
+
+    // Icon should have the provided iconSize.
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff112233), size: 23.0)));
+    await tester.pumpAndSettle();
+
+    expect(getIconData(tester).size, 23.0);
+    expect(getIconData(tester).color, const Color(0xff112233));
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('M2 Chip defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('M2 Chip defaults', (WidgetTester tester) async {
       late TextTheme textTheme;
 
       Widget buildFrame(Brightness brightness) {
@@ -3642,7 +3686,7 @@ void main() {
       expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
     });
 
-    testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,

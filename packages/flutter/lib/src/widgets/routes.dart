@@ -710,7 +710,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
           if (isActive) {
             changedInternalState();
           }
-        });
+        }, debugLabel: 'LocalHistoryRoute.changedInternalState');
       } else {
         changedInternalState();
       }
@@ -834,7 +834,9 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   late Listenable _listenable;
 
   /// The node this scope will use for its root [FocusScope] widget.
-  final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
+  final FocusScopeNode focusScopeNode = FocusScopeNode(
+    debugLabel: '$_ModalScopeState Focus Scope',
+  );
   final ScrollController primaryScrollController = ScrollController();
 
   @override
@@ -936,6 +938,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
+                      // Only top most route can participate in focus traversal.
+                      skipTraversal: !widget.route.isCurrent,
                       child: RepaintBoundary(
                         child: AnimatedBuilder(
                           animation: _listenable, // immutable
@@ -1668,7 +1672,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
             return;
           }
           notification.dispatch(subtreeContext);
-        });
+        }, debugLabel: 'ModalRoute.dispatchNotification');
     }
   }
 
@@ -1705,10 +1709,25 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
+  void didChangeNext(Route<dynamic>? nextRoute) {
+    super.didChangeNext(nextRoute);
+    changedInternalState();
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    super.didPopNext(nextRoute);
+    changedInternalState();
+  }
+
+  @override
   void changedInternalState() {
     super.changedInternalState();
-    setState(() { /* internal state already changed */ });
-    _modalBarrier.markNeedsBuild();
+    // No need to mark dirty if this method is called during build phase.
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      setState(() { /* internal state already changed */ });
+      _modalBarrier.markNeedsBuild();
+    }
     _modalScope.maintainState = maintainState;
   }
 
@@ -2155,7 +2174,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
         child: child,
       );
     }
-    return _transitionBuilder!(context, animation, secondaryAnimation, child);
+    return _transitionBuilder(context, animation, secondaryAnimation, child);
   }
 }
 
@@ -2168,8 +2187,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
 /// does not share a context with the location that [showGeneralDialog] is
 /// originally called from. Use a [StatefulBuilder] or a custom
-/// [StatefulWidget] if the dialog needs to update dynamically. The
-/// `pageBuilder` argument can not be null.
+/// [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the
 /// dialog. It is only used when the method is called. Its corresponding widget

@@ -51,7 +51,6 @@
   "reorderItemRight": "Sağa taşı",
   "expandedIconTapHint": "Daralt",
   "collapsedIconTapHint": "Genişlet",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 karakter kaldı",
   "remainingTextFieldCharacterCountOther": "$remainingCount karakter kaldı",
   "refreshIndicatorSemanticLabel": "Yenile",
@@ -143,7 +142,7 @@
   "expandedHint": "Daraltıldı",
   "collapsedHint": "Genişletildi",
   "menuDismissLabel": "Menüyü kapat",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Ara",
+  "searchWebButtonLabel": "Web'de Ara",
+  "shareButtonLabel": "Paylaş..."
 }

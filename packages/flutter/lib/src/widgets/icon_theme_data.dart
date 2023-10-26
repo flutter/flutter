@@ -157,7 +157,7 @@ class IconThemeData with Diagnosticable {
   /// An opacity to apply to both explicit and default icon colors.
   ///
   /// Falls back to 1.0.
-  double? get opacity => _opacity == null ? null : clampDouble(_opacity!, 0.0, 1.0);
+  double? get opacity => _opacity == null ? null : clampDouble(_opacity, 0.0, 1.0);
   final double? _opacity;
 
   /// The default for [Icon.shadows].

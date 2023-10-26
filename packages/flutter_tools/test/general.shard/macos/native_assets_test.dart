@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/macos/native_assets.dart';
@@ -161,6 +162,13 @@ void main() {
       ),
     );
     expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Dry running native assets for macos.',
+        'Dry running native assets for macos done.',
+      ]),
+    );
+    expect(
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
     );
@@ -291,6 +299,13 @@ void main() {
         ),
       );
       expect(
+        (globals.logger as BufferLogger).traceText,
+        stringContainsInOrder(<String>[
+          'Building native assets for [macos_arm64] debug.',
+          'Building native assets for [macos_arm64] done.',
+        ]),
+      );
+      expect(
         nativeAssetsYaml,
         projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
       );
@@ -300,7 +315,7 @@ void main() {
           'package:bar/bar.dart',
           if (flutterTester)
             // Tests run on host system, so the have the full path on the system.
-            '- ${projectUri.resolve('/build/native_assets/macos/bar.dylib').toFilePath()}'
+            '- ${projectUri.resolve('build/native_assets/macos/bar.dylib').toFilePath()}'
           else
             // Apps are a bundle with the dylibs on their dlopen path.
             '- bar.dylib',
@@ -369,11 +384,25 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
     ),
   }, () async {
     if (!const LocalPlatform().isMacOS) {
-      // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
       return;
     }
 
-    final NativeAssetsBuildRunner runner = NativeAssetsBuildRunnerImpl(projectUri, fileSystem, logger);
+    final File packagesFile = fileSystem
+        .directory(projectUri)
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    await packagesFile.parent.create();
+    await packagesFile.create();
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packagesFile,
+      logger: environment.logger,
+    );
+    final NativeAssetsBuildRunner runner = NativeAssetsBuildRunnerImpl(
+      projectUri,
+      packageConfig,
+      fileSystem,
+      logger,
+    );
     final CCompilerConfig result = await runner.cCompilerConfig;
     expect(
       result.cc,

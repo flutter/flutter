@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Color _kScrollbarColor = Color(0x59000000);
 
@@ -13,7 +14,7 @@ const Offset _kGestureOffset = Offset(0, -25);
 const Radius _kScrollbarRadius = Radius.circular(1.5);
 
 void main() {
-  testWidgets('Paints iOS spec', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Paints iOS spec', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -51,7 +52,7 @@ void main() {
     ));
   });
 
-  testWidgets('Paints iOS spec with nav bar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Paints iOS spec with nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(
@@ -96,7 +97,7 @@ void main() {
     ));
   });
 
-  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("should not paint when there isn't enough space", (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(

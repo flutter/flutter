@@ -64,6 +64,9 @@ class ObjectCreated extends ObjectEvent {
   });
 
   /// Name of the instrumented library.
+  ///
+  /// The format of this parameter should be a library Uri.
+  /// For example: `'package:flutter/rendering.dart'`.
   final String library;
 
   /// Name of the instrumented class.

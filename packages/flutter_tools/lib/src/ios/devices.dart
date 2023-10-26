@@ -501,6 +501,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           activeArch: cpuArchitecture,
           deviceID: id,
+          disablePortPublication: debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
@@ -543,6 +544,7 @@ class IOSDevice extends Device {
           debuggingOptions: debuggingOptions,
           launchArguments: launchArguments,
           ipv6: ipv6,
+          uninstallFirst: debuggingOptions.uninstallFirst,
         );
       }
 
@@ -695,6 +697,7 @@ class IOSDevice extends Device {
               debuggingOptions: debuggingOptions,
               launchArguments: launchArguments,
               ipv6: ipv6,
+              uninstallFirst: false,
               skipInstall: true,
             );
             installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
@@ -721,6 +724,18 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
+
+      if ((isCoreDevice || forceXcodeDebugWorkflow) && debuggingOptions.debuggingEnabled && package is BuildableIOSApp) {
+        // When debugging via Xcode, after the app launches, reset the Generated
+        // settings to not include the custom configuration build directory.
+        // This is to prevent confusion if the project is later ran via Xcode
+        // rather than the Flutter CLI.
+        await updateGeneratedXcodeProperties(
+          project: FlutterProject.current(),
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+        );
+      }
     }
   }
 
@@ -737,6 +752,7 @@ class IOSDevice extends Device {
     required DebuggingOptions debuggingOptions,
     required List<String> launchArguments,
     required bool ipv6,
+    required bool uninstallFirst,
     bool skipInstall = false,
   }) {
     final DeviceLogReader deviceLogReader = getLogReader(
@@ -753,7 +769,7 @@ class IOSDevice extends Device {
         appDeltaDirectory: package.appDeltaDirectory,
         launchArguments: launchArguments,
         interfaceType: connectionInterface,
-        uninstallFirst: debuggingOptions.uninstallFirst,
+        uninstallFirst: uninstallFirst,
         skipInstall: skipInstall,
       );
       if (deviceLogReader is IOSDeviceLogReader) {
@@ -861,10 +877,14 @@ class IOSDevice extends Device {
           projectInfo.reportFlavorNotFoundAndExit();
         }
 
+        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
+
         debugProject = XcodeDebugProject(
           scheme: scheme,
           xcodeProject: project.xcodeProject,
           xcodeWorkspace: project.xcodeWorkspace!,
+          hostAppProjectName: project.hostAppProjectName,
+          expectedConfigurationBuildDir: bundle.parent.absolute.path,
           verboseLogging: _logger.isVerbose,
         );
       } else {
@@ -884,18 +904,6 @@ class IOSDevice extends Device {
       // Kill Xcode on shutdown when running from CI
       if (debuggingOptions.usingCISystem) {
         shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
-      }
-
-      if (package is BuildableIOSApp) {
-        // After automating Xcode, reset the Generated settings to not include
-        // the custom configuration build directory. This is to prevent
-        // confusion if the project is later ran via Xcode rather than the
-        // Flutter CLI.
-        await updateGeneratedXcodeProperties(
-          project: flutterProject,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-        );
       }
 
       return debugSuccess;

@@ -54,7 +54,6 @@
   "reorderItemRight": "Pomjeri desno",
   "expandedIconTapHint": "Suzi",
   "collapsedIconTapHint": "Proširi",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Još jedan znak",
   "remainingTextFieldCharacterCountOther": "Još $remainingCount znakova",
   "refreshIndicatorSemanticLabel": "Osvježi",
@@ -146,7 +145,7 @@
   "expandedHint": "Suženo",
   "collapsedHint": "Prošireno",
   "menuDismissLabel": "Odbacivanje menija",
-  "lookUpButtonLabel": "Pogled prema gore",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Pogled nagore",
+  "searchWebButtonLabel": "Pretraži Web",
+  "shareButtonLabel": "Dijeli..."
 }

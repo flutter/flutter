@@ -7,10 +7,11 @@ import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFe
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);
-  final Function(BuildContext) method;
+  final void Function(BuildContext) method;
   final MediaQueryData data;
 }
 
@@ -43,7 +44,7 @@ class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
 }
 
 void main() {
-  testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery does not have a default', (WidgetTester tester) async {
     late final FlutterError error;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
@@ -87,7 +88,7 @@ void main() {
     );
   });
 
-  testWidgets('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -107,7 +108,7 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
     bool tested = false;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
@@ -128,7 +129,7 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -146,7 +147,7 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromView is sane', (WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -162,7 +163,7 @@ void main() {
     expect(data.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
       textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
@@ -199,7 +200,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQueryData.fromView uses data from platformDispatcher if no platformData is provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromView uses data from platformDispatcher if no platformData is provided', (WidgetTester tester) async {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
@@ -229,7 +230,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
       textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
@@ -278,7 +279,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
@@ -329,7 +330,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView updates on notifications (no parent data)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView updates on notifications (no parent data)', (WidgetTester tester) async {
     addTearDown(() => tester.platformDispatcher.clearAllTestValues());
     addTearDown(() => tester.view.reset());
 
@@ -392,7 +393,7 @@ void main() {
     expect(rebuildCount, 5);
   });
 
-  testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView updates on notifications (with parent data)', (WidgetTester tester) async {
     addTearDown(() => tester.platformDispatcher.clearAllTestValues());
     addTearDown(() => tester.view.reset());
 
@@ -451,7 +452,7 @@ void main() {
     expect(rebuildCount, 2);
   });
 
-  testWidgets('MediaQuery.fromView updates when parent data changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView updates when parent data changes', (WidgetTester tester) async {
     late MediaQueryData data;
     int rebuildCount = 0;
     TextScaler textScaler = const TextScaler.linear(55);
@@ -488,7 +489,7 @@ void main() {
     expect(rebuildCount, 2);
   });
 
-  testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
@@ -510,7 +511,7 @@ void main() {
     expect(copied.displayFeatures, data.displayFeatures);
   });
 
-  testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
     // Random and unique double values are used to ensure that the correct
     // values are copied over exactly
     const Size customSize = Size(3.14, 2.72);
@@ -570,7 +571,7 @@ void main() {
     expect(copied.displayFeatures, customDisplayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -642,7 +643,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -711,7 +712,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -783,7 +784,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -852,7 +853,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -924,7 +925,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -993,7 +994,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.textScalerOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.textScalerOf', (WidgetTester tester) async {
     late TextScaler outsideTextScaler;
     late TextScaler insideTextScaler;
 
@@ -1020,7 +1021,7 @@ void main() {
     expect(insideTextScaler, const TextScaler.linear(4.0));
   });
 
-  testWidgets('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
     late Brightness outsideBrightness;
     late Brightness insideBrightness;
 
@@ -1047,7 +1048,7 @@ void main() {
     expect(insideBrightness, Brightness.dark);
   });
 
-  testWidgets('MediaQuery.highContrastOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.highContrastOf', (WidgetTester tester) async {
     late bool outsideHighContrast;
     late bool insideHighContrast;
 
@@ -1074,7 +1075,7 @@ void main() {
     expect(insideHighContrast, true);
   });
 
-  testWidgets('MediaQuery.onOffSwitchLabelsOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.onOffSwitchLabelsOf', (WidgetTester tester) async {
     late bool outsideOnOffSwitchLabels;
     late bool insideOnOffSwitchLabels;
 
@@ -1101,7 +1102,7 @@ void main() {
     expect(insideOnOffSwitchLabels, true);
   });
 
-  testWidgets('MediaQuery.boldTextOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.boldTextOf', (WidgetTester tester) async {
     late bool outsideBoldTextOverride;
     late bool insideBoldTextOverride;
 
@@ -1128,7 +1129,7 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQuery.fromView creates a MediaQuery', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.fromView creates a MediaQuery', (WidgetTester tester) async {
     MediaQuery? mediaQueryOutside;
     MediaQuery? mediaQueryInside;
 
@@ -1153,7 +1154,7 @@ void main() {
     expect(mediaQueryOutside, isNot(mediaQueryInside));
   });
 
-  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
     final MediaQueryData windowData = MediaQueryData.fromWindow(tester.view);
     late MediaQueryData fromWindowData;
 
@@ -1189,7 +1190,7 @@ void main() {
     expect(settingsA, isNot(settingsB));
   });
 
-  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -1263,7 +1264,7 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const TextScaler textScaler = TextScaler.linear(1.2);
@@ -1347,14 +1348,14 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
   });
 
-  testWidgets('MediaQueryData.gestureSettings is set from view.gestureSettings', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQueryData.gestureSettings is set from view.gestureSettings', (WidgetTester tester) async {
     tester.view.gestureSettings = const GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100);
     addTearDown(() => tester.view.resetGestureSettings());
 
     expect(MediaQueryData.fromView(tester.view).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
   });
 
-  testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery can be partially depended-on', (WidgetTester tester) async {
     MediaQueryData data = const MediaQueryData(
       size: Size(800, 600),
       textScaler: TextScaler.linear(1.1),
@@ -1430,7 +1431,7 @@ void main() {
     expect(textScalerBuildCount, 2);
   });
 
-  testWidgets('MediaQuery partial dependencies', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MediaQuery partial dependencies', (WidgetTester tester) async {
     MediaQueryData data = const MediaQueryData();
 
     int buildCount = 0;

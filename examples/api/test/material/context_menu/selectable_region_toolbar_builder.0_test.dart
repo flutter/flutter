@@ -24,6 +24,9 @@ void main() {
 
     // Right clicking the Text in the SelectionArea shows the custom context
     // menu.
+    final TestGesture primaryMouseButtonGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.text(example.text)),
       kind: PointerDeviceKind.mouse,
@@ -37,7 +40,9 @@ void main() {
     expect(find.text('Print'), findsOneWidget);
 
     // Tap to dismiss.
-    await tester.tapAt(tester.getCenter(find.byType(Scaffold)));
+    await primaryMouseButtonGesture.down(tester.getCenter(find.byType(Scaffold)));
+    await tester.pump();
+    await primaryMouseButtonGesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
