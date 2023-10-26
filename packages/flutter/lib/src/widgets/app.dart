@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection' show HashMap;
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -402,7 +403,8 @@ class WidgetsApp extends StatefulWidget {
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
-       routerConfig = null;
+       routerConfig = null,
+       routeInformationCodec = null;
 
   /// Creates a [WidgetsApp] that uses the [Router] instead of a [Navigator].
   ///
@@ -413,6 +415,7 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   WidgetsApp.router({
     super.key,
+    this.routeInformationCodec,
     this.routeInformationProvider,
     this.routeInformationParser,
     this.routerDelegate,
@@ -609,6 +612,22 @@ class WidgetsApp extends StatefulWidget {
   ///    widget builds the [Router].
   /// {@endtemplate}
   final RouteInformationProvider? routeInformationProvider;
+
+  /// {@template flutter.widgets.widgetsApp.routeInformationCodec}
+  /// A codec to convert [RouteInformation] into a serializable form.
+  ///
+  /// This codec is used for encoding and decoding route information during
+  /// router's state restoration.
+  ///
+  /// Consider provide a codec if the [RouteInformation.state] may contain
+  /// complex objects that are not serializable.
+  ///
+  /// See also:
+  ///
+  ///  * [Router.routeInformationCodec], which receives this object when this
+  ///    widget builds the [Router].
+  /// {@endtemplate}
+  final Codec<RouteInformation?, Object?>? routeInformationCodec;
 
   /// {@template flutter.widgets.widgetsApp.routerConfig}
   /// An object to configure the underlying [Router].
@@ -1671,6 +1690,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       routing = Router<Object>(
         restorationScopeId: 'router',
         routeInformationProvider: _effectiveRouteInformationProvider,
+        routeInformationCodec: widget.routeInformationCodec,
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate!,
         backButtonDispatcher: _effectiveBackButtonDispatcher,

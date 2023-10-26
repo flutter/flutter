@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1228,6 +1230,35 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgetsWithLeakTracking('MaterialApp.router routeInformationCodec pass to router', (WidgetTester tester) async {
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
+        );
+        return route.didPop(result);
+      },
+    );
+    addTearDown(delegate.dispose);
+    await tester.pumpWidget(MaterialApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+      routeInformationCodec: const _TestRouteInformationCodec(),
+    ));
+    final Router<Object> router = tester.widget<Router<Object>>(find.byType(Router<Object>));
+    expect(router.routeInformationCodec, const _TestRouteInformationCodec());
+  });
+
   testWidgetsWithLeakTracking('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;
     await tester.pumpWidget(MaterialApp(
@@ -1598,5 +1629,31 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
         ),
       ],
     );
+  }
+}
+
+class _TestRouteInformationCodec extends Codec<RouteInformation?, Object?> {
+  const _TestRouteInformationCodec();
+  @override
+  Converter<Object?, RouteInformation?> get decoder => const _TestRouteInformationDecoder();
+
+  @override
+  Converter<RouteInformation?, Object?> get encoder => const _TestRouteInformationEncoder();
+
+}
+
+class _TestRouteInformationDecoder extends Converter<Object?, RouteInformation?> {
+  const _TestRouteInformationDecoder();
+  @override
+  RouteInformation? convert(Object? input) {
+    return RouteInformation(uri: Uri.parse('/'));
+  }
+}
+
+class _TestRouteInformationEncoder extends Converter<RouteInformation?, Object?> {
+  const _TestRouteInformationEncoder();
+  @override
+  Object? convert(RouteInformation? input) {
+    return null;
   }
 }

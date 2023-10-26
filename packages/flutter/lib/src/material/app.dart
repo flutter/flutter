@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -246,7 +247,8 @@ class MaterialApp extends StatefulWidget {
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
     this.useInheritedMediaQuery = false,
-  }) : routeInformationProvider = null,
+  }) : routeInformationCodec = null,
+       routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
@@ -258,6 +260,7 @@ class MaterialApp extends StatefulWidget {
   const MaterialApp.router({
     super.key,
     this.scaffoldMessengerKey,
+    this.routeInformationCodec,
     this.routeInformationProvider,
     this.routeInformationParser,
     this.routerDelegate,
@@ -348,6 +351,9 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
+
+  /// {@macro flutter.widgets.widgetsApp.routeInformationCodec}
+  final Codec<RouteInformation?, Object?>? routeInformationCodec;
 
   /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
   final RouteInformationProvider? routeInformationProvider;
@@ -974,6 +980,7 @@ class _MaterialAppState extends State<MaterialApp> {
     if (_usesRouter) {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
+        routeInformationCodec: widget.routeInformationCodec,
         routeInformationProvider: widget.routeInformationProvider,
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate,

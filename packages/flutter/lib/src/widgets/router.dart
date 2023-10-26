@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -138,6 +139,7 @@ class RouterConfig<T> {
     this.routeInformationParser,
     required this.routerDelegate,
     this.backButtonDispatcher,
+    this.routeInformationCodec,
   }) : assert((routeInformationProvider == null) == (routeInformationParser == null));
 
   /// The [RouteInformationProvider] that is used to configure the [Router].
@@ -151,6 +153,9 @@ class RouterConfig<T> {
 
   /// The [BackButtonDispatcher] that is used to configure the [Router].
   final BackButtonDispatcher? backButtonDispatcher;
+
+  /// The codec that is passed to the [Router.routeInformationCodec].
+  final Codec<RouteInformation?, Object?>? routeInformationCodec;
 }
 
 /// The dispatcher for opening and closing pages of an application.
@@ -364,7 +369,9 @@ class Router<T> extends StatefulWidget {
     required this.routerDelegate,
     this.backButtonDispatcher,
     this.restorationScopeId,
-  }) : assert(
+    Codec<RouteInformation?, Object?>? routeInformationCodec,
+  }) : routeInformationCodec = routeInformationCodec ?? const _DefaultRouteInformationCodec(),
+       assert(
          routeInformationProvider == null || routeInformationParser != null,
          'A routeInformationParser must be provided when a routeInformationProvider is specified.',
        );
@@ -390,6 +397,7 @@ class Router<T> extends StatefulWidget {
       routeInformationParser: config.routeInformationParser,
       routerDelegate: config.routerDelegate,
       backButtonDispatcher: config.backButtonDispatcher,
+      routeInformationCodec: config.routeInformationCodec,
       restorationScopeId: restorationScopeId,
     );
   }
@@ -434,6 +442,18 @@ class Router<T> extends StatefulWidget {
   /// The two common alternatives are the [RootBackButtonDispatcher] for root
   /// router, or the [ChildBackButtonDispatcher] for other routers.
   final BackButtonDispatcher? backButtonDispatcher;
+
+  /// A codec to convert [RouteInformation] into a serializable form.
+  ///
+  /// This codec is used for encoding and decoding route information during
+  /// state restoration.
+  ///
+  /// Consider provide a codec if the [RouteInformation.state] may contain
+  /// complex objects that are not serializable.
+  ///
+  /// If not provided, this router uses [StandardMessageCodec] to encode
+  /// [RouteInformation.uri] and [RouteInformation.state].
+  final Codec<RouteInformation?, Object?> routeInformationCodec;
 
   /// Restoration ID to save and restore the state of the [Router].
   ///
@@ -595,7 +615,7 @@ enum RouteInformationReportingType {
 class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   Object? _currentRouterTransaction;
   RouteInformationReportingType? _currentIntentionToReport;
-  final _RestorableRouteInformation _routeInformation = _RestorableRouteInformation();
+  late final _RestorableRouteInformation _routeInformation = _RestorableRouteInformation(widget.routeInformationCodec);
   late bool _routeParsePending;
 
   @override
@@ -1570,6 +1590,9 @@ mixin PopNavigatorRouterDelegateMixin<T> on RouterDelegate<T> {
 }
 
 class _RestorableRouteInformation extends RestorableValue<RouteInformation?> {
+  _RestorableRouteInformation(this.codec);
+  final Codec<RouteInformation?, Object?> codec;
+
   @override
   RouteInformation? createDefaultValue() => null;
 
@@ -1579,21 +1602,54 @@ class _RestorableRouteInformation extends RestorableValue<RouteInformation?> {
   }
 
   @override
-  RouteInformation? fromPrimitives(Object? data) {
-    if (data == null) {
+  RouteInformation? fromPrimitives(Object? data) => codec.decode(data);
+
+  @override
+  Object? toPrimitives() {
+    final Object? encoded = codec.encode(value);
+    assert(
+      debugIsSerializableForRestoration(encoded),
+      'RouteInformation is not serializable. Consider provide a custom '
+      'RouteInformation Codec to the Router if the RouteInformation.state '
+      'may contain unserializable object type.\nIf a custom codec is already '
+      'provided and this error still occur, this means codec does not encode '
+      'the RouteInformation into a serializable format.',
+    );
+    return encoded;
+  }
+}
+
+class _DefaultRouteInformationCodec extends Codec<RouteInformation?, Object?> {
+  const _DefaultRouteInformationCodec();
+  @override
+  Converter<Object?, RouteInformation?> get decoder => const _DefaultRouteInformationDecoder();
+
+  @override
+  Converter<RouteInformation?, Object?> get encoder => const _DefaultRouteInformationEncoder();
+
+}
+
+class _DefaultRouteInformationDecoder extends Converter<Object?, RouteInformation?> {
+  const _DefaultRouteInformationDecoder();
+  @override
+  RouteInformation? convert(Object? input) {
+    if (input == null) {
       return null;
     }
-    assert(data is List<Object?> && data.length == 2);
-    final List<Object?> castedData = data as List<Object?>;
+    assert(input is List<Object?> && input.length == 2);
+    final List<Object?> castedData = input as List<Object?>;
     final String? uri = castedData.first as String?;
     if (uri == null) {
       return null;
     }
     return RouteInformation(uri: Uri.parse(uri), state: castedData.last);
   }
+}
 
+class _DefaultRouteInformationEncoder extends Converter<RouteInformation?, Object?> {
+  const _DefaultRouteInformationEncoder();
   @override
-  Object? toPrimitives() {
-    return value == null ? null : <Object?>[value!.uri.toString(), value!.state];
+  Object? convert(RouteInformation? input) {
+    return input == null ? null : <Object?>[input.uri.toString(), input.state];
   }
 }

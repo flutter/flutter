@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -181,7 +183,8 @@ class CupertinoApp extends StatefulWidget {
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
     this.useInheritedMediaQuery = false,
-  }) : routeInformationProvider = null,
+  }) : routeInformationCodec = null,
+       routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
@@ -192,6 +195,7 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.WidgetsApp.router}
   const CupertinoApp.router({
     super.key,
+    this.routeInformationCodec,
     this.routeInformationProvider,
     this.routeInformationParser,
     this.routerDelegate,
@@ -273,6 +277,9 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
+
+  /// {@macro flutter.widgets.widgetsApp.routeInformationCodec}
+  final Codec<RouteInformation?, Object?>? routeInformationCodec;
 
   /// {@macro flutter.widgets.widgetsApp.routeInformationProvider}
   final RouteInformationProvider? routeInformationProvider;
@@ -542,6 +549,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     if (_usesRouter) {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
+        routeInformationCodec: widget.routeInformationCodec,
         routeInformationProvider: widget.routeInformationProvider,
         routeInformationParser: widget.routeInformationParser,
         routerDelegate: widget.routerDelegate,
