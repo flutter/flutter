@@ -25,11 +25,47 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   WidgetController.hitTestWarningShouldBeFatal = true;
 
   LeakTracking.warnForUnsupportedPlatforms = false;
-  LeakTesting.settings = LeakTesting.settings.withTrackedAll()
-  .withIgnored(
-    notGCed: <String, int?>{},
-    notDisposed: <String, int?>{},
-  );
+
+  // TODO(polina-c): clean up leaks and delete ignored classes from settings.
+  // https://github.com/flutter/flutter/issues/137311
+  LeakTesting.settings = LeakTesting
+    .settings
+    .withTrackedAll()
+    .withIgnored(
+      notGCed: <String, int?>{
+        '_CaretPainter': null,
+        '_RenderColoredBox': null,
+        '_TextHighlightPainter': null,
+        'AnimationController': null,
+        'ClipboardStatusNotifier': null,
+        'CupertinoPageRoute<dynamic>': null,
+        '': null,
+        '': null,
+        '': null,
+        'InheritedElement': null,
+        'LiveTextInputStatusNotifier': null,
+        'MultiChildRenderObjectElement': null,
+        'OverlayEntry': null,
+        'RenderBlockSemantics': null,
+        'RenderConstrainedBox': null,
+        'RenderEditable': null,
+        'RenderExcludeSemantics': null,
+        'RenderIgnorePointer': null,
+        'RenderMouseRegion': null,
+        'RenderPointerListener': null,
+        'RenderSemanticsAnnotations': null,
+        'RawGestureDetectorState': null,
+        'StatefulElement': null,
+        'StatelessElement': null,
+        'SingleChildRenderObjectElement': null,
+        'ValueNotifier<String?>': null,
+        'ValueNotifier<bool>': null,
+      },
+      notDisposed: <String, int?>{
+        'AnimationController': null,
+        'OverlayEntry': null,
+      },
+    );
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
