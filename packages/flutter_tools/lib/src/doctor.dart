@@ -417,6 +417,12 @@ class Doctor {
       }
       if (sendEvent) {
         if (validator is GroupedValidator) {
+          // Ensure that all of the subvalidators in the group have
+          // a corresponding subresult incase a validator crashed
+          if (validator.subValidators.length != validator.subResults.length) {
+            continue;
+          }
+
           for (int i = 0; i < validator.subValidators.length; i++) {
             final DoctorValidator subValidator = validator.subValidators[i];
             final ValidationResult subResult = validator.subResults[i];
