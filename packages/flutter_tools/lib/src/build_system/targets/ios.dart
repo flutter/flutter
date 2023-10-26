@@ -283,10 +283,7 @@ abstract class UnpackIOS extends Target {
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
-    final String? archs = environment.defines[kIosArchs];
-    if (archs == null) {
-      throw MissingDefineException(kIosArchs, name);
-    }
+    final String archs = environment.defines[kIosArchs] ?? 'arm64';
     await _copyFramework(environment, sdkRoot);
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
