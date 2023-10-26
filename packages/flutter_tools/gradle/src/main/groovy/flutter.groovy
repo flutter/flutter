@@ -521,6 +521,18 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    // TODO(gustl22): Can remove this check, once apps only depend on `.flutter-plugins-dependencies`.
+    //  This is not the case yet as developers may still use an old `settings.gradle` which includes all the plugins
+    //  from the `.flutter-plugins` file, even if not made for Android. 
+    //  It then tries to add their implementation, which does not exist.
+    /**
+     * Returns `true` if the given path contains an `android/build.gradle` file.
+     */
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+        return editableAndroidProject.exists()
+    }
+
     /**
      * Add the dependencies on other plugin projects to the plugin project.
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
@@ -529,7 +541,8 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginDependencies(Object dependencyObject) {
         assert dependencyObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
-        if (pluginProject == null) {
+        if (pluginProject == null ||
+            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
             return
         }
         assert dependencyObject.dependencies instanceof List
@@ -539,7 +552,8 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null) {
+            if (dependencyProject == null ||
+                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
                 return
             }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
