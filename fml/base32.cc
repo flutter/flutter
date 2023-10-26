@@ -4,6 +4,7 @@
 
 #include "flutter/fml/base32.h"
 
+#include <cstdint>  // uint8_t
 #include <limits>
 #include <string>
 
