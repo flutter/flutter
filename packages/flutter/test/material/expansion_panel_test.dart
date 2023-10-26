@@ -358,12 +358,7 @@ void main() {
     expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
-  },
-  // TODO(ksokolovskyi): remove after fixing
-  // https://github.com/flutter/flutter/issues/134838
-  leakTesting: LeakTesting.settings.withTrackedAll().withIgnored(
-    notDisposed: <String, int?>{'AnimationController': 1},
-  ));
+  });
 
   testWidgetsWithLeakTracking('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
@@ -504,7 +499,7 @@ void main() {
     expect(find.text('F'), findsNothing);
   });
 
-  testWidgets('Radio mode calls expansionCallback once if other panels closed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio mode calls expansionCallback once if other panels closed', (WidgetTester tester) async {
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -575,7 +570,7 @@ void main() {
     expect(callbackHistory.last['isExpanded'], equals(false));
   });
 
-  testWidgets('Radio mode calls expansionCallback twice if other panel open prior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio mode calls expansionCallback twice if other panel open prior', (WidgetTester tester) async {
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -655,7 +650,7 @@ void main() {
     expect(callbackResults['isExpanded'], equals(true));
   });
 
-  testWidgets('ExpansionPanelList.radio callback displays true or false based on the visibility of a list item',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionPanelList.radio callback displays true or false based on the visibility of a list item',  (WidgetTester tester) async {
     late int lastExpanded;
     bool topElementExpanded = false;
     bool bottomElementExpanded = false;
@@ -750,7 +745,7 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'didUpdateWidget accounts for toggling between ExpansionPanelList '
     'and ExpansionPaneList.radio',
     (WidgetTester tester) async {
@@ -1211,7 +1206,7 @@ void main() {
     expect(find.text('D'), findsOneWidget);
   });
 
-  testWidgets('Toggle ExpansionPanel when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Toggle ExpansionPanel when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 

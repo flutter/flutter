@@ -902,14 +902,9 @@ void main() {
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
-  },
-  // TODO(ksokolovskyi): remove after fixing
-  // https://github.com/flutter/flutter/issues/134838
-  leakTesting: LeakTesting.settings.withTrackedAll().withIgnored(
-    notDisposed: <String, int?>{'AnimationController': 2},
-  ));
+  });
 
-  testWidgets('MergeableMaterial replace gap with chunk', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MergeableMaterial replace gap with chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1001,7 +996,7 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial replace chunk with gap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MergeableMaterial replace chunk with gap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
