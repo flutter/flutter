@@ -58,7 +58,6 @@ void main() {
         config: config,
         childrenInInversePaintOrder: <SemanticsNode>[
           SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
             ..tags = tags,
         ],
@@ -172,6 +171,54 @@ void main() {
       );
     });
 
+    test('provides the correct isMergedIntoParent value', () {
+      final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node1 = SemanticsNode()..rect = const Rect.fromLTRB(1.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node11 = SemanticsNode()..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node12 = SemanticsNode()..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
+
+      final SemanticsConfiguration noMergeConfig = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = false;
+
+      final SemanticsConfiguration mergeConfig = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
+
+      node1.updateWith(config: noMergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node11, node12]);
+
+      expect(node1.isMergedIntoParent, false);
+      expect(node1.mergeAllDescendantsIntoThisNode, false);
+      expect(node11.isMergedIntoParent, false);
+      expect(node12.isMergedIntoParent, false);
+      expect(root.isMergedIntoParent, false);
+
+      root.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node1]);
+      expect(node1.isMergedIntoParent, true);
+      expect(node1.mergeAllDescendantsIntoThisNode, false);
+      expect(node11.isMergedIntoParent, true);
+      expect(node12.isMergedIntoParent, true);
+      expect(root.isMergedIntoParent, false);
+      expect(root.mergeAllDescendantsIntoThisNode, true);
+
+      // Change config
+      node1.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node11, node12]);
+      expect(node1.isMergedIntoParent, true);
+      expect(node1.mergeAllDescendantsIntoThisNode, true);
+      expect(node11.isMergedIntoParent, true);
+      expect(node12.isMergedIntoParent, true);
+      expect(root.isMergedIntoParent, false);
+      expect(root.mergeAllDescendantsIntoThisNode, true);
+
+      root.updateWith(config: noMergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node1]);
+      expect(node1.isMergedIntoParent, false);
+      expect(node1.mergeAllDescendantsIntoThisNode, true);
+      expect(node11.isMergedIntoParent, true);
+      expect(node12.isMergedIntoParent, true);
+      expect(root.isMergedIntoParent, false);
+      expect(root.mergeAllDescendantsIntoThisNode, false);
+    });
+
     test('mutate existing semantic node list errors', () {
       final SemanticsNode node = SemanticsNode()
         ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
@@ -182,7 +229,6 @@ void main() {
 
       final List<SemanticsNode> children = <SemanticsNode>[
         SemanticsNode()
-          ..isMergedIntoParent = true
           ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
       ];
 
@@ -193,8 +239,7 @@ void main() {
 
       children.add(
         SemanticsNode()
-          ..isMergedIntoParent = true
-          ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0),
+          ..rect = const Rect.fromLTRB(42.0, 42.0, 52.0, 52.0),
       );
 
       {
@@ -223,10 +268,8 @@ void main() {
         late FlutterError error;
         final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
           SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
           SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
         ];
         node.updateWith(
@@ -235,11 +278,9 @@ void main() {
         );
         try {
           modifiedChildren[0] = SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
           modifiedChildren[1] = SemanticsNode()
-            ..isMergedIntoParent = true
-            ..rect = const Rect.fromLTRB(40.0, 14.0, 20.0, 20.0);
+            ..rect = const Rect.fromLTRB(40.0, 14.0, 60.0, 60.0);
           node.updateWith(
             config: config,
             childrenInInversePaintOrder: modifiedChildren,
@@ -255,12 +296,12 @@ void main() {
           '   containing the desired `SemanticsNode`s.\n'
           '   Error details:\n'
           '   Child node at position 0 was replaced:\n'
-          '   Previous child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
+          '   Previous child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
+          '   New child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
           '\n'
           '   Child node at position 1 was replaced:\n'
-          '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n',
+          '   Previous child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 60.0, 60.0))\n',
         ));
 
         expect(
