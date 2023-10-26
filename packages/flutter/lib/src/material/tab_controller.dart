@@ -211,12 +211,8 @@ class TabController extends ChangeNotifier {
         });
     } else {
       _indexIsChangingCount += 1;
-      _indexChangingDuration = animationDuration;
-      _indexChangingCurve = Curves.ease;
       _animationController!.value = _index.toDouble();
       _indexIsChangingCount -= 1;
-      _indexChangingDuration = null;
-      _indexChangingCurve = null;
       notifyListeners();
     }
   }
