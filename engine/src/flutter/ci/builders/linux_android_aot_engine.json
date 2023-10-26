@@ -154,12 +154,28 @@
             "ninja": {
                 "config": "android_profile_arm64",
                 "targets": [
-                    "default",
                     "clang_x64/gen_snapshot",
+                    "default",
+                    "flutter/testing/scenario_app/android",
                     "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:analyze_snapshot"
                 ]
-            }
+            },
+            "tests": [
+                {
+                    "env": {
+                        "STORAGE_BUCKET": "gs://flutter_firebase_testlab_staging",
+                        "GCP_PROJECT": "flutter-infra-staging"
+                    },
+                    "name": "test: Android Firebase Test",
+                    "language": "python3",
+                    "script": "flutter/ci/firebase_testlab.py",
+                    "parameters": [
+                        "--variant",
+                        "android_profile_arm64"
+                    ]
+                }
+            ]
         },
         {
             "archives": [
