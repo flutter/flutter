@@ -31,7 +31,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   LeakTesting.settings = LeakTesting
     .settings
     .withTrackedAll()
-    .withIgnored();
+    .withIgnored(
+      allNotGCed: true,
+    );
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
