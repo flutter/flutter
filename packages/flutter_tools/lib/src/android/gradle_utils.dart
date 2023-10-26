@@ -742,7 +742,7 @@ void exitWithNoSdkMessage() {
           flutterUsage: globals.flutterUsage)
       .send();
   throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
-      'Try setting the ANDROID_SDK_ROOT environment variable.');
+      'Try setting the ANDROID_HOME environment variable.');
 }
 
 // Data class to hold normal/defined Java <-> Gradle compatability criteria.

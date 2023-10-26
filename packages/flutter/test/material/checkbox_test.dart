@@ -835,7 +835,7 @@ void main() {
     final Offset checkboxTopLeftGlobal = tester.getTopLeft(find.byType(Checkbox));
     final Offset checkboxCenterGlobal = tester.getCenter(find.byType(Checkbox));
     final Offset checkboxCenterLocal = checkboxCenterGlobal - checkboxTopLeftGlobal;
-    await tester.startGesture(checkboxTopLeftGlobal);
+    final TestGesture gesture = await tester.startGesture(checkboxTopLeftGlobal);
     await tester.pump();
     // Wait for the splash to be drawn, but not long enough for it to animate towards the center, since
     // we want to catch it in its starting position.
@@ -844,6 +844,10 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints..circle(x: checkboxCenterLocal.dx, y: checkboxCenterLocal.dy),
     );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Material2 - Checkbox can be hovered and has correct hover color', (WidgetTester tester) async {
@@ -1365,7 +1369,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildCheckbox());
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1376,7 +1380,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox(active: true));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1399,9 +1403,9 @@ void main() {
 
     await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildCheckbox());
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture3.addPointer();
+    await gesture3.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1409,6 +1413,11 @@ void main() {
       paints..circle(color: theme.hoverColor),
       reason: 'Hovered Checkbox should use default hovered overlay color',
     );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Material3 - Checkbox default overlay color in active/pressed/focused/hovered states', (WidgetTester tester) async {
@@ -1433,7 +1442,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildCheckbox());
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1443,7 +1452,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox(active: true));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1465,9 +1474,9 @@ void main() {
 
     await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildCheckbox());
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture3.addPointer();
+    await gesture3.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1475,6 +1484,11 @@ void main() {
       paints..circle(color: colors.onSurface.withOpacity(0.08)),
       reason: 'Hovered Checkbox should use default hovered overlay color',
     );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Checkbox overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
@@ -1527,7 +1541,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildCheckbox(useOverlay: false));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1541,7 +1555,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox(active: true, useOverlay: false));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1555,7 +1569,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox());
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture3 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1569,7 +1583,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox(active: true));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture4 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1598,9 +1612,9 @@ void main() {
     );
 
     // Start hovering
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture5 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture5.addPointer();
+    await gesture5.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1612,6 +1626,13 @@ void main() {
         ),
       reason: 'Hovered Checkbox should use overlay color $hoverOverlayColor over $hoverColor',
     );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await gesture3.up();
+    await gesture4.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Tristate Checkbox overlay color resolves in pressed active/inactive states', (WidgetTester tester) async {

@@ -177,7 +177,7 @@ class OverlayEntry implements Listenable {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         overlay._markDirty();
-      });
+      }, debugLabel: 'OverlayEntry.markDirty');
     } else {
       overlay._markDirty();
     }
@@ -383,6 +383,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// An [Overlay] widget requires a [Directionality] widget to be in scope, so
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
+///
+/// For widgets drawn in an [OverlayEntry], do not assume that the size of the
+/// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
+/// have different sizes.
 ///
 /// {@tool dartpad}
 /// This example shows how to use the [Overlay] to highlight the [NavigationBar]
@@ -919,12 +923,26 @@ class _TheaterParentData extends StackParentData {
   // children that are created by an OverlayPortal.
   OverlayEntry? overlayEntry;
 
+  /// A [OverlayPortal] makes its overlay child a render child of an ancestor
+  /// [Overlay]. Currently, to make sure the overlay child is painted after its
+  /// [OverlayPortal], and before the next [OverlayEntry] (which could be
+  /// something that should obstruct the overlay child, such as a [ModalRoute])
+  /// in the host [Overlay], the paint order of each overlay child is managed by
+  /// the [OverlayEntry] that hosts its [OverlayPortal].
+  ///
+  /// The following methods are exposed to allow easy access to the overlay
+  /// children's render objects whose order is managed by [overlayEntry], in the
+  /// right order.
+
   // _overlayStateMounted is set to null in _OverlayEntryWidgetState's dispose
   // method. This property is only accessed during layout, paint and hit-test so
   // the `value!` should be safe.
   Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.iterator;
   Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._hitTestOrderIterable.iterator;
-  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.forEach(visitor);
+
+  // A convenience method for traversing `paintOrderIterator` with a
+  // [RenderObjectVisitor].
+  void visitOverlayPortalChildrenOnOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.forEach(visitor);
 }
 
 class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
@@ -974,7 +992,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-      childParentData.visitChildrenOfOverlayEntry(_detachChild);
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry(_detachChild);
       child = childParentData.nextSibling;
     }
   }
@@ -1193,7 +1211,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-      childParentData.visitChildrenOfOverlayEntry(visitor);
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
   }
@@ -1204,7 +1222,6 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-      childParentData.visitChildrenOfOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
   }
@@ -1260,7 +1277,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       }
 
       int subcount = 1;
-      childParentData.visitChildrenOfOverlayEntry((RenderObject renderObject) {
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry((RenderObject renderObject) {
         final RenderBox child = renderObject as RenderBox;
         if (onstage) {
           onstageChildren.add(
@@ -1410,7 +1427,7 @@ class OverlayPortalController {
       : _zOrderIndex != null;
   }
 
-  /// Conventience method for toggling the current [isShowing] status.
+  /// Convenience method for toggling the current [isShowing] status.
   ///
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
@@ -1463,6 +1480,17 @@ class OverlayPortalController {
 /// order between their overlay children is the order in which
 /// [OverlayPortalController.show] was called. The last [OverlayPortal] to have
 /// called `show` gets to paint its overlay child in the foreground.
+///
+/// ### Semantics
+///
+/// The semantics subtree generated by the overlay child is considered attached
+/// to [OverlayPortal] instead of the target [Overlay]. An [OverlayPortal]'s
+/// semantics subtree can be dropped from the semantics tree due to invisibility
+/// while the overlay child is still visible (for example, when the
+/// [OverlayPortal] is completely invisible in a [ListView] but kept alive by
+/// a [KeepAlive] widget). When this happens the semantics subtree generated by
+/// the overlay child is also dropped, even if the overlay child is still visible
+/// on screen.
 ///
 /// {@template flutter.widgets.overlayPortalVsOverlayEntry}
 /// ### Differences between [OverlayPortal] and [OverlayEntry]
@@ -2024,8 +2052,9 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   }
 }
 
-// A `RenderProxyBox` that defers its layout until its `_layoutSurrogate` is
-// laid out.
+// A `RenderProxyBox` that defers its layout until its `_layoutSurrogate` (which
+// is not necessarily an ancestor of this RenderBox, but shares at least one
+// `_RenderTheater` ancestor with this RenderBox) is laid out.
 //
 // This `RenderObject` must be a child of a `_RenderTheater`. It guarantees that:
 //
@@ -2195,5 +2224,14 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // layout, this makes sure that _deferredLayoutChild is reachable via tree
     // walk.
     _deferredLayoutChild?.layoutByLayoutSurrogate();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    super.visitChildrenForSemantics(visitor);
+    final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
+    if (deferredChild != null) {
+      visitor(deferredChild);
+    }
   }
 }

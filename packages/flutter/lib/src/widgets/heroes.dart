@@ -902,7 +902,7 @@ class HeroController extends NavigatorObserver {
           return;
         }
         _startHeroTransition(from, to, flightType, isUserGestureTransition);
-      });
+      }, debugLabel: 'HeroController.startTransition');
     }
   }
 
