@@ -347,6 +347,7 @@ class Message {
     }
   ) : assert(resourceId.isNotEmpty),
       value = _value(templateBundle.resources, resourceId),
+      formattedResourceId = _formattedResourceId(resourceId, templateBundle.namespace),
       description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
       templatePlaceholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
       localePlaceholders = <LocaleInfo, Map<String, Placeholder>>{},
@@ -389,6 +390,7 @@ class Message {
   }
 
   final String resourceId;
+  final String formattedResourceId;
   final String value;
   final String? description;
   late final Map<LocaleInfo, String?> messages;
@@ -408,6 +410,9 @@ class Message {
     return templatePlaceholders.values
       .map((Placeholder templatePlaceholder) => placeholders[templatePlaceholder.name] ?? templatePlaceholder);
   }
+
+  static String _formattedResourceId(String resourceId, String namespace) =>
+    namespace.isEmpty ? resourceId : '${namespace}_$resourceId';
 
   static String _value(Map<String, Object?> bundle, String resourceId) {
     final Object? value = bundle[resourceId];
@@ -591,17 +596,18 @@ class Message {
 /// Represents the contents of one ARB file.
 class AppResourceBundle {
   /// Assuming that the caller has verified that the file exists and is readable.
-  factory AppResourceBundle(File file) {
+  factory AppResourceBundle(File file, String namespace) {
     final Map<String, Object?> resources = parseJsonFile(file);
     final LocaleInfo localeInfo = localeInfoFromFile(file, cachedResources: resources);
     final Iterable<String> ids = resources.keys.where((String key) => !key.startsWith('@'));
-    return AppResourceBundle._(file, localeInfo, resources, ids);
+    return AppResourceBundle._(file, localeInfo, resources, ids, namespace);
   }
 
-  const AppResourceBundle._(this.file, this.locale, this.resources, this.resourceIds);
+  const AppResourceBundle._(this.file, this.locale, this.resources, this.resourceIds, this.namespace);
 
   final File file;
   final LocaleInfo locale;
+  final String namespace;
   /// JSON representation of the contents of the ARB file.
   final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
@@ -621,9 +627,47 @@ class AppResourceBundle {
   }
 }
 
+// Represents all directories that contain ARB files.
+class AppResourceGroupCollection {
+  factory AppResourceGroupCollection(Directory inputDirectory) {
+    final List<FileSystemEntity> entities = inputDirectory.listSync();
+    final List<Directory> directories = <Directory>[inputDirectory];
+    directories.addAll(entities.whereType<Directory>());
+
+    final Map<String, AppResourceBundleCollection> namespaceToBundleCollection =
+        <String, AppResourceBundleCollection>{};
+
+    for (final Directory directory in directories) {
+      final bool isRootDirectory = directory == inputDirectory;
+      final String namespace = isRootDirectory ? '' : directory.basename;
+      final AppResourceBundleCollection bundleCollection =
+        AppResourceBundleCollection(
+          directory,
+          namespace
+        );
+
+      namespaceToBundleCollection[namespace] = bundleCollection;
+    }
+
+    return AppResourceGroupCollection._(namespaceToBundleCollection);
+  }
+
+  AppResourceGroupCollection._(this._namespaceToBundleCollection);
+
+  final Map<String, AppResourceBundleCollection> _namespaceToBundleCollection;
+
+  Iterable<AppResourceBundle> get allBundles => _namespaceToBundleCollection.values.expand((AppResourceBundleCollection element) => element.bundles);
+
+  AppResourceBundleCollection bundleForNamespace(String namespace) => _namespaceToBundleCollection[namespace]!;
+
+  Iterable<AppResourceBundle> bundlesForLanguage(LocaleInfo locale) => allBundles.where((AppResourceBundle bundle) => bundle.locale == locale);
+
+  Set<LocaleInfo> get supportedLocales => Set<LocaleInfo>.from(allBundles.map((AppResourceBundle bundle) => bundle.locale));
+}
+
 // Represents all of the ARB files in [directory] as [AppResourceBundle]s.
 class AppResourceBundleCollection {
-  factory AppResourceBundleCollection(Directory directory) {
+  factory AppResourceBundleCollection(Directory directory, String namespace) {
     // Assuming that the caller has verified that the directory is readable.
 
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
@@ -634,12 +678,12 @@ class AppResourceBundleCollection {
     // by the time we handle locales with country codes.
     final List<File> files = directory
       .listSync()
-      .whereType<File>()
+.whereType<File>()
       .where((File e) => filenameRE.hasMatch(e.path))
       .toList()
       ..sort(sortFilesByPath);
     for (final File file in files) {
-      final AppResourceBundle bundle = AppResourceBundle(file);
+      final AppResourceBundle bundle = AppResourceBundle(file, namespace);
       if (localeToBundle[bundle.locale] != null) {
         throw L10nException(
           "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
@@ -667,11 +711,12 @@ class AppResourceBundleCollection {
       }
     });
 
-    return AppResourceBundleCollection._(directory, localeToBundle, languageToLocales);
+    return AppResourceBundleCollection._(namespace, directory, localeToBundle, languageToLocales);
   }
 
-  const AppResourceBundleCollection._(this._directory, this._localeToBundle, this._languageToLocales);
+  const AppResourceBundleCollection._(this.namespace, this._directory, this._localeToBundle, this._languageToLocales);
 
+  final String namespace;
   final Directory _directory;
   final Map<LocaleInfo, AppResourceBundle> _localeToBundle;
   final Map<String, List<LocaleInfo>> _languageToLocales;
