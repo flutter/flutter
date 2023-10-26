@@ -1345,6 +1345,13 @@ void main() {
 
   testWidgetsWithLeakTracking('Verify showModalBottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 2),
+      reverseDuration: const Duration(seconds: 2),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -1355,11 +1362,7 @@ void main() {
                 showModalBottomSheet<void>(
                   context: context,
                   // The default duration and reverseDuration is 1 second
-                  transitionAnimationController: AnimationController(
-                    vsync: const TestVSync(),
-                    duration: const Duration(seconds: 2),
-                    reverseDuration: const Duration(seconds: 2),
-                  ),
+                  transitionAnimationController: controller,
                   builder: (BuildContext context) {
                     return const Text('BottomSheet');
                   },
@@ -1465,6 +1468,13 @@ void main() {
   testWidgetsWithLeakTracking('Verify persistence BottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const Key tapTargetToClose = Key('tap-target-to-close');
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 2),
+      reverseDuration: const Duration(seconds: 2),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -1475,11 +1485,7 @@ void main() {
                 showBottomSheet<void>(
                   context: context,
                   // The default duration and reverseDuration is 1 second
-                  transitionAnimationController: AnimationController(
-                    vsync: const TestVSync(),
-                    duration: const Duration(seconds: 2),
-                    reverseDuration: const Duration(seconds: 2),
-                  ),
+                  transitionAnimationController: controller,
                   builder: (BuildContext context) {
                     return ElevatedButton(
                       key: tapTargetToClose,

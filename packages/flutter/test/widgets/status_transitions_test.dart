@@ -64,6 +64,7 @@ void main() {
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
+    addTearDown(anotherController.dispose);
 
     await tester.pumpWidget(TestStatusTransitionWidget(
       animation: anotherController,
