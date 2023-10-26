@@ -3934,6 +3934,10 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
     bringup: true
 
   - name: Mac_ios flutter_gallery_ios__compile
@@ -4777,7 +4781,6 @@ targets:
 
   - name: Windows_arm64 hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -4861,7 +4864,6 @@ targets:
 
   - name: Windows_arm64 platform_channel_sample_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -4966,7 +4968,6 @@ targets:
 
   - name: Windows_arm64 run_debug_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5003,7 +5004,6 @@ targets:
 
   - name: Windows_arm64 run_release_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5261,7 +5261,6 @@ targets:
 
   - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5289,7 +5288,6 @@ targets:
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5316,7 +5314,6 @@ targets:
 
   - name: Windows_arm64 flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5343,7 +5340,6 @@ targets:
 
   - name: Windows_arm64 flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5370,7 +5366,6 @@ targets:
 
   - name: Windows_arm64 complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5397,7 +5392,6 @@ targets:
 
   - name: Windows_arm64 flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5424,7 +5418,6 @@ targets:
 
   - name: Windows_arm64 platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5517,7 +5510,6 @@ targets:
 
   - name: Windows_arm64 windows_startup_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5540,7 +5532,6 @@ targets:
 
   - name: Windows_arm64 flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:

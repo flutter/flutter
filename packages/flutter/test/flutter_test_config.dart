@@ -34,7 +34,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     .withIgnored(
       allNotGCed: true,
       notDisposed: <String, int?>{
-        'AnimationController': null,
         'OverlayEntry': null,
       },
     );
