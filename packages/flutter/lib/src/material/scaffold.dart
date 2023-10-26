@@ -2350,6 +2350,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       if (animationController.status != AnimationStatus.dismissed) {
         _dismissedBottomSheets.add(bottomSheet);
       }
+      // TODO(https://github.com/flutter/flutter/issues/137294): Ensure that
+      // this Completer has a nullable type (or more likely, `void`).
+      // ignore: null_argument_to_non_null_type
       completer.complete();
     }
 
