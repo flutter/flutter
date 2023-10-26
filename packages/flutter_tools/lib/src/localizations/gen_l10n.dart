@@ -610,6 +610,9 @@ class LocalizationsGenerator {
   // all of the messages.
   bool requiresIntlImport = false;
 
+  // Whether we need to ignore lints of `no_leading_underscores_for_local_identifiers`
+  bool requiresIgnoreNoLeadingLocalVar = false;
+
   // Whether we want to use escaping for ICU messages.
   bool useEscaping = false;
 
@@ -974,8 +977,16 @@ class LocalizationsGenerator {
       );
     });
 
+    if (header.isNotEmpty) {
+      header = '$header\n\n';
+    }
+
+    if (requiresIgnoreNoLeadingLocalVar) {
+      header = '// ignore_for_file: no_leading_underscores_for_local_identifiers\n\n$header';
+    }
+
     return classFileTemplate
-      .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
+      .replaceAll('@(header)', header)
       .replaceAll('@(language)', describeLocale(locale.toString()))
       .replaceAll('@(baseClass)', className)
       .replaceAll('@(fileName)', fileName)
@@ -1161,6 +1172,7 @@ class LocalizationsGenerator {
       // Get a unique temporary variable name.
       int variableCount = 0;
       String getTempVariableName() {
+        requiresIgnoreNoLeadingLocalVar = true;
         return '_temp${variableCount++}';
       }
 
