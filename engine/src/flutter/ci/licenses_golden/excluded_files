@@ -2069,6 +2069,7 @@
 ../../../third_party/gtest-parallel/gtest_parallel.py
 ../../../third_party/gtest-parallel/gtest_parallel_mocks.py
 ../../../third_party/gtest-parallel/gtest_parallel_tests.py
+../../../third_party/harfbuzz/.ci/requirements.txt
 ../../../third_party/harfbuzz/.clang-format
 ../../../third_party/harfbuzz/.editorconfig
 ../../../third_party/harfbuzz/.git
@@ -2097,6 +2098,7 @@
 ../../../third_party/harfbuzz/perf/meson.build
 ../../../third_party/harfbuzz/replace-enum-strings.cmake
 ../../../third_party/harfbuzz/src/Makefile.sources
+../../../third_party/harfbuzz/src/addTable.py
 ../../../third_party/harfbuzz/src/check-c-linkage-decls.py
 ../../../third_party/harfbuzz/src/check-externs.py
 ../../../third_party/harfbuzz/src/check-header-guards.py
@@ -2121,7 +2123,10 @@
 ../../../third_party/harfbuzz/src/gen-vowel-constraints.py
 ../../../third_party/harfbuzz/src/justify.py
 ../../../third_party/harfbuzz/src/meson.build
+../../../third_party/harfbuzz/src/relative_to.py
 ../../../third_party/harfbuzz/src/sample.py
+../../../third_party/harfbuzz/src/wasm/graphite/Makefile
+../../../third_party/harfbuzz/src/wasm/sample/c/Makefile
 ../../../third_party/harfbuzz/subprojects/.gitignore
 ../../../third_party/harfbuzz/subprojects/packagefiles/ragel/meson.build
 ../../../third_party/harfbuzz/test
