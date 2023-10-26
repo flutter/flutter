@@ -202,10 +202,18 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     const std::string& label) const {
-  if (GetInverseEffectTransform().IsIdentity()) {
+  if (GetInverseEffectTransform().IsIdentity() &&
+      GetGeometry()->IsAxisAlignedRect()) {
+    auto coverage = GetCoverage(entity);
+    if (!coverage.has_value()) {
+      return std::nullopt;
+    }
+    auto scale = Vector2(coverage->size / Size(texture_->GetSize()));
+
     return Snapshot{
         .texture = texture_,
-        .transform = entity.GetTransformation(),
+        .transform = Matrix::MakeTranslation(coverage->origin) *
+                     Matrix::MakeScale(scale),
         .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
         .opacity = GetOpacityFactor(),
     };

@@ -55,4 +55,8 @@ bool RectGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
   return coverage.Contains(rect);
 }
 
+bool RectGeometry::IsAxisAlignedRect() const {
+  return true;
+}
+
 }  // namespace impeller
