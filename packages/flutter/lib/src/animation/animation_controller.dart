@@ -20,12 +20,12 @@ export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
 export 'animation.dart' show Animation, AnimationStatus;
 export 'curves.dart' show Curve;
 
+const String _flutterAnimationLibrary = 'package:flutter/animation.dart';
+
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // late bool dismissed;
 // void setState(VoidCallback fn) { }
-
-const String _flutterAnimationLibrary = 'package:flutter/animation.dart';
 
 /// The direction in which an animation is running.
 enum _AnimationDirection {
