@@ -1876,7 +1876,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
     for (final SemanticsNode child in newChildren) {
-      assert(isPartOfNodeMerging || !child.rect.isEmpty, 'Child $child is invisible and should not be added as a child of $this.');
       child._dead = false;
     }
     bool sawChange = false;
@@ -3300,6 +3299,51 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [onSemanticsUpdate].
   void sendSemanticsUpdate() {
+    // Once the tree is up-to-date, verify that there's no invisible nodes in it.
+    assert(() {
+      final List<SemanticsNode> invisibleNodes = <SemanticsNode>[];
+      bool findInvisibleNodes(SemanticsNode rootNode) {
+        if (rootNode.rect.isEmpty) {
+          invisibleNodes.add(rootNode);
+        } else if (!rootNode.mergeAllDescendantsIntoThisNode) {
+          rootNode.visitChildren(findInvisibleNodes);
+        }
+        return true;
+      }
+
+      // The root node is allowed to be invisible when it has no children.
+      final SemanticsNode? rootSemanticsNode = this.rootSemanticsNode;
+      if (rootSemanticsNode != null) {
+        if (!rootSemanticsNode.mergeAllDescendantsIntoThisNode) {
+          rootSemanticsNode.visitChildren(findInvisibleNodes);
+        } else if (rootSemanticsNode.childrenCount > 0 && rootSemanticsNode.rect.isEmpty) {
+          invisibleNodes.add(rootSemanticsNode);
+        }
+      }
+
+      if (invisibleNodes.isEmpty) {
+        return true;
+      }
+
+      List<DiagnosticsNode> nodeToMessage(SemanticsNode invisibleNode) {
+        final SemanticsNode? parent = invisibleNode.parent;
+        return<DiagnosticsNode>[
+          invisibleNode.toDiagnosticsNode(style: DiagnosticsTreeStyle.errorProperty),
+          parent?.toDiagnosticsNode(name: 'which was added as a child of', style: DiagnosticsTreeStyle.errorProperty) ?? ErrorDescription('which was added as the root SemanticsNode'),
+        ];
+      }
+
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Invisible SemanticsNodes should not be added to the tree.'),
+        ErrorDescription('The following invisible SemanticsNodes were added to the tree:'),
+        ...invisibleNodes.expand(nodeToMessage),
+        ErrorHint(
+          'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, '
+          'and its semantic information is not merged into a visible parent.'
+        ),
+      ]);
+    }());
+
     if (_dirtyNodes.isEmpty) {
       return;
     }

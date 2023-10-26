@@ -219,6 +219,81 @@ void main() {
       expect(root.mergeAllDescendantsIntoThisNode, false);
     });
 
+    test('sendSemanticsUpdate verifies no invisible nodes', () {
+      const Rect invisibleRect = Rect.fromLTRB(0.0, 0.0, 0.0, 10.0);
+      const Rect visibleRect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+
+      final SemanticsOwner owner = SemanticsOwner(
+        onSemanticsUpdate: (SemanticsUpdate update) {},
+      );
+      final SemanticsNode root = SemanticsNode.root(owner: owner)..rect = invisibleRect;
+      final SemanticsNode child = SemanticsNode();
+
+      // It's ok to have an invisible root.
+      expect(owner.sendSemanticsUpdate, returnsNormally);
+
+      // It's ok to have an invisible child if it's merged to an ancestor.
+      root
+        ..rect = visibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = true,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, returnsNormally);
+
+      // It's ok if all nodes are visible.
+      root
+        ..rect = visibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = false,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = visibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, returnsNormally);
+
+      // Invisible root with children bad.
+      root
+        ..rect = invisibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = true,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message, 'message', equals(
+          'Invisible SemanticsNodes should not be added to the tree.\n'
+          'The following invisible SemanticsNodes were added to the tree:\n'
+          'SemanticsNode#0(dirty, merge boundary ⛔️, Rect.fromLTRB(0.0, 0.0, 0.0, 10.0), invisible)\n'
+          'which was added as the root SemanticsNode\n'
+          'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.'
+        ),
+      )));
+
+      // Invisible children bad.
+      root
+        ..rect = visibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = false,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message, 'message', equals(
+          'Invisible SemanticsNodes should not be added to the tree.\n'
+          'The following invisible SemanticsNodes were added to the tree:\n'
+          'SemanticsNode#1(dirty, Rect.fromLTRB(0.0, 0.0, 0.0, 10.0), invisible)\n'
+          'which was added as a child of:\n'
+          '  SemanticsNode#0(dirty, Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))\n'
+          'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.'
+        ),
+      )));
+    });
+
     test('mutate existing semantic node list errors', () {
       final SemanticsNode node = SemanticsNode()
         ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
