@@ -31,6 +31,8 @@ class FilterContents : public Contents {
 
   enum class MorphType { kDilate, kErode };
 
+  /// Creates a gaussian blur that operates in one direction.
+  /// See also: `MakeGaussianBlur`
   static std::shared_ptr<FilterContents> MakeDirectionalGaussianBlur(
       FilterInput::Ref input,
       Sigma sigma,
@@ -40,6 +42,8 @@ class FilterContents : public Contents {
       bool is_second_pass = false,
       Sigma secondary_sigma = {});
 
+  /// Creates a gaussian blur that operates in 2 dimensions.
+  /// See also: `MakeDirectionalGaussianBlur`
   static std::shared_ptr<FilterContents> MakeGaussianBlur(
       const FilterInput::Ref& input,
       Sigma sigma_x,
