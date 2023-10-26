@@ -17,6 +17,9 @@ class RectGeometry : public Geometry {
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
 
+  // |Geometry|
+  bool IsAxisAlignedRect() const override;
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
