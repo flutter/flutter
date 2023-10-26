@@ -16,7 +16,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/border_mask_blur_filter_contents.h"
-#include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
+#include "impeller/entity/contents/filters/directional_gaussian_blur_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/filters/local_matrix_filter_contents.h"
 #include "impeller/entity/contents/filters/matrix_filter_contents.h"
