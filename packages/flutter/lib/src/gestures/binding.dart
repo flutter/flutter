@@ -366,7 +366,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     if (resamplingEnabled) {
       _resampler.addOrDispatch(event);
-      _resampler.sample(samplingOffset, _samplingClock);
+      _resampler.sample(samplingOffset, samplingClock);
       return;
     }
 
@@ -505,16 +505,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _hitTests.clear();
   }
 
-  /// Overrides the sampling clock for debugging and testing.
-  ///
-  /// This value is ignored in non-debug builds.
-  @protected
-  SamplingClock? get debugSamplingClock => null;
-
   void _handleSampleTimeChanged() {
     if (!locked) {
       if (resamplingEnabled) {
-        _resampler.sample(samplingOffset, _samplingClock);
+        _resampler.sample(samplingOffset, samplingClock);
       }
       else {
         _resampler.stop();
@@ -522,7 +516,18 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
-  SamplingClock get _samplingClock {
+  /// Overrides the [samplingClock] for debugging and testing.
+  ///
+  /// This value is ignored in non-debug builds.
+  @protected
+  SamplingClock? get debugSamplingClock => null;
+
+  /// Provides access to the current [DateTime] and [StopWatch] objects for
+  /// sampling.
+  ///
+  /// Overridden by [debugSamplingClock] for debug builds and testing. Using
+  /// this object under test will maintain synchronization with [FakeAsync].
+  SamplingClock get samplingClock {
     SamplingClock value = SamplingClock();
     assert(() {
       final SamplingClock? debugValue = debugSamplingClock;

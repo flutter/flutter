@@ -424,6 +424,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// actual current wall-clock time.
   Clock get clock;
 
+  @override
+  SamplingClock? get debugSamplingClock => _TestSamplingClock(clock);
+
   /// Triggers a frame sequence (build/layout/paint/etc),
   /// then flushes microtasks.
   ///
@@ -2146,6 +2149,18 @@ class TestViewConfiguration extends ViewConfiguration {
 
   @override
   String toString() => 'TestViewConfiguration';
+}
+
+class _TestSamplingClock implements SamplingClock {
+  _TestSamplingClock(this._clock);
+
+  @override
+  DateTime now() => _clock.now();
+
+  @override
+  Stopwatch stopwatch() => _clock.stopwatch();
+
+  final Clock _clock;
 }
 
 const int _kPointerDecay = -2;
