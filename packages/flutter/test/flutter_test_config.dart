@@ -26,7 +26,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   LeakTracking.warnForUnsupportedPlatforms = false;
 
-  // TODO(polina-c): clean up leaks and delete ignored classes from settings.
+  // TODO(polina-c): clean up leaks and stop ignoring them.
   // https://github.com/flutter/flutter/issues/137311
   LeakTesting.settings = LeakTesting
     .settings
