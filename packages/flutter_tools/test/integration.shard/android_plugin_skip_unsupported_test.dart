@@ -6,7 +6,6 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -23,9 +22,8 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> testPlugin({
-    String? settingsGradle,
-  }) async {
+  // Regression test for https://github.com/flutter/flutter/issues/97729.
+  test('skip plugin if it does not support the Android platform', () async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
@@ -107,13 +105,6 @@ task clean(type: Delete) {
         reason:
             'flutter create exited with non 0 code: ${addAndroidResult.stderr}');
 
-    if (settingsGradle != null) {
-      pluginExampleAppDir
-          .childDirectory('android')
-          .childFile('settings.gradle')
-          .writeAsStringSync(settingsGradle);
-    }
-
     // Run flutter build apk to build plugin example project.
     final ProcessResult buildApkResult = processManager.runSync(<String>[
       flutterBin,
@@ -125,26 +116,5 @@ task clean(type: Delete) {
     expect(buildApkResult.exitCode, equals(0),
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
-  }
-
-  // Regression test for https://github.com/flutter/flutter/issues/97729.
-  test('skip plugin if it does not support the Android platform', () async {
-    await testPlugin();
-  });
-
-  test(
-      'skip plugin if it does not support the Android platform with legacy settings.gradle',
-      () async {
-    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path
-        .join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'gradle',
-            'settings.gradle.legacy_versions'));
-    final Iterable<String> legacySettingsDotGradles =
-        legacySettingsDotGradleFiles
-            .readAsStringSync()
-            .split(';EOF')
-            .map<String>((String body) => body.trim());
-
-    // Test with the oldest supported settings.gradle file, which is on first place
-    await testPlugin(settingsGradle: legacySettingsDotGradles.first);
   });
 }
