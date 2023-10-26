@@ -2178,7 +2178,7 @@ typedef ConditionalElementVisitor = bool Function(Element element);
 ///         return TextButton(
 ///           child: const Text('BUTTON'),
 ///           onPressed: () {
-///             Scaffold.of(context).showBottomSheet(
+///             Scaffold.of(context).showBottomSheet<void>(
 ///               (BuildContext context) {
 ///                 return Container(
 ///                   alignment: Alignment.center,
