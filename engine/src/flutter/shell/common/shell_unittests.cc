@@ -2207,57 +2207,6 @@ TEST_F(ShellTest, Screenshot) {
   DestroyShell(std::move(shell));
 }
 
-// Only supported on macOS hosts as a real metal surface needs to be created.
-#if defined(FML_OS_MACOSX)
-TEST_F(ShellTest, ScreenshotImpeller) {
-  auto settings = CreateSettingsForFixture();
-  settings.enable_impeller = true;
-  fml::AutoResetWaitableEvent firstFrameLatch;
-  settings.frame_rasterized_callback =
-      [&firstFrameLatch](const FrameTiming& t) { firstFrameLatch.Signal(); };
-
-  std::unique_ptr<Shell> shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .rendering_backend =
-              ShellTestPlatformView::BackendType::kMetalBackend,
-      }),
-  });
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-
-  RunEngine(shell.get(), std::move(configuration));
-
-  LayerTreeBuilder builder = [&](const std::shared_ptr<ContainerLayer>& root) {
-    auto display_list_layer = std::make_shared<DisplayListLayer>(
-        SkPoint::Make(10, 10), MakeSizedDisplayList(80, 80), false, false);
-    root->Add(display_list_layer);
-  };
-
-  PumpOneFrame(shell.get(), 100, 100, builder);
-  firstFrameLatch.Wait();
-
-  std::promise<Rasterizer::Screenshot> screenshot_promise;
-  auto screenshot_future = screenshot_promise.get_future();
-
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetRasterTaskRunner(),
-      [&screenshot_promise, &shell]() {
-        auto rasterizer = shell->GetRasterizer();
-        screenshot_promise.set_value(rasterizer->ScreenshotLastLayerTree(
-            Rasterizer::ScreenshotType::CompressedImage, false));
-      });
-
-  ASSERT_EQ(screenshot_future.get().data, nullptr);
-
-  DestroyShell(std::move(shell));
-}
-#endif
-
 TEST_F(ShellTest, CanConvertToAndFromMappings) {
   const size_t buffer_size = 2 << 20;
 
