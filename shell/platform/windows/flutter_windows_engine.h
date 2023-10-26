@@ -78,7 +78,9 @@ static void WindowsPlatformThreadPrioritySetter(
 class FlutterWindowsEngine {
  public:
   // Creates a new Flutter engine object configured to run |project|.
-  explicit FlutterWindowsEngine(const FlutterProjectBundle& project);
+  FlutterWindowsEngine(
+      const FlutterProjectBundle& project,
+      std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr);
 
   virtual ~FlutterWindowsEngine();
 
@@ -215,11 +217,11 @@ class FlutterWindowsEngine {
   // Returns true if the semantics tree is enabled.
   bool semantics_enabled() const { return semantics_enabled_; }
 
-  // Update the high contrast feature state.
-  void UpdateHighContrastEnabled(bool enabled);
+  // Refresh accessibility features and send them to the engine.
+  void UpdateAccessibilityFeatures();
 
-  // Returns the flags for all currently enabled accessibility features
-  int EnabledAccessibilityFeatures() const;
+  // Refresh high contrast accessibility mode and notify the engine.
+  void UpdateHighContrastMode();
 
   // Returns true if the high contrast feature is enabled.
   bool high_contrast_enabled() const { return high_contrast_enabled_; }
@@ -239,9 +241,6 @@ class FlutterWindowsEngine {
 
   // Returns the executable name for this process or "Flutter" if unknown.
   std::string GetExecutableName() const;
-
-  // Updates accessibility, e.g. switch to high contrast mode
-  void UpdateAccessibilityFeatures(FlutterAccessibilityFeature flags);
 
   // Called when the application quits in response to a quit request.
   void OnQuit(std::optional<HWND> hwnd,
@@ -272,6 +271,10 @@ class FlutterWindowsEngine {
 
   WindowsLifecycleManager* lifecycle_manager() {
     return lifecycle_manager_.get();
+  }
+
+  std::shared_ptr<WindowsProcTable> windows_proc_table() {
+    return windows_proc_table_;
   }
 
  protected:
@@ -319,6 +322,9 @@ class FlutterWindowsEngine {
   // This requires that a view is attached to the engine.
   // Calling this method again resets the keyboard state.
   void InitializeKeyboard();
+
+  // Send the currently enabled accessibility features to the engine.
+  void SendAccessibilityFeatures();
 
   void HandleAccessibilityMessage(FlutterDesktopMessengerRef messenger,
                                   const FlutterDesktopMessage* message);
@@ -414,7 +420,7 @@ class FlutterWindowsEngine {
   // Handler for top level window messages.
   std::unique_ptr<WindowsLifecycleManager> lifecycle_manager_;
 
-  WindowsProcTable windows_proc_table_;
+  std::shared_ptr<WindowsProcTable> windows_proc_table_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };

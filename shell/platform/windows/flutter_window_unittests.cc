@@ -64,7 +64,6 @@ class MockFlutterWindow : public FlutterWindow {
               (override));
   MOCK_METHOD(void, OnSetCursor, (), (override));
   MOCK_METHOD(float, GetScrollOffsetMultiplier, (), (override));
-  MOCK_METHOD(bool, GetHighContrastEnabled, (), (override));
   MOCK_METHOD(float, GetDpiScale, (), (override));
   MOCK_METHOD(bool, IsVisible, (), (override));
   MOCK_METHOD(void, UpdateCursorRect, (const Rect&), (override));
@@ -290,8 +289,7 @@ TEST(FlutterWindowTest, OnThemeChange) {
   MockWindowBindingHandlerDelegate delegate;
   win32window.SetView(&delegate);
 
-  ON_CALL(win32window, GetHighContrastEnabled()).WillByDefault(Return(true));
-  EXPECT_CALL(delegate, UpdateHighContrastEnabled(true)).Times(1);
+  EXPECT_CALL(delegate, OnHighContrastChanged).Times(1);
 
   win32window.InjectWindowMessage(WM_THEMECHANGED, 0, 0);
 }
@@ -303,17 +301,6 @@ TEST(FlutterWindowTest, AccessibilityNodeWithoutView) {
   MockFlutterWindow win32window;
 
   EXPECT_EQ(win32window.GetNativeViewAccessible(), nullptr);
-}
-
-TEST(FlutterWindowTest, InitialAccessibilityFeatures) {
-  MockFlutterWindow win32window;
-  MockWindowBindingHandlerDelegate delegate;
-  win32window.SetView(&delegate);
-
-  ON_CALL(win32window, GetHighContrastEnabled()).WillByDefault(Return(true));
-  EXPECT_CALL(delegate, UpdateHighContrastEnabled(true)).Times(1);
-
-  win32window.SendInitialAccessibilityFeatures();
 }
 
 // Ensure that announcing the alert propagates the message to the alert node.

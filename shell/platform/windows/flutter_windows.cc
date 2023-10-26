@@ -76,11 +76,12 @@ FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
     int width,
     int height,
     FlutterDesktopEngineRef engine_ref) {
+  flutter::FlutterWindowsEngine* engine_ptr = EngineFromHandle(engine_ref);
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
-      std::make_unique<flutter::FlutterWindow>(width, height);
+      std::make_unique<flutter::FlutterWindow>(
+          width, height, engine_ptr->windows_proc_table());
 
-  auto engine = std::unique_ptr<flutter::FlutterWindowsEngine>(
-      EngineFromHandle(engine_ref));
+  auto engine = std::unique_ptr<flutter::FlutterWindowsEngine>(engine_ptr);
   auto view =
       std::make_unique<flutter::FlutterWindowsView>(std::move(window_wrapper));
   auto controller = std::make_unique<flutter::FlutterWindowsViewController>(
@@ -96,7 +97,11 @@ FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
 
   // Must happen after engine is running.
   controller->view()->SendInitialBounds();
-  controller->view()->SendInitialAccessibilityFeatures();
+
+  // The Windows embedder listens to accessibility updates using the
+  // view's HWND. The embedder's accessibility features may be stale if
+  // the app was in headless mode.
+  controller->engine()->UpdateAccessibilityFeatures();
 
   return HandleForViewController(controller.release());
 }

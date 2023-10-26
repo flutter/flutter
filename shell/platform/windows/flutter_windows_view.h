@@ -82,14 +82,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // Send initial bounds to embedder.  Must occur after engine has initialized.
   void SendInitialBounds();
 
-  // Send the initial accessibility features to the window
-  void SendInitialAccessibilityFeatures();
-
   // Set the text of the alert, and create it if it does not yet exist.
   void AnnounceAlert(const std::wstring& text);
 
   // |WindowBindingHandlerDelegate|
-  void UpdateHighContrastEnabled(bool enabled) override;
+  void OnHighContrastChanged() override;
 
   // Returns the frame buffer id for the engine to render to.
   uint32_t GetFrameBufferId(size_t width, size_t height);

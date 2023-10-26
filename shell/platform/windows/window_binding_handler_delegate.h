@@ -136,8 +136,8 @@ class WindowBindingHandlerDelegate {
   // Returns the root view accessibility node, or nullptr if none.
   virtual gfx::NativeViewAccessible GetNativeViewAccessible() = 0;
 
-  // Update the status of the high contrast feature
-  virtual void UpdateHighContrastEnabled(bool enabled) = 0;
+  // Update the status of the high contrast feature.
+  virtual void OnHighContrastChanged() = 0;
 
   // Obtain a pointer to the fragment root delegate.
   // This is required by UIA in order to obtain the fragment root that
