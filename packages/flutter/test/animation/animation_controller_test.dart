@@ -21,15 +21,16 @@ void main() {
         ..platformDispatcher.onDrawFrame = null;
   });
 
-  test('AnimationController dispatches memory events', () {
-    expect(
-      () {
-        AnimationController(
+  test('AnimationController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => AnimationController(
           duration: const Duration(milliseconds: 100),
           vsync: const TestVSync(),
-        ).dispose();
-      },
-      dispatchesMemoryEvents(AnimationController),
+        ).dispose(),
+        AnimationController,
+      ),
+      areCreateAndDispose,
     );
   });
 

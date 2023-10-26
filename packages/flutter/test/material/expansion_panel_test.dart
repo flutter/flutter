@@ -359,10 +359,10 @@ void main() {
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134838
-    notDisposedAllowList: <String, int?> {'AnimationController': 1},
+  // TODO(ksokolovskyi): remove after fixing
+  // https://github.com/flutter/flutter/issues/134838
+  leakTesting: LeakTesting.settings.withTrackedAll().withIgnored(
+    notDisposed: <String, int?>{'AnimationController': 1},
   ));
 
   testWidgetsWithLeakTracking('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
