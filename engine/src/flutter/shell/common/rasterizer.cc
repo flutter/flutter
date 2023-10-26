@@ -876,6 +876,11 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
     return {};
   }
 
+  // Impeller does not support this screenshot type.
+  if (surface_->GetAiksContext()) {
+    return {};
+  }
+
   sk_sp<SkData> data = nullptr;
   std::string format;
 
