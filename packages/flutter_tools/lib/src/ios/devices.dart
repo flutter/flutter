@@ -501,6 +501,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           activeArch: cpuArchitecture,
           deviceID: id,
+          disablePortPublication: debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
@@ -875,6 +876,8 @@ class IOSDevice extends Device {
         if (scheme == null) {
           projectInfo.reportFlavorNotFoundAndExit();
         }
+
+        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
 
         debugProject = XcodeDebugProject(
           scheme: scheme,

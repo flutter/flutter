@@ -600,7 +600,11 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// provided, then they are not part of the comparison. All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -780,7 +784,11 @@ Matcher matchesSemantics({
 /// There are no default expected values, so no unspecified values will be
 /// validated.
 ///
-/// To retrieve the semantics data of a widget, use [WidgetTester.getSemantics]
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -2502,7 +2510,13 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'No SemanticsData provided. '
         'Maybe you forgot to enable semantics?');
     }
-    final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : (node as SemanticsData);
+
+    final SemanticsData data = switch (node) {
+      SemanticsNode() => node.getSemanticsData(),
+      FinderBase<SemanticsNode>() => node.evaluate().single.getSemanticsData(),
+      _ => node as SemanticsData,
+    };
+
     if (label != null && label != data.label) {
       return failWithDescription(matchState, 'label was: ${data.label}');
     }

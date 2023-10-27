@@ -594,6 +594,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void dispose() {
+    _materialBannerController?.dispose();
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
@@ -1165,7 +1166,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         FloatingActionButtonLocation() => true,
       };
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
-        snackBarYOffsetBase = floatingActionButtonRect.top;
+        if (bottomNavigationBarTop != null) {
+          snackBarYOffsetBase = math.min(bottomNavigationBarTop, floatingActionButtonRect.top);
+        } else {
+          snackBarYOffsetBase = floatingActionButtonRect.top;
+        }
       } else {
         // SnackBarBehavior.fixed applies a SafeArea automatically.
         // SnackBarBehavior.floating does not since the positioning is affected
