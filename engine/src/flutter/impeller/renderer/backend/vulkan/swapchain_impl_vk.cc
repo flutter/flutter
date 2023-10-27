@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain_impl_vk.h"
 
+#include "fml/synchronization/count_down_latch.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
@@ -29,6 +30,9 @@ struct FrameSynchronizer {
   vk::UniqueSemaphore render_ready;
   vk::UniqueSemaphore present_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
+  /// @brief A latch that is signaled _after_ a given swapchain image is
+  ///        presented.
+  std::shared_ptr<fml::CountDownLatch> present_latch;
   bool is_valid = false;
 
   explicit FrameSynchronizer(const vk::Device& device) {
@@ -45,12 +49,14 @@ struct FrameSynchronizer {
     acquire = std::move(acquire_res.value);
     render_ready = std::move(render_res.value);
     present_ready = std::move(present_res.value);
+    present_latch = std::make_shared<fml::CountDownLatch>(0u);
     is_valid = true;
   }
 
   ~FrameSynchronizer() = default;
 
   bool WaitForFence(const vk::Device& device) {
+    present_latch->Wait();
     if (auto result = device.waitForFences(
             *acquire,                             // fence
             true,                                 // wait all
@@ -65,6 +71,7 @@ struct FrameSynchronizer {
       VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
       return false;
     }
+    present_latch = std::make_shared<fml::CountDownLatch>(1u);
     return true;
   }
 };
@@ -497,7 +504,10 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     present_info.setImageIndices(indices);
     present_info.setWaitSemaphores(*sync->present_ready);
 
-    switch (auto result = present_queue_.presentKHR(present_info)) {
+    auto result = present_queue_.presentKHR(present_info);
+    sync->present_latch->CountDown();
+
+    switch (result) {
       case vk::Result::eErrorOutOfDateKHR:
         // Caller will recreate the impl on acquisition, not submission.
         [[fallthrough]];
