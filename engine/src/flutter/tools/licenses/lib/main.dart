@@ -1029,6 +1029,8 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   static final RegExp _licenseNamePattern = RegExp(r'^(?!.*\.py$)(?!.*(?:no|update)-copyright)(?!.*mh-bsd-gcc).*\b_*(?:license(?!\.html)|copying|copyright|notice|l?gpl|GPLv2|bsd|mit|mpl?|ftl|Apache)_*\b', caseSensitive: false);
 
   static const Map<String, _Constructor> _specialCaseFiles = <String, _Constructor>{
+    '/flutter/third_party/rapidjson/LICENSE': _RepositoryOpaqueLicenseFile.new,
+    '/flutter/third_party/rapidjson/license.txt': _RepositoryOpaqueLicenseFile.new,
     '/fuchsia/sdk/linux/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/fuchsia/sdk/mac/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/third_party/boringssl/src/LICENSE': _RepositoryOpenSSLLicenseFile.new,
@@ -1041,8 +1043,6 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/third_party/libjpeg-turbo/LICENSE': _RepositoryLibJpegTurboLicenseFile.new,
     '/third_party/libjpeg-turbo/README.ijg': _RepositoryReadmeIjgFile.new,
     '/third_party/libpng/LICENSE': _RepositoryLibPngLicenseFile.new,
-    '/third_party/rapidjson/LICENSE': _RepositoryOpaqueLicenseFile.new,
-    '/third_party/rapidjson/license.txt': _RepositoryOpaqueLicenseFile.new,
     '/third_party/root_certificates/LICENSE': _RepositoryMpl2File.new,
     '/third_party/vulkan-deps/vulkan-validation-layers/src/LICENSE.txt': _RepositoryVulkanApacheLicenseFile.new,
     '/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,

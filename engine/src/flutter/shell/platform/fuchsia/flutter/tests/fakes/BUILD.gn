@@ -28,7 +28,7 @@ source_set("focus") {
     "//build/fuchsia/pkg:sys_cpp_testing",
     "//flutter/lib/ui",
     "//flutter/testing",
-    "//third_party/rapidjson",
+    "//flutter/third_party/rapidjson",
   ]
 }
 
@@ -41,6 +41,6 @@ source_set("pointer") {
     "//build/fuchsia/pkg:sys_cpp_testing",
     "//flutter/lib/ui",
     "//flutter/testing",
-    "//third_party/rapidjson",
+    "//flutter/third_party/rapidjson",
   ]
 }

@@ -255,10 +255,10 @@ source_set("ios_test_flutter_mrc") {
     "//flutter/shell/common:common",
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
     "//third_party/ocmock:ocmock_shared",
-    "//third_party/rapidjson",
     "//third_party/skia",
   ]
 
@@ -327,11 +327,11 @@ shared_library("ios_test_flutter") {
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
+    "//flutter/third_party/rapidjson",
     "//flutter/third_party/spring_animation",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
     "//third_party/ocmock:ocmock_shared",
-    "//third_party/rapidjson",
     "//third_party/skia",
   ]
   public_configs = [
