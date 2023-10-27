@@ -217,7 +217,8 @@ class SegmentedButton<T> extends StatefulWidget {
   /// ```dart
   /// SegmentedButton(
   ///   style: SegmentedButton.styleFrom(foregroundColor: Colors.green),
-  ///   child: segments,
+  ///   segments: segments,
+  ///   selected: selected,
   ///   onSelectionChanged: () {
   ///     // ...
   ///   },
@@ -249,14 +250,17 @@ class SegmentedButton<T> extends StatefulWidget {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
     @Deprecated('Use backgroundColor instead. '
-        'This feature was deprecated after v3.1.0.')
+        'Deprecated to match the ButtonStyle API. '
+        'This feature was deprecated after v3.16.0-18.0.pre.25.')
     Color? primary,
     @Deprecated('Use foregroundColor instead. '
-        'This feature was deprecated after v3.1.0.')
+        'Deprecated to match the ButtonStyle API. '
+        'This feature was deprecated after v3.16.0-18.0.pre.25.')
     Color? onPrimary,
     @Deprecated(
         'Use disabledForegroundColor and disabledBackgroundColor instead. '
-        'This feature was deprecated after v3.1.0.')
+        'Deprecated to match the ButtonStyle API. '
+        'This feature was deprecated after 3.16.0-18.0.pre.25.')
     Color? onSurface,
   }) {
     final Color? background = backgroundColor ?? primary;
