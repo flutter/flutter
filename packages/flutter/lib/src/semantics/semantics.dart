@@ -3344,6 +3344,16 @@ class SemanticsOwner extends ChangeNotifier {
           'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, '
           'and its semantic information is not merged into a visible parent.'
         ),
+        ErrorHint(
+          'An invisible SemantiscNode makes the accessibility experience confusing, '
+          'as it does not provide any visual indication when the user selects it '
+          'via accessibility technologies.'
+        ),
+        ErrorHint(
+          'Consider removing the above invisible SemanticsNodes if they were added by your '
+          'RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+        ),
       ]);
     }());
 
