@@ -12,10 +12,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_message_handler.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
-
-@protocol FlutterTaskQueue
-- (void)dispatch:(dispatch_block_t)block;
-@end
+#import "flutter/shell/platform/darwin/ios/flutter_task_queue_dispatch.h"
 
 namespace flutter {
 
@@ -39,7 +36,7 @@ class PlatformMessageHandlerIos : public PlatformMessageHandler {
                          NSObject<FlutterTaskQueue>* task_queue);
 
   struct HandlerInfo {
-    fml::scoped_nsprotocol<NSObject<FlutterTaskQueue>*> task_queue;
+    fml::scoped_nsprotocol<NSObject<FlutterTaskQueueDispatch>*> task_queue;
     fml::ScopedBlock<FlutterBinaryMessageHandler> handler;
   };
 

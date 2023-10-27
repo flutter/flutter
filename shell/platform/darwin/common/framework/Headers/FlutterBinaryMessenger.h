@@ -31,7 +31,8 @@ typedef void (^FlutterBinaryMessageHandler)(NSData* _Nullable message, FlutterBi
 
 typedef int64_t FlutterBinaryMessengerConnection;
 
-@protocol FlutterTaskQueue;
+@protocol FlutterTaskQueue <NSObject>
+@end
 
 /**
  * A facility for communicating with the Flutter side using asynchronous message

@@ -8,8 +8,6 @@
 #import "FlutterBinaryMessenger.h"
 #import "FlutterCodecs.h"
 
-@protocol FlutterTaskQueue;
-
 NS_ASSUME_NONNULL_BEGIN
 /**
  * A message reply callback.

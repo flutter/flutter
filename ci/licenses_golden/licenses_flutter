@@ -3614,6 +3614,7 @@ ORIGIN: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMeta
 ORIGIN: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/ios/flutter_task_queue_dispatch.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h + ../../../flutter/LICENSE
@@ -6412,6 +6413,7 @@ FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalS
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.mm
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/flutter_task_queue_dispatch.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h
