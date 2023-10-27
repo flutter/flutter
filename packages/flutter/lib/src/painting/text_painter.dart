@@ -501,6 +501,8 @@ class TextPainter {
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
        _textHeightBehavior = textHeightBehavior {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterPaintingLibrary,
@@ -1608,6 +1610,8 @@ class TextPainter {
       _disposed = true;
       return true;
     }());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
