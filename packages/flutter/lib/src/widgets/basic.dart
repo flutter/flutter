@@ -5588,7 +5588,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 /// ## Hit testing and hidden [Flow] widgets
 ///
-/// The [Flow] widget recomputers its children's positions (as used by hit
+/// The [Flow] widget recomputes its children's positions (as used by hit
 /// testing) during the _paint_ phase rather than during the _layout_ phase.
 ///
 /// Widgets like [Opacity] avoid painting their children when those children
