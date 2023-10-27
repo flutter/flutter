@@ -438,6 +438,8 @@ final class _EmptyLineCaretMetrics implements _CaretMetrics {
   final double lineVerticalOffset;
 }
 
+const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
+
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -498,7 +500,15 @@ class TextPainter {
        _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior;
+       _textHeightBehavior = textHeightBehavior {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$TextPainter',
+        object: this,
+      );
+    }
+  }
 
   /// Computes the width of a configured [TextPainter].
   ///
@@ -1598,6 +1608,9 @@ class TextPainter {
       _disposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();

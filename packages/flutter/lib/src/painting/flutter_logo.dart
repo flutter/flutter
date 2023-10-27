@@ -219,6 +219,12 @@ class _FlutterLogoPainter extends BoxPainter {
   late TextPainter _textPainter;
   late Rect _textBoundingRect;
 
+  @override
+  void dispose() {
+    _textPainter.dispose();
+    super.dispose();
+  }
+
   void _prepareText() {
     const String kLabel = 'Flutter';
     _textPainter = TextPainter(
