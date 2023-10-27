@@ -146,6 +146,8 @@ class OverlayEntry implements Listenable {
   /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
   ValueNotifier<_OverlayEntryWidgetState?>? _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
 
+  // TODO(polina-c): stop duplicating code across disposables
+  // https://github.com/flutter/flutter/issues/137435
   /// Dispatches event of object creation to [MemoryAllocations.instance].
   void _maybeDispatchObjectCreation() {
     if (kFlutterMemoryAllocationsEnabled) {
