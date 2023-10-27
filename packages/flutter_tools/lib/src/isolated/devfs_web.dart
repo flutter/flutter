@@ -833,14 +833,11 @@ class WebDevFS implements DevFS {
       final String entrypoint = globals.fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
       webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes(
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
-      final File flutterJs = globals.artifacts!.getHostArtifact(HostArtifact.flutterJs) as File;
-      webAssetServer.writeBytes(
-          'flutter.js',
-          flutterJs.readAsBytesSync());
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -932,6 +929,11 @@ class WebDevFS implements DevFS {
     'amd',
     'require.js',
   ));
+
+  @visibleForTesting
+  final File flutterJs = globals.fs.file(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJs).path
+  );
 
   @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
