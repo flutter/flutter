@@ -175,9 +175,9 @@ source_set("ui") {
     "//flutter/impeller/runtime_stage",
     "//flutter/runtime:dart_plugin_registrant",
     "//flutter/runtime:test_font",
+    "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:dart_io_api",
-    "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/zlib:zlib",
   ]

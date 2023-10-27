@@ -130,7 +130,7 @@ source_set("common_cpp") {
 
   public_deps = [
     ":common_cpp_core",
-    "//third_party/rapidjson",
+    "//flutter/third_party/rapidjson",
   ]
 }
 
