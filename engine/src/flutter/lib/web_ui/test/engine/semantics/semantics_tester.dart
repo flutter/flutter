@@ -7,7 +7,7 @@ import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/embedder.dart';
+import 'package:ui/src/engine/platform_dispatcher.dart';
 import 'package:ui/src/engine/semantics.dart';
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/src/engine/vector_math.dart';
@@ -22,7 +22,8 @@ import '../../common/matchers.dart';
 /// tree has moved outside of the shadowDOM as a workaround for a password
 /// autofill bug on Chrome.
 /// Ref: https://github.com/flutter/flutter/issues/87735
-DomElement get appHostNode => flutterViewEmbedder.flutterViewElement;
+DomElement get rootElement =>
+    EnginePlatformDispatcher.instance.implicitView!.dom.rootElement;
 
 /// CSS style applied to the root of the semantics tree.
 // TODO(yjbanov): this should be handled internally by [expectSemanticsTree].
@@ -354,14 +355,14 @@ class SemanticsTester {
 void expectSemanticsTree(String semanticsHtml) {
   const List<String> ignoredAttributes = <String>['pointer-events'];
   expect(
-    canonicalizeHtml(appHostNode.querySelector('flt-semantics')!.outerHTML!, ignoredAttributes: ignoredAttributes),
+    canonicalizeHtml(rootElement.querySelector('flt-semantics')!.outerHTML!, ignoredAttributes: ignoredAttributes),
     canonicalizeHtml(semanticsHtml),
   );
 }
 
 /// Finds the first HTML element in the semantics tree used for scrolling.
 DomElement? findScrollable() {
-  return appHostNode.querySelectorAll('flt-semantics').firstWhereOrNull(
+  return rootElement.querySelectorAll('flt-semantics').firstWhereOrNull(
     (DomElement? element) {
       return element!.style.overflow == 'hidden' ||
         element.style.overflowY == 'scroll' ||

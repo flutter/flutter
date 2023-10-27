@@ -4,7 +4,8 @@
 
 import '../../engine.dart' show registerHotRestartListener;
 import '../dom.dart';
-import '../embedder.dart';
+import '../platform_dispatcher.dart';
+import '../view_embedder/dom_manager.dart';
 
 // TODO(yjbanov): this is a hack we use to compute ideographic baseline; this
 //                number is the ratio ideographic/alphabetic for font Ahem,
@@ -14,11 +15,9 @@ import '../embedder.dart';
 //                anything as of this writing.
 const double baselineRatioHack = 1.1662499904632568;
 
-/// Hosts ruler DOM elements in a hidden container under a `root` [DomNode].
-///
-/// The `root` [DomNode] is optional. Defaults to [flutterViewEmbedder.glassPaneShadow].
+/// Hosts ruler DOM elements in a hidden container under [DomManager.renderingHost].
 class RulerHost {
-  RulerHost({DomNode? root}) {
+  RulerHost() {
     _rulerHost.style
       ..position = 'fixed'
       ..visibility = 'hidden'
@@ -28,11 +27,10 @@ class RulerHost {
       ..width = '0'
       ..height = '0';
 
-    if (root == null) {
-      flutterViewEmbedder.glassPaneShadow.appendChild(_rulerHost);
-    } else {
-      root.appendChild(_rulerHost);
-    }
+    // TODO(mdebbar): There could be multiple views with multiple rendering hosts.
+    //                https://github.com/flutter/flutter/issues/137344
+    final DomNode renderingHost = EnginePlatformDispatcher.instance.implicitView!.dom.renderingHost;
+    renderingHost.appendChild(_rulerHost);
     registerHotRestartListener(dispose);
   }
 

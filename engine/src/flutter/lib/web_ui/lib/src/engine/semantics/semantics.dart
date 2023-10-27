@@ -14,7 +14,6 @@ import '../alarm_clock.dart';
 import '../browser_detection.dart';
 import '../configuration.dart';
 import '../dom.dart';
-import '../embedder.dart';
 import '../platform_dispatcher.dart';
 import '../util.dart';
 import '../vector_math.dart';
@@ -2198,7 +2197,10 @@ class EngineSemanticsOwner {
     if (_rootSemanticsElement == null) {
       final SemanticsObject root = _semanticsTree[0]!;
       _rootSemanticsElement = root.element;
-      flutterViewEmbedder.semanticsHostElement!.append(root.element);
+      // TODO(mdebbar): There could be multiple views with multiple semantics hosts.
+      //                https://github.com/flutter/flutter/issues/137344
+      final DomElement semanticsHost = EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost;
+      semanticsHost.append(root.element);
     }
 
     _finalizeTree();

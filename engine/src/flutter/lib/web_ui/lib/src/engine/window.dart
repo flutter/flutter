@@ -24,6 +24,7 @@ import 'platform_dispatcher.dart';
 import 'platform_views/message_handler.dart';
 import 'services.dart';
 import 'util.dart';
+import 'view_embedder/dom_manager.dart';
 
 typedef _HandleMessageCallBack = Future<bool> Function();
 
@@ -39,9 +40,9 @@ const int kImplicitViewId = 0;
 /// a few web-specific properties.
 abstract interface class EngineFlutterView extends ui.FlutterView {
   ContextMenu get contextMenu;
+  DomManager get dom;
   MouseCursor get mouseCursor;
   PlatformViewMessageHandler get platformViewMessageHandler;
-  DomElement get rootElement;
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
@@ -69,17 +70,18 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow implements EngineFlu
   final EnginePlatformDispatcher platformDispatcher;
 
   @override
-  late final MouseCursor mouseCursor = MouseCursor(rootElement);
+  late final MouseCursor mouseCursor = MouseCursor(dom.rootElement);
 
   @override
-  late final ContextMenu contextMenu = ContextMenu(rootElement);
+  late final ContextMenu contextMenu = ContextMenu(dom.rootElement);
 
   @override
-  DomElement get rootElement => flutterViewEmbedder.flutterViewElement;
+  late final DomManager dom =
+      DomManager.fromFlutterViewEmbedderDEPRECATED(flutterViewEmbedder);
 
   @override
   late final PlatformViewMessageHandler platformViewMessageHandler =
-      PlatformViewMessageHandler(platformViewsContainer: flutterViewEmbedder.glassPaneElement);
+      PlatformViewMessageHandler(platformViewsContainer: dom.platformViewsHost);
 
   /// Handles the browser history integration to allow users to use the back
   /// button, etc.

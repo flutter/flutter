@@ -13,6 +13,10 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'common.dart';
 import 'test_data.dart';
 
+DomElement get platformViewsHost {
+  return EnginePlatformDispatcher.instance.implicitView!.dom.platformViewsHost;
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -41,8 +45,7 @@ void testMain() {
       // The platform view is now split in two parts. The contents live
       // as a child of the glassPane, and the slot lives in the glassPane
       // shadow root. The slot is the one that has pointer events auto.
-      final DomElement contents =
-          flutterViewEmbedder.glassPaneElement.querySelector('#view-0')!;
+      final DomElement contents = platformViewsHost.querySelector('#view-0')!;
       final DomElement slot =
           flutterViewEmbedder.sceneElement!.querySelector('slot')!;
       final DomElement contentsHost = contents.parent!;
@@ -594,10 +597,7 @@ void testMain() {
         _overlay,
       ]);
 
-      expect(
-        flutterViewEmbedder.glassPaneElement.querySelector('flt-platform-view'),
-        isNotNull,
-      );
+      expect(platformViewsHost.querySelector('flt-platform-view'), isNotNull);
 
       await disposePlatformView(0);
 
@@ -609,10 +609,7 @@ void testMain() {
         _overlay,
       ]);
 
-      expect(
-        flutterViewEmbedder.glassPaneElement.querySelector('flt-platform-view'),
-        isNull,
-      );
+      expect(platformViewsHost.querySelector('flt-platform-view'), isNull);
     });
 
     test(
@@ -681,10 +678,7 @@ void testMain() {
         _overlay,
       ]);
 
-      expect(
-        flutterViewEmbedder.glassPaneElement.querySelector('flt-platform-view'),
-        isNotNull,
-      );
+      expect(platformViewsHost.querySelector('flt-platform-view'), isNotNull);
 
       // Render a frame with a different platform view.
       await createPlatformView(1, 'test-platform-view');
@@ -699,9 +693,9 @@ void testMain() {
       ]);
 
       expect(
-          flutterViewEmbedder.glassPaneElement
-              .querySelectorAll('flt-platform-view'),
-          hasLength(2));
+        platformViewsHost.querySelectorAll('flt-platform-view'),
+        hasLength(2),
+      );
 
       // Render a frame without a platform view, but also without disposing of
       // the platform view.
@@ -715,9 +709,9 @@ void testMain() {
       // The actual contents of the platform view are kept in the dom, until
       // it's actually disposed of!
       expect(
-          flutterViewEmbedder.glassPaneElement
-              .querySelectorAll('flt-platform-view'),
-          hasLength(2));
+        platformViewsHost.querySelectorAll('flt-platform-view'),
+        hasLength(2),
+      );
     });
 
     test(
