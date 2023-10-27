@@ -23,6 +23,23 @@
 
 namespace impeller {
 
+// This function was derived with polynomial regression when comparing the
+// results with Skia.  Changing the curve below should invalidate this.
+//
+// The following data points were used:
+//   0 | 1
+//  75 | 0.8
+// 150 | 0.5
+// 300 | 0.22
+// 400 | 0.2
+// 500 | 0.15
+Sigma ScaleSigma(Sigma sigma) {
+  // Limit the kernel size to 1000x1000 pixels, like Skia does.
+  Scalar clamped = std::min(sigma.sigma, 500.0f);
+  Scalar scalar = 1.02 - 3.89e-3 * clamped + 4.36e-06 * clamped * clamped;
+  return Sigma(clamped * scalar);
+}
+
 DirectionalGaussianBlurFilterContents::DirectionalGaussianBlurFilterContents() =
     default;
 
@@ -76,8 +93,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  // Limit the kernel size to 1000x1000 pixels, like Skia does.
-  auto radius = std::min(Radius{blur_sigma_}.radius, 500.0f);
+  auto radius = Radius{ScaleSigma(blur_sigma_)}.radius;
 
   auto transform = entity.GetTransformation() * effect_transform.Basis();
   auto transformed_blur_radius =
