@@ -211,7 +211,8 @@ def build_engine_executable_command(
     test_command = [executable] + flags
     if gtest:
       gtest_parallel = os.path.join(
-          BUILDROOT_DIR, 'third_party', 'gtest-parallel', 'gtest-parallel'
+          BUILDROOT_DIR, 'flutter', 'third_party', 'gtest-parallel',
+          'gtest-parallel'
       )
       test_command = ['python3', gtest_parallel] + test_command
 
