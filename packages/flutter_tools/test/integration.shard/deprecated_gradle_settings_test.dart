@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/src/interface/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -16,9 +17,9 @@ void main() {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'gradle_deprecated_settings');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    final settingsDotGradleFile = fileSystem.file(
+    final File settingsDotGradleFile = fileSystem.file(
         fileSystem.path.join(workingDirectory, 'android', 'settings.gradle'));
-    final settingsDotGradle = """
+    const String settingsDotGradle = r"""
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -29,7 +30,7 @@ void main() {
 include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
-def localPropertiesFile = new File(rootProject.projectDir, \"local.properties\")
+def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()
 
 def plugins = new Properties()
@@ -40,8 +41,8 @@ if (pluginsFile.exists()) {
 
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include \":\$name\"
-    project(\":\$name\").projectDir = pluginDirectory
+    include ":$name"
+    project(":$name").projectDir = pluginDirectory
 }
 """;
 
