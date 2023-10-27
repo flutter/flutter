@@ -4,19 +4,24 @@
 
 import 'dart:math' as math;
 
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'button_style.dart';
+import 'button_style_button.dart';
 import 'color_scheme.dart';
+
 import 'colors.dart';
 import 'icons.dart';
+import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'segmented_button_theme.dart';
 import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 /// Data describing a segment of a [SegmentedButton].
@@ -177,6 +182,134 @@ class SegmentedButton<T> extends StatefulWidget {
   /// the user taps on the only selected segment it will not be deselected, and
   /// [onSelectionChanged] will not be called.
   final bool emptySelectionAllowed;
+
+   /// A static convenience method that constructs a text button
+  /// [ButtonStyle] given simple values.
+  ///
+  /// The [selectedForegroundColor] color is used to create a
+  /// [MaterialStateProperty] [ButtonStyle.foregroundColor].
+  ///
+  /// The [selectedBackgroundColor] color is used to create a
+  /// [MaterialStateProperty] [ButtonStyle.backgroundColor].
+  ///
+  /// The [foregroundColor] and [disabledForegroundColor] colors are used
+  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// a derived [ButtonStyle.overlayColor].
+  ///
+  /// The [backgroundColor] and [disabledBackgroundColor] colors are
+  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
+  ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  ///
+  /// All of the other parameters are either used directly or used to
+  /// create a [MaterialStateProperty] with a single value for all
+  /// states.
+  ///
+  /// All parameters default to null. By default this method returns
+  /// a [ButtonStyle] that doesn't override anything.
+  ///
+  /// For example, to override the default text and icon colors for a
+  /// [SegmentedButton], as well as its overlay color, with all of the
+  /// standard opacity adjustments for the pressed, focused, and
+  /// hovered states, one could write:
+  ///
+  /// ```dart
+  /// SegmentedButton(
+  ///   style: SegmentedButton.styleFrom(foregroundColor: Colors.green),
+  ///   child: segments,
+  ///   onSelectionChanged: () {
+  ///     // ...
+  ///   },
+  /// ),
+  /// ```
+  static ButtonStyle styleFrom({
+    Color? foregroundColor,
+    Color? selectedForegroundColor,
+    Color? selectedBackgroundColor,
+    Color? backgroundColor,
+    Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
+    Color? shadowColor,
+    Color? surfaceTintColor,
+    double? elevation,
+    TextStyle? textStyle,
+    EdgeInsetsGeometry? padding,
+    Size? minimumSize,
+    Size? fixedSize,
+    Size? maximumSize,
+    BorderSide? side,
+    OutlinedBorder? shape,
+    MouseCursor? enabledMouseCursor,
+    MouseCursor? disabledMouseCursor,
+    VisualDensity? visualDensity,
+    MaterialTapTargetSize? tapTargetSize,
+    Duration? animationDuration,
+    bool? enableFeedback,
+    AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
+    @Deprecated('Use backgroundColor instead. '
+        'This feature was deprecated after v3.1.0.')
+    Color? primary,
+    @Deprecated('Use foregroundColor instead. '
+        'This feature was deprecated after v3.1.0.')
+    Color? onPrimary,
+    @Deprecated(
+        'Use disabledForegroundColor and disabledBackgroundColor instead. '
+        'This feature was deprecated after v3.1.0.')
+    Color? onSurface,
+  }) {
+    final Color? background = backgroundColor ?? primary;
+    selectedBackgroundColor ??= background;
+    final Color? disabledBackground =
+        disabledBackgroundColor ?? onSurface?.withOpacity(0.12);
+    final MaterialStateProperty<Color?>? backgroundColorProp =
+        (background == null && disabledBackground == null)
+            ? null
+            : _SegmentButtonDefaultColor(
+                background, disabledBackground, selectedBackgroundColor);
+    final Color? foreground = foregroundColor ?? onPrimary;
+    selectedForegroundColor ??= foreground;
+    final Color? disabledForeground =
+        disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final MaterialStateProperty<Color?>? foregroundColorProp =
+        (foreground == null && disabledForeground == null)
+            ? null
+            : _SegmentButtonDefaultColor(
+                foreground, disabledForeground, selectedForegroundColor);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+        ? null
+        : _SegmentedButtonDefaultOverlay(foreground);
+    final MaterialStateProperty<double>? elevationValue = (elevation == null)
+        ? null
+        : _SegmentedButtonDefaultElevation(elevation);
+    final MaterialStateProperty<MouseCursor?> mouseCursor =
+        _SegmentedButtonDefaultMouseCursor(
+            enabledMouseCursor, disabledMouseCursor);
+
+    return ButtonStyle(
+      textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
+      backgroundColor: backgroundColorProp,
+      foregroundColor: foregroundColorProp,
+      overlayColor: overlayColor,
+      shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
+      surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      elevation: elevationValue,
+      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+      minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+      maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
+      side: ButtonStyleButton.allOrNull<BorderSide>(side),
+      shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+      mouseCursor: mouseCursor,
+      visualDensity: visualDensity,
+      tapTargetSize: tapTargetSize,
+      animationDuration: animationDuration,
+      enableFeedback: enableFeedback,
+      alignment: alignment,
+      splashFactory: splashFactory,
+    );
+  }
 
   /// Customizes this button's appearance.
   ///
@@ -417,6 +550,93 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     super.dispose();
   }
 }
+
+@immutable
+class _SegmentedButtonDefaultOverlay extends MaterialStateProperty<Color?>
+    with Diagnosticable {
+  _SegmentedButtonDefaultOverlay(this.overlay);
+
+  final Color overlay;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.pressed)) {
+      return overlay.withOpacity(0.24);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return overlay.withOpacity(0.08);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return overlay.withOpacity(0.24);
+    }
+    return null;
+  }
+}
+
+@immutable
+class _SegmentedButtonDefaultElevation extends MaterialStateProperty<double>
+    with Diagnosticable {
+  _SegmentedButtonDefaultElevation(this.elevation);
+
+  final double elevation;
+
+  @override
+  double resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return 0;
+    }
+    if (states.contains(MaterialState.pressed)) {
+      return elevation + 6;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return elevation + 2;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return elevation + 2;
+    }
+    return elevation;
+  }
+}
+
+@immutable
+class _SegmentedButtonDefaultMouseCursor
+    extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
+  _SegmentedButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
+
+  final MouseCursor? enabledCursor;
+  final MouseCursor? disabledCursor;
+
+  @override
+  MouseCursor? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledCursor;
+    }
+    return enabledCursor;
+  }
+}
+
+@immutable
+class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?>
+    with Diagnosticable {
+  _SegmentButtonDefaultColor(this.color, this.disabled, this.selected);
+
+  final Color? color;
+  final Color? disabled;
+  final Color? selected;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabled;
+    }
+    if (states.contains(MaterialState.selected)) {
+      return selected;
+    }
+    return color;
+  }
+}
+
+
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   const _SegmentedButtonRenderWidget({
     super.key,
