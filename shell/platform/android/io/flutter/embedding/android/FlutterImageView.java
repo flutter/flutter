@@ -186,6 +186,10 @@ public class FlutterImageView extends View implements RenderSurface {
     // Not supported.
   }
 
+  public void resume() {
+    // Not supported.
+  }
+
   /**
    * Acquires the next image to be drawn to the {@link android.graphics.Canvas}. Returns true if
    * there's an image available in the queue.

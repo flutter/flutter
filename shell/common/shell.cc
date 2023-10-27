@@ -814,7 +814,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   const bool should_post_raster_task =
       !task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread();
 
-  fml::AutoResetWaitableEvent latch;
   auto raster_task = fml::MakeCopyable(
       [&waiting_for_first_frame = waiting_for_first_frame_,  //
        rasterizer = rasterizer_->GetWeakPtr(),               //
@@ -841,8 +840,8 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   // weak pointer. However, we are preventing the platform view from being
   // collected by using a latch.
   auto* platform_view = platform_view_.get();
-
   FML_DCHECK(platform_view);
+  fml::AutoResetWaitableEvent latch;
 
   auto io_task = [io_manager = io_manager_->GetWeakPtr(), platform_view,
                   ui_task_runner = task_runners_.GetUITaskRunner(), ui_task,
