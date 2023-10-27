@@ -1,5 +1,103 @@
 ====================================================================================================
+LIBRARY: shaderc
 LIBRARY: txt
+ORIGIN: ../../../flutter/third_party/shaderc/LICENSE
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/android_test/test.cpp
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/dependency_info.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/dependency_info.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/file.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/file.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/file_compiler.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/file_compiler.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/file_includer.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/file_includer.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/file_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/main.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/resource_parse.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/resource_parse.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/resource_parse_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/shader_stage.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/shader_stage.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/glslc/src/stage_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/android-release/continuous_arm.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/android-release/continuous_x86.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/android-release/presubmit_arm.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/android-release/presubmit_x86.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_asan.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_debug.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_release.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_coverage.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug_exception.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_release.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_license_check.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_mingw_release.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_asan.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_debug.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_release.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_coverage.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_debug.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_release.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_license_check.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_debug.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_release.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/macos/presubmit_clang_debug.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/macos/presubmit_clang_release.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/ndk-build/continuous_khronos.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/ndk-build/presubmit_khronos.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_debug_2017.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2015.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2017.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_debug_2017.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2015.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2017.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/env.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/status.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/visibility.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/src/common_shaders_for_test.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/src/shaderc.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_c_smoke_test.c
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_cpp_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_private.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_private_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/args.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/compiler.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/counting_includer.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/exceptions.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/file_finder.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/format.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/io_shaderc.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/message.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/mutex.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/resources.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/resources.inc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/shader_stage.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/spirv_tools_wrapper.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/string_piece.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/universal_unistd.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/version_profile.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/args.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/compiler.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/compiler_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/counting_includer_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/death_test.h
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/file_finder.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/file_finder_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/format_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/io_shaderc.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/io_shaderc_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/message.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/message_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/mutex_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/resources.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/shader_stage.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/spirv_tools_wrapper.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/string_piece_test.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/version_profile.cc
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc_util/src/version_profile_test.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/benchmarks/skparagraph_benchmarks.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/benchmarks/txt_run_all_benchmarks.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.cc
@@ -37,6 +135,107 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutte
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.cc
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/txt/src/txt/typeface_font_asset_provider.h
 TYPE: LicenseType.apache
+FILE: ../../../flutter/third_party/shaderc/DEVELOPMENT.howto.md
+FILE: ../../../flutter/third_party/shaderc/android_test/test.cpp
+FILE: ../../../flutter/third_party/shaderc/downloads.md
+FILE: ../../../flutter/third_party/shaderc/glslc/src/dependency_info.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/dependency_info.h
+FILE: ../../../flutter/third_party/shaderc/glslc/src/file.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/file.h
+FILE: ../../../flutter/third_party/shaderc/glslc/src/file_compiler.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/file_compiler.h
+FILE: ../../../flutter/third_party/shaderc/glslc/src/file_includer.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/file_includer.h
+FILE: ../../../flutter/third_party/shaderc/glslc/src/file_test.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/main.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/resource_parse.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/resource_parse.h
+FILE: ../../../flutter/third_party/shaderc/glslc/src/resource_parse_test.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/shader_stage.cc
+FILE: ../../../flutter/third_party/shaderc/glslc/src/shader_stage.h
+FILE: ../../../flutter/third_party/shaderc/glslc/src/stage_test.cc
+FILE: ../../../flutter/third_party/shaderc/kokoro/android-release/continuous_arm.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/android-release/continuous_x86.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/android-release/presubmit_arm.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/android-release/presubmit_x86.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/img/linux.png
+FILE: ../../../flutter/third_party/shaderc/kokoro/img/macos.png
+FILE: ../../../flutter/third_party/shaderc/kokoro/img/windows.png
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_asan.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_debug.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_release.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_coverage.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug_exception.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_release.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_license_check.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_mingw_release.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_asan.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_debug.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_release.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_coverage.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_debug.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_release.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_license_check.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_debug.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_release.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/macos/presubmit_clang_debug.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/macos/presubmit_clang_release.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/ndk-build/continuous_khronos.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/ndk-build/presubmit_khronos.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_debug_2017.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2015.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2017.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_debug_2017.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2015.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2017.cfg
+FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/env.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp
+FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/status.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/visibility.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc/src/common_shaders_for_test.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc/src/shaderc.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_c_smoke_test.c
+FILE: ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_cpp_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_private.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_private_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc/src/shaderc_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/args.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/compiler.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/counting_includer.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/exceptions.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/file_finder.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/format.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/io_shaderc.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/message.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/mutex.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/resources.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/resources.inc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/shader_stage.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/spirv_tools_wrapper.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/string_piece.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/universal_unistd.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/include/libshaderc_util/version_profile.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/args.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/compiler.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/compiler_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/counting_includer_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/death_test.h
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/file_finder.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/file_finder_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/format_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/io_shaderc.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/io_shaderc_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/message.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/message_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/mutex_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/resources.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/shader_stage.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/spirv_tools_wrapper.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/string_piece_test.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/version_profile.cc
+FILE: ../../../flutter/third_party/shaderc/libshaderc_util/src/version_profile_test.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/skparagraph_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/txt_run_all_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.cc

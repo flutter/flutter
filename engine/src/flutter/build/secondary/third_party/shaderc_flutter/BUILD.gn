@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-shaderc_base = "//third_party/shaderc"
+shaderc_base = "//flutter/third_party/shaderc"
 
 config("shaderc_util_config") {
   include_dirs = [ "$shaderc_base/libshaderc_util/include/" ]

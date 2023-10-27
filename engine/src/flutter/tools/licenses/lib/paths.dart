@@ -36,6 +36,8 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/ninja', // build system
   r'flutter/third_party/rapidjson/contrib', // contains nothing that ends up in the binary executable
   r'flutter/third_party/rapidjson/doc', // documentation
+  r'flutter/third_party/shaderc/third_party/LICENSE.glslang', // unclear what the purpose of this file is
+  r'flutter/third_party/shaderc/third_party/LICENSE.spirv-tools', // unclear what the purpose of this file is
   r'flutter/third_party/test_shaders', // for tests only
   r'flutter/third_party/txt/third_party/fonts',
   r'flutter/tools',
@@ -164,8 +166,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/pyyaml', // build-time dependency only
   r'third_party/root_certificates/certdata.pem',
   r'third_party/root_certificates/certdata.txt',
-  r'third_party/shaderc/third_party/LICENSE.glslang', // unclear what the purpose of this file is
-  r'third_party/shaderc/third_party/LICENSE.spirv-tools', // unclear what the purpose of this file is
   r'third_party/skia/bazel', // contains nothing that ends up in the binary executable
   r'third_party/skia/bench',
   r'third_party/skia/demos.skia.org',
