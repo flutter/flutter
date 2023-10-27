@@ -311,7 +311,7 @@ Future<void> runWebServiceWorkerTest({
       'main.dart.js': 1,
       'flutter_service_worker.js': 1,
       'assets/FontManifest.json': 1,
-      'assets/AssetManifest.json': 1,
+      'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
@@ -353,7 +353,7 @@ Future<void> runWebServiceWorkerTest({
         'flutter.js': 1,
       'flutter_service_worker.js': 2,
       'main.dart.js': 1,
-      'assets/AssetManifest.json': 1,
+      'assets/AssetManifest.bin.json': 1,
       'assets/FontManifest.json': 1,
       'CLOSE': 1,
       if (!headless)
@@ -383,7 +383,7 @@ Future<void> runWebServiceWorkerTest({
       'main.dart.js': 1,
       'assets/FontManifest.json': 1,
       'flutter_service_worker.js': 1,
-      'assets/AssetManifest.json': 1,
+      'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
@@ -436,7 +436,7 @@ Future<void> runWebServiceWorkerTest({
         'flutter.js': 1,
       'flutter_service_worker.js': 2,
       'main.dart.js': 1,
-      'assets/AssetManifest.json': 1,
+      'assets/AssetManifest.bin.json': 1,
       'assets/FontManifest.json': 1,
       'CLOSE': 1,
       if (!headless)
@@ -541,7 +541,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       'main.dart.js': 1,
       'flutter_service_worker.js': 1,
       'assets/FontManifest.json': 1,
-      'assets/AssetManifest.json': 1,
+      'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
       if (!headless)
@@ -600,7 +600,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       'main.dart.js': 1,
       'flutter_service_worker.js': 2,
       'assets/FontManifest.json': 1,
-      'assets/AssetManifest.json': 1,
+      'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
       if (!headless)
@@ -777,7 +777,7 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({
       'CLOSE': 1,
       'flutter_service_worker.js': 1,
       'assets/FontManifest.json': 1,
-      'assets/AssetManifest.json': 1,
+      'assets/AssetManifest.bin.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
       if (!headless)

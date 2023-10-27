@@ -523,6 +523,12 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   void handleTap() {
     // This fades the checkmark in or out when tapped.
     if (widget.checked) {
