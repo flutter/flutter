@@ -1369,9 +1369,9 @@ public class FlutterView extends FrameLayout
       onDone.run();
       return;
     }
-    // Start rendering on the previous surface.
+    // Resume rendering to the previous surface.
     // This surface is typically `FlutterSurfaceView` or `FlutterTextureView`.
-    renderSurface.attachToRenderer(renderer);
+    renderSurface.resume();
 
     // Install a Flutter UI listener to wait until the first frame is rendered
     // in the new surface to call the `onDone` callback.
