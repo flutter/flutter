@@ -1015,6 +1015,43 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsNothing);
   });
+  testWidgetsWithLeakTracking('Tooltip is dismissed after tap to dismiss immediately if tapToDismissDelayDuration is not set', (WidgetTester tester) async {
+
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap);
+
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
+
+   // Tap to trigger the tooltip.
+    await _testGestureTap(tester, tooltip);
+    expect(find.text(tooltipText), findsOneWidget);
+
+   // Tap to dismiss the tooltip.
+    await _testGestureTap(tester, find.text(tooltipText));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+    testWidgetsWithLeakTracking('Tooltip is dismissed after tap to dismiss and the tapToDismissDelayDuration expired', (WidgetTester tester) async {
+    const Duration tapToDismissDelayDuration = Duration(seconds: 3);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, tapToDismissDelayDuration: tapToDismissDelayDuration);
+
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
+
+   // Tap to trigger the tooltip.
+    await _testGestureTap(tester, tooltip);
+    expect(find.text(tooltipText), findsOneWidget);
+
+   // Tap to dismiss the tooltip.
+    await _testGestureTap(tester, find.text(tooltipText));
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Tooltip is dismissed after tapToDismissDelayDuration expired
+    await tester.pump(tapToDismissDelayDuration);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsNothing);
+  });
 
   testWidgetsWithLeakTracking('Tooltip is dismissed after a tap and showDuration expired when competing with a GestureDetector', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/98854
@@ -2480,6 +2517,7 @@ Future<void> setWidgetForTooltipMode(
   WidgetTester tester,
   TooltipTriggerMode triggerMode, {
   Duration? showDuration,
+  Duration? tapToDismissDelayDuration,
   TooltipTriggeredCallback? onTriggered,
 }) async {
   await tester.pumpWidget(
@@ -2489,6 +2527,7 @@ Future<void> setWidgetForTooltipMode(
         triggerMode: triggerMode,
         onTriggered: onTriggered,
         showDuration: showDuration,
+        tapToDismissDelayDuration: tapToDismissDelayDuration,
         child: const SizedBox(width: 100.0, height: 100.0),
       ),
     ),
