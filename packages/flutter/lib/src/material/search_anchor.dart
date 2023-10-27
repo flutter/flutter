@@ -1170,6 +1170,13 @@ class SearchBar extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
+  
+  /// If false the text field is "disabled": it ignores taps and its
+  /// [decoration] is rendered in grey.
+  ///
+  /// If non-null this property overrides the [decoration]'s
+  /// [InputDecoration.enabled] property.
+  final bool? enabled;
 
   @override
   State<SearchBar> createState() => _SearchBarState();
@@ -1291,6 +1298,7 @@ class _SearchBarState extends State<SearchBar> {
                         onSubmitted: widget.onSubmitted,
                         controller: widget.controller,
                         style: effectiveTextStyle,
+                        enabled: widget.enabled,
                         decoration: InputDecoration(
                           hintText: widget.hintText,
                         ).applyDefaults(InputDecorationTheme(
