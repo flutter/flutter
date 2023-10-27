@@ -191,7 +191,7 @@ void main() {
     expect(environment.outputDir.childFile('main.dart.js')
       .existsSync(), true);
     expect(environment.outputDir.childDirectory('assets')
-      .childFile('AssetManifest.json').existsSync(), true);
+      .childFile('AssetManifest.bin.json').existsSync(), true);
 
     // Update to arbitrary resource file triggers rebuild.
     webResources.childFile('foo.txt').writeAsStringSync('B');
