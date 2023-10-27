@@ -2371,11 +2371,6 @@
 ../../../third_party/json/tools/serve_header/README.md
 ../../../third_party/json/tools/serve_header/requirements.txt
 ../../../third_party/json/tools/serve_header/serve_header.py
-../../../third_party/khronos/.git
-../../../third_party/khronos/DEPS
-../../../third_party/khronos/DIR_METADATA
-../../../third_party/khronos/OWNERS
-../../../third_party/khronos/README.chromium
 ../../../third_party/libcxx/.clang-format
 ../../../third_party/libcxx/.clang-tidy
 ../../../third_party/libcxx/.git
