@@ -1015,6 +1015,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsNothing);
   });
+
   testWidgetsWithLeakTracking('Tooltip is dismissed after tap to dismiss immediately if tapToDismissDelayDuration is not set', (WidgetTester tester) async {
 
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap);
@@ -1026,7 +1027,7 @@ void main() {
     await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
 
-   // Tap to dismiss the tooltip.
+   // Tap to dismiss the tooltip. Tooltip is dismissed immediately.
     await _testGestureTap(tester, find.text(tooltipText));
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsNothing);
@@ -1043,7 +1044,7 @@ void main() {
     await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
 
-   // Tap to dismiss the tooltip.
+   // Tap to dismiss the tooltip. Tooltip is not dismissed immediately.
     await _testGestureTap(tester, find.text(tooltipText));
     expect(find.text(tooltipText), findsOneWidget);
 
