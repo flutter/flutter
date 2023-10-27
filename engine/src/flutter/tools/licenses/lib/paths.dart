@@ -29,6 +29,15 @@ final Set<String> skippedPaths = <String>{
   r'flutter/lib/web_ui/dev', // these are build tools; they do not end up in Engine artifacts
   r'flutter/prebuilts',
   r'flutter/sky/packages/sky_engine/LICENSE',
+  r'flutter/third_party/flatbuffers/android',
+  r'flutter/third_party/flatbuffers/benchmarks',
+  r'flutter/third_party/flatbuffers/docs',
+  r'flutter/third_party/flatbuffers/go',
+  r'flutter/third_party/flatbuffers/net',
+  r'flutter/third_party/flatbuffers/php',
+  r'flutter/third_party/flatbuffers/python',
+  r'flutter/third_party/flatbuffers/rust',
+  r'flutter/third_party/flatbuffers/ts',
   r'flutter/third_party/glfw/deps', // Only used by examples and tests; not linked in build.
   r'flutter/third_party/glfw/docs',
   r'flutter/third_party/gn',
@@ -92,15 +101,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/dart/tools', // not shipped in binary
   r'third_party/expat/expat/doc',
   r'third_party/expat/expat/win32/expat.iss',
-  r'third_party/flatbuffers/android',
-  r'third_party/flatbuffers/benchmarks',
-  r'third_party/flatbuffers/docs',
-  r'third_party/flatbuffers/go',
-  r'third_party/flatbuffers/net',
-  r'third_party/flatbuffers/php',
-  r'third_party/flatbuffers/python',
-  r'third_party/flatbuffers/rust',
-  r'third_party/flatbuffers/ts',
   r'third_party/google_fonts_for_unit_tests', // only used in web unit tests
   r'third_party/fontconfig', // not used in standard configurations
   r'third_party/freetype2/builds',

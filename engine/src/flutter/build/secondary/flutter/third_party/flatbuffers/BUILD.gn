@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-_src_root = "//third_party/flatbuffers"
+_src_root = "//flutter/third_party/flatbuffers"
 
 config("flatbuffers_public_configs") {
   include_dirs = [ "$_src_root/include" ]

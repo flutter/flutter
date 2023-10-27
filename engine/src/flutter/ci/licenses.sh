@@ -156,7 +156,7 @@ function verify_licenses() (
 
   local actualLicenseCount
   actualLicenseCount="$(tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9')"
-  local expectedLicenseCount=43 # When changing this number: Update the error message below as well describing the newly expected license types.
+  local expectedLicenseCount=44 # When changing this number: Update the error message below as well describing the newly expected license types.
 
   if [[ $actualLicenseCount -ne $expectedLicenseCount ]]; then
       echo "=============================== ERROR ==============================="
