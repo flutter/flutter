@@ -130,9 +130,9 @@ source_set("common") {
     ":display",
     ":platform_message_handler",
     "//flutter/shell/version",
+    "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
-    "//third_party/rapidjson",
   ]
 
   deps = [
@@ -258,7 +258,7 @@ if (enable_unittests) {
       "//flutter/lib/ui",
       "//flutter/testing:dart",
       "//flutter/testing:fixture_test",
-      "//third_party/rapidjson",
+      "//flutter/third_party/rapidjson",
       "//third_party/skia",
     ]
 

@@ -163,7 +163,7 @@ source_set("flutter_linux_sources") {
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
-    "//third_party/rapidjson",
+    "//flutter/third_party/rapidjson",
   ]
 }
 

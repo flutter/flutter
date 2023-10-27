@@ -138,13 +138,13 @@ source_set("flutter_windows_source") {
     "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
+    "//flutter/third_party/rapidjson",
     "//third_party/angle:libEGL_static",  # the order of libEGL_static and
                                           # libGLESv2_static is important.. if
                                           # reversed, will cause a linker error
                                           # DllMain already defined in
                                           # LIBCMTD.lib
     "//third_party/angle:libGLESv2_static",
-    "//third_party/rapidjson",
   ]
 }
 
@@ -238,8 +238,8 @@ executable("flutter_windows_unittests") {
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
     "//flutter/testing:dart",
+    "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
-    "//third_party/rapidjson",
   ]
 }
 
