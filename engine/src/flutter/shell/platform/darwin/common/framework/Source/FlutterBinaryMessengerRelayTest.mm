@@ -8,13 +8,11 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterTestUtils.h"
+#import "flutter/shell/platform/darwin/ios/flutter_task_queue_dispatch.h"
 #import "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
 FLUTTER_ASSERT_ARC
-
-@protocol FlutterTaskQueue <NSObject>
-@end
 
 @interface FlutterBinaryMessengerRelayTest : NSObject
 @end
@@ -56,7 +54,7 @@ FLUTTER_ASSERT_ARC
   FlutterBinaryMessengerRelay* relay =
       [[FlutterBinaryMessengerRelay alloc] initWithParent:messenger];
   NSString* channel = @"foobar";
-  NSObject<FlutterTaskQueue>* taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueue));
+  NSObject<FlutterTaskQueue>* taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueueDispatch));
   FlutterBinaryMessageHandler handler = ^(NSData* _Nullable, FlutterBinaryReply _Nonnull) {
   };
   [relay setMessageHandlerOnChannel:channel binaryMessageHandler:handler taskQueue:taskQueue];
