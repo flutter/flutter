@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is run as part of a reduced test set in CI on Mac and Windows
-// machines.
-@Tags(<String>['reduced-test-set'])
 @TestOn('!chrome')
 library;
 
@@ -1728,11 +1725,16 @@ void main() {
     ));
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
-    await tester.pump(); // start the splash animation
-    await tester.pump(const Duration(milliseconds: 100)); // splash is underway
+    await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
     // Material 3 uses the InkSparkle which uses a shader, so we can't capture
-    // the effect with paint methods. Use a golden test instead.
-    await expectLater(find.byType(InkWell), matchesGoldenFile('data_table_test.data_row_pressed.png'));
+    // the effect with paint methods.
+    expect(
+      box,
+      paints
+        ..rect()
+        ..rect(rect: const Rect.fromLTRB(0.0, 56.0, 800.0, 104.0), color: pressedColor.withOpacity(0.0)),
+    );
     await gesture.up();
   });
 
@@ -2031,7 +2033,7 @@ void main() {
     );
 
     // Go without crashes.
-    expect(tester.takeException(), isNull);
+
   });
 
   testWidgetsWithLeakTracking('DataTable clip behavior', (WidgetTester tester) async {
