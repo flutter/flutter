@@ -169,4 +169,15 @@ std::optional<Rect> BorderMaskBlurFilterContents::GetFilterCoverage(
               Size(extent.x, extent.y));
 }
 
+std::optional<Rect> BorderMaskBlurFilterContents::GetFilterSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  auto transformed_blur_vector =
+      effect_transform.TransformDirection(Vector2(Radius{sigma_x_}.radius, 0))
+          .Abs() +
+      effect_transform.TransformDirection(Vector2(0, Radius{sigma_y_}.radius))
+          .Abs();
+  return output_limit.Expand(transformed_blur_vector);
+}
+
 }  // namespace impeller

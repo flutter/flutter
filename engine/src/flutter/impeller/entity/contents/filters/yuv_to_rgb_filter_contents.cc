@@ -137,4 +137,10 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
   return sub_entity;
 }
 
+std::optional<Rect> YUVToRGBFilterContents::GetFilterSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  return output_limit;
+}
+
 }  // namespace impeller

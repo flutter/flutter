@@ -68,6 +68,19 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
                               entity.GetClipDepth());
 }
 
+std::optional<Rect> MatrixFilterContents::GetFilterSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  auto transform = effect_transform *          //
+                   matrix_ *                   //
+                   effect_transform.Invert();  //
+  if (transform.GetDeterminant() == 0.0) {
+    return std::nullopt;
+  }
+  auto inverse = transform.Invert();
+  return output_limit.TransformBounds(inverse);
+}
+
 std::optional<Rect> MatrixFilterContents::GetFilterCoverage(
     const FilterInput::Vector& inputs,
     const Entity& entity,

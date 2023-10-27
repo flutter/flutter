@@ -99,4 +99,10 @@ std::optional<Scalar> ColorFilterContents::GetAlpha() const {
   return alpha_;
 }
 
+std::optional<Rect> ColorFilterContents::GetFilterSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  return output_limit;
+}
+
 }  // namespace impeller
