@@ -36,11 +36,13 @@ public class FlutterRendererTest {
 
   private FlutterJNI fakeFlutterJNI;
   private Surface fakeSurface;
+  private Surface fakeSurface2;
 
   @Before
   public void setup() {
     fakeFlutterJNI = mock(FlutterJNI.class);
     fakeSurface = mock(Surface.class);
+    fakeSurface2 = mock(Surface.class);
   }
 
   @Test
@@ -50,7 +52,7 @@ public class FlutterRendererTest {
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
     // Execute the behavior under test.
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Verify the behavior under test.
     verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
@@ -62,7 +64,7 @@ public class FlutterRendererTest {
     Surface fakeSurface = mock(Surface.class);
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute the behavior under test.
     flutterRenderer.surfaceChanged(100, 50);
@@ -77,7 +79,7 @@ public class FlutterRendererTest {
     Surface fakeSurface = mock(Surface.class);
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute the behavior under test.
     flutterRenderer.stopRenderingToSurface();
@@ -92,10 +94,10 @@ public class FlutterRendererTest {
     Surface fakeSurface2 = mock(Surface.class);
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute behavior under test.
-    flutterRenderer.startRenderingToSurface(fakeSurface2, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface2, false);
 
     // Verify behavior under test.
     verify(fakeFlutterJNI, times(1)).onSurfaceDestroyed(); // notification of 1st surface's removal.
@@ -106,7 +108,7 @@ public class FlutterRendererTest {
     // Setup the test.
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute the behavior under test.
     flutterRenderer.stopRenderingToSurface();
@@ -120,9 +122,9 @@ public class FlutterRendererTest {
     // Setup the test.
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Verify behavior under test.
     verify(fakeFlutterJNI, times(1)).onSurfaceDestroyed();
@@ -133,9 +135,9 @@ public class FlutterRendererTest {
     // Setup the test.
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ true);
+    flutterRenderer.startRenderingToSurface(fakeSurface, true);
 
     // Verify behavior under test.
     verify(fakeFlutterJNI, never()).onSurfaceDestroyed();
@@ -151,7 +153,7 @@ public class FlutterRendererTest {
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute the behavior under test.
     flutterRenderer.stopRenderingToSurface();
@@ -174,7 +176,7 @@ public class FlutterRendererTest {
         (FlutterRenderer.SurfaceTextureRegistryEntry)
             flutterRenderer.registerSurfaceTexture(surfaceTexture);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Verify behavior under test.
     assertEquals(surfaceTexture, entry.surfaceTexture());
@@ -195,7 +197,7 @@ public class FlutterRendererTest {
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
     long id = entry.id();
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute the behavior under test.
     runFinalization(entry);
@@ -221,7 +223,7 @@ public class FlutterRendererTest {
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
     long id = entry.id();
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     flutterRenderer.stopRenderingToSurface();
 
@@ -399,7 +401,7 @@ public class FlutterRendererTest {
     // Setup the test.
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute the behavior under test.
     // Simulate calling |FlutterRenderer#stopRenderingToSurface| twice with different code paths.
@@ -408,5 +410,39 @@ public class FlutterRendererTest {
 
     // Verify behavior under test.
     verify(fakeFlutterJNI, times(1)).onSurfaceDestroyed();
+  }
+
+  @Test
+  public void itInvokesCreatesSurfaceWhenStartingRendering() {
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+    verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
+  }
+
+  @Test
+  public void itDoesNotInvokeCreatesSurfaceWhenResumingRendering() {
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+
+    // The following call sequence mimics the behaviour of FlutterView when it exits from hybrid
+    // composition mode.
+
+    // Install initial rendering surface.
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+    verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(0)).onSurfaceWindowChanged(eq(fakeSurface));
+
+    // Install the image view.
+    flutterRenderer.startRenderingToSurface(fakeSurface2, true);
+    verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(0)).onSurfaceWindowChanged(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(0)).onSurfaceCreated(eq(fakeSurface2));
+    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2));
+
+    flutterRenderer.startRenderingToSurface(fakeSurface, true);
+    verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface));
+    verify(fakeFlutterJNI, times(0)).onSurfaceCreated(eq(fakeSurface2));
+    verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2));
   }
 }

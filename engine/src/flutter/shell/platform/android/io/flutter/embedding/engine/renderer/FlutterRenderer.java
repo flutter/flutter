@@ -467,20 +467,26 @@ public class FlutterRenderer implements TextureRegistry {
    * android.view.TextureView.SurfaceTextureListener}
    *
    * @param surface The render surface.
-   * @param keepCurrentSurface True if the current active surface should not be released.
+   * @param onlySwap True if the current active surface should not be detached.
    */
-  public void startRenderingToSurface(@NonNull Surface surface, boolean keepCurrentSurface) {
-    // Don't stop rendering the surface if it's currently paused.
-    // Stop rendering to the surface releases the associated native resources, which
-    // causes a glitch when showing platform views.
-    // For more, https://github.com/flutter/flutter/issues/95343
-    if (this.surface != null && !keepCurrentSurface) {
+  public void startRenderingToSurface(@NonNull Surface surface, boolean onlySwap) {
+    if (!onlySwap) {
+      // Stop rendering to the surface releases the associated native resources, which
+      // causes a glitch when toggling between rendering to an image view (hybrid composition) and
+      // rendering directly to a Surface or Texture view. For more,
+      // https://github.com/flutter/flutter/issues/95343
       stopRenderingToSurface();
     }
 
     this.surface = surface;
 
-    flutterJNI.onSurfaceCreated(surface);
+    if (onlySwap) {
+      // In the swap case we are just swapping the surface that we render to.
+      flutterJNI.onSurfaceWindowChanged(surface);
+    } else {
+      // In the non-swap case we are creating a new surface to render to.
+      flutterJNI.onSurfaceCreated(surface);
+    }
   }
 
   /**
