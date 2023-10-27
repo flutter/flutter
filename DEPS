@@ -279,7 +279,7 @@ deps = {
   'src/flutter/third_party/glfw':
    Var('fuchsia_git') + '/third_party/glfw' + '@' + 'dd8a678a66f1967372e5a5e3deac41ebf65ee127',
 
-  'src/third_party/shaderc':
+  'src/flutter/third_party/shaderc':
    Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + '7ea834ecc59258a5c13c3d3e6fa0582bdde7c543',
 
   'src/third_party/vulkan-deps':
