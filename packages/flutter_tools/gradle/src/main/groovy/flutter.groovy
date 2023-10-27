@@ -394,8 +394,9 @@ class FlutterPlugin implements Plugin<Project> {
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins() {
-        getPluginList().each this.&configurePluginProject
-        getPluginList().each this.&configurePluginDependencies
+        // TODO(gustl22): replace both with [getPluginList], see [getPluginDependencies].
+        getPluginDependencies().each this.&configurePluginProject
+        getPluginDependencies().each this.&configurePluginDependencies
     }
 
     /** Adds the plugin project dependency to the app project. */
@@ -403,7 +404,8 @@ class FlutterPlugin implements Plugin<Project> {
         assert pluginObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
 
-        if (pluginProject == null) {
+        if (pluginProject == null ||
+                !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
             project.logger.error("Plugin project :${pluginObject.name} not found. Please update settings.gradle.")
             return
         }
@@ -521,10 +523,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // TODO(gustl22): Can remove this check, once apps only depend on `.flutter-plugins-dependencies`.
-    //  This is not the case yet as developers may still use an old `settings.gradle` which includes all the plugins
-    //  from the `.flutter-plugins` file, even if not made for Android. 
-    //  It then tries to add their implementation, which does not exist.
+    // TODO(gustl22): Can remove this check, once plugins are exclusively loaded via [getPluginList], see [getPluginDependencies].
     /**
      * Returns `true` if the given path contains an `android/build.gradle` file.
      */
@@ -616,6 +615,52 @@ class FlutterPlugin implements Plugin<Project> {
             androidPlugins.add(androidPlugin)
         }
         return androidPlugins
+    }
+
+    // TODO(gustl22): Remove in favor of [getPluginList] only, see #48918 and 
+    //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
+    //  This means all references to `.flutter-plugins` are then removed and apps only depend exclusively on the
+    //  `plugins` property in `.flutter-plugins-dependencies`.
+    //  This cannot be achieved yet as developers may still use an old `settings.gradle`
+    //  which includes all the plugins from the `.flutter-plugins` file, even if not made for Android. 
+    //  The settings.gradle then:
+    //      1) tries to add the android plugin implementation, which does not exist at all, but is also not included
+    //         successfully (which is not an issue), or
+    //      2) includes the plugin successfully as a valid android plugin directory exists, even if the surrounding
+    //         flutter package does not support the android platform (see e.g. apple_maps_flutter: 1.0.1). 
+    //         So as it's included successfully it expects to be added as API. This is only possible by taking all 
+    //         plugins into account, which only appear on the `dependencyGraph` and under the `plugins`.
+    //  So in summary the plugins are currently selected from the `dependencyGraph` and filtered then with the
+    //  [doesSupportAndroidPlatform] method instead of just using the `plugins.android` list.
+    /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
+    private List getPluginDependencies() {
+        // Consider a `.flutter-plugins-dependencies` file with the following content:
+        // {
+        //     "dependencyGraph": [
+        //       {
+        //         "name": "plugin-a",
+        //         "dependencies": ["plugin-b","plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-b",
+        //         "dependencies": ["plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-c",
+        //         "dependencies": []'
+        //       }
+        //     ]
+        // }
+        //
+        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
+        // `plugin-b` depends on `plugin-c`.
+        // `plugin-c` doesn't depend on anything.
+        Map meta = getDependenciesMetadata()
+        if (meta == null) {
+            return []
+        }
+        assert meta.dependencyGraph instanceof List
+        return meta.dependencyGraph
     }
 
     private Map parsedFlutterPluginsDependencies
