@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//third_party/flatbuffers/flatbuffers.gni")
+import("//flutter/third_party/flatbuffers/flatbuffers.gni")
 import("../tools/impeller.gni")
 
 config("runtime_stage_config") {
@@ -13,7 +13,7 @@ config("runtime_stage_config") {
 flatbuffers("runtime_stage_flatbuffers") {
   flatbuffers = [ "runtime_stage.fbs" ]
   public_configs = [ ":runtime_stage_config" ]
-  public_deps = [ "//third_party/flatbuffers" ]
+  public_deps = [ "//flutter/third_party/flatbuffers" ]
 }
 
 impeller_component("runtime_stage") {

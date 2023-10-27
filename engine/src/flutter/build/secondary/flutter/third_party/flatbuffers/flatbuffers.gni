@@ -10,7 +10,7 @@ template("flatbuffers") {
 
   flatc_target_name = "flatc_$target_name"
   compiled_action_foreach(flatc_target_name) {
-    tool = "//third_party/flatbuffers:flatc"
+    tool = "//flutter/third_party/flatbuffers:flatc"
     sources = invoker.flatbuffers
     outputs = [ "$target_gen_dir/{{source_name_part}}_flatbuffers.h" ]
     args = [
@@ -42,7 +42,7 @@ template("flatbuffers") {
     }
     deps = [
       ":$flatc_target_name",
-      "//third_party/flatbuffers",
+      "//flutter/third_party/flatbuffers",
     ]
     if (defined(invoker.deps)) {
       deps += invoker.deps

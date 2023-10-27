@@ -285,7 +285,7 @@ deps = {
   'src/third_party/vulkan-deps':
    Var('chromium_git') + '/vulkan-deps' + '@' + '40b75117a60b11c42a1fb87bf14c0f49bcdb8b3d',
 
-  'src/third_party/flatbuffers':
+  'src/flutter/third_party/flatbuffers':
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
 
   'src/third_party/icu':

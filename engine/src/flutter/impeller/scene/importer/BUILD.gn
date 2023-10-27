@@ -4,7 +4,7 @@
 
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/version/version.gni")
-import("//third_party/flatbuffers/flatbuffers.gni")
+import("//flutter/third_party/flatbuffers/flatbuffers.gni")
 
 config("runtime_stage_config") {
   configs = [ "//flutter/impeller:impeller_public_config" ]
@@ -14,7 +14,7 @@ config("runtime_stage_config") {
 flatbuffers("importer_flatbuffers") {
   flatbuffers = [ "scene.fbs" ]
   public_configs = [ ":runtime_stage_config" ]
-  public_deps = [ "//third_party/flatbuffers" ]
+  public_deps = [ "//flutter/third_party/flatbuffers" ]
 }
 
 impeller_component("conversions") {
