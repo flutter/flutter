@@ -26,6 +26,11 @@ class YUVToRGBFilterContents final : public FilterContents {
       const Rect& coverage,
       const std::optional<Rect>& coverage_hint) const override;
 
+  // |FilterContents|
+  std::optional<Rect> GetFilterSourceCoverage(
+      const Matrix& effect_transform,
+      const Rect& output_limit) const override;
+
   YUVColorSpace yuv_color_space_ = YUVColorSpace::kBT601LimitedRange;
 
   YUVToRGBFilterContents(const YUVToRGBFilterContents&) = delete;

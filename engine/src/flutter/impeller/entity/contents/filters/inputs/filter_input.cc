@@ -66,6 +66,12 @@ std::optional<Rect> FilterInput::GetLocalCoverage(const Entity& entity) const {
   return GetCoverage(local_entity);
 }
 
+std::optional<Rect> FilterInput::GetSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  return output_limit;
+}
+
 Matrix FilterInput::GetTransform(const Entity& entity) const {
   return entity.GetTransformation() * GetLocalTransform(entity);
 }

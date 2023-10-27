@@ -132,6 +132,20 @@ class FilterContents : public Contents {
   // |Contents|
   const FilterContents* AsFilter() const override;
 
+  /// @brief Determines the coverage of source pixels that will be needed
+  ///        to apply this filter under the given transform and produce
+  ///        results anywhere within the indicated coverage limit.
+  ///
+  ///        This is useful for subpass rendering scenarios where a filter
+  ///        will be applied to the output of the subpass and we need to
+  ///        determine how large of a render target to allocate in order
+  ///        to collect all pixels that might affect the supplied output
+  ///        coverage limit. While we might clip the rendering of the subpass,
+  ///        we want to avoid clipping out any pixels that contribute to
+  ///        the output limit via the filtering operation.
+  std::optional<Rect> GetSourceCoverage(const Matrix& effect_transform,
+                                        const Rect& output_limit) const;
+
   virtual Matrix GetLocalTransform(const Matrix& parent_transform) const;
 
   Matrix GetTransform(const Matrix& parent_transform) const;
@@ -168,6 +182,10 @@ class FilterContents : public Contents {
       const FilterInput::Vector& inputs,
       const Entity& entity,
       const Matrix& effect_transform) const;
+
+  virtual std::optional<Rect> GetFilterSourceCoverage(
+      const Matrix& effect_transform,
+      const Rect& output_limit) const = 0;
 
   /// @brief  Converts zero or more filter inputs into a render instruction.
   virtual std::optional<Entity> RenderFilter(

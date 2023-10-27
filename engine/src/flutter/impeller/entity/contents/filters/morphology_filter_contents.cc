@@ -192,4 +192,18 @@ std::optional<Rect> DirectionalMorphologyFilterContents::GetFilterCoverage(
   return Rect(origin, Size(size.x, size.y));
 }
 
+std::optional<Rect>
+DirectionalMorphologyFilterContents::GetFilterSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  auto transformed_vector =
+      effect_transform.TransformDirection(direction_ * radius_.radius).Abs();
+  switch (morph_type_) {
+    case FilterContents::MorphType::kDilate:
+      return output_limit.Expand(-transformed_vector);
+    case FilterContents::MorphType::kErode:
+      return output_limit.Expand(transformed_vector);
+  }
+}
+
 }  // namespace impeller

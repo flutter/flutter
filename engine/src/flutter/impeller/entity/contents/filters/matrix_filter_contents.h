@@ -41,6 +41,11 @@ class MatrixFilterContents final : public FilterContents {
       const Rect& coverage,
       const std::optional<Rect>& coverage_hint) const override;
 
+  // |FilterContents|
+  std::optional<Rect> GetFilterSourceCoverage(
+      const Matrix& effect_transform,
+      const Rect& output_limit) const override;
+
   Matrix matrix_;
   SamplerDescriptor sampler_descriptor_ = {};
   Entity::RenderingMode rendering_mode_ = Entity::RenderingMode::kDirect;

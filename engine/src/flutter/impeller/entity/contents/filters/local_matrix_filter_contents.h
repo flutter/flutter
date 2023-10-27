@@ -20,6 +20,11 @@ class LocalMatrixFilterContents final : public FilterContents {
   // |FilterContents|
   Matrix GetLocalTransform(const Matrix& parent_transform) const override;
 
+  // |FilterContents|
+  std::optional<Rect> GetFilterSourceCoverage(
+      const Matrix& effect_transform,
+      const Rect& output_limit) const override;
+
  private:
   // |FilterContents|
   std::optional<Entity> RenderFilter(
