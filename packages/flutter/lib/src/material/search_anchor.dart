@@ -1050,6 +1050,7 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
+    this.enabled,
   });
 
   /// Controls the text being edited in the search bar's text field.
