@@ -466,11 +466,15 @@ void main() {
     expect(updateDelta, const Offset(20.0, 0.0));
   });
 
-  testGesture('Drag with multiple pointers in down behavior - default', (GestureTester tester) {
+  testGesture('Drag with multiple pointers in down behavior - trackAllActivePointers', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 =
-      HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+      HorizontalDragGestureRecognizer()
+        ..dragStartBehavior = DragStartBehavior.down
+        ..multitouchDragStrategy = MultitouchDragStrategy.trackAllActivePointers;
     final VerticalDragGestureRecognizer drag2 =
-      VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+      VerticalDragGestureRecognizer()
+        ..dragStartBehavior = DragStartBehavior.down
+        ..multitouchDragStrategy = MultitouchDragStrategy.trackAllActivePointers;
     addTearDown(() => drag1.dispose);
     addTearDown(() => drag2.dispose);
 
@@ -547,15 +551,11 @@ void main() {
     ]);
   });
 
-  testGesture('Drag with multiple pointers in down behavior - trackLatestActivePointer', (GestureTester tester) {
+  testGesture('Drag with multiple pointers in down behavior - default', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 =
-    HorizontalDragGestureRecognizer()
-      ..dragStartBehavior = DragStartBehavior.down
-      ..multitouchDragStrategy = MultitouchDragStrategy.trackLatestActivePointer;
+    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     final VerticalDragGestureRecognizer drag2 =
-    VerticalDragGestureRecognizer()
-      ..dragStartBehavior = DragStartBehavior.down
-      ..multitouchDragStrategy = MultitouchDragStrategy.trackLatestActivePointer;
+    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(() => drag1.dispose);
     addTearDown(() => drag2.dispose);
 

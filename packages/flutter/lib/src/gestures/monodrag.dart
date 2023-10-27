@@ -74,7 +74,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.multitouchDragStrategy = MultitouchDragStrategy.trackAllActivePointers,
+    this.multitouchDragStrategy = MultitouchDragStrategy.trackLatestActivePointer,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
@@ -122,7 +122,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// will take effect.
   /// {@endtemplate}
   ///
-  /// By default, the strategy is [MultitouchDragStrategy.trackAllActivePointers].
+  /// By default, the strategy is [MultitouchDragStrategy.trackLatestActivePointer].
   ///
   /// See also:
   ///
@@ -379,12 +379,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   bool _shouldTrackMoveEvent(int pointer) {
-    if (multitouchDragStrategy == MultitouchDragStrategy.trackAllActivePointers) {
-      return true;
-    } else if (multitouchDragStrategy == MultitouchDragStrategy.trackLatestActivePointer) {
-      return _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
+    final bool result;
+    switch (multitouchDragStrategy) {
+      case MultitouchDragStrategy.trackAllActivePointers:
+        result = true;
+      case MultitouchDragStrategy.trackLatestActivePointer:
+        result = _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
     }
-    return true;
+    return result;
   }
 
   @override
