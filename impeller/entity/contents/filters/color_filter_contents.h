@@ -44,6 +44,11 @@ class ColorFilterContents : public FilterContents {
 
   std::optional<Scalar> GetAlpha() const;
 
+  // |FilterContents|
+  std::optional<Rect> GetFilterSourceCoverage(
+      const Matrix& effect_transform,
+      const Rect& output_limit) const override;
+
  private:
   AbsorbOpacity absorb_opacity_ = AbsorbOpacity::kNo;
   std::optional<Scalar> alpha_;

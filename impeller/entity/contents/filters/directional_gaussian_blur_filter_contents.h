@@ -70,6 +70,11 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
   void SetIsSecondPass(bool is_second_pass);
 
   // |FilterContents|
+  std::optional<Rect> GetFilterSourceCoverage(
+      const Matrix& effect_transform,
+      const Rect& output_limit) const override;
+
+  // |FilterContents|
   std::optional<Rect> GetFilterCoverage(
       const FilterInput::Vector& inputs,
       const Entity& entity,

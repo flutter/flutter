@@ -273,6 +273,17 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
       entity.GetBlendMode(), entity.GetClipDepth());
 }
 
+std::optional<Rect>
+DirectionalGaussianBlurFilterContents::GetFilterSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  auto transform = effect_transform.Basis();
+  auto transformed_blur_vector =
+      transform.TransformDirection(blur_direction_ * Radius{blur_sigma_}.radius)
+          .Abs();
+  return output_limit.Expand(transformed_blur_vector);
+}
+
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
     const FilterInput::Vector& inputs,
     const Entity& entity,

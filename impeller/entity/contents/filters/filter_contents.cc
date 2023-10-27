@@ -229,6 +229,28 @@ std::optional<Rect> FilterContents::GetFilterCoverage(
   return result;
 }
 
+std::optional<Rect> FilterContents::GetSourceCoverage(
+    const Matrix& effect_transform,
+    const Rect& output_limit) const {
+  auto filter_input_coverage =
+      GetFilterSourceCoverage(effect_transform_, output_limit);
+
+  if (!filter_input_coverage.has_value()) {
+    return std::nullopt;
+  }
+
+  std::optional<Rect> inputs_coverage;
+  for (auto input : inputs_) {
+    auto input_coverage = input->GetSourceCoverage(
+        effect_transform, filter_input_coverage.value());
+    if (!input_coverage.has_value()) {
+      return std::nullopt;
+    }
+    inputs_coverage = Union(inputs_coverage, input_coverage.value());
+  }
+  return inputs_coverage;
+}
+
 std::optional<Entity> FilterContents::GetEntity(
     const ContentContext& renderer,
     const Entity& entity,
