@@ -509,6 +509,13 @@
 ../../../flutter/third_party/glfw/src/CMakeLists.txt
 ../../../flutter/third_party/glfw/tests
 ../../../flutter/third_party/gn
+../../../flutter/third_party/gtest-parallel/.git
+../../../flutter/third_party/gtest-parallel/.gitignore
+../../../flutter/third_party/gtest-parallel/CONTRIBUTING.md
+../../../flutter/third_party/gtest-parallel/README.md
+../../../flutter/third_party/gtest-parallel/gtest_parallel.py
+../../../flutter/third_party/gtest-parallel/gtest_parallel_mocks.py
+../../../flutter/third_party/gtest-parallel/gtest_parallel_tests.py
 ../../../flutter/third_party/imgui
 ../../../flutter/third_party/ninja
 ../../../flutter/third_party/rapidjson/.git
@@ -2121,13 +2128,6 @@
 ../../../third_party/google_fonts_for_unit_tests
 ../../../third_party/googletest
 ../../../third_party/gradle
-../../../third_party/gtest-parallel/.git
-../../../third_party/gtest-parallel/.gitignore
-../../../third_party/gtest-parallel/CONTRIBUTING.md
-../../../third_party/gtest-parallel/README.md
-../../../third_party/gtest-parallel/gtest_parallel.py
-../../../third_party/gtest-parallel/gtest_parallel_mocks.py
-../../../third_party/gtest-parallel/gtest_parallel_tests.py
 ../../../third_party/harfbuzz/.ci/requirements.txt
 ../../../third_party/harfbuzz/.clang-format
 ../../../third_party/harfbuzz/.editorconfig
