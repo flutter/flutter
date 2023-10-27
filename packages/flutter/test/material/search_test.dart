@@ -1119,6 +1119,49 @@ void main() {
     await tester.pump();
     expect(textField.controller!.text.length, 15);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgetsWithLeakTracking('Block entering text on disabled widget', (WidgetTester tester) async {
+    const String initValue = 'init';
+    final TextEditingController controller = TextEditingController(text: initValue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              controller: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abcdefghi';
+    await tester.enterText(find.byType(SearchBar), testValue);
+    expect(controller.value.text, initValue);
+
+  });
+
+  testWidgetsWithLeakTracking('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              controller: TextEditingController(text: 'text'),
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    semantics.dispose();
+  });
 }
 
 class TestHomePage extends StatelessWidget {
