@@ -2041,7 +2041,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _children?.forEach(_redepthChild);
   }
 
-  void _updateChildMergeFlag(SemanticsNode child) {
+  void _updateChildMergeFlagRecursively(SemanticsNode child) {
     assert(child.owner == owner);
     final bool childShouldMergeToParent = isPartOfNodeMerging;
 
@@ -2060,7 +2060,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   void _updateChildrenMergeFlags() {
-    _children?.forEach(_updateChildMergeFlag);
+    _children?.forEach(_updateChildMergeFlagRecursively);
   }
 
   void _adoptChild(SemanticsNode child) {
@@ -2078,7 +2078,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       child.attach(_owner!);
     }
     _redepthChild(child);
-    _updateChildMergeFlag(child);
+    _updateChildMergeFlagRecursively(child);
   }
 
   void _dropChild(SemanticsNode child) {
@@ -3299,25 +3299,28 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [onSemanticsUpdate].
   void sendSemanticsUpdate() {
-    // Once the tree is up-to-date, verify that there's no invisible nodes in it.
+    // Once the tree is up-to-date, verify that every node is visible.
     assert(() {
       final List<SemanticsNode> invisibleNodes = <SemanticsNode>[];
-      bool findInvisibleNodes(SemanticsNode rootNode) {
-        if (rootNode.rect.isEmpty) {
-          invisibleNodes.add(rootNode);
-        } else if (!rootNode.mergeAllDescendantsIntoThisNode) {
-          rootNode.visitChildren(findInvisibleNodes);
+      // Finds the invisible nodes in the tree rooted at `node` and adds them to
+      // the invisibleNodes list. If a node is itself invisible, all its
+      // descendants will be skipped.
+      bool findInvisibleNodes(SemanticsNode node) {
+        if (node.rect.isEmpty) {
+          invisibleNodes.add(node);
+        } else if (!node.mergeAllDescendantsIntoThisNode) {
+          node.visitChildren(findInvisibleNodes);
         }
         return true;
       }
 
-      // The root node is allowed to be invisible when it has no children.
       final SemanticsNode? rootSemanticsNode = this.rootSemanticsNode;
       if (rootSemanticsNode != null) {
-        if (!rootSemanticsNode.mergeAllDescendantsIntoThisNode) {
-          rootSemanticsNode.visitChildren(findInvisibleNodes);
-        } else if (rootSemanticsNode.childrenCount > 0 && rootSemanticsNode.rect.isEmpty) {
+        // The root node is allowed to be invisible when it has no children.
+        if (rootSemanticsNode.childrenCount > 0 && rootSemanticsNode.rect.isEmpty) {
           invisibleNodes.add(rootSemanticsNode);
+        } else if (!rootSemanticsNode.mergeAllDescendantsIntoThisNode) {
+          rootSemanticsNode.visitChildren(findInvisibleNodes);
         }
       }
 
