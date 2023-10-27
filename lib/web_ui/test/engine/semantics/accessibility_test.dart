@@ -11,6 +11,7 @@ import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/embedder.dart';
 import 'package:ui/src/engine/semantics.dart';
 import 'package:ui/src/engine/services.dart';
+import 'package:ui/src/engine/view_embedder/dom_manager.dart';
 
 const StandardMessageCodec codec = StandardMessageCodec();
 
@@ -19,26 +20,27 @@ void main() {
 }
 
 void testMain() {
-  late FlutterViewEmbedder embedder;
+  late DomManager domManager;
   late AccessibilityAnnouncements accessibilityAnnouncements;
 
   setUp(() {
-    embedder = FlutterViewEmbedder();
+    final FlutterViewEmbedder embedder = FlutterViewEmbedder();
+    domManager = DomManager.fromFlutterViewEmbedderDEPRECATED(embedder);
     accessibilityAnnouncements = embedder.accessibilityAnnouncements;
     setLiveMessageDurationForTest(const Duration(milliseconds: 10));
     expect(
-      embedder.glassPaneShadow.querySelector('flt-announcement-polite'),
+      domManager.renderingHost.querySelector('flt-announcement-polite'),
       accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite),
     );
     expect(
-      embedder.glassPaneShadow.querySelector('flt-announcement-assertive'),
+      domManager.renderingHost.querySelector('flt-announcement-assertive'),
       accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive),
     );
   });
 
   tearDown(() async {
     await Future<void>.delayed(liveMessageDuration * 2);
-    embedder.glassPaneElement.remove();
+    domManager.rootElement.remove();
   });
 
   group('$AccessibilityAnnouncements', () {

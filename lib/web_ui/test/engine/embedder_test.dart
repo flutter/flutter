@@ -47,7 +47,7 @@ void testMain() {
     final FlutterViewEmbedder embedder = FlutterViewEmbedder();
 
     expect(
-      embedder.glassPaneShadow.querySelectorAll('flt-semantics-placeholder'),
+      embedder.glassPaneShadowDEPRECATED.querySelectorAll('flt-semantics-placeholder'),
       isNotEmpty,
     );
   });
@@ -71,7 +71,7 @@ void testMain() {
 
     regularTextField.focus();
     DomCSSStyleDeclaration? style = domWindow.getComputedStyle(
-        embedder.glassPaneShadow.querySelector('input')!,
+        embedder.glassPaneShadowDEPRECATED.querySelector('input')!,
         '::placeholder');
     expect(style, isNotNull);
     expect(style.opacity, isNot('0'));
@@ -83,7 +83,7 @@ void testMain() {
 
     textField.focus();
     style = domWindow.getComputedStyle(
-        embedder.glassPaneShadow.querySelector('input.flt-text-editing')!,
+        embedder.glassPaneShadowDEPRECATED.querySelector('input.flt-text-editing')!,
         '::placeholder');
     expect(style, isNotNull);
     expect(style.opacity, '0');
@@ -97,7 +97,7 @@ void testMain() {
     });
 
     tearDown(() {
-      embedder.glassPaneElement.remove();
+      embedder.glassPaneElementDEPRECATED.remove();
     });
 
     test('throws when shadowDom is not available', () {
@@ -111,27 +111,27 @@ void testMain() {
     });
 
     test('Initializes and attaches a shadow root', () {
-      expect(domInstanceOfString(embedder.glassPaneShadow, 'ShadowRoot'), isTrue);
-      expect(embedder.glassPaneShadow.host, embedder.glassPaneElement);
-      expect(embedder.glassPaneShadow, embedder.glassPaneElement.shadowRoot);
+      expect(domInstanceOfString(embedder.glassPaneShadowDEPRECATED, 'ShadowRoot'), isTrue);
+      expect(embedder.glassPaneShadowDEPRECATED.host, embedder.glassPaneElementDEPRECATED);
+      expect(embedder.glassPaneShadowDEPRECATED, embedder.glassPaneElementDEPRECATED.shadowRoot);
 
       // The shadow root should be initialized with correct parameters.
-      expect(embedder.glassPaneShadow.mode, 'open');
+      expect(embedder.glassPaneShadowDEPRECATED.mode, 'open');
       if (browserEngine != BrowserEngine.firefox &&
           browserEngine != BrowserEngine.webkit) {
         // Older versions of Safari and Firefox don't support this flag yet.
         // See: https://caniuse.com/mdn-api_shadowroot_delegatesfocus
-        expect(embedder.glassPaneShadow.delegatesFocus, isFalse);
+        expect(embedder.glassPaneShadowDEPRECATED.delegatesFocus, isFalse);
       }
     });
 
     test('Attaches a stylesheet to the shadow root', () {
       final DomElement? style =
-          embedder.glassPaneShadow.querySelector('#flt-internals-stylesheet');
+          embedder.glassPaneShadowDEPRECATED.querySelector('#flt-internals-stylesheet');
 
       expect(style, isNotNull);
       expect(style!.tagName, equalsIgnoringCase('style'));
-      expect(style.parentNode, embedder.glassPaneShadow);
+      expect(style.parentNode, embedder.glassPaneShadowDEPRECATED);
     });
   });
 }

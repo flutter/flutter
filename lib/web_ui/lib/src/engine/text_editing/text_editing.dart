@@ -11,7 +11,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../dom.dart';
-import '../embedder.dart';
 import '../mouse/prevent_default.dart';
 import '../platform_dispatcher.dart';
 import '../safe_browser_api.dart';
@@ -51,8 +50,9 @@ void _emptyCallback(dynamic _) {}
 
 /// The default [HostNode] that hosts all DOM required for text editing when a11y is not enabled.
 @visibleForTesting
-DomElement get defaultTextEditingRoot =>
-    flutterViewEmbedder.textEditingHostNode;
+// TODO(mdebbar): There could be multiple views with multiple text editing hosts.
+//                https://github.com/flutter/flutter/issues/137344
+DomElement get defaultTextEditingRoot => EnginePlatformDispatcher.instance.implicitView!.dom.textEditingHost;
 
 /// These style attributes are constant throughout the life time of an input
 /// element.

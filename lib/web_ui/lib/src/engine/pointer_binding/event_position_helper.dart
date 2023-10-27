@@ -4,13 +4,13 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine/embedder.dart';
-import 'package:ui/src/engine/text_editing/text_editing.dart';
-import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui show Offset;
 
 import '../dom.dart';
+import '../platform_dispatcher.dart';
 import '../semantics.dart' show EngineSemanticsOwner;
+import '../text_editing/text_editing.dart';
+import '../vector_math.dart';
 
 /// Returns an [ui.Offset] of the position of [event], relative to the position of [actualTarget].
 ///
@@ -30,7 +30,10 @@ ui.Offset computeEventOffsetToTarget(DomMouseEvent event, DomElement actualTarge
   }
 
   // On one of our text-editing nodes
-  final bool isInput = flutterViewEmbedder.textEditingHostNode.contains(event.target! as DomNode);
+  // TODO(mdebbar): There could be multiple views with multiple text editing hosts.
+  //                https://github.com/flutter/flutter/issues/137344
+  final DomElement textEditingHost = EnginePlatformDispatcher.instance.implicitView!.dom.textEditingHost;
+  final bool isInput = textEditingHost.contains(event.target! as DomNode);
   if (isInput) {
     final EditableTextGeometry? inputGeometry = textEditing.strategy.geometry;
     if (inputGeometry != null) {
