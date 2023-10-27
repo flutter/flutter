@@ -488,6 +488,13 @@ struct RenderPassData {
     FML_DCHECK(gl.BlitFramebuffer.IsAvailable());
 
     GLuint draw_fbo = GL_NONE;
+    fml::ScopedCleanupClosure delete_draw_fbo([&gl, &draw_fbo, fbo]() {
+      if (draw_fbo != GL_NONE) {
+        gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
+        gl.DeleteFramebuffers(1u, &draw_fbo);
+      }
+    });
+
     gl.GenFramebuffers(1u, &draw_fbo);
     gl.BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
 
