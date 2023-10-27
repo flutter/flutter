@@ -596,7 +596,7 @@ Future<void> diagnoseXcodeBuildFailure(
     const String label = 'xcode-bitcode-failure';
     const String buildType = 'ios';
     final String command = xcodeBuildExecution.buildCommands.toString();
-    final String settings = xcodeBuildExecution.buildCommands.toString();
+    final String settings = xcodeBuildExecution.buildSettings.toString();
 
     BuildEvent(label,
       type: buildType,
@@ -610,7 +610,6 @@ Future<void> diagnoseXcodeBuildFailure(
       command: command,
       settings: settings,
     ));
-    print('${globals.analytics.clientId} &&&&& ${globals.analytics.runtimeType}');
   }
 
   // Handle errors.
