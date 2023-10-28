@@ -15,6 +15,7 @@ void main() {
     addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
     expect(rawData, isEmpty);
 
     await tester.pumpWidget(
@@ -41,6 +42,7 @@ void main() {
     final MockRestorationManager manager = MockRestorationManager();
     addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -64,6 +66,7 @@ void main() {
     final MockRestorationManager manager = MockRestorationManager();
     addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -107,6 +110,7 @@ void main() {
     final MockRestorationManager manager = MockRestorationManager();
     addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -144,6 +148,7 @@ void main() {
     addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
 
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isTrue);
     await tester.pumpWidget(
@@ -173,6 +178,7 @@ void main() {
     addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       UnmanagedRestorationScope(
@@ -235,6 +241,7 @@ void main() {
     addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
 
     await tester.pumpWidget(
       _TestRestorableWidget(
@@ -297,6 +304,7 @@ void main() {
     addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
     final Key key = GlobalKey();
 
     await tester.pumpWidget(
