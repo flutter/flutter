@@ -208,7 +208,7 @@ enum _PickerColumnType {
 ///  * US-English: `| July | 13 | 2012 |`
 ///  * Vietnamese: `| 13 | Tháng 7 | 2012 |`
 ///
-/// Can be used with [showCupertinoModalPopup] to display the picker modally at
+/// Can be used with [showCupertinoModalPopup] to display the picker modal at
 /// the bottom of the screen.
 ///
 /// Sizes itself to its parent and may not render correctly if not given the
