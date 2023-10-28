@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:meta/meta.dart';
 
 import '../base/error_handling_io.dart';
@@ -111,7 +113,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
       );
       if (!androidManifestHasNameVariable(project.directory)) {
         globals.printStatus(
-          r'Your `android/app/src/main/AndroidManifest.xml` does not contain `android:name="${applicationName}"` '
+          'Your `${globals.fs.path.join('android', 'app', 'src', 'main', 'AndroidManifest.xml')}` does not contain `android:name="\${applicationName}"` '
           'under the `application` element. This may be due to creating your project with an old version of Flutter. '
           'Add the `android:name="\${applicationName}"` attribute to your AndroidManifest.xml to enable Flutter\'s multidex support:\n',
           indent: 4,
@@ -146,7 +148,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
           indent: 4,
         );
         globals.printStatus(
-          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java\n',
+          '${globals.fs.path.join('android', 'app', 'src', 'main', 'java','io', 'flutter', 'app', 'FlutterMultiDexApplication.java')}\n',
           indent: 8,
         );
         String selection = 'n';
@@ -520,8 +522,9 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
+    final String gradleCommand = Platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
-      'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+      'To regenerate the lockfiles run: `$gradleCommand :generateLockfiles` in ${gradleFile.path}\n'
       'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
     );
     globals.printBox(
