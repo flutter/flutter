@@ -1276,7 +1276,7 @@ class ShortcutRegistry with ChangeNotifier {
         if (!_disposed) {
           notifyListeners();
         }
-      });
+      }, debugLabel: 'ShortcutRegistry.notifyListeners');
       _notificationScheduled = true;
     }
   }

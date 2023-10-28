@@ -664,6 +664,7 @@ class _SnackBarState extends State<SnackBar> {
     final double actionAndIconWidth = actionTextPainter.size.width +
         (widget.action != null ? actionHorizontalMargin : 0) +
         (showCloseIcon ? (iconButton?.iconSize ?? 0 + iconHorizontalMargin) : 0);
+    actionTextPainter.dispose();
 
     final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
 
