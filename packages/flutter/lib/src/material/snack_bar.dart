@@ -617,7 +617,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final bool showCloseIcon =  widget.showCloseIcon ?? snackBarTheme.showCloseIcon ?? defaults.showCloseIcon!;
 
-    final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
+    final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating || snackBarBehavior == SnackBarBehavior.floatingBelowFab;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding = widget.padding ??
         EdgeInsetsDirectional.only(
