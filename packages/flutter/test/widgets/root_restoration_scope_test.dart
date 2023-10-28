@@ -27,6 +27,7 @@ void main() {
     addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+    addTearDown(root.dispose);
     expect(rawData, isEmpty);
 
     await tester.pumpWidget(
@@ -77,6 +78,7 @@ void main() {
     // Complete the future.
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: rawData);
+    addTearDown(root.dispose);
     bucketCompleter.complete(root);
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -92,6 +94,7 @@ void main() {
   testWidgetsWithLeakTracking('no delay when root is available synchronously', (WidgetTester tester) async {
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: rawData);
+    addTearDown(root.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
 
     await tester.pumpWidget(
@@ -156,6 +159,7 @@ void main() {
 
     // Complete the future.
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: <String, dynamic>{});
+    addTearDown(root.dispose);
     bucketCompleter.complete(root);
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -187,6 +191,7 @@ void main() {
     addTearDown(manager.dispose);
     final Map<String, dynamic> inScopeRawData = <String, dynamic>{};
     final RestorationBucket inScopeRootBucket = RestorationBucket.root(manager: manager, rawData: inScopeRawData);
+    addTearDown(inScopeRootBucket.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -231,6 +236,7 @@ void main() {
 
     final Map<String, dynamic> outOfScopeRawData = <String, dynamic>{};
     final RestorationBucket outOfScopeRootBucket = RestorationBucket.root(manager: binding.restorationManager, rawData: outOfScopeRawData);
+    addTearDown(outOfScopeRootBucket.dispose);
     bucketCompleter.complete(outOfScopeRootBucket);
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -267,6 +273,7 @@ void main() {
   testWidgetsWithLeakTracking('injects new root when old one is decommissioned', (WidgetTester tester) async {
     final Map<String, dynamic> firstRawData = <String, dynamic>{};
     final RestorationBucket firstRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: firstRawData);
+    addTearDown(firstRoot.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(firstRoot);
 
     await tester.pumpWidget(
@@ -299,9 +306,9 @@ void main() {
       },
     };
     final RestorationBucket secondRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: secondRawData);
+    addTearDown(secondRoot.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(secondRoot);
     await tester.pump();
-    firstRoot.dispose();
 
     expect(state.bucket, isNot(same(firstBucket)));
     expect(state.bucket!.read<int>('foo'), 22);
@@ -336,6 +343,7 @@ void main() {
     expect(state.bucket, isNull);
 
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: null);
+    addTearDown(root.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
     await tester.pump();
 
@@ -346,6 +354,7 @@ void main() {
 
   testWidgetsWithLeakTracking('can switch to null', (WidgetTester tester) async {
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: null);
+    addTearDown(root.dispose);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
 
     await tester.pumpWidget(
@@ -367,7 +376,6 @@ void main() {
 
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket?>(null);
     await tester.pump();
-    root.dispose();
 
     expect(binding.restorationManager.rootBucketAccessed, 2);
     expect(find.text('Hello'), findsOneWidget);
