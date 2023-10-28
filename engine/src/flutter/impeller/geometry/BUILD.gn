@@ -59,7 +59,11 @@ impeller_component("geometry_asserts") {
 
 impeller_component("geometry_unittests") {
   testonly = true
-  sources = [ "geometry_unittests.cc" ]
+  sources = [
+    "geometry_unittests.cc",
+    "rect_unittests.cc",
+  ]
+
   deps = [
     ":geometry",
     ":geometry_asserts",

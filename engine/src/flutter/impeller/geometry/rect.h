@@ -134,6 +134,20 @@ struct TRect {
 
   constexpr bool IsMaximum() const { return *this == MakeMaximum(); }
 
+  /// @brief Returns the upper left corner of the rectangle as specified
+  ///        when it was constructed.
+  ///
+  ///        Note that unlike the |GetLeft|, |GetTop|, and |GetLeftTop|
+  ///        methods which will return values as if the rectangle had been
+  ///        "unswapped" by calling |GetPositive| on it, this method
+  ///        returns the raw origin values.
+  constexpr TPoint<Type> GetOrigin() const { return origin; }
+
+  /// @brief Returns the size of the rectangle as specified when it was
+  ///        constructed and which may be negative in either width or
+  ///        height.
+  constexpr TSize<Type> GetSize() const { return size; }
+
   constexpr auto GetLeft() const {
     if (IsMaximum()) {
       return -std::numeric_limits<Type>::infinity();
