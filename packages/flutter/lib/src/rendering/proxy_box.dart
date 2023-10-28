@@ -2264,6 +2264,12 @@ class RenderDecoratedBox extends RenderProxyBox {
   }
 
   @override
+  void dispose() {
+    _painter?.dispose();
+    super.dispose();
+  }
+
+  @override
   bool hitTestSelf(Offset position) {
     return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
   }

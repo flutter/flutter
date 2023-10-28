@@ -231,7 +231,7 @@ class BannerPainter extends CustomPainter {
 ///
 ///  * [CheckedModeBanner], which the [WidgetsApp] widget includes by default in
 ///    debug mode, to show a banner that says "DEBUG".
-class Banner extends StatelessWidget {
+class Banner extends StatefulWidget {
   /// Creates a banner.
   const Banner({
     super.key,
@@ -289,30 +289,47 @@ class Banner extends StatelessWidget {
   final TextStyle textStyle;
 
   @override
+  State<Banner> createState() => _BannerState();
+}
+
+class _BannerState extends State<Banner> {
+  BannerPainter? _painter;
+
+  @override
+  void dispose() {
+    _painter?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    assert((textDirection != null && layoutDirection != null) || debugCheckHasDirectionality(context));
+    assert((widget.textDirection != null && widget.layoutDirection != null) || debugCheckHasDirectionality(context));
+
+    _painter?.dispose();
+    _painter = BannerPainter(
+      message: widget.message,
+      textDirection: widget.textDirection ?? Directionality.of(context),
+      location: widget.location,
+      layoutDirection: widget.layoutDirection ?? Directionality.of(context),
+      color: widget.color,
+      textStyle: widget.textStyle,
+    );
+
     return CustomPaint(
-      foregroundPainter: BannerPainter(
-        message: message,
-        textDirection: textDirection ?? Directionality.of(context),
-        location: location,
-        layoutDirection: layoutDirection ?? Directionality.of(context),
-        color: color,
-        textStyle: textStyle,
-      ),
-      child: child,
+      foregroundPainter: _painter,
+      child: widget.child,
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('message', message, showName: false));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(EnumProperty<BannerLocation>('location', location));
-    properties.add(EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
-    properties.add(ColorProperty('color', color, showName: false));
-    textStyle.debugFillProperties(properties, prefix: 'text ');
+    properties.add(StringProperty('message', widget.message, showName: false));
+    properties.add(EnumProperty<TextDirection>('textDirection', widget.textDirection, defaultValue: null));
+    properties.add(EnumProperty<BannerLocation>('location', widget.location));
+    properties.add(EnumProperty<TextDirection>('layoutDirection', widget.layoutDirection, defaultValue: null));
+    properties.add(ColorProperty('color', widget.color, showName: false));
+    widget.textStyle.debugFillProperties(properties, prefix: 'text ');
   }
 }
 
