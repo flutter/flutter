@@ -141,6 +141,7 @@
 ../../../flutter/impeller/fixtures
 ../../../flutter/impeller/geometry/README.md
 ../../../flutter/impeller/geometry/geometry_unittests.cc
+../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/golden_tests/README.md
 ../../../flutter/impeller/golden_tests_harvester/.dart_tool
 ../../../flutter/impeller/golden_tests_harvester/.gitignore
