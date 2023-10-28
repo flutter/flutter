@@ -1811,15 +1811,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   // MERGING
 
   /// Whether this node merges its semantic information into an ancestor node.
-  bool get isMergedIntoParent => _isMergedIntoParent;
+  ///
+  /// This value indicates whether this node has any ancestors with
+  /// [mergeAllDescendantsIntoThisNode] set to true.
+  bool get isMergedIntoParent => parent != null && _isMergedIntoParent;
   bool _isMergedIntoParent = false;
-  set isMergedIntoParent(bool value) {
-    if (_isMergedIntoParent == value) {
-      return;
-    }
-    _isMergedIntoParent = value;
-    _markDirty();
-  }
 
   /// Whether the user can interact with this node in assistive technologies.
   ///
@@ -1866,46 +1862,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
-      if (identical(newChildren, _children)) {
-        final List<DiagnosticsNode> mutationErrors = <DiagnosticsNode>[];
-        if (newChildren.length != _debugPreviousSnapshot.length) {
-          mutationErrors.add(ErrorDescription(
-            "The list's length has changed from ${_debugPreviousSnapshot.length} "
-            'to ${newChildren.length}.',
-          ));
-        } else {
-          for (int i = 0; i < newChildren.length; i++) {
-            if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
-              if (mutationErrors.isNotEmpty) {
-                mutationErrors.add(ErrorSpacer());
-              }
-              mutationErrors.add(ErrorDescription('Child node at position $i was replaced:'));
-              mutationErrors.add(newChildren[i].toDiagnosticsNode(name: 'Previous child', style: DiagnosticsTreeStyle.singleLine));
-              mutationErrors.add(_debugPreviousSnapshot[i].toDiagnosticsNode(name: 'New child', style: DiagnosticsTreeStyle.singleLine));
-            }
-          }
-        }
-        if (mutationErrors.isNotEmpty) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.'),
-            ErrorHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'),
-            ErrorDescription('Error details:'),
-            ...mutationErrors,
-          ]);
-        }
-      }
-      assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
-
-      _debugPreviousSnapshot = List<SemanticsNode>.of(newChildren);
-
-      SemanticsNode ancestor = this;
-      while (ancestor.parent is SemanticsNode) {
-        ancestor = ancestor.parent!;
-      }
-      assert(!newChildren.any((SemanticsNode child) => child == ancestor));
-      return true;
-    }());
-    assert(() {
       final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
       for (final SemanticsNode child in newChildren) {
         assert(seenChildren.add(child));
@@ -1920,7 +1876,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
     for (final SemanticsNode child in newChildren) {
-      assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
       child._dead = false;
     }
     bool sawChange = false;
@@ -1951,6 +1906,47 @@ class SemanticsNode with DiagnosticableTreeMixin {
         sawChange = true;
       }
     }
+    // Wait until the new children are adopted so isMergedIntoParent becomes
+    // up-to-date.
+    assert(() {
+      if (identical(newChildren, _children)) {
+        final List<DiagnosticsNode> mutationErrors = <DiagnosticsNode>[];
+        if (newChildren.length != _debugPreviousSnapshot.length) {
+          mutationErrors.add(ErrorDescription(
+            "The list's length has changed from ${_debugPreviousSnapshot.length} "
+            'to ${newChildren.length}.',
+          ));
+        } else {
+          for (int i = 0; i < newChildren.length; i++) {
+            if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
+              if (mutationErrors.isNotEmpty) {
+                mutationErrors.add(ErrorSpacer());
+              }
+              mutationErrors.add(ErrorDescription('Child node at position $i was replaced:'));
+              mutationErrors.add(_debugPreviousSnapshot[i].toDiagnosticsNode(name: 'Previous child', style: DiagnosticsTreeStyle.singleLine));
+              mutationErrors.add(newChildren[i].toDiagnosticsNode(name: 'New child', style: DiagnosticsTreeStyle.singleLine));
+            }
+          }
+        }
+        if (mutationErrors.isNotEmpty) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.'),
+            ErrorHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'),
+            ErrorDescription('Error details:'),
+            ...mutationErrors,
+          ]);
+        }
+      }
+      _debugPreviousSnapshot = List<SemanticsNode>.of(newChildren);
+
+      SemanticsNode ancestor = this;
+      while (ancestor.parent is SemanticsNode) {
+        ancestor = ancestor.parent!;
+      }
+      assert(!newChildren.any((SemanticsNode child) => child == ancestor));
+      return true;
+    }());
+
     if (!sawChange && _children != null) {
       assert(newChildren.length == _children!.length);
       // Did the order change?
@@ -2045,6 +2041,28 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _children?.forEach(_redepthChild);
   }
 
+  void _updateChildMergeFlagRecursively(SemanticsNode child) {
+    assert(child.owner == owner);
+    final bool childShouldMergeToParent = isPartOfNodeMerging;
+
+    if (childShouldMergeToParent == child._isMergedIntoParent) {
+      return;
+    }
+
+    child._isMergedIntoParent = childShouldMergeToParent;
+    _markDirty();
+
+    if (child.mergeAllDescendantsIntoThisNode) {
+      // No need to update the descendants since `child` has the merge flag set.
+    } else {
+      child._updateChildrenMergeFlags();
+    }
+  }
+
+  void _updateChildrenMergeFlags() {
+    _children?.forEach(_updateChildMergeFlagRecursively);
+  }
+
   void _adoptChild(SemanticsNode child) {
     assert(child._parent == null);
     assert(() {
@@ -2060,6 +2078,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       child.attach(_owner!);
     }
     _redepthChild(child);
+    _updateChildMergeFlagRecursively(child);
   }
 
   void _dropChild(SemanticsNode child) {
@@ -2482,6 +2501,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       'SemanticsNodes with children must not specify a platformViewId.',
     );
 
+    final bool mergeAllDescendantsIntoThisNodeValueChanged = _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
+
     _attributedLabel = config.attributedLabel;
     _attributedValue = config.attributedValue;
     _attributedIncreasedValue = config.attributedIncreasedValue;
@@ -2511,6 +2532,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _currentValueLength = config._currentValueLength;
     _areUserActionsBlocked = config.isBlockingUserActions;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
+
+    if (mergeAllDescendantsIntoThisNodeValueChanged) {
+      _updateChildrenMergeFlags();
+    }
 
     assert(
       !_canPerformAction(SemanticsAction.increase) || (value == '') == (increasedValue == ''),
@@ -3274,6 +3299,64 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [onSemanticsUpdate].
   void sendSemanticsUpdate() {
+    // Once the tree is up-to-date, verify that every node is visible.
+    assert(() {
+      final List<SemanticsNode> invisibleNodes = <SemanticsNode>[];
+      // Finds the invisible nodes in the tree rooted at `node` and adds them to
+      // the invisibleNodes list. If a node is itself invisible, all its
+      // descendants will be skipped.
+      bool findInvisibleNodes(SemanticsNode node) {
+        if (node.rect.isEmpty) {
+          invisibleNodes.add(node);
+        } else if (!node.mergeAllDescendantsIntoThisNode) {
+          node.visitChildren(findInvisibleNodes);
+        }
+        return true;
+      }
+
+      final SemanticsNode? rootSemanticsNode = this.rootSemanticsNode;
+      if (rootSemanticsNode != null) {
+        // The root node is allowed to be invisible when it has no children.
+        if (rootSemanticsNode.childrenCount > 0 && rootSemanticsNode.rect.isEmpty) {
+          invisibleNodes.add(rootSemanticsNode);
+        } else if (!rootSemanticsNode.mergeAllDescendantsIntoThisNode) {
+          rootSemanticsNode.visitChildren(findInvisibleNodes);
+        }
+      }
+
+      if (invisibleNodes.isEmpty) {
+        return true;
+      }
+
+      List<DiagnosticsNode> nodeToMessage(SemanticsNode invisibleNode) {
+        final SemanticsNode? parent = invisibleNode.parent;
+        return<DiagnosticsNode>[
+          invisibleNode.toDiagnosticsNode(style: DiagnosticsTreeStyle.errorProperty),
+          parent?.toDiagnosticsNode(name: 'which was added as a child of', style: DiagnosticsTreeStyle.errorProperty) ?? ErrorDescription('which was added as the root SemanticsNode'),
+        ];
+      }
+
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Invisible SemanticsNodes should not be added to the tree.'),
+        ErrorDescription('The following invisible SemanticsNodes were added to the tree:'),
+        ...invisibleNodes.expand(nodeToMessage),
+        ErrorHint(
+          'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, '
+          'and its semantic information is not merged into a visible parent.'
+        ),
+        ErrorHint(
+          'An invisible SemantiscNode makes the accessibility experience confusing, '
+          'as it does not provide any visual indication when the user selects it '
+          'via accessibility technologies.'
+        ),
+        ErrorHint(
+          'Consider removing the above invisible SemanticsNodes if they were added by your '
+          'RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+        ),
+      ]);
+    }());
+
     if (_dirtyNodes.isEmpty) {
       return;
     }
