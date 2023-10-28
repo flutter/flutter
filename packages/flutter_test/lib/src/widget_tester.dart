@@ -155,7 +155,7 @@ void testWidgets(
 
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-  callback = _maybeWrapWithLeakTracking(callback, experimentalLeakTesting);
+  callback = _maybeWrapWithLeakTracking(description, callback, experimentalLeakTesting);
 
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
@@ -202,6 +202,7 @@ void testWidgets(
 }
 
 WidgetTesterCallback _maybeWrapWithLeakTracking(
+  String description,
   WidgetTesterCallback callback,
   LeakTesting? leakTesting,
 ) {
@@ -218,8 +219,24 @@ WidgetTesterCallback _maybeWrapWithLeakTracking(
   });
 
 
+  Future<void> wrappedCallBack(WidgetTester tester) async {
+    final settings = leakTesting ?? LeakTesting.settings;
 
-  return callback;
+    final phase = PhaseSettings(
+      name: description,
+      leakDiagnosticConfig: settings.leakDiagnosticConfig,
+      ignoredLeaks: settings.ignoredLeaks,
+      baselining: const MemoryBaselining.none(),
+      ignoreLeaks: settings.ignore,
+    );
+
+    if (!LeakTracking.isStarted) _setUpTestingWithLeakTracking();
+    LeakTracking.phase = phase;
+    await callback(tester);
+    LeakTracking.phase = const PhaseSettings.ignored();
+  }
+
+  return wrappedCallBack;
 }
 
 bool _notSupportedWarningPrinted = false;
@@ -237,6 +254,12 @@ void _mayBePrintPlatformWarning() {
 
 void _dispatchFlutterEventToLeakTracker(ObjectEvent event) {
   return LeakTracking.dispatchObjectEvent(event.toMap());
+}
+
+void _setUpTestingWithLeakTracking() {
+  LeakTracking.phase = const PhaseSettings.ignored();
+  LeakTracking.start(config: LeakTrackingConfig.passive());
+  MemoryAllocations.instance.addListener(_dispatchFlutterEventToLeakTracker);
 }
 
 Future<void> _tearDownTestingWithLeakTracking() async {
