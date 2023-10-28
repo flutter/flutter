@@ -1298,7 +1298,7 @@ flutter:
 
     await residentRunner.runSourceGenerators();
 
-    expect(testLogger.errorText, allOf(contains('Exception')));
+    expect(testLogger.errorText, contains('Error'));
     expect(testLogger.statusText, isEmpty);
   }));
 
