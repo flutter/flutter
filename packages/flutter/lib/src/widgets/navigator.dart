@@ -27,6 +27,9 @@ import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
+// Duration for delay before refocusing in android so that the focus won't be interrupted.
+const Duration _kAndroidRefocusingDelayDuration = Duration(milliseconds: 300);
+
 // Examples can assume:
 // typedef MyAppHome = Placeholder;
 // typedef MyHomePage = Placeholder;
@@ -372,6 +375,8 @@ abstract class Route<T> {
   Future<T?> get popped => _popCompleter.future;
   final Completer<T?> _popCompleter = Completer<T?>();
 
+  final Completer<T?> _disposeCompleter = Completer<T?>();
+
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
   /// return false, otherwise return true (by returning the value of calling
@@ -511,6 +516,7 @@ abstract class Route<T> {
   void dispose() {
     _navigator = null;
     _restorationScopeId.dispose();
+    _disposeCompleter.complete();
     if (kFlutterMemoryAllocationsEnabled) {
       MemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
@@ -2940,6 +2946,7 @@ class _RouteEntry extends RouteTransitionRecord {
   Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
   WeakReference<Route<dynamic>> lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(notAnnounced); // last argument to Route.didPopNext
   Route<dynamic>? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
+  int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is
   /// enabled for it or null if restoration cannot be enabled for it.
@@ -3028,6 +3035,23 @@ class _RouteEntry extends RouteTransitionRecord {
   void handleDidPopNext(Route<dynamic> poppedRoute) {
     route.didPopNext(poppedRoute);
     lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(poppedRoute);
+    if(lastFocusNode != null)
+    {
+      // Move focus back to the last focused node.
+      poppedRoute._disposeCompleter.future.then((dynamic result) {
+        // In the Android platform, we have to wait for the system refocus to complete before
+        // sending the refocus message. Otherwise, the refocus message will be ignored.
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          final int? reFocusNode = lastFocusNode;
+          unawaited(Future<void>(() async {
+            await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
+            SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: reFocusNode));
+          }));
+        } else {
+          SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: lastFocusNode));
+        }
+      });
+    }
   }
 
   /// Process the to-be-popped route.
@@ -3576,7 +3600,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       SystemNavigator.selectSingleEntryHistory();
     }
 
+    SystemChannels.accessibility.setMessageHandler((dynamic message) => handleAccessibilityMessage(message as Object));
     _history.addListener(_handleHistoryChanged);
+  }
+
+  /// Handler called for messages received on the [SystemChannels.accessibility]
+  /// message channel.
+  Future<void> handleAccessibilityMessage(Object accessibilityMessage) async {
+    final Map<String, dynamic> message =
+        (accessibilityMessage as Map<Object?, Object?>).cast<String, dynamic>();
+
+    final String type = message['type'] as String;
+    switch (type) {
+      case 'didGainFocus':
+        recordLastFocus(message['nodeId'] as int);
+    }
+    return;
+  }
+
+  /// Record the last focused node in route entry..
+  void recordLastFocus(int id){
+    final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
+    entry.lastFocusNode = id;
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
