@@ -107,7 +107,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     this.arrowHeadColor,
-    this.footerRowPosition = Alignment.center,
+    this.footerRowPosition = Alignment.centerRight,
     required this.source,
     this.checkboxHorizontalMargin,
     this.controller,
