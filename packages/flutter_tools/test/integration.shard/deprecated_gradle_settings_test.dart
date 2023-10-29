@@ -46,7 +46,10 @@ plugins.each { name, path ->
 }
 """;
 
-    expect(settingsDotGradleFile.readAsStringSync().trim(), settingsDotGradle.trim());
+    expect(
+      settingsDotGradleFile.readAsStringSync().trim().replaceAll('\r', ''),
+      equals(settingsDotGradle.trim()),
+    );
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
