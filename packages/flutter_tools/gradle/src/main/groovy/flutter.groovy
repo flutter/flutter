@@ -394,9 +394,37 @@ class FlutterPlugin implements Plugin<Project> {
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins() {
-        // TODO(gustl22): replace both with [getPluginList], see [getPluginDependencies].
-        getPluginDependencies().each this.&configurePluginProject
-        getPluginDependencies().each this.&configurePluginDependencies
+        configureLegacyPluginProjects()
+        getPluginList().each this.&configurePluginProject
+        getPluginList().each this.&configurePluginDependencies
+    }
+
+    // TODO(gustl22): Can remove configuring legacy plugins, once #48918 is resolved.
+    private configureLegacyPluginProjects() {
+        File settingsGradle = new File(project.projectDir.parentFile, 'settings.gradle')
+        if(!settingsGradle.exists() || !settingsGradle.text.contains("'.flutter-plugins'")) {
+            return
+        }
+        project.logger.error("Your app uses an outdated version of `settings.gradle`. Please update.")
+        List deps = getPluginDependencies()
+        List plugins = getPluginList().collect { it.name }
+        deps.removeIf { plugins.contains(it.name) }
+        deps.each {
+            Project pluginProject = project.rootProject.findProject(":${it.name}")
+            if (pluginProject != null &&
+                    doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
+                configurePluginProject(it)
+            }
+        }
+    }
+
+    // TODO(gustl22): Can remove this check, once #48918 is resolved.
+    /**
+     * Returns `true` if the given path contains an `android/build.gradle` file.
+     */
+    private static Boolean doesSupportAndroidPlatform(String path) {
+        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+        return editableAndroidProject.exists()
     }
 
     /** Adds the plugin project dependency to the app project. */
@@ -404,8 +432,7 @@ class FlutterPlugin implements Plugin<Project> {
         assert pluginObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
 
-        if (pluginProject == null ||
-                !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
+        if (pluginProject == null) {
             project.logger.error("Plugin project :${pluginObject.name} not found. Please update settings.gradle.")
             return
         }
@@ -523,15 +550,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // TODO(gustl22): Can remove this check, once plugins are exclusively loaded via [getPluginList], see [getPluginDependencies].
-    /**
-     * Returns `true` if the given path contains an `android/build.gradle` file.
-     */
-    private Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
-        return editableAndroidProject.exists()
-    }
-
     /**
      * Add the dependencies on other plugin projects to the plugin project.
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
@@ -540,8 +558,7 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginDependencies(Object pluginObject) {
         assert pluginObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        if (pluginProject == null ||
-            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
+        if (pluginProject == null) {
             return
         }
         assert pluginObject.dependencies instanceof List
@@ -551,8 +568,7 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null ||
-                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
+            if (dependencyProject == null) {
                 return
             }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
