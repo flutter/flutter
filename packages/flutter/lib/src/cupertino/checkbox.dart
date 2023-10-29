@@ -12,7 +12,7 @@ import 'toggleable.dart';
 // bool _throwShotAway = false;
 // late StateSetter setState;
 
-// The relative values needed to transform a color to it's equivilant focus
+// The relative values needed to transform a color to it's equivalent focus
 // outline color.
 const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;

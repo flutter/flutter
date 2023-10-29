@@ -772,7 +772,8 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (!_canComputeIntrinsics()) {
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
@@ -1229,7 +1230,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
           final Rect paintRect = node.parentPaintClipRect!.intersect(currentRect);
           configuration.isHidden = paintRect.isEmpty && !currentRect.isEmpty;
         }
-        late final SemanticsNode newChild;
+        final SemanticsNode newChild;
         if (_cachedChildNodes?.isNotEmpty ?? false) {
           newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
         } else {

@@ -51,7 +51,6 @@
   "reorderItemRight": "Siirrä oikealle",
   "expandedIconTapHint": "Tiivistä",
   "collapsedIconTapHint": "Laajenna",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 merkki jäljellä",
   "remainingTextFieldCharacterCountOther": "$remainingCount merkkiä jäljellä",
   "refreshIndicatorSemanticLabel": "Päivitys",

@@ -1906,7 +1906,7 @@ abstract class RenderBox extends RenderObject {
   /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
   @protected
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
       error: FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
