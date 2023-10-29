@@ -489,6 +489,27 @@ void main() {
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
 
+  group('Leak testing', () {
+    final Map<String, FlutterErrorDetails> errors = <String, FlutterErrorDetails>{};
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
+      errors[testDescription] = details;
+    };
+
+    tearDownAll(() async {
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      await binding.runTest(() async {
+        throw 'test error';
+      }, () {});
+
+      //print(flutterErrorDetails == null ? 'null!!!' : 'got it!');
+      binding.postTest();
+    });
+
+    test('empty', () {
+      print('test');
+    });
+  });
+
   group('TargetPlatformVariant', () {
     int numberOfVariationsRun = 0;
     TargetPlatform? origTargetPlatform;
