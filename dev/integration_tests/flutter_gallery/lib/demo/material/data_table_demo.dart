@@ -187,6 +187,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
               sortColumnIndex: _sortColumnIndex,
               sortAscending: _sortAscending,
               onSelectAll: _dessertsDataSource._selectAll,
+              footerRowPosition: Alignment.centerRight,
               columns: <DataColumn>[
                 DataColumn(
                   label: const Text('Dessert (100g serving)'),

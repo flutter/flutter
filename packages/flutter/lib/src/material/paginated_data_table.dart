@@ -107,6 +107,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     this.arrowHeadColor,
+    this.footerRowPosition = Alignment.center,
     required this.source,
     this.checkboxHorizontalMargin,
     this.controller,
@@ -279,6 +280,9 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// Defines the color of the arrow heads in the footer.
   final Color? arrowHeadColor;
+
+  /// Defines the horizontal Alignment of the footer row items.
+  final AlignmentGeometry footerRowPosition;
 
   /// {@macro flutter.widgets.scroll_view.controller}
   final ScrollController? controller;
@@ -610,12 +614,15 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // TODO(bkonyi): this won't handle text zoom correctly,
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
-                    child: SingleChildScrollView(
-                      dragStartBehavior: widget.dragStartBehavior,
-                      scrollDirection: Axis.horizontal,
-                      reverse: true,
-                      child: Row(
-                        children: footerWidgets,
+                    child: Align(
+                      alignment: widget.footerRowPosition,
+                      child: SingleChildScrollView(
+                        dragStartBehavior: widget.dragStartBehavior,
+                        scrollDirection: Axis.horizontal,
+                        reverse: true,
+                        child: Row(
+                          children: footerWidgets,
+                        ),
                       ),
                     ),
                   ),
