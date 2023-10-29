@@ -400,6 +400,19 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     // TODO(gustl22): Can remove configuring legacy plugins, once #48918 is resolved.
+    //  This means all references to `.flutter-plugins` are then removed and apps only depend exclusively on the
+    //  `plugins` property in `.flutter-plugins-dependencies`.
+    //  This cannot be achieved yet as developers may still use an old `settings.gradle`
+    //  which includes all the plugins from the `.flutter-plugins` file, even if not made for Android. 
+    //  The settings.gradle then:
+    //      1) tries to add the android plugin implementation, which does not exist at all, but is also not included
+    //         successfully (which does not throw an error and therefore isn't a problem), or
+    //      2) includes the plugin successfully as a valid android plugin directory exists, even if the surrounding
+    //         flutter package does not support the android platform (see e.g. apple_maps_flutter: 1.0.1). 
+    //         So as it's included successfully it expects to be added as API. This is only possible by taking all 
+    //         plugins into account, which only appear on the `dependencyGraph` and under the `plugins`.
+    //  So in summary the plugins are currently selected from the `dependencyGraph` and filtered then with the
+    //  [doesSupportAndroidPlatform] method instead of just using the `plugins.android` list.
     private configureLegacyPluginProjects() {
         File settingsGradle = new File(project.projectDir.parentFile, 'settings.gradle')
         if(!settingsGradle.exists() || !settingsGradle.text.contains("'.flutter-plugins'")) {
@@ -635,19 +648,6 @@ class FlutterPlugin implements Plugin<Project> {
 
     // TODO(gustl22): Remove in favor of [getPluginList] only, see #48918 and 
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
-    //  This means all references to `.flutter-plugins` are then removed and apps only depend exclusively on the
-    //  `plugins` property in `.flutter-plugins-dependencies`.
-    //  This cannot be achieved yet as developers may still use an old `settings.gradle`
-    //  which includes all the plugins from the `.flutter-plugins` file, even if not made for Android. 
-    //  The settings.gradle then:
-    //      1) tries to add the android plugin implementation, which does not exist at all, but is also not included
-    //         successfully (which is not an issue), or
-    //      2) includes the plugin successfully as a valid android plugin directory exists, even if the surrounding
-    //         flutter package does not support the android platform (see e.g. apple_maps_flutter: 1.0.1). 
-    //         So as it's included successfully it expects to be added as API. This is only possible by taking all 
-    //         plugins into account, which only appear on the `dependencyGraph` and under the `plugins`.
-    //  So in summary the plugins are currently selected from the `dependencyGraph` and filtered then with the
-    //  [doesSupportAndroidPlatform] method instead of just using the `plugins.android` list.
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List getPluginDependencies() {
         // Consider a `.flutter-plugins-dependencies` file with the following content:
