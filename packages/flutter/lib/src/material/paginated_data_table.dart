@@ -107,7 +107,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
     this.arrowHeadColor,
-    this.footerRowPosition = Alignment.centerRight,
+    this.footerRowAlignment = Alignment.centerRight,
     required this.source,
     this.checkboxHorizontalMargin,
     this.controller,
@@ -283,7 +283,7 @@ class PaginatedDataTable extends StatefulWidget {
   final Color? arrowHeadColor;
 
   /// Defines the horizontal Alignment of the footer row items.
-  final AlignmentGeometry footerRowPosition;
+  final AlignmentGeometry footerRowAlignment;
 
   /// {@macro flutter.widgets.scroll_view.controller}
   final ScrollController? controller;
@@ -633,7 +633,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     //  https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
                     child: Align(
-                      alignment: widget.footerRowPosition,
+                      alignment: widget.footerRowAlignment,
                       child: SingleChildScrollView(
                         dragStartBehavior: widget.dragStartBehavior,
                         scrollDirection: Axis.horizontal,
