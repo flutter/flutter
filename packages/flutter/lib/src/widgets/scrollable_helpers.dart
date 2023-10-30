@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'focus_manager.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
@@ -29,8 +28,7 @@ export 'package:flutter/physics.dart' show Tolerance;
 /// information about the Scrollable in order to be initialized.
 @immutable
 class ScrollableDetails {
-  /// Creates a set of details describing the [Scrollable]. The [direction]
-  /// cannot be null.
+  /// Creates a set of details describing the [Scrollable].
   const ScrollableDetails({
     required this.direction,
     this.controller,
@@ -339,8 +337,6 @@ enum ScrollIncrementType {
 /// for the scrollable.
 class ScrollIncrementDetails {
   /// A const constructor for a [ScrollIncrementDetails].
-  ///
-  /// All of the arguments must not be null, and are required.
   const ScrollIncrementDetails({
     required this.type,
     required this.metrics,
@@ -377,10 +373,10 @@ class ScrollIntent extends Intent {
   final ScrollIncrementType type;
 }
 
-/// An [Action] that scrolls the [Scrollable] that encloses the current
-/// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
+/// An [Action] that scrolls the relevant [Scrollable] by the amount configured
+/// in the [ScrollIntent] given to it.
 ///
-/// If a Scrollable cannot be found above the current [primaryFocus], the
+/// If a Scrollable cannot be found above the given [BuildContext], the
 /// [PrimaryScrollController] will be considered for default handling of
 /// [ScrollAction]s.
 ///
@@ -388,21 +384,17 @@ class ScrollIntent extends Intent {
 /// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
 /// pixels.
-class ScrollAction extends Action<ScrollIntent> {
+class ScrollAction extends ContextAction<ScrollIntent> {
   @override
-  bool isEnabled(ScrollIntent intent) {
-    final FocusNode? focus = primaryFocus;
-    final bool contextIsValid = focus != null && focus.context != null;
-    if (contextIsValid) {
-      // Check for primary scrollable within the current context
-      if (Scrollable.maybeOf(focus.context!) != null) {
-        return true;
-      }
-      // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(focus.context!);
-      return primaryScrollController != null && primaryScrollController.hasClients;
+  bool isEnabled(ScrollIntent intent, [BuildContext? context]) {
+    if (context == null) {
+      return false;
     }
-    return false;
+    if (Scrollable.maybeOf(context) != null) {
+      return true;
+    }
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
+    return (primaryScrollController != null) && (primaryScrollController.hasClients);
   }
 
   /// Returns the scroll increment for a single scroll request, for use when
@@ -410,8 +402,8 @@ class ScrollAction extends Action<ScrollIntent> {
   ///
   /// Must not be called when the position is null, or when any of the position
   /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
-  /// null. The type and state arguments must not be null, and the widget must
-  /// have already been laid out so that the position fields are valid.
+  /// null. The widget must have already been laid out so that the position
+  /// fields are valid.
   static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(state.position.hasPixels);
     assert(state.resolvedPhysics == null || state.resolvedPhysics!.shouldAcceptUserOffset(state.position));
@@ -480,10 +472,11 @@ class ScrollAction extends Action<ScrollIntent> {
   }
 
   @override
-  void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
+  void invoke(ScrollIntent intent, [BuildContext? context]) {
+    assert(context != null, 'Cannot scroll without a context.');
+    ScrollableState? state = Scrollable.maybeOf(context!);
     if (state == null) {
-      final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      final ScrollController primaryScrollController = PrimaryScrollController.of(context);
       assert (() {
         if (primaryScrollController.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[

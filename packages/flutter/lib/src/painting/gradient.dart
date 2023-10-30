@@ -149,8 +149,8 @@ class GradientRotation extends GradientTransform {
 abstract class Gradient {
   /// Initialize the gradient's colors and stops.
   ///
-  /// The [colors] argument must not be null, and must have at least two colors
-  /// (the length is not verified until the [createShader] method is called).
+  /// The [colors] argument must have at least two colors (the length is not
+  /// verified until the [createShader] method is called).
   ///
   /// If specified, the [stops] argument must have the same number of entries as
   /// [colors] (this is also not verified until the [createShader] method is
@@ -374,8 +374,7 @@ abstract class Gradient {
 class LinearGradient extends Gradient {
   /// Creates a linear gradient.
   ///
-  /// The [colors] argument must not be null. If [stops] is non-null, it must
-  /// have the same length as [colors].
+  /// If [stops] is non-null, it must have the same length as [colors].
   const LinearGradient({
     this.begin = Alignment.centerLeft,
     this.end = Alignment.centerRight,
@@ -625,8 +624,7 @@ class LinearGradient extends Gradient {
 class RadialGradient extends Gradient {
   /// Creates a radial gradient.
   ///
-  /// The [colors] argument must not be null. If [stops] is non-null, it must
-  /// have the same length as [colors].
+  /// If [stops] is non-null, it must have the same length as [colors].
   const RadialGradient({
     this.center = Alignment.center,
     this.radius = 0.5,
@@ -707,7 +705,7 @@ class RadialGradient extends Gradient {
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
       _resolveTransform(rect, textDirection),
-      focal == null  ? null : focal!.resolve(textDirection).withinRect(rect),
+      focal?.resolve(textDirection).withinRect(rect),
       focalRadius * rect.shortestSide,
     );
   }
@@ -921,8 +919,7 @@ class RadialGradient extends Gradient {
 class SweepGradient extends Gradient {
   /// Creates a sweep gradient.
   ///
-  /// The [colors] argument must not be null. If [stops] is non-null, it must
-  /// have the same length as [colors].
+  /// If [stops] is non-null, it must have the same length as [colors].
   const SweepGradient({
     this.center = Alignment.center,
     this.startAngle = 0.0,

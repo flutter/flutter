@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matcher/expect.dart';
@@ -58,28 +59,61 @@ class MatchesGoldenFile extends AsyncMatcher {
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    final Element e = binding.rootElement!;
     final ui.FlutterView view = binding.platformDispatcher.implicitView!;
+    final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
 
-    // Unlike `flutter_tester`, we don't have the ability to render an element
-    // to an image directly. Instead, we will use `window.render()` to render
-    // only the element being requested, and send a request to the test server
-    // requesting it to take a screenshot through the browser's debug interface.
-    _renderElement(view, renderObject);
-    final String? result = await binding.runAsync<String?>(() async {
-      if (autoUpdateGoldenFiles) {
-        await webGoldenComparator.update(size.width, size.height, key);
-        return null;
-      }
-      try {
-        final bool success = await webGoldenComparator.compare(size.width, size.height, key);
-        return success ? null : 'does not match';
-      } on TestFailure catch (ex) {
-        return ex.message;
-      }
-    }, additionalTime: const Duration(seconds: 22));
-    _renderElement(view, _findRepaintBoundary(e));
-    return result;
+    if (isCanvasKit) {
+      // In CanvasKit, use Layer.toImage to generate the screenshot.
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+      return binding.runAsync<String?>(() async {
+        assert(element.renderObject != null);
+        RenderObject renderObject = element.renderObject!;
+        while (!renderObject.isRepaintBoundary) {
+          renderObject = renderObject.parent!;
+        }
+        assert(!renderObject.debugNeedsPaint);
+        final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+        final ui.Image image = await layer.toImage(renderObject.paintBounds);
+        try {
+          final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          if (bytes == null) {
+            return 'could not encode screenshot.';
+          }
+          if (autoUpdateGoldenFiles) {
+            await webGoldenComparator.updateBytes(bytes.buffer.asUint8List(), key);
+            return null;
+          }
+          try {
+            final bool success = await webGoldenComparator.compareBytes(bytes.buffer.asUint8List(), key);
+            return success ? null : 'does not match';
+          } on TestFailure catch (ex) {
+            return ex.message;
+          }
+        } finally {
+          image.dispose();
+        }
+      });
+    } else {
+      // In the HTML renderer, we don't have the ability to render an element
+      // to an image directly. Instead, we will use `window.render()` to render
+      // only the element being requested, and send a request to the test server
+      // requesting it to take a screenshot through the browser's debug interface.
+      _renderElement(view, renderObject);
+      final String? result = await binding.runAsync<String?>(() async {
+        if (autoUpdateGoldenFiles) {
+          await webGoldenComparator.update(size.width, size.height, key);
+          return null;
+        }
+        try {
+          final bool success = await webGoldenComparator.compare(size.width, size.height, key);
+          return success ? null : 'does not match';
+        } on TestFailure catch (ex) {
+          return ex.message;
+        }
+      });
+      _renderElement(view, renderView);
+      return result;
+    }
   }
 
   @override
@@ -93,7 +127,7 @@ RenderObject _findRepaintBoundary(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   return renderObject;
 }

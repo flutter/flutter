@@ -44,6 +44,13 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 /// which the scrollable content is displayed.
 typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition);
 
+// The return type of _performEnsureVisible.
+//
+// The list of futures represents each pending ScrollPosition call to
+// ensureVisible. The returned ScrollableState's context is used to find the
+// next potential ancestor Scrollable.
+typedef _EnsureVisibleResults = (List<Future<void>>, ScrollableState);
+
 /// A widget that manages scrolling in one dimension and informs the [Viewport]
 /// through which the content is viewed.
 ///
@@ -72,6 +79,14 @@ typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, Vi
 ///    [PageController], which creates a page-oriented scroll position subclass
 ///    that keeps the same page visible when the [Scrollable] resizes.
 ///
+/// ## Persisting the scroll position during a session
+///
+/// Scrollables attempt to persist their scroll position using [PageStorage].
+/// This can be disabled by setting [ScrollController.keepScrollOffset] to false
+/// on the [controller]. If it is enabled, using a [PageStorageKey] for the
+/// [key] of this widget (or one of its ancestors, e.g. a [ScrollView]) is
+/// recommended to help disambiguate different [Scrollable]s from each other.
+///
 /// See also:
 ///
 ///  * [ListView], which is a commonly used [ScrollView] that displays a
@@ -88,8 +103,6 @@ typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, Vi
 ///    the scroll position without using a [ScrollController].
 class Scrollable extends StatefulWidget {
   /// Creates a widget that scrolls.
-  ///
-  /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     super.key,
     this.axisDirection = AxisDirection.down,
@@ -320,6 +333,10 @@ class Scrollable extends StatefulWidget {
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned, or
   /// null if there is none.
   ///
+  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
+  /// means that if the `context` is that of a [Scrollable], it will _not_ find
+  /// _that_ [Scrollable].
+  ///
   /// See also:
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
@@ -358,6 +375,10 @@ class Scrollable extends StatefulWidget {
   /// Using the optional [Axis] is useful when Scrollables are nested and the
   /// target [Scrollable] is not the closest instance. When [axis] is provided,
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned.
+  ///
+  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
+  /// means that if the `context` is that of a [Scrollable], it will _not_ find
+  /// _that_ [Scrollable].
   ///
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
@@ -427,6 +448,10 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
+  ///
+  /// If the [Scrollable] of the provided [BuildContext] is a
+  /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
+  /// the target is made visible.
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
@@ -436,25 +461,28 @@ class Scrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
-    // The `targetRenderObject` is used to record the first target renderObject.
-    // If there are multiple scrollable widgets nested, we should let
-    // the `targetRenderObject` as visible as possible to improve the user experience.
-    // Otherwise, let the outer renderObject as visible as possible maybe cause
-    // the `targetRenderObject` invisible.
+    // The targetRenderObject is used to record the first target renderObject.
+    // If there are multiple scrollable widgets nested, the targetRenderObject
+    // is made to be as visible as possible to improve the user experience. If
+    // the targetRenderObject is already visible, then let the outer
+    // renderObject be as visible as possible.
+    //
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
-      futures.add(scrollable.position.ensureVisible(
+      final List<Future<void>> newFutures;
+      (newFutures, scrollable) = scrollable._performEnsureVisible(
         context.findRenderObject()!,
         alignment: alignment,
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
         targetRenderObject: targetRenderObject,
-      ));
+      );
+      futures.addAll(newFutures);
 
-      targetRenderObject = targetRenderObject ?? context.findRenderObject();
+      targetRenderObject ??= context.findRenderObject();
       context = scrollable.context;
       scrollable = Scrollable.maybeOf(context);
     }
@@ -616,6 +644,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
+    if ((widget.scrollBehavior == null) != (oldWidget.scrollBehavior == null)) {
+      return true;
+    }
+    if (widget.scrollBehavior != null && oldWidget.scrollBehavior != null && widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!)) {
+      return true;
+    }
     ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
     ScrollPhysics? oldPhysics = oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
     do {
@@ -637,7 +671,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (oldWidget.controller == null) {
         // The old controller was null, meaning the fallback cannot be null.
         // Dispose of the fallback.
-        assert(_fallbackScrollController !=  null);
+        assert(_fallbackScrollController != null);
         assert(widget.controller != null);
         _fallbackScrollController!.detach(position);
         _fallbackScrollController!.dispose();
@@ -943,7 +977,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
-      // TODO(ianh): Having all these global keys is sad.
       child: Listener(
         onPointerSignal: _receivedPointerSignal,
         child: RawGestureDetector(
@@ -990,6 +1023,28 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
 
     return result;
+  }
+
+  // Returns the Future from calling ensureVisible for the ScrollPosition, as
+  // as well as this ScrollableState instance so its context can be used to
+  // check for other ancestor Scrollables in executing ensureVisible.
+  _EnsureVisibleResults _performEnsureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    final Future<void> ensureVisibleFuture = position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+      targetRenderObject: targetRenderObject,
+    );
+    return (<Future<void>>[ ensureVisibleFuture ], this);
   }
 
   @override
@@ -1112,7 +1167,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       }
       _scheduledLayoutChange = false;
       layoutDidChange();
-    });
+    }, debugLabel: 'ScrollableSelectionContainer.layoutDidChange');
   }
 
   /// Stores the scroll offset when a scrollable receives the last
@@ -1162,11 +1217,11 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     if (event.type == SelectionEventType.endEdgeUpdate) {
       _currentDragEndRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      event = SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset);
+      event = SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset, granularity: event.granularity);
     } else {
       _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      event = SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset);
+      event = SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset, granularity: event.granularity);
     }
     final SelectionResult result = super.handleSelectionEdgeUpdate(event);
 
@@ -1415,6 +1470,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
       selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset));
+      // Make sure we track that we have synthesized a start event for this selectable,
+      // so we don't synthesize events unnecessarily.
+      _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
     }
     final double? previousEndRecord = _selectableEndEdgeUpdateRecords[selectable];
     if (_currentDragEndRelatedToOrigin != null &&
@@ -1423,6 +1481,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
       selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset));
+      // Make sure we track that we have synthesized an end event for this selectable,
+      // so we don't synthesize events unnecessarily.
+      _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
     }
   }
 
@@ -1565,10 +1626,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
       return;
     }
 
-    _innerNode ??= SemanticsNode(showOnScreen: showOnScreen);
-    _innerNode!
-      ..isMergedIntoParent = node.isPartOfNodeMerging
-      ..rect = node.rect;
+    (_innerNode ??= SemanticsNode(showOnScreen: showOnScreen)).rect = node.rect;
 
     int? firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode!];
@@ -1894,7 +1952,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
       if (oldWidget.horizontalDetails.controller == null) {
         // The old controller was null, meaning the fallback cannot be null.
         // Dispose of the fallback.
-        assert(_horizontalFallbackController !=  null);
+        assert(_horizontalFallbackController != null);
         assert(widget.horizontalDetails.controller != null);
         _horizontalFallbackController!.dispose();
         _horizontalFallbackController = null;
@@ -2015,6 +2073,25 @@ class _VerticalOuterDimension extends Scrollable {
 class _VerticalOuterDimensionState extends ScrollableState {
   DiagonalDragBehavior get diagonalDragBehavior => (widget as _VerticalOuterDimension).diagonalDragBehavior;
 
+  // Implemented in the _HorizontalInnerDimension instead.
+  @override
+  _EnsureVisibleResults _performEnsureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    assert(
+      false,
+      'The _performEnsureVisible method was called for the vertical scrollable '
+      'of a TwoDimensionalScrollable. This should not happen as the horizontal '
+      'scrollable handles both axes.'
+    );
+    return (<Future<void>>[], this);
+  }
+
   @override
   void setCanDrag(bool value) {
     switch (diagonalDragBehavior) {
@@ -2092,6 +2169,39 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     verticalScrollable = Scrollable.of(context);
     assert(axisDirectionToAxis(verticalScrollable.axisDirection) == Axis.vertical);
     super.didChangeDependencies();
+  }
+
+  // Returns the Future from calling ensureVisible for the ScrollPosition, as
+  // as well as the vertical ScrollableState instance so its context can be
+  // used to check for other ancestor Scrollables in executing ensureVisible.
+  @override
+  _EnsureVisibleResults _performEnsureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    final List<Future<void>> newFutures = <Future<void>>[];
+
+    newFutures.add(position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+    ));
+
+    newFutures.add(verticalScrollable.position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+    ));
+
+    return (newFutures, verticalScrollable);
   }
 
   void _evaluateLockedAxis(Offset offset) {

@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('StatefulWidget BuildContext.mounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StatefulWidget BuildContext.mounted', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(TestStatefulWidget(
         onBuild: (BuildContext context) {
@@ -18,7 +19,7 @@ void main() {
     expect(capturedContext.mounted, isFalse);
   });
 
-  testWidgets('StatelessWidget BuildContext.mounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StatelessWidget BuildContext.mounted', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(TestStatelessWidget(
       onBuild: (BuildContext context) {

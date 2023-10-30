@@ -35,7 +35,7 @@ import '_platform_io.dart'
 //
 // When adding support for a new platform (e.g. Windows Phone, Raspberry Pi),
 // first create a new value on the [TargetPlatform] enum, then add a rule for
-// selecting that platform here.
+// selecting that platform in `_platform_io.dart` and `_platform_web.dart`.
 //
 // It would be incorrect to make a platform that isn't supported by
 // [TargetPlatform] default to the behavior of another platform, because doing
@@ -47,6 +47,15 @@ TargetPlatform get defaultTargetPlatform => platform.defaultTargetPlatform;
 /// The platform that user interaction should adapt to target.
 ///
 /// The [defaultTargetPlatform] getter returns the current platform.
+///
+/// When using the "flutter run" command, the "o" key will toggle between
+/// values of this enum when updating [debugDefaultTargetPlatformOverride].
+/// This lets one test how the application will work on various platforms
+/// without having to switch emulators or physical devices.
+//
+// When you add values here, make sure to also add them to
+// nextPlatform() in flutter_tools/lib/src/resident_runner.dart so that
+// the tool can support the new platform for its "o" option.
 enum TargetPlatform {
   /// Android: <https://www.android.com/>
   android,

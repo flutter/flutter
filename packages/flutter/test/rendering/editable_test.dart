@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/text_input.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
-import 'recording_canvas.dart';
 import 'rendering_tester.dart';
 
 void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
@@ -230,7 +229,6 @@ void main() {
         ' │ maxLines: 1\n'
         ' │ minLines: null\n'
         ' │ selectionColor: null\n'
-        ' │ textScaleFactor: 1.0\n'
         ' │ locale: ja_JP\n'
         ' │ selection: null\n'
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
@@ -331,7 +329,7 @@ void main() {
       ),
     ));
 
-    editable.textScaleFactor = 2;
+    editable.textScaler = const TextScaler.linear(2.0);
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
@@ -454,7 +452,7 @@ void main() {
       ),
     ));
 
-    editable.textScaleFactor = 2;
+    editable.textScaler = const TextScaler.linear(2.0);
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
@@ -1006,7 +1004,7 @@ void main() {
       editable.painter = null;
       editable.paintCount = 0;
 
-      final AbstractNode? parent = editable.parent;
+      final RenderObject? parent = editable.parent;
       if (parent is RenderConstrainedBox) {
         parent.child = null;
       }
@@ -1631,11 +1629,24 @@ void main() {
         selection: const TextSelection.collapsed(offset: 3),
         maxLines: 2,
         minLines: 2,
-        textScaleFactor: 2.0,
+        textScaler: const TextScaler.linear(2.0),
         children: renderBoxes,
       );
       _applyParentData(renderBoxes, editable.text!);
+      // Intrinsics can be computed without doing layout.
+      expect(editable.computeMaxIntrinsicWidth(fixedHeight),
+        2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
+        reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
+      );
+      expect(editable.computeMinIntrinsicWidth(fixedHeight),
+        math.max(math.max(2.0 * 10.0 * 4, 14.0 * 3), 14.0 * 3),
+        reason: "intrinsic width = max(scale factor * width of 'test', width of 'one', width of 'two')",
+      );
+      expect(editable.computeMaxIntrinsicHeight(fixedHeight), 40.0);
+      expect(editable.computeMinIntrinsicHeight(fixedHeight), 40.0);
+
       layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
+      // Intrinsics can be computed after layout.
       expect(editable.computeMaxIntrinsicWidth(fixedHeight),
         2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
         reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
@@ -1722,6 +1733,89 @@ void main() {
       editable.hitTest(result, position: const Offset(5.0, 15.0));
       expect(result.path, hasLength(0));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+    test('hits correct WidgetSpan when scrolled', () {
+      final String text = '${"\n" * 10}test';
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = TextEditingValue(
+            text: text,
+            selection: const TextSelection.collapsed(offset: 13),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+      ];
+      final RenderEditable editable = RenderEditable(
+        maxLines: null,
+        text: TextSpan(
+          style: const TextStyle(height: 1.0, fontSize: 10.0),
+          children: <InlineSpan>[
+            TextSpan(text: text),
+            const WidgetSpan(child: Text('a')),
+            const TextSpan(children: <InlineSpan>[
+                WidgetSpan(child: Text('b')),
+                WidgetSpan(child: Text('c')),
+              ],
+            ),
+          ],
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(100.0), // equal to the height of the 10 empty lines
+        textSelectionDelegate: delegate,
+        selection: const TextSelection.collapsed(
+          offset: 0,
+        ),
+        children: renderBoxes,
+      );
+      _applyParentData(renderBoxes, editable.text!);
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      // Prepare for painting after layout.
+      pumpFrame(phase: EnginePhase.compositingBits);
+      BoxHitTestResult result = BoxHitTestResult();
+      editable.hitTest(result, position: Offset.zero);
+      // We expect two hit test entries in the path because the RenderEditable
+      // will add itself as well.
+      expect(result.path, hasLength(2));
+      HitTestTarget target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, text);
+      // Only testing the RenderEditable entry here once, not anymore below.
+      expect(result.path.last.target, isA<RenderEditable>());
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(15.0, 0.0));
+      expect(result.path, hasLength(2));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, text);
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(41.0, 0.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'a');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(55.0, 0.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'b');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(69.0, 5.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'c');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(5.0, 15.0));
+      expect(result.path, hasLength(2));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
   });
 
   test('does not skip TextPainter.layout because of invalid cache', () {
@@ -1745,11 +1839,13 @@ void main() {
     );
     layout(editable, constraints: constraints);
 
+    // ignore: invalid_use_of_protected_member
     final double initialWidth = editable.computeDryLayout(constraints).width;
     expect(initialWidth, 500);
 
     // Turn off forceLine. Now the width should be significantly smaller.
     editable.forceLine = false;
+    // ignore: invalid_use_of_protected_member
     expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
   });
 
@@ -1822,6 +1918,52 @@ void main() {
       color: cursorColor.withOpacity(0.75),
       rrect: expectedRRect
     ));
+  });
+
+  test('getWordAtOffset with a negative position', () {
+    const String text = 'abc';
+    final _FakeEditableTextState delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(height: 1.0, fontSize: 10.0),
+      ),
+    );
+
+    layout(editable, onErrors: expectNoFlutterErrors);
+
+    // Cause text metrics to be computed.
+    editable.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+
+    final TextSelection selection;
+    try {
+      selection = editable.getWordAtOffset(const TextPosition(
+        offset: -1,
+        affinity: TextAffinity.upstream,
+      ));
+    } catch (error) {
+      // In debug mode, negative offsets are caught by an assertion.
+      expect(error, isA<AssertionError>());
+      return;
+    }
+
+    // Web's Paragraph.getWordBoundary behaves differently for a negative
+    // position.
+    if (kIsWeb) {
+      expect(selection, const TextSelection.collapsed(offset: 0));
+    } else {
+      expect(selection, const TextSelection.collapsed(offset: text.length));
+    }
   });
 }
 

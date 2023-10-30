@@ -406,7 +406,7 @@ void main() {
     expect(paragraph.debugNeedsPaint, isFalse);
   });
 
-  test('nested TextSpans in paragraph handle textScaleFactor correctly.', () {
+  test('nested TextSpans in paragraph handle linear textScaler correctly.', () {
     const TextSpan testSpan = TextSpan(
       text: 'a',
       style: TextStyle(
@@ -430,21 +430,21 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
         testSpan,
         textDirection: TextDirection.ltr,
-        textScaleFactor: 1.3,
+        textScaler: const TextScaler.linear(1.3),
     );
     paragraph.layout(const BoxConstraints());
     expect(paragraph.size.width, 78.0);
     expect(paragraph.size.height, 26.0);
 
+    final int length = testSpan.toPlainText().length;
     // Test the sizes of nested spans.
-    final String text = testSpan.toStringDeep();
     final List<ui.TextBox> boxes = <ui.TextBox>[
-      for (int i = 0; i < text.length; ++i)
+      for (int i = 0; i < length; ++i)
         ...paragraph.getBoxesForSelection(
           TextSelection(baseOffset: i, extentOffset: i + 1),
         ),
     ];
-    expect(boxes.length, equals(4));
+    expect(boxes, hasLength(4));
 
     expect(boxes[0].toRect().width, 13.0);
     expect(boxes[0].toRect().height, 13.0);
@@ -821,6 +821,33 @@ void main() {
       expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
     });
 
+// Regression test for https://github.com/flutter/flutter/issues/126652.
+    test('paints selection when tap at chinese character', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      const Color selectionColor = Color(0xAF6694e8);
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: '你好'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        selectionColor: selectionColor,
+      );
+      layout(paragraph);
+      final MockPaintingContext paintingContext = MockPaintingContext();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawnRect, isNull);
+      expect(paintingContext.canvas.drawnRectPaint, isNull);
+
+      for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
+        selectable.dispatchSelectionEvent(const SelectWordSelectionEvent(globalPosition: Offset(7, 0)));
+      }
+
+      paintingContext.canvas.clear();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawnRect!.isEmpty, false);
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+
     test('getPositionForOffset works', () async {
       final RenderParagraph paragraph = RenderParagraph(const TextSpan(text: '1234567'), textDirection: TextDirection.ltr);
       layout(paragraph);
@@ -951,7 +978,8 @@ void main() {
           granularity: TextGranularity.word,
         ),
       );
-      expect(paragraph.selections.length, 0); // how []are you
+      expect(paragraph.selections.length, 1); // how []are you
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 4));
 
       // Equivalent to sending shift + alt + arrow-left.
       registrar.selectables[0].dispatchSelectionEvent(

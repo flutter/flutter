@@ -94,6 +94,10 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
     required VoidCallback? onSelectAll,
+    required VoidCallback? onLookUp,
+    required VoidCallback? onSearchWeb,
+    required VoidCallback? onShare,
+    required VoidCallback? onLiveTextInput,
     required this.anchors,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
@@ -102,6 +106,10 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          onCut: onCut,
          onPaste: onPaste,
          onSelectAll: onSelectAll,
+         onLookUp: onLookUp,
+         onSearchWeb: onSearchWeb,
+         onShare: onShare,
+         onLiveTextInput: onLiveTextInput
        );
 
   /// Create an instance of [CupertinoAdaptiveTextSelectionToolbar] with the

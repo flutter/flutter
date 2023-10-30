@@ -67,7 +67,7 @@ abstract final class DateUtils {
   ///
   /// `date` would be January 15, 2019.
   /// `futureDate` would be April 1, 2019 since it adds 3 months.
-  static  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+  static DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
     return DateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 

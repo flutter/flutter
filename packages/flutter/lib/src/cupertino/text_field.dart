@@ -194,8 +194,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight], respectively.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
@@ -261,7 +260,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onSubmitted,
     this.onTapOutside,
     this.inputFormatters,
-    this.enabled,
+    this.enabled = true,
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius = const Radius.circular(2.0),
@@ -332,13 +331,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
-  ///
-  /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
-  /// [suffixMode], [textAlign], [selectionHeightStyle], [selectionWidthStyle],
-  /// and [enableSuggestions] properties must not be null.
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively.
   ///
   /// See also:
   ///
@@ -393,7 +386,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onSubmitted,
     this.onTapOutside,
     this.inputFormatters,
-    this.enabled,
+    this.enabled = true,
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius = const Radius.circular(2.0),
@@ -489,7 +482,7 @@ class CupertinoTextField extends StatefulWidget {
   /// Controls the visibility of the [prefix] widget based on the state of
   /// text entry when the [prefix] argument is not null.
   ///
-  /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
+  /// Defaults to [OverlayVisibilityMode.always].
   ///
   /// Has no effect when [prefix] is null.
   final OverlayVisibilityMode prefixMode;
@@ -500,7 +493,7 @@ class CupertinoTextField extends StatefulWidget {
   /// Controls the visibility of the [suffix] widget based on the state of
   /// text entry when the [suffix] argument is not null.
   ///
-  /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
+  /// Defaults to [OverlayVisibilityMode.always].
   ///
   /// Has no effect when [suffix] is null.
   final OverlayVisibilityMode suffixMode;
@@ -512,7 +505,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Will only appear if no [suffix] widget is appearing.
   ///
-  /// Defaults to never appearing and cannot be null.
+  /// Defaults to [OverlayVisibilityMode.never].
   final OverlayVisibilityMode clearButtonMode;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
@@ -653,7 +646,9 @@ class CupertinoTextField extends StatefulWidget {
   /// Text fields in disabled states have a light grey background and don't
   /// respond to touch events including the [prefix], [suffix] and the clear
   /// button.
-  final bool? enabled;
+  ///
+  /// Defaults to true.
+  final bool enabled;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
@@ -946,7 +941,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     if (widget.controller == null) {
       _createLocalController();
     }
-    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
+    _effectiveFocusNode.canRequestFocus = widget.enabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
@@ -965,7 +960,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
       (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
     }
-    _effectiveFocusNode.canRequestFocus = widget.enabled ?? true;
+    _effectiveFocusNode.canRequestFocus = widget.enabled;
   }
 
   @override
@@ -1079,41 +1074,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   @override
   bool get wantKeepAlive => _controller?.value.text.isNotEmpty ?? false;
 
-  bool _shouldShowAttachment({
+  static bool _shouldShowAttachment({
     required OverlayVisibilityMode attachment,
     required bool hasText,
   }) {
-    switch (attachment) {
-      case OverlayVisibilityMode.never:
-        return false;
-      case OverlayVisibilityMode.always:
-        return true;
-      case OverlayVisibilityMode.editing:
-        return hasText;
-      case OverlayVisibilityMode.notEditing:
-        return !hasText;
-    }
-  }
-
-  bool _showPrefixWidget(TextEditingValue text) {
-    return widget.prefix != null && _shouldShowAttachment(
-      attachment: widget.prefixMode,
-      hasText: text.text.isNotEmpty,
-    );
-  }
-
-  bool _showSuffixWidget(TextEditingValue text) {
-    return widget.suffix != null && _shouldShowAttachment(
-      attachment: widget.suffixMode,
-      hasText: text.text.isNotEmpty,
-    );
-  }
-
-  bool _showClearButton(TextEditingValue text) {
-    return _shouldShowAttachment(
-      attachment: widget.clearButtonMode,
-      hasText: text.text.isNotEmpty,
-    );
+    return switch (attachment) {
+      OverlayVisibilityMode.never => false,
+      OverlayVisibilityMode.always => true,
+      OverlayVisibilityMode.editing => hasText,
+      OverlayVisibilityMode.notEditing => !hasText,
+    };
   }
 
   // True if any surrounding decoration widgets will be shown.
@@ -1134,6 +1104,32 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     return _hasDecoration ? TextAlignVertical.center : TextAlignVertical.top;
   }
 
+  void _onClearButtonTapped() {
+    final bool hadText = _effectiveController.text.isNotEmpty;
+    _effectiveController.clear();
+    if (hadText) {
+      // Tapping the clear button is also considered a "user initiated" change
+      // (instead of a programmatical one), so call `onChanged` if the text
+      // changed as a result.
+      widget.onChanged?.call(_effectiveController.text);
+    }
+  }
+
+  Widget _buildClearButton() {
+    return GestureDetector(
+      key: _clearGlobalKey,
+      onTap: widget.enabled ? _onClearButtonTapped : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        child: Icon(
+          CupertinoIcons.clear_thick_circled,
+          size: 18.0,
+          color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
+        ),
+      ),
+    );
+  }
+
   Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle, TextStyle placeholderStyle) {
     // If there are no surrounding widgets, just return the core editable text
     // part.
@@ -1145,59 +1141,69 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: _effectiveController,
       child: editableText,
-      builder: (BuildContext context, TextEditingValue? text, Widget? child) {
+      builder: (BuildContext context, TextEditingValue text, Widget? child) {
+        final bool hasText = text.text.isNotEmpty;
+        final String? placeholderText = widget.placeholder;
+        final Widget? placeholder = placeholderText == null
+          ? null
+          // Make the placeholder invisible when hasText is true.
+          : Visibility(
+              maintainAnimation: true,
+              maintainSize: true,
+              maintainState: true,
+              visible: !hasText,
+              child: SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: widget.padding,
+                  child: Text(
+                    placeholderText,
+                    // This is to make sure the text field is always tall enough
+                    // to accommodate the first line of the placeholder, so the
+                    // text does not shrink vertically as you type (however in
+                    // rare circumstances, the height may still change when
+                    // there's no placeholder text).
+                    maxLines: hasText ? 1 : widget.maxLines,
+                    overflow: placeholderStyle.overflow,
+                    style: placeholderStyle,
+                    textAlign: widget.textAlign,
+                  ),
+                ),
+              ),
+          );
+
+        final Widget? prefixWidget = _shouldShowAttachment(attachment: widget.prefixMode, hasText: hasText) ? widget.prefix : null;
+
+        // Show user specified suffix if applicable and fall back to clear button.
+        final bool showUserSuffix = _shouldShowAttachment(attachment: widget.suffixMode, hasText: hasText);
+        final bool showClearButton = _shouldShowAttachment(attachment: widget.clearButtonMode, hasText: hasText);
+        final Widget? suffixWidget = switch ((showUserSuffix, showClearButton)) {
+          (false, false) => null,
+          (true, false) => widget.suffix,
+          (true, true) => widget.suffix ?? _buildClearButton(),
+          (false, true) => _buildClearButton(),
+        };
         return Row(children: <Widget>[
           // Insert a prefix at the front if the prefix visibility mode matches
           // the current text state.
-          if (_showPrefixWidget(text!)) widget.prefix!,
+          if (prefixWidget != null) prefixWidget,
           // In the middle part, stack the placeholder on top of the main EditableText
           // if needed.
           Expanded(
             child: Stack(
+              // Ideally this should be baseline aligned. However that comes at
+              // the cost of the ability to compute the intrinsic dimensions of
+              // this widget.
+              // See also https://github.com/flutter/flutter/issues/13715.
+              alignment: AlignmentDirectional.center,
+              textDirection: widget.textDirection,
               children: <Widget>[
-                if (widget.placeholder != null && text.text.isEmpty)
-                  SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: widget.padding,
-                      child: Text(
-                        widget.placeholder!,
-                        maxLines: widget.maxLines,
-                        overflow: placeholderStyle.overflow ?? TextOverflow.ellipsis,
-                        style: placeholderStyle,
-                        textAlign: widget.textAlign,
-                      ),
-                    ),
-                  ),
-                child!,
+                if (placeholder != null) placeholder,
+                editableText,
               ],
             ),
           ),
-          // First add the explicit suffix if the suffix visibility mode matches.
-          if (_showSuffixWidget(text))
-            widget.suffix!
-          // Otherwise, try to show a clear button if its visibility mode matches.
-          else if (_showClearButton(text))
-            GestureDetector(
-              key: _clearGlobalKey,
-              onTap: widget.enabled ?? true ? () {
-                // Special handle onChanged for ClearButton
-                // Also call onChanged when the clear button is tapped.
-                final bool textChanged = _effectiveController.text.isNotEmpty;
-                _effectiveController.clear();
-                if (widget.onChanged != null && textChanged) {
-                  widget.onChanged!(_effectiveController.text);
-                }
-              } : null,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                child: Icon(
-                  CupertinoIcons.clear_thick_circled,
-                  size: 18.0,
-                  color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
-                ),
-              ),
-            ),
+          if (suffixWidget != null) suffixWidget
         ]);
       },
     );
@@ -1251,7 +1257,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         };
     }
 
-    final bool enabled = widget.enabled ?? true;
+    final bool enabled = widget.enabled;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.devicePixelRatioOf(context), 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,

@@ -123,7 +123,10 @@ function upgrade_flutter () (
   #  * STAMP_PATH is an empty file, or
   #  * Contents of STAMP_PATH is not what we are going to compile, or
   #  * pubspec.yaml last modified after pubspec.lock
-  if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$compilekey" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+  if [[ ! -f "$SNAPSHOT_PATH" || \
+        ! -s "$STAMP_PATH" || \
+        "$(cat "$STAMP_PATH")" != "$compilekey" || \
+        "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
     # the lock entirely, but as a result this required a second verification that
@@ -137,6 +140,7 @@ function upgrade_flutter () (
 
     # Fetch Dart...
     rm -f "$FLUTTER_ROOT/version"
+    rm -f "$FLUTTER_ROOT/bin/cache/flutter.version.json"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
@@ -225,7 +229,23 @@ function shared::execute() {
     exit 1
   fi
 
-  upgrade_flutter 7< "$PROG_NAME"
+  # File descriptor 7 is prepared here so that we can use it with
+  # flock(1) in _lock() (see above).
+  #
+  # We use number 7 because it's a luckier number than 3; luck is
+  # important when making locks work reliably. Also because that way
+  # if anyone is redirecting other file descriptors there's less
+  # chance of a conflict.
+  #
+  # In any case, the file we redirect into this file descriptor is
+  # this very source file you are reading right now, because that's
+  # the only file we can truly guarantee exists, since we're running
+  # it. We don't use PROG_NAME because otherwise if you run `dart` and
+  # `flutter` simultaneously they'll end up using different lock files
+  # and will corrupt each others' downloads.
+  #
+  # SHARED_NAME itself is prepared by the caller script.
+  upgrade_flutter 7< "$SHARED_NAME"
 
   BIN_NAME="$(basename "$PROG_NAME")"
   case "$BIN_NAME" in

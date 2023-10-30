@@ -5,6 +5,7 @@
 import 'package:flutter/src/foundation/assertions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const List<Widget> children = <Widget>[
   SizedBox(width: 200.0, height: 150.0),
@@ -15,20 +16,21 @@ const List<Widget> children = <Widget>[
 
 void expectRects(WidgetTester tester, List<Rect> expected) {
   final Finder finder = find.byType(SizedBox);
-  finder.precache();
   final List<Rect> actual = <Rect>[];
-  for (int i = 0; i < expected.length; ++i) {
-    final Finder current = finder.at(i);
-    expect(current, findsOneWidget);
-    actual.add(tester.getRect(finder.at(i)));
-  }
+  finder.runCached(() {
+    for (int i = 0; i < expected.length; ++i) {
+      final Finder current = finder.at(i);
+      expect(current, findsOneWidget);
+      actual.add(tester.getRect(finder.at(i)));
+    }
+  });
   expect(() => finder.at(expected.length), throwsRangeError);
   expect(actual, equals(expected));
 }
 
 void main() {
 
-  testWidgets('ListBody down', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListBody down', (WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
       children: <Widget>[ ListBody(children: children) ],
@@ -45,7 +47,7 @@ void main() {
     );
   });
 
-  testWidgets('ListBody up', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListBody up', (WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
       children: <Widget>[ ListBody(reverse: true, children: children) ],
@@ -62,7 +64,7 @@ void main() {
     );
   });
 
-  testWidgets('ListBody right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListBody right', (WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
@@ -85,7 +87,7 @@ void main() {
     );
   });
 
-  testWidgets('ListBody left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListBody left', (WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
@@ -108,7 +110,7 @@ void main() {
     );
   });
 
-  testWidgets('Limited space along main axis error', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Limited space along main axis error', (WidgetTester tester) async {
     final FlutterExceptionHandler oldHandler = FlutterError.onError!;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
@@ -141,7 +143,7 @@ void main() {
     ));
   });
 
-  testWidgets('Nested ListBody unbounded cross axis error', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Nested ListBody unbounded cross axis error', (WidgetTester tester) async {
     final FlutterExceptionHandler oldHandler = FlutterError.onError!;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);

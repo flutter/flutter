@@ -79,61 +79,24 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// are a little bit different, see the Material 3 spec at
 /// <https://m3.material.io/components/navigation-drawer/overview> for
 /// more details. While the [Drawer] widget can have only one child, the
-/// [NavigationDrawer] widget can have list of widgets, which typically contains
+/// [NavigationDrawer] widget can have a list of widgets, which typically contains
 /// [NavigationDrawerDestination] widgets and/or customized widgets like headlines
 /// and dividers.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This example shows how to create a [Scaffold] that contains an [AppBar] and
 /// a [Drawer]. A user taps the "menu" icon in the [AppBar] to open the
 /// [Drawer]. The [Drawer] displays four items: A header and three menu items.
 /// The [Drawer] displays the four items using a [ListView], which allows the
 /// user to scroll through the items if need be.
 ///
-/// ```dart
-/// Scaffold(
-///   appBar: AppBar(
-///     title: const Text('Drawer Demo'),
-///   ),
-///   drawer: Drawer(
-///     child: ListView(
-///       padding: EdgeInsets.zero,
-///       children: const <Widget>[
-///         DrawerHeader(
-///           decoration: BoxDecoration(
-///             color: Colors.blue,
-///           ),
-///           child: Text(
-///             'Drawer Header',
-///             style: TextStyle(
-///               color: Colors.white,
-///               fontSize: 24,
-///             ),
-///           ),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.message),
-///           title: Text('Messages'),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.account_circle),
-///           title: Text('Profile'),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.settings),
-///           title: Text('Settings'),
-///         ),
-///       ],
-///     ),
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/drawer/drawer.0.dart **
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This example shows how to migrate the above [Drawer] to a [NavigationDrawer].
 ///
-/// See code in examples/api/lib/material/navigation_drawer/navigation_drawer.1.dart **
+/// ** See code in examples/api/lib/material/navigation_drawer/navigation_drawer.0.dart **
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
@@ -347,7 +310,7 @@ class DrawerController extends StatefulWidget {
   ///
   /// Rarely used directly.
   ///
-  /// The [child] argument must not be null and is typically a [Drawer].
+  /// The [child] argument is typically a [Drawer].
   const DrawerController({
     GlobalKey? key,
     required this.child,
@@ -508,6 +471,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void dispose() {
     _historyEntry?.remove();
     _controller.dispose();
+    _focusScopeNode.dispose();
     super.dispose();
   }
 

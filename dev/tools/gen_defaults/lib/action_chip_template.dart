@@ -41,7 +41,15 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
 
   @override
-  Color? get backgroundColor => ${componentColor("$tokenGroup$flatVariant.container")};
+  MaterialStateProperty<Color?>? get color =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _chipVariant == _ChipVariant.flat
+          ? ${componentColor("$tokenGroup$flatVariant.disabled.container")}
+          : ${componentColor("$tokenGroup$elevatedVariant.disabled.container")};
+      }
+      return ${componentColor("$tokenGroup$flatVariant.container")};
+    });
 
   @override
   Color? get shadowColor => _chipVariant == _ChipVariant.flat
@@ -52,15 +60,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get selectedColor => ${componentColor("$tokenGroup$flatVariant.selected.container")};
-
-  @override
   Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
-
-  @override
-  Color? get disabledColor => _chipVariant == _ChipVariant.flat
-    ? ${componentColor("$tokenGroup$flatVariant.disabled.container")}
-    : ${componentColor("$tokenGroup$elevatedVariant.disabled.container")};
 
   @override
   Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
@@ -91,7 +91,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
   )!;
 }
 ''';

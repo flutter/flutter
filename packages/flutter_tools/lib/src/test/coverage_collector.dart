@@ -37,6 +37,7 @@ class CoverageCollector extends TestWatcher {
 
   final coverage.Resolver? resolver;
   final Map<String, List<List<int>>?> _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
+  final Map<String, Set<int>> _coverableLineCache = <String, Set<int>>{};
 
   final TestTimeRecorder? testTimeRecorder;
 
@@ -103,7 +104,11 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri vmServiceUri) async {
     _logMessage('collecting coverage data from $vmServiceUri...');
     final Map<String, dynamic> data = await collect(
-        vmServiceUri, libraryNames, branchCoverage: branchCoverage);
+      vmServiceUri,
+      libraryNames,
+      branchCoverage: branchCoverage,
+      coverableLineCache: _coverableLineCache,
+    );
 
     _logMessage('($vmServiceUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
@@ -145,9 +150,12 @@ class CoverageCollector extends TestWatcher {
       .then((Uri? vmServiceUri) {
         _logMessage('collecting coverage data from $testDevice at $vmServiceUri...');
         return collect(
-            vmServiceUri!, libraryNames, serviceOverride: serviceOverride,
-            branchCoverage: branchCoverage)
-          .then<void>((Map<String, dynamic> result) {
+          vmServiceUri!,
+          libraryNames,
+          serviceOverride: serviceOverride,
+          branchCoverage: branchCoverage,
+          coverableLineCache: _coverableLineCache,
+        ).then<void>((Map<String, dynamic> result) {
             _logMessage('Collected coverage data.');
             data = result;
           });
@@ -187,8 +195,13 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver usedResolver = resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
-      final List<String> reportOn = coverageDirectory == null
-          ? <String>[globals.fs.path.join(packagePath, 'lib')]
+      // find paths for libraryNames so we can include them to report
+      final List<String>? libraryPaths = libraryNames
+          ?.map((String e) => usedResolver.resolve('package:$e'))
+          .whereType<String>()
+          .toList();
+      final List<String>? reportOn = coverageDirectory == null
+          ? libraryPaths
           : <String>[coverageDirectory.path];
       formatter = (Map<String, coverage.HitMap> hitmap) => hitmap
           .formatLcov(usedResolver, reportOn: reportOn, basePath: packagePath);
@@ -262,9 +275,12 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String>? libraryNames, 
   @visibleForTesting bool forceSequential = false,
   @visibleForTesting FlutterVmService? serviceOverride,
   bool branchCoverage = false,
+  Map<String, Set<int>>? coverableLineCache,
 }) {
   return coverage.collect(
-      serviceUri, false, false, false, libraryNames,
-      serviceOverrideForTesting: serviceOverride?.service,
-      branchCoverage: branchCoverage);
+    serviceUri, false, false, false, libraryNames,
+    serviceOverrideForTesting: serviceOverride?.service,
+    branchCoverage: branchCoverage,
+    coverableLineCache: coverableLineCache,
+  );
 }

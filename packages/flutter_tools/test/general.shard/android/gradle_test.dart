@@ -198,7 +198,7 @@ void main() {
       expect(() {
         gradle_utils.updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
       }, throwsToolExit(
-        message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
+        message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
       ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
@@ -211,7 +211,7 @@ void main() {
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      localEngineArtifacts = Artifacts.test(localEngine: 'out/android_arm');
+      localEngineArtifacts = Artifacts.testLocalEngine(localEngine: 'out/android_arm', localEngineHost: 'out/host_release');
     });
 
     void testUsingAndroidContext(String description, dynamic Function() testMethod) {

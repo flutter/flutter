@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -900,8 +899,6 @@ class BoxHitTestResult extends HitTestResult {
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
-  ///
-  /// The [localPosition] argument must not be null.
   BoxHitTestEntry(super.target, this.localPosition);
 
   /// The position of the hit test in the local coordinates of [target].
@@ -912,6 +909,15 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
+///
+/// {@tool dartpad}
+/// Parent data is used to communicate to a render object about its
+/// children. In this example, there are two render objects that perform
+/// text layout. They use parent data to identify the kind of child they
+/// are laying out, and space the children accordingly.
+///
+/// ** See code in examples/api/lib/rendering/box/parent_data.0.dart **
+/// {@end-tool}
 class BoxParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system.
   Offset offset = Offset.zero;
@@ -1396,7 +1402,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType intrinsics',
             arguments: debugTimelineArguments,
           );
@@ -1411,7 +1417,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;
@@ -1832,7 +1838,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType.getDryLayout',
             arguments: debugTimelineArguments,
           );
@@ -1844,7 +1850,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;
@@ -1900,7 +1906,7 @@ abstract class RenderBox extends RenderObject {
   /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
   @protected
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
       error: FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
@@ -2136,7 +2142,6 @@ abstract class RenderBox extends RenderObject {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
     assert(() {
-      final RenderObject? parent = this.parent as RenderObject?;
       if (owner!.debugDoingLayout) {
         return (RenderObject.debugActiveLayout == parent) && parent!.debugDoingThisLayout;
       }
@@ -2144,7 +2149,6 @@ abstract class RenderBox extends RenderObject {
         return ((RenderObject.debugActivePaint == parent) && parent!.debugDoingThisPaint) ||
                ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
       }
-      assert(parent == this.parent);
       return false;
     }());
     assert(_debugSetDoingBaseline(true));

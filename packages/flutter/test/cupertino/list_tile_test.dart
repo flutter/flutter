@@ -4,9 +4,10 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('shows title', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shows title', (WidgetTester tester) async {
     const Widget title = Text('CupertinoListTile');
 
     await tester.pumpWidget(
@@ -23,7 +24,7 @@ void main() {
     expect(find.text('CupertinoListTile'), findsOneWidget);
   });
 
-  testWidgets('shows subtitle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shows subtitle', (WidgetTester tester) async {
     const Widget subtitle = Text('CupertinoListTile subtitle');
 
     await tester.pumpWidget(
@@ -41,7 +42,7 @@ void main() {
     expect(find.text('CupertinoListTile subtitle'), findsOneWidget);
   });
 
-  testWidgets('shows additionalInfo', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shows additionalInfo', (WidgetTester tester) async {
     const Widget additionalInfo = Text('Not Connected');
 
     await tester.pumpWidget(
@@ -59,7 +60,7 @@ void main() {
     expect(find.text('Not Connected'), findsOneWidget);
   });
 
-  testWidgets('shows trailing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shows trailing', (WidgetTester tester) async {
     const Widget trailing = CupertinoListTileChevron();
 
     await tester.pumpWidget(
@@ -76,7 +77,7 @@ void main() {
     expect(tester.widget<CupertinoListTileChevron>(find.byType(CupertinoListTileChevron)), trailing);
   });
 
-  testWidgets('shows leading', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shows leading', (WidgetTester tester) async {
     const Widget leading = Icon(CupertinoIcons.add);
 
     await tester.pumpWidget(
@@ -93,7 +94,7 @@ void main() {
     expect(tester.widget<Icon>(find.byType(Icon)), leading);
   });
 
-  testWidgets('sets backgroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('sets backgroundColor', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemRed;
 
     await tester.pumpWidget(
@@ -118,7 +119,7 @@ void main() {
     expect(container.color, backgroundColor);
   });
 
-  testWidgets('does not change backgroundColor when tapped if onTap is not provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('does not change backgroundColor when tapped if onTap is not provided', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -148,7 +149,7 @@ void main() {
     expect(container.color, backgroundColor);
   });
 
-  testWidgets('changes backgroundColor when tapped if onTap is provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('changes backgroundColor when tapped if onTap is provided', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -187,7 +188,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('does not contain GestureDetector if onTap is not provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('does not contain GestureDetector if onTap is not provided', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -208,7 +209,7 @@ void main() {
     expect(find.byType(GestureDetector), findsNothing);
   });
 
-  testWidgets('contains GestureDetector if onTap is provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('contains GestureDetector if onTap is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -230,7 +231,7 @@ void main() {
     expect(find.byType(GestureDetector), findsOneWidget);
   });
 
-  testWidgets('resets the background color when navigated back', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('resets the background color when navigated back', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -279,7 +280,7 @@ void main() {
   });
 
   group('alignment of widgets for left-to-right', () {
-    testWidgets('leading is on the left of title', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('leading is on the left of title', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget leading = Icon(CupertinoIcons.add);
 
@@ -303,7 +304,7 @@ void main() {
       expect(foundTitle.dx > foundLeading.dx, true);
     });
 
-    testWidgets('subtitle is placed below title and aligned on left', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('subtitle is placed below title and aligned on left', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile title');
       const Widget subtitle = Text('CupertinoListTile subtitle');
 
@@ -328,7 +329,7 @@ void main() {
       expect(foundTitle.dy < foundSubtitle.dy, isTrue);
     });
 
-    testWidgets('additionalInfo is on the right of title', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('additionalInfo is on the right of title', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
 
@@ -352,7 +353,7 @@ void main() {
       expect(foundTitle.dx < foundInfo.dx, isTrue);
     });
 
-    testWidgets('trailing is on the right of additionalInfo', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('trailing is on the right of additionalInfo', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
       const Widget trailing = CupertinoListTileChevron();
@@ -380,7 +381,7 @@ void main() {
   });
 
   group('alignment of widgets for right-to-left', () {
-    testWidgets('leading is on the right of title', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('leading is on the right of title', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget leading = Icon(CupertinoIcons.add);
 
@@ -404,7 +405,7 @@ void main() {
       expect(foundTitle.dx < foundLeading.dx, true);
     });
 
-    testWidgets('subtitle is placed below title and aligned on right', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('subtitle is placed below title and aligned on right', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile title');
       const Widget subtitle = Text('CupertinoListTile subtitle');
 
@@ -429,7 +430,7 @@ void main() {
       expect(foundTitle.dy < foundSubtitle.dy, isTrue);
     });
 
-    testWidgets('additionalInfo is on the left of title', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('additionalInfo is on the left of title', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
 
@@ -453,7 +454,7 @@ void main() {
       expect(foundTitle.dx > foundInfo.dx, isTrue);
     });
 
-    testWidgets('trailing is on the left of additionalInfo', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('trailing is on the left of additionalInfo', (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
       const Widget trailing = CupertinoListTileChevron();
@@ -480,7 +481,7 @@ void main() {
     });
   });
 
-  testWidgets('onTap with delay does not throw an exception', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onTap with delay does not throw an exception', (WidgetTester tester) async {
     const Widget title = Text('CupertinoListTile');
     bool showTile = true;
 
@@ -520,7 +521,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('title does not overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('title does not overflow', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -534,7 +535,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('subtitle does not overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('subtitle does not overflow', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(

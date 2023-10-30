@@ -100,7 +100,7 @@ void main() {
     expect(logger.statusText, contains('NoPIIFakeDoctorText'));
     expect(logger.statusText, isNot(contains('Ignored')));
     expect(logger.statusText, contains('https://github.com/flutter/flutter/issues/new'));
-    expect(logger.errorText, contains('A crash report has been written to ${file.path}.'));
+    expect(logger.errorText.trim(), 'A crash report has been written to ${file.path}');
   });
 
   testWithoutContext('suppress analytics', () async {

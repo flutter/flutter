@@ -22,19 +22,21 @@ TaskFunction createPlatformInteractionTest() {
   ).call;
 }
 
-TaskFunction createFlavorsTest() {
+TaskFunction createFlavorsTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
     extraOptions: <String>['--flavor', 'paid'],
+    environment: environment,
   ).call;
 }
 
-TaskFunction createIntegrationTestFlavorsTest() {
+TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'integration_test/integration_test.dart',
     extraOptions: <String>['--flavor', 'paid'],
+    environment: environment,
   ).call;
 }
 
@@ -106,10 +108,11 @@ TaskFunction createEndToEndFrameNumberTest() {
   ).call;
 }
 
-TaskFunction createEndToEndDriverTest() {
+TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/driver.dart',
+    environment: environment,
   ).call;
 }
 
@@ -173,6 +176,7 @@ class DriverTest {
     this.testTarget, {
       this.extraOptions = const <String>[],
       this.deviceIdOverride,
+      this.environment,
     }
   );
 
@@ -180,6 +184,7 @@ class DriverTest {
   final String testTarget;
   final List<String> extraOptions;
   final String? deviceIdOverride;
+  final Map<String, String>? environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -202,7 +207,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options);
+      await flutter('drive', options: options, environment: environment);
 
       return TaskResult.success(null);
     });
@@ -216,6 +221,7 @@ class IntegrationTest {
       this.extraOptions = const <String>[],
       this.createPlatforms = const <String>[],
       this.withTalkBack = false,
+      this.environment,
     }
   );
 
@@ -224,6 +230,7 @@ class IntegrationTest {
   final List<String> extraOptions;
   final List<String> createPlatforms;
   final bool withTalkBack;
+  final Map<String, String>? environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -255,7 +262,7 @@ class IntegrationTest {
         testTarget,
         ...extraOptions,
       ];
-      await flutter('test', options: options);
+      await flutter('test', options: options, environment: environment);
 
       if (withTalkBack) {
         await disableTalkBack();
