@@ -1045,7 +1045,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/third_party/libpng/LICENSE': _RepositoryLibPngLicenseFile.new,
     '/third_party/root_certificates/LICENSE': _RepositoryMpl2File.new,
     '/third_party/vulkan-deps/vulkan-validation-layers/src/LICENSE.txt': _RepositoryVulkanApacheLicenseFile.new,
-    '/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
+    '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
   };
 
   _RepositoryFile createFile(fs.IoNode entry) {

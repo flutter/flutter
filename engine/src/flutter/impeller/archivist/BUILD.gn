@@ -33,7 +33,7 @@ impeller_component("archivist") {
 
   deps = [
     "//flutter/fml",
-    "//third_party/sqlite",
+    "//flutter/third_party/sqlite",
   ]
 }
 
