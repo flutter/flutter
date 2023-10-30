@@ -277,7 +277,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       _logger.printTrace(runResult.toString());
       if (throwOnError && runResult.exitCode != 0 &&
           (allowedFailures == null || !allowedFailures(runResult.exitCode))) {
-        runResult.throwException('Process exited abnormally:\n$runResult');
+        runResult.throwException('Process exited abnormally with exit code ${runResult.exitCode}:\n$runResult');
       }
       return runResult;
     }
@@ -341,7 +341,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         _logger.printTrace(runResult.toString());
         if (throwOnError && runResult.exitCode != 0 &&
             (allowedFailures == null || !allowedFailures(exitCode))) {
-          runResult.throwException('Process exited abnormally:\n$runResult');
+          runResult.throwException('Process exited abnormally with exit code $exitCode:\n$runResult');
         }
         return runResult;
       }
@@ -407,7 +407,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      String message = 'The command failed';
+      String message = 'The command failed with exit code ${runResult.exitCode}';
       if (verboseExceptions) {
         message = 'The command failed\nStdout:\n${runResult.stdout}\n'
             'Stderr:\n${runResult.stderr}';
