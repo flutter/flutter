@@ -166,9 +166,6 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     );
   }
 
-  // TODO(dacoharkes): What is the right approach here?
-  // Cache per target OS?
-  // Apparently we're never having `globals.platform.isAndroid`.
   @override
   late final Future<CCompilerConfig> cCompilerConfig = () {
     if (globals.platform.isMacOS || globals.platform.isIOS) {
@@ -180,7 +177,10 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     if (globals.platform.isWindows) {
       return cCompilerConfigWindows();
     }
-    throwToolExit('Should use ndkCCompilerConfig for Android.');
+    if (globals.platform.isAndroid) {
+      throwToolExit('Should use ndkCCompilerConfig for Android.');
+    }
+    throwToolExit('Unknown target OS.');
   }();
 
   @override

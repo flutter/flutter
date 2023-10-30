@@ -320,7 +320,7 @@ class AndroidSdk {
 
   String? getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
-  String? getNdkCompilerPath(String binaryName) {
+  String? getNdkBinaryPath(String binaryName) {
     final Directory ndk = directory.childDirectory('ndk');
     if (!ndk.existsSync()) {
       return null;
@@ -349,13 +349,13 @@ class AndroidSdk {
   }
 
   String? getNdkClangPath() =>
-      getNdkCompilerPath(globals.platform.isWindows ? 'clang.exe' : 'clang');
+      getNdkBinaryPath(globals.platform.isWindows ? 'clang.exe' : 'clang');
 
-  String? getNdkArPath() => getNdkCompilerPath(
+  String? getNdkArPath() => getNdkBinaryPath(
       globals.platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar');
 
   String? getNdkLdPath() =>
-      getNdkCompilerPath(globals.platform.isWindows ? 'ld.lld.exe' : 'ld.lld');
+      getNdkBinaryPath(globals.platform.isWindows ? 'ld.lld.exe' : 'ld.lld');
 
   /// Sets up various paths used internally.
   ///

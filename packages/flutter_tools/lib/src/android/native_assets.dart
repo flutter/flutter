@@ -174,8 +174,7 @@ Asset _targetLocationAndroid(Asset asset) {
       final String fileName = path.uri.pathSegments.last;
       return asset.copyWith(path: AssetAbsolutePath(Uri(path: fileName)));
   }
-  // ignore: only_throw_errors
-  throw 'Unsupported asset path type ${path.runtimeType} in asset $asset';
+  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
 }
 
 const Map<Architecture, String> _architectureStringsCMakeAndroid =
