@@ -352,7 +352,7 @@ void main() {
       );
       expect(
         logger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
+        contains('Developer identity "iPhone Developer: Profile 3 (3333CCCC33)" selected for iOS code signing'),
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
@@ -405,7 +405,7 @@ void main() {
 
       expect(
         logger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 1 (1111AAAA11)"'),
+        contains('Developer identity "iPhone Developer: Profile 1 (1111AAAA11)" selected for iOS code signing'),
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
@@ -461,7 +461,7 @@ void main() {
       );
       expect(
         logger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
+        contains('Developer identity "iPhone Developer: Profile 3 (3333CCCC33)" selected for iOS code signing'),
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
