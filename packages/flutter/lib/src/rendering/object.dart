@@ -4880,6 +4880,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     }
 
     final SemanticsNode node = (owner._semantics ??= SemanticsNode(showOnScreen: owner.showOnScreen))
+      ..isMergedIntoParent = _mergeIntoParent
       ..tags = _tagsForChildren;
 
     node.elevationAdjustment = elevationAdjustment;
@@ -4941,7 +4942,9 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       // They need to share the same transform if they are going to attach to the
       // parent of the immediate explicit node.
       assert(siblingNode.transform == null);
-      siblingNode.transform = node.transform;
+      siblingNode
+        ..transform = node.transform
+        ..isMergedIntoParent = node.isMergedIntoParent;
       if (_tagsForChildren != null) {
         siblingNode.tags ??= <SemanticsTag>{};
         siblingNode.tags!.addAll(_tagsForChildren!);
