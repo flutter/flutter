@@ -7,26 +7,23 @@ import 'deferred_components_config.dart';
 import 'deferred_components_project.dart';
 
 class LegacySettingsGradleProject extends BasicProject {
-
   @override
   String get pubspec => r'''
 name: test_plugin_example
 environment:
-  sdk: '>=3.3.0-71.0.dev <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
-
-  test_plugin:
-    path: ../
   ''';
-  
+
   @override
-  final DeferredComponentsConfig? deferredComponents = LegacySettingsGradleDeferredComponentsConfig();
+  final DeferredComponentsConfig? deferredComponents =
+      LegacySettingsGradleDeferredComponentsConfig();
 }
 
-
-class LegacySettingsGradleDeferredComponentsConfig extends BasicDeferredComponentsConfig {
+class LegacySettingsGradleDeferredComponentsConfig
+    extends BasicDeferredComponentsConfig {
   @override
   String get androidBuild => r'''
 buildscript {
@@ -129,7 +126,7 @@ flutter {
     source '../..'
 }
 ''';
-  
+
   @override
   String get appManifest => r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
