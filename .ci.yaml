@@ -1015,7 +1015,7 @@ targets:
       # TODO(godofredoc): Fix directory structure in CIPD package (https://github.com/flutter/flutter/issues/136666)
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "33v6_transitional"},
+          {"dependency": "android_sdk", "version": "version:33v6transitional2"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -5145,7 +5145,7 @@ targets:
       # TODO(godofredoc): Fix directory structure in CIPD package (https://github.com/flutter/flutter/issues/136666)
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "33v6_transitional"},
+          {"dependency": "android_sdk", "version": "version:33v6transitional2"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
