@@ -1040,4 +1040,33 @@ void main() {
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
   });
+
+  testWidgets('ExpansionTile reverse test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              title: Text('title'),
+              childrenPadding: EdgeInsets.fromLTRB(10, 8, 12, 4),
+              reverse: true,
+              children: <Widget>[
+                Text('first-child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Find the widgets
+    final Finder child = find.text('first-child');
+    final Finder tile = find.text('title');
+
+    // Check if the children are rendered above the tile
+    expect(tester.getRect(child).top < tester.getRect(tile).top, true);
+  });
 }
