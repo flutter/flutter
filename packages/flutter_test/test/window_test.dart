@@ -92,7 +92,7 @@ void main() {
         return WidgetsBinding.instance.window.textScaleFactor;
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
-        binding.window.textScaleFactorTestValue = fakeValue;
+        binding.platformDispatcher.textScaleFactorTestValue = fakeValue;
       },
     );
   });
@@ -106,7 +106,7 @@ void main() {
         return WidgetsBinding.instance.window.platformBrightness;
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, Brightness fakeValue) {
-        binding.window.platformBrightnessTestValue = fakeValue;
+        binding.platformDispatcher.platformBrightnessTestValue = fakeValue;
       },
     );
   });
@@ -118,7 +118,7 @@ void main() {
 
     // Set fake values for window properties.
     testWindow.devicePixelRatioTestValue = 2.5;
-    testWindow.textScaleFactorTestValue = 3.0;
+    tester.platformDispatcher.textScaleFactorTestValue = 3.0;
 
     // Erase fake window property values.
     testWindow.clearAllTestValues();

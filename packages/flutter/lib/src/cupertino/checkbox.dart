@@ -12,7 +12,7 @@ import 'toggleable.dart';
 // bool _throwShotAway = false;
 // late StateSetter setState;
 
-// The relative values needed to transform a color to it's equivilant focus
+// The relative values needed to transform a color to it's equivalent focus
 // outline color.
 const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
@@ -57,8 +57,6 @@ class CupertinoCheckbox extends StatefulWidget {
   ///   can only be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
-  ///
-  /// The values of [tristate] and [autofocus] must not be null.
   const CupertinoCheckbox({
     super.key,
     required this.value,

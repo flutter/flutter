@@ -34,6 +34,7 @@ import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
 import 'mac.dart';
+import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
 
@@ -500,7 +501,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           activeArch: cpuArchitecture,
           deviceID: id,
-          isCoreDevice: isCoreDevice || forceXcodeDebugWorkflow,
+          disablePortPublication: debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
@@ -537,34 +538,13 @@ class IOSDevice extends Device {
       int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to vmService');
-        final DeviceLogReader deviceLogReader = getLogReader(
-          app: package,
-          usingCISystem: debuggingOptions.usingCISystem,
-        );
-
-        // If the device supports syslog reading, prefer launching the app without
-        // attaching the debugger to avoid the overhead of the unnecessary extra running process.
-        if (majorSdkVersion >= IOSDeviceLogReader.minimumUniversalLoggingSdkVersion) {
-          iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
-            deviceId: id,
-            bundlePath: bundle.path,
-            appDeltaDirectory: package.appDeltaDirectory,
-            launchArguments: launchArguments,
-            interfaceType: connectionInterface,
-            uninstallFirst: debuggingOptions.uninstallFirst,
-          );
-          if (deviceLogReader is IOSDeviceLogReader) {
-            deviceLogReader.debuggerStream = iosDeployDebugger;
-          }
-        }
-        // Don't port foward if debugging with a wireless device.
-        vmServiceDiscovery = ProtocolDiscovery.vmService(
-          deviceLogReader,
-          portForwarder: isWirelesslyConnected ? null : portForwarder,
-          hostPort: debuggingOptions.hostVmServicePort,
-          devicePort: debuggingOptions.deviceVmServicePort,
+        vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
+          package: package,
+          bundle: bundle,
+          debuggingOptions: debuggingOptions,
+          launchArguments: launchArguments,
           ipv6: ipv6,
-          logger: _logger,
+          uninstallFirst: debuggingOptions.uninstallFirst,
         );
       }
 
@@ -573,6 +553,7 @@ class IOSDevice extends Device {
           debuggingOptions: debuggingOptions,
           package: package,
           launchArguments: launchArguments,
+          mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
           shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
         ) ? 0 : 1;
@@ -589,10 +570,7 @@ class IOSDevice extends Device {
         installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
-        _logger.printError('Could not run ${bundle.path} on $id.');
-        _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-        _logger.printError('  open ios/Runner.xcworkspace');
-        _logger.printError('');
+        _printInstallError(bundle);
         await dispose();
         return LaunchResult.failed();
       }
@@ -704,6 +682,32 @@ class IOSDevice extends Device {
           );
         } else {
           localUri = await vmServiceDiscovery?.uri;
+          // If the `ios-deploy` debugger loses connection before it finds the
+          // Dart Service VM url, try starting the debugger and launching the
+          // app again.
+          if (localUri == null &&
+              debuggingOptions.usingCISystem &&
+              iosDeployDebugger != null &&
+              iosDeployDebugger!.lostConnection) {
+            _logger.printStatus('Lost connection to device. Trying to connect again...');
+            await dispose();
+            vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
+              package: package,
+              bundle: bundle,
+              debuggingOptions: debuggingOptions,
+              launchArguments: launchArguments,
+              ipv6: ipv6,
+              uninstallFirst: false,
+              skipInstall: true,
+            );
+            installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
+            if (installationResult != 0) {
+              _printInstallError(bundle);
+              await dispose();
+              return LaunchResult.failed();
+            }
+            localUri = await vmServiceDiscovery.uri;
+          }
         }
       }
       timer.cancel();
@@ -720,7 +724,67 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
+
+      if ((isCoreDevice || forceXcodeDebugWorkflow) && debuggingOptions.debuggingEnabled && package is BuildableIOSApp) {
+        // When debugging via Xcode, after the app launches, reset the Generated
+        // settings to not include the custom configuration build directory.
+        // This is to prevent confusion if the project is later ran via Xcode
+        // rather than the Flutter CLI.
+        await updateGeneratedXcodeProperties(
+          project: FlutterProject.current(),
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+        );
+      }
     }
+  }
+
+  void _printInstallError(Directory bundle) {
+    _logger.printError('Could not run ${bundle.path} on $id.');
+    _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
+    _logger.printError('  open ios/Runner.xcworkspace');
+    _logger.printError('');
+  }
+
+  ProtocolDiscovery _setupDebuggerAndVmServiceDiscovery({
+    required IOSApp package,
+    required Directory bundle,
+    required DebuggingOptions debuggingOptions,
+    required List<String> launchArguments,
+    required bool ipv6,
+    required bool uninstallFirst,
+    bool skipInstall = false,
+  }) {
+    final DeviceLogReader deviceLogReader = getLogReader(
+      app: package,
+      usingCISystem: debuggingOptions.usingCISystem,
+    );
+
+    // If the device supports syslog reading, prefer launching the app without
+    // attaching the debugger to avoid the overhead of the unnecessary extra running process.
+    if (majorSdkVersion >= IOSDeviceLogReader.minimumUniversalLoggingSdkVersion) {
+      iosDeployDebugger = _iosDeploy.prepareDebuggerForLaunch(
+        deviceId: id,
+        bundlePath: bundle.path,
+        appDeltaDirectory: package.appDeltaDirectory,
+        launchArguments: launchArguments,
+        interfaceType: connectionInterface,
+        uninstallFirst: uninstallFirst,
+        skipInstall: skipInstall,
+      );
+      if (deviceLogReader is IOSDeviceLogReader) {
+        deviceLogReader.debuggerStream = iosDeployDebugger;
+      }
+    }
+    // Don't port foward if debugging with a wireless device.
+    return ProtocolDiscovery.vmService(
+      deviceLogReader,
+      portForwarder: isWirelesslyConnected ? null : portForwarder,
+      hostPort: debuggingOptions.hostVmServicePort,
+      devicePort: debuggingOptions.deviceVmServicePort,
+      ipv6: ipv6,
+      logger: _logger,
+    );
   }
 
   /// Starting with Xcode 15 and iOS 17, `ios-deploy` stopped working due to
@@ -737,6 +801,7 @@ class IOSDevice extends Device {
     required DebuggingOptions debuggingOptions,
     required IOSApp package,
     required List<String> launchArguments,
+    required String? mainPath,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
@@ -775,6 +840,7 @@ class IOSDevice extends Device {
       });
 
       XcodeDebugProject debugProject;
+      final FlutterProject flutterProject = FlutterProject.current();
 
       if (package is PrebuiltIOSApp) {
         debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
@@ -783,6 +849,19 @@ class IOSDevice extends Device {
           verboseLogging: _logger.isVerbose,
         );
       } else if (package is BuildableIOSApp) {
+        // Before installing/launching/debugging with Xcode, update the build
+        // settings to use a custom configuration build directory so Xcode
+        // knows where to find the app bundle to launch.
+        final Directory bundle = _fileSystem.directory(
+          package.deviceBundlePath,
+        );
+        await updateGeneratedXcodeProperties(
+          project: flutterProject,
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+          configurationBuildDir: bundle.parent.absolute.path,
+        );
+
         final IosProject project = package.project;
         final XcodeProjectInfo? projectInfo = await project.projectInfo();
         if (projectInfo == null) {
@@ -798,10 +877,14 @@ class IOSDevice extends Device {
           projectInfo.reportFlavorNotFoundAndExit();
         }
 
+        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
+
         debugProject = XcodeDebugProject(
           scheme: scheme,
           xcodeProject: project.xcodeProject,
           xcodeWorkspace: project.xcodeWorkspace!,
+          hostAppProjectName: project.hostAppProjectName,
+          expectedConfigurationBuildDir: bundle.parent.absolute.path,
           verboseLogging: _logger.isVerbose,
         );
       } else {

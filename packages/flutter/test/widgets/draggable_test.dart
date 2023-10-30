@@ -14,11 +14,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Drag and drop - control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - control test', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     int dragStartedCount = 0;
@@ -93,7 +94,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/76825
-  testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onLeave callback fires correctly with generic parameter', (WidgetTester tester) async {
     final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -168,7 +169,7 @@ void main() {
     expect(leftBehind['Target 2'], equals(1));
   });
 
-  testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> leftBehind = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -244,7 +245,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/76825
-  testWidgets('Drag and drop - onMove callback fires correctly with generic parameter', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onMove callback fires correctly with generic parameter', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -317,7 +318,7 @@ void main() {
     expect(targetMoveCount['Target 2'], equals(1));
   });
 
-  testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -394,7 +395,7 @@ void main() {
     expect(targetMoveCount['Target 2'], equals(1));
   });
 
-  testWidgets('Drag and drop - dragging over button', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - dragging over button', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation;
 
@@ -487,7 +488,7 @@ void main() {
     events.clear();
   });
 
-  testWidgets('Drag and drop - tapping button', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - tapping button', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation;
 
@@ -544,7 +545,7 @@ void main() {
     events.clear();
   });
 
-  testWidgets('Drag and drop - long press draggable, short press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - long press draggable, short press', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation;
 
@@ -593,7 +594,7 @@ void main() {
     expect(events, isEmpty);
   });
 
-  testWidgets('Drag and drop - long press draggable, long press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - long press draggable, long press', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation;
 
@@ -644,7 +645,7 @@ void main() {
     expect(events, equals(<String>['drop', 'details']));
   });
 
-  testWidgets('Drag and drop - horizontal and vertical draggables in vertical block', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - horizontal and vertical draggables in vertical block', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation, thirdLocation;
 
@@ -754,7 +755,7 @@ void main() {
     events.clear();
   });
 
-  testWidgets('Drag and drop - horizontal and vertical draggables in horizontal block', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - horizontal and vertical draggables in horizontal block', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation, thirdLocation;
 
@@ -913,7 +914,7 @@ void main() {
         ),
       );
     }
-    testWidgets('Null axis draggable moves along all axes', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Null axis draggable moves along all axes', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       final Offset firstLocation = tester.getTopLeft(find.text('N'));
       final Offset secondLocation = firstLocation + const Offset(300.0, 300.0);
@@ -928,7 +929,7 @@ void main() {
       expect(tester.getTopLeft(find.text('N')), thirdLocation);
     });
 
-    testWidgets('Horizontal axis draggable moves horizontally', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Horizontal axis draggable moves horizontally', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       final Offset firstLocation = tester.getTopLeft(find.text('H'));
       final Offset secondLocation = firstLocation + const Offset(300.0, 0.0);
@@ -943,7 +944,7 @@ void main() {
       expect(tester.getTopLeft(find.text('H')), thirdLocation);
     });
 
-    testWidgets('Horizontal axis draggable does not move vertically', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Horizontal axis draggable does not move vertically', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       final Offset firstLocation = tester.getTopLeft(find.text('H'));
       final Offset secondDragLocation = firstLocation + const Offset(300.0, 200.0);
@@ -961,7 +962,7 @@ void main() {
       expect(tester.getTopLeft(find.text('H')), thirdWidgetLocation);
     });
 
-    testWidgets('Vertical axis draggable moves vertically', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Vertical axis draggable moves vertically', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       final Offset firstLocation = tester.getTopLeft(find.text('V'));
       final Offset secondLocation = firstLocation + const Offset(0.0, 300.0);
@@ -976,7 +977,7 @@ void main() {
       expect(tester.getTopLeft(find.text('V')), thirdLocation);
     });
 
-    testWidgets('Vertical axis draggable does not move horizontally', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Vertical axis draggable does not move horizontally', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       final Offset firstLocation = tester.getTopLeft(find.text('V'));
       final Offset secondDragLocation = firstLocation + const Offset(200.0, 300.0);
@@ -1042,7 +1043,7 @@ void main() {
       );
     }
 
-    testWidgets('Null axis onDragUpdate called only if draggable moves in any direction', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Null axis onDragUpdate called only if draggable moves in any direction', (WidgetTester tester) async {
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -1077,7 +1078,7 @@ void main() {
       expect(dragDelta.dy, 10);
     });
 
-    testWidgets('Vertical axis onDragUpdate only called if draggable moves vertical', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Vertical axis onDragUpdate only called if draggable moves vertical', (WidgetTester tester) async {
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -1112,7 +1113,7 @@ void main() {
       expect(dragDelta.dy, 10);
     });
 
-    testWidgets('Horizontal axis onDragUpdate only called if draggable moves horizontal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Horizontal axis onDragUpdate only called if draggable moves horizontal', (WidgetTester tester) async {
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -1148,7 +1149,7 @@ void main() {
     });
   });
 
-  testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
@@ -1216,7 +1217,7 @@ void main() {
     expect(onDraggableCanceledCalled, isFalse);
   });
 
-  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
@@ -1293,7 +1294,7 @@ void main() {
     expect(onDraggableCanceledOffset, equals(Offset(secondLocation.dx, secondLocation.dy)));
   });
 
-  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with details', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with details', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
@@ -1370,7 +1371,7 @@ void main() {
     expect(onDraggableCanceledOffset, equals(Offset(secondLocation.dx, secondLocation.dy)));
   });
 
-  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
@@ -1422,7 +1423,7 @@ void main() {
     expect(onDraggableCanceledOffset, equals(Offset(flingStart.dx, flingStart.dy) + const Offset(0.0, 100.0)));
   });
 
-  testWidgets('Drag and drop - onDragEnd not called if dropped on non-accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDragEnd not called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
@@ -1498,7 +1499,7 @@ void main() {
     );
   });
 
-  testWidgets('Drag and drop - onDragEnd not called if dropped on non-accepting target with details', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDragEnd not called if dropped on non-accepting target with details', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
@@ -1574,7 +1575,7 @@ void main() {
     );
   });
 
-  testWidgets('Drag and drop - DragTarget rebuilds with and without rejected data when a rejected draggable enters and leaves', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - DragTarget rebuilds with and without rejected data when a rejected draggable enters and leaves', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: <Widget>[
@@ -1604,7 +1605,7 @@ void main() {
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
     final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1628,7 +1629,7 @@ void main() {
   });
 
 
-  testWidgets('Drag and drop - Can drag and drop over a non-accepting target multiple times', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - Can drag and drop over a non-accepting target multiple times', (WidgetTester tester) async {
     int numberOfTimesOnDraggableCanceledCalled = 0;
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -1662,7 +1663,7 @@ void main() {
 
     final Offset firstLocation = tester.getTopLeft(find.text('Source'));
     final TestGesture gesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1687,7 +1688,7 @@ void main() {
 
     // Drag and drop the Draggable onto the Target a second time.
     final TestGesture secondGesture =
-    await tester.startGesture(firstLocation, pointer: 7);
+        await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Dragging'), findsOneWidget);
@@ -1710,7 +1711,7 @@ void main() {
     expect(find.text('Rejected'), findsNothing);
   });
 
-  testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDragCompleted not called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
@@ -1781,7 +1782,7 @@ void main() {
     expect(onDragCompletedCalled, isFalse);
   });
 
-  testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target with details', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDragCompleted not called if dropped on non-accepting target with details', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
@@ -1852,7 +1853,7 @@ void main() {
     expect(onDragCompletedCalled, isFalse);
   });
 
-  testWidgets('Drag and drop - onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
@@ -1928,7 +1929,7 @@ void main() {
     expect(onDragEndDraggableDetails.offset, equals(expectedDropOffset));
   });
 
-  testWidgets('DragTarget does not call onDragEnd when remove from the tree', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DragTarget does not call onDragEnd when remove from the tree', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation;
     int timesOnDragEndCalled = 0;
@@ -1994,7 +1995,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Drag and drop - onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
@@ -2062,7 +2063,7 @@ void main() {
     expect(onDragCompletedCalled, isTrue);
   });
 
-  testWidgets('Drag and drop - allow pass through of unaccepted data test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - allow pass through of unaccepted data test', (WidgetTester tester) async {
     final List<int> acceptedInts = <int>[];
     final List<DragTargetDetails<int>> acceptedIntsDetails = <DragTargetDetails<int>>[];
     final List<double> acceptedDoubles = <double>[];
@@ -2196,7 +2197,7 @@ void main() {
     expect(find.text('DoubleDragging'), findsNothing);
   });
 
-  testWidgets('Drag and drop - allow pass through of unaccepted data twice test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - allow pass through of unaccepted data twice test', (WidgetTester tester) async {
     final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
     final List<DragTargetDetails<DragTargetData>> acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>>[];
     final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
@@ -2264,7 +2265,7 @@ void main() {
     }
   });
 
-  testWidgets('Drag and drop - maxSimultaneousDrags', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - maxSimultaneousDrags', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
 
@@ -2391,14 +2392,17 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
   });
 
-  testWidgets('Draggable disposes recognizer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Draggable disposes recognizer', (WidgetTester tester) async {
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     bool didTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) => GestureDetector(
                 onTap: () {
                   didTap = true;
@@ -2420,17 +2424,21 @@ void main() {
       ),
     );
 
-    await tester.startGesture(const Offset(10.0, 10.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(10.0, 10.0));
     expect(didTap, isFalse);
 
     // This tears down the draggable without terminating the gesture sequence,
     // which used to trigger asserts in the multi-drag gesture recognizer.
     await tester.pumpWidget(Container(key: UniqueKey()));
     expect(didTap, isFalse);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/6128.
-  testWidgets('Draggable plays nice with onTap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Draggable plays nice with onTap', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2463,7 +2471,7 @@ void main() {
     await secondGesture.up();
   });
 
-  testWidgets('DragTarget does not set state when remove from the tree', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DragTarget does not set state when remove from the tree', (WidgetTester tester) async {
     final List<String> events = <String>[];
     Offset firstLocation, secondLocation;
 
@@ -2525,7 +2533,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Drag and drop - remove draggable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - remove draggable', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
 
@@ -2605,7 +2613,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
   });
 
-  testWidgets('Tap above long-press draggable works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tap above long-press draggable works', (WidgetTester tester) async {
     final List<String> events = <String>[];
 
     await tester.pumpWidget(MaterialApp(
@@ -2629,7 +2637,7 @@ void main() {
     expect(events, equals(<String>['tap']));
   });
 
-  testWidgets('long-press draggable calls onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long-press draggable calls onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
@@ -2716,7 +2724,7 @@ void main() {
     expect(onDragEndDraggableDetails.offset, equals(expectedDropOffset));
   });
 
-  testWidgets('long-press draggable calls onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long-press draggable calls onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
@@ -2792,7 +2800,7 @@ void main() {
     expect(onDragCompletedCalled, isTrue);
   });
 
-  testWidgets('long-press draggable calls onDragStartedCalled after long press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long-press draggable calls onDragStartedCalled after long press', (WidgetTester tester) async {
     bool onDragStartedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -2811,7 +2819,7 @@ void main() {
     expect(onDragStartedCalled, isFalse);
 
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(find.text('Source'), findsOneWidget);
@@ -2823,9 +2831,13 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(onDragStartedCalled, isTrue);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgets('Custom long press delay for LongPressDraggable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom long press delay for LongPressDraggable', (WidgetTester tester) async {
     bool onDragStartedCalled = false;
     await tester.pumpWidget(MaterialApp(
       home: LongPressDraggable<int>(
@@ -2842,7 +2854,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(onDragStartedCalled, isFalse);
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
@@ -2857,9 +2869,13 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(onDragStartedCalled, isTrue);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgets('Default long press delay for LongPressDraggable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default long press delay for LongPressDraggable', (WidgetTester tester) async {
     bool onDragStartedCalled = false;
     await tester.pumpWidget(MaterialApp(
       home: LongPressDraggable<int>(
@@ -2875,7 +2891,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(onDragStartedCalled, isFalse);
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
@@ -2890,25 +2906,29 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(onDragStartedCalled, isTrue);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgets('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
     await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: true, expectedHapticFeedbackCount: 1);
   });
 
-  testWidgets('long-press draggable can disable Haptic Feedback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long-press draggable can disable Haptic Feedback', (WidgetTester tester) async {
     await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: false, expectedHapticFeedbackCount: 0);
   });
 
-  testWidgets('Drag feedback with child anchor positions correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag feedback with child anchor positions correctly', (WidgetTester tester) async {
     await _testChildAnchorFeedbackPosition(tester: tester);
   });
 
-  testWidgets('Drag feedback with child anchor within a non-global Overlay positions correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag feedback with child anchor within a non-global Overlay positions correctly', (WidgetTester tester) async {
     await _testChildAnchorFeedbackPosition(tester: tester, left: 100.0, top: 100.0);
   });
 
-  testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
       final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
       // Create a [MaterialApp], with a nested [Navigator], which has the
@@ -2976,7 +2996,7 @@ void main() {
     });
 
   // Regression test for https://github.com/flutter/flutter/issues/72483
-  testWidgets('Drag and drop - DragTarget<Object> can accept Draggable<int> data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - DragTarget<Object> can accept Draggable<int> data', (WidgetTester tester) async {
     final List<Object> accepted = <Object>[];
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -3012,7 +3032,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
   });
 
-  testWidgets('Drag and drop - DragTarget<int> can accept Draggable<Object> data when runtime type is int', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - DragTarget<int> can accept Draggable<Object> data when runtime type is int', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -3048,7 +3068,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
   });
 
-  testWidgets('Drag and drop - DragTarget<int> should not accept Draggable<Object> data when runtime type null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - DragTarget<int> should not accept Draggable<Object> data when runtime type null', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     bool isReceiveNullDataForCheck = false;
     await tester.pumpWidget(MaterialApp(
@@ -3091,7 +3111,7 @@ void main() {
     expect(isReceiveNullDataForCheck, true);
   });
 
-  testWidgets('Drag and drop can contribute semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop can contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(MaterialApp(
         home: ListView(
@@ -3257,7 +3277,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Drag and drop - when a dragAnchorStrategy is provided it gets called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag and drop - when a dragAnchorStrategy is provided it gets called', (WidgetTester tester) async {
     bool dragAnchorStrategyCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -3276,12 +3296,16 @@ void main() {
     ));
 
     final Offset location = tester.getCenter(find.text('Source'));
-    await tester.startGesture(location, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(location, pointer: 7);
 
     expect(dragAnchorStrategyCalled, true);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('configurable Draggable hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
     await tester.pumpWidget(
@@ -3301,7 +3325,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/92083
-  testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Column(
@@ -3329,7 +3353,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grabbing);
   });
 
-  testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('configurable feedback ignore pointer behavior', (WidgetTester tester) async {
     bool onTap = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -3358,7 +3382,7 @@ void main() {
     expect(onTap, true);
   });
 
-  testWidgets('configurable feedback ignore pointer behavior - LongPressDraggable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('configurable feedback ignore pointer behavior - LongPressDraggable', (WidgetTester tester) async {
     bool onTap = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -3389,7 +3413,7 @@ void main() {
     expect(onTap, true);
   });
 
-  testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('configurable DragTarget hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
     await tester.pumpWidget(
@@ -3410,7 +3434,7 @@ void main() {
     expect(tester.widget<MetaData>(find.byType(MetaData)).behavior, hitTestBehavior);
   });
 
-  testWidgets('LongPressDraggable.dragAnchorStrategy', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LongPressDraggable.dragAnchorStrategy', (WidgetTester tester) async {
     const Widget widget1 = Placeholder(key: ValueKey<int>(1));
     const Widget widget2 = Placeholder(key: ValueKey<int>(2));
     Offset dummyStrategy(Draggable<Object> draggable, BuildContext context, Offset position) => Offset.zero;
@@ -3420,7 +3444,7 @@ void main() {
     expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
   });
 
-  testWidgets('Test allowedButtonsFilter', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Test allowedButtonsFilter', (WidgetTester tester) async {
     Widget build(bool Function(int buttons)? allowedButtonsFilter) {
       return MaterialApp(
         home: Draggable<int>(
@@ -3462,7 +3486,7 @@ void main() {
     await gesture3.up();
   });
 
- testWidgets('throws error when both onWillAccept and onWillAcceptWithDetails are provided', (WidgetTester tester) async {
+ testWidgetsWithLeakTracking('throws error when both onWillAccept and onWillAcceptWithDetails are provided', (WidgetTester tester) async {
     expect(() => DragTarget<int>(
       builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
         return const SizedBox(height: 100.0, child: Text('Target'));
@@ -3501,7 +3525,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   expect(onDragStartedCalled, isFalse);
 
   final Offset firstLocation = tester.getCenter(find.text('Source'));
-  await tester.startGesture(firstLocation, pointer: 7);
+  final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
   await tester.pump();
 
   expect(find.text('Source'), findsOneWidget);
@@ -3514,6 +3538,10 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   expect(find.text('Dragging'), findsOneWidget);
   expect(onDragStartedCalled, isTrue);
   expect(hapticFeedbackCalls, expectedHapticFeedbackCount);
+
+  // Finish gesture to release resources.
+  await gesture.up();
+  await tester.pumpAndSettle();
 }
 
 Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, double top = 0.0, double left = 0.0 }) async {

@@ -79,6 +79,7 @@ void main() {
     updatedDelta = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
+    expect(scale.pointerCount, 1);
 
     // Two-finger scaling
     final TestPointer pointer2 = TestPointer(2);
@@ -87,6 +88,7 @@ void main() {
     tap.addPointer(down2);
     tester.closeArena(2);
     tester.route(down2);
+    expect(scale.pointerCount, 2);
 
     expect(didEndScale, isTrue);
     didEndScale = false;

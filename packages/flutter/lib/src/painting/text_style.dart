@@ -518,10 +518,10 @@ class TextStyle with Diagnosticable {
   /// Otherwise, the combining is allowed, and the returned [TextStyle] inherits
   /// the [inherit] value from the method receiver.
   ///
-  /// This property has no effect on [TextSpan]'s text style cascading: in a
-  /// [TextSpan] tree, a [TextSpan]'s text style can be combined with that of an
-  /// ancestor [TextSpan] if it has unspecified fields, regardless of its
-  /// [inherit] value.
+  /// This property does not affect the text style inheritance in an [InlineSpan]
+  /// tree: an [InlineSpan]'s text style is merged with that of an ancestor
+  /// [InlineSpan] if it has unspecified fields, regardless of its [inherit]
+  /// value.
   ///
   /// Properties that don't have explicit values or other default values to fall
   /// back to will revert to the defaults: white in color, a font size of 14
@@ -929,8 +929,6 @@ class TextStyle with Diagnosticable {
   /// applied to a `style` whose [fontWeight] is [FontWeight.w500] will return a
   /// [TextStyle] with a [FontWeight.w300].
   ///
-  /// The numeric arguments must not be null.
-  ///
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
   ///
@@ -1321,9 +1319,9 @@ class TextStyle with Diagnosticable {
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
   ///
-  /// The `textScaleFactor` argument must not be null. If omitted, it defaults
-  /// to 1.0. The other arguments may be null. The `maxLines` argument, if
-  /// specified and non-null, must be greater than zero.
+  /// If the `textScaleFactor` argument is omitted, it defaults to one. The
+  /// other arguments may be null. The `maxLines` argument, if specified and
+  /// non-null, must be greater than zero.
   ///
   /// If the font size on this style isn't set, it will default to 14 logical
   /// pixels.

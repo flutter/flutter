@@ -54,7 +54,6 @@
   "reorderItemRight": "Pomakni udesno",
   "expandedIconTapHint": "Sažmi",
   "collapsedIconTapHint": "Proširi",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Preostao je 1 znak",
   "remainingTextFieldCharacterCountOther": "Preostalo je $remainingCount znakova",
   "refreshIndicatorSemanticLabel": "Osvježi",
@@ -147,6 +146,6 @@
   "collapsedHint": "Prošireno",
   "menuDismissLabel": "Odbacivanje izbornika",
   "lookUpButtonLabel": "Pogled prema gore",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Pretraži web",
+  "shareButtonLabel": "Dijeli..."
 }

@@ -244,6 +244,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// If [registerTestTextInput] returns true when this method is called,
   /// the [testTextInput] is configured to simulate the keyboard.
   void reset() {
+    _restorationManager?.dispose();
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
@@ -781,7 +782,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
-  /// the value passed to [testWidgets]. It must not be null.
+  /// the value passed to [testWidgets].
   Future<void> runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester, {

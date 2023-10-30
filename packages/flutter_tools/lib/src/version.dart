@@ -279,6 +279,8 @@ abstract class FlutterVersion {
       localFrameworkCommitDate = DateTime.parse(_gitCommitDate(workingDirectory: flutterRoot));
     } on VersionCheckError {
       return;
+    } on FormatException {
+      return;
     }
     final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
 

@@ -1070,4 +1070,68 @@ void main() {
     expect(refreshCalled, true);
     expect(stretchAccepted, false);
   });
+
+  testWidgetsWithLeakTracking('RefreshIndicator manipulates value color opacity correctly', (WidgetTester tester) async {
+    final List<Color> colors = <Color>[
+      Colors.black,
+      Colors.black54,
+      Colors.white,
+      Colors.white54,
+      Colors.transparent,
+    ];
+    const List<double> positions = <double>[50.0, 100.0, 150.0];
+
+    Future<void> testColor(Color color) async {
+      final AnimationController positionController = AnimationController(vsync: const TestVSync());
+      addTearDown(positionController.dispose);
+      // Correspond to [_setupColorTween].
+      final Animation<Color?> valueColorAnimation = positionController.drive(
+        ColorTween(
+          begin: color.withAlpha(0),
+          end: color.withAlpha(color.alpha),
+        ).chain(
+          CurveTween(
+            // Correspond to [_kDragSizeFactorLimit].
+            curve: const Interval(0.0, 1.0 / 1.5),
+          ),
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: refresh,
+            color: color,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      );
+
+      RefreshProgressIndicator getIndicator() {
+        return tester.widget<RefreshProgressIndicator>(
+          find.byType(RefreshProgressIndicator),
+        );
+      }
+
+      // Correspond to [_kDragContainerExtentPercentage].
+      final double maxPosition = tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+      for (final double position in positions) {
+        await tester.fling(find.text('X'), Offset(0.0, position), 1.0);
+        await tester.pump();
+        positionController.value = position / maxPosition;
+        expect(
+          getIndicator().valueColor!.value!.alpha,
+          valueColorAnimation.value!.alpha,
+        );
+        // Wait until the fling finishes before starting the next fling.
+        await tester.pumpAndSettle();
+      }
+    }
+
+    for (final Color color in colors) {
+      await testColor(color);
+    }
+  });
 }

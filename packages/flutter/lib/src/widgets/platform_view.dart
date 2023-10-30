@@ -66,7 +66,6 @@ class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
   /// {@template flutter.widgets.AndroidView.constructorArgs}
-  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
   const AndroidView({
@@ -189,7 +188,7 @@ class AndroidView extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
@@ -230,13 +229,13 @@ abstract class _DarwinView extends StatefulWidget {
   /// {@macro flutter.widgets.AndroidView.layoutDirection}
   final TextDirection? layoutDirection;
 
-  /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
+  /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a4e3c4390cd6ebd982390635e9bca4edc)
   ///
   /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
-  /// platform side. It should match the codec returned by [-\[FlutterPlatformViewFactory createArgsCodec:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createArgsCodec)
+  /// platform side. It should match the codec returned by [-\[FlutterPlatformViewFactory createArgsCodec:\]](/ios-embedder/protocol_flutter_platform_view_factory-p.html#a32c3c067cb45a83dfa720c74a0d5c93c)
   ///
   /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
   ///
@@ -665,6 +664,9 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
 
     if (widget.viewType != oldWidget.viewType) {
       _controller?.dispose();
+      _controller = null;
+      focusNode?.dispose();
+      focusNode = null;
       _createNewUiKitView();
       return;
     }
@@ -936,8 +938,6 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 class PlatformViewLink extends StatefulWidget {
   /// Construct a [PlatformViewLink] widget.
   ///
-  /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
-  ///
   /// See also:
   ///
   ///  * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
@@ -1079,8 +1079,6 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a [PlatformViewSurface].
-  ///
-  /// The [controller] must not be null.
   const PlatformViewSurface({
     super.key,
     required this.controller,
@@ -1303,7 +1301,7 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
     // A call to `localToGlobal` requires waiting for a frame to render first.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       onLayout(size, localToGlobal(Offset.zero));
-    });
+    }, debugLabel: 'PlatformViewPlaceholderBox.onLayout');
   }
 }
 
@@ -1335,6 +1333,6 @@ extension on PlatformViewController {
   void disposePostFrame() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       dispose();
-    });
+    }, debugLabel: 'PlatformViewController.dispose');
   }
 }

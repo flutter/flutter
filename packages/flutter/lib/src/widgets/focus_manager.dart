@@ -118,6 +118,18 @@ typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent
 /// was handled.
 typedef FocusOnKeyEventCallback = KeyEventResult Function(FocusNode node, KeyEvent event);
 
+/// Signature of a callback used by [FocusManager.addEarlyKeyEventHandler] and
+/// [FocusManager.addLateKeyEventHandler].
+///
+/// The `event` parameter is a [KeyEvent] that is being sent to the callback to
+/// be handled.
+///
+/// The [KeyEventResult] return value indicates whether or not the event will
+/// continue to be propagated. If the value returned is [KeyEventResult.handled]
+/// or [KeyEventResult.skipRemainingHandlers], then the event will not continue
+/// to be propagated.
+typedef OnKeyEventCallback = KeyEventResult Function(KeyEvent event);
+
 // Represents a pending autofocus request.
 @immutable
 class _Autofocus {
@@ -417,9 +429,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
-  /// arguments must not be null.
-  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
@@ -439,7 +448,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     this.debugLabel = debugLabel;
 
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -955,7 +964,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(node._manager == _manager);
 
     if (removeScopeFocus) {
-      node.enclosingScope?._focusedChildren.remove(node);
+      final FocusScopeNode? nodeScope = node.enclosingScope;
+      if (nodeScope != null) {
+        nodeScope._focusedChildren.remove(node);
+        node.descendants.where((FocusNode descendant) {
+          return descendant.enclosingScope == nodeScope;
+        }).forEach(nodeScope._focusedChildren.remove);
+      }
     }
 
     node._parent = null;
@@ -1468,7 +1483,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// documentation in that method for caveats to watch out for.
   FocusManager() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     rootScope._manager = this;
   }
@@ -1550,6 +1565,85 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// Remove a previously registered closure from the list of closures that the
   /// [FocusManager] notifies.
   void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _highlightManager.removeListener(listener);
+
+  /// {@template flutter.widgets.focus_manager.FocusManager.addEarlyKeyEventHandler}
+  /// Adds a key event handler to a set of handlers that are called before any
+  /// key event handlers in the focus tree are called.
+  ///
+  /// All of the handlers in the set will be called for every key event the
+  /// [FocusManager] receives. If any one of the handlers returns
+  /// [KeyEventResult.handled] or [KeyEventResult.skipRemainingHandlers], then
+  /// none of the handlers in the focus tree will be called.
+  ///
+  /// If handlers are added while the existing callbacks are being invoked, they
+  /// will not be called until the next key event occurs.
+  ///
+  /// See also:
+  ///
+  /// * [removeEarlyKeyEventHandler], which removes handlers added by this
+  ///   function.
+  /// * [addLateKeyEventHandler], which is a similar mechanism for adding
+  ///   handlers that are invoked after the focus tree has had a chance to
+  ///   handle an event.
+  /// {@endtemplate}
+  void addEarlyKeyEventHandler(OnKeyEventCallback handler) {
+    _highlightManager.addEarlyKeyEventHandler(handler);
+  }
+
+  /// {@template flutter.widgets.focus_manager.FocusManager.removeEarlyKeyEventHandler}
+  /// Removes a key handler added by calling [addEarlyKeyEventHandler].
+  ///
+  /// If handlers are removed while the existing callbacks are being invoked,
+  /// they will continue to be called until the next key event is received.
+  ///
+  /// See also:
+  ///
+  /// * [addEarlyKeyEventHandler], which adds the handlers removed by this
+  ///   function.
+  /// {@endtemplate}
+  void removeEarlyKeyEventHandler(OnKeyEventCallback handler) {
+    _highlightManager.removeEarlyKeyEventHandler(handler);
+  }
+
+  /// {@template flutter.widgets.focus_manager.FocusManager.addLateKeyEventHandler}
+  /// Adds a key event handler to a set of handlers that are called if none of
+  /// the key event handlers in the focus tree handle the event.
+  ///
+  /// If the event reaches the root of the focus tree without being handled,
+  /// then all of the handlers in the set will be called. If any of them returns
+  /// [KeyEventResult.handled] or [KeyEventResult.skipRemainingHandlers], then
+  /// event propagation to the platform will be stopped.
+  ///
+  /// If handlers are added while the existing callbacks are being invoked, they
+  /// will not be called until the next key event is not handled by the focus
+  /// tree.
+  ///
+  /// See also:
+  ///
+  /// * [removeLateKeyEventHandler], which removes handlers added by this
+  ///   function.
+  /// * [addEarlyKeyEventHandler], which is a similar mechanism for adding
+  ///   handlers that are invoked before the focus tree has had a chance to
+  ///   handle an event.
+  /// {@endtemplate}
+  void addLateKeyEventHandler(OnKeyEventCallback handler) {
+    _highlightManager.addLateKeyEventHandler(handler);
+  }
+
+  /// {@template flutter.widgets.focus_manager.FocusManager.removeLateKeyEventHandler}
+  /// Removes a key handler added by calling [addLateKeyEventHandler].
+  ///
+  /// If handlers are removed while the existing callbacks are being invoked,
+  /// they will continue to be called until the next key event is received.
+  ///
+  /// See also:
+  ///
+  /// * [addLateKeyEventHandler], which adds the handlers removed by this
+  ///   function.
+  /// {@endtemplate}
+  void removeLateKeyEventHandler(OnKeyEventCallback handler) {
+    _highlightManager.removeLateKeyEventHandler(handler);
+  }
 
   /// The root [FocusScopeNode] in the focus tree.
   ///
@@ -1731,6 +1825,24 @@ class _HighlightModeManager {
     updateMode();
   }
 
+  /// {@macro flutter.widgets.focus_manager.FocusManager.addEarlyKeyEventHandler}
+  void addEarlyKeyEventHandler(OnKeyEventCallback callback) => _earlyKeyEventHandlers.add(callback);
+
+  /// {@macro flutter.widgets.focus_manager.FocusManager.removeEarlyKeyEventHandler}
+  void removeEarlyKeyEventHandler(OnKeyEventCallback callback) => _earlyKeyEventHandlers.remove(callback);
+
+  // The list of callbacks for early key handling.
+  final HashedObserverList<OnKeyEventCallback> _earlyKeyEventHandlers = HashedObserverList<OnKeyEventCallback>();
+
+  /// {@macro flutter.widgets.focus_manager.FocusManager.addLateKeyEventHandler}
+  void addLateKeyEventHandler(OnKeyEventCallback callback) => _lateKeyEventHandlers.add(callback);
+
+  /// {@macro flutter.widgets.focus_manager.FocusManager.removeLateKeyEventHandler}
+  void removeLateKeyEventHandler(OnKeyEventCallback callback) => _lateKeyEventHandlers.remove(callback);
+
+  // The list of callbacks for late key handling.
+  final HashedObserverList<OnKeyEventCallback> _lateKeyEventHandlers = HashedObserverList<OnKeyEventCallback>();
+
   /// Register a closure to be called when the [FocusManager] notifies its
   /// listeners that the value of [highlightMode] has changed.
   void addListener(ValueChanged<FocusHighlightMode> listener) => _listeners.add(listener);
@@ -1822,10 +1934,38 @@ class _HighlightModeManager {
       return false;
     }
 
-    // Walk the current focus from the leaf to the root, calling each one's
+    bool handled = false;
+    // Check to see if any of the early handlers handle the key. If so, then
+    // return early.
+    if (_earlyKeyEventHandlers.isNotEmpty) {
+      final List<KeyEventResult> results = <KeyEventResult>[];
+      // Copy the list before iteration to prevent problems if the list gets
+      // modified during iteration.
+      final List<OnKeyEventCallback> iterationList = _earlyKeyEventHandlers.toList();
+      for (final OnKeyEventCallback callback in iterationList) {
+        for (final KeyEvent event in message.events) {
+          results.add(callback(event));
+        }
+      }
+      final KeyEventResult result = combineKeyEventResults(results);
+      switch (result) {
+        case KeyEventResult.ignored:
+          break;
+        case KeyEventResult.handled:
+          assert(_focusDebug(() => 'Key event $message handled by early key event callback.'));
+          handled = true;
+        case KeyEventResult.skipRemainingHandlers:
+          assert(_focusDebug(() => 'Key event $message propagation stopped by early key event callback.'));
+          handled = false;
+      }
+    }
+    if (handled) {
+      return true;
+    }
+
+    // Walk the current focus from the leaf to the root, calling each node's
     // onKey on the way up, and if one responds that they handled it or want to
     // stop propagation, stop.
-    bool handled = false;
     for (final FocusNode node in <FocusNode>[
       FocusManager.instance.primaryFocus!,
       ...FocusManager.instance.primaryFocus!.ancestors,
@@ -1855,8 +1995,32 @@ class _HighlightModeManager {
       assert(result != KeyEventResult.ignored);
       break;
     }
+
+    // Check to see if any late key event handlers want to handle the event.
+    if (!handled && _lateKeyEventHandlers.isNotEmpty) {
+      final List<KeyEventResult> results = <KeyEventResult>[];
+      // Copy the list before iteration to prevent problems if the list gets
+      // modified during iteration.
+      final List<OnKeyEventCallback> iterationList = _lateKeyEventHandlers.toList();
+      for (final OnKeyEventCallback callback in iterationList) {
+        for (final KeyEvent event in message.events) {
+          results.add(callback(event));
+        }
+      }
+      final KeyEventResult result = combineKeyEventResults(results);
+      switch (result) {
+        case KeyEventResult.ignored:
+          break;
+        case KeyEventResult.handled:
+          assert(_focusDebug(() => 'Key event $message handled by late key event callback.'));
+          handled = true;
+        case KeyEventResult.skipRemainingHandlers:
+          assert(_focusDebug(() => 'Key event $message propagation stopped by late key event callback.'));
+          handled = false;
+      }
+    }
     if (!handled) {
-      assert(_focusDebug(() => 'Key event not handled by anyone: $message.'));
+      assert(_focusDebug(() => 'Key event not handled by focus system: $message.'));
     }
     return handled;
   }

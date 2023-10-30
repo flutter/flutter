@@ -125,7 +125,7 @@ void main() {
     expect(localizations.pasteButtonLabel, 'Coller');
     expect(localizations.datePickerDateOrder, DatePickerDateOrder.dmy);
     expect(localizations.timerPickerSecondLabel(20), 's');
-    expect(localizations.selectAllButtonLabel, 'Tout sélect.');
+    expect(localizations.selectAllButtonLabel, 'Tout sélectionner');
     expect(localizations.timerPickerMinute(10), '10');
   });
 
