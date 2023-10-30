@@ -321,11 +321,8 @@ class AndroidSdk {
   String? getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
   String? getNdkCompilerPath(String binaryName) {
-    print('getNdkCompilerPath');
-    print('SDK directory $directory');
     final Directory ndk = directory.childDirectory('ndk');
     if (!ndk.existsSync()) {
-      print('$ndk does not exist');
       return null;
     }
     final List<Directory> ndkVersions =
@@ -336,20 +333,15 @@ class AndroidSdk {
           .childDirectory('llvm')
           .childDirectory('prebuilt');
       if (!prebuilt.existsSync()) {
-        print('$prebuilt does not exist');
         continue;
       }
-      print('$prebuilt exists');
       final List<Directory> hostArchitectures =
           prebuilt.listSync().whereType<Directory>().toList();
       for (final Directory hostArchitecture in hostArchitectures) {
         final File executable =
             hostArchitecture.childDirectory('bin').childFile(binaryName);
         if (executable.existsSync()) {
-          print('$executable exists');
           return executable.path;
-        } else {
-          print('$executable does not exist');
         }
       }
     }
