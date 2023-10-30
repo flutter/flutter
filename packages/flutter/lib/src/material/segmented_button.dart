@@ -214,7 +214,7 @@ class SegmentedButton<T> extends StatefulWidget {
   /// hovered states, one could write:
   ///
   /// ```dart
-  /// SegmentedButton<int>(
+  /// SegmentedButton(
   ///   style: SegmentedButton.styleFrom(foregroundColor: Colors.green),
   ///   segments: const <ButtonSegment<int>>[
   ///      ButtonSegment<int>(
@@ -255,23 +255,18 @@ class SegmentedButton<T> extends StatefulWidget {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
-    @Deprecated(
-        'Use backgroundColor instead. '
+    @Deprecated('Use backgroundColor instead. '
         'Deprecated to match the ButtonStyle API. '
-        'This feature was deprecated after v3.16.0-18.0.pre.25.'
-        )
+        'This feature was deprecated after v3.16.0-18.0.pre.25.')
     Color? primary,
-    @Deprecated(
-        'Use foregroundColor instead. '
+    @Deprecated('Use foregroundColor instead. '
         'Deprecated to match the ButtonStyle API. '
-        'This feature was deprecated after v3.16.0-18.0.pre.25.'
-        )
+        'This feature was deprecated after v3.16.0-18.0.pre.25.')
     Color? onPrimary,
     @Deprecated(
         'Use disabledForegroundColor and disabledBackgroundColor instead. '
         'Deprecated to match the ButtonStyle API. '
-        'This feature was deprecated after 3.16.0-18.0.pre.25.'
-        )
+        'This feature was deprecated after 3.16.0-18.0.pre.25.')
     Color? onSurface,
   }) {
     final Color? background = backgroundColor ?? primary;
