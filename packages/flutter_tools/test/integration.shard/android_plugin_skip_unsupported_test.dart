@@ -8,10 +8,12 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
+import 'test_data/legacy_settings_gradle_project.dart';
 import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
+  final LegacySettingsGradleProject project = LegacySettingsGradleProject();
 
   setUp(() {
     Cache.flutterRoot = getFlutterRoot();
@@ -22,8 +24,10 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/97729.
-  test('skip plugin if it does not support the Android platform', () async {
+  // Regression test for https://github.com/flutter/flutter/issues/97729 (#137115).
+  Future<void> testPlugin({
+    bool isLegacyProject = false,
+  }) async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
@@ -79,18 +83,23 @@ flutter:
     final Directory pluginExampleAppDir =
         pluginAppDir.childDirectory('example');
 
-    // Add android support to the plugin's example app.
-    final ProcessResult addAndroidResult = processManager.runSync(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'create',
-      '--template=app',
-      '--platforms=android',
-      '.',
-    ], workingDirectory: pluginExampleAppDir.path);
-    expect(addAndroidResult.exitCode, equals(0),
-        reason:
-            'flutter create exited with non 0 code: ${addAndroidResult.stderr}');
+    if (isLegacyProject) {
+      await project.setUpIn(pluginExampleAppDir);
+    } else {
+      // TODO: may simply use BasicProject to set up.
+      // Add android support to the plugin's example app.
+      final ProcessResult addAndroidResult = processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'create',
+        '--template=app',
+        '--platforms=android',
+        '.',
+      ], workingDirectory: pluginExampleAppDir.path);
+      expect(addAndroidResult.exitCode, equals(0),
+          reason:
+          'flutter create exited with non 0 code: ${addAndroidResult.stderr}');
+    }
 
     // Run flutter build apk to build plugin example project.
     final ProcessResult buildApkResult = processManager.runSync(<String>[
@@ -103,5 +112,16 @@ flutter:
     expect(buildApkResult.exitCode, equals(0),
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+  }
+
+  test('skip plugin if it does not support the Android platform', () async {
+    await testPlugin();
+  });
+
+  test(
+      'skip plugin if it does not support the Android platform with legacy settings.gradle',
+          () async {
+        // Test with the oldest supported settings.gradle file, which is on first place
+        await testPlugin(isLegacyProject: true);
   });
 }
