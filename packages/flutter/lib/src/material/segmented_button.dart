@@ -258,19 +258,19 @@ class SegmentedButton<T> extends StatefulWidget {
     @Deprecated(
         'Use backgroundColor instead. '
         'Deprecated to match the ButtonStyle API. '
-        'This feature was deprecated after v3.16.0-0.3.pre.'
+        'This feature was deprecated after v3.16.0-18.0.pre.25.'
         )
     Color? primary,
     @Deprecated(
         'Use foregroundColor instead. '
         'Deprecated to match the ButtonStyle API. '
-        'This feature was deprecated after v3.16.0-0.3.pre.'
+        'This feature was deprecated after v3.16.0-18.0.pre.25.'
         )
     Color? onPrimary,
     @Deprecated(
         'Use disabledForegroundColor and disabledBackgroundColor instead. '
         'Deprecated to match the ButtonStyle API. '
-        'This feature was deprecated after v3.16.0-0.3.pre.'
+        'This feature was deprecated after 3.16.0-18.0.pre.25.'
         )
     Color? onSurface,
   }) {
