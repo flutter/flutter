@@ -23,8 +23,6 @@ const TextStyle _kTextStyle = TextStyle(
   height: 1.0,
 );
 
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
-
 /// Where to show a [Banner].
 ///
 /// The start and end locations are relative to the ambient [Directionality]
@@ -63,17 +61,7 @@ class BannerPainter extends CustomPainter {
     required this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : super(repaint: PaintingBinding.instance.systemFonts) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$BannerPainter',
-        object: this,
-      );
-    }
-  }
+  }) : super(repaint: PaintingBinding.instance.systemFonts);
 
   /// The message to show in the banner.
   final String message;
@@ -129,11 +117,6 @@ class BannerPainter extends CustomPainter {
   ///
   /// After calling this method, this object is no longer usable.
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
     _textPainter?.dispose();
     _textPainter = null;
   }
@@ -248,7 +231,7 @@ class BannerPainter extends CustomPainter {
 ///
 ///  * [CheckedModeBanner], which the [WidgetsApp] widget includes by default in
 ///    debug mode, to show a banner that says "DEBUG".
-class Banner extends StatefulWidget {
+class Banner extends StatelessWidget {
   /// Creates a banner.
   const Banner({
     super.key,
@@ -306,47 +289,30 @@ class Banner extends StatefulWidget {
   final TextStyle textStyle;
 
   @override
-  State<Banner> createState() => _BannerState();
-}
-
-class _BannerState extends State<Banner> {
-  BannerPainter? _painter;
-
-  @override
-  void dispose() {
-    _painter?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    assert((widget.textDirection != null && widget.layoutDirection != null) || debugCheckHasDirectionality(context));
-
-    _painter?.dispose();
-    _painter = BannerPainter(
-      message: widget.message,
-      textDirection: widget.textDirection ?? Directionality.of(context),
-      location: widget.location,
-      layoutDirection: widget.layoutDirection ?? Directionality.of(context),
-      color: widget.color,
-      textStyle: widget.textStyle,
-    );
-
+    assert((textDirection != null && layoutDirection != null) || debugCheckHasDirectionality(context));
     return CustomPaint(
-      foregroundPainter: _painter,
-      child: widget.child,
+      foregroundPainter: BannerPainter(
+        message: message,
+        textDirection: textDirection ?? Directionality.of(context),
+        location: location,
+        layoutDirection: layoutDirection ?? Directionality.of(context),
+        color: color,
+        textStyle: textStyle,
+      ),
+      child: child,
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('message', widget.message, showName: false));
-    properties.add(EnumProperty<TextDirection>('textDirection', widget.textDirection, defaultValue: null));
-    properties.add(EnumProperty<BannerLocation>('location', widget.location));
-    properties.add(EnumProperty<TextDirection>('layoutDirection', widget.layoutDirection, defaultValue: null));
-    properties.add(ColorProperty('color', widget.color, showName: false));
-    widget.textStyle.debugFillProperties(properties, prefix: 'text ');
+    properties.add(StringProperty('message', message, showName: false));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(EnumProperty<BannerLocation>('location', location));
+    properties.add(EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
+    properties.add(ColorProperty('color', color, showName: false));
+    textStyle.debugFillProperties(properties, prefix: 'text ');
   }
 }
 

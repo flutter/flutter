@@ -244,10 +244,10 @@ _flutter.loader = null;
      * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
      */
     async loadEntrypoint(options) {
-      const { entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded, nonce } =
+      const { entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded } =
         options || {};
 
-      return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded, nonce);
+      return this._loadEntrypoint(entrypointUrl, onEntrypointLoaded);
     }
 
     /**
@@ -286,12 +286,12 @@ _flutter.loader = null;
      *                                is loaded, or undefined if `onEntrypointLoaded`
      *                                is a function.
      */
-    _loadEntrypoint(entrypointUrl, onEntrypointLoaded, nonce) {
+    _loadEntrypoint(entrypointUrl, onEntrypointLoaded) {
       const useCallback = typeof onEntrypointLoaded === "function";
 
       if (!this._scriptLoaded) {
         this._scriptLoaded = true;
-        const scriptTag = this._createScriptTag(entrypointUrl, nonce);
+        const scriptTag = this._createScriptTag(entrypointUrl);
         if (useCallback) {
           // Just inject the script tag, and return nothing; Flutter will call
           // `didCreateEngineInitializer` when it's done.
@@ -319,12 +319,9 @@ _flutter.loader = null;
      * @param {string} url
      * @returns {HTMLScriptElement}
      */
-    _createScriptTag(url, nonce) {
+    _createScriptTag(url) {
       const scriptTag = document.createElement("script");
       scriptTag.type = "application/javascript";
-      if (nonce) {
-        scriptTag.nonce = nonce;
-      }
       // Apply TrustedTypes validation, if available.
       let trustedUrl = url;
       if (this._ttPolicy != null) {

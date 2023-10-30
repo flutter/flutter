@@ -33,9 +33,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     .withTrackedAll()
     .withIgnored(
       allNotGCed: true,
-      notDisposed: <String, int?>{
-        'OverlayEntry': null,
-      },
     );
 
   // Enable golden file testing using Skia Gold.

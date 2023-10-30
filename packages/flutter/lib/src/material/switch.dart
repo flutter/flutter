@@ -1309,7 +1309,6 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  final TextPainter _textPainter = TextPainter();
   Color? _cachedThumbColor;
   ImageProvider? _cachedThumbImage;
   ImageErrorListener? _cachedThumbErrorListener;
@@ -1595,15 +1594,16 @@ class _SwitchPainter extends ToggleablePainter {
             shadows: iconShadows,
           ),
         );
-        _textPainter
-          ..textDirection = textDirection
-          ..text = textSpan;
-        _textPainter.layout();
+        final TextPainter textPainter = TextPainter(
+          textDirection: textDirection,
+          text: textSpan,
+        );
+        textPainter.layout();
         final double additionalHorizontalOffset = (thumbSize.width - iconSize) / 2;
         final double additionalVerticalOffset = (thumbSize.height - iconSize) / 2;
         final Offset offset = thumbPaintOffset + Offset(additionalHorizontalOffset, additionalVerticalOffset);
 
-        _textPainter.paint(canvas, offset);
+        textPainter.paint(canvas, offset);
       }
     } finally {
       _isPainting = false;
@@ -1612,7 +1612,6 @@ class _SwitchPainter extends ToggleablePainter {
 
   @override
   void dispose() {
-    _textPainter.dispose();
     _cachedThumbPainter?.dispose();
     _cachedThumbPainter = null;
     _cachedThumbColor = null;
