@@ -1020,14 +1020,22 @@ void main() {
     environment.outputDir
       .childFile('index.html')
       .createSync(recursive: true);
+    environment.outputDir
+      .childFile('assets/index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('A');
     await WebServiceWorker(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
-    // Contains file hash for both `/` and index.html.
+    // Contains the same file hash for both `/` and the root index.html file.
+    const String rootIndexHash = 'd41d8cd98f00b204e9800998ecf8427e';
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('"/": "d41d8cd98f00b204e9800998ecf8427e"'));
+      contains('"/": "$rootIndexHash"'));
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('"index.html": "d41d8cd98f00b204e9800998ecf8427e"'));
+      contains('"index.html": "$rootIndexHash"'));
+    // Make sure `assets/index.html` has a different hash than `index.html`.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"assets/index.html": "7fc56270e7a70fa81a5935b72eacbe29"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
   }));
 
