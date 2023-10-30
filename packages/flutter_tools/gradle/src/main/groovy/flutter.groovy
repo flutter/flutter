@@ -399,7 +399,7 @@ class FlutterPlugin implements Plugin<Project> {
         getPluginList().each this.&configurePluginDependencies
     }
 
-    // TODO(gustl22): Can remove configuring legacy plugins, once #48918 is resolved.
+    // TODO(gustl22): Can remove configuring legacy plugins, once #54566 and therefor #48918 is resolved.
     //  This means all references to `.flutter-plugins` are then removed and apps only depend exclusively on the
     //  `plugins` property in `.flutter-plugins-dependencies`.
     //  This cannot be achieved yet as developers may still use an old `settings.gradle`
@@ -431,7 +431,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // TODO(gustl22): Can remove this check, once #48918 is resolved.
+    // TODO(gustl22): Can remove this check, once #54566 is resolved.
     /**
      * Returns `true` if the given path contains an `android/build.gradle` file.
      */
@@ -646,7 +646,7 @@ class FlutterPlugin implements Plugin<Project> {
         return androidPlugins
     }
 
-    // TODO(gustl22): Remove in favor of [getPluginList] only, see #48918 and 
+    // TODO(gustl22): Remove in favor of [getPluginList] only, see #54566 and #48918 and 
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List getPluginDependencies() {
@@ -676,7 +676,7 @@ class FlutterPlugin implements Plugin<Project> {
             return []
         }
         assert meta.dependencyGraph instanceof List
-        return meta.dependencyGraph
+        return meta.dependencyGraph as List
     }
 
     private Map parsedFlutterPluginsDependencies

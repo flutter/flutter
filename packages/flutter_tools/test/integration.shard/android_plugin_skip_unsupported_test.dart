@@ -26,7 +26,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/97729 (#137115).
-  Future<void> testPlugin({
+  Future<ProcessResult> testPlugin({
     required Project project,
   }) async {
     final String flutterBin = fileSystem.path.join(
@@ -87,28 +87,37 @@ flutter:
     await project.setUpIn(pluginExampleAppDir);
 
     // Run flutter build apk to build plugin example project.
-    final ProcessResult buildApkResult = processManager.runSync(<String>[
+    return processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--debug',
     ], workingDirectory: pluginExampleAppDir.path);
-    expect(buildApkResult.exitCode, equals(0),
-        reason:
-            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   }
 
   test('skip plugin if it does not support the Android platform', () async {
     final Project project = UnsupportedAndroidPluginProject();
-    await testPlugin(project: project);
+    final ProcessResult buildApkResult = await testPlugin(project: project);
+    expect(buildApkResult.exitCode, equals(0),
+        reason:
+            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
 
+  // This test can be removed, when https://github.com/flutter/flutter/issues/54566 is resolved.
   test(
       'skip plugin if it does not support the Android platform with legacy settings.gradle',
       () async {
     final Project project = LegacyUnsupportedAndroidPluginProject();
-    await testPlugin(project: project);
+    final ProcessResult buildApkResult = await testPlugin(project: project);
+    expect(
+      buildApkResult.stderr,
+      contains(
+          'Your app uses an outdated version of `settings.gradle`. Please update.'),
+    );
+    expect(buildApkResult.exitCode, equals(0),
+        reason:
+            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
 }
 
@@ -127,7 +136,9 @@ dependencies:
   ''';
 }
 
-class LegacyUnsupportedAndroidPluginProject extends LegacySettingsGradleProject {
+// This class can be removed, when https://github.com/flutter/flutter/issues/54566 is resolved.
+class LegacyUnsupportedAndroidPluginProject
+    extends LegacySettingsGradleProject {
   @override
   String get pubspec => r'''
 name: test_plugin_example
