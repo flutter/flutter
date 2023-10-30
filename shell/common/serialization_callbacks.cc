@@ -22,7 +22,7 @@ sk_sp<SkData> SerializeTypefaceWithData(SkTypeface* typeface, void* ctx) {
 sk_sp<SkTypeface> DeserializeTypefaceWithoutData(const void* data,
                                                  size_t length,
                                                  void* ctx) {
-  return SkTypeface::MakeDefault();
+  return nullptr;
 }
 
 struct ImageMetaData {
