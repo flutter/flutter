@@ -662,7 +662,7 @@ platform :ios, '11.0'
         project.xcodeProjectInfoFile = xcodeProjectInfoFile;
 
         xcodeProjectSchemeFile = memoryFileSystem.file('Runner.xcscheme');
-        project.xcodeProjectSchemeFile = xcodeProjectSchemeFile;
+        project.schemeFile = xcodeProjectSchemeFile;
       });
 
       testWithoutContext('skipped if files are missing', () {
@@ -1370,8 +1370,10 @@ class FakeIosProject extends Fake implements IosProject {
   @override
   File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
 
+  File? schemeFile;
+
   @override
-  File xcodeProjectSchemeFile = MemoryFileSystem.test().file('xcodeProjectSchemeFile');
+  File xcodeProjectSchemeFile({String? scheme}) => schemeFile ?? MemoryFileSystem.test().file('xcodeProjectSchemeFile');
 
   @override
   File appFrameworkInfoPlist = MemoryFileSystem.test().file('appFrameworkInfoPlist');

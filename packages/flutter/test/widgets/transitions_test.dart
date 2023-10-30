@@ -147,6 +147,7 @@ void main() {
 
   testWidgetsWithLeakTracking('AlignTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
       end: Alignment.bottomRight,
@@ -171,6 +172,7 @@ void main() {
 
   testWidgetsWithLeakTracking('RelativePositionedTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<Rect?> rectTween = RectTween(
       begin: const Rect.fromLTWH(0, 0, 30, 40),
       end: const Rect.fromLTWH(100, 200, 100, 200),
@@ -217,6 +219,7 @@ void main() {
 
   testWidgetsWithLeakTracking('AlignTransition keeps width and height factors', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
       end: Alignment.bottomRight,
@@ -238,6 +241,7 @@ void main() {
 
   testWidgetsWithLeakTracking('SizeTransition clamps negative size factors - vertical axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  Directionality(
@@ -273,6 +277,7 @@ void main() {
 
   testWidgetsWithLeakTracking('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  Directionality(
@@ -309,6 +314,7 @@ void main() {
 
   testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
 
     const Key key = Key('key');
@@ -367,6 +373,7 @@ void main() {
 
   testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
 
     const Key key = Key('key');
@@ -426,6 +433,7 @@ void main() {
 
   testWidgetsWithLeakTracking('MatrixTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
       onTransform: (double value) => Matrix4.translationValues(value, value, value),
@@ -466,6 +474,7 @@ void main() {
 
   testWidgetsWithLeakTracking('MatrixTransition maintains chosen alignment during animation', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
       onTransform: (double value) => Matrix4.identity(),
@@ -487,6 +496,7 @@ void main() {
 
   testWidgetsWithLeakTracking('RotationTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
       turns: controller,
@@ -526,6 +536,7 @@ void main() {
 
   testWidgetsWithLeakTracking('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
       turns: controller,
@@ -556,6 +567,7 @@ void main() {
     }
     testWidgetsWithLeakTracking('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
@@ -599,6 +611,7 @@ void main() {
     }
     testWidgetsWithLeakTracking('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Localizations(
         locale: const Locale('en', 'us'),
@@ -649,6 +662,7 @@ void main() {
   group('MatrixTransition', () {
     testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
@@ -712,6 +726,7 @@ void main() {
   group('ScaleTransition', () {
     testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
@@ -765,6 +780,7 @@ void main() {
   group('RotationTransition', () {
     testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
