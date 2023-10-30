@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -739,13 +740,19 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
         plistPath, PlistParser.kFLTEnableImpellerKey,
       );
-      BuildEvent(
-        impellerEnabled == false
+
+      final String buildLabel = impellerEnabled == false
           ? 'plist-impeller-disabled'
-          : 'plist-impeller-enabled',
+          : 'plist-impeller-enabled';
+      BuildEvent(
+        buildLabel,
         type: 'ios',
         flutterUsage: globals.flutterUsage,
       ).send();
+      globals.analytics.send(Event.flutterBuildInfo(
+        label: buildLabel,
+        buildType: 'ios',
+      ));
 
       return FlutterCommandResult.success();
     }
