@@ -1230,7 +1230,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
           final Rect paintRect = node.parentPaintClipRect!.intersect(currentRect);
           configuration.isHidden = paintRect.isEmpty && !currentRect.isEmpty;
         }
-        final SemanticsNode newChild;
+        late final SemanticsNode newChild;
         if (_cachedChildNodes?.isNotEmpty ?? false) {
           newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
         } else {

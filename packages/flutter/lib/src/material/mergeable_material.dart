@@ -154,14 +154,6 @@ class _AnimationTuple {
   final CurvedAnimation endAnimation;
   final CurvedAnimation gapAnimation;
   double gapStart = 0.0;
-
-  @mustCallSuper
-  void dispose() {
-    controller.dispose();
-    startAnimation.dispose();
-    endAnimation.dispose();
-    gapAnimation.dispose();
-  }
 }
 
 class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {
@@ -216,7 +208,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void dispose() {
     for (final MergeableMaterialItem child in _children) {
       if (child is MaterialGap) {
-        _animationTuples[child.key]!.dispose();
+        _animationTuples[child.key]!.controller.dispose();
       }
     }
     super.dispose();
@@ -266,7 +258,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     final MergeableMaterialItem child = _children.removeAt(index);
 
     if (child is MaterialGap) {
-      _animationTuples[child.key]!.dispose();
       _animationTuples[child.key] = null;
     }
   }

@@ -1130,19 +1130,12 @@ class FlutterPlugin implements Plugin<Project> {
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
             }
-            // The following tasks use the output of copyFlutterAssetsTask,
-            // so it's necessary to declare it as an dependency since Gradle 8.
-            // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
+            // Task compressAssets uses the output of copyFlutterAssetsTask,
+            // so it's necessary to declare it as an dependency.
             def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
             if (compressAssetsTask) {
                 compressAssetsTask.dependsOn copyFlutterAssetsTask
             }
-
-            def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
-            if (bundleAarTask) {
-                bundleAarTask.dependsOn copyFlutterAssetsTask
-            }
-
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
 

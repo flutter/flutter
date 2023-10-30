@@ -594,7 +594,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void dispose() {
-    _materialBannerController?.dispose();
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
     _snackBarTimer = null;

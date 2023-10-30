@@ -254,7 +254,6 @@ void main() {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =
               _MockAnimationController();
-          addTearDown(animationController.dispose);
 
           const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
