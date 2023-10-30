@@ -3817,6 +3817,165 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
 
     expect(completer.isCompleted, false);
   });
+
+  testWidgetsWithLeakTracking('SnackbarBehavior.floatingBelowFab is positioned between FAB and BottomBar', (WidgetTester tester) async {
+    const String snackbarAboveContent = 'Snackbar Above';
+    const String snackbarBelowContent = 'Snackbar Below';
+    const String buttonAboveContent = 'Snackbar Above Fab';
+    const String buttonBelowContent = 'Snackbar Below Fab';
+
+    const Duration snackbarDuration = Duration(seconds: 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.local_pizza),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          body: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    child: const Text(buttonBelowContent),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floatingBelowFab,
+                          duration: snackbarDuration,
+                          content: Text(snackbarBelowContent),
+                        ),
+                      );
+                    },
+                  ),
+                  ElevatedButton(
+                    child: const Text(buttonAboveContent),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          duration: snackbarDuration,
+                          content: Text(snackbarAboveContent),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    Finder fabFinder;
+    Offset fabFinderOffset;
+
+    fabFinder = find.byType(FloatingActionButton);
+    expect(fabFinder, findsOne);
+
+    await tester.tap(find.text(buttonBelowContent));
+    await tester.pumpAndSettle();
+
+    final Finder snackbarBelowFinder = find.text(snackbarBelowContent);
+    expect(snackbarBelowFinder, findsOne);
+    expect(find.text(snackbarAboveContent), findsNothing);
+    final Offset snackBarBelowOffset = tester.getBottomRight(snackbarBelowFinder);
+    fabFinderOffset = tester.getBottomRight(fabFinder);
+    expect(snackBarBelowOffset.dy, greaterThan(fabFinderOffset.dy));
+
+    await tester.tap(find.text(buttonAboveContent));
+    await tester.pumpAndSettle();
+
+    final Finder snackbarAboveFinder = find.text(snackbarAboveContent);
+    expect(snackbarAboveFinder, findsOne);
+    expect(find.text(snackbarBelowContent), findsNothing);
+    final Offset snackBarAboveOffset = tester.getBottomRight(snackbarAboveFinder);
+    fabFinderOffset = tester.getBottomRight(fabFinder);
+    expect(snackBarBelowOffset.dy, greaterThan(fabFinderOffset.dy));
+    expect(snackBarAboveOffset.dy, equals(snackBarBelowOffset.dy));
+  });
+
+  testWidgetsWithLeakTracking('SnackbarBehavior.floatingBelowFab position the SnackBar below FAB even if the positioning of this is on the top', (WidgetTester tester) async {
+    const String snackbarAboveContent = 'Snackbar Above';
+    const String snackbarBelowContent = 'Snackbar Below';
+    const String buttonAboveContent = 'Snackbar Above Fab';
+    const String buttonBelowContent = 'Snackbar Below Fab';
+
+    const Duration snackbarDuration = Duration(seconds: 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.local_pizza),
+          ),
+          body: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    child: const Text(buttonBelowContent),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floatingBelowFab,
+                          duration: snackbarDuration,
+                          content: Text(snackbarBelowContent),
+                        ),
+                      );
+                    },
+                  ),
+                  ElevatedButton(
+                    child: const Text(buttonAboveContent),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          duration: snackbarDuration,
+                          content: Text(snackbarAboveContent),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    Finder fabFinder;
+    Offset snackBarOffset;
+    Offset fabFinderOffset;
+
+    fabFinder = find.byType(FloatingActionButton);
+    expect(fabFinder, findsOne);
+
+    await tester.tap(find.text(buttonBelowContent));
+    await tester.pumpAndSettle();
+
+    final Finder snackbarBelowFinder = find.text(snackbarBelowContent);
+    expect(snackbarBelowFinder, findsOne);
+    expect(find.text(snackbarAboveContent), findsNothing);
+    snackBarOffset = tester.getBottomRight(snackbarBelowFinder);
+    fabFinderOffset = tester.getBottomRight(fabFinder);
+    expect(snackBarOffset.dy, greaterThan(fabFinderOffset.dy));
+
+    await tester.tap(find.text(buttonAboveContent));
+    await tester.pumpAndSettle();
+
+    final Finder snackbarAboveFinder = find.text(snackbarAboveContent);
+    expect(snackbarAboveFinder, findsOne);
+    expect(find.text(snackbarBelowContent), findsNothing);
+    snackBarOffset = tester.getBottomRight(snackbarAboveFinder);
+    fabFinderOffset = tester.getBottomRight(fabFinder);
+    expect(snackBarOffset.dy, lessThan(fabFinderOffset.dy));
+  });
 }
 
 /// Start test for "SnackBar dismiss test".
