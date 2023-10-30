@@ -2,28 +2,30 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("libtess2") {
-  public = [ "//third_party/libtess2/Include/tesselator.h" ]
+source_root = "//flutter/third_party/libtess2"
 
-  include_dirs = [ "//third_party/libtess2/Include/" ]
+source_set("libtess2") {
+  public = [ "$source_root/Include/tesselator.h" ]
+
+  include_dirs = [ "$source_root/Include/" ]
 
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
 
   sources = [
-    "//third_party/libtess2/Source/bucketalloc.c",
-    "//third_party/libtess2/Source/bucketalloc.h",
-    "//third_party/libtess2/Source/dict.c",
-    "//third_party/libtess2/Source/dict.h",
-    "//third_party/libtess2/Source/geom.c",
-    "//third_party/libtess2/Source/geom.h",
-    "//third_party/libtess2/Source/mesh.c",
-    "//third_party/libtess2/Source/mesh.h",
-    "//third_party/libtess2/Source/priorityq.c",
-    "//third_party/libtess2/Source/priorityq.h",
-    "//third_party/libtess2/Source/sweep.c",
-    "//third_party/libtess2/Source/sweep.h",
-    "//third_party/libtess2/Source/tess.c",
-    "//third_party/libtess2/Source/tess.h",
+    "$source_root/Source/bucketalloc.c",
+    "$source_root/Source/bucketalloc.h",
+    "$source_root/Source/dict.c",
+    "$source_root/Source/dict.h",
+    "$source_root/Source/geom.c",
+    "$source_root/Source/geom.h",
+    "$source_root/Source/mesh.c",
+    "$source_root/Source/mesh.h",
+    "$source_root/Source/priorityq.c",
+    "$source_root/Source/priorityq.h",
+    "$source_root/Source/sweep.c",
+    "$source_root/Source/sweep.h",
+    "$source_root/Source/tess.c",
+    "$source_root/Source/tess.h",
   ]
 }
