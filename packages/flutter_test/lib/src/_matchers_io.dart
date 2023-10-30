@@ -24,7 +24,7 @@ Future<ui.Image> captureImage(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   assert(!renderObject.debugNeedsPaint);
   final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
@@ -60,8 +60,9 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     Uint8List? buffer;
-    if (item is Future<List<int>>) {
-      buffer = Uint8List.fromList(await item);
+    if (item is Future<List<int>?>) {
+      final List<int>? bytes = await item;
+      buffer = bytes == null ? null : Uint8List.fromList(bytes);
     } else if (item is List<int>) {
       buffer = Uint8List.fromList(item);
     }
@@ -124,7 +125,7 @@ class MatchesGoldenFile extends AsyncMatcher {
           image.dispose();
         }
       }
-    }, additionalTime: const Duration(minutes: 1));
+    });
   }
 
   @override

@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -252,8 +253,20 @@ class FakeStdio extends Stdio {
 class FakeStdin extends Fake implements Stdin {
   final StreamController<List<int>> controller = StreamController<List<int>>();
 
+  void Function(bool mode)? echoModeCallback;
+
+  bool _echoMode = true;
+
   @override
-  bool echoMode = true;
+  bool get echoMode => _echoMode;
+
+  @override
+  set echoMode(bool mode) {
+    _echoMode = mode;
+    if (echoModeCallback != null) {
+      echoModeCallback!(mode);
+    }
+  }
 
   @override
   bool lineMode = true;
@@ -337,12 +350,25 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkAge = '0 hours ago',
     this.frameworkCommitDate = '12/01/01',
     this.gitTagVersion = const GitTagVersion.unknown(),
+    this.flutterRoot = '/path/to/flutter',
+    this.nextFlutterVersion,
   });
 
   final String branch;
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   bool _didFetchTagsAndUpdate = false;
+
+  /// Will be returned by [fetchTagsAndGetVersion] if not null.
+  final FlutterVersion? nextFlutterVersion;
+
+  @override
+    FlutterVersion fetchTagsAndGetVersion({
+      SystemClock clock = const SystemClock(),
+    }) {
+    _didFetchTagsAndUpdate = true;
+    return nextFlutterVersion ?? this;
+  }
 
   bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
   bool _didCheckFlutterVersionFreshness = false;
@@ -354,6 +380,9 @@ class FakeFlutterVersion implements FlutterVersion {
     }
     return kUserBranch;
   }
+
+  @override
+  final String flutterRoot;
 
   @override
   final String devToolsVersion;
@@ -386,15 +415,10 @@ class FakeFlutterVersion implements FlutterVersion {
   final String frameworkCommitDate;
 
   @override
-  String get frameworkDate => frameworkCommitDate;
-
-  @override
   final GitTagVersion gitTagVersion;
 
   @override
-  void fetchTagsAndUpdate() {
-    _didFetchTagsAndUpdate = true;
-  }
+  FileSystem get fs => throw UnimplementedError('FakeFlutterVersion.fs is not implemented');
 
   @override
   Future<void> checkFlutterVersionFreshness() async {
@@ -414,7 +438,7 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   String getVersionString({bool redactUnknownBranches = false}) {
-    return 'v0.0.0';
+    return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevision';
   }
 
   @override
@@ -431,12 +455,14 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isSingleWidgetReloadEnabled = false,
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
     this.isFlutterWebWasmEnabled = false,
+    this.isCliAnimationEnabled = true,
+    this.isNativeAssetsEnabled = false,
+    this.isPreviewDeviceEnabled = false,
   });
 
   @override
@@ -450,9 +476,6 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
-
-  @override
-  final bool isSingleWidgetReloadEnabled;
 
   @override
   final bool isAndroidEnabled;
@@ -470,28 +493,29 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isFlutterWebWasmEnabled;
 
   @override
+  final bool isCliAnimationEnabled;
+
+  @override
+  final bool isNativeAssetsEnabled;
+
+  @override
+  final bool isPreviewDeviceEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
-    switch (feature) {
-      case flutterWebFeature:
-        return isWebEnabled;
-      case flutterLinuxDesktopFeature:
-        return isLinuxEnabled;
-      case flutterMacOSDesktopFeature:
-        return isMacOSEnabled;
-      case flutterWindowsDesktopFeature:
-        return isWindowsEnabled;
-      case singleWidgetReload:
-        return isSingleWidgetReloadEnabled;
-      case flutterAndroidFeature:
-        return isAndroidEnabled;
-      case flutterIOSFeature:
-        return isIOSEnabled;
-      case flutterFuchsiaFeature:
-        return isFuchsiaEnabled;
-      case flutterCustomDevicesFeature:
-        return areCustomDevicesEnabled;
-    }
-    return false;
+    return switch (feature) {
+      flutterWebFeature => isWebEnabled,
+      flutterLinuxDesktopFeature => isLinuxEnabled,
+      flutterMacOSDesktopFeature => isMacOSEnabled,
+      flutterWindowsDesktopFeature => isWindowsEnabled,
+      flutterAndroidFeature => isAndroidEnabled,
+      flutterIOSFeature => isIOSEnabled,
+      flutterFuchsiaFeature => isFuchsiaEnabled,
+      flutterCustomDevicesFeature => areCustomDevicesEnabled,
+      cliAnimation => isCliAnimationEnabled,
+      nativeAssets => isNativeAssetsEnabled,
+      _ => false,
+    };
   }
 }
 

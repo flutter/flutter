@@ -37,7 +37,8 @@ void main() {
 
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
-      realCommandRunner = UpgradeCommandRunner();
+      realCommandRunner = UpgradeCommandRunner()
+          ..workingDirectory = getFlutterRoot();
       processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{

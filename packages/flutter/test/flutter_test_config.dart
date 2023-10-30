@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '_goldens_io.dart'
   if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
@@ -23,7 +24,19 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  LeakTrackingTestConfig.warnForNonSupportedPlatforms = false;
+  LeakTracking.warnForUnsupportedPlatforms = false;
+
+  // TODO(polina-c): clean up leaks and stop ignoring them.
+  // https://github.com/flutter/flutter/issues/137311
+  LeakTesting.settings = LeakTesting
+    .settings
+    .withTrackedAll()
+    .withIgnored(
+      allNotGCed: true,
+      notDisposed: <String, int?>{
+        'OverlayEntry': null,
+      },
+    );
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);

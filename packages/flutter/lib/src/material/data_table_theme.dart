@@ -162,8 +162,6 @@ class DataTableThemeData with Diagnosticable {
 
   /// Linearly interpolate between two [DataTableThemeData]s.
   ///
-  /// The argument `t` must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
     if (identical(a, b)) {
@@ -266,8 +264,6 @@ class DataTableThemeData with Diagnosticable {
 class DataTableTheme extends InheritedWidget {
   /// Constructs a data table theme that configures all descendant
   /// [DataTable] widgets.
-  ///
-  /// The [data] must not be null.
   const DataTableTheme({
     super.key,
     required this.data,

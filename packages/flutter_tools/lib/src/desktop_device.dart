@@ -254,6 +254,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.traceSystrace) {
       addFlag('trace-systrace=true');
     }
+    if (debuggingOptions.traceToFile != null) {
+      addFlag('trace-to-file=${debuggingOptions.traceToFile}');
+    }
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }
@@ -265,6 +268,13 @@ abstract class DesktopDevice extends Device {
     }
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
+    }
+    switch (debuggingOptions.enableImpeller) {
+      case ImpellerStatus.enabled:
+        addFlag('enable-impeller=true');
+      case ImpellerStatus.disabled:
+      case ImpellerStatus.platformDefault:
+        addFlag('enable-impeller=false');
     }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.

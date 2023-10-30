@@ -59,7 +59,8 @@ String sentenceCase(String str, [String? locale]) {
   if (str.isEmpty) {
     return str;
   }
-  return toBeginningOfSentenceCase(str, locale)!;
+  // TODO(christopherfujino): Remove this check after the next release of intl
+  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
 }
 
 /// Converts `foo_bar` to `Foo Bar`.

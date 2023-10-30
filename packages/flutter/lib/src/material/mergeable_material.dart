@@ -19,8 +19,6 @@ import 'theme.dart';
 abstract class MergeableMaterialItem {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  ///
-  /// The argument is the [key], which must not be null.
   const MergeableMaterialItem(this.key);
 
   /// The key for this item of the list.
@@ -156,6 +154,14 @@ class _AnimationTuple {
   final CurvedAnimation endAnimation;
   final CurvedAnimation gapAnimation;
   double gapStart = 0.0;
+
+  @mustCallSuper
+  void dispose() {
+    controller.dispose();
+    startAnimation.dispose();
+    endAnimation.dispose();
+    gapAnimation.dispose();
+  }
 }
 
 class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {
@@ -210,7 +216,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void dispose() {
     for (final MergeableMaterialItem child in _children) {
       if (child is MaterialGap) {
-        _animationTuples[child.key]!.controller.dispose();
+        _animationTuples[child.key]!.dispose();
       }
     }
     super.dispose();
@@ -260,6 +266,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     final MergeableMaterialItem child = _children.removeAt(index);
 
     if (child is MaterialGap) {
+      _animationTuples[child.key]!.dispose();
       _animationTuples[child.key] = null;
     }
   }
@@ -470,7 +477,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       _removeChild(j);
     }
     while (i < newChildren.length) {
-      _insertChild(j, newChildren[i]);
+      final MergeableMaterialItem newChild = newChildren[i];
+      _insertChild(j, newChild);
+
+      if (newChild is MaterialGap) {
+        _animationTuples[newChild.key]!.controller.forward();
+      }
 
       i += 1;
       j += 1;

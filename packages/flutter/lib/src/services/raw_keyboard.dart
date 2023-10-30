@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 import 'hardware_keyboard.dart';
-import 'keyboard_key.g.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
 import 'raw_keyboard_ios.dart';
@@ -356,6 +355,10 @@ abstract class RawKeyEvent with Diagnosticable {
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
           );
+          final Object? characters = message['characters'];
+          if (characters is String && characters.isNotEmpty) {
+            character = characters;
+          }
         case 'linux':
           final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
           data = RawKeyEventDataLinux(
@@ -403,7 +406,7 @@ abstract class RawKeyEvent with Diagnosticable {
     }
   }
 
-  /// Returns true if the given [KeyboardKey] is pressed.
+  /// Returns true if the given [LogicalKeyboardKey] is pressed.
   bool isKeyPressed(LogicalKeyboardKey key) => RawKeyboard.instance.keysPressed.contains(key);
 
   /// Returns true if a CTRL modifier key is pressed, regardless of which side

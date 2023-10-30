@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_builder.dart';
 import 'android/android_sdk.dart';
@@ -60,6 +61,7 @@ import 'persistent_tool_state.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
+import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
@@ -87,6 +89,11 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
+      Analytics: () => getAnalytics(
+        runningOnBot: runningOnBot,
+        flutterVersion: globals.flutterVersion,
+        environment: globals.platform.environment,
+      ),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
         logger: globals.logger,
@@ -211,7 +218,10 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
-      Doctor: () => Doctor(logger: globals.logger),
+      Doctor: () => Doctor(
+        logger: globals.logger,
+        clock: globals.systemClock,
+      ),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
         java: globals.java,
@@ -226,7 +236,10 @@ Future<T> runInContext<T>(
         config: globals.config,
         platform: globals.platform,
       ),
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(
+        fs: globals.fs,
+        flutterRoot: Cache.flutterRoot!,
+      ),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
@@ -349,6 +362,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
@@ -365,6 +379,7 @@ Future<T> runInContext<T>(
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
+        fileSystem: globals.fs,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

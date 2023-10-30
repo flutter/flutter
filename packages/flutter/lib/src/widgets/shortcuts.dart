@@ -747,7 +747,11 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   ShortcutManager({
     Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
-  })  : _shortcuts = shortcuts;
+  })  : _shortcuts = shortcuts {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   /// True if the [ShortcutManager] should not pass on keys that it doesn't
   /// handle to any key-handling widgets that are ancestors to this one.
@@ -843,9 +847,13 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
           primaryContext,
           intent: matchedIntent,
         );
-        if (action != null && action.isEnabled(matchedIntent)) {
-          final Object? invokeResult = Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
-          return action.toKeyEventResult(matchedIntent, invokeResult);
+        if (action != null) {
+          final (bool enabled, Object? invokeResult) = Actions.of(primaryContext).invokeActionIfEnabled(
+            action, matchedIntent, primaryContext,
+          );
+          if (enabled) {
+            return action.toKeyEventResult(matchedIntent, invokeResult);
+          }
         }
       }
     }
@@ -1047,6 +1055,8 @@ class _ShortcutsState extends State<Shortcuts> {
 
 /// A widget that binds key combinations to specific callbacks.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=VcQQ1ns_qNY}
+///
 /// This is similar to but simpler than the [Shortcuts] widget as it doesn't
 /// require [Intent]s and [Actions] widgets. Instead, it accepts a map
 /// of [ShortcutActivator]s to [VoidCallback]s.
@@ -1190,6 +1200,13 @@ class ShortcutRegistryEntry {
 /// widgets that are not descendants of the registry can listen to it (e.g. in
 /// overlays).
 class ShortcutRegistry with ChangeNotifier {
+  /// Creates an instance of [ShortcutRegistry].
+  ShortcutRegistry() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   bool _notificationScheduled = false;
   bool _disposed = false;
 
@@ -1259,7 +1276,7 @@ class ShortcutRegistry with ChangeNotifier {
         if (!_disposed) {
           notifyListeners();
         }
-      });
+      }, debugLabel: 'ShortcutRegistry.notifyListeners');
       _notificationScheduled = true;
     }
   }
@@ -1427,6 +1444,7 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   void dispose() {
     registry.removeListener(_shortcutsChanged);
     registry.dispose();
+    manager.dispose();
     super.dispose();
   }
 

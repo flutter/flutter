@@ -20,6 +20,8 @@ export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
 export 'animation.dart' show Animation, AnimationStatus;
 export 'curves.dart' show Curve;
 
+const String _flutterAnimationLibrary = 'package:flutter/animation.dart';
+
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // late bool dismissed;
@@ -230,9 +232,9 @@ class AnimationController extends Animation<double>
   ///   value at which this animation is deemed to be completed. It cannot be
   ///   null.
   ///
-  /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and must not be null. See
-  ///   [TickerProvider] for advice on obtaining a ticker provider.
+  /// * `vsync` is the required [TickerProvider] for the current context. It can
+  ///   be changed by calling [resync]. See [TickerProvider] for advice on
+  ///   obtaining a ticker provider.
   AnimationController({
     double? value,
     this.duration,
@@ -244,6 +246,9 @@ class AnimationController extends Animation<double>
     required TickerProvider vsync,
   }) : assert(upperBound >= lowerBound),
        _direction = _AnimationDirection.forward {
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
@@ -258,9 +263,9 @@ class AnimationController extends Animation<double>
   /// * [debugLabel] is a string to help identify this animation during
   ///   debugging (used by [toString]).
   ///
-  /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and must not be null. See
-  ///   [TickerProvider] for advice on obtaining a ticker provider.
+  /// * `vsync` is the required [TickerProvider] for the current context. It can
+  ///   be changed by calling [resync]. See [TickerProvider] for advice on
+  ///   obtaining a ticker provider.
   ///
   /// This constructor is most useful for animations that will be driven using a
   /// physics simulation, especially when the physics simulation has no
@@ -275,8 +280,22 @@ class AnimationController extends Animation<double>
   }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
        _direction = _AnimationDirection.forward {
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
+  }
+
+  /// Dispatches event of object creation to [MemoryAllocations.instance].
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterAnimationLibrary,
+        className: '$AnimationController',
+        object: this,
+      );
+    }
   }
 
   /// The value at which this animation is deemed to be dismissed.
@@ -800,6 +819,9 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _ticker!.dispose();
     _ticker = null;
     clearStatusListeners();

@@ -67,9 +67,14 @@ Future<void> writeResponseData(
 ///
 /// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
+///
+/// `writeResponseOnFailure` determines whether the `responseDataCallback`
+/// function will be called to process the [Response.data] when a test fails.
+/// The default value is `false`.
 Future<void> integrationDriver({
   Duration timeout = const Duration(minutes: 20),
   ResponseDataCallback? responseDataCallback = writeResponseData,
+  bool writeResponseOnFailure = false,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
@@ -85,6 +90,9 @@ Future<void> integrationDriver({
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
+    if (responseDataCallback != null && writeResponseOnFailure) {
+      await responseDataCallback(response.data);
+    }
     exit(1);
   }
 }

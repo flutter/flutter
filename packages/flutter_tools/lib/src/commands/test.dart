@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
@@ -66,6 +67,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     requiresPubspecYaml();
     usesPubOption();
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
@@ -130,6 +132,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption('coverage-path',
         defaultsTo: 'coverage/lcov.info',
         help: 'Where to store coverage information (if coverage is enabled).',
+      )
+      ..addMultiOption('coverage-package',
+        help: 'A regular expression matching packages names '
+              'to include in the coverage report (if coverage is enabled). '
+              'If unset, matches the current package name.',
+        valueHelp: 'package-name-regexp',
+        splitCommas: false,
       )
       ..addFlag('machine',
         hide: !verboseHelp,
@@ -395,10 +404,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') ||
         boolArg('branch-coverage')) {
-      final String projectName = flutterProject.manifest.appName;
+      final Set<String> packagesToInclude = _getCoveragePackages(
+        stringsArg('coverage-package'),
+        flutterProject,
+        buildInfo.packageConfig,
+      );
       collector = CoverageCollector(
         verbose: !machine,
-        libraryNames: <String>{projectName},
+        libraryNames: packagesToInclude,
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
@@ -506,6 +519,30 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit(null);
     }
     return FlutterCommandResult.success();
+  }
+
+  Set<String> _getCoveragePackages(
+    List<String> packagesRegExps,
+    FlutterProject flutterProject,
+    PackageConfig packageConfig,
+  ) {
+    final String projectName = flutterProject.manifest.appName;
+    final Set<String> packagesToInclude = <String>{
+      if (packagesRegExps.isEmpty) projectName,
+    };
+    try {
+      for (final String regExpStr in packagesRegExps) {
+        final RegExp regExp = RegExp(regExpStr);
+        packagesToInclude.addAll(
+          packageConfig.packages
+              .map((Package e) => e.name)
+              .where((String e) => regExp.hasMatch(e)),
+        );
+      }
+    } on FormatException catch (e) {
+      throwToolExit('Regular expression syntax is invalid. $e');
+    }
+    return packagesToInclude;
   }
 
   /// Parses a test file/directory target passed as an argument and returns it
