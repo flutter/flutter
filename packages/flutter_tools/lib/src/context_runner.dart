@@ -388,6 +388,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
     },
   );
