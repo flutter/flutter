@@ -14,7 +14,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTexture.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
-#import "flutter/testing/testing.h"
+#include "flutter/testing/autoreleasepool_test.h"
+#include "flutter/testing/testing.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
@@ -66,7 +67,17 @@
 
 namespace flutter::testing {
 
-TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
+// AutoreleasePoolTest subclass that exists simply to provide more specific naming.
+class FlutterEmbedderExternalTextureTest : public AutoreleasePoolTest {
+ public:
+  FlutterEmbedderExternalTextureTest() = default;
+  ~FlutterEmbedderExternalTextureTest() = default;
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderExternalTextureTest);
+};
+
+TEST_F(FlutterEmbedderExternalTextureTest, TestTextureResolution) {
   // Constants.
   const size_t width = 100;
   const size_t height = 100;
@@ -125,7 +136,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
   gpuSurface->makeImageSnapshot();
 }
 
-TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
+TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTexture) {
   // Constants.
   const size_t width = 100;
   const size_t height = 100;
@@ -178,7 +189,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
   gpuSurface->makeImageSnapshot();
 }
 
-TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
+TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA) {
   // Constants.
   const size_t width = 100;
   const size_t height = 100;
@@ -233,7 +244,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
   gpuSurface->makeImageSnapshot();
 }
 
-TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) {
+TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA2) {
   // Constants.
   const size_t width = 100;
   const size_t height = 100;
