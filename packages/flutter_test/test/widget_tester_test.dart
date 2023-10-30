@@ -13,8 +13,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher;
-import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:matcher/src/expect/async_matcher.dart';
+
+import 'utils/leaking_classes.dart'; // ignore: implementation_imports
 
 void main() {
   group('expectLater', () {
@@ -490,24 +494,50 @@ void main() {
   });
 
   group('Leak testing', () {
-    final Map<String, FlutterErrorDetails> errors = <String, FlutterErrorDetails>{};
-    reportTestException = (FlutterErrorDetails details, String testDescription) {
-      errors[testDescription] = details;
-    };
+    final List<Leaks> collectedLeaks = <Leaks>[];
+
+    late final LeakTesting originalLeakTesting;
+    late final LeakTesting trackAll =
+      LeakTesting.settings.copyWith(ignoredLeaks: const IgnoredLeaks(), ignore: false,
+      // failOnLeaksCollected: false,
+      // onLeaks: (Leaks leaks){
+      //   print('leaks collected');
+      //   collectedLeaks.add(leaks);
+      // },
+    );
+
+    late String testNoLeaks;
+    late String testWithLeaks;
+
+    setUpAll(() {
+      originalLeakTesting = LeakTesting.settings;
+      LeakTesting.settings = trackAll;
+    });
 
     tearDownAll(() async {
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      await binding.runTest(() async {
-        throw 'test error';
-      }, () {});
+      print('!!!!');
+      print(collectedLeaks.length);
+      LeakTesting.settings = originalLeakTesting;
+
+      // final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      // await binding.runTest(() async {
+      //   throw 'test error';
+      // }, () {});
 
       //print(flutterErrorDetails == null ? 'null!!!' : 'got it!');
-      binding.postTest();
+      //binding.postTest();
+      //reportTestException = originalExceptionReporter;
+
     });
 
-    test('empty', () {
-      print('test');
+    group('tests', () {
+      testWidgets(testNoLeaks = 'no leaks', (_) async {});
+
+      testWidgets(testWithLeaks = 'with leaks', (_) async {
+        StatelessLeakingWidget();
+      });
     });
+
   });
 
   group('TargetPlatformVariant', () {
