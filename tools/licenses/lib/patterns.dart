@@ -1608,7 +1608,7 @@ final List<RegExp> csStrayCopyrights = <RegExp>[
     multiLine: true,
   ),
 
-  // third_party/inja/third_party/include/hayai/hayai_clock.hpp
+  // flutter/third_party/inja/third_party/include/hayai/hayai_clock.hpp
   // Advice was to just ignore these copyright notices given the LICENSE.md file
   // in the same directory.
   RegExp(

@@ -1130,6 +1130,17 @@ freely, subject to the following restrictions:
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: include
+ORIGIN: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_clock.hpp
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_clock.hpp
+----------------------------------------------------------------------------------------------------
+Copyright (C) 2011 Nick Bruun <nick@bruun.co>
+Copyright (C) 2013 Vlad Lazarenko <vlad@lazarenko.me>
+Copyright (C) 2014 Nicolas Pauss <nicolas.pauss@gmail.com>
+====================================================================================================
+
+====================================================================================================
 LIBRARY: rapidjson
 ORIGIN: ../../../flutter/third_party/rapidjson/include/rapidjson/schema.h + http://opensource->org/licenses/MIT referenced by ../../../flutter/third_party/rapidjson/include/rapidjson/schema.h
 TYPE: LicenseType.mit
@@ -1221,6 +1232,70 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libtess2
+ORIGIN: ../../../flutter/third_party/libtess2/Include/tesselator.h
+ORIGIN: ../../../flutter/third_party/libtess2/LICENSE.txt
+ORIGIN: ../../../flutter/third_party/libtess2/Source/bucketalloc.c
+ORIGIN: ../../../flutter/third_party/libtess2/Source/bucketalloc.h
+ORIGIN: ../../../flutter/third_party/libtess2/Source/dict.c
+ORIGIN: ../../../flutter/third_party/libtess2/Source/dict.h
+ORIGIN: ../../../flutter/third_party/libtess2/Source/geom.c
+ORIGIN: ../../../flutter/third_party/libtess2/Source/geom.h
+ORIGIN: ../../../flutter/third_party/libtess2/Source/mesh.c
+ORIGIN: ../../../flutter/third_party/libtess2/Source/mesh.h
+ORIGIN: ../../../flutter/third_party/libtess2/Source/priorityq.c
+ORIGIN: ../../../flutter/third_party/libtess2/Source/priorityq.h
+ORIGIN: ../../../flutter/third_party/libtess2/Source/sweep.c
+ORIGIN: ../../../flutter/third_party/libtess2/Source/sweep.h
+ORIGIN: ../../../flutter/third_party/libtess2/Source/tess.c
+ORIGIN: ../../../flutter/third_party/libtess2/Source/tess.h
+TYPE: LicenseType.mit
+FILE: ../../../flutter/third_party/libtess2/Bin/bg.svg
+FILE: ../../../flutter/third_party/libtess2/Bin/fg.svg
+FILE: ../../../flutter/third_party/libtess2/Include/tesselator.h
+FILE: ../../../flutter/third_party/libtess2/Source/bucketalloc.c
+FILE: ../../../flutter/third_party/libtess2/Source/bucketalloc.h
+FILE: ../../../flutter/third_party/libtess2/Source/dict.c
+FILE: ../../../flutter/third_party/libtess2/Source/dict.h
+FILE: ../../../flutter/third_party/libtess2/Source/geom.c
+FILE: ../../../flutter/third_party/libtess2/Source/geom.h
+FILE: ../../../flutter/third_party/libtess2/Source/mesh.c
+FILE: ../../../flutter/third_party/libtess2/Source/mesh.h
+FILE: ../../../flutter/third_party/libtess2/Source/priorityq.c
+FILE: ../../../flutter/third_party/libtess2/Source/priorityq.h
+FILE: ../../../flutter/third_party/libtess2/Source/sweep.c
+FILE: ../../../flutter/third_party/libtess2/Source/sweep.h
+FILE: ../../../flutter/third_party/libtess2/Source/tess.c
+FILE: ../../../flutter/third_party/libtess2/Source/tess.h
+FILE: ../../../flutter/third_party/libtess2/premake4.lua
+----------------------------------------------------------------------------------------------------
+Copyright (C) [dates of first publication] Silicon Graphics, Inc.
+All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice including the dates of first publication and either this
+permission notice or a reference to http://oss.sgi.com/projects/FreeB/ shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL SILICON GRAPHICS, INC.
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of Silicon Graphics, Inc. shall not
+be used in advertising or otherwise to promote the sale, use or other dealings in
+this Software without prior written authorization from Silicon Graphics, Inc.
 ====================================================================================================
 
 ====================================================================================================
@@ -1556,6 +1631,60 @@ freely, subject to the following restrictions:
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: include
+ORIGIN: ../../../flutter/third_party/inja/third_party/include/nlohmann/json.hpp
+TYPE: LicenseType.mit
+FILE: ../../../flutter/third_party/inja/third_party/include/nlohmann/json.hpp
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+
+Permission is hereby  granted, free of charge, to any  person obtaining a copy
+of this software and associated  documentation files (the "Software"), to deal
+in the Software  without restriction, including without  limitation the rights
+to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
+copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
+IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
+FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
+AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
+LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: include
+ORIGIN: ../../../flutter/third_party/inja/third_party/include/nlohmann/json.hpp
+TYPE: LicenseType.mit
+FILE: ../../../flutter/third_party/inja/third_party/include/nlohmann/json.hpp
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009 Florian Loitsch.
+
+Permission is hereby  granted, free of charge, to any  person obtaining a copy
+of this software and associated  documentation files (the "Software"), to deal
+in the Software  without restriction, including without  limitation the rights
+to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
+copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
+IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
+FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
+AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
+LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: accessibility
 ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc + ../../../flutter/third_party/accessibility/LICENSE
 TYPE: LicenseType.bsd
@@ -1747,6 +1876,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: include
+ORIGIN: ../../../flutter/third_party/inja/third_party/include/hayai/LICENSE.md
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_benchmarker.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_compatibility.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_console.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_console_outputter.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_default_test_factory.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_fixture.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_json_outputter.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_junit_xml_outputter.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_main.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_outputter.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_test.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_test_descriptor.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_test_factory.hpp
+FILE: ../../../flutter/third_party/inja/third_party/include/hayai/hayai_test_result.hpp
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2011 - Nick Bruun.
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1.  The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
+2.  Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+3.  If you meet (any of) the author(s), you're encouraged to buy them a beer,
+    a drink or whatever is suited to the situation, given that you like the
+    software.
+4.  This notice may not be removed or altered from any source
+    distribution.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: accessibility
 ORIGIN: ../../../flutter/third_party/accessibility/base/auto_reset.h + ../../../flutter/third_party/accessibility/LICENSE
 ORIGIN: ../../../flutter/third_party/accessibility/base/win/atl_module.h + ../../../flutter/third_party/accessibility/LICENSE
@@ -1928,6 +2100,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: include
+ORIGIN: ../../../flutter/third_party/inja/third_party/include/nlohmann/json.hpp
+TYPE: LicenseType.mit
+FILE: ../../../flutter/third_party/inja/third_party/include/nlohmann/json.hpp
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2013-2019 Niels Lohmann <http://nlohmann.me>.
+
+Permission is hereby  granted, free of charge, to any  person obtaining a copy
+of this software and associated  documentation files (the "Software"), to deal
+in the Software  without restriction, including without  limitation the rights
+to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
+copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
+IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
+FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
+AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
+LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: glfw
 ORIGIN: ../../../flutter/third_party/glfw/src/linux_joystick.h
 ORIGIN: ../../../flutter/third_party/glfw/src/wl_init.c
@@ -2090,6 +2289,71 @@ freely, subject to the following restrictions:
 
 3. This notice may not be removed or altered from any source
    distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: inja
+ORIGIN: ../../../flutter/third_party/inja/LICENSE
+TYPE: LicenseType.mit
+FILE: ../../../flutter/third_party/inja/include/inja/config.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/environment.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/exceptions.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/function_storage.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/lexer.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/node.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/parser.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/renderer.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/statistics.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/template.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/token.hpp
+FILE: ../../../flutter/third_party/inja/include/inja/utils.hpp
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2018-2021 Berscheid
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: inja
+ORIGIN: ../../../flutter/third_party/inja/include/inja/inja.hpp
+ORIGIN: ../../../flutter/third_party/inja/single_include/inja/inja.hpp
+TYPE: LicenseType.mit
+FILE: ../../../flutter/third_party/inja/include/inja/inja.hpp
+FILE: ../../../flutter/third_party/inja/single_include/inja/inja.hpp
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2018-2021 Lars Berscheid
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
@@ -8388,6 +8652,38 @@ All Tencent Modifications are Copyright (C) 2015 THL A29 Limited.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: sqlite
+ORIGIN: ../../../flutter/third_party/sqlite/LICENSE
+TYPE: LicenseType.unknown
+FILE: ../../../flutter/third_party/sqlite/sqlite3.c
+FILE: ../../../flutter/third_party/sqlite/sqlite3.h
+----------------------------------------------------------------------------------------------------
+The source code for SQLite is in the public domain. No claim of
+copyright is made on any part of the core source code. (The
+documentation and test code is a different matter - some sections of
+documentation and test logic are governed by open-source licenses.)
+All contributors to the SQLite core software have signed affidavits
+specifically disavowing any copyright interest in the code. This means
+that anybody is able to legally do anything they want with the SQLite
+source code.
+
+There are other SQL database engines with liberal licenses that allow
+the code to be broadly and freely used. But those other engines are
+still governed by copyright law. SQLite is different in that copyright
+law simply does not apply.
+
+The source code files for other SQL database engines typically begin
+with a comment describing your legal rights to view and copy that
+file. The SQLite source code contains no license since it is not
+governed by copyright. Instead of a license, the SQLite source code
+offers a blessing:
+
+May you do good and not evil
+May you find forgiveness for yourself and forgive others
+May you share freely, never taking more than you give.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: web_unicode
 ORIGIN: http://www.unicode.org/terms_of_use.html referenced by ../../../flutter/third_party/web_unicode/properties/LineBreak.txt
 ORIGIN: http://www.unicode.org/terms_of_use.html referenced by ../../../flutter/third_party/web_unicode/properties/WordBreakProperty.txt
@@ -8497,4 +8793,4 @@ use or other dealings in these Data Files or Software without prior
 written authorization of the copyright holder.
 ====================================================================================================
 
-Total license count: 44
+Total license count: 53
