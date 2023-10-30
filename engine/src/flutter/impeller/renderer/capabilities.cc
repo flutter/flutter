@@ -21,6 +21,9 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
+  bool SupportsImplicitResolvingMSAA() const override { return false; }
+
+  // |Capabilities|
   bool SupportsSSBO() const override { return supports_ssbo_; }
 
   // |Capabilities|

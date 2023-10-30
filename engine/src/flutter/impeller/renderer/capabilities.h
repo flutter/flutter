@@ -19,6 +19,11 @@ class Capabilities {
   ///         color/stencil textures.
   virtual bool SupportsOffscreenMSAA() const = 0;
 
+  /// @brief  Whether the context backend supports multisampled rendering to
+  ///         the on-screen surface without requiring an explicit resolve of
+  ///         the MSAA color attachment.
+  virtual bool SupportsImplicitResolvingMSAA() const = 0;
+
   /// @brief  Whether the context backend supports binding Shader Storage Buffer
   ///         Objects (SSBOs) to pipelines.
   virtual bool SupportsSSBO() const = 0;

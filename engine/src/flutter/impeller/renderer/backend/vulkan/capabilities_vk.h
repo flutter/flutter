@@ -61,6 +61,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsOffscreenMSAA() const override;
 
   // |Capabilities|
+  bool SupportsImplicitResolvingMSAA() const override;
+
+  // |Capabilities|
   bool SupportsSSBO() const override;
 
   // |Capabilities|

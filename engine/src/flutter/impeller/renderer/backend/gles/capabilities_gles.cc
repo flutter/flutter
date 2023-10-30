@@ -19,6 +19,10 @@ static const constexpr char* kNvidiaTextureBorderClampExt =
 static const constexpr char* kOESTextureBorderClampExt =
     "GL_OES_texture_border_clamp";
 
+// https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_multisampled_render_to_texture.txt
+static const constexpr char* kMultisampledRenderToTextureExt =
+    "GL_EXT_multisampled_render_to_texture2";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -32,7 +36,9 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     max_cube_map_texture_size = value;
   }
 
-  if (gl.GetDescription()->IsES()) {
+  auto const desc = gl.GetDescription();
+
+  if (desc->IsES()) {
     GLint value = 0;
     gl.GetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &value);
     max_fragment_uniform_vectors = value;
@@ -56,7 +62,7 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     max_texture_size = ISize{value, value};
   }
 
-  if (gl.GetDescription()->IsES()) {
+  if (desc->IsES()) {
     GLint value = 0;
     gl.GetIntegerv(GL_MAX_VARYING_VECTORS, &value);
     max_varying_vectors = value;
@@ -74,7 +80,7 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     max_vertex_texture_image_units = value;
   }
 
-  if (gl.GetDescription()->IsES()) {
+  if (desc->IsES()) {
     GLint value = 0;
     gl.GetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &value);
     max_vertex_uniform_vectors = value;
@@ -92,31 +98,26 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     num_compressed_texture_formats = value;
   }
 
-  if (gl.GetDescription()->IsES()) {
+  if (desc->IsES()) {
     GLint value = 0;
     gl.GetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &value);
     num_shader_binary_formats = value;
   }
 
-  supports_framebuffer_fetch_ =
-      gl.GetDescription()->HasExtension(kFramebufferFetchExt);
+  supports_framebuffer_fetch_ = desc->HasExtension(kFramebufferFetchExt);
 
-  if (gl.GetDescription()->HasExtension(kTextureBorderClampExt) ||
-      gl.GetDescription()->HasExtension(kNvidiaTextureBorderClampExt) ||
-      gl.GetDescription()->HasExtension(kOESTextureBorderClampExt)) {
+  if (desc->HasExtension(kTextureBorderClampExt) ||
+      desc->HasExtension(kNvidiaTextureBorderClampExt) ||
+      desc->HasExtension(kOESTextureBorderClampExt)) {
     supports_decal_sampler_address_mode_ = true;
   }
 
-  if (gl.GetDescription()->HasExtension(
-          "GL_EXT_multisampled_render_to_texture2") &&
-      // The current implementation of MSAA support in Impeller GLES requires
-      // the use of glBlitFramebuffer, which is not available on all GLES
-      // implementations. We can't use MSAA on these platforms yet.
-      gl.BlitFramebuffer.IsAvailable()) {
+  if (desc->HasExtension(kMultisampledRenderToTextureExt)) {
+    supports_implicit_msaa_ = true;
+
     // We hard-code 4x MSAA, so let's make sure it's supported.
     GLint value = 0;
     gl.GetIntegerv(GL_MAX_SAMPLES_EXT, &value);
-
     supports_offscreen_msaa_ = value >= 4;
   }
 }
@@ -138,6 +139,10 @@ size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
 
 bool CapabilitiesGLES::SupportsOffscreenMSAA() const {
   return supports_offscreen_msaa_;
+}
+
+bool CapabilitiesGLES::SupportsImplicitResolvingMSAA() const {
+  return supports_implicit_msaa_;
 }
 
 bool CapabilitiesGLES::SupportsSSBO() const {

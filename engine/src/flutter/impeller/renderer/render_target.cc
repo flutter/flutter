@@ -286,6 +286,11 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
   color0_tex_desc.size = size;
   color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
+  if (context.GetCapabilities()->SupportsImplicitResolvingMSAA()) {
+    // See below ("SupportsImplicitResolvingMSAA") for more details.
+    color0_tex_desc.storage_mode = StorageMode::kDevicePrivate;
+  }
+
   auto color0_msaa_tex = allocator.CreateTexture(color0_tex_desc);
   if (!color0_msaa_tex) {
     VALIDATION_LOG << "Could not create multisample color texture.";
@@ -321,6 +326,17 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
   color0.store_action = color_attachment_config.store_action;
   color0.texture = color0_msaa_tex;
   color0.resolve_texture = color0_resolve_tex;
+
+  if (context.GetCapabilities()->SupportsImplicitResolvingMSAA()) {
+    // If implicit MSAA is supported, then the resolve texture is not needed
+    // because the multisample texture is automatically resolved. We instead
+    // provide a view of the multisample texture as the resolve texture (because
+    // the HAL does expect a resolve texture).
+    //
+    // In practice, this is used for GLES 2.0 EXT_multisampled_render_to_texture
+    // https://registry.khronos.org/OpenGL/extensions/EXT/EXT_multisampled_render_to_texture.txt
+    color0.resolve_texture = color0_msaa_tex;
+  }
 
   target.SetColorAttachment(color0, 0u);
 
