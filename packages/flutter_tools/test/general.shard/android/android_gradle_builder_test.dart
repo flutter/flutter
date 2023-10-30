@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -33,6 +34,7 @@ void main() {
   group('gradle build', () {
     late BufferLogger logger;
     late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
     late FileSystem fileSystem;
     late FakeProcessManager processManager;
 
@@ -42,6 +44,11 @@ void main() {
       testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
       Cache.flutterRoot = '';
+
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
@@ -52,6 +59,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -133,6 +141,14 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+      expect(testUsage.events, hasLength(2));
+
+      expect(
+          fakeAnalytics.sentEvents,
+          unorderedEquals(<Event>[
+            Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
+            Event.flutterBuildInfo(label: 'gradle-random-event-label-failure', buildType: 'gradle'),
+          ]));
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
@@ -145,6 +161,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -213,6 +230,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -307,6 +325,15 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+      expect(testUsage.events, hasLength(4));
+
+      expect(fakeAnalytics.sentEvents, hasLength(4));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+            label: 'gradle-random-event-label-failure',
+            buildType: 'gradle',
+          )
+      ));
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
@@ -319,6 +346,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -400,6 +428,16 @@ void main() {
           parameters: CustomDimensions(),
         ),
       ));
+      expect(testUsage.events, hasLength(2));
+
+      expect(fakeAnalytics.sentEvents, hasLength(2));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+            label: 'gradle-random-event-label-failure',
+            buildType: 'gradle',
+          )
+      ));
+
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
@@ -412,6 +450,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -477,6 +516,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -581,6 +621,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(
           environment: <String, String>{
@@ -683,6 +724,7 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -811,6 +853,7 @@ android {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -846,6 +889,7 @@ BuildVariant: paidProfile
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -877,6 +921,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -904,6 +949,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -970,6 +1016,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1029,6 +1076,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1089,6 +1137,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1169,6 +1218,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm64', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1249,6 +1299,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x86', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1329,6 +1380,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x64', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1410,6 +1462,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1471,6 +1524,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1560,6 +1614,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm64', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1649,6 +1704,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x86', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
@@ -1738,6 +1794,7 @@ Gradle Crashed
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x64', localEngineHost: 'out/host_release'),
         usage: testUsage,
+        analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
