@@ -30,64 +30,51 @@ void main() {
       'flutter',
     );
 
-    // Create dummy plugin that *only* supports iOS.
+    // Create dummy plugin that supports iOS and Android.
     processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'create',
       '--template=plugin',
-      '--platforms=ios',
+      '--platforms=ios,android',
       'test_plugin',
     ], workingDirectory: tempDir.path);
 
     final Directory pluginAppDir = tempDir.childDirectory('test_plugin');
+    
+    // Override pubspec to drop support for the Android implementation.
+    final File pubspecFile = pluginAppDir.childFile('pubspec.yaml');
+    const String pubspecYamlSrc = r'''
+name: test_plugin
+version: 0.0.1
 
-    // Create an android directory and a build.gradle file within.
+environment:
+  sdk: '>=3.3.0-71.0.dev <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: TestPlugin
+''';
+    pubspecFile.writeAsStringSync(pubspecYamlSrc);
+    
+    // Check the android directory and the build.gradle file within.
     final File pluginGradleFile = pluginAppDir
         .childDirectory('android')
-        .childFile('build.gradle')
-      ..createSync(recursive: true);
+        .childFile('build.gradle');
     expect(pluginGradleFile, exists);
-
-    pluginGradleFile.writeAsStringSync(r'''
-buildscript {
-    ext.kotlin_version = '1.5.31'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-
-    configurations.classpath {
-        resolutionStrategy.activateDependencyLocking()
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-rootProject.buildDir = '../build'
-
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-
-subprojects {
-    project.evaluationDependsOn(':app')
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-''');
 
     final Directory pluginExampleAppDir =
         pluginAppDir.childDirectory('example');
