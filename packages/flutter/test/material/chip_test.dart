@@ -1778,7 +1778,7 @@ void main() {
               labelStyle: TextStyle(height: 4), // inherit: true
             ),
           ),
-          child: const Chip(label: Text('Label')), // labeStyle: null
+          child: const Chip(label: Text('Label')), // labelStyle: null
         ),
       );
     }
