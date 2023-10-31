@@ -12,7 +12,7 @@ Here are some noteworthy benchmarks related to Impeller performance:
     - Skia vs Vulkan Impeller - 90th percentile frame rasterizer time: [dashboard](https://flutter-flutter-perf.skia.org/e/?keys=X2cacf305c9d4b1b5fc43f81368803a9b)
   - Moto G4 (OpenGLES): [dashboard](https://flutter-flutter-perf.skia.org/e/?keys=Xaeae5aa39c9028be43e8a9ad40540bd8)
   - iPhone 11
-    - Metal: [dashboard](https://flutter-flutter-perf.skia.org/e/?keys=Xc30b4774a54a03180fa93bf6641c5469)
+    - Metal: [dashboard](https://flutter-flutter-perf.skia.org/e/?keys=X9d52e54d0ac32151cc10feca61ea34cc)
     - Skia vs Metal Impeller - 90th percentile frame rasterizer time: [dashboard](https://flutter-flutter-perf.skia.org/e/?keys=X836c18b955eb83a9102a4391672f37e0)
 
 - **Animated Blur Backdrop Filter** - A driver test that scrolls to a screen and
