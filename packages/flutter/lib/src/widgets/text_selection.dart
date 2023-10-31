@@ -1888,6 +1888,10 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 
   /// Whether the user may select text in the text field.
   bool get selectionEnabled;
+
+  // /// Whether the user provided onTap callback should be dispatched on every
+  // /// tap or only non-consecutive taps.
+  // bool get onTapAlwaysCalled => false;
 }
 
 /// Builds a [TextSelectionGestureDetector] to wrap an [EditableText].
@@ -2267,6 +2271,23 @@ class TextSelectionGestureDetectorBuilder {
       editableText.showToolbar();
     }
   }
+
+  /// Whether the user provided onTap callback should be dispatched on every
+  /// tap or only non-consecutive taps.
+  @protected
+  bool get onTapAlwaysCalled => false;
+
+  /// Handler for [TextSelectionGestureDetector.onUserTap].
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onUserTap], which triggers this
+  ///    callback.
+  ///  * [TextSelectionGestureDetector.onTapAlwaysCalled], which controls
+  ///     whether this callback is called only on the first tap in a series
+  ///     of taps.
+  @protected
+  void onUserTap() { /* Subclass should override this method if needed. */ }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
   ///
@@ -2992,6 +3013,7 @@ class TextSelectionGestureDetectorBuilder {
       onSecondaryTapDown: onSecondaryTapDown,
       onSingleTapUp: onSingleTapUp,
       onSingleTapCancel: onSingleTapCancel,
+      onUserTap: onUserTap,
       onSingleLongTapStart: onSingleLongTapStart,
       onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
       onSingleLongTapEnd: onSingleLongTapEnd,
@@ -3000,6 +3022,7 @@ class TextSelectionGestureDetectorBuilder {
       onDragSelectionStart: onDragSelectionStart,
       onDragSelectionUpdate: onDragSelectionUpdate,
       onDragSelectionEnd: onDragSelectionEnd,
+      onTapAlwaysCalled: onTapAlwaysCalled,
       behavior: behavior,
       child: child,
     );
@@ -3033,6 +3056,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSecondaryTapDown,
     this.onSingleTapUp,
     this.onSingleTapCancel,
+    this.onUserTap,
     this.onSingleLongTapStart,
     this.onSingleLongTapMoveUpdate,
     this.onSingleLongTapEnd,
@@ -3041,6 +3065,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onDragSelectionStart,
     this.onDragSelectionUpdate,
     this.onDragSelectionEnd,
+    this.onTapAlwaysCalled = false,
     this.behavior,
     required this.child,
   });
@@ -3083,6 +3108,13 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// another gesture from the touch is recognized.
   final GestureCancelCallback? onSingleTapCancel;
 
+  /// Called for the first tap in a series of taps when [onTapAlwaysCalled] is
+  /// disabled.
+  ///
+  /// When [onTapAlwaysCalled] is enabled, this will be called for every tap,
+  /// including consecutive taps.
+  final GestureTapCallback? onUserTap;
+
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
@@ -3110,6 +3142,14 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// Called when a mouse that was previously dragging is released.
   final GestureTapDragEndCallback? onDragSelectionEnd;
+
+  /// Whether [onUserTap] should always be called.
+  ///
+  /// When disabled [onUserTap] will only be called the first tap in a
+  /// a series of taps.
+  ///
+  /// When enabled [onUserTap] will be called for consecutive taps.
+  final bool onTapAlwaysCalled;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -3189,6 +3229,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _handleTapUp(TapDragUpDetails details) {
     if (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 1) {
       widget.onSingleTapUp?.call(details);
+      widget.onUserTap?.call();
+    } else if (widget.onTapAlwaysCalled) {
+      widget.onUserTap?.call();
     }
   }
 

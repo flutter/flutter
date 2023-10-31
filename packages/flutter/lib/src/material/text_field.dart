@@ -69,6 +69,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   void onSingleTapUp(TapDragUpDetails details) {
     super.onSingleTapUp(details);
     _state._requestKeyboard();
+    // _state.widget.onTap?.call();// A user might want to run this everytime despite it not being a single tap up.
+  }
+
+  @override
+  bool get onTapAlwaysCalled => _state.widget.onTapAlwaysCalled;
+
+  @override
+  void onUserTap() {
     _state.widget.onTap?.call();
   }
 
@@ -297,6 +305,7 @@ class TextField extends StatefulWidget {
     bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
+    this.onTapAlwaysCalled = false,
     this.onTapOutside,
     this.mouseCursor,
     this.buildCounter,
@@ -656,6 +665,15 @@ class TextField extends StatefulWidget {
   /// text field's internal gesture detector, use a [Listener].
   /// {@endtemplate}
   final GestureTapCallback? onTap;
+
+  /// Whether [onTap] is only called for distinct taps.
+  ///
+  /// When disabled [onTap] is only called for distinct taps.
+  ///
+  /// When enabled [onTap] is called for every tap.
+  ///
+  /// Defaults to false.
+  final bool onTapAlwaysCalled;
 
   /// {@macro flutter.widgets.editableText.onTapOutside}
   ///
