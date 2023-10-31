@@ -30,10 +30,6 @@ struct TRect {
   constexpr TRect(TPoint<Type> origin, TSize<Type> size)
       : origin(origin), size(size) {}
 
-  constexpr TRect(const Type components[4])
-      : origin(components[0], components[1]),
-        size(components[2], components[3]) {}
-
   constexpr TRect(Type x, Type y, Type width, Type height)
       : origin(x, y), size(width, height) {}
 
@@ -46,6 +42,11 @@ struct TRect {
 
   constexpr static TRect MakeXYWH(Type x, Type y, Type width, Type height) {
     return TRect(x, y, width, height);
+  }
+
+  constexpr static TRect MakeOriginSize(const TPoint<Type>& origin,
+                                        const TSize<Type>& size) {
+    return TRect(origin, size);
   }
 
   template <class U>

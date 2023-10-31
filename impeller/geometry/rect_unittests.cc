@@ -11,7 +11,7 @@ namespace testing {
 
 TEST(RectTest, RectOriginSizeGetters) {
   {
-    Rect r{{10, 20}, {50, 40}};
+    Rect r = Rect::MakeOriginSize({10, 20}, {50, 40});
     ASSERT_EQ(r.GetOrigin(), Point(10, 20));
     ASSERT_EQ(r.GetSize(), Size(50, 40));
   }
