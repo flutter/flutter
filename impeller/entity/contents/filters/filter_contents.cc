@@ -246,7 +246,7 @@ std::optional<Rect> FilterContents::GetSourceCoverage(
     if (!input_coverage.has_value()) {
       return std::nullopt;
     }
-    inputs_coverage = Union(inputs_coverage, input_coverage.value());
+    inputs_coverage = Rect::Union(inputs_coverage, input_coverage.value());
   }
   return inputs_coverage;
 }
