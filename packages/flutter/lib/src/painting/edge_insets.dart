@@ -904,7 +904,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
         return EdgeInsets.fromLTRB(start, top, end, bottom);
     }
   }
-  
+
   /// Creates a copy of this EdgeInsetsDirectional but with the given
   /// fields replaced with the new values.
   EdgeInsetsDirectional copyWith({
