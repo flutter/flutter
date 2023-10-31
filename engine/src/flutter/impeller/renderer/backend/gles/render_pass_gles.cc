@@ -503,6 +503,12 @@ struct RenderPassData {
     );
   }
 
+#ifdef IMPELLER_DEBUG
+  if (is_default_fbo) {
+    tracer->MarkFrameEnd(gl);
+  }
+#endif  // IMPELLER_DEBUG
+
   return true;
 }
 
