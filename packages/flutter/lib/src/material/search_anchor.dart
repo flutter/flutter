@@ -1324,6 +1324,7 @@ class _SearchBarState extends State<SearchBar> {
                 if (leading != null) leading,
                 Expanded(
                   child: IgnorePointer(
+                    ignoring: false,
                     child: Padding(
                       padding: effectivePadding,
                       child: TextField(
