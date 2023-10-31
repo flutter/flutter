@@ -319,24 +319,6 @@ _compile_platform("flutter_dart2wasm_kernel_sdk_full_sound") {
   null_environment = true
 }
 
-# TODO(jacksongardner): remove these once they are no longer used by the flutter tool
-copy("flutter_dartdevc_kernel_sdk_outline_unsound_legacy") {
-  sources = get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_unsound")
-
-  outputs = [ "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill" ]
-
-  deps = [ ":flutter_dartdevc_kernel_sdk_outline_unsound" ]
-}
-
-copy("flutter_dartdevc_kernel_sdk_outline_sound_legacy") {
-  sources = get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
-
-  outputs =
-      [ "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk_sound.dill" ]
-
-  deps = [ ":flutter_dartdevc_kernel_sdk_outline_sound" ]
-}
-
 group("flutter_platform_dills") {
   public_deps = [
     ":flutter_dart2js_kernel_sdk_full_sound",
@@ -378,14 +360,10 @@ template("_compile_ddc_modules") {
 
     amd_js_path =
         "$root_out_dir/flutter_web_sdk/kernel/amd${name_suffix}/dart_sdk.js"
-    legacy_js_path =
-        "$root_out_dir/flutter_web_sdk/kernel/legacy${name_suffix}/dart_sdk.js"
 
     outputs = [
       amd_js_path,
       amd_js_path + ".map",
-      legacy_js_path,
-      legacy_js_path + ".map",
     ]
 
     if (invoker.sound_null_safety) {
@@ -423,10 +401,6 @@ template("_compile_ddc_modules") {
       "amd",
       "-o",
       rebase_path(amd_js_path),
-      "--modules",
-      "legacy",
-      "-o",
-      rebase_path(legacy_js_path),
     ]
     if (flutter_prebuilt_dart_sdk) {
       args += [
@@ -492,11 +466,6 @@ group("flutter_ddc_modules") {
     ":flutter_dartdevc_canvaskit_kernel_sdk_sound",
     ":flutter_dartdevc_kernel_sdk",
     ":flutter_dartdevc_kernel_sdk_sound",
-
-    # TODO(jacksongardner): remove these once they are no longer used by the flutter tool
-    # https://github.com/flutter/flutter/issues/113303
-    ":flutter_dartdevc_kernel_sdk_outline_sound_legacy",
-    ":flutter_dartdevc_kernel_sdk_outline_unsound_legacy",
   ]
 }
 
@@ -525,6 +494,7 @@ if (!is_fuchsia) {
         "//flutter/third_party/canvaskit:skwasm_group",
       ]
     }
+    deps += [ "//flutter/lib/web_ui/flutter_js" ]
 
     # flutter_ddc_modules
     sources = get_target_outputs(":flutter_dartdevc_kernel_sdk")
@@ -558,12 +528,7 @@ if (!is_fuchsia) {
       ]
     }
 
-    # TODO(jacksongardner): remove these once they are no longer used by the flutter tool
-    # https://github.com/flutter/flutter/issues/113303
-    sources += get_target_outputs(
-            ":flutter_dartdevc_kernel_sdk_outline_unsound_legacy")
-    sources +=
-        get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound_legacy")
+    sources += [ "$root_out_dir/flutter_web_sdk/flutter.js" ]
 
     foreach(web_engine_library, web_engine_libraries) {
       sources += get_target_outputs(web_engine_library)
