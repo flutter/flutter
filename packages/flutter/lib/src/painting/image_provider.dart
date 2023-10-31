@@ -1399,6 +1399,9 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 // our cache if the headers describe the image as having expired at that point.
 abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
+  ///
+  /// The [scale] argument is the linear scale factor for drawing this image at
+  /// its intended size. See [ImageInfo.scale] for more information.
   const factory NetworkImage(String url, { double scale, Map<String, String>? headers }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
