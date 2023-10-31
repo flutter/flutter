@@ -104,7 +104,7 @@ vars = {
   # An LLVM backend needs LLVM binaries and headers. To avoid build time
   # increases we can use prebuilts. We don't want to download this on every
   # CQ/CI bot nor do we want the average Dart developer to incur that cost.
-  # So by default we will not download prebuilts. This varible is needed in
+  # So by default we will not download prebuilts. This variable is needed in
   # the flutter engine to ensure that Dart gn has access to it as well.
   "checkout_llvm": False,
 
