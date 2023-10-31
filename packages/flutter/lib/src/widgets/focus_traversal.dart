@@ -344,17 +344,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     return node.canRequestFocus && !node.skipTraversal;
   }
 
-  static Iterable<FocusNode> _getDescendantsWithoutExpandingScope(FocusNode node) {
-    final List<FocusNode> result = <FocusNode>[];
-    for (final FocusNode child in node.children) {
-      result.add(child);
-      if (child is! FocusScopeNode) {
-        result.addAll(_getDescendantsWithoutExpandingScope(child));
-      }
-    }
-    return result;
-  }
-
   static Map<FocusNode?, _FocusTraversalGroupInfo> _findGroups(FocusScopeNode scope, _FocusTraversalGroupNode? scopeGroupNode, FocusNode currentNode) {
     final FocusTraversalPolicy defaultPolicy = scopeGroupNode?.policy ?? ReadingOrderTraversalPolicy();
     final Map<FocusNode?, _FocusTraversalGroupInfo> groups = <FocusNode?, _FocusTraversalGroupInfo>{};
