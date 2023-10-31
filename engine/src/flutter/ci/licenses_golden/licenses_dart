@@ -1,4 +1,4 @@
-Signature: f0265baab66e751c13b0df01465fe757
+Signature: 069f67e9bb23f4bb8e9d1569c1f61b0c
 
 ====================================================================================================
 LIBRARY: dart
@@ -3920,10 +3920,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
+ORIGIN: ../../../third_party/dart/runtime/bin/dart_precompiled_runtime_test_component.cml + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/bin/dart_test_component.cml + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/bin/main_impl.h + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/bin/run_vm_tests_test_component.cml + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/platform/unwinding_records.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/platform/unwinding_records.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/platform/unwinding_records_win.cc + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/vm-jit.shard.cml + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/vm.shard.cml + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/backend/parallel_move_resolver.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/backend/parallel_move_resolver.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/ffi/native_assets.cc + ../../../third_party/dart/LICENSE
@@ -3976,10 +3981,15 @@ ORIGIN: ../../../third_party/dart/sdk/lib/async/future_extensions.dart + ../../.
 ORIGIN: ../../../third_party/dart/sdk/lib/js_interop/js_interop.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/bin/dart_precompiled_runtime_test_component.cml
+FILE: ../../../third_party/dart/runtime/bin/dart_test_component.cml
 FILE: ../../../third_party/dart/runtime/bin/main_impl.h
+FILE: ../../../third_party/dart/runtime/bin/run_vm_tests_test_component.cml
 FILE: ../../../third_party/dart/runtime/platform/unwinding_records.cc
 FILE: ../../../third_party/dart/runtime/platform/unwinding_records.h
 FILE: ../../../third_party/dart/runtime/platform/unwinding_records_win.cc
+FILE: ../../../third_party/dart/runtime/vm-jit.shard.cml
+FILE: ../../../third_party/dart/runtime/vm.shard.cml
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/parallel_move_resolver.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/parallel_move_resolver.h
 FILE: ../../../third_party/dart/runtime/vm/ffi/native_assets.cc
