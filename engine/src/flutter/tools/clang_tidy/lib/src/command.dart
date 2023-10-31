@@ -146,8 +146,9 @@ class Command {
       '--',
     ];
     args.addAll(tidyArgs.split(' '));
+    final String clangTidyPath = options.clangTidyPath?.path ?? tidyPath;
     return WorkerJob(
-      <String>[tidyPath, ...args],
+      <String>[clangTidyPath, ...args],
       workingDirectory: directory,
       name: 'clang-tidy on $filePath',
       printOutput: options.verbose,
