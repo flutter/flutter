@@ -320,29 +320,44 @@ class AndroidSdk {
 
   String? getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
+  /// From https://developer.android.com/ndk/guides/other_build_systems.
+  static const Map<String, String> _llvmHostDirectoryName = <String, String>{
+    'macos': 'darwin-x86_64',
+    'linux': 'linux-x86_64',
+    'windows': 'windows-x86_64',
+  };
+
   String? getNdkBinaryPath(String binaryName) {
     final Directory ndk = directory.childDirectory('ndk');
     if (!ndk.existsSync()) {
       return null;
     }
-    final List<Directory> ndkVersions =
-        ndk.listSync().whereType<Directory>().toList()..reversed;
-    for (final Directory ndkVersion in ndkVersions) {
-      final Directory prebuilt = ndkVersion
+    final List<Version> ndkVersions = ndk
+        .listSync()
+        .map((FileSystemEntity entity) {
+          try {
+            return Version.parse(entity.basename);
+          } on Exception {
+            return null;
+          }
+        })
+        .whereType<Version>()
+        .toList()
+      // Use latest NDK first.
+      ..sort((Version a, Version b) => -a.compareTo(b));
+    for (final Version ndkVersion in ndkVersions) {
+      final File executable = ndk
+          .childDirectory(ndkVersion.toString())
           .childDirectory('toolchains')
           .childDirectory('llvm')
-          .childDirectory('prebuilt');
-      if (!prebuilt.existsSync()) {
-        continue;
-      }
-      final List<Directory> hostArchitectures =
-          prebuilt.listSync().whereType<Directory>().toList();
-      for (final Directory hostArchitecture in hostArchitectures) {
-        final File executable =
-            hostArchitecture.childDirectory('bin').childFile(binaryName);
-        if (executable.existsSync()) {
-          return executable.path;
-        }
+          .childDirectory('prebuilt')
+          .childDirectory(
+              _llvmHostDirectoryName[globals.platform.operatingSystem]!)
+          .childDirectory('bin')
+          .childFile(binaryName);
+      if (executable.existsSync()) {
+        // LLVM missing in this NDK version.
+        return executable.path;
       }
     }
     return null;

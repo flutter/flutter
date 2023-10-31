@@ -343,6 +343,12 @@ void main() {
     });
   });
 
+  const Map<String, String> llvmHostDirectoryName = <String, String>{
+    'macos': 'darwin-x86_64',
+    'linux': 'linux-x86_64',
+    'windows': 'windows-x86_64',
+  };
+
   for (final String operatingSystem in <String>['windows', 'linux', 'macos']) {
     final FileSystem fileSystem;
     final String extension;
@@ -358,18 +364,26 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-      final Directory binDir = sdk.directory
-          .childDirectory('ndk')
-          .childDirectory('24.0.8215888')
-          .childDirectory('toolchains')
-          .childDirectory('llvm')
-          .childDirectory('prebuilt')
-          .childDirectory('darwin-x86_64')
-          .childDirectory('bin')
-        ..createSync(recursive: true);
-      final File clang = binDir.childFile('clang$extension')..createSync();
-      final File ar = binDir.childFile('llvm-ar$extension')..createSync();
-      final File ld = binDir.childFile('ld.lld$extension')..createSync();
+      late File clang;
+      late File ar;
+      late File ld;
+      const List<String> versions = <String>['22.1.7171670', '24.0.8215888'];
+      for (final String version in versions) {
+        final Directory binDir = sdk.directory
+            .childDirectory('ndk')
+            .childDirectory(version)
+            .childDirectory('toolchains')
+            .childDirectory('llvm')
+            .childDirectory('prebuilt')
+            .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+            .childDirectory('bin')
+          ..createSync(recursive: true);
+        // Save the last version.
+        clang = binDir.childFile('clang$extension')..createSync();
+        ar = binDir.childFile('llvm-ar$extension')..createSync();
+        ld = binDir.childFile('ld.lld$extension')..createSync();
+      }
+      // Check the last NDK version is used.
       expect(sdk.getNdkClangPath(), clang.path);
       expect(sdk.getNdkArPath(), ar.path);
       expect(sdk.getNdkLdPath(), ld.path);
