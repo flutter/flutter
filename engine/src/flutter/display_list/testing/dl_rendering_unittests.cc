@@ -872,10 +872,6 @@ class TestParameters {
         return false;
       }
     }
-    if (flags_.applies_dither() &&  //
-        ref_attr.isDither() != attr.isDither()) {
-      return false;
-    }
     if (flags_.applies_color() &&  //
         ref_attr.getColor() != attr.getColor()) {
       return false;
@@ -1780,64 +1776,11 @@ class CanvasCompareTester {
                        "LinearGradient GYB",
                        [=](const SkSetupContext& ctx) {
                          ctx.paint.setShader(sk_gradient);
+                         ctx.paint.setDither(testP.uses_gradient());
                        },
                        [=](const DlSetupContext& ctx) {
                          ctx.paint.setColorSource(dl_gradient);
                        }));
-      }
-
-      if (testP.uses_gradient()) {
-        // Dithering is only applied to gradients so we reuse the gradient
-        // created above in these setup methods. Also, thin stroked
-        // primitives (mainly drawLine and drawPoints) do not show much
-        // dithering so we use a non-trivial stroke width as well.
-        RenderEnvironment dither_env =
-            RenderEnvironment::Make565(env.provider());
-        if (!dither_env.valid()) {
-          // Currently only happens on Metal backend
-          static OncePerBackendWarning warnings("Skipping Dithering tests");
-          warnings.warn(dither_env.backend_name());
-        } else {
-          DlColor dither_bg = DlColor::kBlack();
-          SkSetup sk_dither_setup = [=](const SkSetupContext& ctx) {
-            ctx.paint.setShader(sk_gradient);
-            ctx.paint.setAlpha(0xf0);
-            ctx.paint.setStrokeWidth(5.0);
-          };
-          DlSetup dl_dither_setup = [=](const DlSetupContext& ctx) {
-            ctx.paint.setColorSource(dl_gradient);
-            ctx.paint.setAlpha(0xf0);
-            ctx.paint.setStrokeWidth(5.0);
-          };
-          dither_env.init_ref(sk_dither_setup, testP.sk_renderer(),
-                              dl_dither_setup, testP.dl_renderer(),
-                              testP.imp_renderer(), dither_bg);
-          quickCompareToReference(dither_env, "dither");
-          RenderWith(testP, dither_env, tolerance,
-                     CaseParameters(
-                         "Dither == True",
-                         [=](const SkSetupContext& ctx) {
-                           sk_dither_setup(ctx);
-                           ctx.paint.setDither(true);
-                         },
-                         [=](const DlSetupContext& ctx) {
-                           dl_dither_setup(ctx);
-                           ctx.paint.setDither(true);
-                         })
-                         .with_bg(dither_bg));
-          RenderWith(testP, dither_env, tolerance,
-                     CaseParameters(
-                         "Dither = False",
-                         [=](const SkSetupContext& ctx) {
-                           sk_dither_setup(ctx);
-                           ctx.paint.setDither(false);
-                         },
-                         [=](const DlSetupContext& ctx) {
-                           dl_dither_setup(ctx);
-                           ctx.paint.setDither(false);
-                         })
-                         .with_bg(dither_bg));
-        }
       }
     }
   }

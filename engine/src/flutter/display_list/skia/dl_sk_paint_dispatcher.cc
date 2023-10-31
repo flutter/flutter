@@ -40,9 +40,6 @@ void DlSkPaintDispatchHelper::restore_opacity() {
 void DlSkPaintDispatchHelper::setAntiAlias(bool aa) {
   paint_.setAntiAlias(aa);
 }
-void DlSkPaintDispatchHelper::setDither(bool dither) {
-  dither_ = dither;
-}
 void DlSkPaintDispatchHelper::setInvertColors(bool invert) {
   invert_colors_ = invert;
   paint_.setColorFilter(makeColorFilter());
@@ -73,6 +70,14 @@ void DlSkPaintDispatchHelper::setBlendMode(DlBlendMode mode) {
   paint_.setBlendMode(ToSk(mode));
 }
 void DlSkPaintDispatchHelper::setColorSource(const DlColorSource* source) {
+  // On the Impeller backend, we only support dithering of *gradients*, and
+  // so we need to set the dither flag whenever we render a gradient.
+  //
+  // In this method we can determine whether or not the source is a gradient,
+  // but we don't have the other half of the information which is what
+  // rendering op is being performed. So, we simply record whether the
+  // source is a gradient here and let the |paint()| method figure out
+  // the rest (i.e. whether the color source will be used).
   color_source_gradient_ = source && source->isGradient();
   paint_.setShader(ToSk(source));
 }

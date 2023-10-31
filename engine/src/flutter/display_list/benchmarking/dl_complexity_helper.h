@@ -101,7 +101,6 @@ class ComplexityCalculatorHelper
 
   virtual ~ComplexityCalculatorHelper() = default;
 
-  void setDither(bool dither) override {}
   void setInvertColors(bool invert) override {}
   void setStrokeCap(DlStrokeCap cap) override {}
   void setStrokeJoin(DlStrokeJoin join) override {}

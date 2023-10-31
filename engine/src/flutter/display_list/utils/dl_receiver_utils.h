@@ -24,7 +24,6 @@ namespace flutter {
 class IgnoreAttributeDispatchHelper : public virtual DlOpReceiver {
  public:
   void setAntiAlias(bool aa) override {}
-  void setDither(bool dither) override {}
   void setInvertColors(bool invert) override {}
   void setStrokeCap(DlStrokeCap cap) override {}
   void setStrokeJoin(DlStrokeJoin join) override {}

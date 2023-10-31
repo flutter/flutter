@@ -10,7 +10,9 @@
 
 namespace flutter {
 
-SkPaint ToSk(const DlPaint& paint, bool force_stroke = false);
+SkPaint ToSk(const DlPaint& paint);
+SkPaint ToStrokedSk(const DlPaint& paint);
+SkPaint ToNonShaderSk(const DlPaint& paint);
 
 inline SkBlendMode ToSk(DlBlendMode mode) {
   return static_cast<SkBlendMode>(mode);

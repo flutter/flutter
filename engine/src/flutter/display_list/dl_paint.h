@@ -61,12 +61,6 @@ class DlPaint {
     return *this;
   }
 
-  bool isDither() const { return is_dither_; }
-  DlPaint& setDither(bool isDither) {
-    is_dither_ = isDither;
-    return *this;
-  }
-
   bool isInvertColors() const { return is_invert_colors_; }
   DlPaint& setInvertColors(bool isInvertColors) {
     is_invert_colors_ = isInvertColors;
@@ -222,7 +216,6 @@ class DlPaint {
       unsigned stroke_cap_ : kStrokeCapBits;
       unsigned stroke_join_ : kStrokeJoinBits;
       unsigned is_anti_alias_ : 1;
-      unsigned is_dither_ : 1;
       unsigned is_invert_colors_ : 1;
     };
   };

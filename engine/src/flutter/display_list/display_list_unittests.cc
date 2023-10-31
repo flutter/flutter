@@ -101,7 +101,6 @@ class DisplayListTestBase : public BaseT {
     DlPaint defaults;
 
     EXPECT_EQ(builder_paint.isAntiAlias(), defaults.isAntiAlias());
-    EXPECT_EQ(builder_paint.isDither(), defaults.isDither());
     EXPECT_EQ(builder_paint.isInvertColors(), defaults.isInvertColors());
     EXPECT_EQ(builder_paint.getColor(), defaults.getColor());
     EXPECT_EQ(builder_paint.getBlendMode(), defaults.getBlendMode());
@@ -384,10 +383,6 @@ TEST_F(DisplayListTest, BuildRestoresAttributes) {
   DlOpReceiver& receiver = ToReceiver(builder);
 
   receiver.setAntiAlias(true);
-  builder.Build();
-  check_defaults(builder, cull_rect);
-
-  receiver.setDither(true);
   builder.Build();
   check_defaults(builder, cull_rect);
 
@@ -1060,11 +1055,9 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
   };
 
 #define RUN_TESTS(body) \
-  run_tests(            \
-      #body, [](DlOpReceiver& receiver) { body }, true, false)
+  run_tests(#body, [](DlOpReceiver& receiver) { body }, true, false)
 #define RUN_TESTS2(body, expect) \
-  run_tests(                     \
-      #body, [](DlOpReceiver& receiver) { body }, expect, expect)
+  run_tests(#body, [](DlOpReceiver& receiver) { body }, expect, expect)
 
   RUN_TESTS(receiver.drawPaint(););
   RUN_TESTS2(receiver.drawColor(DlColor(SK_ColorRED), DlBlendMode::kSrcOver);

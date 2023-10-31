@@ -117,7 +117,6 @@ struct DLOp {
     }                                                        \
   };
 DEFINE_SET_BOOL_OP(AntiAlias)
-DEFINE_SET_BOOL_OP(Dither)
 DEFINE_SET_BOOL_OP(InvertColors)
 #undef DEFINE_SET_BOOL_OP
 
