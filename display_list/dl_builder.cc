@@ -123,10 +123,6 @@ void DisplayListBuilder::onSetAntiAlias(bool aa) {
   current_.setAntiAlias(aa);
   Push<SetAntiAliasOp>(0, 0, aa);
 }
-void DisplayListBuilder::onSetDither(bool dither) {
-  current_.setDither(dither);
-  Push<SetDitherOp>(0, 0, dither);
-}
 void DisplayListBuilder::onSetInvertColors(bool invert) {
   current_.setInvertColors(invert);
   Push<SetInvertColorsOp>(0, 0, invert);
@@ -346,9 +342,6 @@ void DisplayListBuilder::SetAttributesFromPaint(
     const DisplayListAttributeFlags flags) {
   if (flags.applies_anti_alias()) {
     setAntiAlias(paint.isAntiAlias());
-  }
-  if (flags.applies_dither()) {
-    setDither(paint.isDither());
   }
   if (flags.applies_alpha_or_color()) {
     setColor(paint.getColor());

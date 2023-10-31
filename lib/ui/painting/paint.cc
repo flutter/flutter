@@ -34,8 +34,9 @@ constexpr int kMaskFilterIndex = 9;
 constexpr int kMaskFilterBlurStyleIndex = 10;
 constexpr int kMaskFilterSigmaIndex = 11;
 constexpr int kInvertColorIndex = 12;
-constexpr int kDitherIndex = 13;
-constexpr size_t kDataByteCount = 56;  // 4 * (last index + 1)
+constexpr size_t kDataByteCount = 52;  // 4 * (last index + 1)
+static_assert(kDataByteCount == sizeof(uint32_t) * (kInvertColorIndex + 1),
+              "kDataByteCount must match the size of the data array.");
 
 // Indices for objects.
 constexpr int kShaderIndex = 0;
@@ -169,10 +170,6 @@ const DlPaint* Paint::paint(DlPaint& paint,
     paint.setInvertColors(uint_data[kInvertColorIndex] != 0);
   }
 
-  if (flags.applies_dither()) {
-    paint.setDither(uint_data[kDitherIndex] != 0);
-  }
-
   if (flags.applies_path_effect()) {
     // The paint API exposed to Dart does not support path effects.  But other
     // operations such as text may set a path effect, which must be cleared.
@@ -270,8 +267,6 @@ void Paint::toDlPaint(DlPaint& paint) const {
   paint.setStrokeJoin(static_cast<DlStrokeJoin>(stroke_join));
 
   paint.setInvertColors(uint_data[kInvertColorIndex] != 0);
-
-  paint.setDither(uint_data[kDitherIndex] != 0);
 
   switch (uint_data[kMaskFilterIndex]) {
     case kNull:

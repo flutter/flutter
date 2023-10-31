@@ -27,9 +27,6 @@ class DlDispatcher final : public flutter::DlOpReceiver {
   void setAntiAlias(bool aa) override;
 
   // |flutter::DlOpReceiver|
-  void setDither(bool dither) override;
-
-  // |flutter::DlOpReceiver|
   void setDrawStyle(flutter::DlDrawStyle style) override;
 
   // |flutter::DlOpReceiver|

@@ -270,12 +270,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
     }
   }
   // |DlOpReceiver|
-  void setDither(bool dither) override {
-    if (current_.isDither() != dither) {
-      onSetDither(dither);
-    }
-  }
-  // |DlOpReceiver|
   void setInvertColors(bool invert) override {
     if (current_.isInvertColors() != invert) {
       onSetInvertColors(invert);
@@ -673,7 +667,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   }
 
   void onSetAntiAlias(bool aa);
-  void onSetDither(bool dither);
   void onSetInvertColors(bool invert);
   void onSetStrokeCap(DlStrokeCap cap);
   void onSetStrokeJoin(DlStrokeJoin join);

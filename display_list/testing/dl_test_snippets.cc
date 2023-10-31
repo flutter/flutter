@@ -49,11 +49,6 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(true); }},
            {0, 0, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(false); }},
        }},
-      {"SetDither",
-       {
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setDither(true); }},
-           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setDither(false); }},
-       }},
       {"SetInvertColors",
        {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setInvertColors(true); }},

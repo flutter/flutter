@@ -12,7 +12,6 @@ DlPaint::DlPaint(DlColor color)
       stroke_cap_(static_cast<unsigned>(DlStrokeCap::kDefaultCap)),
       stroke_join_(static_cast<unsigned>(DlStrokeJoin::kDefaultJoin)),
       is_anti_alias_(false),
-      is_dither_(false),
       is_invert_colors_(false),
       color_(color),
       stroke_width_(kDefaultWidth),
@@ -24,7 +23,6 @@ bool DlPaint::operator==(DlPaint const& other) const {
          stroke_cap_ == other.stroke_cap_ &&              //
          stroke_join_ == other.stroke_join_ &&            //
          is_anti_alias_ == other.is_anti_alias_ &&        //
-         is_dither_ == other.is_dither_ &&                //
          is_invert_colors_ == other.is_invert_colors_ &&  //
          color_ == other.color_ &&                        //
          stroke_width_ == other.stroke_width_ &&          //
