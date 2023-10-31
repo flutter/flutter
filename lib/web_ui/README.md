@@ -206,7 +206,7 @@ After rolling Chrome and/or Firefox, also update the CI dependencies in
         [
           {"dependency": "chrome_and_driver", "version": "version:107.0"},
           {"dependency": "firefox", "version": "version:83.0"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
 ```
 
