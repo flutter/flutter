@@ -1020,7 +1020,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     final bool showSnackBarAboveFab = snackBarBehavior != SnackBarBehavior.fixed && snackBarBehavior  == SnackBarBehavior.floating && canShowAboveFab;
     final bool showSnackBarBelowFab = snackBarBehavior != SnackBarBehavior.fixed && snackBarBehavior  == SnackBarBehavior.floatingBelowFab;
     final bool isSnackBarFloating = showSnackBarBelowFab || showSnackBarAboveFab;
-    
+
     // This part of the layout has the same effect as putting the app bar and
     // body in a column and making the body flexible. What's different is that
     // in this case the app bar appears _after_ the body in the stacking order,
