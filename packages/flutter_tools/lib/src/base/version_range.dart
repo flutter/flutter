@@ -10,7 +10,7 @@ import 'package:meta/meta.dart' show immutable;
 /// Both the [versionMin] and [versionMax] are inclusive versions, and undefined
 /// values represent an unknown minimum/maximum version.
 @immutable
-class VersionRange{
+class VersionRange {
   const VersionRange(
     this.versionMin,
     this.versionMax,
