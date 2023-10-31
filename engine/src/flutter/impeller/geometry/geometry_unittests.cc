@@ -670,17 +670,17 @@ TEST(GeometryTest, BoundingBoxCubic) {
       builder.AddCubicCurve({120, 160}, {25, 200}, {220, 260}, {220, 40})
           .TakePath();
   auto box = path.GetBoundingBox();
-  Rect expected(93.9101, 40, 126.09, 158.862);
+  Rect expected = Rect::MakeXYWH(93.9101, 40, 126.09, 158.862);
   ASSERT_TRUE(box.has_value());
   ASSERT_RECT_NEAR(box.value(), expected);
 }
 
 TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
   PathBuilder builder;
-  builder.AddRoundedRect({{10, 10}, {300, 300}}, {50, 50, 50, 50});
+  builder.AddRoundedRect(Rect::MakeXYWH(10, 10, 300, 300), {50, 50, 50, 50});
   auto path = builder.TakePath();
   auto actual = path.GetBoundingBox();
-  Rect expected(10, 10, 300, 300);
+  Rect expected = Rect::MakeXYWH(10, 10, 300, 300);
   ASSERT_TRUE(actual.has_value());
   ASSERT_RECT_NEAR(actual.value(), expected);
 }
@@ -742,7 +742,7 @@ TEST(GeometryTest, CanConvertTTypesExplicitly) {
   }
 
   {
-    Rect r1(1.0, 2.0, 3.0, 4.0);
+    Rect r1 = Rect::MakeXYWH(1.0, 2.0, 3.0, 4.0);
     IRect r2 = static_cast<IRect>(r1);
     ASSERT_EQ(r2.origin.x, 1u);
     ASSERT_EQ(r2.origin.y, 2u);
@@ -1612,34 +1612,34 @@ TEST(GeometryTest, RectMakeSize) {
 
 TEST(GeometryTest, RectUnion) {
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(0, 0, 0, 0);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(0, 0, 0, 0);
     auto u = a.Union(b);
-    auto expected = Rect(0, 0, 200, 200);
+    auto expected = Rect::MakeXYWH(0, 0, 200, 200);
     ASSERT_RECT_NEAR(u, expected);
   }
 
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(10, 10, 0, 0);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(10, 10, 0, 0);
     auto u = a.Union(b);
-    auto expected = Rect(10, 10, 190, 190);
+    auto expected = Rect::MakeXYWH(10, 10, 190, 190);
     ASSERT_RECT_NEAR(u, expected);
   }
 
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(10, 10, 100, 100);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(10, 10, 100, 100);
     auto u = a.Union(b);
-    auto expected = Rect(0, 0, 110, 110);
+    auto expected = Rect::MakeXYWH(0, 0, 110, 110);
     ASSERT_RECT_NEAR(u, expected);
   }
 
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(100, 100, 100, 100);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(100, 100, 100, 100);
     auto u = a.Union(b);
-    auto expected = Rect(0, 0, 200, 200);
+    auto expected = Rect::MakeXYWH(0, 0, 200, 200);
     ASSERT_RECT_NEAR(u, expected);
   }
 }
@@ -1698,39 +1698,39 @@ TEST(GeometryTest, OptRectUnion) {
 
 TEST(GeometryTest, RectIntersection) {
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(0, 0, 0, 0);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(0, 0, 0, 0);
 
     auto u = a.Intersection(b);
     ASSERT_FALSE(u.has_value());
   }
 
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(10, 10, 0, 0);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(10, 10, 0, 0);
     auto u = a.Intersection(b);
     ASSERT_FALSE(u.has_value());
   }
 
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(10, 10, 100, 100);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(10, 10, 100, 100);
     auto u = a.Intersection(b);
     ASSERT_TRUE(u.has_value());
-    auto expected = Rect(10, 10, 90, 90);
+    auto expected = Rect::MakeXYWH(10, 10, 90, 90);
     ASSERT_RECT_NEAR(u.value(), expected);
   }
 
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(100, 100, 100, 100);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(100, 100, 100, 100);
     auto u = a.Intersection(b);
     ASSERT_FALSE(u.has_value());
   }
 
   {
     Rect a = Rect::MakeMaximum();
-    Rect b(10, 10, 300, 300);
+    Rect b = Rect::MakeXYWH(10, 10, 300, 300);
     auto u = a.Intersection(b);
     ASSERT_TRUE(u);
     ASSERT_RECT_NEAR(u.value(), b);
@@ -1799,32 +1799,32 @@ TEST(GeometryTest, OptRectIntersection) {
 
 TEST(GeometryTest, RectIntersectsWithRect) {
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(0, 0, 0, 0);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(0, 0, 0, 0);
     ASSERT_FALSE(a.IntersectsWithRect(b));
   }
 
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(10, 10, 0, 0);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(10, 10, 0, 0);
     ASSERT_FALSE(a.IntersectsWithRect(b));
   }
 
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(10, 10, 100, 100);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(10, 10, 100, 100);
     ASSERT_TRUE(a.IntersectsWithRect(b));
   }
 
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(100, 100, 100, 100);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(100, 100, 100, 100);
     ASSERT_FALSE(a.IntersectsWithRect(b));
   }
 
   {
     Rect a = Rect::MakeMaximum();
-    Rect b(10, 10, 100, 100);
+    Rect b = Rect::MakeXYWH(10, 10, 100, 100);
     ASSERT_TRUE(a.IntersectsWithRect(b));
   }
 
@@ -1838,8 +1838,8 @@ TEST(GeometryTest, RectIntersectsWithRect) {
 TEST(GeometryTest, RectCutout) {
   // No cutout.
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(0, 0, 50, 50);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(0, 0, 50, 50);
     auto u = a.Cutout(b);
     ASSERT_TRUE(u.has_value());
     ASSERT_RECT_NEAR(u.value(), a);
@@ -1847,8 +1847,8 @@ TEST(GeometryTest, RectCutout) {
 
   // Full cutout.
   {
-    Rect a(0, 0, 100, 100);
-    Rect b(-10, -10, 120, 120);
+    Rect a = Rect::MakeXYWH(0, 0, 100, 100);
+    Rect b = Rect::MakeXYWH(-10, -10, 120, 120);
     auto u = a.Cutout(b);
     ASSERT_FALSE(u.has_value());
   }
@@ -1897,23 +1897,23 @@ TEST(GeometryTest, RectCutout) {
 TEST(GeometryTest, RectContainsPoint) {
   {
     // Origin is inclusive
-    Rect r(100, 100, 100, 100);
+    Rect r = Rect::MakeXYWH(100, 100, 100, 100);
     Point p(100, 100);
     ASSERT_TRUE(r.Contains(p));
   }
   {
     // Size is exclusive
-    Rect r(100, 100, 100, 100);
+    Rect r = Rect::MakeXYWH(100, 100, 100, 100);
     Point p(200, 200);
     ASSERT_FALSE(r.Contains(p));
   }
   {
-    Rect r(100, 100, 100, 100);
+    Rect r = Rect::MakeXYWH(100, 100, 100, 100);
     Point p(99, 99);
     ASSERT_FALSE(r.Contains(p));
   }
   {
-    Rect r(100, 100, 100, 100);
+    Rect r = Rect::MakeXYWH(100, 100, 100, 100);
     Point p(199, 199);
     ASSERT_TRUE(r.Contains(p));
   }
@@ -1927,44 +1927,44 @@ TEST(GeometryTest, RectContainsPoint) {
 
 TEST(GeometryTest, RectContainsRect) {
   {
-    Rect a(100, 100, 100, 100);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
     ASSERT_TRUE(a.Contains(a));
   }
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(0, 0, 0, 0);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(0, 0, 0, 0);
     ASSERT_FALSE(a.Contains(b));
   }
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(150, 150, 20, 20);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(150, 150, 20, 20);
     ASSERT_TRUE(a.Contains(b));
   }
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(150, 150, 100, 100);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(150, 150, 100, 100);
     ASSERT_FALSE(a.Contains(b));
   }
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(50, 50, 100, 100);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(50, 50, 100, 100);
     ASSERT_FALSE(a.Contains(b));
   }
   {
-    Rect a(100, 100, 100, 100);
-    Rect b(0, 0, 300, 300);
+    Rect a = Rect::MakeXYWH(100, 100, 100, 100);
+    Rect b = Rect::MakeXYWH(0, 0, 300, 300);
     ASSERT_FALSE(a.Contains(b));
   }
   {
     Rect a = Rect::MakeMaximum();
-    Rect b(0, 0, 300, 300);
+    Rect b = Rect::MakeXYWH(0, 0, 300, 300);
     ASSERT_TRUE(a.Contains(b));
   }
 }
 
 TEST(GeometryTest, RectGetPoints) {
   {
-    Rect r(100, 200, 300, 400);
+    Rect r = Rect::MakeXYWH(100, 200, 300, 400);
     auto points = r.GetPoints();
     ASSERT_POINT_NEAR(points[0], Point(100, 200));
     ASSERT_POINT_NEAR(points[1], Point(400, 200));
@@ -1994,7 +1994,7 @@ TEST(GeometryTest, RectShift) {
 }
 
 TEST(GeometryTest, RectGetTransformedPoints) {
-  Rect r(100, 200, 300, 400);
+  Rect r = Rect::MakeXYWH(100, 200, 300, 400);
   auto points = r.GetTransformedPoints(Matrix::MakeTranslation({10, 20}));
   ASSERT_POINT_NEAR(points[0], Point(110, 220));
   ASSERT_POINT_NEAR(points[1], Point(410, 220));
@@ -2006,7 +2006,7 @@ TEST(GeometryTest, RectMakePointBounds) {
   {
     std::vector<Point> points{{1, 5}, {4, -1}, {0, 6}};
     Rect r = Rect::MakePointBounds(points.begin(), points.end()).value();
-    auto expected = Rect(0, -1, 4, 7);
+    auto expected = Rect::MakeXYWH(0, -1, 4, 7);
     ASSERT_RECT_NEAR(r, expected);
   }
   {
@@ -2046,14 +2046,14 @@ TEST(GeometryTest, RectExpand) {
 
 TEST(GeometryTest, RectGetPositive) {
   {
-    Rect r{100, 200, 300, 400};
+    Rect r = Rect::MakeXYWH(100, 200, 300, 400);
     auto actual = r.GetPositive();
     ASSERT_RECT_NEAR(r, actual);
   }
   {
-    Rect r{100, 200, -100, -100};
+    Rect r = Rect::MakeXYWH(100, 200, -100, -100);
     auto actual = r.GetPositive();
-    Rect expected(0, 100, 100, 100);
+    Rect expected = Rect::MakeXYWH(0, 100, 100, 100);
     ASSERT_RECT_NEAR(expected, actual);
   }
 }
@@ -2164,7 +2164,8 @@ TEST(GeometryTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
   }
 
   {
-    Path path = PathBuilder{}.AddOval(Rect(100, 100, 100, 100)).TakePath();
+    Path path =
+        PathBuilder{}.AddOval(Rect::MakeXYWH(100, 100, 100, 100)).TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
     ASSERT_POINT_NEAR(contour.destination, Point(150, 100));
@@ -2172,7 +2173,8 @@ TEST(GeometryTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
   }
 
   {
-    Path path = PathBuilder{}.AddRect(Rect(100, 100, 100, 100)).TakePath();
+    Path path =
+        PathBuilder{}.AddRect(Rect::MakeXYWH(100, 100, 100, 100)).TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
     ASSERT_POINT_NEAR(contour.destination, Point(100, 100));
@@ -2180,8 +2182,9 @@ TEST(GeometryTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
   }
 
   {
-    Path path =
-        PathBuilder{}.AddRoundedRect(Rect(100, 100, 100, 100), 10).TakePath();
+    Path path = PathBuilder{}
+                    .AddRoundedRect(Rect::MakeXYWH(100, 100, 100, 100), 10)
+                    .TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
     ASSERT_POINT_NEAR(contour.destination, Point(110, 100));

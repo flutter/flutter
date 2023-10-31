@@ -224,7 +224,7 @@ TEST_P(EntityTest, FilterCoverageRespectsCropRect) {
 
 TEST_P(EntityTest, CanDrawRect) {
   auto contents = std::make_shared<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakeRect({100, 100, 100, 100}));
+  contents->SetGeometry(Geometry::MakeRect(Rect::MakeXYWH(100, 100, 100, 100)));
   contents->SetColor(Color::Red());
 
   Entity entity;
@@ -238,7 +238,7 @@ TEST_P(EntityTest, CanDrawRRect) {
   auto contents = std::make_shared<SolidColorContents>();
   auto path = PathBuilder{}
                   .SetConvexity(Convexity::kConvex)
-                  .AddRoundedRect({100, 100, 100, 100}, 10.0)
+                  .AddRoundedRect(Rect::MakeXYWH(100, 100, 100, 100), 10.0)
                   .TakePath();
   contents->SetGeometry(Geometry::MakeFillPath(path));
   contents->SetColor(Color::Red());
@@ -251,11 +251,11 @@ TEST_P(EntityTest, CanDrawRRect) {
 }
 
 TEST_P(EntityTest, GeometryBoundsAreTransformed) {
-  auto geometry = Geometry::MakeRect({100, 100, 100, 100});
+  auto geometry = Geometry::MakeRect(Rect::MakeXYWH(100, 100, 100, 100));
   auto transform = Matrix::MakeScale({2.0, 2.0, 2.0});
 
   ASSERT_RECT_NEAR(geometry->GetCoverage(transform).value(),
-                   Rect(200, 200, 200, 200));
+                   Rect::MakeXYWH(200, 200, 200, 200));
 }
 
 TEST_P(EntityTest, ThreeStrokesInOnePath) {
@@ -915,9 +915,10 @@ TEST_P(EntityTest, BlendingModeOptions) {
         Point(470, 190), Point(270, 390), 20, Color::White(), Color::White());
 
     bool result = true;
-    result = result && draw_rect(Rect(0, 0, pass.GetRenderTargetSize().width,
+    result = result &&
+             draw_rect(Rect::MakeXYWH(0, 0, pass.GetRenderTargetSize().width,
                                       pass.GetRenderTargetSize().height),
-                                 Color(), BlendMode::kClear);
+                       Color(), BlendMode::kClear);
     result = result && draw_rect(Rect::MakeLTRB(a.x, a.y, b.x, b.y), color1,
                                  BlendMode::kSourceOver);
     result = result && draw_rect(Rect::MakeLTRB(c.x, c.y, d.x, d.y), color2,
@@ -2482,7 +2483,7 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
   }
 
   auto contents = std::make_shared<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakeRect({100, 100, 100, 100}));
+  contents->SetGeometry(Geometry::MakeRect(Rect::MakeXYWH(100, 100, 100, 100)));
   contents->SetColor(Color::Red());
 
   Entity entity;
