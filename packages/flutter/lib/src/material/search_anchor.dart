@@ -1311,7 +1311,9 @@ class _SearchBarState extends State<SearchBar> {
         child: InkWell(
           onTap: () {
             widget.onTap?.call();
-            _focusNode.requestFocus();
+            if (!_focusNode.hasFocus) {
+              _focusNode.requestFocus();
+            }
           },
           overlayColor: effectiveOverlayColor,
           customBorder: effectiveShape?.copyWith(side: effectiveSide),
@@ -1323,35 +1325,35 @@ class _SearchBarState extends State<SearchBar> {
               children: <Widget>[
                 if (leading != null) leading,
                 Expanded(
-                  child: IgnorePointer(
-                    ignoring: false,
-                    child: Padding(
-                      padding: effectivePadding,
-                      child: TextField(
-                        focusNode: _focusNode,
-                        onChanged: widget.onChanged,
-                        onSubmitted: widget.onSubmitted,
-                        controller: widget.controller,
-                        style: effectiveTextStyle,
-                        decoration: InputDecoration(
-                          hintText: widget.hintText,
-                        ).applyDefaults(InputDecorationTheme(
-                          hintStyle: effectiveHintStyle,
-
-                          // The configuration below is to make sure that the text field
-                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                          enabledBorder: InputBorder.none,
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          // Setting `isDense` to true to allow the text field height to be
-                          // smaller than 48.0
-                          isDense: true,
-                        )),
-                        textCapitalization: effectiveTextCapitalization,
-                      ),
+                  child: Padding(
+                    padding: effectivePadding,
+                    child: TextField(
+                      onTap: () {
+                        widget.onTap?.call();
+                        _focusNode.requestFocus();
+                      },
+                      focusNode: _focusNode,
+                      onChanged: widget.onChanged,
+                      onSubmitted: widget.onSubmitted,
+                      controller: widget.controller,
+                      style: effectiveTextStyle,
+                      decoration: InputDecoration(
+                        hintText: widget.hintText,
+                      ).applyDefaults(InputDecorationTheme(
+                        hintStyle: effectiveHintStyle,
+                        // The configuration below is to make sure that the text field
+                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                        enabledBorder: InputBorder.none,
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        // Setting `isDense` to true to allow the text field height to be
+                        // smaller than 48.0
+                        isDense: true,
+                      )),
+                      textCapitalization: effectiveTextCapitalization,
                     ),
-                  )
+                  ),
                 ),
                 if (trailing != null) ...trailing,
               ],

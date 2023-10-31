@@ -414,20 +414,22 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.elevation, hoveredElevation);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.elevation, pressedElevation);
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.elevation, focusedElevation);
@@ -454,20 +456,22 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.color, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.color, pressedColor);
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.color, focusedColor);
@@ -494,20 +498,22 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.shadowColor, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.shadowColor, pressedColor);
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.shadowColor, focusedColor);
@@ -534,20 +540,22 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.surfaceTintColor, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.surfaceTintColor, pressedColor);
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.surfaceTintColor, focusedColor);
@@ -574,21 +582,23 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(inkFeatures, paints..rect(color: hoveredColor.withOpacity(1.0)));
 
     // On pressed.
     await tester.pumpAndSettle();
-    await tester.startGesture(tester.getCenter(find.byType(SearchBar)));
+    await gesture.down(tester.getCenter(find.byType(SearchBar)));
     await tester.pumpAndSettle();
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect()..rect(color: pressedColor.withOpacity(1.0)));
 
     // On focused.
     await tester.pumpAndSettle();
-    focusNode.requestFocus();
+    await gesture.up();
     await tester.pumpAndSettle();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
+    await tester.pump();
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect()..rect(color: focusedColor.withOpacity(1.0)));
   });
@@ -648,20 +658,22 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.shape, hoveredShape.copyWith(side: hoveredSide));
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.shape, pressedShape.copyWith(side: pressedSide));
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     material = tester.widget<Material>(searchBarMaterial);
     expect(material.shape, focusedShape.copyWith(side: focusedSide));
@@ -711,19 +723,21 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
     helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, pressedColor);
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, focusedColor);
@@ -748,19 +762,21 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     EditableText inputText = tester.widget(find.text('input text'));
     expect(inputText.style.color, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
     inputText = tester.widget(find.text('input text'));
     expect(inputText.style.color, pressedColor);
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     inputText = tester.widget(find.text('input text'));
     expect(inputText.style.color, focusedColor);
@@ -997,19 +1013,21 @@ void main() {
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    addTearDown(gesture.removePointer);
     await tester.pump();
     Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump();
+    await tester.pumpAndSettle();
     helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, pressedColor);
 
     // On focused.
-    await tester.tap(find.byType(SearchBar));
+    await gesture.up();
+    await tester.pump();
+    // Remove the pointer so we are no longer hovering.
+    await gesture.removePointer();
     await tester.pump();
     helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, focusedColor);
