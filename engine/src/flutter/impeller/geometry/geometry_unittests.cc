@@ -1650,25 +1650,25 @@ TEST(GeometryTest, OptRectUnion) {
   Rect c = Rect::MakeLTRB(100, 0, 200, 100);
 
   // NullOpt, NullOpt
-  EXPECT_FALSE(Union(std::nullopt, std::nullopt).has_value());
-  EXPECT_EQ(Union(std::nullopt, std::nullopt), std::nullopt);
+  EXPECT_FALSE(Rect::Union(std::nullopt, std::nullopt).has_value());
+  EXPECT_EQ(Rect::Union(std::nullopt, std::nullopt), std::nullopt);
 
   auto test1 = [](const Rect& r) {
     // Rect, NullOpt
-    EXPECT_TRUE(Union(r, std::nullopt).has_value());
-    EXPECT_EQ(Union(r, std::nullopt).value(), r);
+    EXPECT_TRUE(Rect::Union(r, std::nullopt).has_value());
+    EXPECT_EQ(Rect::Union(r, std::nullopt).value(), r);
 
     // OptRect, NullOpt
-    EXPECT_TRUE(Union(std::optional(r), std::nullopt).has_value());
-    EXPECT_EQ(Union(std::optional(r), std::nullopt).value(), r);
+    EXPECT_TRUE(Rect::Union(std::optional(r), std::nullopt).has_value());
+    EXPECT_EQ(Rect::Union(std::optional(r), std::nullopt).value(), r);
 
     // NullOpt, Rect
-    EXPECT_TRUE(Union(std::nullopt, r).has_value());
-    EXPECT_EQ(Union(std::nullopt, r).value(), r);
+    EXPECT_TRUE(Rect::Union(std::nullopt, r).has_value());
+    EXPECT_EQ(Rect::Union(std::nullopt, r).value(), r);
 
     // NullOpt, OptRect
-    EXPECT_TRUE(Union(std::nullopt, std::optional(r)).has_value());
-    EXPECT_EQ(Union(std::nullopt, std::optional(r)).value(), r);
+    EXPECT_TRUE(Rect::Union(std::nullopt, std::optional(r)).has_value());
+    EXPECT_EQ(Rect::Union(std::nullopt, std::optional(r)).value(), r);
   };
 
   test1(a);
@@ -1679,16 +1679,16 @@ TEST(GeometryTest, OptRectUnion) {
     ASSERT_EQ(a.Union(b), u);
 
     // Rect, OptRect
-    EXPECT_TRUE(Union(a, std::optional(b)).has_value());
-    EXPECT_EQ(Union(a, std::optional(b)).value(), u);
+    EXPECT_TRUE(Rect::Union(a, std::optional(b)).has_value());
+    EXPECT_EQ(Rect::Union(a, std::optional(b)).value(), u);
 
     // OptRect, Rect
-    EXPECT_TRUE(Union(std::optional(a), b).has_value());
-    EXPECT_EQ(Union(std::optional(a), b).value(), u);
+    EXPECT_TRUE(Rect::Union(std::optional(a), b).has_value());
+    EXPECT_EQ(Rect::Union(std::optional(a), b).value(), u);
 
     // OptRect, OptRect
-    EXPECT_TRUE(Union(std::optional(a), std::optional(b)).has_value());
-    EXPECT_EQ(Union(std::optional(a), std::optional(b)).value(), u);
+    EXPECT_TRUE(Rect::Union(std::optional(a), std::optional(b)).has_value());
+    EXPECT_EQ(Rect::Union(std::optional(a), std::optional(b)).value(), u);
   };
 
   test2(a, b, Rect::MakeLTRB(0, 0, 200, 200));
@@ -1751,25 +1751,25 @@ TEST(GeometryTest, OptRectIntersection) {
   Rect c = Rect::MakeLTRB(100, 0, 200, 110);
 
   // NullOpt, NullOpt
-  EXPECT_FALSE(Intersection(std::nullopt, std::nullopt).has_value());
-  EXPECT_EQ(Intersection(std::nullopt, std::nullopt), std::nullopt);
+  EXPECT_FALSE(Rect::Intersection(std::nullopt, std::nullopt).has_value());
+  EXPECT_EQ(Rect::Intersection(std::nullopt, std::nullopt), std::nullopt);
 
   auto test1 = [](const Rect& r) {
     // Rect, NullOpt
-    EXPECT_TRUE(Intersection(r, std::nullopt).has_value());
-    EXPECT_EQ(Intersection(r, std::nullopt).value(), r);
+    EXPECT_TRUE(Rect::Intersection(r, std::nullopt).has_value());
+    EXPECT_EQ(Rect::Intersection(r, std::nullopt).value(), r);
 
     // OptRect, NullOpt
-    EXPECT_TRUE(Intersection(std::optional(r), std::nullopt).has_value());
-    EXPECT_EQ(Intersection(std::optional(r), std::nullopt).value(), r);
+    EXPECT_TRUE(Rect::Intersection(std::optional(r), std::nullopt).has_value());
+    EXPECT_EQ(Rect::Intersection(std::optional(r), std::nullopt).value(), r);
 
     // NullOpt, Rect
-    EXPECT_TRUE(Intersection(std::nullopt, r).has_value());
-    EXPECT_EQ(Intersection(std::nullopt, r).value(), r);
+    EXPECT_TRUE(Rect::Intersection(std::nullopt, r).has_value());
+    EXPECT_EQ(Rect::Intersection(std::nullopt, r).value(), r);
 
     // NullOpt, OptRect
-    EXPECT_TRUE(Intersection(std::nullopt, std::optional(r)).has_value());
-    EXPECT_EQ(Intersection(std::nullopt, std::optional(r)).value(), r);
+    EXPECT_TRUE(Rect::Intersection(std::nullopt, std::optional(r)).has_value());
+    EXPECT_EQ(Rect::Intersection(std::nullopt, std::optional(r)).value(), r);
   };
 
   test1(a);
@@ -1780,16 +1780,18 @@ TEST(GeometryTest, OptRectIntersection) {
     ASSERT_EQ(a.Intersection(b), i);
 
     // Rect, OptRect
-    EXPECT_TRUE(Intersection(a, std::optional(b)).has_value());
-    EXPECT_EQ(Intersection(a, std::optional(b)).value(), i);
+    EXPECT_TRUE(Rect::Intersection(a, std::optional(b)).has_value());
+    EXPECT_EQ(Rect::Intersection(a, std::optional(b)).value(), i);
 
     // OptRect, Rect
-    EXPECT_TRUE(Intersection(std::optional(a), b).has_value());
-    EXPECT_EQ(Intersection(std::optional(a), b).value(), i);
+    EXPECT_TRUE(Rect::Intersection(std::optional(a), b).has_value());
+    EXPECT_EQ(Rect::Intersection(std::optional(a), b).value(), i);
 
     // OptRect, OptRect
-    EXPECT_TRUE(Intersection(std::optional(a), std::optional(b)).has_value());
-    EXPECT_EQ(Intersection(std::optional(a), std::optional(b)).value(), i);
+    EXPECT_TRUE(
+        Rect::Intersection(std::optional(a), std::optional(b)).has_value());
+    EXPECT_EQ(Rect::Intersection(std::optional(a), std::optional(b)).value(),
+              i);
   };
 
   test2(a, b, Rect::MakeLTRB(100, 100, 110, 110));
@@ -2117,11 +2119,11 @@ TEST(GeometryTest, RectProject) {
 TEST(GeometryTest, RectRoundOut) {
   {
     auto r = Rect::MakeLTRB(-100, -100, 100, 100);
-    ASSERT_EQ(RoundOut(r), r);
+    ASSERT_EQ(Rect::RoundOut(r), r);
   }
   {
     auto r = Rect::MakeLTRB(-100.1, -100.1, 100.1, 100.1);
-    ASSERT_EQ(RoundOut(r), Rect::MakeLTRB(-101, -101, 101, 101));
+    ASSERT_EQ(Rect::RoundOut(r), Rect::MakeLTRB(-101, -101, 101, 101));
   }
 }
 

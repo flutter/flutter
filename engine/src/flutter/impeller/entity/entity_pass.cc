@@ -616,7 +616,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Skip();
     }
 
-    subpass_coverage = RoundOut(subpass_coverage.value());
+    subpass_coverage = Rect::RoundOut(subpass_coverage.value());
 
     auto subpass_size = ISize(subpass_coverage->size);
     if (subpass_size.IsEmpty()) {
