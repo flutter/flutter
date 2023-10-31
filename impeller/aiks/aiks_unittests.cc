@@ -3948,5 +3948,31 @@ TEST_P(AiksTest, BlurredRectangleWithShader) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, ArcWithZeroSweepAndBlur) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+
+  Paint paint;
+  paint.color = Color::Red();
+  std::vector<Color> colors = {Color{1.0, 0.0, 0.0, 1.0},
+                               Color{0.0, 0.0, 0.0, 1.0}};
+  std::vector<Scalar> stops = {0.0, 1.0};
+  paint.color_source = ColorSource::MakeSweepGradient(
+      {100, 100}, Degrees(45), Degrees(135), std::move(colors),
+      std::move(stops), Entity::TileMode::kMirror, {});
+  paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+      .style = FilterContents::BlurStyle::kNormal,
+      .sigma = Sigma(20),
+  };
+
+  PathBuilder builder;
+  builder.AddArc(Rect::MakeXYWH(10, 10, 100, 100), Degrees(0), Degrees(0),
+                 false);
+  canvas.DrawPath(builder.TakePath(), paint);
+
+  // Check that this empty picture can be created without crashing.
+  canvas.EndRecordingAsPicture();
+}
+
 }  // namespace testing
 }  // namespace impeller
