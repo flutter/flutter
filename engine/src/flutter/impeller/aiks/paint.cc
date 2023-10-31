@@ -166,7 +166,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
 
   auto expanded_local_bounds = blurred_mask->GetCoverage({});
   if (!expanded_local_bounds.has_value()) {
-    return nullptr;
+    expanded_local_bounds = Rect();
   }
   color_source_contents->SetGeometry(
       Geometry::MakeRect(*expanded_local_bounds));
