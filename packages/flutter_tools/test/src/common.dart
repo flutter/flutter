@@ -93,19 +93,20 @@ Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
 final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 
 /// Matcher for functions that throw [ToolExit].
+///
+/// [message] is matched using the [contains] matcher.
 Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
-  Matcher matcher = _isToolExit;
+  TypeMatcher<ToolExit> result = const TypeMatcher<ToolExit>();
+
   if (exitCode != null) {
-    matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
+    result = result.having((ToolExit e) => e.exitCode, 'exitCode', equals(exitCode));
   }
   if (message != null) {
-    matcher = allOf(matcher, (ToolExit e) => e.message?.contains(message) ?? false);
+    result = result.having((ToolExit e) => e.message, 'message', contains(message));
   }
-  return throwsA(matcher);
-}
 
-/// Matcher for [ToolExit]s.
-final TypeMatcher<ToolExit> _isToolExit = isA<ToolExit>();
+  return throwsA(result);
+}
 
 /// Matcher for functions that throw [UsageException].
 Matcher throwsUsageException({Pattern? message }) {
