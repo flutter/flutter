@@ -1,4 +1,4 @@
-Signature: c7ea76f5b89559349024bb80f7f1cba5
+Signature: 235df4f87d189e11e44be4b5f55ac2df
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8639,6 +8639,7 @@ ORIGIN: ../../../third_party/skia/src/codec/SkJpegXmp.h + ../../../third_party/s
 ORIGIN: ../../../third_party/skia/src/codec/SkTiffUtility.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkTiffUtility.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkXmp.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkMipmapDrawDownSampler.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkMipmapHQDownSampler.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineContextUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h + ../../../third_party/skia/LICENSE
@@ -8684,6 +8685,7 @@ FILE: ../../../third_party/skia/src/codec/SkJpegXmp.h
 FILE: ../../../third_party/skia/src/codec/SkTiffUtility.cpp
 FILE: ../../../third_party/skia/src/codec/SkTiffUtility.h
 FILE: ../../../third_party/skia/src/codec/SkXmp.cpp
+FILE: ../../../third_party/skia/src/core/SkMipmapDrawDownSampler.cpp
 FILE: ../../../third_party/skia/src/core/SkMipmapHQDownSampler.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineContextUtils.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h
