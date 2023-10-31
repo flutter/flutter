@@ -69,6 +69,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   String? codesignIdentity,
   Uri? yamlParentDirectory,
   required FileSystem fileSystem,
+  required int targetAndroidNdkApi,
 }) async {
   const OS targetOS = OS.android;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOS);
@@ -98,7 +99,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.ndkCCompilerConfig,
       // TODO(dacoharkes): Get this value from somewhere.
-      targetAndroidNdkApi: 30,
+      targetAndroidNdkApi: targetAndroidNdkApi,
     );
     nativeAssets.addAll(result.assets);
     dependencies.addAll(result.dependencies);

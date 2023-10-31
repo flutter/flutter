@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
 import 'package:package_config/package_config_types.dart';
 
+import '../../android/gradle_utils.dart';
 import '../../android/native_assets.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
@@ -204,6 +205,8 @@ class NativeAssets extends Target {
             targetPlatform,
             androidArchsEnvironment,
           );
+          final int targetAndroidNdkApi =
+              int.parse(environment.defines[kMinSdkVersion] ?? minSdkVersion);
           (_, dependencies) = await buildNativeAssetsAndroid(
             buildMode: BuildMode.debug,
             projectUri: projectUri,
@@ -211,6 +214,7 @@ class NativeAssets extends Target {
             fileSystem: fileSystem,
             buildRunner: buildRunner,
             androidArchs: androidArchs,
+            targetAndroidNdkApi: targetAndroidNdkApi
           );
         case TargetPlatform.fuchsia_arm64:
         case TargetPlatform.fuchsia_x64:

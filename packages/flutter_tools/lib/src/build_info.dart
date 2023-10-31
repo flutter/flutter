@@ -930,6 +930,17 @@ const String kDarwinArchs = 'DarwinArchs';
 /// This is expected to be a space-delimited list of architectures.
 const String kAndroidArchs = 'AndroidArchs';
 
+/// The define to control what min Android SDK version is built for.
+///
+/// This is expected to be int.
+///
+/// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
+///
+/// For more info, see:
+/// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
+/// https://developer.android.com/ndk/guides/other_build_systems#overview
+const String kMinSdkVersion = 'MinSdkVersion';
+
 /// Path to the SDK root to be used as the isysroot.
 const String kSdkRoot = 'SdkRoot';
 

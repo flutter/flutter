@@ -1222,7 +1222,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // | ----------------- | ----------------------------- |
                     // |   Build Variant   |   Flutter Equivalent Variant  |
                     // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   release                      |
+                    // |   freeRelease     |   release                     |
                     // |   freeDebug       |   debug                       |
                     // |   freeDevelop     |   debug                       |
                     // |   profile         |   profile                     |
@@ -1357,6 +1357,16 @@ abstract class BaseFlutterTask extends DefaultTask {
         } else {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
+        // TODO(dacoharkes): Should this go somewhere outside this task?
+        int minSdkVersion;
+        project.android.applicationVariants.all { variant ->
+            def variantMinSdkVersion = variant.mergedFlavor.minSdkVersion.apiLevel
+            if (minSdkVersion != null) {
+                minSdkVersion = variantMinSdkVersion
+            } else if (minSdkVersion != variantMinSdkVersion){
+                throw new GradleException("Inconsistent minSdkVersions amoung variants: ${minSdkVersion} and ${variantMinSdkVersion}.")
+            }
+        }
         project.exec {
             logging.captureStandardError LogLevel.ERROR
             executable flutterExecutable.absolutePath
@@ -1418,6 +1428,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--ExtraFrontEndOptions=${extraFrontEndOptions}"
             }
             args "-dAndroidArchs=${targetPlatformValues.join(' ')}"
+            args "-dMinSdkVersion=${minSdkVersion}"
             args ruleNames
         }
     }
