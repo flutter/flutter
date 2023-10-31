@@ -58,7 +58,6 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
       : os_(os), cur_indent_(cur_indent), indent_(indent) {}
 
   void setAntiAlias(bool aa) override;
-  void setDither(bool dither) override;
   void setDrawStyle(DlDrawStyle style) override;
   void setColor(DlColor color) override;
   void setStrokeWidth(SkScalar width) override;

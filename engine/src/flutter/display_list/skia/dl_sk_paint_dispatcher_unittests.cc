@@ -5,6 +5,8 @@
 #include "display_list/effects/dl_color_source.h"
 #include "flutter/display_list/skia/dl_sk_paint_dispatcher.h"
 
+#include "flutter/display_list/skia/dl_sk_dispatcher.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "gtest/gtest.h"
 
@@ -45,60 +47,69 @@ TEST(DisplayListUtils, OverRestore) {
 }
 
 // https://github.com/flutter/flutter/issues/132860.
-TEST(DisplayListUtils, SetDitherIgnoredIfColorSourceNotGradient) {
+TEST(DisplayListUtils, SetColorSourceDithersIfGradient) {
   MockDispatchHelper helper;
-  helper.setDither(true);
-  EXPECT_FALSE(helper.paint().isDither());
+
+  helper.setColorSource(kTestLinearGradient.get());
+  EXPECT_TRUE(helper.paint(true).isDither());
+  EXPECT_FALSE(helper.paint(false).isDither());
 }
 
 // https://github.com/flutter/flutter/issues/132860.
-TEST(DisplayListUtils, SetColorSourceClearsDitherIfNotGradient) {
+TEST(DisplayListUtils, SetColorSourceDoesNotDitherIfNotGradient) {
   MockDispatchHelper helper;
-  helper.setDither(true);
+
+  helper.setColorSource(kTestLinearGradient.get());
   helper.setColorSource(nullptr);
-  EXPECT_FALSE(helper.paint().isDither());
+  EXPECT_FALSE(helper.paint(true).isDither());
+  EXPECT_FALSE(helper.paint(false).isDither());
+
+  DlColorColorSource color_color_source(DlColor::kBlue());
+  helper.setColorSource(&color_color_source);
+  EXPECT_FALSE(helper.paint(true).isDither());
+  EXPECT_FALSE(helper.paint(false).isDither());
+
+  helper.setColorSource(&kTestSource1);
+  EXPECT_FALSE(helper.paint(true).isDither());
+  EXPECT_FALSE(helper.paint(false).isDither());
 }
 
 // https://github.com/flutter/flutter/issues/132860.
-TEST(DisplayListUtils, SetDitherTrueThenSetColorSourceDithersIfGradient) {
-  MockDispatchHelper helper;
+TEST(DisplayListUtils, SkDispatcherSetColorSourceDithersIfGradient) {
+  SkCanvas canvas;
+  DlSkCanvasDispatcher dispatcher(&canvas);
 
-  // A naive implementation would ignore the dither flag here since the current
-  // color source is not a gradient.
-  helper.setDither(true);
-  helper.setColorSource(kTestLinearGradient.get());
-  EXPECT_TRUE(helper.paint().isDither());
+  dispatcher.setColorSource(kTestLinearGradient.get());
+  EXPECT_TRUE(dispatcher.paint(true).isDither());
+  EXPECT_FALSE(dispatcher.paint(false).isDither());
+  EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());
+  // Calling safe_paint(false) returns a nullptr
 }
 
 // https://github.com/flutter/flutter/issues/132860.
-TEST(DisplayListUtils, SetDitherTrueThenRenderNonGradientThenRenderGradient) {
-  MockDispatchHelper helper;
+TEST(DisplayListUtils, SkDispatcherSetColorSourceDoesNotDitherIfNotGradient) {
+  SkCanvas canvas;
+  DlSkCanvasDispatcher dispatcher(&canvas);
 
-  // "Render" a dithered non-gradient.
-  helper.setDither(true);
-  EXPECT_FALSE(helper.paint().isDither());
+  dispatcher.setColorSource(kTestLinearGradient.get());
+  dispatcher.setColorSource(nullptr);
+  EXPECT_FALSE(dispatcher.paint(true).isDither());
+  EXPECT_FALSE(dispatcher.paint(false).isDither());
+  EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());
+  // Calling safe_paint(false) returns a nullptr
 
-  // "Render" a gradient.
-  helper.setColorSource(kTestLinearGradient.get());
-  EXPECT_TRUE(helper.paint().isDither());
-}
+  DlColorColorSource color_color_source(DlColor::kBlue());
+  dispatcher.setColorSource(&color_color_source);
+  EXPECT_FALSE(dispatcher.paint(true).isDither());
+  EXPECT_FALSE(dispatcher.paint(false).isDither());
+  EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());
+  // Calling safe_paint(false) returns a nullptr
 
-// https://github.com/flutter/flutter/issues/132860.
-TEST(DisplayListUtils, SetDitherTrueThenGradientTHenNonGradientThenGradient) {
-  MockDispatchHelper helper;
-
-  // "Render" a dithered gradient.
-  helper.setDither(true);
-  helper.setColorSource(kTestLinearGradient.get());
-  EXPECT_TRUE(helper.paint().isDither());
-
-  // "Render" a non-gradient.
-  helper.setColorSource(nullptr);
-  EXPECT_FALSE(helper.paint().isDither());
-
-  // "Render" a gradient again.
-  helper.setColorSource(kTestLinearGradient.get());
-  EXPECT_TRUE(helper.paint().isDither());
+  dispatcher.setColorSource(&kTestSource1);
+  EXPECT_FALSE(dispatcher.paint(true).isDither());
+  EXPECT_FALSE(dispatcher.paint(false).isDither());
+  EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());
+  // Calling safe_paint(false) returns a nullptr
 }
 
 }  // namespace testing

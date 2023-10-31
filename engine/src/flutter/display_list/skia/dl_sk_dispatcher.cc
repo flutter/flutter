@@ -17,7 +17,10 @@ const SkPaint* DlSkCanvasDispatcher::safe_paint(bool use_attributes) {
   if (use_attributes) {
     // The accumulated SkPaint object will already have incorporated
     // any attribute overrides.
-    return &paint();
+    // Any rendering operation that uses an optional paint will ignore
+    // the shader in the paint so we inform that |paint()| method so
+    // that it can set the dither flag appropriately.
+    return &paint(false);
   } else if (has_opacity()) {
     temp_paint_.setAlphaf(opacity());
     return &temp_paint_;

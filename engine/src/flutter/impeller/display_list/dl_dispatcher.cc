@@ -179,11 +179,6 @@ void DlDispatcher::setAntiAlias(bool aa) {
   // Nothing to do because AA is implicit.
 }
 
-// |flutter::DlOpReceiver|
-void DlDispatcher::setDither(bool dither) {
-  paint_.dither = dither;
-}
-
 static Paint::Style ToStyle(flutter::DlDrawStyle style) {
   switch (style) {
     case flutter::DlDrawStyle::kFill:

@@ -23,7 +23,6 @@ class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
   }
 
   void setAntiAlias(bool aa) override;
-  void setDither(bool dither) override;
   void setDrawStyle(DlDrawStyle style) override;
   void setColor(DlColor color) override;
   void setStrokeWidth(SkScalar width) override;
@@ -38,18 +37,23 @@ class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
   void setMaskFilter(const DlMaskFilter* filter) override;
   void setImageFilter(const DlImageFilter* filter) override;
 
-  const SkPaint& paint() {
+  const SkPaint& paint(bool uses_shader = true) {
     // On the Impeller backend, we will only support dithering of *gradients*,
     // and it will be enabled by default (without the option to disable it).
     // Until Skia support is completely removed, we only want to respect the
     // dither flag for gradients (otherwise it will also apply to, for
-    // example, images, which is not supported in Impeller).
+    // example, image ops and image sources, which are not dithered in
+    // Impeller) and only on those operations that use the color source.
+    //
+    // The color_source_gradient_ flag lets us know if the color source is
+    // a gradient and then the uses_shader flag passed in to this method by
+    // the rendering op lets us know if the color source is used (and is
+    // therefore the primary source of colors for the op).
     //
     // See https://github.com/flutter/flutter/issues/112498.
-    paint_.setDither(color_source_gradient_ && dither_);
+    paint_.setDither(uses_shader && color_source_gradient_);
     return paint_;
   }
-
   /// Returns the current opacity attribute which is used to reduce
   /// the alpha of all setColor calls encountered in the streeam
   SkScalar opacity() { return opacity_; }
@@ -69,7 +73,6 @@ class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
  private:
   SkPaint paint_;
   bool color_source_gradient_ = false;
-  bool dither_ = false;
   bool invert_colors_ = false;
   sk_sp<SkColorFilter> sk_color_filter_;
 
