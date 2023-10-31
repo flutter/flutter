@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/texture.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
@@ -19,6 +18,7 @@ class TextureGLES final : public Texture,
     kTexture,
     kTextureMultisampled,
     kRenderBuffer,
+    kRenderBufferMultisampled,
   };
 
   enum class IsWrapped {
