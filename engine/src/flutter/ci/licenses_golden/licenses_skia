@@ -1,4 +1,4 @@
-Signature: 62fe673d20480d201dece4792f6392cc
+Signature: 7ee57d623472364406d831a4c8ed39c5
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,17 +386,6 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
-FILE: ../../../third_party/skia/relnotes/base64.md
-FILE: ../../../third_party/skia/relnotes/font-default.md
-FILE: ../../../third_party/skia/relnotes/glbackendsemaphore.md
-FILE: ../../../third_party/skia/relnotes/graphite_borrow.md
-FILE: ../../../third_party/skia/relnotes/grsurface-info.md
-FILE: ../../../third_party/skia/relnotes/mesh.md
-FILE: ../../../third_party/skia/relnotes/readbuffer-deserial.md
-FILE: ../../../third_party/skia/relnotes/recorder-static-member.md
-FILE: ../../../third_party/skia/relnotes/typeface.md
-FILE: ../../../third_party/skia/relnotes/vk-directcontext.md
-FILE: ../../../third_party/skia/relnotes/waitSemaphore.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
