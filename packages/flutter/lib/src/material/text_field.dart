@@ -665,13 +665,10 @@ class TextField extends StatefulWidget {
   /// {@endtemplate}
   final GestureTapCallback? onTap;
 
-  /// Whether [onTap] is only called for distinct taps.
+  /// Whether [onTap] should be called for every tap.
   ///
-  /// When disabled [onTap] is only called for distinct taps.
-  ///
-  /// When enabled [onTap] is called for every tap.
-  ///
-  /// Defaults to false.
+  /// Defaults to false, so [onTap] is only called for each distinct tap. When
+  /// enabled, [onTap] is called for every tap including consecutive taps.
   final bool onTapAlwaysCalled;
 
   /// {@macro flutter.widgets.editableText.onTapOutside}

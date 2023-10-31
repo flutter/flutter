@@ -2268,7 +2268,7 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
-  /// Whether the user provided onTap callback should be dispatched on every
+  /// Whether the user provided [onUserTap] callback should be dispatched on every
   /// tap or only non-consecutive taps.
   @protected
   bool get onTapAlwaysCalled => false;
@@ -3141,7 +3141,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// Whether [onUserTap] should always be called.
   ///
-  /// When disabled [onUserTap] will only be called the first tap in a
+  /// When disabled [onUserTap] will only be called for the first tap in a
   /// a series of taps.
   ///
   /// When enabled [onUserTap] will be called for consecutive taps.
