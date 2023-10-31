@@ -69,7 +69,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   void onSingleTapUp(TapDragUpDetails details) {
     super.onSingleTapUp(details);
     _state._requestKeyboard();
-    // _state.widget.onTap?.call();// A user might want to run this everytime despite it not being a single tap up.
   }
 
   @override

@@ -1888,10 +1888,6 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 
   /// Whether the user may select text in the text field.
   bool get selectionEnabled;
-
-  // /// Whether the user provided onTap callback should be dispatched on every
-  // /// tap or only non-consecutive taps.
-  // bool get onTapAlwaysCalled => false;
 }
 
 /// Builds a [TextSelectionGestureDetector] to wrap an [EditableText].

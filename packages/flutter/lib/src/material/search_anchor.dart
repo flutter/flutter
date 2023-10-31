@@ -1332,6 +1332,7 @@ class _SearchBarState extends State<SearchBar> {
                         widget.onTap?.call();
                         _focusNode.requestFocus();
                       },
+                      onTapAlwaysCalled: true,
                       focusNode: _focusNode,
                       onChanged: widget.onChanged,
                       onSubmitted: widget.onSubmitted,
