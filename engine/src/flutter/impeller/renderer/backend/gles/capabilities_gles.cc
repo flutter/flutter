@@ -21,7 +21,7 @@ static const constexpr char* kOESTextureBorderClampExt =
 
 // https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_multisampled_render_to_texture.txt
 static const constexpr char* kMultisampledRenderToTextureExt =
-    "GL_EXT_multisampled_render_to_texture2";
+    "GL_EXT_multisampled_render_to_texture";
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
