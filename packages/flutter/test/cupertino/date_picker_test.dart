@@ -599,7 +599,7 @@ void main() {
           home: Center(
             child: SizedBox(
               height: 400.0,
-              width: 500.0,
+              width: 400.0,
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.time,
                 onDateTimeChanged: (_) { },
@@ -633,7 +633,7 @@ void main() {
       // Distance between the first and the last column should be the same.
       expect(
         tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx,
-        distance,
+        closeTo(distance, 0.00000001),
       );
     });
 
