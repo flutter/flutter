@@ -38,6 +38,7 @@ class Options {
     this.shardCommandsPaths = const <io.File>[],
     this.enableCheckProfile = false,
     StringSink? errSink,
+    this.clangTidyPath,
   }) : checks = checksArg.isNotEmpty ? '--checks=$checksArg' : null,
        _errSink = errSink ?? io.stderr;
 
@@ -69,6 +70,7 @@ class Options {
     StringSink? errSink,
     required List<io.File> shardCommandsPaths,
     int? shardId,
+    io.File? clangTidyPath,
   }) {
     final LintTarget lintTarget;
     if (options.wasParsed('lint-all') || io.Platform.environment['FLUTTER_LINT_ALL'] != null) {
@@ -92,6 +94,7 @@ class Options {
       shardCommandsPaths: shardCommandsPaths,
       shardId: shardId,
       enableCheckProfile: options['enable-check-profile'] as bool,
+      clangTidyPath: clangTidyPath,
     );
   }
 
@@ -138,12 +141,16 @@ class Options {
     if (shardId != null && (shardId > shardCommands.length || shardId < 0)) {
       return Options._error('Invalid shard-id value: $shardId.', errSink: errSink);
     }
+    final io.File? clangTidyPath = ((String? path) => path == null
+        ? null
+        : io.File(path))(argResults['clang-tidy'] as String?);
     return Options._fromArgResults(
       argResults,
       buildCommandsPath: buildCommands,
       errSink: errSink,
       shardCommandsPaths: shardCommands,
       shardId: shardId,
+      clangTidyPath: clangTidyPath,
     );
   }
 
@@ -227,6 +234,10 @@ class Options {
               'string, indicating all checks should be performed.',
         defaultsTo: '',
       )
+      ..addOption('clang-tidy',
+          help:
+              'Path to the clang-tidy executable. Defaults to deriving the path\n'
+              'from compile_commands.json.')
       ..addFlag(
         'enable-check-profile',
         help: 'Enable per-check timing profiles and print a report to stderr.',
@@ -275,6 +286,10 @@ class Options {
   final String? errorMessage;
 
   final StringSink _errSink;
+
+  /// Override for which clang-tidy to use. If it is null it will be derived
+  /// instead.
+  final io.File? clangTidyPath;
 
   /// Print command usage with an additional message.
   void printUsage({String? message, required Engine? engine}) {
