@@ -1312,10 +1312,17 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 /// Since the selections in [PlaceholderSpan] are handled independently in its
 /// subtree, a selection in [RenderParagraph] can't continue across a
 /// [PlaceholderSpan]. The [RenderParagraph] splits itself on [PlaceholderSpan]
-/// to create multiple `_SelectableFragment`s so that they can be selected
+/// to create multiple `SelectableFragment`s so that they can be selected
 /// separately.
-class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutMetrics {
-  _SelectableFragment({
+class SelectableFragment
+    with Selectable, ChangeNotifier
+    implements TextLayoutMetrics {
+  /// Creates a new interactive piece of a paragraph.
+  ///
+  /// - [paragraph] : The underlying paragraph object that we're making selectable.
+  /// - [fullText] : The complete text content for context.
+  /// - [range] : The specific section of text that this fragment covers.
+  SelectableFragment({
     required this.paragraph,
     required this.fullText,
     required this.range,
