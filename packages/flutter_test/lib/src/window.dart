@@ -259,7 +259,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onPlatformBrightnessChanged(VoidCallback? callback) {
     _platformDispatcher.onPlatformBrightnessChanged = callback;
   }
-  /// Hides the real text scale factor and reports the given
+  /// Hides the real platform brightness and reports the given
   /// [platformBrightnessTestValue] instead.
   set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
     _platformBrightnessTestValue = platformBrightnessTestValue;
