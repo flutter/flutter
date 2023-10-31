@@ -21,7 +21,7 @@ TEST(AiksCanvasTest, EmptyCullRect) {
 }
 
 TEST(AiksCanvasTest, InitialCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
   Canvas canvas(initial_cull);
 
@@ -30,8 +30,8 @@ TEST(AiksCanvasTest, InitialCullRect) {
 }
 
 TEST(AiksCanvasTest, TranslatedCullRect) {
-  Rect initial_cull(5, 5, 10, 10);
-  Rect translated_cull(0, 0, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect translated_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.Translate(Vector3(5, 5, 0));
@@ -41,8 +41,8 @@ TEST(AiksCanvasTest, TranslatedCullRect) {
 }
 
 TEST(AiksCanvasTest, ScaledCullRect) {
-  Rect initial_cull(5, 5, 10, 10);
-  Rect scaled_cull(10, 10, 20, 20);
+  Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect scaled_cull = Rect::MakeXYWH(10, 10, 20, 20);
 
   Canvas canvas(initial_cull);
   canvas.Scale(Vector2(0.5, 0.5));
@@ -52,7 +52,7 @@ TEST(AiksCanvasTest, ScaledCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipIntersectAgainstEmptyCullRect) {
-  Rect rect_clip(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas;
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kIntersect);
@@ -62,7 +62,7 @@ TEST(AiksCanvasTest, RectClipIntersectAgainstEmptyCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffAgainstEmptyCullRect) {
-  Rect rect_clip(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas;
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -71,9 +71,9 @@ TEST(AiksCanvasTest, RectClipDiffAgainstEmptyCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipIntersectAgainstCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(5, 5, 10, 10);
-  Rect result_cull(5, 5, 5, 5);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 5, 5);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kIntersect);
@@ -83,9 +83,9 @@ TEST(AiksCanvasTest, RectClipIntersectAgainstCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffAgainstNonCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(5, 5, 10, 10);
-  Rect result_cull(0, 0, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -95,9 +95,9 @@ TEST(AiksCanvasTest, RectClipDiffAgainstNonCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffAboveCullRect) {
-  Rect initial_cull(5, 5, 10, 10);
-  Rect rect_clip(0, 0, 20, 4);
-  Rect result_cull(5, 5, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(0, 0, 20, 4);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -107,9 +107,9 @@ TEST(AiksCanvasTest, RectClipDiffAboveCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffBelowCullRect) {
-  Rect initial_cull(5, 5, 10, 10);
-  Rect rect_clip(0, 16, 20, 4);
-  Rect result_cull(5, 5, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(0, 16, 20, 4);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -119,9 +119,9 @@ TEST(AiksCanvasTest, RectClipDiffBelowCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffLeftOfCullRect) {
-  Rect initial_cull(5, 5, 10, 10);
-  Rect rect_clip(0, 0, 4, 20);
-  Rect result_cull(5, 5, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(0, 0, 4, 20);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -131,9 +131,9 @@ TEST(AiksCanvasTest, RectClipDiffLeftOfCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffRightOfCullRect) {
-  Rect initial_cull(5, 5, 10, 10);
-  Rect rect_clip(16, 0, 4, 20);
-  Rect result_cull(5, 5, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(16, 0, 4, 20);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -143,9 +143,9 @@ TEST(AiksCanvasTest, RectClipDiffRightOfCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffAgainstVCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(5, 0, 10, 10);
-  Rect result_cull(0, 0, 5, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 0, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 5, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -155,9 +155,9 @@ TEST(AiksCanvasTest, RectClipDiffAgainstVCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, RectClipDiffAgainstHCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(0, 5, 10, 10);
-  Rect result_cull(0, 0, 10, 5);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(0, 5, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 10, 5);
 
   Canvas canvas(initial_cull);
   canvas.ClipRect(rect_clip, Entity::ClipOperation::kDifference);
@@ -167,7 +167,7 @@ TEST(AiksCanvasTest, RectClipDiffAgainstHCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipIntersectAgainstEmptyCullRect) {
-  Rect rect_clip(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas;
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kIntersect);
@@ -177,7 +177,7 @@ TEST(AiksCanvasTest, RRectClipIntersectAgainstEmptyCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipDiffAgainstEmptyCullRect) {
-  Rect rect_clip(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas;
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kDifference);
@@ -186,9 +186,9 @@ TEST(AiksCanvasTest, RRectClipDiffAgainstEmptyCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipIntersectAgainstCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(5, 5, 10, 10);
-  Rect result_cull(5, 5, 5, 5);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 5, 5);
 
   Canvas canvas(initial_cull);
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kIntersect);
@@ -198,9 +198,9 @@ TEST(AiksCanvasTest, RRectClipIntersectAgainstCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipDiffAgainstNonCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(5, 5, 10, 10);
-  Rect result_cull(0, 0, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kDifference);
@@ -210,9 +210,9 @@ TEST(AiksCanvasTest, RRectClipDiffAgainstNonCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipDiffAgainstVPartiallyCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(5, 0, 10, 10);
-  Rect result_cull(0, 0, 6, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 0, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 6, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kDifference);
@@ -222,9 +222,9 @@ TEST(AiksCanvasTest, RRectClipDiffAgainstVPartiallyCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipDiffAgainstVFullyCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(5, -2, 10, 14);
-  Rect result_cull(0, 0, 5, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, -2, 10, 14);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 5, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kDifference);
@@ -234,9 +234,9 @@ TEST(AiksCanvasTest, RRectClipDiffAgainstVFullyCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipDiffAgainstHPartiallyCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(0, 5, 10, 10);
-  Rect result_cull(0, 0, 10, 6);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(0, 5, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 10, 6);
 
   Canvas canvas(initial_cull);
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kDifference);
@@ -246,9 +246,9 @@ TEST(AiksCanvasTest, RRectClipDiffAgainstHPartiallyCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, RRectClipDiffAgainstHFullyCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
-  Rect rect_clip(-2, 5, 14, 10);
-  Rect result_cull(0, 0, 10, 5);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(-2, 5, 14, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 10, 5);
 
   Canvas canvas(initial_cull);
   canvas.ClipRRect(rect_clip, 1, Entity::ClipOperation::kDifference);
@@ -259,12 +259,12 @@ TEST(AiksCanvasTest, RRectClipDiffAgainstHFullyCoveredCullRect) {
 
 TEST(AiksCanvasTest, PathClipIntersectAgainstEmptyCullRect) {
   PathBuilder builder;
-  builder.AddRect({5, 5, 1, 1});
-  builder.AddRect({5, 14, 1, 1});
-  builder.AddRect({14, 5, 1, 1});
-  builder.AddRect({14, 14, 1, 1});
+  builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(5, 14, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 14, 1, 1));
   Path path = builder.TakePath();
-  Rect rect_clip(5, 5, 10, 10);
+  Rect rect_clip = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas;
   canvas.ClipPath(path, Entity::ClipOperation::kIntersect);
@@ -275,10 +275,10 @@ TEST(AiksCanvasTest, PathClipIntersectAgainstEmptyCullRect) {
 
 TEST(AiksCanvasTest, PathClipDiffAgainstEmptyCullRect) {
   PathBuilder builder;
-  builder.AddRect({5, 5, 1, 1});
-  builder.AddRect({5, 14, 1, 1});
-  builder.AddRect({14, 5, 1, 1});
-  builder.AddRect({14, 14, 1, 1});
+  builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(5, 14, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 14, 1, 1));
   Path path = builder.TakePath();
 
   Canvas canvas;
@@ -288,14 +288,14 @@ TEST(AiksCanvasTest, PathClipDiffAgainstEmptyCullRect) {
 }
 
 TEST(AiksCanvasTest, PathClipIntersectAgainstCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   PathBuilder builder;
-  builder.AddRect({5, 5, 1, 1});
-  builder.AddRect({5, 14, 1, 1});
-  builder.AddRect({14, 5, 1, 1});
-  builder.AddRect({14, 14, 1, 1});
+  builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(5, 14, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 14, 1, 1));
   Path path = builder.TakePath();
-  Rect result_cull(5, 5, 5, 5);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 5, 5);
 
   Canvas canvas(initial_cull);
   canvas.ClipPath(path, Entity::ClipOperation::kIntersect);
@@ -305,14 +305,14 @@ TEST(AiksCanvasTest, PathClipIntersectAgainstCullRect) {
 }
 
 TEST(AiksCanvasTest, PathClipDiffAgainstNonCoveredCullRect) {
-  Rect initial_cull(0, 0, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
   PathBuilder builder;
-  builder.AddRect({5, 5, 1, 1});
-  builder.AddRect({5, 14, 1, 1});
-  builder.AddRect({14, 5, 1, 1});
-  builder.AddRect({14, 14, 1, 1});
+  builder.AddRect(Rect::MakeXYWH(5, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(5, 14, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 5, 1, 1));
+  builder.AddRect(Rect::MakeXYWH(14, 14, 1, 1));
   Path path = builder.TakePath();
-  Rect result_cull(0, 0, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(0, 0, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipPath(path, Entity::ClipOperation::kDifference);
@@ -322,12 +322,12 @@ TEST(AiksCanvasTest, PathClipDiffAgainstNonCoveredCullRect) {
 }
 
 TEST(AiksCanvasTest, PathClipDiffAgainstFullyCoveredCullRect) {
-  Rect initial_cull(5, 5, 10, 10);
+  Rect initial_cull = Rect::MakeXYWH(5, 5, 10, 10);
   PathBuilder builder;
-  builder.AddRect({0, 0, 100, 100});
+  builder.AddRect(Rect::MakeXYWH(0, 0, 100, 100));
   Path path = builder.TakePath();
   // Diff clip of Paths is ignored due to complexity
-  Rect result_cull(5, 5, 10, 10);
+  Rect result_cull = Rect::MakeXYWH(5, 5, 10, 10);
 
   Canvas canvas(initial_cull);
   canvas.ClipPath(path, Entity::ClipOperation::kDifference);
