@@ -146,10 +146,10 @@ class FadeInImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-    int? placeholderCacheWidth,
-    int? placeholderCacheHeight,
-    int? imageCacheWidth,
-    int? imageCacheHeight,
+    double? placeholderCacheWidth,
+    double? placeholderCacheHeight,
+    double? imageCacheWidth,
+    double? imageCacheHeight,
   }) : placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
 
@@ -204,10 +204,10 @@ class FadeInImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-    int? placeholderCacheWidth,
-    int? placeholderCacheHeight,
-    int? imageCacheWidth,
-    int? imageCacheHeight,
+    double? placeholderCacheWidth,
+    double? placeholderCacheHeight,
+    double? imageCacheWidth,
+    double? imageCacheHeight,
   }) : placeholder = placeholderScale != null
          ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
          : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),

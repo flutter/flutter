@@ -87,14 +87,14 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.loadBuffer(provider, (ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+    expect(provider.loadBuffer(provider, (ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool? allowUpscaling}) async {
       return Future<Codec>.value(FakeCodec());
     }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 

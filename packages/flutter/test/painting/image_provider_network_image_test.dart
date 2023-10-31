@@ -18,7 +18,7 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
   HttpOverrides.global = _FakeHttpOverrides();
 
-  Future<Codec>  basicDecoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+  Future<Codec>  basicDecoder(ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool? allowUpscaling}) {
     return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
@@ -227,7 +227,7 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 

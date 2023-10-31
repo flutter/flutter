@@ -135,7 +135,7 @@ void main() {
   });
 
   test('Returns null if an error is caught resolving an image', () {
-    Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {double? cacheWidth, double? cacheHeight, bool? allowUpscaling}) {
       return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
     }
     final ErrorImageProvider errorImage = ErrorImageProvider();
