@@ -177,6 +177,7 @@ std::unique_ptr<Shell> Shell::Create(
   auto resource_cache_limit_calculator =
       std::make_shared<ResourceCacheLimitCalculator>(
           settings.resource_cache_max_bytes_threshold);
+
   return CreateWithSnapshot(platform_data,                     //
                             task_runners,                      //
                             /*parent_thread_merger=*/nullptr,  //
