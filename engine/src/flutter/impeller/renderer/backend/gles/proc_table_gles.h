@@ -8,7 +8,6 @@
 #include <string>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/description_gles.h"
@@ -189,19 +188,19 @@ struct GLProc {
 
 #define FOR_EACH_IMPELLER_GLES3_PROC(PROC) PROC(BlitFramebuffer);
 
-#define FOR_EACH_IMPELLER_EXT_PROC(PROC)   \
-  PROC(DebugMessageControlKHR);            \
-  PROC(DiscardFramebufferEXT);             \
-  PROC(FramebufferTexture2DMultisampleEXT) \
-  PROC(PushDebugGroupKHR);                 \
-  PROC(PopDebugGroupKHR);                  \
-  PROC(ObjectLabelKHR);                    \
-  PROC(RenderbufferStorageMultisampleEXT); \
-  PROC(GenQueriesEXT);                     \
-  PROC(DeleteQueriesEXT);                  \
-  PROC(GetQueryObjectui64vEXT);            \
-  PROC(BeginQueryEXT);                     \
-  PROC(EndQueryEXT);                       \
+#define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
+  PROC(DebugMessageControlKHR);             \
+  PROC(DiscardFramebufferEXT);              \
+  PROC(FramebufferTexture2DMultisampleEXT); \
+  PROC(PushDebugGroupKHR);                  \
+  PROC(PopDebugGroupKHR);                   \
+  PROC(ObjectLabelKHR);                     \
+  PROC(RenderbufferStorageMultisampleEXT);  \
+  PROC(GenQueriesEXT);                      \
+  PROC(DeleteQueriesEXT);                   \
+  PROC(GetQueryObjectui64vEXT);             \
+  PROC(BeginQueryEXT);                      \
+  PROC(EndQueryEXT);                        \
   PROC(GetQueryObjectuivEXT);
 
 enum class DebugResourceType {
