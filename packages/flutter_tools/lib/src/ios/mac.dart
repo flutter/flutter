@@ -592,7 +592,7 @@ Future<void> diagnoseXcodeBuildFailure(
   if (xcodeBuildExecution != null
       && xcodeBuildExecution.environmentType == EnvironmentType.physical
       && (result.stdout?.toUpperCase().contains('BITCODE') ?? false)) {
-    
+
     const String label = 'xcode-bitcode-failure';
     const String buildType = 'ios';
     final String command = xcodeBuildExecution.buildCommands.toString();
