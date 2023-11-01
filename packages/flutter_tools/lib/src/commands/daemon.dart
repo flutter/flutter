@@ -562,6 +562,7 @@ class AppDomain extends Domain {
         multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
+        analytics: globals.analytics,
       );
     } else {
       runner = ColdRunner(

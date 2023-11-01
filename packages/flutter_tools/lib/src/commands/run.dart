@@ -597,6 +597,7 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         ipv6: ipv6 ?? false,
         multidexEnabled: boolArg('multidex'),
+        analytics: globals.analytics,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
