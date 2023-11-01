@@ -70,9 +70,10 @@ class BufferBindingsGLES {
                          Allocator& transients_allocator,
                          const BufferResource& buffer);
 
-  bool BindTextures(const ProcTableGLES& gl,
-                    const Bindings& bindings,
-                    ShaderStage stage);
+  std::optional<size_t> BindTextures(const ProcTableGLES& gl,
+                                     const Bindings& bindings,
+                                     ShaderStage stage,
+                                     size_t unit_start_index = 0);
 
   BufferBindingsGLES(const BufferBindingsGLES&) = delete;
 

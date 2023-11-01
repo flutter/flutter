@@ -155,11 +155,15 @@ bool BufferBindingsGLES::BindUniformData(const ProcTableGLES& gl,
     }
   }
 
-  if (!BindTextures(gl, vertex_bindings, ShaderStage::kVertex)) {
+  std::optional<size_t> next_unit_index =
+      BindTextures(gl, vertex_bindings, ShaderStage::kVertex);
+  if (!next_unit_index.has_value()) {
     return false;
   }
 
-  if (!BindTextures(gl, fragment_bindings, ShaderStage::kFragment)) {
+  if (!BindTextures(gl, fragment_bindings, ShaderStage::kFragment,
+                    *next_unit_index)
+           .has_value()) {
     return false;
   }
 
@@ -334,20 +338,22 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
   return true;
 }
 
-bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
-                                      const Bindings& bindings,
-                                      ShaderStage stage) {
-  size_t active_index = 0;
+std::optional<size_t> BufferBindingsGLES::BindTextures(
+    const ProcTableGLES& gl,
+    const Bindings& bindings,
+    ShaderStage stage,
+    size_t unit_start_index) {
+  size_t active_index = unit_start_index;
   for (const auto& data : bindings.sampled_images) {
     const auto& texture_gles = TextureGLES::Cast(*data.second.texture.resource);
     if (data.second.texture.GetMetadata() == nullptr) {
       VALIDATION_LOG << "No metadata found for texture binding.";
-      return false;
+      return std::nullopt;
     }
 
     auto location = ComputeTextureLocation(data.second.texture.GetMetadata());
     if (location == -1) {
-      return false;
+      return std::nullopt;
     }
 
     //--------------------------------------------------------------------------
@@ -356,7 +362,7 @@ bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
     if (active_index >= gl.GetCapabilities()->GetMaxTextureUnits(stage)) {
       VALIDATION_LOG << "Texture units specified exceed the capabilities for "
                         "this shader stage.";
-      return false;
+      return std::nullopt;
     }
     gl.ActiveTexture(GL_TEXTURE0 + active_index);
 
@@ -364,7 +370,7 @@ bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
     /// Bind the texture.
     ///
     if (!texture_gles.Bind()) {
-      return false;
+      return std::nullopt;
     }
 
     //--------------------------------------------------------------------------
@@ -373,7 +379,7 @@ bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
     ///
     const auto& sampler_gles = SamplerGLES::Cast(*data.second.sampler.resource);
     if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
-      return false;
+      return std::nullopt;
     }
 
     //--------------------------------------------------------------------------
@@ -386,7 +392,7 @@ bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
     ///
     active_index++;
   }
-  return true;
+  return active_index;
 }
 
 }  // namespace impeller
