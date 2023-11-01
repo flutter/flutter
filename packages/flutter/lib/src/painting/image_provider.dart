@@ -174,7 +174,7 @@ class ImageConfiguration {
   'Use ImageDecoderCallback with ImageProvider.loadImage instead. '
   'This feature was deprecated after v3.7.0-1.4.pre.',
 )
-typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
+typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool allowUpscaling});
 
 // Method signature for _loadAsync decode callbacks.
 typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
@@ -771,8 +771,8 @@ class ResizeImageKey {
 
   final Object _providerCacheKey;
   final ResizeImagePolicy _policy;
-  final int? _width;
-  final int? _height;
+  final double? _width;
+  final double? _height;
   final bool _allowUpscaling;
 
   @override
@@ -1215,12 +1215,12 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// The width the image should decode to and cache.
   ///
   /// At least one of this and [height] must be non-null.
-  final int? width;
+  final double? width;
 
   /// The height the image should decode to and cache.
   ///
   /// At least one of this and [width] must be non-null.
-  final int? height;
+  final double? height;
 
   /// The policy that determines how [width] and [height] are interpreted.
   ///
@@ -1241,7 +1241,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   ///
   /// When `cacheWidth` and `cacheHeight` are both null, this will return the
   /// `provider` directly.
-  static ImageProvider<Object> resizeIfNeeded(int? cacheWidth, int? cacheHeight, ImageProvider<Object> provider) {
+  static ImageProvider<Object> resizeIfNeeded(double? cacheWidth, double? cacheHeight, ImageProvider<Object> provider) {
     if (cacheWidth != null || cacheHeight != null) {
       return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
     }
@@ -1254,7 +1254,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     'This feature was deprecated after v3.7.0-1.4.pre.',
   )
   ImageStreamCompleter loadBuffer(ResizeImageKey key, DecoderBufferCallback decode) {
-    Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
@@ -1279,11 +1279,11 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
         'ResizeImage cannot be composed with another ImageProvider that applies '
         'getTargetSize.',
       );
-      return decode(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+      return decode(buffer, getTargetSize: (double intrinsicWidth, double intrinsicHeight) {
         switch (policy) {
           case ResizeImagePolicy.exact:
-            int? targetWidth = width;
-            int? targetHeight = height;
+            double? targetWidth = width;
+            double? targetHeight = height;
 
             if (!allowUpscaling) {
               if (targetWidth != null && targetWidth > intrinsicWidth) {
@@ -1297,32 +1297,32 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
             return ui.TargetImageSize(width: targetWidth, height: targetHeight);
           case ResizeImagePolicy.fit:
             final double aspectRatio = intrinsicWidth / intrinsicHeight;
-            final int maxWidth = width ?? intrinsicWidth;
-            final int maxHeight = height ?? intrinsicHeight;
-            int targetWidth = intrinsicWidth;
-            int targetHeight = intrinsicHeight;
+            final double maxWidth = width ?? intrinsicWidth;
+            final double maxHeight = height ?? intrinsicHeight;
+            double targetWidth = intrinsicWidth;
+            double targetHeight = intrinsicHeight;
 
             if (targetWidth > maxWidth) {
               targetWidth = maxWidth;
-              targetHeight = targetWidth ~/ aspectRatio;
+              targetHeight = targetWidth / aspectRatio;
             }
 
             if (targetHeight > maxHeight) {
               targetHeight = maxHeight;
-              targetWidth = (targetHeight * aspectRatio).floor();
+              targetWidth = targetHeight * aspectRatio;
             }
 
             if (allowUpscaling) {
               if (width == null) {
                 assert(height != null);
                 targetHeight = height!;
-                targetWidth = (targetHeight * aspectRatio).floor();
+                targetWidth = targetHeight * aspectRatio;
               } else if (height == null) {
                 targetWidth = width!;
-                targetHeight = targetWidth ~/ aspectRatio;
+                targetHeight = targetWidth / aspectRatio;
               } else {
-                final int derivedMaxWidth = (maxHeight * aspectRatio).floor();
-                final int derivedMaxHeight = maxWidth ~/ aspectRatio;
+                final double derivedMaxWidth = maxHeight * aspectRatio;
+                final double derivedMaxHeight = maxWidth / aspectRatio;
                 targetWidth = math.min(maxWidth, derivedMaxWidth);
                 targetHeight = math.min(maxHeight, derivedMaxHeight);
               }

@@ -416,8 +416,8 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     this.isAntiAlias = false,
     Map<String, String>? headers,
-    int? cacheWidth,
-    int? cacheHeight,
+    double? cacheWidth,
+    double? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
@@ -471,8 +471,8 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
-    int? cacheWidth,
-    int? cacheHeight,
+    double? cacheWidth,
+    double? cacheHeight,
   }) :
        // FileImage is not supported on Flutter Web therefore neither this method.
        assert(
@@ -631,8 +631,8 @@ class Image extends StatefulWidget {
     this.isAntiAlias = false,
     String? package,
     this.filterQuality = FilterQuality.low,
-    int? cacheWidth,
-    int? cacheHeight,
+    double? cacheWidth,
+    double? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
@@ -693,8 +693,8 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
-    int? cacheWidth,
-    int? cacheHeight,
+    double? cacheWidth,
+    double? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),

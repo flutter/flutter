@@ -392,7 +392,7 @@ void main() {
         );
 
         bool called = false;
-        Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+        Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool allowUpscaling = false}) {
           expect(cacheWidth, 20);
           expect(cacheHeight, 30);
           expect(allowUpscaling, false);
@@ -422,7 +422,7 @@ void main() {
         );
 
         bool called = false;
-        Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+        Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {double? cacheWidth, double? cacheHeight, bool allowUpscaling = false}) {
           expect(cacheWidth, null);
           expect(cacheHeight, null);
           expect(allowUpscaling, false);

@@ -29,7 +29,7 @@ void main() {
         expect(rawImageSize, const Size(1, 1));
 
         const Size resizeDims = Size(14, 7);
-        final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
+        final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width, height: resizeDims.height, allowUpscaling: true);
         const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
         final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
         expect(resizedImageSize, resizeDims);
@@ -43,7 +43,7 @@ void main() {
         expect(rawImageSize, const Size(50, 50));
 
         const Size resizeDims = Size(25, 25);
-        final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
+        final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width, height: resizeDims.height, allowUpscaling: true);
         const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
         final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
         expect(resizedImageSize, resizeDims);
@@ -56,7 +56,7 @@ void main() {
         expect(rawImageSize, const Size(1, 1));
 
         const Size resizeDims = Size(50, 50);
-        final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
+        final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width, height: resizeDims.height);
         const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
         final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
         expect(resizedImageSize, const Size(1, 1));
@@ -329,7 +329,7 @@ void main() {
       final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321, allowUpscaling: true);
 
       Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {ui.TargetImageSizeCallback? getTargetSize}) {
-        return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+        return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (double intrinsicWidth, double intrinsicHeight) {
           expect(getTargetSize, isNotNull);
           final ui.TargetImageSize targetSize = getTargetSize!(intrinsicWidth, intrinsicHeight);
           expect(targetSize.width, 123);

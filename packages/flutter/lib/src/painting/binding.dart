@@ -105,8 +105,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   )
   Future<ui.Codec> instantiateImageCodecFromBuffer(
     ui.ImmutableBuffer buffer, {
-    int? cacheWidth,
-    int? cacheHeight,
+    double? cacheWidth,
+    double? cacheHeight,
     bool allowUpscaling = false,
   }) {
     assert(cacheWidth == null || cacheWidth > 0);

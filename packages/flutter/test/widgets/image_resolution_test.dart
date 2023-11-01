@@ -118,7 +118,7 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
   );
 }
 
-Widget buildImageCacheResized(String name, Key key, int width, int height, int cacheWidth, int cacheHeight) {
+Widget buildImageCacheResized(String name, Key key, double width, double height, double cacheWidth, double cacheHeight) {
   return Center(
     child: RepaintBoundary(
       child: SizedBox(
