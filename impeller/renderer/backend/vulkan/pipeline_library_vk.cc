@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 
 #include <chrono>
+#include <cstdint>
 #include <optional>
 #include <sstream>
 

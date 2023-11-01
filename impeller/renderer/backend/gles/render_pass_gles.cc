@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/render_pass_gles.h"
 
+#include <cstdint>
+
 #include "GLES3/gl3.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"

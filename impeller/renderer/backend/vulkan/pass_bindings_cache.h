@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <optional>
 
 #include "flutter/impeller/renderer/backend/vulkan/vk.h"
