@@ -78,7 +78,7 @@ void main() {
 
     Future<void> checkText(String testValue) async {
       await tester.enterText(find.byType(TextField), testValue);
-      // pumping is unnecessary because callback happens regardless of frames
+      // Pumping is unnecessary because callback happens regardless of frames.
       expect(fieldValue, equals(testValue));
     }
 
