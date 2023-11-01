@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "flutter/fml/macros.h"
 #include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/device_holder.h"

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "flutter/fml/macros.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"

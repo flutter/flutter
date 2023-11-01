@@ -4,6 +4,7 @@
 
 #include "impeller/scene/importer/vertices_builder.h"
 
+#include <cstdint>
 #include <cstring>
 #include <limits>
 #include <memory>

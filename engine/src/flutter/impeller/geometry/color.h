@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <cstdlib>
 #include <ostream>
 #include <type_traits>

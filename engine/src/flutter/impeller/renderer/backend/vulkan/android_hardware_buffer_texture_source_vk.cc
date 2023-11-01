@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/vulkan/android_hardware_buffer_texture_source_vk.h"
+
+#include <cstdint>
+
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 
 #ifdef FML_OS_ANDROID

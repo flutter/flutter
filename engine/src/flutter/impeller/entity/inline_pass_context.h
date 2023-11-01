@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "impeller/entity/entity_pass_target.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"

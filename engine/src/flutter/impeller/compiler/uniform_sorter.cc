@@ -4,6 +4,8 @@
 
 #include "impeller/compiler/uniform_sorter.h"
 
+#include <cstdint>
+
 namespace impeller {
 
 std::vector<spirv_cross::ID> SortUniforms(

@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
 
+#include <cstdint>
+
 namespace impeller {
 
 vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input) {

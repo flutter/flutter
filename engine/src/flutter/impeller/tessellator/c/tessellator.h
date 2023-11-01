@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "impeller/geometry/path_builder.h"
 #include "impeller/tessellator/tessellator.h"
 

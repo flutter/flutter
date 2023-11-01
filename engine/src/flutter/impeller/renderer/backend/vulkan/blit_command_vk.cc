@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/blit_command_vk.h"
 
+#include <cstdint>
+
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 
