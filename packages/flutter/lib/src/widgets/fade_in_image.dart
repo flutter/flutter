@@ -84,6 +84,8 @@ class FadeInImage extends StatefulWidget {
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
+    this.color,
+    this.colorBlendMode,
     this.width,
     this.height,
     this.fit,
@@ -140,6 +142,8 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.color,
+    this.colorBlendMode,
     this.placeholderFit,
     this.filterQuality = FilterQuality.low,
     this.placeholderFilterQuality,
@@ -198,6 +202,8 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.color,
+    this.colorBlendMode,
     this.placeholderFit,
     this.filterQuality = FilterQuality.low,
     this.placeholderFilterQuality,
@@ -253,6 +259,20 @@ class FadeInImage extends StatefulWidget {
   /// placeholder image does not match that of the target image. The size is
   /// also affected by the scale factor.
   final double? width;
+
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
+  /// Color applies to both [placeholder] and [image]
+  final Color? color;
+
+  /// Used to combine [color] with this image and the placeholder
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode? colorBlendMode;
 
   /// If non-null, require the image to have this height.
   ///
@@ -361,6 +381,8 @@ class _FadeInImageState extends State<FadeInImage> {
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
     BoxFit? fit,
+    Color? color,
+    BlendMode? colorBlendMode,
     required FilterQuality filterQuality,
     required Animation<double> opacity,
   }) {
@@ -372,6 +394,8 @@ class _FadeInImageState extends State<FadeInImage> {
       width: widget.width,
       height: widget.height,
       fit: fit,
+      color: color,
+      colorBlendMode: colorBlendMode,
       filterQuality: filterQuality,
       alignment: widget.alignment,
       repeat: widget.repeat,
@@ -388,6 +412,8 @@ class _FadeInImageState extends State<FadeInImage> {
       errorBuilder: widget.imageErrorBuilder,
       opacity: _imageAnimation,
       fit: widget.fit,
+      color: widget.color,
+      colorBlendMode: widget.colorBlendMode,
       filterQuality: widget.filterQuality,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
@@ -400,6 +426,8 @@ class _FadeInImageState extends State<FadeInImage> {
             image: widget.placeholder,
             errorBuilder: widget.placeholderErrorBuilder,
             opacity: _placeholderAnimation,
+            color: widget.color,
+            colorBlendMode: widget.colorBlendMode,
             fit: widget.placeholderFit ?? widget.fit,
             filterQuality: widget.placeholderFilterQuality ?? widget.filterQuality,
           ),
