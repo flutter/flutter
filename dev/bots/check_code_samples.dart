@@ -261,7 +261,7 @@ class SampleChecker {
   }
 }
 
-// These tests are known to be missing.  They should all eventually be
+// These tests are known to be missing. They should all eventually be
 // implemented, but until they are we allow them, so that we can catch any new
 // examples that are added without tests.
 //
@@ -282,7 +282,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/text_field/text_field.1_test.dart',
   'examples/api/test/material/button_style/button_style.0_test.dart',
   'examples/api/test/material/range_slider/range_slider.0_test.dart',
-  'examples/api/test/material/card/card.2_test.dart',
   'examples/api/test/material/card/card.0_test.dart',
   'examples/api/test/material/selection_container/selection_container_disabled.0_test.dart',
   'examples/api/test/material/selection_container/selection_container.0_test.dart',
