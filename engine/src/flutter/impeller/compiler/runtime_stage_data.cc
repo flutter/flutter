@@ -5,6 +5,7 @@
 #include "impeller/compiler/runtime_stage_data.h"
 
 #include <array>
+#include <cstdint>
 #include <optional>
 
 #include "inja/inja.hpp"

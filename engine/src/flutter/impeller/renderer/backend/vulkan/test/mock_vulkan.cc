@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+
+#include <cstdint>
 #include <cstring>
 #include <utility>
 #include <vector>
+
 #include "fml/macros.h"
 #include "fml/thread_local.h"
 #include "impeller/base/thread_safety.h"

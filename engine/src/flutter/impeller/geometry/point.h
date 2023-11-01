@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <type_traits>

@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/compute_tessellator.h"
 
+#include <cstdint>
+
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/path_polyline.comp.h"
 #include "impeller/renderer/pipeline_library.h"
