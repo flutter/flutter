@@ -597,9 +597,9 @@ void main() {
 
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
-            label: 'plist-impeller-enabled',
-            buildType: 'ios',
-          )
+          label: 'plist-impeller-enabled',
+          buildType: 'ios',
+        ),
       ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -660,9 +660,9 @@ void main() {
 
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
-            label: 'plist-impeller-disabled',
-            buildType: 'ios',
-          )
+          label: 'plist-impeller-disabled',
+          buildType: 'ios',
+        ),
       ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

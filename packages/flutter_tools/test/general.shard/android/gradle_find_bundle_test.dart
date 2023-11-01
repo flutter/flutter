@@ -437,11 +437,15 @@ void main() {
     ));
     expect(fakeAnalytics.sentEvents, hasLength(1));
     expect(
-        fakeAnalytics.sentEvents,
-        contains(Event.flutterBuildInfo(
-            label: 'gradle-expected-file-not-found',
-            buildType: 'gradle',
-            settings: 'androidGradlePluginVersion: 7.5, fileExtension: .aab')));
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.flutterBuildInfo(
+          label: 'gradle-expected-file-not-found',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: 7.5, fileExtension: .aab',
+        ),
+      ),
+    );
   });
 }
 

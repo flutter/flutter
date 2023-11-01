@@ -133,9 +133,9 @@ class WebBuilder {
     }
 
     final String buildSettingsString = _buildEventAnalyticsSettings(
-        config: compilerConfig,
-        buildInfo: buildInfo,
-      );
+      config: compilerConfig,
+      buildInfo: buildInfo,
+    );
 
     BuildEvent(
       'web-compile',

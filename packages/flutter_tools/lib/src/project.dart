@@ -762,14 +762,15 @@ The detected reason was:
 ''');
     if (deprecationBehavior == DeprecationBehavior.ignore) {
       BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-      globals.analytics.send(Event.flutterBuildInfo(
+      globals.analytics.send(
+        Event.flutterBuildInfo(
         label: 'deprecated-v1-android-embedding-ignored',
         buildType: 'gradle',
       ));
 
     } else { // DeprecationBehavior.exit
-      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-      globals.analytics.send(Event.flutterBuildInfo(
+      globals.analytics.send(
+        Event.flutterBuildInfo(
         label: 'deprecated-v1-android-embedding-failed',
         buildType: 'gradle',
       ));

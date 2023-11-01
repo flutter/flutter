@@ -598,7 +598,8 @@ Future<void> diagnoseXcodeBuildFailure(
     final String command = xcodeBuildExecution.buildCommands.toString();
     final String settings = xcodeBuildExecution.buildSettings.toString();
 
-    BuildEvent(label,
+    BuildEvent(
+      label,
       type: buildType,
       command: command,
       settings: settings,

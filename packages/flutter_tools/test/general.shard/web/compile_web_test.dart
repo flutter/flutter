@@ -109,13 +109,16 @@ void main() {
       ),
     );
 
-    expect(fakeAnalytics.sentEvents, unorderedEquals(<Event>[
-      Event.flutterBuildInfo(
-            label: 'web-compile',
-            buildType: 'web',
-            settings: 'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
-          ),
-    ]));
+    expect(
+      fakeAnalytics.sentEvents,
+      unorderedEquals(<Event>[
+        Event.flutterBuildInfo(
+          label: 'web-compile',
+          buildType: 'web',
+          settings: 'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
+        ),
+      ]),
+    );
 
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;

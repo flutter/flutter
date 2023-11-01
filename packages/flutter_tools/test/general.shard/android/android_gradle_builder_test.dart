@@ -144,11 +144,12 @@ void main() {
       expect(testUsage.events, hasLength(2));
 
       expect(
-          fakeAnalytics.sentEvents,
-          unorderedEquals(<Event>[
-            Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
-            Event.flutterBuildInfo(label: 'gradle-random-event-label-failure', buildType: 'gradle'),
-          ]));
+        fakeAnalytics.sentEvents,
+        unorderedEquals(<Event>[
+          Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
+          Event.flutterBuildInfo(label: 'gradle-random-event-label-failure', buildType: 'gradle'),
+        ]),
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
@@ -330,9 +331,9 @@ void main() {
       expect(fakeAnalytics.sentEvents, hasLength(4));
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
-            label: 'gradle-random-event-label-failure',
-            buildType: 'gradle',
-          )
+          label: 'gradle-random-event-label-failure',
+          buildType: 'gradle',
+        ),
       ));
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
@@ -433,9 +434,9 @@ void main() {
       expect(fakeAnalytics.sentEvents, hasLength(2));
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
-            label: 'gradle-random-event-label-failure',
-            buildType: 'gradle',
-          )
+          label: 'gradle-random-event-label-failure',
+          buildType: 'gradle',
+        ),
       ));
 
     }, overrides: <Type, Generator>{
