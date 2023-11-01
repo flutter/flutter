@@ -112,7 +112,9 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.filled-tonal-button', 'FilledTonalButton', '$materialLib/filled_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.outlined-button', 'OutlinedButton', '$materialLib/outlined_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
-  CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
+  CardTemplate('md.comp.elevated-card', 'Card', '$materialLib/card.dart', tokens).updateFile();
+  CardTemplate('md.comp.filled-card', 'FilledCard', '$materialLib/card.dart', tokens).updateFile();
+  CardTemplate('md.comp.outlined-card', 'OutlinedCard', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
   ColorSchemeTemplate(colorLightTokens, colorDarkTokens, 'ColorScheme', '$materialLib/theme_data.dart', tokens).updateFile();
   DatePickerTemplate('DatePicker', '$materialLib/date_picker_theme.dart', tokens).updateFile();
