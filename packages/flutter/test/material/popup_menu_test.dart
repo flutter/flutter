@@ -3785,6 +3785,32 @@ void main() {
     await tester.pumpAndSettle();
     expect(count, 1);
   });
+
+  testWidgetsWithLeakTracking('PopupMenuButton honors transitionDuration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              transitionDuration: const Duration(seconds: 5),
+              child: const Text('button'),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<String>>[
+                  const CheckedPopupMenuItem<String>(
+                    value: 'item1',
+                    child: Text('item1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('button'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<PopupMenuButton<String>>(find.byType(PopupMenuButton<String>)).transitionDuration?.inSeconds, 5);
+  });
 }
 
 class TestApp extends StatelessWidget {
