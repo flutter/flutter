@@ -74,9 +74,9 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12
+      os: Mac-12|Mac-13
       device_type: none
       $flutter/osx_sdk : >-
         {
@@ -86,9 +86,9 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12
+      os: Mac-12|Mac-13
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
@@ -99,11 +99,11 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-12
+      os: Mac-12|Mac-13
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
@@ -114,9 +114,9 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12
+      os: Mac-12|Mac-13
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -128,7 +128,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12
       device_type: none
@@ -163,7 +163,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12
       cpu: x86
