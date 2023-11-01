@@ -805,7 +805,7 @@ void main() {
     expect(event.category, 'hot');
     expect(event.parameter, 'reload');
     expect(event.parameters?.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
-    
+
     final Event newEvent = fakeAnalytics.sentEvents.first;
     expect(newEvent.eventName.label, 'hot_runner_info');
     expect(newEvent.eventData['label'], 'reload');
