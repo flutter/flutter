@@ -86,26 +86,11 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
                   .has_value());
 }
 
-static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
-  auto mapping = flutter::testing::OpenFixtureAsMapping(fixture_name);
-  if (!mapping) {
-    return nullptr;
-  }
-  auto data = SkData::MakeWithProc(
-      mapping->GetMapping(), mapping->GetSize(),
-      [](const void* ptr, void* context) {
-        delete reinterpret_cast<fml::Mapping*>(context);
-      },
-      mapping.get());
-  mapping.release();
-  return data;
-}
-
 TEST_P(TypographerTest, LazyAtlasTracksColor) {
 #if FML_OS_MACOSX
-  auto mapping = OpenFixtureAsSkData("Apple Color Emoji.ttc");
+  auto mapping = flutter::testing::OpenFixtureAsSkData("Apple Color Emoji.ttc");
 #else
-  auto mapping = OpenFixtureAsSkData("NotoColorEmoji.ttf");
+  auto mapping = flutter::testing::OpenFixtureAsSkData("NotoColorEmoji.ttf");
 #endif
   ASSERT_TRUE(mapping);
   SkFont emoji_font(SkTypeface::MakeFromData(mapping), 50.0);

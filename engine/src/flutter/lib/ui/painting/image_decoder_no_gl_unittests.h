@@ -96,7 +96,6 @@ namespace testing {
 
 float HalfToFloat(uint16_t half);
 float DecodeBGR10(uint32_t x);
-sk_sp<SkData> OpenFixtureAsSkData(const char* name);
 
 }  // namespace testing
 }  // namespace flutter

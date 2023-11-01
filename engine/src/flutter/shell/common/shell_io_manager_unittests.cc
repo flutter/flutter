@@ -16,36 +16,6 @@
 namespace flutter {
 namespace testing {
 
-static sk_sp<SkData> OpenFixtureAsSkData(const char* name) {
-  auto fixtures_directory =
-      fml::OpenDirectory(GetFixturesPath(), false, fml::FilePermission::kRead);
-  if (!fixtures_directory.is_valid()) {
-    return nullptr;
-  }
-
-  auto fixture_mapping =
-      fml::FileMapping::CreateReadOnly(fixtures_directory, name);
-
-  if (!fixture_mapping) {
-    return nullptr;
-  }
-
-  SkData::ReleaseProc on_release = [](const void* ptr, void* context) -> void {
-    delete reinterpret_cast<fml::FileMapping*>(context);
-  };
-
-  auto data = SkData::MakeWithProc(fixture_mapping->GetMapping(),
-                                   fixture_mapping->GetSize(), on_release,
-                                   fixture_mapping.get());
-
-  if (!data) {
-    return nullptr;
-  }
-  // The data is now owned by Skia.
-  fixture_mapping.release();
-  return data;
-}
-
 class ShellIOManagerTest : public FixtureTest {};
 
 // Regression test for https://github.com/flutter/engine/pull/32106.
@@ -54,7 +24,7 @@ TEST_F(ShellIOManagerTest,
   auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
   auto vm_data = vm_ref.GetVMData();
-  auto gif_mapping = OpenFixtureAsSkData("hello_loop_2.gif");
+  auto gif_mapping = flutter::testing::OpenFixtureAsSkData("hello_loop_2.gif");
   ASSERT_TRUE(gif_mapping);
 
   ImageGeneratorRegistry registry;
