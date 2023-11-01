@@ -253,18 +253,15 @@ void EntityPass::AddSubpassInline(std::unique_ptr<EntityPass> pass) {
       pass->advanced_blend_reads_from_pass_texture_;
 }
 
-static RenderTarget::AttachmentConfig GetDefaultStencilConfig(bool readable) {
-  return RenderTarget::AttachmentConfig{
-      .storage_mode = readable ? StorageMode::kDevicePrivate
-                               : StorageMode::kDeviceTransient,
-      .load_action = LoadAction::kDontCare,
-      .store_action = StoreAction::kDontCare,
-  };
-}
+static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
+    RenderTarget::AttachmentConfig{
+        .storage_mode = StorageMode::kDeviceTransient,
+        .load_action = LoadAction::kDontCare,
+        .store_action = StoreAction::kDontCare,
+    };
 
 static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
                                            ISize size,
-                                           bool readable,
                                            const Color& clear_color) {
   auto context = renderer.GetContext();
 
@@ -285,8 +282,8 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
             .resolve_storage_mode = StorageMode::kDevicePrivate,
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kMultisampleResolve,
-            .clear_color = clear_color},   // color_attachment_config
-        GetDefaultStencilConfig(readable)  // stencil_attachment_config
+            .clear_color = clear_color},  // color_attachment_config
+        kDefaultStencilConfig             // stencil_attachment_config
     );
   } else {
     target = RenderTarget::CreateOffscreen(
@@ -299,8 +296,8 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kDontCare,
             .clear_color = clear_color,
-        },                                 // color_attachment_config
-        GetDefaultStencilConfig(readable)  // stencil_attachment_config
+        },                     // color_attachment_config
+        kDefaultStencilConfig  // stencil_attachment_config
     );
   }
 
@@ -361,9 +358,9 @@ bool EntityPass::Render(ContentContext& renderer,
   // and then blit the results onto the onscreen texture. If using this branch,
   // there's no need to set up a stencil attachment on the root render target.
   if (!supports_onscreen_backdrop_reads && reads_from_onscreen_backdrop) {
-    auto offscreen_target = CreateRenderTarget(
-        renderer, root_render_target.GetRenderTargetSize(), true,
-        GetClearColor(render_target.GetRenderTargetSize()));
+    auto offscreen_target =
+        CreateRenderTarget(renderer, root_render_target.GetRenderTargetSize(),
+                           GetClearColor(render_target.GetRenderTargetSize()));
 
     if (!OnRender(renderer,  // renderer
                   capture,   // capture
@@ -465,8 +462,7 @@ bool EntityPass::Render(ContentContext& renderer,
         *renderer.GetContext(), *renderer.GetRenderTargetCache(),
         color0.texture->GetSize(),
         renderer.GetContext()->GetCapabilities()->SupportsOffscreenMSAA(),
-        "ImpellerOnscreen",
-        GetDefaultStencilConfig(reads_from_onscreen_backdrop));
+        "ImpellerOnscreen", kDefaultStencilConfig);
   }
 
   // Set up the clear color of the root pass.
@@ -503,10 +499,10 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
   //--------------------------------------------------------------------------
   /// Setup entity element.
   ///
-
   if (const auto& entity = std::get_if<Entity>(&element)) {
     element_entity = *entity;
     element_entity.SetCapture(capture.CreateChild("Entity"));
+
     if (!global_pass_position.IsZero()) {
       // If the pass image is going to be rendered with a non-zero position,
       // apply the negative translation to entity copies before rendering them
@@ -515,16 +511,15 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
           Matrix::MakeTranslation(Vector3(-global_pass_position)) *
           element_entity.GetTransformation());
     }
+    return EntityPass::EntityResult::Success(element_entity);
   }
 
   //--------------------------------------------------------------------------
   /// Setup subpass element.
   ///
-
-  else if (const auto& subpass_ptr =
-               std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+  if (const auto& subpass_ptr =
+          std::get_if<std::unique_ptr<EntityPass>>(&element)) {
     auto subpass = subpass_ptr->get();
-
     if (subpass->delegate_->CanElide()) {
       return EntityPass::EntityResult::Skip();
     }
@@ -625,10 +620,9 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     }
 
     auto subpass_target = CreateRenderTarget(
-        renderer,                                  // renderer
-        subpass_size,                              // size
-        subpass->GetTotalPassReads(renderer) > 0,  // readable
-        subpass->GetClearColor(subpass_size));     // clear_color
+        renderer,                               // renderer
+        subpass_size,                           // size
+        subpass->GetClearColor(subpass_size));  // clear_color
 
     if (!subpass_target.IsValid()) {
       VALIDATION_LOG << "Subpass render target is invalid.";
@@ -696,11 +690,10 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     element_entity.SetTransformation(subpass_texture_capture.AddMatrix(
         "Transform", Matrix::MakeTranslation(Vector3(subpass_coverage->origin -
                                                      global_pass_position))));
-  } else {
-    FML_UNREACHABLE();
-  }
 
-  return EntityPass::EntityResult::Success(element_entity);
+    return EntityPass::EntityResult::Success(element_entity);
+  }
+  FML_UNREACHABLE();
 }
 
 bool EntityPass::RenderElement(Entity& element_entity,
@@ -724,6 +717,15 @@ bool EntityPass::RenderElement(Entity& element_entity,
   // blit the non-MSAA resolve texture of the previous pass to MSAA textures
   // (let alone a transient one).
   if (result.backdrop_texture) {
+    // Restore any clips that were recorded before the backdrop filter was
+    // applied.
+    auto& replay_entities = clip_replay_->GetReplayEntities();
+    for (const auto& entity : replay_entities) {
+      if (!entity.Render(renderer, *result.pass)) {
+        VALIDATION_LOG << "Failed to render entity for clip restore.";
+      }
+    }
+
     auto size_rect = Rect::MakeSize(result.pass->GetRenderTargetSize());
     auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
     msaa_backdrop_contents->SetStencilEnabled(false);
@@ -836,6 +838,7 @@ bool EntityPass::RenderElement(Entity& element_entity,
 #endif
 
   element_entity.SetClipDepth(element_entity.GetClipDepth() - clip_depth_floor);
+  clip_replay_->RecordEntity(element_entity, clip_coverage.type);
   if (!element_entity.Render(renderer, *result.pass)) {
     VALIDATION_LOG << "Failed to render entity.";
     return false;
@@ -1178,6 +1181,26 @@ void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {
 
 void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
   enable_offscreen_debug_checkerboard_ = enabled;
+}
+
+EntityPassClipRecorder::EntityPassClipRecorder() {}
+
+void EntityPassClipRecorder::RecordEntity(const Entity& entity,
+                                          Contents::ClipCoverage::Type type) {
+  switch (type) {
+    case Contents::ClipCoverage::Type::kNoChange:
+      return;
+    case Contents::ClipCoverage::Type::kAppend:
+      rendered_clip_entities_.push_back(entity);
+      break;
+    case Contents::ClipCoverage::Type::kRestore:
+      rendered_clip_entities_.pop_back();
+      break;
+  }
+}
+
+const std::vector<Entity>& EntityPassClipRecorder::GetReplayEntities() const {
+  return rendered_clip_entities_;
 }
 
 }  // namespace impeller
