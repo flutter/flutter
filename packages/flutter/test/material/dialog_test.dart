@@ -57,7 +57,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 // What was the AlertDialog's ButtonBar when many of these tests were written,
 // is now a Padding widget with an OverflowBar child. The Padding widget's size
 // and location match the original ButtonBar's size and location.
-Finder _findButtonBar() {
+Finder _findOverflowBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
 
@@ -610,7 +610,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(_findButtonBar());
+    final Size actionsSize = tester.getSize(_findOverflowBar());
 
     expect(actionsSize.width, dialogSize.width);
   });
@@ -687,25 +687,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findOverflowBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 8.0,
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findOverflowBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 8.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dx - 8.0,
     ); // right
   });
 
@@ -745,25 +745,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy,
+      tester.getTopRight(_findOverflowBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 24.0,
     ); // bottom
 
     // // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy,
+      tester.getTopRight(_findOverflowBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 24.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dx - 24.0,
     ); // right
   });
 
@@ -809,25 +809,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findOverflowBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findOverflowBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dx - ((10.0 + 20.0) / 2),
     ); // right
   });
 
@@ -850,7 +850,7 @@ void main() {
     final Finder iconFinder = find.byKey(iconKey);
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
-    final Finder actionsFinder = _findButtonBar();
+    final Finder actionsFinder = _findOverflowBar();
     final Finder childrenFinder = find.byKey(childrenKey);
 
     Future<void> openDialog(WidgetTester tester, Widget dialog, double textScaleFactor, {bool isM3 = false}) async {
