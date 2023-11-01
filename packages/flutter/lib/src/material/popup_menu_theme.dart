@@ -57,6 +57,7 @@ class PopupMenuThemeData with Diagnosticable {
     this.position,
     this.iconColor,
     this.iconSize,
+    this.transitionDuration,
   });
 
   /// The background color of the popup menu.
@@ -103,6 +104,9 @@ class PopupMenuThemeData with Diagnosticable {
   /// The size of the icon in the popup menu button.
   final double? iconSize;
 
+  /// The duration of animation when menu opens or closes.
+  final Duration? transitionDuration;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
@@ -118,6 +122,7 @@ class PopupMenuThemeData with Diagnosticable {
     PopupMenuPosition? position,
     Color? iconColor,
     double? iconSize,
+    Duration? transitionDuration,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -132,6 +137,7 @@ class PopupMenuThemeData with Diagnosticable {
       position: position ?? this.position,
       iconColor: iconColor ?? this.iconColor,
       iconSize: iconSize ?? this.iconSize,
+      transitionDuration: transitionDuration ?? this.transitionDuration,
     );
   }
 
