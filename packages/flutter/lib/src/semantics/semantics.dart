@@ -274,6 +274,17 @@ class CustomSemanticsAction {
   static CustomSemanticsAction? getAction(int id) {
     return _actions[id];
   }
+
+  /// Resets internal state between tests. Does nothing if asserts are disabled.
+  @visibleForTesting
+  static void resetForTests() {
+    assert(() {
+      _actions.clear();
+      _ids.clear();
+      _nextId = 0;
+      return true;
+    }());
+  }
 }
 
 /// A string that carries a list of [StringAttribute]s.
