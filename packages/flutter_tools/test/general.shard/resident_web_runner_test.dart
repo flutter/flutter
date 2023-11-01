@@ -681,6 +681,7 @@ void main() {
       fakeAnalytics.sentEvents,
       contains(
         Event.hotRunnerInfo(
+          label: 'restart',
           targetPlatform: 'web-javascript',
           sdkName: '',
           emulator: false,
@@ -766,6 +767,7 @@ void main() {
       fakeAnalytics.sentEvents,
       contains(
         Event.hotRunnerInfo(
+          label: 'restart',
           targetPlatform: 'web-javascript',
           sdkName: '',
           emulator: false,

@@ -456,6 +456,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         overallTimeInMs: elapsed.inMilliseconds,
       ).send();
       _analytics.send(Event.hotRunnerInfo(
+        label: 'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
         sdkName: sdkName,
         emulator: false,
