@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// FLUTTER_NOLINT: https://github.com/flutter/flutter/issues/132129
-
 #include "impeller/entity/entity_pass.h"
 
 #include <memory>
@@ -25,6 +23,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/rect.h"
 #include "impeller/renderer/command_buffer.h"
 
 #ifdef IMPELLER_DEBUG
@@ -97,19 +96,20 @@ size_t EntityPass::GetSubpassesDepth() const {
 
 std::optional<Rect> EntityPass::GetElementsCoverage(
     std::optional<Rect> coverage_limit) const {
-  std::optional<Rect> result;
+  std::optional<Rect> accumulated_coverage;
   for (const auto& element : elements_) {
-    std::optional<Rect> coverage;
+    std::optional<Rect> element_coverage;
 
     if (auto entity = std::get_if<Entity>(&element)) {
-      coverage = entity->GetCoverage();
+      element_coverage = entity->GetCoverage();
 
       // When the coverage limit is std::nullopt, that means there is no limit,
       // as opposed to empty coverage.
-      if (coverage.has_value() && coverage_limit.has_value()) {
+      if (element_coverage.has_value() && coverage_limit.has_value()) {
         const auto* filter = entity->GetContents()->AsFilter();
         if (!filter || filter->IsTranslationOnly()) {
-          coverage = coverage->Intersection(coverage_limit.value());
+          element_coverage =
+              element_coverage->Intersection(coverage_limit.value());
         }
       }
     } else if (auto subpass_ptr =
@@ -122,21 +122,15 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
       // If the current pass elements have any coverage so far and there's a
       // backdrop filter, then incorporate the backdrop filter in the
       // pre-filtered coverage of the subpass.
-      if (result.has_value() && subpass.backdrop_filter_proc_) {
+      if (accumulated_coverage.has_value() && subpass.backdrop_filter_proc_) {
         std::shared_ptr<FilterContents> backdrop_filter =
-            subpass.backdrop_filter_proc_(FilterInput::Make(result.value()),
-                                          subpass.xformation_,
-                                          Entity::RenderingMode::kSubpass);
+            subpass.backdrop_filter_proc_(
+                FilterInput::Make(accumulated_coverage.value()),
+                subpass.xformation_, Entity::RenderingMode::kSubpass);
         if (backdrop_filter) {
           auto backdrop_coverage = backdrop_filter->GetCoverage({});
-          backdrop_coverage->origin += result->origin;
-          if (backdrop_coverage.has_value()) {
-            if (unfiltered_coverage.has_value()) {
-              unfiltered_coverage = coverage->Union(*backdrop_coverage);
-            } else {
-              unfiltered_coverage = backdrop_coverage;
-            }
-          }
+          unfiltered_coverage =
+              Rect::Union(unfiltered_coverage, backdrop_coverage);
         } else {
           VALIDATION_LOG << "The EntityPass backdrop filter proc didn't return "
                             "a valid filter.";
@@ -161,29 +155,19 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
       if (image_filter) {
         Entity subpass_entity;
         subpass_entity.SetTransformation(subpass.xformation_);
-        coverage = image_filter->GetCoverage(subpass_entity);
+        element_coverage = image_filter->GetCoverage(subpass_entity);
       } else {
-        coverage = unfiltered_coverage;
+        element_coverage = unfiltered_coverage;
       }
 
-      if (coverage.has_value() && coverage_limit.has_value() &&
-          (!image_filter || image_filter->IsTranslationOnly())) {
-        coverage = coverage->Intersection(coverage_limit.value());
-      }
+      element_coverage = Rect::Intersection(element_coverage, coverage_limit);
     } else {
       FML_UNREACHABLE();
     }
 
-    if (!result.has_value() && coverage.has_value()) {
-      result = coverage;
-      continue;
-    }
-    if (!coverage.has_value()) {
-      continue;
-    }
-    result = result->Union(coverage.value());
+    accumulated_coverage = Rect::Union(accumulated_coverage, element_coverage);
   }
-  return result;
+  return accumulated_coverage;
 }
 
 std::optional<Rect> EntityPass::GetSubpassCoverage(
@@ -762,16 +746,9 @@ bool EntityPass::RenderElement(Entity& element_entity,
   // rendered output will actually be used, and so we set this to the current
   // clip coverage (which is the max clip bounds). The contents may
   // optionally use this hint to avoid unnecessary rendering work.
-  if (element_entity.GetContents()->GetCoverageHint().has_value()) {
-    // If the element already has a coverage hint (because its an advanced
-    // blend), then we need to intersect the clip coverage hint with the
-    // existing coverage hint.
-    element_entity.GetContents()->SetCoverageHint(
-        current_clip_coverage->Intersection(
-            element_entity.GetContents()->GetCoverageHint().value()));
-  } else {
-    element_entity.GetContents()->SetCoverageHint(current_clip_coverage);
-  }
+  auto element_coverage_hint = element_entity.GetContents()->GetCoverageHint();
+  element_entity.GetContents()->SetCoverageHint(
+      Rect::Intersection(element_coverage_hint, current_clip_coverage));
 
   switch (clip_coverage.type) {
     case Contents::ClipCoverage::Type::kNoChange:
