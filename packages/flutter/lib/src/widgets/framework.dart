@@ -872,7 +872,7 @@ const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 ///    objects should override [didUpdateWidget] to respond to changes in their
 ///    associated widget (e.g., to start implicit animations). The framework
 ///    always calls [build] after calling [didUpdateWidget], which means any
-///    calls to [setState] in [didUpdateWidget] are redundant. (See alse the
+///    calls to [setState] in [didUpdateWidget] are redundant. (See also the
 ///    discussion at [Element.rebuild].)
 ///  * During development, if a hot reload occurs (whether initiated from the
 ///    command line `flutter` tool by pressing `r`, or from an IDE), the
