@@ -101,6 +101,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
         androidStudio: globals.androidStudio,
@@ -387,6 +388,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
     },
   );

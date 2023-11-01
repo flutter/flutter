@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -581,17 +582,35 @@ return result.exitCode != 0 &&
     result.stdout.contains(kConcurrentRunFailureMessage2);
 }
 
-Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsage, Logger logger) async {
+Future<void> diagnoseXcodeBuildFailure(
+  XcodeBuildResult result,
+  Usage flutterUsage,
+  Logger logger,
+  Analytics analytics,
+) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
   if (xcodeBuildExecution != null
       && xcodeBuildExecution.environmentType == EnvironmentType.physical
       && (result.stdout?.toUpperCase().contains('BITCODE') ?? false)) {
-    BuildEvent('xcode-bitcode-failure',
-      type: 'ios',
-      command: xcodeBuildExecution.buildCommands.toString(),
-      settings: xcodeBuildExecution.buildSettings.toString(),
+
+    const String label = 'xcode-bitcode-failure';
+    const String buildType = 'ios';
+    final String command = xcodeBuildExecution.buildCommands.toString();
+    final String settings = xcodeBuildExecution.buildSettings.toString();
+
+    BuildEvent(
+      label,
+      type: buildType,
+      command: command,
+      settings: settings,
       flutterUsage: flutterUsage,
     ).send();
+    analytics.send(Event.flutterBuildInfo(
+      label: label,
+      buildType: buildType,
+      command: command,
+      settings: settings,
+    ));
   }
 
   // Handle errors.

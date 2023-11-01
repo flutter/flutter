@@ -322,6 +322,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             usage: globals.flutterUsage,
+            analytics: globals.analytics,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -400,6 +401,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           usage: globals.flutterUsage,
+          analytics: globals.analytics,
         );
         await webBuilder.buildWeb(
           flutterProject,

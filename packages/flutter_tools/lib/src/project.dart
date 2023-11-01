@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
@@ -761,8 +762,19 @@ The detected reason was:
 ''');
     if (deprecationBehavior == DeprecationBehavior.ignore) {
       BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      globals.analytics.send(
+        Event.flutterBuildInfo(
+        label: 'deprecated-v1-android-embedding-ignored',
+        buildType: 'gradle',
+      ));
+
     } else { // DeprecationBehavior.exit
-      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      globals.analytics.send(
+        Event.flutterBuildInfo(
+        label: 'deprecated-v1-android-embedding-failed',
+        buildType: 'gradle',
+      ));
+
       throwToolExit(
         'Build failed due to use of deprecated Android v1 embedding.',
         exitCode: 1,

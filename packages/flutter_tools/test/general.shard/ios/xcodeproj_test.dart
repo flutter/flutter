@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -72,6 +73,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
     );
   });
 
@@ -184,6 +186,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -510,6 +513,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
@@ -536,6 +540,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
     );
 
     expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
@@ -562,6 +567,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
     );
 
     expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));

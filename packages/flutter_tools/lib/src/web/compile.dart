@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -34,12 +35,14 @@ class WebBuilder {
     required ProcessManager processManager,
     required BuildSystem buildSystem,
     required Usage usage,
+    required Analytics analytics,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
   })  : _logger = logger,
         _processManager = processManager,
         _buildSystem = buildSystem,
         _flutterUsage = usage,
+        _analytics = analytics,
         _flutterVersion = flutterVersion,
         _fileSystem = fileSystem;
 
@@ -47,6 +50,7 @@ class WebBuilder {
   final ProcessManager _processManager;
   final BuildSystem _buildSystem;
   final Usage _flutterUsage;
+  final Analytics _analytics;
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
 
@@ -127,15 +131,23 @@ class WebBuilder {
     } finally {
       status.stop();
     }
+
+    final String buildSettingsString = _buildEventAnalyticsSettings(
+      config: compilerConfig,
+      buildInfo: buildInfo,
+    );
+
     BuildEvent(
       'web-compile',
       type: 'web',
-      settings: _buildEventAnalyticsSettings(
-        config: compilerConfig,
-        buildInfo: buildInfo,
-      ),
+      settings: buildSettingsString,
       flutterUsage: _flutterUsage,
     ).send();
+    _analytics.send(Event.flutterBuildInfo(
+      label: 'web-compile',
+      buildType: 'web',
+      settings: buildSettingsString,
+    ));
 
     _flutterUsage.sendTiming(
       'build',
