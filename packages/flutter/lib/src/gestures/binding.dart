@@ -522,7 +522,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @protected
   SamplingClock? get debugSamplingClock => null;
 
-  /// Provides access to the current [DateTime] and [StopWatch] objects for
+  /// Provides access to the current [DateTime] and `StopWatch` objects for
   /// sampling.
   ///
   /// Overridden by [debugSamplingClock] for debug builds and testing. Using
