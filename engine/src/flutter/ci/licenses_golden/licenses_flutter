@@ -4669,7 +4669,6 @@ ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCha
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponderTest.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.mm + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositorTest.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderExternalTextureTest.mm + ../../../flutter/LICENSE
@@ -7473,7 +7472,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChann
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponderTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositorTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderExternalTextureTest.mm

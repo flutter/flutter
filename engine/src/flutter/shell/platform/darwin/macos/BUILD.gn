@@ -173,7 +173,6 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterAppDelegateTest.mm",
     "framework/Source/FlutterAppLifecycleDelegateTest.mm",
     "framework/Source/FlutterChannelKeyResponderTest.mm",
-    "framework/Source/FlutterCompositorTest.mm",
     "framework/Source/FlutterEmbedderExternalTextureTest.mm",
     "framework/Source/FlutterEmbedderKeyResponderTest.mm",
     "framework/Source/FlutterEngineTest.mm",

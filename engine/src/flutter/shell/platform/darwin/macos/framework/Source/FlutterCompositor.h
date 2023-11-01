@@ -20,6 +20,8 @@ namespace flutter {
 // FlutterCompositor creates and manages the backing stores used for
 // rendering Flutter content and presents Flutter content and Platform views.
 // Platform views are not yet supported.
+//
+// TODO(cbracken): refactor for testability. https://github.com/flutter/flutter/issues/137648
 class FlutterCompositor {
  public:
   // Create a FlutterCompositor with a view provider.
