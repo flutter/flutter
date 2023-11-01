@@ -1,4 +1,4 @@
-Signature: 2d3e4e07b566a360a414451f3c4fd698
+Signature: ae906def1a1cc8e0c09fa3d03579e15d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -6193,16 +6193,6 @@ ORIGIN: ../../../third_party/skia/gm/swizzle.cpp + ../../../third_party/skia/LIC
 ORIGIN: ../../../third_party/skia/gm/tilemodes_alpha.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkPathTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skparagraph/bench/ParagraphBench.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/app/editor_application.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/include/editor.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/include/stringslice.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/include/stringview.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/editor.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/shape.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/shape.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/stringslice.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkContainers.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkMalloc.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPixelRefPriv.h + ../../../third_party/skia/LICENSE
@@ -6232,16 +6222,6 @@ FILE: ../../../third_party/skia/gm/swizzle.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
 FILE: ../../../third_party/skia/include/core/SkPathTypes.h
 FILE: ../../../third_party/skia/modules/skparagraph/bench/ParagraphBench.cpp
-FILE: ../../../third_party/skia/modules/skplaintexteditor/app/editor_application.cpp
-FILE: ../../../third_party/skia/modules/skplaintexteditor/include/editor.h
-FILE: ../../../third_party/skia/modules/skplaintexteditor/include/stringslice.h
-FILE: ../../../third_party/skia/modules/skplaintexteditor/include/stringview.h
-FILE: ../../../third_party/skia/modules/skplaintexteditor/src/editor.cpp
-FILE: ../../../third_party/skia/modules/skplaintexteditor/src/shape.cpp
-FILE: ../../../third_party/skia/modules/skplaintexteditor/src/shape.h
-FILE: ../../../third_party/skia/modules/skplaintexteditor/src/stringslice.cpp
-FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.cpp
-FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.h
 FILE: ../../../third_party/skia/src/base/SkContainers.cpp
 FILE: ../../../third_party/skia/src/base/SkMalloc.cpp
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
