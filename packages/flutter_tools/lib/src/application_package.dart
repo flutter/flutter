@@ -7,6 +7,7 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 
 abstract class ApplicationPackageFactory {
+  /// My change
   static ApplicationPackageFactory? get instance => context.get<ApplicationPackageFactory>();
 
   /// Create an [ApplicationPackage] for the given platform.
