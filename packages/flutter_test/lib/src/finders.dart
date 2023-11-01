@@ -965,7 +965,7 @@ mixin _LegacyFinderMixin on FinderBase<Element> {
 /// A base class for creating finders that search the [Element] tree for
 /// [Widget]s.
 ///
-/// The [findInCandidates] method must be overriden and will be enforced at
+/// The [findInCandidates] method must be overridden and will be enforced at
 /// compilation after [apply] is removed.
 abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
   /// Creates a new [Finder] with the given `skipOffstage` value.
