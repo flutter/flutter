@@ -608,6 +608,7 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         fileSystem: globals.fs,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         logger: globals.logger,
         systemClock: globals.systemClock,
       );
