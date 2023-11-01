@@ -77,7 +77,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12|Mac-13
       device_type: none
@@ -89,7 +89,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12|Mac-13
       device_type: none
@@ -102,7 +102,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       device_type: none
       mac_model: "Macmini8,1"
@@ -117,7 +117,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12|Mac-13
       device_type: none
@@ -131,7 +131,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12|Mac-13
       device_type: none
@@ -166,7 +166,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12|Mac-13
       cpu: x86
