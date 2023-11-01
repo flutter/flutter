@@ -4,10 +4,51 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+// Returns the RenderEditable at the given index, or the first if not given.
+RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
+  final RenderObject root = tester.renderObject(find.byType(EditableText).at(index));
+  expect(root, isNotNull);
+
+  late RenderEditable renderEditable;
+  void recursiveFinder(RenderObject child) {
+    if (child is RenderEditable) {
+      renderEditable = child;
+      return;
+    }
+    child.visitChildren(recursiveFinder);
+  }
+  root.visitChildren(recursiveFinder);
+  expect(renderEditable, isNotNull);
+  return renderEditable;
+}
+
+List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+  return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+    return TextSelectionPoint(
+      box.localToGlobal(point.point),
+      point.direction,
+    );
+  }).toList();
+}
+
+Offset _textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
+  final RenderEditable renderEditable = findRenderEditable(tester, index: index);
+  final List<TextSelectionPoint> endpoints = globalize(
+    renderEditable.getEndpointsForSelection(
+      TextSelection.collapsed(offset: offset),
+    ),
+    renderEditable,
+  );
+  expect(endpoints.length, 1);
+  return endpoints[0].point + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
+}
 void main() {
   testWidgetsWithLeakTracking('SearchBar defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -2324,6 +2365,168 @@ void main() {
     expect(searchViewRect.bottomRight, equals(const Offset(300.0, 300.0)));
   });
 
+  // Regression tests for https://github.com/flutter/flutter/issues/128332
+  group('SearchAnchor text selection', () {
+    testWidgetsWithLeakTracking('can right-click to select word', (WidgetTester tester) async {
+      const String defaultText = 'initial text';
+      final SearchController controller = SearchController();
+      addTearDown(controller.dispose);
+      controller.text = defaultText;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SearchAnchor.bar(
+              searchController: controller,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.value.text, defaultText);
+      expect(find.text(defaultText), findsOneWidget);
+
+      final TestGesture gesture = await tester.startGesture(
+        _textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.value.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
+      await gesture.removePointer();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+    testWidgetsWithLeakTracking('can click to set position', (WidgetTester tester) async {
+      const String defaultText = 'initial text';
+      final SearchController controller = SearchController();
+      addTearDown(controller.dispose);
+      controller.text = defaultText;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SearchAnchor.bar(
+              searchController: controller,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.value.text, defaultText);
+      expect(find.text(defaultText), findsOneWidget);
+
+      final TestGesture gesture = await _pointGestureToSearchBar(tester);
+      await gesture.down(_textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(controller.value.selection, const TextSelection.collapsed(offset: 4));
+
+      await gesture.down(_textOffsetToPosition(tester, 9) + Offset(0.0, -9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.value.selection, const TextSelection.collapsed(offset: 9));
+      await gesture.removePointer();
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgetsWithLeakTracking('can double-click to select word', (WidgetTester tester) async {
+      const String defaultText = 'initial text';
+      final SearchController controller = SearchController();
+      addTearDown(controller.dispose);
+      controller.text = defaultText;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SearchAnchor.bar(
+              searchController: controller,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.value.text, defaultText);
+      expect(find.text(defaultText), findsOneWidget);
+
+      final TestGesture gesture = await _pointGestureToSearchBar(tester);
+      final Offset targetPosition = _textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0);
+      await gesture.down(targetPosition);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+
+      await gesture.down(targetPosition);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pump();
+  
+      await gesture.down(targetPosition);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(controller.value.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
+      await gesture.removePointer();
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgetsWithLeakTracking('can triple-click to select field', (WidgetTester tester) async {
+      const String defaultText = 'initial text';
+      final SearchController controller = SearchController();
+      addTearDown(controller.dispose);
+      controller.text = defaultText;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SearchAnchor.bar(
+              searchController: controller,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.value.text, defaultText);
+      expect(find.text(defaultText), findsOneWidget);
+
+      final TestGesture gesture = await _pointGestureToSearchBar(tester);
+      final Offset targetPosition = _textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0);
+      await gesture.down(targetPosition);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+
+      await gesture.down(targetPosition);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(targetPosition);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(targetPosition);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.value.selection, const TextSelection(baseOffset: 0, extentOffset: 12));
+      await gesture.removePointer();
+    }, variant: TargetPlatformVariant.desktop());
+  });
 
   // Regression tests for https://github.com/flutter/flutter/issues/126623
   group('Overall InputDecorationTheme does not impact SearchBar and SearchView', () {
