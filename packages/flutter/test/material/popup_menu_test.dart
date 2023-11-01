@@ -3809,7 +3809,80 @@ void main() {
     );
     await tester.tap(find.text('button'));
     await tester.pumpAndSettle();
-    expect(tester.widget<PopupMenuButton<String>>(find.byType(PopupMenuButton<String>)).transitionDuration?.inSeconds, 5);
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 4));
+    expect(find.text('item1'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1001));
+    expect(find.text('item1'), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('PopupMenuButton honors transitionDuration from PopupThemeData', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          popupMenuTheme: const PopupMenuThemeData(
+            transitionDuration: Duration(seconds: 3),
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              child: const Text('button'),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<String>>[
+                  const CheckedPopupMenuItem<String>(
+                    value: 'item1',
+                    child: Text('item1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('button'));
+    await tester.pumpAndSettle();
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('item1'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1001));
+    expect(find.text('item1'), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('PopupMenuButton honors default 300ms transition duration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              child: const Text('button'),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<String>>[
+                  const CheckedPopupMenuItem<String>(
+                    value: 'item1',
+                    child: Text('item1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('button'));
+    await tester.pumpAndSettle();
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('item1'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 101));
+    expect(find.text('item1'), findsNothing);
   });
 }
 
