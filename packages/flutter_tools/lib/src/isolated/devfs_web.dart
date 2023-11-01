@@ -931,9 +931,10 @@ class WebDevFS implements DevFS {
   ));
 
   @visibleForTesting
-  final File flutterJs = globals.fs.file(
-    globals.artifacts!.getHostArtifact(HostArtifact.flutterJs).path
-  );
+  final File flutterJs = globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
+  ));
 
   @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(

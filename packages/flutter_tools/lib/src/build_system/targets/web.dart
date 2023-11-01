@@ -525,7 +525,10 @@ class WebBuiltInAssets extends Target {
 
     // Write the flutter.js file
     final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
-    final File flutterJsFile = globals.artifacts!.getHostArtifact(HostArtifact.flutterJs) as File;
+    final File flutterJsFile = fileSystem.file(fileSystem.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ));
     flutterJsFile.copySync(flutterJsOut);
   }
 }
