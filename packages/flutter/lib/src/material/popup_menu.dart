@@ -816,6 +816,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.constraints,
     required this.clipBehavior,
     super.settings,
+    this.menuDuration,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
@@ -834,6 +835,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final CapturedThemes capturedThemes;
   final BoxConstraints? constraints;
   final Clip clipBehavior;
+  final Duration? menuDuration;
 
   @override
   Animation<double> createAnimation() {
@@ -845,7 +847,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => _kMenuDuration;
+  Duration get transitionDuration => menuDuration ?? _kMenuDuration;
 
   @override
   bool get barrierDismissible => true;
@@ -945,6 +947,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// menu to the [Navigator] furthest from or nearest to the given `context`. It
 /// is `false` by default.
 ///
+/// The `transitionDuration` argument is used to control the duration of
+/// animation when menu opens/closes.
+///
 /// The `semanticLabel` argument is used by accessibility frameworks to
 /// announce screen transitions when the menu is opened and closed. If this
 /// label is not provided, it will default to
@@ -977,6 +982,7 @@ Future<T?> showMenu<T>({
   BoxConstraints? constraints,
   Clip clipBehavior = Clip.none,
   RouteSettings? routeSettings,
+  Duration? transitionDuration,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1008,6 +1014,7 @@ Future<T?> showMenu<T>({
     constraints: constraints,
     clipBehavior: clipBehavior,
     settings: routeSettings,
+    menuDuration: transitionDuration,
   ));
 }
 
@@ -1128,6 +1135,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.constraints,
     this.position,
     this.clipBehavior = Clip.none,
+    this.transitionDuration,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1292,6 +1300,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// The `transitionDuration` argument is used to control the duration of
+  /// animation when menu opens/closes.
+  final Duration? transitionDuration;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1348,6 +1360,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         color: widget.color ?? popupMenuTheme.color,
         constraints: widget.constraints,
         clipBehavior: widget.clipBehavior,
+        transitionDuration: widget.transitionDuration ?? popupMenuTheme.transitionDuration,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
