@@ -73,41 +73,11 @@ float DecodeBGR10(uint32_t x) {
   return (x * slope) + intercept;
 }
 
-sk_sp<SkData> OpenFixtureAsSkData(const char* name) {
-  auto fixtures_directory =
-      fml::OpenDirectory(GetFixturesPath(), false, fml::FilePermission::kRead);
-  if (!fixtures_directory.is_valid()) {
-    return nullptr;
-  }
-
-  auto fixture_mapping =
-      fml::FileMapping::CreateReadOnly(fixtures_directory, name);
-
-  if (!fixture_mapping) {
-    return nullptr;
-  }
-
-  SkData::ReleaseProc on_release = [](const void* ptr, void* context) -> void {
-    delete reinterpret_cast<fml::FileMapping*>(context);
-  };
-
-  auto data = SkData::MakeWithProc(fixture_mapping->GetMapping(),
-                                   fixture_mapping->GetSize(), on_release,
-                                   fixture_mapping.get());
-
-  if (!data) {
-    return nullptr;
-  }
-  // The data is now owned by Skia.
-  fixture_mapping.release();
-  return data;
-}
-
 TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Fuchsia can't load the test fixtures.";
 #endif
-  auto data = OpenFixtureAsSkData("DisplayP3Logo.png");
+  auto data = flutter::testing::OpenFixtureAsSkData("DisplayP3Logo.png");
   auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
@@ -164,7 +134,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Fuchsia can't load the test fixtures.";
 #endif
-  auto data = OpenFixtureAsSkData("WideGamutIndexed.png");
+  auto data = flutter::testing::OpenFixtureAsSkData("WideGamutIndexed.png");
   auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());

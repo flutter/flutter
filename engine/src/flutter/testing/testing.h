@@ -12,6 +12,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/assertions.h"
 #include "gtest/gtest.h"
+#include "third_party/skia/include/core/SkData.h"
 
 namespace flutter {
 namespace testing {
@@ -72,6 +73,17 @@ fml::UniqueFD OpenFixture(const std::string& fixture_name);
 ///
 std::unique_ptr<fml::Mapping> OpenFixtureAsMapping(
     const std::string& fixture_name);
+
+//------------------------------------------------------------------------------
+/// @brief      Opens a fixture of the given file name and returns a Skia SkData
+///             holding its contents.
+///
+/// @param[in]  fixture_name  The fixture name
+///
+/// @return     An SkData, or null if the fixture does not exist or its contents
+///             cannot be mapped in.
+///
+sk_sp<SkData> OpenFixtureAsSkData(const std::string& fixture_name);
 
 //------------------------------------------------------------------------------
 /// @brief      Gets the name of the currently running test. This is useful in

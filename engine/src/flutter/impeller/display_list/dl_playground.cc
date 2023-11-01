@@ -52,24 +52,9 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
       });
 }
 
-static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
-  auto mapping = flutter::testing::OpenFixtureAsMapping(fixture_name);
-  if (!mapping) {
-    return nullptr;
-  }
-  auto data = SkData::MakeWithProc(
-      mapping->GetMapping(), mapping->GetSize(),
-      [](const void* ptr, void* context) {
-        delete reinterpret_cast<fml::Mapping*>(context);
-      },
-      mapping.get());
-  mapping.release();
-  return data;
-}
-
 SkFont DlPlayground::CreateTestFontOfSize(SkScalar scalar) {
   static constexpr const char* kTestFontFixture = "Roboto-Regular.ttf";
-  auto mapping = OpenFixtureAsSkData(kTestFontFixture);
+  auto mapping = flutter::testing::OpenFixtureAsSkData(kTestFontFixture);
   FML_CHECK(mapping);
   return SkFont{SkTypeface::MakeFromData(mapping), scalar};
 }
