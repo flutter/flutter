@@ -1968,11 +1968,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   // The currently selected values of the picker.
   int? selectedHour;
-
-  FixedExtentScrollController? _hourScrollController;
-  FixedExtentScrollController? _minuteScrollController;
-  FixedExtentScrollController? _secondScrollController;
-
   late int selectedMinute;
   int? selectedSecond;
 
@@ -1994,6 +1989,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   late double totalWidth;
   late double pickerColumnWidth;
+
+  FixedExtentScrollController? _hourScrollController;
+  FixedExtentScrollController? _minuteScrollController;
+  FixedExtentScrollController? _secondScrollController;
 
   @override
   void initState() {
