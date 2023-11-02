@@ -3237,6 +3237,18 @@ extension SkParagraphExtension on SkParagraph {
   List<SkLineMetrics> getLineMetrics() =>
       _getLineMetrics().toDart.cast<SkLineMetrics>();
 
+  @JS('getLineMetricsAt')
+  external SkLineMetrics? _getLineMetricsAt(JSNumber index);
+  SkLineMetrics? getLineMetricsAt(double index) => _getLineMetricsAt(index.toJS);
+
+  @JS('getNumberOfLines')
+  external JSNumber _getNumberOfLines();
+  double getNumberOfLines() => _getNumberOfLines().toDartDouble;
+
+  @JS('getLineNumberAt')
+  external JSNumber _getLineNumberAt(JSNumber index);
+  double getLineNumberAt(double index) => _getLineNumberAt(index.toJS).toDartDouble;
+
   @JS('getLongestLine')
   external JSNumber _getLongestLine();
   double getLongestLine() => _getLongestLine().toDartDouble;

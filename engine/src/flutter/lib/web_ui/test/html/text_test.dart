@@ -79,10 +79,6 @@ Future<void> testMain() async {
       expect(paragraph.height, fontSize * 2.0); // because it wraps
       expect(paragraph.width, fontSize * 5.0);
       expect(paragraph.minIntrinsicWidth, fontSize * 4.0);
-
-      // TODO(yjbanov): due to https://github.com/flutter/flutter/issues/21965
-      //                Flutter reports a different number. Ours is correct
-      //                though.
       expect(paragraph.maxIntrinsicWidth, fontSize * 9.0);
       expect(paragraph.alphabeticBaseline, fontSize * .8);
       expect(
@@ -92,6 +88,31 @@ Future<void> testMain() async {
             from: paragraph.alphabeticBaseline * baselineRatio),
       );
     }
+  });
+
+  test('Basic line related metrics', () {
+    const double fontSize = 10;
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: fontSize,
+      maxLines: 1,
+      ellipsis: 'BBB',
+    ))..addText('A' * 100);
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 100.0));
+
+    expect(paragraph.numberOfLines, 1);
+
+    expect(paragraph.getLineMetricsAt(-1), isNull);
+    expect(paragraph.getLineMetricsAt(0), isNotNull);
+    expect(paragraph.getLineMetricsAt(1), isNull);
+
+    expect(paragraph.getLineNumberAt(-1), isNull);
+    expect(paragraph.getLineNumberAt(0), 0);
+    expect(paragraph.getLineNumberAt(6), 0);
+    // The last 3 characters on the first line are ellipsized with BBB.
+    expect(paragraph.getLineNumberAt(7), isNull);
   });
 
   test('Can disable rounding hack', () {
