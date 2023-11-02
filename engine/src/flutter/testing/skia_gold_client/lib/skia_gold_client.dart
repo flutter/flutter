@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
@@ -36,7 +37,13 @@ class SkiaGoldClient {
   ///
   /// [dimensions] allows to add attributes about the environment
   /// used to generate the screenshots.
-  SkiaGoldClient(this.workDirectory, { this.dimensions });
+  SkiaGoldClient(this.workDirectory, { this.dimensions, this.verbose = false});
+
+  /// Whether to print verbose output from goldctl.
+  ///
+  /// This flag is intended for use in debugging CI issues, and should not
+  /// ordinarily be set to true.
+  final bool verbose;
 
   /// Allows to add attributes about the environment used to generate the screenshots.
   final Map<String, String>? dimensions;
@@ -95,6 +102,7 @@ class SkiaGoldClient {
     final List<String> authCommand = <String>[
       _goldctl,
       'auth',
+      if (verbose) '--verbose',
       '--work-dir', _tempPath,
       '--luci',
     ];
@@ -111,6 +119,9 @@ class SkiaGoldClient {
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
+    } else if (verbose) {
+      print('stdout:\n${result.stdout}');
+      print('stderr:\n${result.stderr}');
     }
   }
 
@@ -134,6 +145,7 @@ class SkiaGoldClient {
     final List<String> imgtestInitCommand = <String>[
       _goldctl,
       'imgtest', 'init',
+      if (verbose) '--verbose',
       '--instance', _instance,
       '--work-dir', _tempPath,
       '--commit', commitHash,
@@ -163,7 +175,11 @@ class SkiaGoldClient {
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
+    } else if (verbose) {
+      print('stdout:\n${result.stdout}');
+      print('stderr:\n${result.stderr}');
     }
+
   }
 
   /// Executes the `imgtest add` command in the `goldctl` tool.
@@ -229,6 +245,7 @@ class SkiaGoldClient {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
+      if (verbose) '--verbose',
       '--work-dir', _tempPath,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
@@ -243,6 +260,9 @@ class SkiaGoldClient {
       // is meant to inform when an unexpected result occurs.
       print('goldctl imgtest add stdout: ${result.stdout}');
       print('goldctl imgtest add stderr: ${result.stderr}');
+    } else if (verbose) {
+      print('stdout:\n${result.stdout}');
+      print('stderr:\n${result.stderr}');
     }
   }
 
@@ -261,6 +281,7 @@ class SkiaGoldClient {
     final List<String> tryjobInitCommand = <String>[
       _goldctl,
       'imgtest', 'init',
+      if (verbose) '--verbose',
       '--instance', _instance,
       '--work-dir', _tempPath,
       '--commit', commitHash,
@@ -293,6 +314,9 @@ class SkiaGoldClient {
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
+    } else if (verbose) {
+      print('stdout:\n${result.stdout}');
+      print('stderr:\n${result.stderr}');
     }
   }
 
@@ -317,6 +341,7 @@ class SkiaGoldClient {
     final List<String> tryjobCommand = <String>[
       _goldctl,
       'imgtest', 'add',
+      if (verbose) '--verbose',
       '--work-dir', _tempPath,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
@@ -338,6 +363,9 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}')
         ..writeln();
       throw Exception(buf.toString());
+    } else if (verbose) {
+      print('stdout:\n${result.stdout}');
+      print('stderr:\n${result.stderr}');
     }
   }
 
@@ -421,13 +449,13 @@ class SkiaGoldClient {
 
   /// Returns the current commit hash of the engine repository.
   Future<String> _getCurrentCommit() async {
-    final File currentScript = File.fromUri(Platform.script);
+    final String engineCheckout = Engine.findWithin().flutterDir.path;
     final ProcessResult revParse = await process.run(
       <String>['git', 'rev-parse', 'HEAD'],
-      workingDirectory: currentScript.parent.absolute.path,
+      workingDirectory: engineCheckout,
     );
     if (revParse.exitCode != 0) {
-      throw Exception('Current commit of the engine can not be found from path ${currentScript.path}.');
+      throw Exception('Current commit of the engine can not be found from path $engineCheckout.');
     }
     return (revParse.stdout as String).trim();
   }

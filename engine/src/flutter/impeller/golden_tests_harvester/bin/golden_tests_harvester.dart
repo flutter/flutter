@@ -16,12 +16,15 @@ bool get isLuciEnv => Platform.environment.containsKey(_kLuciEnvName);
 
 /// Fake SkiaGoldClient that is used if the harvester is run outside of Luci.
 class FakeSkiaGoldClient implements SkiaGoldClient {
-  FakeSkiaGoldClient(this._workingDirectory, {this.dimensions});
+  FakeSkiaGoldClient(this._workingDirectory, {this.dimensions, this.verbose = false});
 
   final Directory _workingDirectory;
 
   @override
   final Map<String, String>? dimensions;
+
+  @override
+  final bool verbose;
 
   @override
   Future<void> addImg(String testName, File goldenFile,

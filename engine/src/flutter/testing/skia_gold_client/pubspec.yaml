@@ -17,6 +17,7 @@ environment:
 dependencies:
   crypto: any
   path: any
+  engine_repo_tools: any
   process: any
 
 dependency_overrides:
@@ -24,6 +25,8 @@ dependency_overrides:
     path: ../../../third_party/dart/third_party/pkg/collection
   crypto:
     path: ../../../third_party/dart/third_party/pkg/crypto
+  engine_repo_tools:
+    path: ../../tools/pkg/engine_repo_tools
   file:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
   meta:
