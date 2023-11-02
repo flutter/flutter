@@ -1577,6 +1577,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     for (final PopEntry popEntry in _popEntries) {
       popEntry.onPopInvoked?.call(didPop);
     }
+    super.onPopInvoked(didPop);
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.
@@ -1634,8 +1635,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [unregisterPopEntry], which performs the opposite operation.
   void registerPopEntry(PopEntry popEntry) {
     _popEntries.add(popEntry);
-    popEntry.canPopNotifier.addListener(_handlePopEntryChange);
-    _handlePopEntryChange();
+    popEntry.canPopNotifier.addListener(_maybeDispatchNavigationNotification);
+    _maybeDispatchNavigationNotification();
   }
 
   /// Unregisters a [PopEntry] in the route's widget subtree.
@@ -1645,11 +1646,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [registerPopEntry], which performs the opposite operation.
   void unregisterPopEntry(PopEntry popEntry) {
     _popEntries.remove(popEntry);
-    popEntry.canPopNotifier.removeListener(_handlePopEntryChange);
-    _handlePopEntryChange();
+    popEntry.canPopNotifier.removeListener(_maybeDispatchNavigationNotification);
+    _maybeDispatchNavigationNotification();
   }
 
-  void _handlePopEntryChange() {
+  void _maybeDispatchNavigationNotification() {
     if (!isCurrent) {
       return;
     }
@@ -1718,6 +1719,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
     changedInternalState();
+    _maybeDispatchNavigationNotification();
   }
 
   @override
