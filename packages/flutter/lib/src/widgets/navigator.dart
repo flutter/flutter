@@ -3160,7 +3160,7 @@ class _RouteEntry extends RouteTransitionRecord {
     return true;
   }
 
-  void handleComplete() {
+  void handleComplete(NavigatorState navigator) {
     route.didComplete(pendingResult);
     pendingResult = null;
     assert(route._popCompleter.isCompleted); // implies didComplete was called
@@ -4345,7 +4345,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // Will exit this state when animation completes.
           break;
         case _RouteLifecycle.complete:
-          entry.handleComplete();
+          entry.handleComplete(this);
           assert(entry.currentState == _RouteLifecycle.remove);
           continue;
         case _RouteLifecycle.remove:
@@ -4365,6 +4365,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           if (!canRemoveOrAdd && next != null) {
             // We aren't allowed to remove this route yet.
             break;
+          }
+          if (entry.pageBased) {
+            widget.onDidRemovePage?.call(entry.route.settings as Page<Object?>);
           }
           entry.currentState = _RouteLifecycle.dispose;
           continue;
