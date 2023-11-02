@@ -349,7 +349,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return const <TextSelection>[];
     }
     final List<TextSelection> results = <TextSelection>[];
-    for (final SelectableFragment fragment in _lastSelectableFragments!) {
+    for (final _SelectableFragment fragment in _lastSelectableFragments!) {
       if (fragment._textSelectionStart != null &&
           fragment._textSelectionEnd != null) {
         results.add(
@@ -366,7 +366,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   // Should be null if selection is not enabled, i.e. _registrar = null. The
   // paragraph splits on [PlaceholderSpan.placeholderCodeUnit], and stores each
   // fragment in this list.
-  List<SelectableFragment>? _lastSelectableFragments;
+  List<_SelectableFragment>? _lastSelectableFragments;
 
   /// The [SelectionRegistrar] this paragraph will be, or is, registered to.
   SelectionRegistrar? get registrar => _registrar;
@@ -399,9 +399,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _lastSelectableFragments!.forEach(_registrar!.remove);
   }
 
-  List<SelectableFragment> _getSelectableFragments() {
+  List<_SelectableFragment> _getSelectableFragments() {
     final String plainText = text.toPlainText(includeSemanticsLabels: false);
-    final List<SelectableFragment> result = <SelectableFragment>[];
+    final List<_SelectableFragment> result = <_SelectableFragment>[];
     int start = 0;
     while (start < plainText.length) {
       int end = plainText.indexOf(_placeholderCharacter, start);
@@ -409,7 +409,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         if (end == -1) {
           end = plainText.length;
         }
-        result.add(SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText));
+        result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText));
         start = end;
       }
       start += 1;
@@ -421,7 +421,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (_lastSelectableFragments == null) {
       return;
     }
-    for (final SelectableFragment fragment in _lastSelectableFragments!) {
+    for (final _SelectableFragment fragment in _lastSelectableFragments!) {
       fragment.dispose();
     }
     _lastSelectableFragments = null;
@@ -432,7 +432,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void markNeedsLayout() {
-    _lastSelectableFragments?.forEach((SelectableFragment element) => element.didChangeParagraphLayout());
+    _lastSelectableFragments?.forEach((_SelectableFragment element) => element.didChangeParagraphLayout());
     super.markNeedsLayout();
   }
 
@@ -614,7 +614,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _selectionColor = value;
-    if (_lastSelectableFragments?.any((SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
+    if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
       markNeedsPaint();
     }
   }
@@ -899,7 +899,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
 
     if (_lastSelectableFragments != null) {
-      for (final SelectableFragment fragment in _lastSelectableFragments!) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
         fragment.paint(context, offset);
       }
     }
