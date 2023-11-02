@@ -2889,8 +2889,8 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   The Navigator.onPopPage must be provided to use the\n'
-          '   Navigator.pages API\n',
+          '   The one of onDidRemovePage and onPopPage must be provided to use\n'
+          '   the Navigator.pages API but not both.\n',
         ),
       );
     });
