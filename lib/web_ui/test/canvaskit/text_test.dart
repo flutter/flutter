@@ -124,6 +124,43 @@ void testMain() {
       });
     });
 
+    test('empty paragraph', () {
+      const double fontSize = 10.0;
+      final ui.Paragraph paragraph = ui.ParagraphBuilder(CkParagraphStyle(
+        fontSize: fontSize,
+      )).build();
+      paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+      expect(paragraph.getLineMetricsAt(0), isNull);
+      expect(paragraph.numberOfLines, 0);
+      expect(paragraph.getLineNumberAt(0), isNull);
+    });
+
+    test('Basic line related metrics', () {
+      const double fontSize = 10;
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(CkParagraphStyle(
+        fontStyle: ui.FontStyle.normal,
+        fontWeight: ui.FontWeight.normal,
+        fontSize: fontSize,
+        maxLines: 1,
+        ellipsis: 'BBB',
+      ))..addText('A' * 100);
+      final ui.Paragraph paragraph = builder.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 100.0));
+
+      expect(paragraph.numberOfLines, 1);
+
+      expect(paragraph.getLineMetricsAt(-1), isNull);
+      expect(paragraph.getLineMetricsAt(0), isNotNull);
+      expect(paragraph.getLineMetricsAt(1), isNull);
+
+      expect(paragraph.getLineNumberAt(-1), isNull);
+      expect(paragraph.getLineNumberAt(0), 0);
+      expect(paragraph.getLineNumberAt(6), 0);
+      // The last 3 characters on the first line are ellipsized with BBB.
+      expect(paragraph.getLineMetricsAt(7), isNull);
+    });
+
     test('rounding hack disabled by default', () {
       expect(ui.ParagraphBuilder.shouldDisableRoundingHack, isTrue);
 

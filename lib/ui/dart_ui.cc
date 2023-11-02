@@ -218,6 +218,9 @@ typedef CanvasPath Path;
   V(Paragraph, didExceedMaxLines, 1)                   \
   V(Paragraph, dispose, 1)                             \
   V(Paragraph, getLineBoundary, 2)                     \
+  V(Paragraph, getLineMetricsAt, 3)                    \
+  V(Paragraph, getLineNumberAt, 2)                     \
+  V(Paragraph, getNumberOfLines, 1)                    \
   V(Paragraph, getPositionForOffset, 3)                \
   V(Paragraph, getRectsForPlaceholders, 1)             \
   V(Paragraph, getRectsForRange, 5)                    \

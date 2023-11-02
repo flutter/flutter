@@ -390,7 +390,10 @@ class TextLayoutService {
     // it possible to do hit testing. Once we find the box, we look inside that
     // box to find where exactly the `offset` is located.
 
-    final ParagraphLine line = _findLineForY(offset.dy);
+    final ParagraphLine? line = _findLineForY(offset.dy);
+    if (line == null) {
+      return const ui.TextPosition(offset: 0);
+    }
     // [offset] is to the left of the line.
     if (offset.dx <= line.left) {
       return ui.TextPosition(
@@ -416,7 +419,10 @@ class TextLayoutService {
     return ui.TextPosition(offset: line.startIndex);
   }
 
-  ParagraphLine _findLineForY(double y) {
+  ParagraphLine? _findLineForY(double y) {
+    if (lines.isEmpty) {
+      return null;
+    }
     // We could do a binary search here but it's not worth it because the number
     // of line is typically low, and each iteration is a cheap comparison of
     // doubles.

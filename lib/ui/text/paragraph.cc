@@ -8,10 +8,14 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/task_runner.h"
+#include "third_party/dart/runtime/include/dart_api.h"
+#include "third_party/skia/modules/skparagraph/include/DartTypes.h"
+#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
+#include "third_party/tonic/logging/dart_invoke.h"
 
 namespace flutter {
 
@@ -122,12 +126,12 @@ Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   return tonic::DartConverter<decltype(result)>::ToDart(result);
 }
 
-Dart_Handle Paragraph::getLineBoundary(unsigned offset) {
+Dart_Handle Paragraph::getLineBoundary(unsigned utf16Offset) {
   std::vector<txt::LineMetrics> metrics = m_paragraph->GetLineMetrics();
   int line_start = -1;
   int line_end = -1;
   for (txt::LineMetrics& line : metrics) {
-    if (offset >= line.start_index && offset <= line.end_index) {
+    if (utf16Offset >= line.start_index && utf16Offset <= line.end_index) {
       line_start = line.start_index;
       line_end = line.end_index;
       break;
@@ -137,7 +141,7 @@ Dart_Handle Paragraph::getLineBoundary(unsigned offset) {
   return tonic::DartConverter<decltype(result)>::ToDart(result);
 }
 
-tonic::Float64List Paragraph::computeLineMetrics() {
+tonic::Float64List Paragraph::computeLineMetrics() const {
   std::vector<txt::LineMetrics> metrics = m_paragraph->GetLineMetrics();
 
   // Layout:
@@ -163,6 +167,42 @@ tonic::Float64List Paragraph::computeLineMetrics() {
   }
 
   return result;
+}
+
+Dart_Handle Paragraph::getLineMetricsAt(int lineNumber,
+                                        Dart_Handle constructor) const {
+  skia::textlayout::LineMetrics line;
+  const bool found = m_paragraph->GetLineMetricsAt(lineNumber, &line);
+  if (!found) {
+    return Dart_Null();
+  }
+  std::array<Dart_Handle, 9> arguments = {
+      Dart_NewBoolean(line.fHardBreak),
+      Dart_NewDouble(line.fAscent),
+      Dart_NewDouble(line.fDescent),
+      Dart_NewDouble(line.fUnscaledAscent),
+      // We add then round to get the height. The
+      // definition of height here is different
+      // than the one in LibTxt.
+      Dart_NewDouble(round(line.fAscent + line.fDescent)),
+      Dart_NewDouble(line.fWidth),
+      Dart_NewDouble(line.fLeft),
+      Dart_NewDouble(line.fBaseline),
+      Dart_NewInteger(line.fLineNumber),
+  };
+
+  Dart_Handle handle =
+      Dart_InvokeClosure(constructor, arguments.size(), arguments.data());
+  tonic::CheckAndHandleError(handle);
+  return handle;
+}
+
+size_t Paragraph::getNumberOfLines() const {
+  return m_paragraph->GetNumberOfLines();
+}
+
+int Paragraph::getLineNumberAt(size_t utf16Offset) const {
+  return m_paragraph->GetLineNumberAt(utf16Offset);
 }
 
 void Paragraph::dispose() {
