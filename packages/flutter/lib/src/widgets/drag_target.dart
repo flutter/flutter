@@ -652,11 +652,13 @@ class DragTarget<T extends Object> extends StatefulWidget {
   final DragTargetWillAcceptWithDetails<T>? onWillAcceptWithDetails;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
+  /// It will not be called if `data` is `null`.
   ///
   /// Equivalent to [onAcceptWithDetails], but only includes the data.
   final DragTargetAccept<T>? onAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
+  /// It will not be called if `data` is `null`.
   ///
   /// Equivalent to [onAccept], but with information, including the data, in a
   /// [DragTargetDetails].
@@ -666,7 +668,8 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// the target.
   final DragTargetLeave<T>? onLeave;
 
-  /// Called when a [Draggable] moves within this [DragTarget].
+  /// Called when a [Draggable] moves within this [DragTarget]. It will not be
+  /// called if `data` is `null`.
   ///
   /// This includes entering and leaving the target.
   final DragTargetMove<T>? onMove;
@@ -707,6 +710,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
                                     (widget.onWillAccept != null &&
                                     widget.onWillAccept!(avatar.data as T?)) ||
                                     (widget.onWillAcceptWithDetails != null &&
+                                    avatar.data != null &&
                                     widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
     if (resolvedWillAccept) {
       setState(() {
@@ -741,12 +745,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    widget.onAccept?.call(avatar.data! as T);
-    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    if (avatar.data != null)  {
+      widget.onAccept?.call(avatar.data! as T);
+      widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    }
   }
 
   void didMove(_DragAvatar<Object> avatar) {
-    if (!mounted) {
+    if (!mounted || avatar.data == null) {
       return;
     }
     widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
