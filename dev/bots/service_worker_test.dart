@@ -935,7 +935,7 @@ Future<void> runWebServiceWorkerTestWithCustomBaseHref({
       '$baseHref/flutter_service_worker.js': 1,
       '$baseHref/CLOSE': 1,
       '$baseHref/assets/FontManifest.json': 1,
-      '$baseHref/assets/AssetManifest.json': 1,
+      '$baseHref/assets/AssetManifest.bin.json': 1,
       '$baseHref/assets/fonts/MaterialIcons-Regular.otf': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.png'.
       if (!headless) ...<String, int>{
