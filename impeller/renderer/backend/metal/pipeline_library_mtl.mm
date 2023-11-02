@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 
+#include <Foundation/Foundation.h>
 #include <Metal/Metal.h>
 
 #include "flutter/fml/build_config.h"
@@ -28,14 +29,25 @@ static MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor(
   descriptor.label = @(desc.GetLabel().c_str());
   descriptor.rasterSampleCount = static_cast<NSUInteger>(desc.GetSampleCount());
 
+  const auto& constants = desc.GetSpecializationConstants();
   for (const auto& entry : desc.GetStageEntrypoints()) {
     if (entry.first == ShaderStage::kVertex) {
-      descriptor.vertexFunction =
-          ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
+      if (constants.empty()) {
+        descriptor.vertexFunction =
+            ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
+      } else {
+        descriptor.vertexFunction = ShaderFunctionMTL::Cast(*entry.second)
+                                        .GetMTLFunctionSpecialized(constants);
+      }
     }
     if (entry.first == ShaderStage::kFragment) {
-      descriptor.fragmentFunction =
-          ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
+      if (constants.empty()) {
+        descriptor.fragmentFunction =
+            ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
+      } else {
+        descriptor.fragmentFunction = ShaderFunctionMTL::Cast(*entry.second)
+                                          .GetMTLFunctionSpecialized(constants);
+      }
     }
   }
 
