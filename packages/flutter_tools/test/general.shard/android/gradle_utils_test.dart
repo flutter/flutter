@@ -500,6 +500,8 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    // Decoy value to ensure we ignore commented out lines.
+    // id "com.android.application" version "6.1.0" apply false
     id "com.android.application" version "7.3.0" apply false
 }
 

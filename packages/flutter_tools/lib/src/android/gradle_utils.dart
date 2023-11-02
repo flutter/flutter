@@ -70,28 +70,31 @@ const String maxKnownAgpVersion = '8.3';
 // compatible Java version.
 const String oldestDocumentedJavaAgpCompatibilityVersion = '4.2';
 
+// Constant used in [_buildAndroidGradlePluginRegExp] and
+// [_settingsAndroidGradlePluginRegExp] to identify the version section.
+const String _versionGroupName = 'version';
+
 // AGP can be defined in build.gradle
 // Expected content:
 // "classpath 'com.android.tools.build:gradle:7.3.0'"
-// Parentheticals are use to group which helps with version extraction.
-// "...build:gradle:(...)" where group(1) should be the version string.
+// ?<version> is used to name the version group which helps with extraction.
 final RegExp _buildAndroidGradlePluginRegExp =
-    RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
+    RegExp(r'com\.android\.tools\.build:gradle:(?<version>\d+\.\d+\.\d+)');
 
 // AGP can be defined in settings.gradle.
 // Expected content:
 // "id "com.android.application" version "{{agpVersion}}""
-// Parentheticals are use to group which helps with version extraction.
-// "...version (...)" where group(1) should be the version string.
-final RegExp _settingsAndroidGradlePluginRegExp =
-    RegExp(r'id\s+"com.android.application"\s+version\s+"(\d+\.\d+\.\d+)"');
+// ?<version> is used to name the version group which helps with extraction.
+final RegExp _settingsAndroidGradlePluginRegExp = RegExp(
+    r'^\s+id\s+"com.android.application"\s+version\s+"(?<version>\d+\.\d+\.\d+)"',
+    multiLine: true);
 
 // Expected content format (with lines above and below).
 // Version can have 2 or 3 numbers.
 // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
 // '^\s*' protects against commented out lines.
 final RegExp distributionUrlRegex =
-  RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
+    RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
 
 // Modified version of the gradle distribution url match designed to only match
 // gradle.org urls so that we can guarantee any modifications to the url
@@ -327,34 +330,34 @@ String? getAgpVersion(Directory androidDirectory, Logger logger) {
     return null;
   }
   final String buildFileContent = buildFile.readAsStringSync();
-  final Iterable<Match> buildMatches =
-      _buildAndroidGradlePluginRegExp.allMatches(buildFileContent);
-  if (!buildMatches.isEmpty) {
-    final String? androidPluginVersion = buildMatches.first.group(1);
+  final RegExpMatch? buildMatch =
+      _buildAndroidGradlePluginRegExp.firstMatch(buildFileContent);
+  if (buildMatch != null) {
+    final String? androidPluginVersion =
+        buildMatch.namedGroup(_versionGroupName);
     logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');
     return androidPluginVersion;
-  } else {
-    logger.printTrace(
-        "$buildFile doesn't provide an AGP version. Checking settings.");
-    final File settingsFile = androidDirectory.childFile('settings.gradle');
-    if (!settingsFile.existsSync()) {
-      logger.printTrace("$settingsFile does not exist.");
-      return null;
-    }
-    final String settingsFileContent = settingsFile.readAsStringSync();
-    final Iterable<Match> settingsMatches =
-        _settingsAndroidGradlePluginRegExp.allMatches(settingsFileContent);
-
-    if (!settingsMatches.isEmpty) {
-      final String? androidPluginVersion = settingsMatches.first.group(1);
-      logger.printTrace(
-          '$settingsFile provides AGP version: $androidPluginVersion');
-      return androidPluginVersion;
-    } else {
-      logger.printTrace("$settingsFile doesn't provide an AGP version.");
-      return null;
-    }
   }
+  logger.printTrace(
+      "$buildFile doesn't provide an AGP version. Checking settings.");
+  final File settingsFile = androidDirectory.childFile('settings.gradle');
+  if (!settingsFile.existsSync()) {
+    logger.printTrace('$settingsFile does not exist.');
+    return null;
+  }
+  final String settingsFileContent = settingsFile.readAsStringSync();
+  final RegExpMatch? settingsMatch =
+      _settingsAndroidGradlePluginRegExp.firstMatch(settingsFileContent);
+
+  if (settingsMatch != null) {
+    final String? androidPluginVersion =
+        settingsMatch.namedGroup(_versionGroupName);
+    logger.printTrace(
+        '$settingsFile provides AGP version: $androidPluginVersion');
+    return androidPluginVersion;
+  }
+  logger.printTrace("$settingsFile doesn't provide an AGP version.");
+  return null;
 }
 
 String _formatParseWarning(String content) {

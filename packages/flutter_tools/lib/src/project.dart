@@ -614,7 +614,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
-      final gradleDescription = agpVersion != null
+      final String gradleDescription = agpVersion != null
           ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
           : '';
       description = '''
