@@ -1044,6 +1044,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
                 buildMode variantBuildMode
+                minSdkVersion variant.mergedFlavor.minSdkVersion.apiLevel
                 localEngine this.localEngine
                 localEngineHost this.localEngineHost
                 localEngineSrcPath this.localEngineSrcPath
@@ -1280,6 +1281,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     File flutterExecutable
     @Input
     String buildMode
+    @Input
+    int minSdkVersion
     @Optional @Input
     String localEngine
     @Optional @Input
@@ -1356,16 +1359,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             ruleNames = targetPlatformValues.collect { "android_aot_deferred_components_bundle_${buildMode}_$it" }
         } else {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
-        }
-        // TODO(dacoharkes): Should this go somewhere outside this task?
-        int minSdkVersion;
-        project.android.applicationVariants.all { variant ->
-            def variantMinSdkVersion = variant.mergedFlavor.minSdkVersion.apiLevel
-            if (minSdkVersion != null) {
-                minSdkVersion = variantMinSdkVersion
-            } else if (minSdkVersion != variantMinSdkVersion){
-                throw new GradleException("Inconsistent minSdkVersions amoung variants: ${minSdkVersion} and ${variantMinSdkVersion}.")
-            }
         }
         project.exec {
             logging.captureStandardError LogLevel.ERROR
