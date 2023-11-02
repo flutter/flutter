@@ -108,7 +108,8 @@ source_set("flow") {
 
 if (enable_unittests) {
   test_fixtures("flow_fixtures") {
-    fixtures = []
+    fixtures =
+        [ "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf" ]
   }
 
   source_set("flow_testing") {

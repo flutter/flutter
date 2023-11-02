@@ -306,7 +306,7 @@ TEST(DisplayListComplexity, DrawVertices) {
 
 TEST(DisplayListComplexity, DrawTextBlob) {
   auto text_blob = SkTextBlob::MakeFromString(
-      "The quick brown fox jumps over the lazy dog.", SkFont());
+      "The quick brown fox jumps over the lazy dog.", CreateTestFontOfSize(20));
 
   DisplayListBuilder builder;
   builder.DrawTextBlob(text_blob, 0.0f, 0.0f, DlPaint());

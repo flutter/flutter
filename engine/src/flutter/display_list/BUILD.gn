@@ -96,11 +96,12 @@ source_set("display_list") {
   }
 }
 
-if (enable_unittests) {
-  test_fixtures("display_list_fixtures") {
-    fixtures = []
-  }
+test_fixtures("display_list_fixtures") {
+  fixtures =
+      [ "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf" ]
+}
 
+if (enable_unittests) {
   executable("display_list_unittests") {
     testonly = true
 
@@ -201,10 +202,6 @@ if (enable_unittests) {
   }
 }
 
-fixtures_location("display_list_benchmarks_fixtures") {
-  assets_dir = "$target_gen_dir/"
-}
-
 source_set("display_list_benchmarks_source") {
   testonly = true
 
@@ -215,10 +212,11 @@ source_set("display_list_benchmarks_source") {
 
   deps = [
     ":display_list",
-    ":display_list_benchmarks_fixtures",
+    ":display_list_fixtures",
     "//flutter/benchmarking",
     "//flutter/common/graphics",
     "//flutter/display_list/testing:display_list_surface_provider",
+    "//flutter/display_list/testing:display_list_testing",
     "//flutter/fml",
     "//flutter/testing:skia",
     "//flutter/testing:testing_lib",
