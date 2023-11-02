@@ -164,6 +164,7 @@ source_set("ui") {
     "//flutter/shell/common:display",
     "//flutter/shell/common:platform_message_handler",
     "//flutter/third_party/txt",
+    "//third_party/skia/modules/skparagraph",
   ]
 
   deps = [

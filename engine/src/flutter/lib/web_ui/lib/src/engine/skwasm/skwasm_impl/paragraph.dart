@@ -102,6 +102,15 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   bool get didExceedMaxLines => paragraphGetDidExceedMaxLines(handle);
 
   @override
+  int get numberOfLines => paragraphGetLineCount(handle);
+
+  @override
+  int? getLineNumberAt(int codeUnitOffset) {
+    final int lineNumber = paragraphGetLineNumberAt(handle, codeUnitOffset);
+    return lineNumber >= 0 ? lineNumber : null;
+  }
+
+  @override
   void layout(ui.ParagraphConstraints constraints) {
     paragraphLayout(handle, constraints.width);
     if (!_hasCheckedForMissingCodePoints) {
@@ -213,6 +222,12 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
     return List<SkwasmLineMetrics>.generate(lineCount,
       (int index) => SkwasmLineMetrics._(paragraphGetLineMetricsAtIndex(handle, index))
     );
+  }
+
+  @override
+  ui.LineMetrics? getLineMetricsAt(int index) {
+    final LineMetricsHandle lineMetrics = paragraphGetLineMetricsAtIndex(handle, index);
+    return lineMetrics == nullptr ? SkwasmLineMetrics._(lineMetrics) : null;
   }
 }
 
