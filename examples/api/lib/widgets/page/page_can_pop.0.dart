@@ -9,10 +9,15 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const PageApiExampleApp());
 
-final RouterDelegate<Object> delegate = MyRouterDelegate();
-
-class PageApiExampleApp extends StatelessWidget {
+class PageApiExampleApp extends StatefulWidget {
   const PageApiExampleApp({super.key});
+
+  @override
+  State<PageApiExampleApp> createState() => _PageApiExampleAppState();
+}
+
+class _PageApiExampleAppState extends State<PageApiExampleApp> {
+  final RouterDelegate<Object> delegate = MyRouterDelegate();
 
   @override
   Widget build(BuildContext context) {
