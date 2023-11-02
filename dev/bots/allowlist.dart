@@ -34,7 +34,6 @@ const Set<String> kCorePackageAllowList = <String>{
   'intl',
   'leak_tracker',
   'leak_tracker_testing',
-  'leak_tracker_flutter_testing',
   'matcher',
   'material_color_utilities',
   'meta',
@@ -53,6 +52,6 @@ const Set<String> kCorePackageAllowList = <String>{
   'vector_math',
   'vm_service',
   'web',
-  'webdriver',
   'web_socket_channel',
+  'webdriver',
 };
