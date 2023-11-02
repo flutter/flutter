@@ -586,7 +586,7 @@ class WebServiceWorker extends Target {
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
-      if (environment.fileSystem.path.basename(url) == 'index.html') {
+      if (url == 'index.html') {
         urlToHash['/'] = hash;
       }
     }
@@ -604,8 +604,8 @@ class WebServiceWorker extends Target {
       <String>[
         'main.dart.js',
         'index.html',
-        if (urlToHash.containsKey('assets/AssetManifest.json'))
-          'assets/AssetManifest.json',
+        if (urlToHash.containsKey('assets/AssetManifest.bin.json'))
+          'assets/AssetManifest.bin.json',
         if (urlToHash.containsKey('assets/FontManifest.json'))
           'assets/FontManifest.json',
       ],
