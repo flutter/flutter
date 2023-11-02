@@ -48,8 +48,10 @@ struct PipelineBuilder {
   ///             context, a pipeline descriptor.
   ///
   static std::optional<PipelineDescriptor> MakeDefaultPipelineDescriptor(
-      const Context& context) {
+      const Context& context,
+      const std::vector<int>& constants = {}) {
     PipelineDescriptor desc;
+    desc.SetSpecializationConstants(constants);
     if (InitializePipelineDescriptorDefaults(context, desc)) {
       return {std::move(desc)};
     }

@@ -2536,6 +2536,26 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
   }
 }
 
+TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
+  auto content_context =
+      ContentContext(GetContext(), TypographerContextSkia::Make());
+
+  auto default_color_burn = content_context.GetBlendColorBurnPipeline(
+      {.has_stencil_attachment = false});
+  auto alt_color_burn = content_context.GetBlendColorBurnPipeline(
+      {.has_stencil_attachment = true});
+
+  ASSERT_NE(default_color_burn, alt_color_burn);
+  ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
+            alt_color_burn->GetDescriptor().GetSpecializationConstants());
+
+  auto decal_supported = static_cast<int32_t>(
+      GetContext()->GetCapabilities()->SupportsDecalSamplerAddressMode());
+  std::vector<int32_t> expected_constants = {5, decal_supported};
+  ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
+            expected_constants);
+}
+
 }  // namespace testing
 }  // namespace impeller
 
