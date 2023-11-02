@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/native_assets.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -258,4 +259,67 @@ void main() {
       exists,
     );
   });
+
+  // Ensure no exceptions for a non installed NDK are thrown if no native
+  // assets have to be build.
+  testUsingContext(
+      'does not throw if NDK not present but no native assets present',
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+        ProcessManager: () => FakeProcessManager.empty(),
+      }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.create(recursive: true);
+    await buildNativeAssetsAndroid(
+      androidArchs: <AndroidArch>[AndroidArch.x86_64],
+      targetAndroidNdkApi: 21,
+      projectUri: projectUri,
+      buildMode: BuildMode.debug,
+      fileSystem: fileSystem,
+      buildRunner: _BuildRunnerWithoutNdk(),
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      isNot(contains('Building native assets for ')),
+    );
+  });
+
+  testUsingContext('throw if NDK not present and there are native assets',
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+      }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => buildNativeAssetsAndroid(
+        androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+        targetAndroidNdkApi: 21,
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        yamlParentDirectory: environment.buildDir.uri,
+        buildRunner: _BuildRunnerWithoutNdk(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+        ),
+      ),
+      throwsToolExit(
+        message: 'Android NDK Clang could not be found.',
+      ),
+    );
+  });
+}
+
+class _BuildRunnerWithoutNdk extends FakeNativeAssetsBuildRunner {
+  _BuildRunnerWithoutNdk({
+    super.packagesWithNativeAssetsResult = const <Package>[],
+  });
+
+  @override
+  Future<CCompilerConfig> get ndkCCompilerConfig async =>
+      throwToolExit('Android NDK Clang could not be found.');
 }

@@ -7,6 +7,7 @@ import 'package:native_assets_builder/native_assets_builder.dart'
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
@@ -187,13 +188,21 @@ const Map<Architecture, String> _architectureStringsCMakeAndroid =
 };
 
 
+@override
 Future<CCompilerConfig> cCompilerConfigAndroid() async {
   final AndroidSdk? androidSdk = AndroidSdk.locateAndroidSdk();
-  return CCompilerConfig(
-    cc: _toOptionalFileUri(androidSdk?.getNdkClangPath()),
-    ar: _toOptionalFileUri(androidSdk?.getNdkArPath()),
-    ld: _toOptionalFileUri(androidSdk?.getNdkLdPath()),
+  if (androidSdk == null) {
+    throwToolExit('Android SDK could not be found.');
+  }
+  final CCompilerConfig result = CCompilerConfig(
+    cc: _toOptionalFileUri(androidSdk.getNdkClangPath()),
+    ar: _toOptionalFileUri(androidSdk.getNdkArPath()),
+    ld: _toOptionalFileUri(androidSdk.getNdkLdPath()),
   );
+  if (result.cc == null || result.ar == null || result.ld == null) {
+    throwToolExit('Android NDK Clang could not be found.');
+  }
+  return result;
 }
 
 Uri? _toOptionalFileUri(String? string) {

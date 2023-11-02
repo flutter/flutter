@@ -63,6 +63,7 @@ abstract class NativeAssetsBuildRunner {
   /// The C compiler config to use for compilation.
   Future<CCompilerConfig> get cCompilerConfig;
 
+  /// The NDK compiler to use to use for compilation for Android.
   Future<CCompilerConfig> get ndkCCompilerConfig;
 }
 
