@@ -78,7 +78,7 @@ TEST_F(GoldenTests, ConicalGradient) {
 
   paint.stroke_width = 0.0;
   paint.style = Paint::Style::kFill;
-  canvas.DrawRect(Rect(10, 10, 250, 250), paint);
+  canvas.DrawRect(Rect::MakeXYWH(10, 10, 250, 250), paint);
   Picture picture = canvas.EndRecordingAsPicture();
 
   auto aiks_context =

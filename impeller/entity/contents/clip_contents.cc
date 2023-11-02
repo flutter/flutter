@@ -93,7 +93,7 @@ bool ClipContents::Render(const ContentContext& renderer,
     {
       DEBUG_COMMAND_INFO(cmd, "Difference Clip (Increment)");
 
-      auto points = Rect(Size(pass.GetRenderTargetSize())).GetPoints();
+      auto points = Rect::MakeSize(pass.GetRenderTargetSize()).GetPoints();
       auto vertices =
           VertexBufferBuilder<VS::PerVertexData>{}
               .AddVertices({{points[0]}, {points[1]}, {points[2]}, {points[3]}})
@@ -188,8 +188,9 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
 
   // Create a rect that covers either the given restore area, or the whole
   // render target texture.
-  auto ltrb = restore_coverage_.value_or(Rect(Size(pass.GetRenderTargetSize())))
-                  .GetLTRB();
+  auto ltrb =
+      restore_coverage_.value_or(Rect::MakeSize(pass.GetRenderTargetSize()))
+          .GetLTRB();
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
   vtx_builder.AddVertices({
       {Point(ltrb[0], ltrb[1])},

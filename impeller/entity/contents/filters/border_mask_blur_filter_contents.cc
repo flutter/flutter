@@ -164,9 +164,7 @@ std::optional<Rect> BorderMaskBlurFilterContents::GetFilterCoverage(
   auto transformed_blur_vector =
       transform.TransformDirection(Vector2(Radius{sigma_x_}.radius, 0)).Abs() +
       transform.TransformDirection(Vector2(0, Radius{sigma_y_}.radius)).Abs();
-  auto extent = coverage->size + transformed_blur_vector * 2;
-  return Rect(coverage->origin - transformed_blur_vector,
-              Size(extent.x, extent.y));
+  return coverage->Expand(transformed_blur_vector);
 }
 
 std::optional<Rect> BorderMaskBlurFilterContents::GetFilterSourceCoverage(
