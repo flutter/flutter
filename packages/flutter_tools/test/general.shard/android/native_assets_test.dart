@@ -72,6 +72,7 @@ void main() {
   }, () async {
     await buildNativeAssetsAndroid(
       androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+      targetAndroidNdkApi: 21,
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
@@ -165,6 +166,7 @@ void main() {
     expect(
       () => buildNativeAssetsAndroid(
         androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+        targetAndroidNdkApi: 21,
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
@@ -191,6 +193,7 @@ void main() {
     await packageConfig.create();
     await buildNativeAssetsAndroid(
       androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+      targetAndroidNdkApi: 21,
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
@@ -222,6 +225,7 @@ void main() {
     await dylibAfterCompiling.create();
     await buildNativeAssetsAndroid(
       androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+      targetAndroidNdkApi: 21,
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
