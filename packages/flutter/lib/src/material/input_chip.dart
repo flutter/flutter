@@ -236,6 +236,7 @@ class InputChip extends StatelessWidget
       checkmarkColor: checkmarkColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
     );
   }
 }

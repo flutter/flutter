@@ -597,6 +597,34 @@ void main() {
     testedExtensions.add(RenderingServiceExtensions.profileRenderObjectLayouts.name);
   });
 
+  test('Service extensions - profilePlatformChannels', () async {
+    Map<String, dynamic> result;
+
+    expect(debugProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{'enabled': 'true'});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(debugProfilePlatformChannels, true);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(debugProfilePlatformChannels, true);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{'enabled': 'false'});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfilePlatformChannels, false);
+
+    result = await binding.testExtension(ServicesServiceExtensions.profilePlatformChannels.name, <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfilePlatformChannels, false);
+
+    testedExtensions.add(ServicesServiceExtensions.profilePlatformChannels.name);
+  });
+
   test('Service extensions - evict', () async {
     Map<String, dynamic> result;
     bool completed;

@@ -51,7 +51,6 @@
   "reorderItemRight": "دائیں منتقل کریں",
   "expandedIconTapHint": "سکیڑیں",
   "collapsedIconTapHint": "پھیلائیں",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 حرف باقی ہے",
   "remainingTextFieldCharacterCountOther": "$remainingCount حروف باقی ہیں",
   "refreshIndicatorSemanticLabel": "ریفریش کریں",
@@ -143,7 +142,7 @@
   "expandedHint": "سکڑا ہوا",
   "collapsedHint": "پھیلا ہوا",
   "menuDismissLabel": "مینو برخاست کریں",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "تفصیل دیکھیں",
+  "searchWebButtonLabel": "ویب تلاش کریں",
+  "shareButtonLabel": "اشتراک کریں..."
 }

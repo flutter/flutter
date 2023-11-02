@@ -105,6 +105,9 @@ Future<int> run(
           globals.flutterUsage.enabled = true;
           globals.printStatus('Analytics reporting enabled.');
 
+          // TODO(eliasyishak): Set the telemetry for the unified_analytics
+          //  package as well, the above will be removed once we have
+          //  fully transitioned to using the new package
           await globals.analytics.setTelemetry(true);
         }
 

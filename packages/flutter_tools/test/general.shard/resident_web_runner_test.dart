@@ -39,6 +39,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations =
@@ -679,8 +680,9 @@ void main() {
     ]);
     setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final FakeProcess process = FakeProcess();
     final Chromium chrome =
-        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
+        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
@@ -747,8 +749,9 @@ void main() {
     ]);
     setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final FakeProcess process = FakeProcess();
     final Chromium chrome =
-        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
+        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
@@ -1094,8 +1097,9 @@ void main() {
     setupMocks();
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+    final FakeProcess process = FakeProcess();
     final Chromium chrome =
-        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher);
+        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(

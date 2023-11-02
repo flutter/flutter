@@ -213,7 +213,7 @@ void main() {
     completer.complete();
     expect(secondLaunchResult.started, true);
     expect(secondLaunchResult.hasVmService, true);
-    expect(await device.stopApp(iosApp), false);
+    expect(await device.stopApp(iosApp), true);
   });
 
   testWithoutContext('IOSDevice.startApp launches in debug mode via log reading on <iOS 13', () async {
@@ -291,7 +291,7 @@ void main() {
 
     expect(launchResult.started, true);
     expect(launchResult.hasVmService, true);
-    expect(await device.stopApp(iosApp), false);
+    expect(await device.stopApp(iosApp), true);
     expect(logger.errorText, contains('The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...'));
     expect(utf8.decoder.convert(stdin.writes.first), contains('process interrupt'));
     completer.complete();
@@ -336,7 +336,7 @@ void main() {
 
     expect(launchResult.started, true);
     expect(launchResult.hasVmService, true);
-    expect(await device.stopApp(iosApp), false);
+    expect(await device.stopApp(iosApp), true);
     expect(logger.errorText, contains('The Dart VM Service was not discovered after 45 seconds. This is taking much longer than expected...'));
     expect(logger.errorText, contains('Click "Allow" to the prompt asking if you would like to find and connect devices on your local network.'));
     completer.complete();
@@ -388,7 +388,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
     expect(launchResult.started, true);
     expect(launchResult.hasVmService, true);
-    expect(await device.stopApp(iosApp), false);
+    expect(await device.stopApp(iosApp), true);
   });
 
   testWithoutContext('IOSDevice.startApp does not retry when ios-deploy loses connection if not in CI', () async {
@@ -485,6 +485,7 @@ void main() {
             '--verify-entry-points',
             '--enable-software-rendering',
             '--trace-systrace',
+            '--trace-to-file="path/to/trace.binpb"',
             '--skia-deterministic-rendering',
             '--trace-skia',
             '--trace-allowlist="foo"',
@@ -541,6 +542,7 @@ void main() {
         traceAllowlist: 'foo',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,

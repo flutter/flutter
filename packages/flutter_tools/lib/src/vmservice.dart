@@ -28,7 +28,6 @@ const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
 const String kRunInViewMethod = '_flutter.runInView';
 const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
-const String kScreenshotMethod = '_flutter.screenshot';
 const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
 const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
@@ -974,7 +973,7 @@ class FlutterVmService {
       if (event.kind == vm_service.EventKind.kServiceExtensionAdded
           && event.extensionRPC == extensionName) {
         isolateEvents.cancel();
-        extensionAdded.complete(event.isolate);
+        extensionAdded.complete(event.isolate!);
       }
     });
 
@@ -1061,10 +1060,6 @@ class FlutterVmService {
       '_deleteDevFS',
       args: <String, Object?>{'fsName': fsName},
     );
-  }
-
-  Future<vm_service.Response?> screenshot() {
-    return _checkedCallServiceExtension(kScreenshotMethod);
   }
 
   Future<vm_service.Response?> screenshotSkp() {

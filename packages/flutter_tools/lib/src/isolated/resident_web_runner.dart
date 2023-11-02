@@ -297,6 +297,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           enableDds: debuggingOptions.enableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
+          extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
@@ -321,6 +322,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             usage: globals.flutterUsage,
+            analytics: globals.analytics,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -402,6 +404,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           usage: globals.flutterUsage,
+          analytics: globals.analytics,
         );
         await webBuilder.buildWeb(
           flutterProject,

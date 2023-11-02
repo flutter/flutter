@@ -51,7 +51,6 @@
   "reorderItemRight": "Naar rechts verplaatsen",
   "expandedIconTapHint": "Samenvouwen",
   "collapsedIconTapHint": "Uitvouwen",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 teken resterend",
   "remainingTextFieldCharacterCountOther": "$remainingCount tekens resterend",
   "refreshIndicatorSemanticLabel": "Vernieuwen",
@@ -143,7 +142,7 @@
   "expandedHint": "Samengevouwen",
   "collapsedHint": "Uitgevouwen",
   "menuDismissLabel": "Menu sluiten",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Opzoeken",
+  "searchWebButtonLabel": "Op internet zoeken",
+  "shareButtonLabel": "Delen..."
 }

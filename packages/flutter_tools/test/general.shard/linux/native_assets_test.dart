@@ -181,6 +181,13 @@ void main() {
       ),
     );
     expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Dry running native assets for linux.',
+        'Dry running native assets for linux done.',
+      ]),
+    );
+    expect(
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/linux/native_assets.yaml'),
     );
@@ -222,6 +229,7 @@ void main() {
     await packageConfig.parent.create();
     await packageConfig.create();
     final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+      targetPlatform: TargetPlatform.linux_x64,
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
@@ -257,16 +265,14 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager: () => FakeProcessManager.empty(),
     }, () async {
-      if (const LocalPlatform().isWindows) {
-        return; // Backslashes in commands, but we will never run these commands on Windows.
-      }
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      final File packageConfig = environment.projectDir.childDirectory('.dart_tool').childFile('package_config.json');
       await packageConfig.parent.create();
       await packageConfig.create();
       final File dylibAfterCompiling = fileSystem.file('libbar.so');
       // The mock doesn't create the file, so create it here.
       await dylibAfterCompiling.create();
       final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+        targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
@@ -288,6 +294,13 @@ void main() {
         ),
       );
       expect(
+        (globals.logger as BufferLogger).traceText,
+        stringContainsInOrder(<String>[
+          'Building native assets for linux_x64 debug.',
+          'Building native assets for linux_x64 done.',
+        ]),
+      );
+      expect(
         nativeAssetsYaml,
         projectUri.resolve('build/native_assets/linux/native_assets.yaml'),
       );
@@ -297,7 +310,7 @@ void main() {
           'package:bar/bar.dart',
           if (flutterTester)
             // Tests run on host system, so the have the full path on the system.
-            '- ${projectUri.resolve('/build/native_assets/linux/libbar.so').toFilePath()}'
+            '- ${projectUri.resolve('build/native_assets/linux/libbar.so').toFilePath()}'
           else
             // Apps are a bundle with the dylibs on their dlopen path.
             '- libbar.so',
@@ -365,7 +378,6 @@ void main() {
     FileSystem: () => fileSystem,
   }, () async {
     if (!const LocalPlatform().isLinux) {
-      // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
       return;
     }
 

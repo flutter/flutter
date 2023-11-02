@@ -772,6 +772,9 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
 /// <meta-data
 ///   android:name="io.flutter.embedding.android.ImpellerBackend"
 ///   android:value="opengles" />
+/// <meta-data
+///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
+///   android:value="true" />
 void _addOpenGLESToManifest(String testDirectory) {
   final String manifestPath = path.join(
       testDirectory, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
@@ -783,30 +786,34 @@ void _addOpenGLESToManifest(String testDirectory) {
 
   final String xmlStr = file.readAsStringSync();
   final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
-  const String key = 'io.flutter.embedding.android.ImpellerBackend';
-  const String value = 'opengles';
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
+    ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true')
+  ];
 
   final XmlElement applicationNode =
       xmlDoc.findAllElements('application').first;
 
   // Check if the meta-data node already exists.
-  final Iterable<XmlElement> existingMetaData = applicationNode
-      .findAllElements('meta-data')
-      .where((XmlElement node) => node.getAttribute('android:name') == key);
+  for (final (String key, String value) in keyPairs) {
+    final Iterable<XmlElement> existingMetaData = applicationNode
+        .findAllElements('meta-data')
+        .where((XmlElement node) => node.getAttribute('android:name') == key);
 
-  if (existingMetaData.isNotEmpty) {
-    final XmlElement existingEntry = existingMetaData.first;
-    existingEntry.setAttribute('android:value', value);
-  } else {
-    final XmlElement metaData = XmlElement(
-      XmlName('meta-data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('android:name'), key),
-        XmlAttribute(XmlName('android:value'), value)
-      ],
-    );
+    if (existingMetaData.isNotEmpty) {
+      final XmlElement existingEntry = existingMetaData.first;
+      existingEntry.setAttribute('android:value', value);
+    } else {
+      final XmlElement metaData = XmlElement(
+        XmlName('meta-data'),
+        <XmlAttribute>[
+          XmlAttribute(XmlName('android:name'), key),
+          XmlAttribute(XmlName('android:value'), value)
+        ],
+      );
 
-    applicationNode.children.add(metaData);
+      applicationNode.children.add(metaData);
+    }
   }
 
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
@@ -886,6 +893,7 @@ class StartupTest {
              '-v',
             '--profile',
             '--target=$target',
+            if (deviceOperatingSystem == DeviceOperatingSystem.ios) '--no-publish-port',
           ]);
           final String buildRoot = path.join(testDirectory, 'build');
           applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
@@ -958,11 +966,7 @@ class StartupTest {
           }
         }
 
-        await flutter('install', options: <String>[
-          '--uninstall-only',
-          '-d',
-          device.deviceId,
-        ]);
+        await device.uninstallApp();
       }
 
       final Map<String, dynamic> averageResults = _average(results, iterations);
@@ -1084,11 +1088,7 @@ class DevtoolsStartupTest {
         await process.exitCode;
       }
 
-      await flutter('install', options: <String>[
-        '--uninstall-only',
-        '-d',
-        device.deviceId,
-      ]);
+      await device.uninstallApp();
 
       if (sawLine) {
         return TaskResult.success(null, benchmarkScoreKeys: <String>[]);
@@ -1294,6 +1294,22 @@ class PerfTest {
         );
       }
 
+      final bool recordGPU;
+      switch (deviceOperatingSystem) {
+        case DeviceOperatingSystem.ios:
+          recordGPU = true;
+        case DeviceOperatingSystem.android:
+        case DeviceOperatingSystem.androidArm:
+        case DeviceOperatingSystem.androidArm64:
+          recordGPU = enableImpeller ?? false;
+        case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.linux:
+        case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.windows:
+          recordGPU = false;
+      }
+
       // TODO(liyuqian): Remove isAndroid restriction once
       // https://github.com/flutter/flutter/issues/61567 is fixed.
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
@@ -1308,6 +1324,9 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
+          'average_frame_request_pending_latency',
+          '90th_percentile_frame_request_pending_latency',
+          '99th_percentile_frame_request_pending_latency',
           if (measureCpuGpu && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_cpu_usage'] != null) 'average_cpu_usage',
@@ -1326,6 +1345,12 @@ class PerfTest {
           if (data['90hz_frame_percentage'] != null) '90hz_frame_percentage',
           if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
           if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
+          if (recordGPU) ...<String>[
+            if (data['average_gpu_frame_time'] != null) 'average_gpu_frame_time',
+            if (data['90th_percentile_gpu_frame_time'] != null) '90th_percentile_gpu_frame_time',
+            if (data['99th_percentile_gpu_frame_time'] != null) '99th_percentile_gpu_frame_time',
+            if (data['worst_gpu_frame_time'] != null) 'worst_gpu_frame_time',
+          ]
         ],
       );
     });
@@ -1850,7 +1875,7 @@ class MemoryTest {
       }
 
       await adb.cancel();
-      await flutter('install', options: <String>['--uninstall-only', '-d', device!.deviceId]);
+      await device!.uninstallApp();
 
       final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);

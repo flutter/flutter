@@ -486,6 +486,40 @@ void main() {
     expect(semanticsClip.size.width, length);
   });
 
+  testWidgetsWithLeakTracking('SingleChildScrollView getOffsetToReveal - will not assert on axis mismatch', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
+    List<Widget> children;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 200.0,
+            width: 300.0,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: Column(
+                children: children = List<Widget>.generate(20, (int i) {
+                  return SizedBox(
+                    height: 100.0,
+                    width: 300.0,
+                    child: Text('Tile $i'),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5]));
+    viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
+  });
+
   testWidgetsWithLeakTracking('SingleChildScrollView getOffsetToReveal - down', (WidgetTester tester) async {
     final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
     addTearDown(controller.dispose);

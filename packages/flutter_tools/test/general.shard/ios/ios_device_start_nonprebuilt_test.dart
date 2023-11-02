@@ -520,6 +520,81 @@ void main() {
         Xcode: () => xcode,
       });
 
+      group('with flavor', () {
+        setUp(() {
+          projectInfo = XcodeProjectInfo(
+            <String>['Runner'],
+            <String>['Debug', 'Release', 'Debug-free', 'Release-free'],
+            <String>['Runner', 'free'],
+            logger,
+          );
+          fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
+          xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: fakeXcodeProjectInterpreter);
+        });
+
+        testUsingContext('succeeds', () async {
+          final IOSDevice iosDevice = setUpIOSDevice(
+            fileSystem: fileSystem,
+            processManager: FakeProcessManager.any(),
+            logger: logger,
+            artifacts: artifacts,
+            isCoreDevice: true,
+            coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcodeDebug: FakeXcodeDebug(
+              expectedProject: XcodeDebugProject(
+                scheme: 'free',
+                xcodeWorkspace: fileSystem.directory('/ios/Runner.xcworkspace'),
+                xcodeProject: fileSystem.directory('/ios/Runner.xcodeproj'),
+                hostAppProjectName: 'Runner',
+              ),
+              expectedDeviceId: '123',
+              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedSchemeFilePath: '/ios/Runner.xcodeproj/xcshareddata/xcschemes/free.xcscheme',
+            ),
+          );
+
+          setUpIOSProject(fileSystem);
+          final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+          fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
+
+          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+          iosDevice.portForwarder = const NoOpDevicePortForwarder();
+          iosDevice.setLogReader(buildableIOSApp, deviceLogReader);
+
+          // Start writing messages to the log reader.
+          Timer.run(() {
+            deviceLogReader.addLine('Foo');
+            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+          });
+
+          final LaunchResult launchResult = await iosDevice.startApp(
+            buildableIOSApp,
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+              BuildMode.debug,
+              'free',
+              buildName: '1.2.3',
+              buildNumber: '4',
+              treeShakeIcons: false,
+            )),
+            platformArgs: <String, Object>{},
+          );
+
+          expect(logger.errorText, isEmpty);
+          expect(fileSystem.directory('build/ios/iphoneos'), exists);
+          expect(launchResult.started, true);
+          expect(processManager, hasNoRemainingExpectations);
+        }, overrides: <Type, Generator>{
+          ProcessManager: () => FakeProcessManager.any(),
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          Platform: () => macPlatform,
+          XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
+          Xcode: () => xcode,
+        });
+      });
+
       testUsingContext('updates Generated.xcconfig before and after launch', () async {
         final Completer<void> debugStartedCompleter = Completer<void>();
         final Completer<void> debugEndedCompleter = Completer<void>();
@@ -829,6 +904,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     this.expectedProject,
     this.expectedDeviceId,
     this.expectedLaunchArguments,
+    this.expectedSchemeFilePath = '/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
     this.debugStartedCompleter,
     this.debugEndedCompleter,
   });
@@ -840,6 +916,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   final List<String>? expectedLaunchArguments;
   final Completer<void>? debugStartedCompleter;
   final Completer<void>? debugEndedCompleter;
+  final String expectedSchemeFilePath;
 
   @override
   Future<bool> debugApp({
@@ -862,6 +939,11 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     }
     await debugEndedCompleter?.future;
     return debugSuccess;
+  }
+
+  @override
+  void ensureXcodeDebuggerLaunchAction(File schemeFile) {
+    expect(schemeFile.path, expectedSchemeFilePath);
   }
 }
 
