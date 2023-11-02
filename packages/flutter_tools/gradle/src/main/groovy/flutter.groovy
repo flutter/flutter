@@ -41,7 +41,7 @@ import org.gradle.internal.os.OperatingSystem
 */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 33
+    static int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 19
