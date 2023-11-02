@@ -1758,6 +1758,7 @@ class PlatformViewsWithClipsScrolling extends Scenario
 }
 
 final Map<String, int> _createdPlatformViews = <String, int> {};
+final Map<String, bool> _calledToBeCreatedPlatformViews = <String, bool> {};
 
 /// Adds the platform view to the scene.
 ///
@@ -1787,6 +1788,10 @@ void addPlatformView(
     );
     return;
   }
+  if (_calledToBeCreatedPlatformViews.containsKey(platformViewKey)) {
+    return;
+  }
+  _calledToBeCreatedPlatformViews[platformViewKey] = true;
 
   final bool usesAndroidHybridComposition = scenarioParams['use_android_view'] as bool? ?? false;
   final bool expectAndroidHybridCompositionFallback =
