@@ -6,6 +6,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -1203,7 +1204,7 @@ void BM_DrawTextBlob(benchmark::State& state,
 
   for (size_t i = 0; i < draw_calls; i++) {
     character[0] = 'A' + (i % 26);
-    auto blob = SkTextBlob::MakeFromString(character, SkFont());
+    auto blob = SkTextBlob::MakeFromString(character, CreateTestFontOfSize(20));
     builder.DrawTextBlob(blob, 50.0f, 50.0f, paint);
   }
 

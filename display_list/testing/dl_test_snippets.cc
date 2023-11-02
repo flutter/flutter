@@ -901,13 +901,21 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
       {"DrawTextBlob",
        {
            {1, 24, 1, 24,
-            [](DlOpReceiver& r) { r.drawTextBlob(TestBlob1, 10, 10); }},
+            [](DlOpReceiver& r) {
+              r.drawTextBlob(GetTestTextBlob(1), 10, 10);
+            }},
            {1, 24, 1, 24,
-            [](DlOpReceiver& r) { r.drawTextBlob(TestBlob1, 20, 10); }},
+            [](DlOpReceiver& r) {
+              r.drawTextBlob(GetTestTextBlob(1), 20, 10);
+            }},
            {1, 24, 1, 24,
-            [](DlOpReceiver& r) { r.drawTextBlob(TestBlob1, 10, 20); }},
+            [](DlOpReceiver& r) {
+              r.drawTextBlob(GetTestTextBlob(1), 10, 20);
+            }},
            {1, 24, 1, 24,
-            [](DlOpReceiver& r) { r.drawTextBlob(TestBlob2, 10, 10); }},
+            [](DlOpReceiver& r) {
+              r.drawTextBlob(GetTestTextBlob(2), 10, 10);
+            }},
        }},
       // The -1 op counts below are to indicate to the framework not to test
       // SkCanvas conversion of these ops as it converts the operation into a
@@ -964,6 +972,27 @@ std::vector<DisplayListInvocationGroup> CreateAllGroups() {
   std::move(all_rendering_ops.begin(), all_rendering_ops.end(),
             std::back_inserter(result));
   return result;
+}
+
+SkFont CreateTestFontOfSize(SkScalar scalar) {
+  static constexpr const char* kTestFontFixture = "Roboto-Regular.ttf";
+  auto mapping = flutter::testing::OpenFixtureAsSkData(kTestFontFixture);
+  FML_CHECK(mapping);
+  return SkFont{SkTypeface::MakeFromData(mapping), scalar};
+}
+
+sk_sp<SkTextBlob> GetTestTextBlob(int index) {
+  static std::map<int, sk_sp<SkTextBlob>> text_blobs;
+  auto it = text_blobs.find(index);
+  if (it != text_blobs.end()) {
+    return it->second;
+  }
+  std::string text = "TestBlob" + std::to_string(index);
+  sk_sp<SkTextBlob> blob =
+      SkTextBlob::MakeFromText(text.c_str(), text.size(),
+                               CreateTestFontOfSize(20), SkTextEncoding::kUTF8);
+  text_blobs.insert(std::make_pair(index, blob));
+  return blob;
 }
 
 }  // namespace testing

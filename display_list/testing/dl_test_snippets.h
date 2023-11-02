@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/testing/testing.h"
 
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -222,12 +223,9 @@ static sk_sp<DisplayList> TestDisplayList1 =
 static sk_sp<DisplayList> TestDisplayList2 =
     MakeTestDisplayList(25, 25, SK_ColorBLUE);
 
-static sk_sp<SkTextBlob> MakeTextBlob(std::string string) {
-  return SkTextBlob::MakeFromText(string.c_str(), string.size(), SkFont(),
-                                  SkTextEncoding::kUTF8);
-}
-static sk_sp<SkTextBlob> TestBlob1 = MakeTextBlob("TestBlob1");
-static sk_sp<SkTextBlob> TestBlob2 = MakeTextBlob("TestBlob2");
+SkFont CreateTestFontOfSize(SkScalar scalar);
+
+sk_sp<SkTextBlob> GetTestTextBlob(int index);
 
 struct DisplayListInvocation {
   unsigned int op_count_;
