@@ -381,7 +381,7 @@ targets:
       backfill: "false"
       validation: docs
       validation_name: Docs
-      firebase_project: master-docs-flutter-dev
+      firebase_project: main-docs-flutter-prod
       release_ref: refs/heads/master
       release_build: "true"
     drone_dimensions:
