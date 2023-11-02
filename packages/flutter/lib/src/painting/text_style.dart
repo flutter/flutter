@@ -475,6 +475,12 @@ class TextStyle with Diagnosticable {
   /// The `package` argument must be non-null if the font family is defined in a
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
+  ///
+  /// On Apple devices the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used as proxies for the Apple system fonts.
+  /// They currently redirect to the equivilant of SF Pro Text and SF Pro Display
+  /// respectively. 'CupertinoSystemText' is designed for fonts below 20 point
+  /// size, and 'CupertinoSystemDisplay' is recommended for sizes 20 and above.
   const TextStyle({
     this.inherit = true,
     this.color,
