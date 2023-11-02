@@ -85,15 +85,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        final NavigatorState navigator =
-            navigatorKeys[selectedIndex].currentState!;
-        if (!navigator.canPop()) {
-          return true;
-        }
+    return NavigatorPopHandler(
+      onPop: () {
+        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
         navigator.pop();
-        return false;
       },
       child: Scaffold(
         body: SafeArea(
@@ -199,7 +194,7 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
-                showDialog(
+                showDialog<void>(
                   context: context,
                   useRootNavigator: false,
                   builder: _buildDialog,
@@ -211,9 +206,9 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
-                showDialog(
+                showDialog<void>(
                   context: context,
-                  useRootNavigator: true,
+                  useRootNavigator: true,  // ignore: avoid_redundant_argument_values
                   builder: _buildDialog,
                 );
               },
@@ -225,7 +220,7 @@ class RootPage extends StatelessWidget {
                 return ElevatedButton(
                   style: buttonStyle,
                   onPressed: () {
-                    showBottomSheet(
+                    showBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
                         return Container(
@@ -265,7 +260,9 @@ class ListPage extends StatelessWidget {
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)),
+        side: BorderSide(
+          color: colorScheme.onSurface.withOpacity(0.12),
+        ),
       ),
       foregroundColor: destination.color,
       fixedSize: const Size.fromHeight(64),
