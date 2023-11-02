@@ -99,7 +99,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.ndkCCompilerConfig,
-      // TODO(dacoharkes): Get this value from somewhere.
       targetAndroidNdkApi: targetAndroidNdkApi,
     );
     nativeAssets.addAll(result.assets);
