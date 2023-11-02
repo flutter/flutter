@@ -310,6 +310,9 @@ class IconButton extends StatelessWidget {
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
   ///
+  /// This property is only used when [icon] is or contains an [Icon] widget. It will be
+  /// ignored if other widgets are used, such as an [Image].
+  ///
   /// If [ThemeData.useMaterial3] is set to true and this is null, the size of the
   /// [IconButton] would default to 24.0. The size given here is passed down to the
   /// [ButtonStyle.iconSize] property.

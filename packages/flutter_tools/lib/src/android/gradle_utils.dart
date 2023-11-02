@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -741,6 +742,11 @@ void exitWithNoSdkMessage() {
           eventError: 'android-sdk-not-found',
           flutterUsage: globals.flutterUsage)
       .send();
+  globals.analytics.send(Event.flutterBuildInfo(
+    label: 'unsupported-project',
+    buildType: 'gradle',
+    error: 'android-sdk-not-found',
+  ));
   throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
       'Try setting the ANDROID_HOME environment variable.');
 }
