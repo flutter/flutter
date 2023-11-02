@@ -208,7 +208,7 @@ class RootPage extends StatelessWidget {
               onPressed: () {
                 showDialog<void>(
                   context: context,
-                  useRootNavigator: true,  // ignore: avoid_redundant_argument_values
+                  useRootNavigator: true, // ignore: avoid_redundant_argument_values
                   builder: _buildDialog,
                 );
               },
