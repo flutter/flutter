@@ -744,10 +744,10 @@ TEST(GeometryTest, CanConvertTTypesExplicitly) {
   {
     Rect r1 = Rect::MakeXYWH(1.0, 2.0, 3.0, 4.0);
     IRect r2 = static_cast<IRect>(r1);
-    ASSERT_EQ(r2.origin.x, 1u);
-    ASSERT_EQ(r2.origin.y, 2u);
-    ASSERT_EQ(r2.size.width, 3u);
-    ASSERT_EQ(r2.size.height, 4u);
+    ASSERT_EQ(r2.GetOrigin().x, 1u);
+    ASSERT_EQ(r2.GetOrigin().y, 2u);
+    ASSERT_EQ(r2.GetSize().width, 3u);
+    ASSERT_EQ(r2.GetSize().height, 4u);
   }
 }
 

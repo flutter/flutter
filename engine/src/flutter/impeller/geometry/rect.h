@@ -20,7 +20,9 @@ template <class T>
 struct TRect {
   using Type = T;
 
+  /// DEPRECATED: Use |GetOrigin|
   TPoint<Type> origin;
+  /// DEPRECATED: Use |GetSize|
   TSize<Type> size;
 
   constexpr TRect() : origin({0, 0}), size({0, 0}) {}
