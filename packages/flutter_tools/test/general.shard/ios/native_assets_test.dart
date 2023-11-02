@@ -143,6 +143,13 @@ void main() {
       ),
     );
     expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Dry running native assets for ios.',
+        'Dry running native assets for ios done.',
+      ]),
+    );
+    expect(
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/ios/native_assets.yaml'),
     );
@@ -259,12 +266,19 @@ void main() {
             Asset(
               id: 'package:bar/bar.dart',
               linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSArm64,
+              target: native_assets_cli.Target.iOSArm64,
               path: AssetAbsolutePath(Uri.file('bar.dylib')),
             ),
           ],
         ),
       ),
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Building native assets for [ios_arm64] debug.',
+        'Building native assets for [ios_arm64] done.',
+      ]),
     );
     expect(
       environment.buildDir.childFile('native_assets.yaml'),

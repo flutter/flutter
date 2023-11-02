@@ -51,7 +51,6 @@
   "reorderItemRight": "Siirrä oikealle",
   "expandedIconTapHint": "Tiivistä",
   "collapsedIconTapHint": "Laajenna",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 merkki jäljellä",
   "remainingTextFieldCharacterCountOther": "$remainingCount merkkiä jäljellä",
   "refreshIndicatorSemanticLabel": "Päivitys",
@@ -143,7 +142,7 @@
   "expandedHint": "Tiivistetty",
   "collapsedHint": "Laajennettu",
   "menuDismissLabel": "Hylkää valikko",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Hae",
+  "searchWebButtonLabel": "Hae verkosta",
+  "shareButtonLabel": "Jaa…"
 }

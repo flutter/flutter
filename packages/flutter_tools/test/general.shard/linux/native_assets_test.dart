@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -86,6 +87,24 @@ void main() {
     );
   });
 
+  testUsingContext('does not throw if clang not present but no native assets present', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.create(recursive: true);
+    await buildNativeAssetsLinux(
+      projectUri: projectUri,
+      buildMode: BuildMode.debug,
+      fileSystem: fileSystem,
+      buildRunner: _BuildRunnerWithoutClang(),
+    );
+    expect(
+      (globals.logger as BufferLogger).traceText,
+      isNot(contains('Building native assets for ')),
+    );
+  });
+
   testUsingContext('dry run for multiple OSes with no package config', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
@@ -162,6 +181,13 @@ void main() {
       ),
     );
     expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Dry running native assets for linux.',
+        'Dry running native assets for linux done.',
+      ]),
+    );
+    expect(
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/linux/native_assets.yaml'),
     );
@@ -203,6 +229,7 @@ void main() {
     await packageConfig.parent.create();
     await packageConfig.create();
     final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+      targetPlatform: TargetPlatform.linux_x64,
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
@@ -238,16 +265,14 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager: () => FakeProcessManager.empty(),
     }, () async {
-      if (const LocalPlatform().isWindows) {
-        return; // Backslashes in commands, but we will never run these commands on Windows.
-      }
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      final File packageConfig = environment.projectDir.childDirectory('.dart_tool').childFile('package_config.json');
       await packageConfig.parent.create();
       await packageConfig.create();
       final File dylibAfterCompiling = fileSystem.file('libbar.so');
       // The mock doesn't create the file, so create it here.
       await dylibAfterCompiling.create();
       final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+        targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
@@ -269,6 +294,13 @@ void main() {
         ),
       );
       expect(
+        (globals.logger as BufferLogger).traceText,
+        stringContainsInOrder(<String>[
+          'Building native assets for linux_x64 debug.',
+          'Building native assets for linux_x64 done.',
+        ]),
+      );
+      expect(
         nativeAssetsYaml,
         projectUri.resolve('build/native_assets/linux/native_assets.yaml'),
       );
@@ -278,7 +310,7 @@ void main() {
           'package:bar/bar.dart',
           if (flutterTester)
             // Tests run on host system, so the have the full path on the system.
-            '- ${projectUri.resolve('/build/native_assets/linux/libbar.so').toFilePath()}'
+            '- ${projectUri.resolve('build/native_assets/linux/libbar.so').toFilePath()}'
           else
             // Apps are a bundle with the dylibs on their dlopen path.
             '- libbar.so',
@@ -346,7 +378,6 @@ void main() {
     FileSystem: () => fileSystem,
   }, () async {
     if (!const LocalPlatform().isLinux) {
-      // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
       return;
     }
 
@@ -371,4 +402,9 @@ void main() {
     final CCompilerConfig result = await runner.cCompilerConfig;
     expect(result.cc, Uri.file('/some/path/to/clang'));
   });
+}
+
+class _BuildRunnerWithoutClang extends FakeNativeAssetsBuildRunner {
+  @override
+  Future<CCompilerConfig> get cCompilerConfig async => throwToolExit('Failed to find clang++ on the PATH.');
 }

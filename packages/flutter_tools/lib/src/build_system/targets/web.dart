@@ -238,7 +238,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
     );
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
-    final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.path;
+    final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
+    final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
 
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: TargetPlatform.web_javascript),
@@ -246,14 +247,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       artifacts.getArtifactPath(Artifact.dart2wasmSnapshot, platform: TargetPlatform.web_javascript),
       '--packages=.dart_tool/package_config.json',
       '--dart-sdk=$dartSdkPath',
-      '--multi-root-scheme',
-      'org-dartlang-sdk',
-      '--multi-root',
-      artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
-      '--multi-root',
-      dartSdkRoot,
-      '--libraries-spec',
-      artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
+      '--platform=$platformFilePath',
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
@@ -592,7 +586,7 @@ class WebServiceWorker extends Target {
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
-      if (environment.fileSystem.path.basename(url) == 'index.html') {
+      if (url == 'index.html') {
         urlToHash['/'] = hash;
       }
     }
@@ -610,8 +604,8 @@ class WebServiceWorker extends Target {
       <String>[
         'main.dart.js',
         'index.html',
-        if (urlToHash.containsKey('assets/AssetManifest.json'))
-          'assets/AssetManifest.json',
+        if (urlToHash.containsKey('assets/AssetManifest.bin.json'))
+          'assets/AssetManifest.bin.json',
         if (urlToHash.containsKey('assets/FontManifest.json'))
           'assets/FontManifest.json',
       ],

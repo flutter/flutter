@@ -1298,7 +1298,7 @@ flutter:
 
     await residentRunner.runSourceGenerators();
 
-    expect(testLogger.errorText, allOf(contains('Exception')));
+    expect(testLogger.errorText, contains('Error'));
     expect(testLogger.statusText, isEmpty);
   }));
 
@@ -2420,7 +2420,7 @@ flutter:
         expect(buildRunner.buildInvocations, 0);
         expect(buildRunner.dryRunInvocations, 1);
         expect(buildRunner.hasPackageConfigInvocations, 1);
-        expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+        expect(buildRunner.packagesWithNativeAssetsInvocations, 1);
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
