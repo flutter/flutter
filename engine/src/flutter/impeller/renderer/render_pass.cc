@@ -50,7 +50,7 @@ bool RenderPass::AddCommand(Command&& command) {
   }
 
   if (command.scissor.has_value()) {
-    auto target_rect = IRect({}, render_target_.GetRenderTargetSize());
+    auto target_rect = IRect::MakeSize(render_target_.GetRenderTargetSize());
     if (!target_rect.Contains(command.scissor.value())) {
       VALIDATION_LOG << "Cannot apply a scissor that lies outside the bounds "
                         "of the render target.";

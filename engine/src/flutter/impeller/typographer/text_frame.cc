@@ -45,14 +45,14 @@ bool TextFrame::MaybeHasOverlapping() const {
   // accumulated bounds rect. This gives faster but less precise information
   // on text runs.
   auto first_position = glyph_positions[0];
-  auto overlapping_rect =
-      Rect(first_position.position + first_position.glyph.bounds.origin,
-           first_position.glyph.bounds.size);
+  auto overlapping_rect = Rect::MakeOriginSize(
+      first_position.position + first_position.glyph.bounds.origin,
+      first_position.glyph.bounds.size);
   for (auto i = 1u; i < glyph_positions.size(); i++) {
     auto glyph_position = glyph_positions[i];
-    auto glyph_rect =
-        Rect(glyph_position.position + glyph_position.glyph.bounds.origin,
-             glyph_position.glyph.bounds.size);
+    auto glyph_rect = Rect::MakeOriginSize(
+        glyph_position.position + glyph_position.glyph.bounds.origin,
+        glyph_position.glyph.bounds.size);
     auto intersection = glyph_rect.Intersection(overlapping_rect);
     if (intersection.has_value()) {
       return true;

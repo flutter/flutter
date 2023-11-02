@@ -271,8 +271,9 @@ void Canvas::DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint) {
 
 void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
   Size half_size(radius, radius);
-  if (AttemptDrawBlurredRRect(Rect(center - half_size, half_size * 2), radius,
-                              paint)) {
+  if (AttemptDrawBlurredRRect(
+          Rect::MakeOriginSize(center - half_size, half_size * 2), radius,
+          paint)) {
     return;
   }
   auto circle_path =

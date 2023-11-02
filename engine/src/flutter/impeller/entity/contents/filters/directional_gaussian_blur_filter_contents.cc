@@ -106,12 +106,10 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
   std::optional<Rect> expanded_coverage_hint;
   if (coverage_hint.has_value()) {
     auto r =
-        Size(transformed_blur_radius_length, transformed_blur_radius_length)
+        Point(transformed_blur_radius_length, transformed_blur_radius_length)
             .Abs();
     expanded_coverage_hint =
-        is_second_pass_ ? coverage_hint
-                        : Rect(coverage_hint.value().origin - r,
-                               Size(coverage_hint.value().size + r * 2));
+        is_second_pass_ ? coverage_hint : coverage_hint->Expand(r);
   }
   auto input_snapshot = inputs[0]->GetSnapshot("GaussianBlur", renderer, entity,
                                                expanded_coverage_hint);
@@ -317,9 +315,7 @@ std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
   auto transformed_blur_vector =
       transform.TransformDirection(blur_direction_ * Radius{blur_sigma_}.radius)
           .Abs();
-  auto extent = coverage->size + transformed_blur_vector * 2;
-  return Rect(coverage->origin - transformed_blur_vector,
-              Size(extent.x, extent.y));
+  return coverage->Expand(transformed_blur_vector);
 }
 
 }  // namespace impeller

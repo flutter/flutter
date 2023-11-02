@@ -425,7 +425,7 @@ void Path::ComputeBounds() {
   auto min = min_max->first;
   auto max = min_max->second;
   const auto difference = max - min;
-  computed_bounds_ = Rect{min.x, min.y, difference.x, difference.y};
+  computed_bounds_ = Rect::MakeXYWH(min.x, min.y, difference.x, difference.y);
 }
 
 std::optional<Rect> Path::GetTransformedBoundingBox(

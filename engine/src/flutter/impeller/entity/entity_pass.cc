@@ -569,11 +569,11 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
     // The maximum coverage of the subpass. Subpasses textures should never
     // extend outside the parent pass texture or the current clip coverage.
-    auto coverage_limit =
-        Rect(global_pass_position, Size(pass_context.GetPassTarget()
-                                            .GetRenderTarget()
-                                            .GetRenderTargetSize()))
-            .Intersection(clip_coverage_back.value());
+    auto coverage_limit = Rect::MakeOriginSize(global_pass_position,
+                                               Size(pass_context.GetPassTarget()
+                                                        .GetRenderTarget()
+                                                        .GetRenderTargetSize()))
+                              .Intersection(clip_coverage_back.value());
     if (!coverage_limit.has_value()) {
       capture.CreateChild("Subpass Entity (Skipped: Empty coverage limit A)");
       return EntityPass::EntityResult::Skip();

@@ -12,7 +12,7 @@ std::optional<Rect> Snapshot::GetCoverage() const {
   if (!texture) {
     return std::nullopt;
   }
-  return Rect(Size(texture->GetSize())).TransformBounds(transform);
+  return Rect::MakeSize(texture->GetSize()).TransformBounds(transform);
 }
 
 std::optional<Matrix> Snapshot::GetUVTransform() const {

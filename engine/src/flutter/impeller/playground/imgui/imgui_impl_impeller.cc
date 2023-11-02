@@ -145,12 +145,12 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
   auto buffer = bd->context->GetResourceAllocator()->CreateBuffer(buffer_desc);
   buffer->SetLabel(impeller::SPrintF("ImGui vertex+index buffer"));
 
-  auto display_rect =
-      impeller::Rect(draw_data->DisplayPos.x, draw_data->DisplayPos.y,
-                     draw_data->DisplaySize.x, draw_data->DisplaySize.y);
+  auto display_rect = impeller::Rect::MakeXYWH(
+      draw_data->DisplayPos.x, draw_data->DisplayPos.y,
+      draw_data->DisplaySize.x, draw_data->DisplaySize.y);
 
   auto viewport = impeller::Viewport{
-      .rect = impeller::Rect(
+      .rect = impeller::Rect::MakeXYWH(
           display_rect.origin.x * draw_data->FramebufferScale.x,
           display_rect.origin.y * draw_data->FramebufferScale.y,
           display_rect.size.width * draw_data->FramebufferScale.x,
