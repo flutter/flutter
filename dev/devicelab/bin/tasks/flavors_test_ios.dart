@@ -44,7 +44,7 @@ Future<TaskResult> _testInstallDebugPaidFlavor() async {
     options: <String>['--flavor', 'paid'],
   );
 
-  if (!stdout.contains('Skipping assets entry "assets/free/" since its configured flavor, "free" did not match provided flavor')) {
+  if (!stdout.contains('Skipping assets entry "assets/free/" since its configured flavor, "free", did not match the provided flavor')) {
     return TaskResult.failure('Assets declared with a flavor not equal to the argued --flavor value should not be bundled.');
   }
 

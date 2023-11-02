@@ -637,7 +637,7 @@ class ManifestAssetBundle implements AssetBundle {
       final Map<_Asset, List<_Asset>> componentAssets = <_Asset, List<_Asset>>{};
       for (final AssetsEntry assetsEntry in component.assets) {
         if (assetsEntry.flavor != null && assetsEntry.flavor != flavor) {
-          _logger.printTrace('Skipping assets entry "${assetsEntry.uri.path}" since its configured flavor, "${assetsEntry.flavor}" did not match provided flavor (if any).');
+          _logger.printTrace('Skipping assets entry "${assetsEntry.uri.path}" since its configured flavor, "${assetsEntry.flavor}", did not match the provided flavor (if any).');
           continue;
         }
         if (assetsEntry.uri.path.endsWith('/')) {
@@ -663,7 +663,7 @@ class ManifestAssetBundle implements AssetBundle {
 
         for (final _Asset assetsEntry in componentAssets.keys) {
           if (assetsEntry.flavor != null && assetsEntry.flavor != flavor) {
-            _logger.printTrace('Skipping assets entry "${assetsEntry.entryUri.path}" since its configured flavor, "${assetsEntry.flavor}" did not match provided flavor (if any).');
+            _logger.printTrace('Skipping assets entry "${assetsEntry.entryUri.path}" since its configured flavor, "${assetsEntry.flavor}", did not match the provided flavor (if any).');
             componentAssets.remove(assetsEntry);
           }
         }
@@ -851,7 +851,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     result.removeWhere((_Asset asset, List<_Asset> variants) {
       if (asset.flavor != null && asset.flavor != flavor) {
-        _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}" did not match provided flavor (if any).');
+        _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
         return true;
       }
       return false;
@@ -992,7 +992,7 @@ class ManifestAssetBundle implements AssetBundle {
           return true;
         }
         else if (!assetUri.path.endsWith('/') && preExistingAsset.originUri.path.endsWith('/')) {
-          _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}" did not match provided flavor (if any).');
+          _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
           result.remove(preExistingAsset);
         }
       }
@@ -1001,7 +1001,7 @@ class ManifestAssetBundle implements AssetBundle {
     })();
 
     if (hasMoreSpecificDeclarationWithFlavor) {
-      _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}" did not match provided flavor (if any).');
+      _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
       return;
     }
 

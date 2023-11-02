@@ -784,10 +784,3 @@ class AssetsEntry {
   @override
   int get hashCode => uri.hashCode;
 }
-
-// class AssetsEntryParseResult {
-//   AssetsEntryParseResult({required this.errors, required this.value});
-
-//   final List<String> errors;
-//   final AssetsEntry value;
-// }
