@@ -366,7 +366,7 @@ void main() {
     expect(render.size.height, greaterThan(500.0));
     expect(scrollController.offset, 0.0);
 
-    // Change selection to non-collapased so that cursor isn't shown
+    // Change selection to non-collapsed so that cursor isn't shown
     // and the location requires a bit of scroll.
     tester.testTextInput.updateEditingValue(TextEditingValue(
       text: text,

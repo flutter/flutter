@@ -763,7 +763,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
             _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
           position.goBallistic(0);
         }
-      });
+      }, debugLabel: 'DraggableScrollableSheet.snap');
     }
   }
 

@@ -1507,7 +1507,7 @@ class _TabBarState extends State<TabBar> {
         }
         return true;
       }());
-    });
+    }, debugLabel: 'TabBar.tabsCountCheck');
     _debugHasScheduledValidTabsCountCheck = true;
     return true;
   }
@@ -2024,7 +2024,7 @@ class _TabBarViewState extends State<TabBarView> {
         }
         return true;
       }());
-    });
+    }, debugLabel: 'TabBarView.validChildrenCountCheck');
     _debugHasScheduledValidChildrenCountCheck = true;
     return true;
   }

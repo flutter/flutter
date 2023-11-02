@@ -565,7 +565,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
 
 /// The signature of a callback accepted by [CallbackAction.onInvoke].
 ///
-/// Such callbacks are implementions of [Action.invoke]. The returned value
+/// Such callbacks are implementations of [Action.invoke]. The returned value
 /// is the return value of [Action.invoke], the argument is the intent passed
 /// to [Action.invoke], and so forth.
 typedef OnInvokeCallback<T extends Intent> = Object? Function(T intent);
@@ -1231,7 +1231,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
-    });
+    }, debugLabel: 'FocusableActionDetector.updateHighlightMode');
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -1339,7 +1339,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     if (widget.enabled != oldWidget.enabled) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
-      });
+      }, debugLabel: 'FocusableActionDetector.mayTriggerCallback');
     }
   }
 

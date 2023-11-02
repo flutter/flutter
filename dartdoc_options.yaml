@@ -36,6 +36,6 @@ dartdoc:
     - unknown-macro
     - unresolved-doc-reference
     ## Ignores that are elevated to errors:
-    # - type-as-html # not yet tested
-    # - missing-constant-constructor # not yet tested
-    # - missing-code-block-language # not yet tested
+    # - type-as-html # broken, https://github.com/dart-lang/dartdoc/issues/3545
+    - missing-constant-constructor
+    # - missing-code-block-language # blocked on https://github.com/dart-lang/matcher/pull/230
