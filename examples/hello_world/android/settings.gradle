@@ -24,13 +24,6 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-
-    plugins {
-        // Flutter Gradle Plugin's ID is defined in /packages/flutter_tools/gradle/build.gradle.kts.
-        // We set `apply false`, because we don't want to apply the plugin to
-        // the `android` root project, but only to the `app` subproject.
-        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
-    }
 }
 
 plugins {
