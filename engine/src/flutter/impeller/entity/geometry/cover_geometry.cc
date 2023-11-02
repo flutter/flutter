@@ -15,7 +15,7 @@ CoverGeometry::~CoverGeometry() = default;
 GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                 const Entity& entity,
                                                 RenderPass& pass) {
-  auto rect = Rect(Size(pass.GetRenderTargetSize()));
+  auto rect = Rect::MakeSize(pass.GetRenderTargetSize());
   constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
   auto& host_buffer = pass.GetTransientsBuffer();
   return GeometryResult{
@@ -44,7 +44,7 @@ GeometryResult CoverGeometry::GetPositionUVBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
-  auto rect = Rect(Size(pass.GetRenderTargetSize()));
+  auto rect = Rect::MakeSize(pass.GetRenderTargetSize());
   return ComputeUVGeometryForRect(rect, texture_coverage, effect_transform,
                                   renderer, entity, pass);
 }

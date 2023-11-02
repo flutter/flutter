@@ -25,14 +25,6 @@ struct TRect {
 
   constexpr TRect() : origin({0, 0}), size({0, 0}) {}
 
-  constexpr TRect(TSize<Type> size) : origin({0.0, 0.0}), size(size) {}
-
-  constexpr TRect(TPoint<Type> origin, TSize<Type> size)
-      : origin(origin), size(size) {}
-
-  constexpr TRect(Type x, Type y, Type width, Type height)
-      : origin(x, y), size(width, height) {}
-
   constexpr static TRect MakeLTRB(Type left,
                                   Type top,
                                   Type right,
@@ -363,6 +355,13 @@ struct TRect {
       const std::optional<TRect> b) {
     return a.has_value() ? Intersection(a.value(), b) : b;
   }
+
+ private:
+  constexpr TRect(Type x, Type y, Type width, Type height)
+      : origin(x, y), size(width, height) {}
+
+  constexpr TRect(TPoint<Type> origin, TSize<Type> size)
+      : origin(origin), size(size) {}
 };
 
 using Rect = TRect<Scalar>;

@@ -522,9 +522,7 @@ std::optional<Rect> StrokePathGeometry::GetCoverage(
           .TransformDirection(Vector2(max_radius, max_radius) *
                               std::max(stroke_width_, min_size))
           .Abs();
-  return Rect(path_coverage.origin - max_radius_xy,
-              Size(path_coverage.size.width + max_radius_xy.x * 2,
-                   path_coverage.size.height + max_radius_xy.y * 2));
+  return path_coverage.Expand(max_radius_xy);
 }
 
 }  // namespace impeller

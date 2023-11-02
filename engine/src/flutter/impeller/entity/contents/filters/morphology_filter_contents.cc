@@ -96,7 +96,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     auto transformed_radius =
         transform.TransformDirection(direction_ * radius_.radius);
     auto transformed_texture_vertices =
-        Rect(Size(input_snapshot->texture->GetSize()))
+        Rect::MakeSize(input_snapshot->texture->GetSize())
             .GetTransformedPoints(input_snapshot->transform);
     auto transformed_texture_width =
         transformed_texture_vertices[0].GetDistance(
@@ -189,7 +189,7 @@ std::optional<Rect> DirectionalMorphologyFilterContents::GetFilterCoverage(
   if (size.x < 0 || size.y < 0) {
     return Rect::MakeSize(Size(0, 0));
   }
-  return Rect(origin, Size(size.x, size.y));
+  return Rect::MakeOriginSize(origin, Size(size.x, size.y));
 }
 
 std::optional<Rect>
