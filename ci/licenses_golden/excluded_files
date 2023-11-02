@@ -2835,6 +2835,7 @@
 ../../../third_party/skia/modules/skparagraph/src/BUILD.bazel
 ../../../third_party/skia/modules/skparagraph/tests
 ../../../third_party/skia/modules/skparagraph/utils/BUILD.bazel
+../../../third_party/skia/modules/skplaintexteditor/README.md
 ../../../third_party/skia/modules/skresources/BUILD.bazel
 ../../../third_party/skia/modules/skresources/include/BUILD.bazel
 ../../../third_party/skia/modules/skresources/src/BUILD.bazel

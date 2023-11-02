@@ -1,4 +1,4 @@
-Signature: 6ea751a5422bf58307b04f4f08cc2a6b
+Signature: 04249e503a3ff012210a57eddf1bb17d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,6 +386,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/relnotes/FontConfigInterface.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -6195,6 +6196,16 @@ ORIGIN: ../../../third_party/skia/gm/swizzle.cpp + ../../../third_party/skia/LIC
 ORIGIN: ../../../third_party/skia/gm/tilemodes_alpha.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkPathTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skparagraph/bench/ParagraphBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/app/editor_application.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/include/editor.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/include/stringslice.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/include/stringview.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/editor.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/shape.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/shape.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/stringslice.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkContainers.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkMalloc.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPixelRefPriv.h + ../../../third_party/skia/LICENSE
@@ -6224,6 +6235,16 @@ FILE: ../../../third_party/skia/gm/swizzle.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
 FILE: ../../../third_party/skia/include/core/SkPathTypes.h
 FILE: ../../../third_party/skia/modules/skparagraph/bench/ParagraphBench.cpp
+FILE: ../../../third_party/skia/modules/skplaintexteditor/app/editor_application.cpp
+FILE: ../../../third_party/skia/modules/skplaintexteditor/include/editor.h
+FILE: ../../../third_party/skia/modules/skplaintexteditor/include/stringslice.h
+FILE: ../../../third_party/skia/modules/skplaintexteditor/include/stringview.h
+FILE: ../../../third_party/skia/modules/skplaintexteditor/src/editor.cpp
+FILE: ../../../third_party/skia/modules/skplaintexteditor/src/shape.cpp
+FILE: ../../../third_party/skia/modules/skplaintexteditor/src/shape.h
+FILE: ../../../third_party/skia/modules/skplaintexteditor/src/stringslice.cpp
+FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.cpp
+FILE: ../../../third_party/skia/modules/skplaintexteditor/src/word_boundaries.h
 FILE: ../../../third_party/skia/src/base/SkContainers.cpp
 FILE: ../../../third_party/skia/src/base/SkMalloc.cpp
 FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
