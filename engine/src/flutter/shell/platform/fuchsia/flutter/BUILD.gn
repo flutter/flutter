@@ -657,12 +657,28 @@ if (enable_unittests) {
     deps = [ "//flutter/display_list:display_list_unittests" ]
 
     binary = "display_list_unittests"
+
+    resources = [
+      {
+        path = rebase_path(
+                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        dest = "assets/Roboto-Regular.ttf"
+      },
+    ]
   }
 
   fuchsia_test_archive("display_list_render_tests") {
     deps = [ "//flutter/display_list:display_list_rendertests" ]
 
     binary = "display_list_rendertests"
+
+    resources = [
+      {
+        path = rebase_path(
+                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        dest = "assets/Roboto-Regular.ttf"
+      },
+    ]
   }
 
   fuchsia_test_archive("flow_tests") {
@@ -685,6 +701,11 @@ if (enable_unittests) {
         path = rebase_path(
                 "//flutter/testing/resources/performance_overlay_gold_120fps.png")
         dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
+      },
+      {
+        path = rebase_path(
+                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        dest = "assets/Roboto-Regular.ttf"
       },
     ]
   }
