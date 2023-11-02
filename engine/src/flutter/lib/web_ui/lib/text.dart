@@ -695,9 +695,6 @@ abstract class Paragraph {
   TextRange getLineBoundary(TextPosition position);
   List<TextBox> getBoxesForPlaceholders();
   List<LineMetrics> computeLineMetrics();
-  LineMetrics? getLineMetricsAt(int lineNumber);
-  int get numberOfLines;
-  int? getLineNumberAt(int codeUnitOffset);
   void dispose();
   bool get debugDisposed;
 }
