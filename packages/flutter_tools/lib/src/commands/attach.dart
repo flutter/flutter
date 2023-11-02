@@ -22,7 +22,6 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -540,6 +539,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,
           flutterProject: flutterProject,
+          analytics: analytics,
         )
       : ColdRunner(
           flutterDevices,
@@ -572,7 +572,7 @@ class HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
-    Analytics? analytics,
+    required Analytics analytics,
   }) => HotRunner(
     devices,
     target: target,
@@ -584,6 +584,6 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
-    analytics: analytics ?? globals.analytics,
+    analytics: analytics,
   );
 }
