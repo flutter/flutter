@@ -12,6 +12,7 @@ import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:vector_math/vector_math_64.dart';
 
+import 'goldens.dart';
 import 'impeller_enabled.dart';
 
 typedef CanvasCallback = void Function(Canvas canvas);
@@ -123,59 +124,9 @@ void testNoCrashes() {
   });
 }
 
-/// @returns true When the images are reasonably similar.
-/// @todo Make the search actually fuzzy to a certain degree.
-Future<bool> fuzzyCompareImages(Image golden, Image img) async {
-  if (golden.width != img.width || golden.height != img.height) {
-    return false;
-  }
-  int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
-  final ByteData goldenData = (await golden.toByteData())!;
-  final ByteData imgData = (await img.toByteData())!;
-  for (int y = 0; y < golden.height; y++) {
-    for (int x = 0; x < golden.width; x++) {
-      if (getPixel(goldenData, x, y) != getPixel(imgData, x, y)) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
+void main() async {
+  final ImageComparer comparer = await ImageComparer.create();
 
-Future<void> saveTestImage(Image image, String filename) async {
-  final String imagesPath = path.join('flutter', 'testing', 'resources');
-  final ByteData pngData = (await image.toByteData(format: ImageByteFormat.png))!;
-  final String outPath = path.join(imagesPath, filename);
-  File(outPath).writeAsBytesSync(pngData.buffer.asUint8List());
-  print('wrote: $outPath');
-}
-
-/// @returns true When the images are reasonably similar.
-Future<bool> fuzzyGoldenImageCompare(
-    Image image, String goldenImageName) async {
-  final String imagesPath = path.join('flutter', 'testing', 'resources');
-  final File file = File(path.join(imagesPath, goldenImageName));
-
-  bool areEqual = false;
-
-  if (file.existsSync()) {
-    final Uint8List goldenData = await file.readAsBytes();
-
-    final Codec codec = await instantiateImageCodec(goldenData);
-    final FrameInfo frame = await codec.getNextFrame();
-    expect(frame.image.height, equals(image.height));
-    expect(frame.image.width, equals(image.width));
-
-    areEqual = await fuzzyCompareImages(frame.image, image);
-  }
-
-  if (!areEqual) {
-    saveTestImage(image, 'found_$goldenImageName');
-  }
-  return areEqual;
-}
-
-void main() {
   testNoCrashes();
 
   test('Simple .toImage', () async {
@@ -190,11 +141,8 @@ void main() {
     }, 100, 100);
     expect(image.width, equals(100));
     expect(image.height, equals(100));
-
-    final bool areEqual =
-        await fuzzyGoldenImageCompare(image, 'canvas_test_toImage.png');
-    expect(areEqual, true);
-  }, skip: impellerEnabled);
+    await comparer.addGoldenImage(image, 'canvas_test_toImage.png');
+  });
 
   Gradient makeGradient() {
     return Gradient.linear(
@@ -212,10 +160,8 @@ void main() {
     expect(image.width, equals(100));
     expect(image.height, equals(100));
 
-    final bool areEqual =
-        await fuzzyGoldenImageCompare(image, 'canvas_test_dithered_gradient.png');
-    expect(areEqual, true);
-  }, skip: !Platform.isLinux || impellerEnabled); // https://github.com/flutter/flutter/issues/53784
+    await comparer.addGoldenImage(image, 'canvas_test_dithered_gradient.png');
+  });
 
   test('Null values allowed for drawAtlas methods', () async {
     final Image image = await createImage(100, 100);
@@ -302,12 +248,8 @@ void main() {
       });
     }, width, height);
 
-    final bool areEqual = await fuzzyCompareImages(incrementalMatrixImage, combinedMatrixImage);
+    final bool areEqual = await comparer.fuzzyCompareImages(incrementalMatrixImage, combinedMatrixImage);
 
-    if (!areEqual) {
-      saveTestImage(incrementalMatrixImage, 'incremental_3D_transform_test_image.png');
-      saveTestImage(combinedMatrixImage, 'combined_3D_transform_test_image.png');
-    }
     expect(areEqual, true);
   });
 
@@ -348,10 +290,8 @@ void main() {
     expect(image.width, equals(200));
     expect(image.height, equals(250));
 
-    final bool areEqual =
-        await fuzzyGoldenImageCompare(image, 'dotted_path_effect_mixed_with_stroked_geometry.png');
-    expect(areEqual, true);
-  }, skip: !Platform.isLinux || impellerEnabled); // https://github.com/flutter/flutter/issues/53784
+    await comparer.addGoldenImage(image, 'dotted_path_effect_mixed_with_stroked_geometry.png');
+  });
 
   test('Gradients with matrices in Paragraphs render correctly', () async {
     final Image image = await toImage((Canvas canvas) {
@@ -400,10 +340,8 @@ void main() {
     expect(image.width, equals(600));
     expect(image.height, equals(400));
 
-    final bool areEqual =
-    await fuzzyGoldenImageCompare(image, 'text_with_gradient_with_matrix.png');
-    expect(areEqual, true);
-  }, skip: !Platform.isLinux || impellerEnabled); // https://github.com/flutter/flutter/issues/53784
+    await comparer.addGoldenImage(image, 'text_with_gradient_with_matrix.png');
+  });
 
   test('toImageSync - too big', () async {
     PictureRecorder recorder = PictureRecorder();
@@ -602,8 +540,8 @@ void main() {
     final Image tofuImage = await drawText('>\b<');
 
     // The tab's image should be identical to the space's image but not the tofu's image.
-    final bool tabToSpaceComparison = await fuzzyCompareImages(tabImage, spaceImage);
-    final bool tabToTofuComparison = await fuzzyCompareImages(tabImage, tofuImage);
+    final bool tabToSpaceComparison = await comparer.fuzzyCompareImages(tabImage, spaceImage);
+    final bool tabToTofuComparison = await comparer.fuzzyCompareImages(tabImage, tofuImage);
 
     expect(tabToSpaceComparison, isTrue);
     expect(tabToTofuComparison, isFalse);

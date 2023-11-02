@@ -606,6 +606,11 @@ class FlutterTesterOptions():
       return 'multithreaded'
     return 'single-threaded'
 
+  def impeller_enabled(self):
+    if self.enable_impeller:
+      return 'impeller swiftshader'
+    return 'skia software'
+
 
 def gather_dart_test(build_dir, dart_file, options):
   kernel_file_name = os.path.basename(dart_file) + '.dill'
@@ -637,8 +642,8 @@ def gather_dart_test(build_dir, dart_file, options):
 
   tester_name = 'flutter_tester'
   logger.info(
-      "Running test '%s' using '%s' (%s)", kernel_file_name, tester_name,
-      options.threading_description()
+      "Running test '%s' using '%s' (%s, %s)", kernel_file_name, tester_name,
+      options.threading_description(), options.impeller_enabled()
   )
   forbidden_output = [] if 'unopt' in build_dir or options.expect_failure else [
       '[ERROR'
