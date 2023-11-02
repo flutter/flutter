@@ -40,7 +40,7 @@ class CanvasParagraph implements ui.Paragraph {
   final EngineParagraphStyle paragraphStyle;
 
   /// The full textual content of the paragraph.
-  late String plainText;
+  final String plainText;
 
   /// Whether this paragraph can be drawn on a bitmap canvas.
   ///
@@ -221,23 +221,44 @@ class CanvasParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int index = position.offset;
-
-    int i;
-    for (i = 0; i < lines.length - 1; i++) {
-      final ParagraphLine line = lines[i];
-      if (index >= line.startIndex && index < line.endIndex) {
-        break;
-      }
+    if (lines.isEmpty) {
+      return ui.TextRange.empty;
     }
-
-    final ParagraphLine line = lines[i];
+    final int? lineNumber = getLineNumberAt(position.offset);
+    // Fallback to the last line for backward compatibility.
+    final ParagraphLine line = lineNumber != null ? lines[lineNumber] : lines.last;
     return ui.TextRange(start: line.startIndex, end: line.endIndex - line.trailingNewlines);
   }
 
   @override
   List<EngineLineMetrics> computeLineMetrics() {
     return lines.map((ParagraphLine line) => line.lineMetrics).toList();
+  }
+
+  @override
+  EngineLineMetrics? getLineMetricsAt(int lineNumber) {
+    return 0 <= lineNumber && lineNumber < lines.length
+      ? lines[lineNumber].lineMetrics
+      : null;
+  }
+
+  @override
+  int get numberOfLines => lines.length;
+
+  @override
+  int? getLineNumberAt(int codeUnitOffset) => _findLine(codeUnitOffset, 0, lines.length);
+
+  int? _findLine(int codeUnitOffset, int startLine, int endLine) {
+    if (endLine <= startLine || codeUnitOffset < lines[startLine].startIndex || lines[endLine - 1].endIndex <= codeUnitOffset) {
+      return null;
+    }
+    if (endLine == startLine + 1) {
+      return startLine;
+    }
+    // endLine >= startLine + 2 thus we have
+    // startLine + 1 <= midIndex <= endLine - 1
+    final int midIndex = (startLine + endLine) ~/ 2;
+    return _findLine(codeUnitOffset, midIndex, endLine) ?? _findLine(codeUnitOffset, startLine, midIndex);
   }
 
   bool _disposed = false;
