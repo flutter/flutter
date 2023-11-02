@@ -200,7 +200,7 @@ class RootPage extends StatelessWidget {
                 return ElevatedButton(
                   style: buttonStyle,
                   onPressed: () {
-                    showBottomSheet<void>(
+                    showBottomSheet(
                       context: context,
                       builder: (BuildContext context) {
                         return Container(
