@@ -69,7 +69,7 @@ void main() {
         ..writeAsStringSync('foo:foo/lib/\n');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.empty();
-      globals.fs.file('bin/cache/flutter_web_sdk/flutter.js')
+      globals.fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
         .createSync(recursive: true);
 
       environment = Environment.test(
