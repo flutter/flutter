@@ -33,7 +33,7 @@ android {
     if (project.android.hasProperty("namespace")) {
         namespace 'com.example.integration_test_example'
     }
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdk flutter.compileSdkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
