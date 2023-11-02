@@ -54,3 +54,7 @@ dev_dependencies:
     path: ../../web_sdk/web_engine_tester
   skia_gold_client:
     path: ../../testing/skia_gold_client
+
+dependency_overrides:
+  engine_repo_tools:
+    path: ../../tools/pkg/engine_repo_tools

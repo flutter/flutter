@@ -30,6 +30,8 @@ dependency_overrides:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
   meta:
     path: ../../../third_party/dart/pkg/meta
+  engine_repo_tools:
+    path: ../../tools/pkg/engine_repo_tools
   path:
     path: ../../../third_party/dart/third_party/pkg/path
   platform:
