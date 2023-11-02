@@ -52,10 +52,10 @@ inline ::testing::AssertionResult QuaternionNear(impeller::Quaternion a,
 }
 
 inline ::testing::AssertionResult RectNear(impeller::Rect a, impeller::Rect b) {
-  auto equal = NumberNear(a.origin.x, b.origin.x) &&
-               NumberNear(a.origin.y, b.origin.y) &&
-               NumberNear(a.size.width, b.size.width) &&
-               NumberNear(a.size.height, b.size.height);
+  auto equal = NumberNear(a.GetOrigin().x, b.GetOrigin().x) &&
+               NumberNear(a.GetOrigin().y, b.GetOrigin().y) &&
+               NumberNear(a.GetSize().width, b.GetSize().width) &&
+               NumberNear(a.GetSize().height, b.GetSize().height);
 
   return equal ? ::testing::AssertionSuccess()
                : ::testing::AssertionFailure() << "Rects are not equal.";
