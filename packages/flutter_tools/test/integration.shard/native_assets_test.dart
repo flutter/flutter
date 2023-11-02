@@ -375,14 +375,16 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
     <String>[
       flutterBin,
       'create',
+      '--no-pub',
       '--template=package_ffi',
       packageName,
     ],
     workingDirectory: tempDirectory.path,
   );
-
   if (result.exitCode != 0) {
-    throw Exception('flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    throw Exception(
+      'flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+    );
   }
 
   final Directory packageDirectory = tempDirectory.childDirectory(packageName);
@@ -394,7 +396,33 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   expect(packageDirectory.childDirectory('macos/'), isNot(exists));
   expect(packageDirectory.childDirectory('windows/'), isNot(exists));
 
+  await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
+  await pinDependencies(
+      packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
+
+  final ProcessResult result2 = await processManager.run(
+    <String>[
+      flutterBin,
+      'pub',
+      'get',
+    ],
+    workingDirectory: packageDirectory.path,
+  );
+  if (result2.exitCode != 0) {
+    throw Exception(
+      'flutter create failed: ${result2.exitCode}\n${result2.stderr}\n${result2.stdout}',
+    );
+  }
+
   return packageDirectory;
+}
+
+Future<void> pinDependencies(File pubspecFile) async {
+  expect(pubspecFile, exists);
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
+  expect(newPubspec, isNot(oldPubspec));
+  await pubspecFile.writeAsString(newPubspec);
 }
 
 Future<void> inTempDir(Future<void> Function(Directory tempDirectory) fun) async {
