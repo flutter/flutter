@@ -570,7 +570,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // The primary pointer is not part of a "trigger" gesture so the tooltip
   // should be dismissed.
   void _handleTapToDismiss() {
-    if(!widget.enableTapToDismiss) {
+    if (!widget.enableTapToDismiss) {
       return ;
     }
     _scheduleDismissTooltip(withDelay: Duration.zero);
