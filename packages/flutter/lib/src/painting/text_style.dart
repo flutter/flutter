@@ -482,7 +482,7 @@ class TextStyle with Diagnosticable {
   /// Text and SF Pro Display respectively. 'CupertinoSystemText' is designed
   /// for fonts below 20 point size, and 'CupertinoSystemDisplay' is recommended
   /// for sizes 20 and above. When used on non-Apple platforms, these strings
-  /// will fail and return the fallback font family as normal.
+  /// will return the regular fallback font family instead.
   const TextStyle({
     this.inherit = true,
     this.color,
@@ -580,8 +580,8 @@ class TextStyle with Diagnosticable {
   /// They currently redirect to the equivilant of SF Pro Text and SF Pro Display
   /// respectively. 'CupertinoSystemText' is designed for fonts below 20 point
   /// size, and 'CupertinoSystemDisplay' is recommended for sizes 20 and above.
-  /// When used on non-Apple platforms, these strings will fail and return the
-  /// fallback font family as normal.
+  /// When used on non-Apple platforms, these strings will return the regular
+  /// fallback font family instead.
   final String? fontFamily;
 
   /// The ordered list of font families to fall back on when a glyph cannot be
