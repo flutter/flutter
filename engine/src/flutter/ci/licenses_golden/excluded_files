@@ -1811,6 +1811,7 @@
 ../../../third_party/dart/runtime/tools/create_snapshot_bin.py
 ../../../third_party/dart/runtime/tools/create_snapshot_file.py
 ../../../third_party/dart/runtime/tools/create_string_literal.py
+../../../third_party/dart/runtime/tools/dart_codesign.py
 ../../../third_party/dart/runtime/tools/dart_profiler_symbols.py
 ../../../third_party/dart/runtime/tools/dartfuzz/README.md
 ../../../third_party/dart/runtime/tools/dartfuzz/README_minimize.md
@@ -1821,6 +1822,7 @@
 ../../../third_party/dart/runtime/tools/dartfuzz/pubspec.yaml
 ../../../third_party/dart/runtime/tools/dartfuzz/update_spreadsheet.py
 ../../../third_party/dart/runtime/tools/embedder_layering_check.py
+../../../third_party/dart/runtime/tools/entitlements/README.md
 ../../../third_party/dart/runtime/tools/gen_library_src_paths.py
 ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.css
 ../../../third_party/dart/runtime/tools/heapsnapshot/CHANGELOG.md
