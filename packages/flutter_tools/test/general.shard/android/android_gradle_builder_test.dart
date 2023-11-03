@@ -918,12 +918,7 @@ Gradle Crashed
 
     testUsingContext('can call custom gradle task outputFreeDebugAppLinkSettings and parse the result', () async {
       final String expectedOutputPath;
-      if (io.Platform.isWindows) {
-        final FileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-        expectedOutputPath = fs.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
-      } else {
-        expectedOutputPath = fileSystem.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
-      }
+      expectedOutputPath = fileSystem.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         java: FakeJava(),
         logger: logger,
@@ -950,6 +945,8 @@ Gradle Crashed
       );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
