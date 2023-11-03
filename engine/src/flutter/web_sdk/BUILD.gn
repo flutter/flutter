@@ -4,6 +4,7 @@
 
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
+import("//flutter/lib/web_ui/flutter_js/sources.gni")
 import("//flutter/web_sdk/web_sdk.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 
@@ -472,16 +473,7 @@ group("flutter_ddc_modules") {
 # Archives Flutter Web SDK
 if (!is_fuchsia) {
   zip_bundle_from_file("flutter_web_sdk_archive") {
-    if (target_os == "wasm") {
-      output = "flutter-web-sdk.zip"
-    } else if (is_win) {
-      output = "flutter-web-sdk-${full_target_platform_name}.zip"
-    } else {
-      # TODO(jacksongardner): remove this once we stop making platform-specific
-      # flutter_web_sdk archives.
-      # https://github.com/flutter/flutter/issues/113303
-      output = "flutter-web-sdk-${full_platform_name}.zip"
-    }
+    output = "flutter-web-sdk.zip"
     deps = [
              ":flutter_ddc_modules",
              ":flutter_platform_dills",
@@ -528,7 +520,16 @@ if (!is_fuchsia) {
       ]
     }
 
-    sources += [ "$root_out_dir/flutter_web_sdk/flutter.js" ]
+    # flutter.js full sources
+    foreach(source, flutter_js_source_list) {
+      sources += [ "$root_out_dir/flutter_web_sdk/flutter_js/$source" ]
+    }
+
+    # flutter.js bundled source and sourcemap
+    sources += [
+      "$root_out_dir/flutter_web_sdk/flutter_js/flutter.js",
+      "$root_out_dir/flutter_web_sdk/flutter_js/flutter.js.map",
+    ]
 
     foreach(web_engine_library, web_engine_libraries) {
       sources += get_target_outputs(web_engine_library)

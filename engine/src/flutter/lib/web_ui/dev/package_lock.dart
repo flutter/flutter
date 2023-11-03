@@ -9,28 +9,30 @@ import 'package:yaml/yaml.dart';
 
 import 'environment.dart';
 
-/// Returns the browser configuration based on the `browser_lock.yaml` file in
+/// Returns the browser configuration based on the `package_lock.yaml` file in
 /// the current engine workspace.
-final BrowserLock browserLock = BrowserLock();
+final PackageLock packageLock = PackageLock();
 
-/// Provides access to the contents of the `browser_lock.yaml` file.
-class BrowserLock {
-  factory BrowserLock() {
+/// Provides access to the contents of the `package_lock.yaml` file.
+class PackageLock {
+  factory PackageLock() {
     final io.File lockFile = io.File(
-      path.join(environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'),
+      path.join(environment.webUiRootDir.path, 'dev', 'package_lock.yaml'),
     );
     final YamlMap yaml = loadYaml(lockFile.readAsStringSync()) as YamlMap;
-    return BrowserLock._fromYaml(yaml);
+    return PackageLock._fromYaml(yaml);
   }
 
-  BrowserLock._fromYaml(YamlMap yaml) :
+  PackageLock._fromYaml(YamlMap yaml) :
     chromeLock = ChromeLock._fromYaml(yaml['chrome'] as YamlMap),
     firefoxLock = FirefoxLock._fromYaml(yaml['firefox'] as YamlMap),
-    edgeLock = EdgeLock._fromYaml(yaml['edge'] as YamlMap);
+    edgeLock = EdgeLock._fromYaml(yaml['edge'] as YamlMap),
+    esbuildLock = EsbuildLock._fromYaml(yaml['esbuild'] as YamlMap);
 
   final ChromeLock chromeLock;
   final FirefoxLock firefoxLock;
   final EdgeLock edgeLock;
+  final EsbuildLock esbuildLock;
 }
 
 class ChromeLock {
@@ -53,4 +55,11 @@ class EdgeLock {
       launcherVersion = yaml['launcher_version'] as String;
 
   final String launcherVersion;
+}
+
+class EsbuildLock {
+  EsbuildLock._fromYaml(YamlMap yaml) :
+    version = yaml['version'] as String;
+
+  final String version;
 }

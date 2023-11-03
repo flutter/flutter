@@ -8,9 +8,9 @@ import 'dart:io' as io;
 import 'package:http/http.dart';
 import 'package:path/path.dart' as path;
 
-import 'browser_lock.dart';
 import 'common.dart';
 import 'environment.dart';
+import 'package_lock.dart';
 
 /// Returns the installation of Edge.
 ///
@@ -84,7 +84,7 @@ class EdgeLauncher {
   bool get isInstalled => executable.existsSync();
 
   /// Version number launcher executable  `MicrosoftEdgeLauncher`.
-  String get version => browserLock.edgeLock.launcherVersion;
+  String get version => packageLock.edgeLock.launcherVersion;
 
   /// Url for downloading  `MicrosoftEdgeLauncher`.
   ///

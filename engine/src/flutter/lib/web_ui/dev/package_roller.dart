@@ -8,9 +8,9 @@ import 'package:args/args.dart';
 import 'package:http/http.dart';
 import 'package:path/path.dart' as path;
 
-import 'browser_lock.dart';
 import 'cipd.dart';
 import 'common.dart';
+import 'package_lock.dart';
 import 'utils.dart';
 
 final ArgParser _argParser = ArgParser(allowTrailingOptions: false)
@@ -33,7 +33,7 @@ late final bool verbose;
 
 final Client _client = Client();
 
-/// Rolls browser CIPD packages to the version specified in `browser_lock.yaml`.
+/// Rolls browser CIPD packages to the version specified in `package_lock.yaml`.
 ///
 /// Currently only rolls Chrome.
 ///
@@ -61,7 +61,7 @@ final Client _client = Client();
 Future<void> main(List<String> args) async {
   try {
     processArgs(_argParser.parse(args));
-    await _BrowserRoller().roll();
+    await _PackageRoller().roll();
     io.exitCode = 0;
   } on FormatException catch (e) {
     print('''
@@ -93,8 +93,8 @@ class _Platform {
   String get name => '$os-$arch';
 }
 
-class _BrowserRoller {
-  _BrowserRoller();
+class _PackageRoller {
+  _PackageRoller();
 
   final io.Directory _rollDir = io.Directory.systemTemp.createTempSync('browser-roll-');
 
@@ -105,7 +105,7 @@ class _BrowserRoller {
     _Platform('windows', 'amd64', WindowsPlatformBinding()),
   ];
 
-  final BrowserLock _lock = BrowserLock();
+  final PackageLock _lock = PackageLock();
 
   // Prints output when --verbose is set.
   void vprint(String out) {
@@ -123,6 +123,7 @@ class _BrowserRoller {
       if (platform.os == 'linux') {
         await _rollFirefox(platform);
       }
+      await _rollEsbuild(platform);
     }
     if (dryRun) {
       print('\nDry Run Done!\nNon-published roll artifacts kept here: ${_rollDir.path}\n');
@@ -221,7 +222,7 @@ class _BrowserRoller {
       isVerbose: verbose
     )) {
       print('  Skipping $cipdPackageName version:$version. Already uploaded to CIPD!');
-      vprint('  Update  browser_lock.yaml  and use a different version value.');
+      vprint('  Update  package_lock.yaml  and use a different version value.');
       return;
     }
 
@@ -264,7 +265,7 @@ class _BrowserRoller {
       isVerbose: verbose
     )) {
       print('  Skipping $cipdPackageName version:$version. Already uploaded to CIPD!');
-      vprint('  Update  browser_lock.yaml  and use a different version value.');
+      vprint('  Update  package_lock.yaml  and use a different version value.');
       return;
     }
 
@@ -309,7 +310,7 @@ class _BrowserRoller {
       isVerbose: verbose
     )) {
       print('  Skipping $cipdPackageName version:$version. Already uploaded to CIPD!');
-      vprint('  Update  browser_lock.yaml  and use a different version value.');
+      vprint('  Update  package_lock.yaml  and use a different version value.');
       return;
     }
 
@@ -332,6 +333,62 @@ class _BrowserRoller {
       description: 'Firefox $version used for testing',
       version: version,
       root: relativePlatformDirPath,
+      isDryRun: dryRun,
+      isVerbose: verbose,
+    );
+  }
+
+  Future<void> _rollEsbuild(_Platform platform) async {
+    final String version = _lock.esbuildLock.version;
+    final String url = platform.binding.getEsbuildDownloadUrl(version);
+    final String cipdPackageName = 'flutter/tools/esbuild/${platform.name}';
+    final io.Directory platformDir = io.Directory(path.join(_rollDir.path, platform.name));
+    print('\nRolling esbuild for ${platform.name} (version:$version)');
+    // Bail out if CIPD already has version:$majorVersion for this package!
+    if (!dryRun && await cipdKnowsPackageVersion(
+      package: cipdPackageName,
+      versionTag: version,
+      isVerbose: verbose
+    )) {
+      print('  Skipping $cipdPackageName version:$version. Already uploaded to CIPD!');
+      vprint('  Update  package_lock.yaml  and use a different version value.');
+      return;
+    }
+
+    await platformDir.create(recursive: true);
+    vprint('  Created target directory [${platformDir.path}]');
+
+    final io.File esbuildDownload = await _downloadTemporaryFile(url);
+
+    await _uncompressAndDeleteFile(esbuildDownload, platformDir);
+    final String packageDir = path.join(platformDir.path, 'package');
+
+    // Write out the license file from the github repo.
+    // Copied from https://github.com/evanw/esbuild/blob/main/LICENSE.md
+    final io.File licenseFile = io.File(path.join(
+      packageDir,
+      'LICENSE.md',
+    ));
+    licenseFile..createSync()..writeAsStringSync('''
+MIT License
+
+Copyright (c) 2020 Evan Wallace
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+''');
+
+    vprint('  Uploading esbuild (${platform.name}) to CIPD...');
+    await uploadDirectoryToCipd(
+      directory: _rollDir,
+      packageName: cipdPackageName,
+      configFileName: 'cipd.esbuild.${platform.name}.yaml',
+      description: 'esbuild used by the flutter engine for bundling JavaScript',
+      version: version,
+      root: packageDir,
       isDryRun: dryRun,
       isVerbose: verbose,
     );
