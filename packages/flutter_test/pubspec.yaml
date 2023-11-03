@@ -57,4 +57,10 @@ dev_dependencies:
   # Used to detect memory leaks.
   leak_tracker_flutter_testing: 1.0.10
 
+dependency_overrides:
+  leak_tracker:
+    path: ../../../leak_tracker/pkgs/leak_tracker
+  leak_tracker_flutter_testing:
+    path: ../../../leak_tracker/pkgs/leak_tracker_testing
+
 # PUBSPEC CHECKSUM: 11ce
