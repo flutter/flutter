@@ -2279,4 +2279,9 @@ class _SelectableFragment
   @override
   TextRange getWordBoundary(TextPosition position) =>
       paragraph.getWordBoundary(position);
+
+  @override
+  TextSelection? getLocalTextSelection() {
+    return TextSelection(baseOffset: 0, extentOffset: fullText.length);
+  }
 }

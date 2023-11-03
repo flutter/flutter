@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/services/text_editing.dart' show TextSelection;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'layer.dart';
@@ -229,8 +228,6 @@ mixin SelectionRegistrant on Selectable {
       _subscribedToSelectionRegistrar = false;
     }
   }
-
-
 
   // not applicable since don't know the type here
   @override
