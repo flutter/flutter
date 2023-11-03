@@ -64,7 +64,7 @@ ColorSource ColorSource::MakeLinearGradient(Point start_point,
     std::vector<Point> bounds{start_point, end_point};
     auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
     if (intrinsic_size.has_value()) {
-      contents->SetColorSourceSize(intrinsic_size->size);
+      contents->SetColorSourceSize(intrinsic_size->GetSize());
     }
     return contents;
   };
@@ -98,7 +98,7 @@ ColorSource ColorSource::MakeConicalGradient(Point center,
     std::vector<Point> bounds{center + radius_pt, center - radius_pt};
     auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
     if (intrinsic_size.has_value()) {
-      contents->SetColorSourceSize(intrinsic_size->size);
+      contents->SetColorSourceSize(intrinsic_size->GetSize());
     }
     return contents;
   };
@@ -128,7 +128,7 @@ ColorSource ColorSource::MakeRadialGradient(Point center,
     std::vector<Point> bounds{center + radius_pt, center - radius_pt};
     auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
     if (intrinsic_size.has_value()) {
-      contents->SetColorSourceSize(intrinsic_size->size);
+      contents->SetColorSourceSize(intrinsic_size->GetSize());
     }
     return contents;
   };
