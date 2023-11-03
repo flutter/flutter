@@ -19,10 +19,6 @@ ShaderStage ShaderFunction::GetStage() const {
   return stage_;
 }
 
-const std::string& ShaderFunction::GetName() const {
-  return name_;
-}
-
 // |Comparable<ShaderFunction>|
 std::size_t ShaderFunction::GetHash() const {
   return fml::HashCombine(parent_library_id_, name_, stage_);

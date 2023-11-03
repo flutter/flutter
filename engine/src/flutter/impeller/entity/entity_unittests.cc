@@ -2536,39 +2536,6 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
   }
 }
 
-TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
-  auto content_context =
-      ContentContext(GetContext(), TypographerContextSkia::Make());
-
-  auto default_color_burn = content_context.GetBlendColorBurnPipeline(
-      {.has_stencil_attachment = false});
-  auto alt_color_burn = content_context.GetBlendColorBurnPipeline(
-      {.has_stencil_attachment = true});
-
-  ASSERT_NE(default_color_burn, alt_color_burn);
-  ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
-            alt_color_burn->GetDescriptor().GetSpecializationConstants());
-
-  auto decal_supported = static_cast<int32_t>(
-      GetContext()->GetCapabilities()->SupportsDecalSamplerAddressMode());
-  std::vector<int32_t> expected_constants = {5, decal_supported};
-  ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
-            expected_constants);
-}
-
-TEST_P(EntityTest, BlurSpecializationConstantValuesAreExpected) {
-  auto content_context =
-      ContentContext(GetContext(), TypographerContextSkia::Make());
-
-  auto decal_pipeline = content_context.GetGaussianBlurDecalPipeline({});
-  auto nodecal_pipeline = content_context.GetGaussianBlurPipeline({});
-
-  ASSERT_EQ(decal_pipeline->GetDescriptor().GetSpecializationConstants()[0],
-            /*decal_specialization*/ 1);
-  ASSERT_EQ(nodecal_pipeline->GetDescriptor().GetSpecializationConstants()[0],
-            /*decal_specialization*/ 0);
-}
-
 }  // namespace testing
 }  // namespace impeller
 

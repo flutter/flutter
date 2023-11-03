@@ -39,7 +39,7 @@ class ShaderLibraryMTL final : public ShaderLibrary {
   ShaderFunctionMap functions_;
   bool is_valid_ = false;
 
-  explicit ShaderLibraryMTL(NSArray<id<MTLLibrary>>* libraries);
+  ShaderLibraryMTL(NSArray<id<MTLLibrary>>* libraries);
 
   // |ShaderLibrary|
   std::shared_ptr<const ShaderFunction> GetFunction(std::string_view name,

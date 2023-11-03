@@ -8,10 +8,6 @@
 #include <impeller/color.glsl>
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
-#include "blend_select.glsl"
-
-layout(constant_id = 0) const int blend_type = 0;
-layout(constant_id = 1) const int supports_decal = 1;
 
 layout(set = 0,
        binding = 0,
@@ -33,13 +29,13 @@ in vec2 v_src_texture_coords;
 out vec4 frag_color;
 
 vec4 Sample(sampler2D texture_sampler, vec2 texture_coords) {
-  if (supports_decal > 1) {
-    return texture(texture_sampler, texture_coords);
-  }
+// gles 2.0 is the only backend without native decal support.
+#ifdef IMPELLER_TARGET_OPENGLES
   return IPSampleDecal(texture_sampler, texture_coords);
+#else
+  return texture(texture_sampler, texture_coords);
+#endif
 }
-
-AdvancedBlend(blend_type);
 
 void main() {
   f16vec4 dst = f16vec4(ReadDestination());
@@ -48,7 +44,6 @@ void main() {
                                )) *
                 frag_info.src_input_alpha;
 
-  f16vec3 blend_result = Blend(dst.rgb, src.rgb);
-  f16vec4 blended = mix(src, f16vec4(blend_result, dst.a), dst.a);
+  f16vec4 blended = mix(src, f16vec4(Blend(dst.rgb, src.rgb), dst.a), dst.a);
   frag_color = vec4(mix(dst, blended, src.a));
 }
