@@ -51,6 +51,8 @@ vars = {
 
   'gcloud_version': 'version:2@444.0.0.chromium.3',
 
+  'esbuild_version': '0.19.5',
+
   # When updating the Dart revision, ensure that all entries that are
   # dependencies of Dart are also updated to match the entries in the
   # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
@@ -85,6 +87,9 @@ vars = {
 
   # Download a prebuilt Dart SDK by default
   'download_dart_sdk': True,
+
+  # Download a prebuilt esbuild by default
+  'download_esbuild': True,
 
   # Checkout Android dependencies only on platforms where we build for Android targets.
   'download_android_deps': 'host_os == "mac" or (host_os == "linux" and host_cpu == "x64")',
@@ -566,6 +571,48 @@ deps = {
     ],
     'dep_type': 'cipd',
     'condition': 'host_os == "win" and download_dart_sdk and not release_candidate'
+  },
+
+  # esbuild download
+  'src/flutter/prebuilts/linux-x64/esbuild': {
+    'packages': [
+      {
+        'package': 'flutter/tools/esbuild/linux-amd64',
+        'version': Var('esbuild_version')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "linux" and download_esbuild'
+  },
+  'src/flutter/prebuilts/macos-x64/esbuild': {
+    'packages': [
+      {
+        'package': 'flutter/tools/esbuild/mac-amd64',
+        'version': Var('esbuild_version')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "mac" and download_esbuild'
+  },
+  'src/flutter/prebuilts/macos-arm64/esbuild': {
+    'packages': [
+      {
+        'package': 'flutter/tools/esbuild/mac-arm64',
+        'version': Var('esbuild_version')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "mac" and download_esbuild'
+  },
+  'src/flutter/prebuilts/windows-x64/esbuild': {
+    'packages': [
+      {
+        'package': 'flutter/tools/esbuild/windows-amd64',
+        'version': Var('esbuild_version')
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'host_os == "win" and download_esbuild'
   },
 
   'src/third_party/colorama/src':

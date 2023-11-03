@@ -14,11 +14,11 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
 
 import 'browser.dart';
-import 'browser_lock.dart';
 import 'browser_process.dart';
 import 'chrome_installer.dart';
 import 'common.dart';
 import 'environment.dart';
+import 'package_lock.dart';
 
 /// Provides an environment for desktop Chrome.
 class ChromeEnvironment implements BrowserEnvironment {
@@ -52,7 +52,7 @@ class ChromeEnvironment implements BrowserEnvironment {
 
   @override
   Future<void> prepare() async {
-    final String version = browserLock.chromeLock.version;
+    final String version = packageLock.chromeLock.version;
     _installation = await getOrInstallChrome(
       version,
       infoLog: isCi ? stdout : DevNull(),
