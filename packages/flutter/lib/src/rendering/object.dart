@@ -895,7 +895,17 @@ class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsOwnerCreated,
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
-  });
+  }){
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/rendering.dart',
+        className: '$PipelineOwner',
+        object: this,
+      );
+    }
+  }
 
   /// Called when a render object associated with this pipeline owner wishes to
   /// update its visual appearance.
@@ -1433,6 +1443,9 @@ class PipelineOwner with DiagnosticableTreeMixin {
     assert(rootNode == null);
     assert(_manifold == null);
     assert(_debugParent == null);
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _semanticsOwner?.dispose();
     _semanticsOwner = null;
     _nodesNeedingLayout.clear();
@@ -2051,7 +2064,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// in its [performLayout] implementation.
   ///
   /// This method is used to implement an assert that ensures the render subtree
-  /// actively performing layout can not get accidently mutated. It's only
+  /// actively performing layout can not get accidentally mutated. It's only
   /// implemented in debug mode and always returns null in release mode.
   ///
   /// The default implementation returns [parent] and overriding is rarely
@@ -4880,7 +4893,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     }
 
     final SemanticsNode node = (owner._semantics ??= SemanticsNode(showOnScreen: owner.showOnScreen))
-      ..isMergedIntoParent = _mergeIntoParent
       ..tags = _tagsForChildren;
 
     node.elevationAdjustment = elevationAdjustment;
@@ -4942,9 +4954,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       // They need to share the same transform if they are going to attach to the
       // parent of the immediate explicit node.
       assert(siblingNode.transform == null);
-      siblingNode
-        ..transform = node.transform
-        ..isMergedIntoParent = node.isMergedIntoParent;
+      siblingNode.transform = node.transform;
       if (_tagsForChildren != null) {
         siblingNode.tags ??= <SemanticsTag>{};
         siblingNode.tags!.addAll(_tagsForChildren!);

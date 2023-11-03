@@ -594,6 +594,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void dispose() {
+    _materialBannerController?.dispose();
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
@@ -2350,6 +2351,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       if (animationController.status != AnimationStatus.dismissed) {
         _dismissedBottomSheets.add(bottomSheet);
       }
+      // TODO(srawlins): Ensure that this Completer has a nullable type (or more
+      // likely, `void`).
+      // https://github.com/flutter/flutter/issues/137294).
+      // ignore: null_argument_to_non_null_type
       completer.complete();
     }
 
