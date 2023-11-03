@@ -749,7 +749,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
     this.modal = false,
   })  : _shortcuts = shortcuts {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1203,7 +1203,7 @@ class ShortcutRegistry with ChangeNotifier {
   /// Creates an instance of [ShortcutRegistry].
   ShortcutRegistry() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1276,7 +1276,7 @@ class ShortcutRegistry with ChangeNotifier {
         if (!_disposed) {
           notifyListeners();
         }
-      });
+      }, debugLabel: 'ShortcutRegistry.notifyListeners');
       _notificationScheduled = true;
     }
   }

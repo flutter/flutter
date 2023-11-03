@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class InnerWidget extends StatefulWidget {
   const InnerWidget({ super.key });
@@ -44,7 +45,7 @@ class OuterContainerState extends State<OuterContainer> {
 }
 
 void main() {
-  testWidgets('resync stateful widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('resync stateful widget', (WidgetTester tester) async {
     const Key innerKey = Key('inner');
     const Key outerKey = Key('outer');
 

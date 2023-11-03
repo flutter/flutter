@@ -313,7 +313,7 @@ final TextSelectionControls emptyTextSelectionControls = EmptyTextSelectionContr
 class TextSelectionOverlay {
   /// Creates an object that manages overlay entries for selection handles.
   ///
-  /// The [context] must not be null and must have an [Overlay] as an ancestor.
+  /// The [context] must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
     required TextEditingValue value,
     required this.context,
@@ -373,13 +373,6 @@ class TextSelectionOverlay {
   /// will display the text selection handles in that [Overlay].
   /// {@endtemplate}
   final BuildContext context;
-
-  /// Controls the fade-in and fade-out animations for the toolbar and handles.
-  @Deprecated(
-    'Use `SelectionOverlay.fadeDuration` instead. '
-    'This feature was deprecated after v2.12.0-4.1.pre.'
-  )
-  static const Duration fadeDuration = SelectionOverlay.fadeDuration;
 
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.
@@ -921,7 +914,7 @@ class TextSelectionOverlay {
 class SelectionOverlay {
   /// Creates an object that manages overlay entries for selection handles.
   ///
-  /// The [context] must not be null and must have an [Overlay] as an ancestor.
+  /// The [context] must have an [Overlay] as an ancestor.
   SelectionOverlay({
     required this.context,
     this.debugRequiredFor,
@@ -1032,7 +1025,7 @@ class SelectionOverlay {
         context: context,
         below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
             ? null
-            : _handles?.first,
+            : _handles?.start,
         builder: (_) => builtMagnifier);
   }
 
@@ -1340,7 +1333,7 @@ class SelectionOverlay {
 
   /// A pair of handles. If this is non-null, there are always 2, though the
   /// second is hidden when the selection is collapsed.
-  List<OverlayEntry>? _handles;
+  ({OverlayEntry start, OverlayEntry end})? _handles;
 
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
@@ -1358,11 +1351,12 @@ class SelectionOverlay {
       return;
     }
 
-    _handles = <OverlayEntry>[
-      OverlayEntry(builder: _buildStartHandle),
-      OverlayEntry(builder: _buildEndHandle),
-    ];
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
+    _handles = (
+      start: OverlayEntry(builder: _buildStartHandle),
+      end: OverlayEntry(builder: _buildEndHandle),
+    );
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)
+        .insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -1370,10 +1364,10 @@ class SelectionOverlay {
   /// {@endtemplate}
   void hideHandles() {
     if (_handles != null) {
-      _handles![0].remove();
-      _handles![0].dispose();
-      _handles![1].remove();
-      _handles![1].dispose();
+      _handles!.start.remove();
+      _handles!.start.dispose();
+      _handles!.end.remove();
+      _handles!.end.dispose();
       _handles = null;
     }
   }
@@ -1451,8 +1445,8 @@ class SelectionOverlay {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _buildScheduled = false;
         if (_handles != null) {
-          _handles![0].markNeedsBuild();
-          _handles![1].markNeedsBuild();
+          _handles!.start.markNeedsBuild();
+          _handles!.end.markNeedsBuild();
         }
         _toolbar?.markNeedsBuild();
         if (_contextMenuController.isShown) {
@@ -1460,11 +1454,11 @@ class SelectionOverlay {
         } else if (_spellCheckToolbarController.isShown) {
           _spellCheckToolbarController.markNeedsBuild();
         }
-      });
+      }, debugLabel: 'SelectionOverlay.markNeedsBuild');
     } else {
       if (_handles != null) {
-        _handles![0].markNeedsBuild();
-        _handles![1].markNeedsBuild();
+        _handles!.start.markNeedsBuild();
+        _handles!.end.markNeedsBuild();
       }
       _toolbar?.markNeedsBuild();
       if (_contextMenuController.isShown) {
@@ -1481,10 +1475,10 @@ class SelectionOverlay {
   void hide() {
     _magnifierController.hide();
     if (_handles != null) {
-      _handles![0].remove();
-      _handles![0].dispose();
-      _handles![1].remove();
-      _handles![1].dispose();
+      _handles!.start.remove();
+      _handles!.start.dispose();
+      _handles!.end.remove();
+      _handles!.end.dispose();
       _handles = null;
     }
     if (_toolbar != null || _contextMenuController.isShown || _spellCheckToolbarController.isShown) {
@@ -3028,7 +3022,6 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Create a [TextSelectionGestureDetector].
   ///
   /// Multiple callbacks can be called for one sequence of input gesture.
-  /// The [child] parameter must not be null.
   const TextSelectionGestureDetector({
     super.key,
     this.onTapTrackStart,

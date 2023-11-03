@@ -78,7 +78,7 @@ void main() {
     );
   });
 
-  testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('works with MaterialApp and Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
@@ -122,7 +122,7 @@ void main() {
     );
   });
 
-  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("should not paint when there isn't enough space", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(

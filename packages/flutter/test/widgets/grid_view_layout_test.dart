@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Empty GridView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Empty GridView', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
       const DecoratedBox(decoration: BoxDecoration()),
       const DecoratedBox(decoration: BoxDecoration()),

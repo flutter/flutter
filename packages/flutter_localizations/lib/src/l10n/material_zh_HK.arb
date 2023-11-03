@@ -1,4 +1,6 @@
 {
+  "searchWebButtonLabel": "搜尋網頁",
+  "shareButtonLabel": "分享…",
   "scanTextButtonLabel": "掃瞄文字",
   "lookUpButtonLabel": "查詢",
   "menuDismissLabel": "閂選單",
@@ -139,7 +141,6 @@
   "reorderItemRight": "向右移",
   "expandedIconTapHint": "收合",
   "collapsedIconTapHint": "展開",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "尚餘 1 個字元",
   "remainingTextFieldCharacterCountOther": "尚餘 $remainingCount 個字元",
   "refreshIndicatorSemanticLabel": "重新整理"

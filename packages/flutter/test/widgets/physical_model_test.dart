@@ -10,9 +10,10 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalModel updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: PhysicalModel(color: Colors.red)),
     );
@@ -28,7 +29,7 @@ void main() {
     expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('PhysicalShape updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: PhysicalShape(color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()))),
     );
@@ -44,7 +45,7 @@ void main() {
     expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('PhysicalModel - clips when overflows and elevation is 0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalModel - clips when overflows and elevation is 0', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       Theme(

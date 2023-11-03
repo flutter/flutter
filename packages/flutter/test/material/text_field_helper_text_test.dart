@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('TextField works correctly when changing helperText', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextField works correctly when changing helperText', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Material(child: TextField(decoration: InputDecoration(helperText: 'Awesome')))));
     expect(find.text('Awesome'), findsNWidgets(1));
     await tester.pump(const Duration(milliseconds: 100));

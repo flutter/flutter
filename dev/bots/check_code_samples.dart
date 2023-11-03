@@ -261,7 +261,7 @@ class SampleChecker {
   }
 }
 
-// These tests are known to be missing.  They should all eventually be
+// These tests are known to be missing. They should all eventually be
 // implemented, but until they are we allow them, so that we can catch any new
 // examples that are added without tests.
 //
@@ -282,7 +282,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/text_field/text_field.1_test.dart',
   'examples/api/test/material/button_style/button_style.0_test.dart',
   'examples/api/test/material/range_slider/range_slider.0_test.dart',
-  'examples/api/test/material/card/card.2_test.dart',
   'examples/api/test/material/card/card.0_test.dart',
   'examples/api/test/material/selection_container/selection_container_disabled.0_test.dart',
   'examples/api/test/material/selection_container/selection_container.0_test.dart',
@@ -292,7 +291,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/stepper/stepper.controls_builder.0_test.dart',
   'examples/api/test/material/stepper/stepper.0_test.dart',
   'examples/api/test/material/flexible_space_bar/flexible_space_bar.0_test.dart',
-  'examples/api/test/material/data_table/data_table.1_test.dart',
   'examples/api/test/material/data_table/data_table.0_test.dart',
   'examples/api/test/material/floating_action_button_location/standard_fab_location.0_test.dart',
   'examples/api/test/material/chip/deletable_chip_attributes.on_deleted.0_test.dart',
@@ -319,7 +317,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/filled_button/filled_button.0_test.dart',
   'examples/api/test/material/text_form_field/text_form_field.1_test.dart',
   'examples/api/test/material/scrollbar/scrollbar.1_test.dart',
-  'examples/api/test/material/scrollbar/scrollbar.0_test.dart',
   'examples/api/test/material/dropdown_menu/dropdown_menu.1_test.dart',
   'examples/api/test/material/radio/radio.toggleable.0_test.dart',
   'examples/api/test/material/radio/radio.0_test.dart',
@@ -394,7 +391,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.2_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.1_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.0_test.dart',
-  'examples/api/test/widgets/page_view/page_view.0_test.dart',
   'examples/api/test/widgets/scroll_position/scroll_metrics_notification.0_test.dart',
   'examples/api/test/widgets/media_query/media_query_data.system_gesture_insets.0_test.dart',
   'examples/api/test/widgets/async/stream_builder.0_test.dart',

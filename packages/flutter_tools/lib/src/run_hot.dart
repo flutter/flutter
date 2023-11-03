@@ -21,6 +21,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'native_assets.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -92,9 +93,11 @@ class HotRunner extends ResidentRunner {
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
+    NativeAssetsBuildRunner? buildRunner,
   }) : _stopwatchFactory = stopwatchFactory,
        _reloadSourcesHelper = reloadSourcesHelper,
        _reassembleHelper = reassembleHelper,
+        _buildRunner = buildRunner,
        super(
           hotMode: true,
         );
@@ -131,6 +134,8 @@ class HotRunner extends ResidentRunner {
   String? _targetPlatform;
   String? _sdkName;
   bool? _emulator;
+
+  NativeAssetsBuildRunner? _buildRunner;
 
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatform != null) {
@@ -360,6 +365,20 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
+    final Uri projectUri = Uri.directory(projectRootPath);
+    _buildRunner ??= NativeAssetsBuildRunnerImpl(
+      projectUri,
+      debuggingOptions.buildInfo.packageConfig,
+      fileSystem,
+      globals.logger,
+    );
+    final Uri? nativeAssetsYaml = await dryRunNativeAssets(
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildRunner: _buildRunner!,
+      flutterDevices: flutterDevices,
+    );
+
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
     firstBuildTime = DateTime.now();
@@ -391,6 +410,7 @@ class HotRunner extends ResidentRunner {
             packageConfig: debuggingOptions.buildInfo.packageConfig,
             projectRootPath: FlutterProject.current().directory.absolute.path,
             fs: globals.fs,
+            nativeAssetsYaml: nativeAssetsYaml,
           ).then((CompilerOutput? output) {
             compileTimer.stop();
             totalCompileTime += compileTimer.elapsed;

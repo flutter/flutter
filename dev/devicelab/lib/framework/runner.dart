@@ -42,13 +42,13 @@ Future<void> runTasks(
   List<String>? taskArgs,
   bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
-  @visibleForTesting Function(String) print = print,
+  @visibleForTesting void Function(String) print = print,
   @visibleForTesting List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {
     TaskResult result = TaskResult.success(null);
-    int retry = 0;
-    while (retry <= Cocoon.retryNumber) {
+    int failureCount = 0;
+    while (failureCount <= Cocoon.retryNumber) {
       result = await rerunTask(
         taskName,
         deviceId: deviceId,
@@ -66,11 +66,14 @@ Future<void> runTasks(
       );
 
       if (!result.succeeded) {
-        retry += 1;
+        failureCount += 1;
+        if (exitOnFirstTestFailure) {
+          break;
+        }
       } else {
         section('Flaky status for "$taskName"');
-        if (retry > 0) {
-          print('Total ${retry+1} executions: $retry failures and 1 false positive.');
+        if (failureCount > 0) {
+          print('Total ${failureCount+1} executions: $failureCount failures and 1 false positive.');
           print('flaky: true');
           // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
           // if exitOnFirstTestFailure is true.
@@ -84,7 +87,7 @@ Future<void> runTasks(
 
     if (!result.succeeded) {
       section('Flaky status for "$taskName"');
-      print('Consistently failed across all $retry executions.');
+      print('Consistently failed across all $failureCount executions.');
       print('flaky: false');
       exitCode = 1;
       if (exitOnFirstTestFailure) {

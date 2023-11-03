@@ -87,6 +87,7 @@ void main() {
         BuildMode.debug,
         null,
         trackWidgetCreation: true,
+        frontendServerStarterPath: 'path/to/frontend_server_starter.dart',
         extraFrontEndOptions: <String>['test1', 'test2'],
         extraGenSnapshotOptions: <String>['test3', 'test4'],
         fileSystemRoots: <String>['test5', 'test6'],
@@ -106,6 +107,7 @@ void main() {
     expect(env!.defines[kTargetPlatform], 'ios');
     expect(env!.defines[kTargetFile], mainPath);
     expect(env!.defines[kTrackWidgetCreation], 'true');
+    expect(env!.defines[kFrontendServerStarterPath], 'path/to/frontend_server_starter.dart');
     expect(env!.defines[kExtraFrontEndOptions], 'test1,test2');
     expect(env!.defines[kExtraGenSnapshotOptions], 'test3,test4');
     expect(env!.defines[kFileSystemRoots], 'test5,test6');

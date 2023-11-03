@@ -174,9 +174,9 @@ class SelectableText extends StatefulWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
 
-  /// The [showCursor], [autofocus], [dragStartBehavior], [selectionHeightStyle],
-  /// [selectionWidthStyle] and [data] parameters must not be null. If specified,
-  /// the [maxLines] argument must be greater than zero.
+  /// If the [showCursor], [autofocus], [dragStartBehavior],
+  /// [selectionHeightStyle], [selectionWidthStyle] and [data] arguments are
+  /// specified, the [maxLines] argument must be greater than zero.
   const SelectableText(
     String this.data, {
     super.key,
@@ -232,10 +232,8 @@ class SelectableText extends StatefulWidget {
 
   /// Creates a selectable text widget with a [TextSpan].
   ///
-  /// The [textSpan] parameter must not be null and only contain [TextSpan] in
-  /// [textSpan].children. Other type of [InlineSpan] is not allowed.
-  ///
-  /// The [autofocus] and [dragStartBehavior] arguments must not be null.
+  /// The [TextSpan.children] attribute of the [textSpan] parameter must only
+  /// contain [TextSpan]s. Other types of [InlineSpan] are not allowed.
   const SelectableText.rich(
     TextSpan this.textSpan, {
     super.key,
@@ -538,6 +536,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     super.didUpdateWidget(oldWidget);
     if (widget.data != oldWidget.data || widget.textSpan != oldWidget.textSpan) {
       _controller.removeListener(_onControllerChanged);
+      _controller.dispose();
       _controller = _TextSpanEditingController(
           textSpan: widget.textSpan ?? TextSpan(text: widget.data),
       );

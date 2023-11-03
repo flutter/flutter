@@ -659,6 +659,48 @@ dependencies {
           androidSdk: androidSdk,
         );
       });
+      group('_', () {
+        final FakeProcessManager processManager;
+        final Java java;
+        final AndroidStudio androidStudio;
+        final FakeAndroidSdkWithDir androidSdk;
+        final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: Version(11, 0, 2));
+        processManager = FakeProcessManager.empty();
+        androidStudio = FakeAndroidStudio();
+        androidSdk =
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
+        fileSystem.currentDirectory
+            .childDirectory(androidStudio.javaPath!)
+            .createSync();
+        _testInMemory(
+          'null agp only',
+          () async {
+            const String gradleV = '7.0.3';
+            final FlutterProject? project = await configureGradleAgpForTest(
+              gradleV: gradleV,
+              agpV: '',
+            );
+            final CompatibilityResult value =
+                await project!.android.hasValidJavaGradleAgpVersions();
+            expect(value.success, isFalse);
+            // Should not have the valid string.
+            expect(
+                value.description,
+                isNot(
+                    contains(RegExp(AndroidProject.validJavaGradleAgpString))));
+            // On gradle/agp error print help url null value for agp.
+            expect(value.description,
+                contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+            expect(value.description, contains(RegExp(gradleV)));
+            expect(value.description, contains(RegExp('null')));
+          },
+          java: java,
+          androidStudio: androidStudio,
+          processManager: processManager,
+          androidSdk: androidSdk,
+        );
+      });
     });
 
     group('language', () {
@@ -733,7 +775,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -751,9 +792,8 @@ apply plugin: 'kotlin-android'
               'applinks:example2.com',
             ],
           );
-          final String outputFilePath = await project.ios.outputUniversalLinkSettings(
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
@@ -781,7 +821,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -800,9 +839,8 @@ apply plugin: 'kotlin-android'
             ],
           );
 
-          final String outputFilePath = await project.ios.outputUniversalLinkSettings(
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
@@ -827,7 +865,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -836,9 +873,8 @@ apply plugin: 'kotlin-android'
           };
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
           testPlistUtils.setProperty(PlistParser.kCFBundleIdentifierKey, r'$(PRODUCT_BUNDLE_IDENTIFIER)');
-          final String outputFilePath = await project.ios.outputUniversalLinkSettings(
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
@@ -1626,7 +1662,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 33
+    compileSdk 34
 
     defaultConfig {
         applicationId '$id'
@@ -1643,7 +1679,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
 }
 ''';
 }

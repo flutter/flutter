@@ -5,11 +5,12 @@
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
 void main() {
-  testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tap item after scroll - horizontal', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
     await tester.pumpWidget(
       Directionality(
@@ -51,7 +52,7 @@ void main() {
     expect(tapped, equals(<int>[2]));
   });
 
-  testWidgets('Tap item after scroll - vertical', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tap item after scroll - vertical', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
     await tester.pumpWidget(
       Directionality(
@@ -94,7 +95,7 @@ void main() {
     expect(tapped, equals(<int>[1])); // the center of the third item is off-screen so it shouldn't get hit
   });
 
-  testWidgets('Padding scroll anchor start', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Padding scroll anchor start', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
@@ -126,7 +127,7 @@ void main() {
     expect(tapped, equals(<int>[0, 1, 1]));
   });
 
-  testWidgets('Padding scroll anchor end', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Padding scroll anchor end', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
@@ -159,7 +160,7 @@ void main() {
     expect(tapped, equals(<int>[0, 1, 1]));
   });
 
-  testWidgets('Tap immediately following clamped overscroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tap immediately following clamped overscroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5709
     final List<int> tapped = <int>[];
 

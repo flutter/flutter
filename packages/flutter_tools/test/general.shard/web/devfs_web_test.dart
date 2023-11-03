@@ -682,6 +682,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
@@ -796,6 +797,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
@@ -907,6 +909,7 @@ void main() {
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
+        extraHeaders: const <String, String>{},
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
       );
@@ -965,6 +968,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullAssertions: true,
       nativeNullAssertions: true,
@@ -1011,6 +1015,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
@@ -1056,6 +1061,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
@@ -1138,10 +1144,42 @@ void main() {
       false,
       Uri.base,
       null,
+      const <String, String>{},
       NullSafetyMode.unsound,
       testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
+    await webAssetServer.dispose();
+  });
+
+  test('passes on extra headers', () async {
+    const String extraHeaderKey = 'hurray';
+    const String extraHeaderValue = 'flutter';
+    final WebAssetServer webAssetServer = await WebAssetServer.start(
+      null,
+      'localhost',
+      0,
+      null,
+      true,
+      true,
+      true,
+      const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+      ),
+      false,
+      false,
+      Uri.base,
+      null,
+      const <String, String>{
+        extraHeaderKey: extraHeaderValue,
+      },
+      NullSafetyMode.unsound,
+      testMode: true);
+
+    expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
+
     await webAssetServer.dispose();
   });
 
@@ -1212,6 +1250,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
@@ -1255,6 +1294,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
+    Uri? nativeAssetsYaml,
   }) async {
     return output;
   }

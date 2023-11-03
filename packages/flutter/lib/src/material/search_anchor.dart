@@ -142,8 +142,6 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/material/search_anchor/search_anchor.0.dart **
   /// {@end-tool}
-  ///
-  /// The [suggestionsBuilder] argument must not be null.
   factory SearchAnchor.bar({
     Widget? barLeading,
     Iterable<Widget>? barTrailing,
@@ -295,8 +293,6 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// The widget returned by this builder is faded out when it is tapped.
   /// At the same time a search view route is faded in.
-  ///
-  /// This must not be null.
   final SearchAnchorChildBuilder builder;
 
   /// Called to get the suggestion list for the search view.
@@ -314,15 +310,12 @@ class _SearchAnchorState extends State<SearchAnchor> {
   bool _anchorIsVisible = true;
   final GlobalKey _anchorKey = GlobalKey();
   bool get _viewIsOpen => !_anchorIsVisible;
-  late SearchController? _internalSearchController;
-  SearchController get _searchController => widget.searchController ?? _internalSearchController!;
+  SearchController? _internalSearchController;
+  SearchController get _searchController => widget.searchController ?? (_internalSearchController ??= SearchController());
 
   @override
   void initState() {
     super.initState();
-    if (widget.searchController == null) {
-      _internalSearchController = SearchController();
-    }
     _searchController._attach(this);
   }
 
@@ -339,14 +332,25 @@ class _SearchAnchorState extends State<SearchAnchor> {
   }
 
   @override
+  void didUpdateWidget(SearchAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchController != widget.searchController) {
+      oldWidget.searchController?._detach(this);
+      _searchController._attach(this);
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
-    _searchController._detach(this);
-    _internalSearchController = null;
+    widget.searchController?._detach(this);
+    _internalSearchController?._detach(this);
+    _internalSearchController?.dispose();
   }
 
   void _openView() {
-    Navigator.of(context).push(_SearchViewRoute(
+    final NavigatorState navigator = Navigator.of(context);
+    navigator.push(_SearchViewRoute(
       viewLeading: widget.viewLeading,
       viewTrailing: widget.viewTrailing,
       viewHintText: widget.viewHintText,
@@ -367,6 +371,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
       textCapitalization: widget.textCapitalization,
+      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     ));
   }
 
@@ -437,6 +442,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     required this.anchorKey,
     required this.searchController,
     required this.suggestionsBuilder,
+    required this.capturedThemes,
   });
 
   final ValueGetter<bool>? toggleVisibility;
@@ -459,6 +465,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final GlobalKey anchorKey;
   final SearchController searchController;
   final SuggestionsBuilder suggestionsBuilder;
+  final CapturedThemes capturedThemes;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -471,7 +478,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
   late final SearchViewThemeData viewDefaults;
   late final SearchViewThemeData viewTheme;
-  late final DividerThemeData dividerTheme;
   final RectTween _rectTween = RectTween();
 
   Rect? getRect() {
@@ -506,7 +512,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   void updateViewConfig(BuildContext context) {
     viewDefaults = _SearchViewDefaultsM3(context, isFullScreen: showFullScreenView);
     viewTheme = SearchViewTheme.of(context);
-    dividerTheme = DividerTheme.of(context);
   }
 
   void updateTweens(BuildContext context) {
@@ -580,30 +585,29 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               curve: _kViewFadeOnInterval,
               reverseCurve: _kViewFadeOnInterval.flipped,
             ),
-            child: _ViewContent(
-              viewLeading: viewLeading,
-              viewTrailing: viewTrailing,
-              viewHintText: viewHintText,
-              viewBackgroundColor: viewBackgroundColor,
-              viewElevation: viewElevation,
-              viewSurfaceTintColor: viewSurfaceTintColor,
-              viewSide: viewSide,
-              viewShape: viewShape,
-              viewHeaderTextStyle: viewHeaderTextStyle,
-              viewHeaderHintStyle: viewHeaderHintStyle,
-              dividerColor: dividerColor,
-              showFullScreenView: showFullScreenView,
-              animation: curvedAnimation,
-              topPadding: topPadding,
-              viewMaxWidth: _rectTween.end!.width,
-              viewRect: viewRect,
-              viewDefaults: viewDefaults,
-              viewTheme: viewTheme,
-              dividerTheme: dividerTheme,
-              viewBuilder: viewBuilder,
-              searchController: searchController,
-              suggestionsBuilder: suggestionsBuilder,
-              textCapitalization: textCapitalization,
+            child: capturedThemes.wrap(
+              _ViewContent(
+                viewLeading: viewLeading,
+                viewTrailing: viewTrailing,
+                viewHintText: viewHintText,
+                viewBackgroundColor: viewBackgroundColor,
+                viewElevation: viewElevation,
+                viewSurfaceTintColor: viewSurfaceTintColor,
+                viewSide: viewSide,
+                viewShape: viewShape,
+                viewHeaderTextStyle: viewHeaderTextStyle,
+                viewHeaderHintStyle: viewHeaderHintStyle,
+                dividerColor: dividerColor,
+                showFullScreenView: showFullScreenView,
+                animation: curvedAnimation,
+                topPadding: topPadding,
+                viewMaxWidth: _rectTween.end!.width,
+                viewRect: viewRect,
+                viewBuilder: viewBuilder,
+                searchController: searchController,
+                suggestionsBuilder: suggestionsBuilder,
+                textCapitalization: textCapitalization,
+              ),
             ),
           );
         }
@@ -635,9 +639,6 @@ class _ViewContent extends StatefulWidget {
     required this.animation,
     required this.viewMaxWidth,
     required this.viewRect,
-    required this.viewDefaults,
-    required this.viewTheme,
-    required this.dividerTheme,
     required this.searchController,
     required this.suggestionsBuilder,
   });
@@ -660,9 +661,6 @@ class _ViewContent extends StatefulWidget {
   final Animation<double> animation;
   final double viewMaxWidth;
   final Rect viewRect;
-  final SearchViewThemeData viewDefaults;
-  final SearchViewThemeData viewTheme;
-  final DividerThemeData dividerTheme;
   final SearchController searchController;
   final SuggestionsBuilder suggestionsBuilder;
 
@@ -682,6 +680,8 @@ class _ViewContentState extends State<_ViewContent> {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
+    _controller.addListener(updateSuggestions);
+
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
     }
@@ -709,6 +709,13 @@ class _ViewContentState extends State<_ViewContent> {
       }
     }
     unawaited(updateSuggestions());
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(updateSuggestions);
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
@@ -746,44 +753,47 @@ class _ViewContentState extends State<_ViewContent> {
         icon: const Icon(Icons.close),
         onPressed: () {
           _controller.clear();
-          updateSuggestions();
         },
       ),
     ];
 
+    final SearchViewThemeData viewDefaults = _SearchViewDefaultsM3(context, isFullScreen: widget.showFullScreenView);
+    final SearchViewThemeData viewTheme = SearchViewTheme.of(context);
+    final DividerThemeData dividerTheme = DividerTheme.of(context);
+
     final Color effectiveBackgroundColor = widget.viewBackgroundColor
-      ?? widget.viewTheme.backgroundColor
-      ?? widget.viewDefaults.backgroundColor!;
+      ?? viewTheme.backgroundColor
+      ?? viewDefaults.backgroundColor!;
     final Color effectiveSurfaceTint = widget.viewSurfaceTintColor
-      ?? widget.viewTheme.surfaceTintColor
-      ?? widget.viewDefaults.surfaceTintColor!;
+      ?? viewTheme.surfaceTintColor
+      ?? viewDefaults.surfaceTintColor!;
     final double effectiveElevation = widget.viewElevation
-      ?? widget.viewTheme.elevation
-      ?? widget.viewDefaults.elevation!;
+      ?? viewTheme.elevation
+      ?? viewDefaults.elevation!;
     final BorderSide? effectiveSide = widget.viewSide
-      ?? widget.viewTheme.side
-      ?? widget.viewDefaults.side;
+      ?? viewTheme.side
+      ?? viewDefaults.side;
     OutlinedBorder effectiveShape = widget.viewShape
-      ?? widget.viewTheme.shape
-      ?? widget.viewDefaults.shape!;
+      ?? viewTheme.shape
+      ?? viewDefaults.shape!;
     if (effectiveSide != null) {
       effectiveShape = effectiveShape.copyWith(side: effectiveSide);
     }
     final Color effectiveDividerColor = widget.dividerColor
-      ?? widget.viewTheme.dividerColor
-      ?? widget.dividerTheme.color
-      ?? widget.viewDefaults.dividerColor!;
+      ?? viewTheme.dividerColor
+      ?? dividerTheme.color
+      ?? viewDefaults.dividerColor!;
     final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle
-      ?? widget.viewTheme.headerTextStyle
-      ?? widget.viewDefaults.headerTextStyle;
+      ?? viewTheme.headerTextStyle
+      ?? viewDefaults.headerTextStyle;
     final TextStyle? effectiveHintStyle = widget.viewHeaderHintStyle
-      ?? widget.viewTheme.headerHintStyle
+      ?? viewTheme.headerHintStyle
       ?? widget.viewHeaderTextStyle
-      ?? widget.viewTheme.headerTextStyle
-      ?? widget.viewDefaults.headerHintStyle;
+      ?? viewTheme.headerTextStyle
+      ?? viewDefaults.headerHintStyle;
 
     final Widget viewDivider = DividerTheme(
-      data: widget.dividerTheme.copyWith(color: effectiveDividerColor),
+      data: dividerTheme.copyWith(color: effectiveDividerColor),
       child: const Divider(height: 1),
     );
 
@@ -947,15 +957,18 @@ class SearchController extends TextEditingController {
   // it controls.
   _SearchAnchorState? _anchor;
 
+  /// Whether this controller has associated search anchor.
+  bool get isAttached => _anchor != null;
+
   /// Whether or not the associated search view is currently open.
   bool get isOpen {
-    assert(_anchor != null);
+    assert(isAttached);
     return _anchor!._viewIsOpen;
   }
 
   /// Opens the search view that this controller is associated with.
   void openView() {
-    assert(_anchor != null);
+    assert(isAttached);
     _anchor!._openView();
   }
 
@@ -964,7 +977,7 @@ class SearchController extends TextEditingController {
   /// If `selectedText` is given, then the text value of the controller is set to
   /// `selectedText`.
   void closeView(String? selectedText) {
-    assert(_anchor != null);
+    assert(isAttached);
     _anchor!._closeView(selectedText);
   }
 
@@ -1164,7 +1177,8 @@ class SearchBar extends StatefulWidget {
 
 class _SearchBarState extends State<SearchBar> {
   late final MaterialStatesController _internalStatesController;
-  late final FocusNode _focusNode;
+  FocusNode? _internalFocusNode;
+  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -1173,12 +1187,12 @@ class _SearchBarState extends State<SearchBar> {
     _internalStatesController.addListener(() {
       setState(() {});
     });
-    _focusNode = widget.focusNode ?? FocusNode();
   }
 
   @override
   void dispose() {
     _internalStatesController.dispose();
+    _internalFocusNode?.dispose();
     super.dispose();
   }
 

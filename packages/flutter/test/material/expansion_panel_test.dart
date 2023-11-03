@@ -875,7 +875,7 @@ void main() {
     },
   );
 
-  testWidgets('No duplicate global keys at layout/build time', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('No duplicate global keys at layout/build time', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13780
     await tester.pumpWidget(
       StatefulBuilder(
@@ -1586,7 +1586,7 @@ void main() {
     expect(expandIcon.color, expandIconColor);
   });
 
-  testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
     const double elevation = 8;
 
     // Test for ExpansionPanelList.
