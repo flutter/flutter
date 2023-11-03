@@ -106,6 +106,17 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
 /// the tooltip is shown when the widget is long pressed.
 ///
+/// This tooltip will default to showing above the [Text] instead of below
+/// because its ambient [TooltipThemeData.preferBelow] is false.
+/// (See the use of [MaterialApp.theme].)
+/// Setting that piece of theme data is recommended to avoid having a finger or
+/// cursor hide the tooltip. For other ways to set that piece of theme data see:
+///
+/// * [Theme.data], [ThemeData.tooltipTheme]
+/// * [TooltipTheme.data]
+///
+/// or it can be set directly on each tooltip with [Tooltip.preferBelow].
+///
 /// ** See code in examples/api/lib/material/tooltip/tooltip.0.dart **
 /// {@end-tool}
 ///
@@ -113,9 +124,9 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
 /// `height` has been used to set a specific height of the Tooltip.
-/// `preferBelow` is false, the tooltip will prefer showing above [Tooltip]'s child widget.
-/// However, it may show the tooltip below if there's not enough space
-/// above the widget.
+/// `preferBelow` is true; the tooltip will prefer showing below [Tooltip]'s child widget.
+/// However, it may show the tooltip above if there's not enough space
+/// below the widget.
 /// `textStyle` has been used to set the font size of the 'message'.
 /// `showDuration` accepts a Duration to continue showing the message after the long
 /// press has been released or the mouse pointer exits the child widget.
@@ -231,9 +242,15 @@ class Tooltip extends StatefulWidget {
 
   /// Whether the tooltip defaults to being displayed below the widget.
   ///
-  /// Defaults to true. If there is insufficient space to display the tooltip in
+  /// If there is insufficient space to display the tooltip in
   /// the preferred direction, the tooltip will be displayed in the opposite
   /// direction.
+  ///
+  /// If this property is null, then [TooltipThemeData.preferBelow] is used.
+  /// If that is also null, the default value is true.
+  ///
+  /// Applying [TooltipThemeData.preferBelow]: `false` for the entire app
+  /// is recommended to avoid having a finger or cursor hide a tooltip.
   final bool? preferBelow;
 
   /// Whether the tooltip's [message] or [richMessage] should be excluded from
