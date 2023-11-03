@@ -52,6 +52,10 @@ void testMain() {
 
       DomKeyboardEvent event;
 
+      // Dispatch a keydown event first so that KeyboardBinding will recognize the keyup event.
+      // and will not set preventDefault on it.
+      event = dispatchKeyboardEvent('keydown', key: 'SomeKey', code: 'SomeCode', keyCode: 1);
+
       event = dispatchKeyboardEvent('keyup', key: 'SomeKey', code: 'SomeCode', keyCode: 1);
 
       expect(event.defaultPrevented, isFalse);
