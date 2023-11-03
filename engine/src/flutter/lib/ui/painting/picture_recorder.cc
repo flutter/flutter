@@ -31,20 +31,18 @@ sk_sp<DisplayListBuilder> PictureRecorder::BeginRecording(SkRect bounds) {
   return display_list_builder_;
 }
 
-fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
+void PictureRecorder::endRecording(Dart_Handle dart_picture) {
   if (!canvas_) {
-    return nullptr;
+    return;
   }
 
-  fml::RefPtr<Picture> picture;
-
-  picture = Picture::Create(dart_picture, display_list_builder_->Build());
+  Picture::CreateAndAssociateWithDartWrapper(dart_picture,
+                                             display_list_builder_->Build());
   display_list_builder_ = nullptr;
 
   canvas_->Invalidate();
   canvas_ = nullptr;
   ClearDartWrapper();
-  return picture;
 }
 
 }  // namespace flutter

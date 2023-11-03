@@ -26,13 +26,12 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
-fml::RefPtr<Picture> Picture::Create(Dart_Handle dart_handle,
-                                     sk_sp<DisplayList> display_list) {
+void Picture::CreateAndAssociateWithDartWrapper(
+    Dart_Handle dart_handle,
+    sk_sp<DisplayList> display_list) {
   FML_DCHECK(display_list->isUIThreadSafe());
   auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(display_list));
-
   canvas_picture->AssociateWithDartWrapper(dart_handle);
-  return canvas_picture;
 }
 
 Picture::Picture(sk_sp<DisplayList> display_list)
