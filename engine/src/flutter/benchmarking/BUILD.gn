@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 config("benchmark_config") {
-  include_dirs = [ "//third_party/benchmark:benchmark_config" ]
+  include_dirs = [ "//flutter/third_party/benchmark:benchmark_config" ]
 }
 
 source_set("benchmarking") {
@@ -16,7 +16,7 @@ source_set("benchmarking") {
 
   public_deps = [
     "//flutter/fml",
-    "//third_party/benchmark",
+    "//flutter/third_party/benchmark",
   ]
 
   public_configs = [
@@ -39,7 +39,7 @@ source_set("benchmarking_library") {
     "library.h",
   ]
 
-  public_deps = [ "//third_party/benchmark" ]
+  public_deps = [ "//flutter/third_party/benchmark" ]
 
   public_configs = [
     "//flutter:config",

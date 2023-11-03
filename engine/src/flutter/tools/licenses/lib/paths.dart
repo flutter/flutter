@@ -29,6 +29,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/lib/web_ui/dev', // these are build tools; they do not end up in Engine artifacts
   r'flutter/prebuilts',
   r'flutter/sky/packages/sky_engine/LICENSE',
+  r'flutter/third_party/benchmark', // only used by tests
   r'flutter/third_party/flatbuffers/android',
   r'flutter/third_party/flatbuffers/benchmarks',
   r'flutter/third_party/flatbuffers/docs',
@@ -74,7 +75,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/angle/third_party', // Unused by Flutter: BUILD files with forwarding targets (but no code).
   r'third_party/angle/tools', // These are build-time tools, and aren't shipped.
   r'third_party/angle/util',
-  r'third_party/benchmark', // only used by tests
   r'third_party/boringssl/src/crypto/err/err_data_generate.go',
   r'third_party/boringssl/src/fuzz', // testing tools, not shipped
   r'third_party/boringssl/src/rust', // rust-related code is not shipped
