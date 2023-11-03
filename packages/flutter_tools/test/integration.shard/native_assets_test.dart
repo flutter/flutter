@@ -408,11 +408,7 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
     ],
     workingDirectory: packageDirectory.path,
   );
-  if (result2.exitCode != 0) {
-    throw Exception(
-      'flutter create failed: ${result2.exitCode}\n${result2.stderr}\n${result2.stdout}',
-    );
-  }
+  expect(result2, const ProcessResultMatcher());
 
   return packageDirectory;
 }
@@ -420,7 +416,7 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
 Future<void> pinDependencies(File pubspecFile) async {
   expect(pubspecFile, exists);
   final String oldPubspec = await pubspecFile.readAsString();
-  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
+  final String newPubspec = oldPubspec.replaceAll(RegExp(r':\s*\^'), ': ');
   expect(newPubspec, isNot(oldPubspec));
   await pubspecFile.writeAsString(newPubspec);
 }
