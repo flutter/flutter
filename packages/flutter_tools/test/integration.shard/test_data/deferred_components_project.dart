@@ -175,7 +175,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdk flutter.compileSdkVersion
+      compileSdkVersion flutter.compileSdkVersion
       ndkVersion flutter.ndkVersion
 
       sourceSets {

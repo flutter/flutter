@@ -14,7 +14,7 @@ android {
     }
 
     namespace "dev.flutter.multipleflutters"
-    compileSdk 34
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
