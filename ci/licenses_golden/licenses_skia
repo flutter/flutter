@@ -1,4 +1,4 @@
-Signature: 6740111aa72fbf12623984795e61820f
+Signature: 503ecd559b9847e70b09160c5cec9051
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8798,6 +8798,13 @@ ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Int96.cpp + ../../.
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/SweepLine.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skcms/src/skcms_RestoreTarget.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skcms/src/skcms_SetTarget.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skcms/src/skcms_TransformHsw.cc + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skcms/src/skcms_TransformSkx.cc + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skcms/src/skcms_internals.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skcms/src/skcms_public.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBezierCurves.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkCubics.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkCubics.h + ../../../third_party/skia/LICENSE
@@ -9071,6 +9078,13 @@ FILE: ../../../third_party/skia/modules/bentleyottmann/src/Int96.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/SweepLine.cpp
+FILE: ../../../third_party/skia/modules/skcms/src/skcms_RestoreTarget.h
+FILE: ../../../third_party/skia/modules/skcms/src/skcms_SetTarget.h
+FILE: ../../../third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc
+FILE: ../../../third_party/skia/modules/skcms/src/skcms_TransformHsw.cc
+FILE: ../../../third_party/skia/modules/skcms/src/skcms_TransformSkx.cc
+FILE: ../../../third_party/skia/modules/skcms/src/skcms_internals.h
+FILE: ../../../third_party/skia/modules/skcms/src/skcms_public.h
 FILE: ../../../third_party/skia/src/base/SkBezierCurves.h
 FILE: ../../../third_party/skia/src/base/SkCubics.cpp
 FILE: ../../../third_party/skia/src/base/SkCubics.h
