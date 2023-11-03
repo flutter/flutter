@@ -4118,7 +4118,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Sends the current composing rect to the embedder's text input plugin.
   //
   // In cases where the composing rect hasn't been updated in the embedder due
-  // the lag of asynchronous messages over the channel, the position of the
+  // to the lag of asynchronous messages over the channel, the position of the
   // current caret rect is used instead.
   //
   // See: [_updateCaretRectIfNeeded]
@@ -4137,20 +4137,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // Sends the current caret rect to the embedder's text input plugin.
   //
-  // The position of the caret rect is updated on each change such that if the
+  // The position of the caret rect is updated periodically such that if the
   // user initiates composing input, the current cursor rect can be used for
   // the first character until the composing rect can be sent.
   //
   // On selection changes, the start of the selection is used. This ensures
   // that regardless of the direction the selection was created, the cursor is
-  // set to the position where next text input occurs.
+  // set to the position where next text input occurs. This position is used to
+  // position the IME's candidate selection menu.
+  //
+  // See: [_updateComposingRectIfNeeded]
   void _updateCaretRectIfNeeded() {
     final TextSelection? selection = renderEditable.selection;
     if (selection == null || !selection.isValid) {
       return;
     }
-    final int startOffset = math.min(selection.baseOffset, selection.extentOffset);
-    final TextPosition currentTextPosition = TextPosition(offset: startOffset);
+    final TextPosition currentTextPosition = TextPosition(offset: selection.start);
     final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
     _textInputConnection!.setCaretRect(caretRect);
   }
