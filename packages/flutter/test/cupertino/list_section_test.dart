@@ -223,4 +223,44 @@ void main() {
       }
     }
   });
+
+  testWidgetsWithLeakTracking('does not show margin by default', (WidgetTester tester) async {
+    const Widget child = CupertinoListTile(title: Text('CupertinoListTile'));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            header: const Text('Header'),
+            children: const <Widget>[
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byWidget(child)), offsetMoreOrLessEquals(const Offset(0, 41), epsilon: 1));
+  });
+
+  testWidgetsWithLeakTracking('shows custom margin', (WidgetTester tester) async {
+    const Widget child = CupertinoListTile(title: Text('CupertinoListTile'));
+    const double margin = 10;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            header: const Text('Header'),
+            margin: const EdgeInsets.all(margin),
+            children: const <Widget>[
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byWidget(child)), offsetMoreOrLessEquals(const Offset(margin, 41 + margin), epsilon: 1));
+  });
 }

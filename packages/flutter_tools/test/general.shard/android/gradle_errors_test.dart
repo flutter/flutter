@@ -1081,13 +1081,13 @@ Execution failed for task ':app:checkDebugAarMetadata'.
         testLogger.statusText,
         contains(
           '\n'
-          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
-          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
-          '│ android {                                                                     │\n'
-          '│   compileSdkVersion 31                                                        │\n'
-          '│ }                                                                             │\n'
-          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+          '┌─ Flutter Fix ──────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdk version.                         │\n'
+          '│ Fix this issue by bumping the compileSdk version in /android/app/build.gradle: │\n'
+          '│ android {                                                                      │\n'
+          '│   compileSdk 31                                                                │\n'
+          '│ }                                                                              │\n'
+          '└────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
@@ -1376,9 +1376,12 @@ Could not compile build file '…/example/android/build.gradle'.
         multidexEnabled: true,
       );
 
-      // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions, links to related resources,
+      // and a portion of the path to where to change their gradle version.
       expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
       expect(testLogger.statusText, contains('docs.flutter.dev/go/android-java-gradle-error'));
+      expect(testLogger.statusText, contains('gradle-wrapper.properties'));
+      expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
