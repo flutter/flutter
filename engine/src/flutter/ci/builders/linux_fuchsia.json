@@ -72,7 +72,21 @@
                     "flutter/shell/platform/fuchsia:fuchsia",
                     "fuchsia_tests"
                 ]
-            }
+            },
+            "tests": [
+                {
+                    "name": "Upload to Symbol Server for arch: arm64",
+                    "language": "python3",
+                    "script": "flutter/tools/fuchsia/upload_to_symbol_server.py",
+                    "parameters": [
+                        "--symbol-dir",
+                        "out/fuchsia_debug_arm64/.build-id",
+                        "--engine-version",
+                        "${REVISION}",
+                        "--upload"
+                    ]
+                }
+            ]
         },
         {
             "drone_dimensions": [
@@ -143,7 +157,21 @@
                     "flutter/shell/platform/fuchsia:fuchsia",
                     "fuchsia_tests"
                 ]
-            }
+            },
+            "tests": [
+                {
+                    "name": "Upload to Symbol Server for arch: x64",
+                    "language": "python3",
+                    "script": "flutter/tools/fuchsia/upload_to_symbol_server.py",
+                    "parameters": [
+                        "--symbol-dir",
+                        "out/fuchsia_debug_x64/.build-id",
+                        "--engine-version",
+                        "${REVISION}",
+                        "--upload"
+                    ]
+                }
+            ]
         }
     ],
     "generators": {
@@ -164,7 +192,7 @@
                 "parameters": [
                     "--engine-version",
                     "${REVISION}",
-		    "--upload",
+                    "--upload",
                     "--target-arch",
                     "arm64",
                     "--out-dir",
@@ -182,7 +210,7 @@
                 "parameters": [
                     "--engine-version",
                     "${REVISION}",
-		    "--upload",
+                    "--upload",
                     "--target-arch",
                     "x64",
                     "--out-dir",
