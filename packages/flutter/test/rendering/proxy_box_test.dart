@@ -972,6 +972,51 @@ void main() {
     const TestConstraints constraints = TestConstraints(testValue: 6);
     expect(box.computeDryLayout(constraints), const Size.square(6));
   });
+
+  test('RenderConstrainedBox intrinsic dimensions child calls respect additionalConstraints', () {
+    final _RenderIntrinsicCallsKeepingSizedBox childBox = _RenderIntrinsicCallsKeepingSizedBox(const Size(100, 100));
+
+    final RenderConstrainedBox box = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(minWidth: 200, maxWidth: 250, minHeight: 300, maxHeight: 350),
+      child: childBox,
+    );
+
+    // For infinite dimensions returns min-constrained dimensions
+    expect(box.getMinIntrinsicWidth(double.infinity), 200);
+    expect(box.getMaxIntrinsicWidth(double.infinity), 200);
+    expect(box.getMinIntrinsicHeight(double.infinity), 300);
+    expect(box.getMaxIntrinsicHeight(double.infinity), 300);
+
+    // ...and passes max-constrained cross dimension
+    expect(childBox.minWidthCalls.last, 350);
+    expect(childBox.maxWidthCalls.last, 350);
+    expect(childBox.minHeightCalls.last, 250);
+    expect(childBox.maxHeightCalls.last, 250);
+
+    // For zero dimensions returns also min-constrained dimensions
+    expect(box.getMinIntrinsicWidth(0), 200);
+    expect(box.getMaxIntrinsicWidth(0), 200);
+    expect(box.getMinIntrinsicHeight(0), 300);
+    expect(box.getMaxIntrinsicHeight(0), 300);
+
+    // ...and passes min-constrained cross dimension
+    expect(childBox.minWidthCalls.last, 300);
+    expect(childBox.maxWidthCalls.last, 300);
+    expect(childBox.minHeightCalls.last, 200);
+    expect(childBox.maxHeightCalls.last, 200);
+
+    // For dimensions fitting within constraints returns min-constrained dimensions
+    expect(box.getMinIntrinsicWidth(325), 200);
+    expect(box.getMaxIntrinsicWidth(325), 200);
+    expect(box.getMinIntrinsicHeight(225), 300);
+    expect(box.getMaxIntrinsicHeight(225), 300);
+
+    // ...and passes cross dimension unchanged
+    expect(childBox.minWidthCalls.last, 325);
+    expect(childBox.maxWidthCalls.last, 325);
+    expect(childBox.minHeightCalls.last, 225);
+    expect(childBox.maxHeightCalls.last, 225);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -1108,5 +1153,38 @@ class RenderBoxWithTestConstraints extends RenderProxyBox {
   @override
   Size computeDryLayout(TestConstraints constraints) {
     return constraints.constrain(Size.square(constraints.testValue));
+  }
+}
+
+class _RenderIntrinsicCallsKeepingSizedBox extends RenderSizedBox {
+  _RenderIntrinsicCallsKeepingSizedBox(super.size);
+
+  final List<double> minWidthCalls = <double>[];
+  final List<double> maxWidthCalls = <double>[];
+  final List<double> minHeightCalls = <double>[];
+  final List<double> maxHeightCalls = <double>[];
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    minWidthCalls.add(height);
+    return super.computeMinIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    maxWidthCalls.add(height);
+    return super.computeMaxIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    minHeightCalls.add(width);
+    return super.computeMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    maxHeightCalls.add(width);
+    return super.computeMaxIntrinsicHeight(width);
   }
 }

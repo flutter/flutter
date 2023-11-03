@@ -133,4 +133,37 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(ConstrainedBox)).getMinIntrinsicHeight(double.infinity), 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(ConstrainedBox)).getMaxIntrinsicHeight(double.infinity), 0.0);
   });
+
+  testWidgets('RenderConstrainedBox returning widget constrains dimension passed to get intrinsic dimension', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/137546
+
+    const Key key = Key('widget');
+
+    await tester.pumpWidget(
+     Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IntrinsicHeight(
+            key: key,
+            child: SizedBox(
+              width: 100,
+              child: Wrap(
+                children: List<Widget>.filled(5, const SizedBox(width: 50, height: 10)),
+              ),
+            ),
+          ),
+        ),
+     ),
+    );
+
+    final RenderBox renderBox = tester.renderObject<RenderBox>(find.byKey(key));
+
+    // Rectangles 50x10 will fit in a 100x100 square with intrinsic height like that:
+    // +----------+
+    // |<===><===>|
+    // |<===><===>|
+    // |<===>     |
+    // +----------+
+    expect(renderBox.size, const Size(100, 30));
+  });
 }
