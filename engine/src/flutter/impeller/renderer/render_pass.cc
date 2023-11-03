@@ -44,7 +44,7 @@ void RenderPass::SetLabel(std::string label) {
 }
 
 bool RenderPass::AddCommand(Command&& command) {
-  if (!command) {
+  if (!command.IsValid()) {
     VALIDATION_LOG << "Attempted to add an invalid command to the render pass.";
     return false;
   }
