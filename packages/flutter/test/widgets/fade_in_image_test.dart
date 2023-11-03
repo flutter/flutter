@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/src/rendering/image.dart';
+import 'package:flutter/src/rendering/stack.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -42,6 +44,8 @@ class FadeInImageElements {
   double get opacity => rawImage.opacity?.value ?? 1.0;
   BoxFit? get fit => rawImage.fit;
   FilterQuality? get filterQuality => rawImage.filterQuality;
+  Color? get color => rawImage.color;
+  BlendMode? get colorBlendMode => rawImage.colorBlendMode;
 }
 
 class LoadTestImageProvider extends ImageProvider<Object> {
@@ -376,6 +380,27 @@ void main() {
       await tester.pump(animationDuration);
       expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
+    });
+
+    testWidgetsWithLeakTracking('Image color and colorBlend parameters', (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+        color: const Color(0xFF00FF00),
+        colorBlendMode: BlendMode.clear,
+        fadeOutDuration: animationDuration,
+        fadeInDuration: animationDuration,
+        excludeFromSemantics: true,
+      ));
+
+      expect(findFadeInImage(tester).placeholder?.color, const Color(0xFF00FF00));
+      expect(findFadeInImage(tester).placeholder?.colorBlendMode, BlendMode.clear);
+      await tester.pump(animationDuration);
+      expect(findFadeInImage(tester).target.color, const Color(0xFF00FF00));
+      expect(findFadeInImage(tester).target.colorBlendMode, BlendMode.clear);
     });
 
     group('ImageProvider', () {
