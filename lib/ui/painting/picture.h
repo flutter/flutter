@@ -20,8 +20,9 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
  public:
   ~Picture() override;
-  static fml::RefPtr<Picture> Create(Dart_Handle dart_handle,
-                                     sk_sp<DisplayList> display_list);
+  static void CreateAndAssociateWithDartWrapper(
+      Dart_Handle dart_handle,
+      sk_sp<DisplayList> display_list);
 
   sk_sp<DisplayList> display_list() const { return display_list_; }
 
