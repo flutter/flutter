@@ -3153,10 +3153,8 @@ ORIGIN: ../../../flutter/impeller/entity/shaders/conical_gradient_fill.frag + ..
 ORIGIN: ../../../flutter/impeller/entity/shaders/conical_gradient_ssbo_fill.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/debug/checkerboard.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/debug/checkerboard.vert + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.glsl + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.vert + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_decal.frag + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_nodecal.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/geometry/points.comp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/geometry/uv.comp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/glyph_atlas.frag + ../../../flutter/LICENSE
@@ -5907,10 +5905,8 @@ FILE: ../../../flutter/impeller/entity/shaders/conical_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/conical_gradient_ssbo_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/debug/checkerboard.frag
 FILE: ../../../flutter/impeller/entity/shaders/debug/checkerboard.vert
-FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.glsl
+FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.frag
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.vert
-FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_decal.frag
-FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_nodecal.frag
 FILE: ../../../flutter/impeller/entity/shaders/geometry/points.comp
 FILE: ../../../flutter/impeller/entity/shaders/geometry/uv.comp
 FILE: ../../../flutter/impeller/entity/shaders/glyph_atlas.frag

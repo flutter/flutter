@@ -18,6 +18,8 @@
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
+layout(constant_id = 0) const int decal_specialization = 0;
+
 uniform f16sampler2D texture_sampler;
 
 uniform BlurInfo {
@@ -33,11 +35,10 @@ uniform BlurInfo {
 blur_info;
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
-#if ENABLE_DECAL_SPECIALIZATION
-  return IPHalfSampleDecal(tex, coords);
-#else
+  if (decal_specialization == 1) {
+    return IPHalfSampleDecal(tex, coords);
+  }
   return texture(tex, coords);
-#endif
 }
 
 in vec2 v_texture_coords;
