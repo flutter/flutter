@@ -32,6 +32,8 @@ class EntityPlayground : public PlaygroundTest {
 
   bool OpenPlaygroundHere(EntityPlaygroundCallback callback);
 
+  std::shared_ptr<ContentContext> GetContentContext() const;
+
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
 
