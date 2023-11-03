@@ -802,7 +802,7 @@ class WebDevFS implements DevFS {
       url ='localhost:$selectedPort';
     }
     _baseUri = Uri.http(url, webAssetServer.basePath);
-    if (tlsCertPath !=null && tlsCertKeyPath!=null) {
+    if (tlsCertPath != null && tlsCertKeyPath!= null) {
       _baseUri = Uri.https(url, webAssetServer.basePath);
     }
     return _baseUri!;
