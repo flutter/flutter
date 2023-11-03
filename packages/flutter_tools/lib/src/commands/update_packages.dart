@@ -37,7 +37,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
   // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker': '9.0.13',
+  'leak_tracker': '9.0.14',
     // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_testing': '1.0.5',
   // https://github.com/flutter/devtools/issues/3951
