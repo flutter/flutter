@@ -1696,6 +1696,56 @@ void main() {
     expect(states, <String>['deactivate', 'dispose']);
   });
 
+  testWidgetsWithLeakTracking('Element.deactivate reports its deactivation to the InheritedElement it depends on', (WidgetTester tester) async {
+    final List<Key> removedDependentWidgetKeys = <Key>[];
+
+    InheritedElement elementCreator(InheritedWidget widget) {
+      return _InheritedElementSpy(
+        widget,
+        onRemoveDependent: (Element dependent) {
+          removedDependentWidgetKeys.add(dependent.widget.key!);
+        },
+      );
+    }
+
+    Widget builder(BuildContext context) {
+      context.dependOnInheritedWidgetOfExactType<Inherited>();
+      return Container();
+    }
+
+    await tester.pumpWidget(
+      Inherited(
+        0,
+        elementCreator: elementCreator,
+        child: Column(
+          children: <Widget>[
+            Builder(
+              key: const Key('dependent'),
+              builder: builder,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(removedDependentWidgetKeys, isEmpty);
+
+    await tester.pumpWidget(
+      Inherited(
+        0,
+        elementCreator: elementCreator,
+        child: Column(
+          children: <Widget>[
+            Container(),
+          ],
+        ),
+      ),
+    );
+
+    expect(removedDependentWidgetKeys, hasLength(1));
+    expect(removedDependentWidgetKeys.first, const Key('dependent'));
+  });
+
   testWidgetsWithLeakTracking('RenderObjectElement.unmount disposes of its renderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     final RenderObjectElement element = tester.allElements.whereType<RenderObjectElement>().last;
@@ -1902,12 +1952,33 @@ class DirtyElementWithCustomBuildOwner extends Element {
 }
 
 class Inherited extends InheritedWidget {
-  const Inherited(this.value, {super.key, required super.child});
+  const Inherited(this.value, {super.key, required super.child, this.elementCreator});
 
   final int? value;
+  final InheritedElement Function(Inherited widget)? elementCreator;
 
   @override
   bool updateShouldNotify(Inherited oldWidget) => oldWidget.value != value;
+
+  @override
+  InheritedElement createElement() {
+    if (elementCreator != null) {
+      return elementCreator!(this);
+    }
+    return super.createElement();
+  }
+}
+
+class _InheritedElementSpy extends InheritedElement {
+  _InheritedElementSpy(super.widget, {this.onRemoveDependent});
+
+  final void Function(Element element)? onRemoveDependent;
+
+  @override
+  void removeDependent(Element dependent) {
+    super.removeDependent(dependent);
+    onRemoveDependent?.call(dependent);
+  }
 }
 
 class DependentStatefulWidget extends StatefulWidget {
