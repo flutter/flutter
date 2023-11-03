@@ -80,9 +80,14 @@ void main() {
     expect(textFormFieldsFinder, findsOneWidget);
     await tester.tap(find.byKey(const Key('input2')));
 
-    // // Press Tab. This should trigger `onFieldSubmitted` of TextField.
+    // Press Tab. This should trigger `onFieldSubmitted` of TextField.
     final InputElement input = findElements('input')[0] as InputElement;
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
+      'keyCode': 13, // Enter.
+      'cancelable': true,
+    });
+    // Release Tab.
+    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
       'keyCode': 13, // Enter.
       'cancelable': true,
     });
@@ -112,6 +117,14 @@ void main() {
 
     // Press Tab. The focus should move to the next TextFormField.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
+      'key': 'Tab',
+      'code': 'Tab',
+      'bubbles': true,
+      'cancelable': true,
+      'composed': true,
+    });
+    // Release tab.
+    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
       'key': 'Tab',
       'code': 'Tab',
       'bubbles': true,
@@ -159,6 +172,14 @@ void main() {
 
     // Press Tab. The focus should move to the next TextFormField.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
+      'key': 'Tab',
+      'code': 'Tab',
+      'bubbles': true,
+      'cancelable': true,
+      'composed': true,
+    });
+    // Release Tab.
+    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
       'key': 'Tab',
       'code': 'Tab',
       'bubbles': true,
