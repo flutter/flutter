@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester tester, RenderObject renderObject) async {
   assert(!renderObject.debugNeedsLayout);
@@ -36,7 +37,7 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester t
 }
 
 void main() {
-  testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Text('text widget'),
@@ -46,7 +47,7 @@ void main() {
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Safe to query a RelayoutWhenSystemFontsChangeMixin for text layout after system fonts changes',
     (WidgetTester tester) async {
       final _RenderCustomRelayoutWhenSystemFontsChange child = _RenderCustomRelayoutWhenSystemFontsChange();
@@ -68,7 +69,7 @@ void main() {
     },
   );
 
-  testWidgets('RenderEditable relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderEditable relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectableText('text widget'),
@@ -79,7 +80,7 @@ void main() {
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, state.renderEditable);
   });
 
-  testWidgets('Banner repaint upon system fonts changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Banner repaint upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Banner(
         message: 'message',
@@ -100,7 +101,7 @@ void main() {
     expect(renderObject.debugNeedsPaint, isTrue);
   });
 
-  testWidgets('CupertinoDatePicker reset cache upon system fonts change - date time mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoDatePicker reset cache upon system fonts change - date time mode', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoDatePicker(
@@ -126,7 +127,7 @@ void main() {
     expect(element.dirty, isTrue);
   }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('CupertinoDatePicker reset cache upon system fonts change - date mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoDatePicker reset cache upon system fonts change - date mode', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoDatePicker(
@@ -154,7 +155,7 @@ void main() {
     expect(element.dirty, isTrue);
   }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('CupertinoDatePicker reset cache upon system fonts change - time mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoDatePicker reset cache upon system fonts change - time mode', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTimerPicker(
@@ -189,7 +190,7 @@ void main() {
     expect(element.dirty, isTrue);
   }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('RangeSlider relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RangeSlider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -212,7 +213,7 @@ void main() {
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
-  testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -228,7 +229,7 @@ void main() {
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
-  testWidgets('TimePicker relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TimePicker relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
