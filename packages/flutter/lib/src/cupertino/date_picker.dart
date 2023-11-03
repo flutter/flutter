@@ -1957,9 +1957,6 @@ class CupertinoTimerPicker extends StatefulWidget {
 class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   late TextDirection textDirection;
   late CupertinoLocalizations localizations;
-  FixedExtentScrollController? hourController;
-  FixedExtentScrollController? secondController;
-  late FixedExtentScrollController minuteController;
   int get textDirectionFactor {
     switch (textDirection) {
       case TextDirection.ltr:
@@ -1998,17 +1995,15 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     super.initState();
 
     selectedMinute = widget.initialTimerDuration.inMinutes % 60;
-    minuteController = FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
 
     if (widget.mode != CupertinoTimerPickerMode.ms) {
       selectedHour = widget.initialTimerDuration.inHours;
-      hourController = FixedExtentScrollController(initialItem: selectedHour!);
     }
 
     if (widget.mode != CupertinoTimerPickerMode.hm) {
       selectedSecond = widget.initialTimerDuration.inSeconds % 60;
-      secondController = FixedExtentScrollController(initialItem: selectedSecond! ~/ widget.secondInterval);
     }
+
     PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
 
@@ -2022,10 +2017,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   @override
   void dispose() {
-    hourController?.dispose();
-    secondController?.dispose();
-    minuteController.dispose();
-
     PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     textPainter.dispose();
     super.dispose();
@@ -2039,14 +2030,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       oldWidget.mode == widget.mode,
       "The CupertinoTimerPicker's mode cannot change once it's built",
     );
-    if (widget.minuteInterval != oldWidget.minuteInterval) {
-      minuteController.dispose();
-      minuteController = FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval);
-    }
-    if (widget.secondInterval != oldWidget.secondInterval) {
-      secondController?.dispose();
-      secondController = FixedExtentScrollController(initialItem: selectedSecond! ~/ widget.secondInterval);
-    }
   }
 
   @override
@@ -2182,7 +2165,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
     return CupertinoPicker(
-      scrollController:hourController ,
+      scrollController: FixedExtentScrollController(initialItem: selectedHour!),
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(additionalPadding.start, 0),
       itemExtent: widget.itemExtent,
@@ -2241,7 +2224,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
     return CupertinoPicker(
-      scrollController: minuteController,
+      scrollController: FixedExtentScrollController(
+        initialItem: selectedMinute ~/ widget.minuteInterval,
+      ),
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,
@@ -2305,7 +2290,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   Widget _buildSecondPicker(EdgeInsetsDirectional additionalPadding, Widget selectionOverlay) {
     return CupertinoPicker(
-      scrollController: secondController,
+      scrollController: FixedExtentScrollController(
+        initialItem: selectedSecond! ~/ widget.secondInterval,
+      ),
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(
           additionalPadding.start,
