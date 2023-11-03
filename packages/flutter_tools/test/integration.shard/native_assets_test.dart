@@ -20,7 +20,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem, platform;
+import 'test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
 import 'transition_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
