@@ -8,10 +8,10 @@ import 'dart:io';
 import 'package:test_api/src/backend/runtime.dart';
 
 import 'browser.dart';
-import 'browser_lock.dart';
 import 'browser_process.dart';
 import 'common.dart';
 import 'edge_installation.dart';
+import 'package_lock.dart';
 
 /// Provides an environment for the desktop Microsoft Edge (Chromium-based).
 class EdgeEnvironment implements BrowserEnvironment {
@@ -51,7 +51,7 @@ class Edge extends Browser {
   factory Edge(Uri url) {
     return Edge._(BrowserProcess(() async {
       final BrowserInstallation installation = await getEdgeInstallation(
-        browserLock.edgeLock.launcherVersion,
+        packageLock.edgeLock.launcherVersion,
         infoLog: DevNull(),
       );
 

@@ -57,6 +57,10 @@ abstract class PlatformBinding {
   String getFirefoxLatestVersionUrl();
   String getMacApplicationLauncher();
   String getCommandToRunEdge();
+
+  String getEsbuildDownloadUrl(String version) =>
+      'https://registry.npmjs.org/@esbuild/$esbuildPlatformName/-/$esbuildPlatformName-$version.tgz';
+  String get esbuildPlatformName;
 }
 
 class WindowsPlatformBinding extends PlatformBinding {
@@ -89,6 +93,9 @@ class WindowsPlatformBinding extends PlatformBinding {
 
   @override
   String getCommandToRunEdge() => 'MicrosoftEdgeLauncher';
+
+  @override
+  String get esbuildPlatformName => 'win32-x64';
 }
 
 class LinuxPlatformBinding extends PlatformBinding {
@@ -123,6 +130,9 @@ class LinuxPlatformBinding extends PlatformBinding {
   @override
   String getCommandToRunEdge() =>
       throw UnsupportedError('Edge is not supported on Linux');
+
+  @override
+  String get esbuildPlatformName => 'linux-x64';
 }
 
 abstract class MacPlatformBinding extends PlatformBinding {
@@ -162,11 +172,17 @@ abstract class MacPlatformBinding extends PlatformBinding {
 class MacArmPlatformBinding extends MacPlatformBinding {
   @override
   String get chromePlatformString => 'mac-arm64';
+
+  @override
+  String get esbuildPlatformName => 'darwin-arm64';
 }
 
 class Macx64PlatformBinding extends MacPlatformBinding {
   @override
   String get chromePlatformString => 'mac-x64';
+
+  @override
+  String get esbuildPlatformName => 'darwin-x64';
 }
 
 class BrowserInstallation {
