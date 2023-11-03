@@ -31,7 +31,7 @@ android {
         namespace 'dev.flutter.integration_test'
     }
 
-    compileSdk 34
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
