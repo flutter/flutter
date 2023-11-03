@@ -1093,7 +1093,6 @@ void main() {
       controller: controller,
       referenceBox: sizedBoxKey.currentContext!.findRenderObject()! as RenderBox,
     );
-    addTearDown(tracker.dispose);
     controller.addInkFeature(tracker);
     expect(tracker.paintCount, 0);
 
@@ -1121,6 +1120,8 @@ void main() {
     // Force a repaint again. This time, it gets repainted because it is onstage.
     materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(layer2, Rect.largest), Offset.zero);
     expect(tracker.paintCount, 2);
+
+    tracker.dispose();
   });
 
   testWidgetsWithLeakTracking('$InkFeature dispatches memory events', (WidgetTester tester) async {
