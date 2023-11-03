@@ -2556,6 +2556,19 @@ TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
             expected_constants);
 }
 
+TEST_P(EntityTest, BlurSpecializationConstantValuesAreExpected) {
+  auto content_context =
+      ContentContext(GetContext(), TypographerContextSkia::Make());
+
+  auto decal_pipeline = content_context.GetGaussianBlurDecalPipeline({});
+  auto nodecal_pipeline = content_context.GetGaussianBlurPipeline({});
+
+  ASSERT_EQ(decal_pipeline->GetDescriptor().GetSpecializationConstants()[0],
+            /*decal_specialization*/ 1);
+  ASSERT_EQ(nodecal_pipeline->GetDescriptor().GetSpecializationConstants()[0],
+            /*decal_specialization*/ 0);
+}
+
 }  // namespace testing
 }  // namespace impeller
 
