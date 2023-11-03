@@ -41,7 +41,7 @@ Future<void> _renderTemplateToFile(
 Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies,
     {FileSystem? fileSystem}) async {
   final FileSystem fs = fileSystem ?? globals.fs;
-  final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
+  final File pubspecFile = fs.file(fs.path.join(packageRoot.path, 'pubspec.yaml'));
   if (!pubspecFile.existsSync()) {
     return null;
   }
