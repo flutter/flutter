@@ -31,7 +31,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     .settings
     .withTrackedAll()
     .withIgnored(
-      // allNotGCed: true,
+      allNotGCed: true,
       notDisposed: <String, int?>{
         'OverlayEntry': null,
       },
