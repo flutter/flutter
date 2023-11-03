@@ -5,7 +5,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 34
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
