@@ -206,9 +206,7 @@ struct Command : public ResourceBinder {
 
   BufferView GetVertexBuffer() const;
 
-  constexpr explicit operator bool() const {
-    return pipeline && pipeline->IsValid();
-  }
+  bool IsValid() const { return pipeline && pipeline->IsValid(); }
 
  private:
   template <class T>
