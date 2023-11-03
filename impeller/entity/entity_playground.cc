@@ -36,17 +36,21 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPass& entity_pass) {
   return Playground::OpenPlaygroundHere(callback);
 }
 
+std::shared_ptr<ContentContext> EntityPlayground::GetContentContext() const {
+  return std::make_shared<ContentContext>(GetContext(), typographer_context_);
+}
+
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
   if (!switches_.enable_playground) {
     return true;
   }
 
-  ContentContext content_context(GetContext(), typographer_context_);
-  if (!content_context.IsValid()) {
+  auto content_context = GetContentContext();
+  if (!content_context->IsValid()) {
     return false;
   }
   SinglePassCallback callback = [&](RenderPass& pass) -> bool {
-    return entity.Render(content_context, pass);
+    return entity.Render(*content_context, pass);
   };
   return Playground::OpenPlaygroundHere(callback);
 }

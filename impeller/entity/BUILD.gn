@@ -268,6 +268,7 @@ impeller_component("entity_unittests") {
   testonly = true
 
   sources = [
+    "contents/checkerboard_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
     "entity_playground.cc",
     "entity_playground.h",
