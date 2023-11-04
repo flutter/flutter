@@ -190,9 +190,14 @@ void main() {
     if (!fileSystem.file('${tempDir.path}/pubspec.yaml').existsSync()) {
       await project.setUpIn(tempDir);
     }
-
-    final ProcessResult result = await globals.processManager
-        .run(<String>['flutter', 'analyze'], workingDirectory: tempDir.path);
+    await globals.processManager.run(
+      <String>['flutter', 'gen-l10n'],
+      workingDirectory: tempDir.path,
+    );
+    final ProcessResult result = await globals.processManager.run(
+      <String>['flutter', 'analyze'],
+      workingDirectory: tempDir.path,
+    );
     final String analyzeResults = result.stdout as String;
 
     for (final String line in analyzeResults.split('\n')) {
