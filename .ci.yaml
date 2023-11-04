@@ -381,7 +381,7 @@ targets:
       backfill: "false"
       validation: docs
       validation_name: Docs
-      firebase_project: master-docs-flutter-dev
+      firebase_project: main-docs-flutter-prod
       release_ref: refs/heads/master
       release_build: "true"
     drone_dimensions:
@@ -4551,7 +4551,6 @@ targets:
   - name: Windows build_tests_1_6
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -4606,7 +4605,6 @@ targets:
   - name: Windows build_tests_4_6
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-

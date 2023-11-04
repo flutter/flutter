@@ -608,15 +608,20 @@ class AndroidProject extends FlutterProjectPlatform {
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
         gradleV: gradleVersion, agpV: agpVersion);
 
-    final bool compatibleJavaGradle = gradle.validateJavaAndGradle(globals.logger,
-        javaV: javaVersion, gradleV: gradleVersion);
+    final bool compatibleJavaGradle = gradle.validateJavaAndGradle(
+        globals.logger,
+        javaV: javaVersion,
+        gradleV: gradleVersion);
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
+      final String gradleDescription = agpVersion != null
+          ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
+          : '';
       description = '''
 Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
-Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
+$gradleDescription\n
 See the link below for more information:
 $gradleAgpCompatUrl
 ''';
