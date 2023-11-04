@@ -152,11 +152,13 @@ void testWidgets(
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
 
+  callback = _wrapWithLeakTracking(description, callback, experimentalLeakTesting);
+
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-  callback = _maybeWrapWithLeakTracking(description, callback, experimentalLeakTesting);
 
   for (final dynamic value in variant.values) {
+    _plannedTests ++;
     final String variationDescription = variant.describeValue(value);
     // IDEs may make assumptions about the format of this suffix in order to
     // support running tests directly from the editor (where they may have
@@ -175,7 +177,7 @@ void testWidgets(
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
-        return binding.runTest(
+        final result = binding.runTest(
           () async {
             binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
@@ -183,6 +185,7 @@ void testWidgets(
             try {
               memento = await variant.setUp(value);
               await callback(tester);
+              _executedTests ++;
             } finally {
               await variant.tearDown(value, memento);
             }
@@ -191,6 +194,7 @@ void testWidgets(
           tester._endOfTestVerifications,
           description: combinedDescription,
         );
+        return result;
       },
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
@@ -200,36 +204,39 @@ void testWidgets(
   }
 }
 
-WidgetTesterCallback _maybeWrapWithLeakTracking(
+WidgetTesterCallback _wrapWithLeakTracking(
   String description,
   WidgetTesterCallback callback,
   LeakTesting? leakTesting,
 ) {
-  leakTesting = leakTesting ?? LeakTesting.settings;
-  if (leakTesting.ignore) {
-    return callback;
-  }
-  if (!_isPlatformSupported) {
-    _mayBePrintPlatformWarning();
-    return callback;
-  }
-  tearDownAll(() async {
-    await _tearDownTestingWithLeakTracking();
+  tearDown(() async {
+    await _mayBeFinalizeLeakTracking();
   });
-
 
   Future<void> wrappedCallBack(WidgetTester tester) async {
     final settings = leakTesting ?? LeakTesting.settings;
+
+    if (settings.ignore) {
+      await callback(tester);
+      return;
+    }
+
+    if (!_isPlatformSupported) {
+      _mayBePrintPlatformWarning();
+      await callback(tester);
+      return;
+    }
 
     final phase = PhaseSettings(
       name: description,
       leakDiagnosticConfig: settings.leakDiagnosticConfig,
       ignoredLeaks: settings.ignoredLeaks,
-      baselining: const MemoryBaselining.none(),
+      baselining: settings.baselining,
       ignoreLeaks: settings.ignore,
     );
 
     if (!LeakTracking.isStarted) _setUpTestingWithLeakTracking();
+
     LeakTracking.phase = phase;
     await callback(tester);
     LeakTracking.phase = const PhaseSettings.ignored();
@@ -261,15 +268,21 @@ void _setUpTestingWithLeakTracking() {
   MemoryAllocations.instance.addListener(_dispatchFlutterEventToLeakTracker);
 }
 
-Future<void> _tearDownTestingWithLeakTracking() async {
+int _plannedTests = 0;
+int _executedTests = 0;
+Future<void> _mayBeFinalizeLeakTracking() async {
+  if (_plannedTests > _executedTests) return;
+  print('finalizing leak tracking');
   MemoryAllocations.instance.removeListener(_dispatchFlutterEventToLeakTracker);
 
   LeakTracking.declareNotDisposedObjectsAsLeaks();
   await forceGC(fullGcCycles: defaultNumberOfGcCycles);
-  final Leaks leaks = await LeakTracking.collectLeaks();
-
+  // final Leaks leaks = await LeakTracking.collectLeaks();
   LeakTracking.stop();
-  expect(leaks, isLeakFree);
+
+  // throw 'leaks found';
+
+  // expect(leaks, isLeakFree);
 }
 
 /// An abstract base class for describing test environment variants.

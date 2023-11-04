@@ -57,7 +57,6 @@ dev_dependencies:
 dependency_overrides:
   leak_tracker:
     path: ../../../leak_tracker/pkgs/leak_tracker
-  leak_tracker_flutter_testing:
+  leak_tracker_testing:
     path: ../../../leak_tracker/pkgs/leak_tracker_testing
-
 # PUBSPEC CHECKSUM: a8bb

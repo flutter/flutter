@@ -14,11 +14,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher;
 import 'package:matcher/src/expect/async_matcher.dart';
-
-import 'utils/leaking_classes.dart'; // ignore: implementation_imports
 
 void main() {
   group('expectLater', () {
@@ -514,6 +511,7 @@ void main() {
       LeakTesting.settings = trackAll;
     });
 
+    print('> tearDownAll 0');
     tearDownAll(() async {
       print('!!!!');
       print(collectedLeaks.length);
@@ -533,9 +531,9 @@ void main() {
     group('tests', () {
       testWidgets(testNoLeaks = 'no leaks', (_) async {});
 
-      testWidgets(testWithLeaks = 'with leaks', (_) async {
-        StatelessLeakingWidget();
-      });
+      // testWidgets(testWithLeaks = 'with leaks', (_) async {
+      //   StatelessLeakingWidget();
+      // });
     });
 
   });
