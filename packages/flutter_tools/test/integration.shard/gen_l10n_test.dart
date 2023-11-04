@@ -185,7 +185,7 @@ void main() {
   });
 
   // Analyze generated l10n file
-  // (see https://github.com/flutter/flutter/pull/137312)
+  // (see https://github.com/flutter/flutter/issues/137313)
   testUsingContext('generated l10n file without require_trailing_commas and no_leading_underscores_for_local_identifiers problems', () async {
     if (!fileSystem.file('${tempDir.path}/pubspec.yaml').existsSync()) {
       await project.setUpIn(tempDir);
