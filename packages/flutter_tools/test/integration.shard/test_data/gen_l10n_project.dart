@@ -23,10 +23,11 @@ class GenL10nProject extends Project {
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
+    writeFile(fileSystem.path.join(dir.path, 'analysis_options.yaml'), analysisOptions);
     writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
-      useDeferredLoading: useDeferredLoading,
-      useSyntheticPackage: useSyntheticPackage,
-    ));
+          useDeferredLoading: useDeferredLoading,
+          useSyntheticPackage: useSyntheticPackage,
+        ));
     return super.setUpIn(dir);
   }
 
@@ -42,6 +43,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any # Pick up the pinned version from flutter_localizations
+
+dev_dependencies:
+  flutter_lints: any
 ''';
 
   @override
@@ -328,6 +332,14 @@ void main() {
   );
 }
 ''';
+
+  final String analysisOptions = r'''
+include: package:flutter_lints/flutter.yaml
+linter:
+  rules:
+    require_trailing_commas: true
+    no_leading_underscores_for_local_identifiers: true
+ ''';
 
   final String appEn = r'''
 {
