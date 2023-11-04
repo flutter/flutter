@@ -171,7 +171,7 @@ void main() {
       '#l10n 115 (ES 419 - Hello World)\n'
       '#l10n 116 (ES 419 - Hello two worlds)\n'
       '#l10n END\n'
-
+    
     );
   }
 
@@ -205,18 +205,25 @@ void main() {
       if (parts.length < 3) {
         continue;
       }
-      if (parts[2].startsWith(r'lib\l10n\app_localizations.dart') &&
-          parts[0] == 'require_trailing_commas') {
-        assert(
-          false,
-          r'found require_trailing_commas problem in lib\l10n\app_localizations.dart',
-        );
-      } else if (parts[2].startsWith(r'lib\l10n\app_localizations') &&
-          parts[0] == 'no_leading_underscores_for_local_identifiers') {
-        assert(
-          false,
-          'found no_leading_underscores_for_local_identifiers problem in ${parts[2]}',
-        );
+      if (parts[2].startsWith(r'lib\l10n\app_localizations.dart')) {
+        if (parts[0] == 'require_trailing_commas') {
+          assert(
+            false,
+            r'found require_trailing_commas problem in lib\l10n\app_localizations.dart',
+          );
+        }
+      } else if (parts[2].startsWith(r'lib\l10n\app_localizations')) {
+        if (parts[0] == 'no_leading_underscores_for_local_identifiers') {
+          assert(
+            false,
+            'found no_leading_underscores_for_local_identifiers problem in ${parts[2]}',
+          );
+        } else if (parts[0] == 'use_super_parameters') {
+          assert(
+            false,
+            'found use_super_parameters problem in ${parts[2]}',
+          );
+        }
       }
     }
   });

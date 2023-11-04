@@ -165,7 +165,7 @@ const String classFileTemplate = '''
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
-  @(class)([String locale = '@(localeName)']) : super(locale);
+  @(class)([super.locale = '@(localeName)']);
 
 @(methods)
 }
