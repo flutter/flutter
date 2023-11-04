@@ -305,34 +305,31 @@ class FormState extends State<Form> {
 
 
   /// Validates every [FormField]s that is a descendant of this [Form], and
-  /// returns a [Map] which keys' are [Key]s of the descendant [FormField]s
-  /// and values' are their corresponding validation results.
+  /// returns a [List] of [FormFieldState] of the invalid field(s) only, if any.
   ///
-  /// Any [FormField] that has not been assigned a key will be ignored in the result.
   /// To get the absolute validation value of the Form, Consider using [validate]
   ///
   /// Common usage of this method is when you need draw the user's attention
   /// to the invalid field(s) using their widget key(s).
   ///
   /// The form will rebuild to report the results.
-  Map<Key, bool> validateGranularly() {
-    final Map<Key, bool> validationResults = <Key, bool>{};
+  List<FormFieldState<dynamic>> validateGranularly() {
+    final List<FormFieldState<dynamic>> invalidFields = List<FormFieldState<dynamic>>.empty(growable: true);
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(validationResults);
-    return validationResults;
+    _validate(invalidFields);
+    return invalidFields;
   }
 
-  bool _validate([Map<Key, bool>? validationResults]) {
+  bool _validate([List<FormFieldState<dynamic>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
       final bool isFieldValid = field.validate();
       hasError = !isFieldValid || hasError;
       errorMessage += field.errorText ?? '';
-      final Key? key = field.widget.key;
-      if (validationResults != null && key != null) {
-        validationResults[key] = isFieldValid;
+      if (invalidFields != null && !isFieldValid) {
+        invalidFields.add(field);
       }
     }
 

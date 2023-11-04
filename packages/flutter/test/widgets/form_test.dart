@@ -277,8 +277,9 @@ void main() {
     'validateGranularly returns correct values for fields with keys and ignores fields without keys',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-      final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+      final UniqueKey validFieldsKey = UniqueKey();
+      final UniqueKey invalidFieldsKey = UniqueKey();
+
       const String validString = 'Valid string';
       const String invalidString = 'Invalid string';
       String? validator(String? s) => s == validString ? null : 'Error text';
@@ -296,18 +297,19 @@ void main() {
                     child: ListView(
                       children: <Widget>[
                         TextFormField(
-                          key: fieldKey1,
+                          key: validFieldsKey,
                           initialValue: validString,
                           validator: validator,
                           autovalidateMode: AutovalidateMode.disabled,
                         ),
                         TextFormField(
+                          key: invalidFieldsKey,
                           initialValue: invalidString,
                           validator: validator,
                           autovalidateMode: AutovalidateMode.disabled,
                         ),
                         TextFormField(
-                          key: fieldKey2,
+                          key: invalidFieldsKey,
                           initialValue: invalidString,
                           validator: validator,
                           autovalidateMode: AutovalidateMode.disabled,
@@ -324,19 +326,18 @@ void main() {
 
       await tester.pumpWidget(builder());
 
-      final Map<Key, bool> validationResult = formKey.currentState!.validateGranularly();
+      final List<FormFieldState<dynamic>> validationResult = formKey.currentState!.validateGranularly();
 
       expect(validationResult.length, equals(2));
-      expect(validationResult[fieldKey1], isTrue);
-      expect(validationResult[fieldKey2], isFalse);
+      expect(validationResult.where((FormFieldState<dynamic> field) => field.widget.key == invalidFieldsKey).length, equals(2));
+      expect(validationResult.where((FormFieldState<dynamic> field) => field.widget.key == validFieldsKey).length, equals(0));
     },
   );
 
   testWidgetsWithLeakTracking(
-    'Should announce error text when validateGranularly is called even if an invalid field has no key',
+    'Should announce error text when validateGranularly is called',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-      final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
       const String validString = 'Valid string';
       String? validator(String? s) => s == validString ? null : 'error';
 
@@ -353,7 +354,6 @@ void main() {
                     child: ListView(
                       children: <Widget>[
                         TextFormField(
-                          key: fieldKey1,
                           initialValue: validString,
                           validator: validator,
                           autovalidateMode: AutovalidateMode.disabled,
@@ -376,10 +376,7 @@ void main() {
       await tester.pumpWidget(builder());
       expect(find.text('error'), findsNothing);
 
-      final Map<Key, bool> validationResult = formKey.currentState!.validateGranularly();
-
-      expect(validationResult.length, equals(1));
-      expect(validationResult.values, everyElement(isTrue));
+      formKey.currentState!.validateGranularly();
 
       await tester.pump();
       expect(find.text('error'), findsOneWidget);
