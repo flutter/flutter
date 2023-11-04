@@ -196,18 +196,17 @@ String generateNumberFormattingLogic(Message message) {
       final Iterable<String> parameters =
         placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
           if (parameter.value is num) {
-            return '${parameter.name}: ${parameter.value}';
+            return '${parameter.name}: ${parameter.value},';
           } else {
-            return "${parameter.name}: '${generateString(parameter.value.toString())}'";
+            return "${parameter.name}: '${generateString(parameter.value.toString())}',";
           }
         },
       );
-
       if (placeholder.hasNumberFormatWithParameters) {
         return numberFormatNamedTemplate
             .replaceAll('@(placeholder)', placeholder.name)
             .replaceAll('@(format)', placeholderFormat)
-            .replaceAll('@(parameters)', parameters.join(',\n      '));
+            .replaceAll('@(parameters)', parameters.join('\n      '));
       } else {
         return numberFormatPositionalTemplate
             .replaceAll('@(placeholder)', placeholder.name)

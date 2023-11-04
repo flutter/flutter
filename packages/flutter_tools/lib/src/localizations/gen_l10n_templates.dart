@@ -115,7 +115,7 @@ const String numberFormatPositionalTemplate = '''
 const String numberFormatNamedTemplate = '''
     final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
       locale: localeName,
-      @(parameters),
+      @(parameters)
     );
     final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
