@@ -389,13 +389,15 @@ void main() {
         image: imageProvider,
         color: const Color(0xFF00FF00),
         colorBlendMode: BlendMode.clear,
+        placeholderColor: const Color(0xFF0000FF),
+        placeholderColorBlendMode: BlendMode.modulate,
         fadeOutDuration: animationDuration,
         fadeInDuration: animationDuration,
         excludeFromSemantics: true,
       ));
 
-      expect(findFadeInImage(tester).placeholder?.color, const Color(0xFF00FF00));
-      expect(findFadeInImage(tester).placeholder?.colorBlendMode, BlendMode.clear);
+      expect(findFadeInImage(tester).placeholder?.color, const Color(0xFF0000FF));
+      expect(findFadeInImage(tester).placeholder?.colorBlendMode, BlendMode.modulate);
       await tester.pump(animationDuration);
       expect(findFadeInImage(tester).target.color, const Color(0xFF00FF00));
       expect(findFadeInImage(tester).target.colorBlendMode, BlendMode.clear);

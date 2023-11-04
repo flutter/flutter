@@ -86,6 +86,8 @@ class FadeInImage extends StatefulWidget {
     this.fadeInCurve = Curves.easeIn,
     this.color,
     this.colorBlendMode,
+    this.placeholderColor,
+    this.placeholderColorBlendMode,
     this.width,
     this.height,
     this.fit,
@@ -144,6 +146,8 @@ class FadeInImage extends StatefulWidget {
     this.fit,
     this.color,
     this.colorBlendMode,
+    this.placeholderColor,
+    this.placeholderColorBlendMode,
     this.placeholderFit,
     this.filterQuality = FilterQuality.low,
     this.placeholderFilterQuality,
@@ -204,6 +208,8 @@ class FadeInImage extends StatefulWidget {
     this.fit,
     this.color,
     this.colorBlendMode,
+    this.placeholderColor,
+    this.placeholderColorBlendMode,
     this.placeholderFit,
     this.filterQuality = FilterQuality.low,
     this.placeholderFilterQuality,
@@ -261,10 +267,10 @@ class FadeInImage extends StatefulWidget {
   final double? width;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
-  /// Color applies to both [placeholder] and [image]
+  /// Color applies to the [image]
   final Color? color;
 
-  /// Used to combine [color] with this image and the placeholder
+  /// Used to combine [color] with this image
   ///
   /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
   /// the source and this image is the destination.
@@ -273,6 +279,20 @@ class FadeInImage extends StatefulWidget {
   ///
   ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
   final BlendMode? colorBlendMode;
+
+  /// If non-null, this color is blended with each placeholder image pixel using [placeholderColorBlendMode].
+  /// Color applies to the [placeholder]
+  final Color? placeholderColor;
+
+  /// Used to combine [placeholderColor] with the placeholder image
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [placeholderColor] is
+  /// the source and this placeholder is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode? placeholderColorBlendMode;
 
   /// If non-null, require the image to have this height.
   ///
@@ -426,8 +446,8 @@ class _FadeInImageState extends State<FadeInImage> {
             image: widget.placeholder,
             errorBuilder: widget.placeholderErrorBuilder,
             opacity: _placeholderAnimation,
-            color: widget.color,
-            colorBlendMode: widget.colorBlendMode,
+            color: widget.placeholderColor,
+            colorBlendMode: widget.placeholderColorBlendMode,
             fit: widget.placeholderFit ?? widget.fit,
             filterQuality: widget.placeholderFilterQuality ?? widget.filterQuality,
           ),
