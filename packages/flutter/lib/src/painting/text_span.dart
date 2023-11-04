@@ -431,25 +431,6 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     return localOffset < text.length ? text.codeUnitAt(localOffset) : null;
   }
 
-  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
-  /// to be able to construct a [SemanticsNode].
-  ///
-  /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
-  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (0xFFFC) that is inserted to represent it.
-  ///
-  /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
-  /// `semanticsElements` for [PlaceholderSpan]s.
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer) {
-      final int length = semanticsLabel?.length ?? text!.length;
-      semanticsOffsets.add(offset.value);
-      semanticsOffsets.add(offset.value + length);
-      semanticsElements.add(recognizer);
-    }
-    offset.increment(text != null ? text!.length : 0);
-  }
-
   /// In debug mode, throws an exception if the object is not in a valid
   /// configuration. Otherwise, returns true.
   ///

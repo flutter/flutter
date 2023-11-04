@@ -1298,7 +1298,7 @@ flutter:
 
     await residentRunner.runSourceGenerators();
 
-    expect(testLogger.errorText, allOf(contains('Exception')));
+    expect(testLogger.errorText, contains('Error'));
     expect(testLogger.statusText, isEmpty);
   }));
 
@@ -1963,6 +1963,28 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('FlutterDevice passes frontendServerStarterPath parameter if specified', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeDevice device = FakeDevice();
+
+    final DefaultResidentCompiler? residentCompiler = (await FlutterDevice.create(
+      device,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        frontendServerStarterPath: '/foo/bar/frontend_server_starter.dart',
+      ),
+      target: null, platform: FakePlatform(),
+    )).generator as DefaultResidentCompiler?;
+
+    expect(residentCompiler!.frontendServerStarterPath, '/foo/bar/frontend_server_starter.dart');
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('Handle existing VM service clients DDS error', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
@@ -2398,7 +2420,7 @@ flutter:
         expect(buildRunner.buildInvocations, 0);
         expect(buildRunner.dryRunInvocations, 1);
         expect(buildRunner.hasPackageConfigInvocations, 1);
-        expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+        expect(buildRunner.packagesWithNativeAssetsInvocations, 1);
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),

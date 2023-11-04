@@ -31,7 +31,7 @@ void main() {
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
     expect(find.text('Action Sheet'), findsNothing);
-  }, leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed());
+  });
 
   testWidgetsWithLeakTracking('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -178,8 +178,6 @@ class Switch extends StatelessWidget {
         _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the user toggles the switch on or off.
@@ -712,7 +710,7 @@ class _MaterialSwitch extends StatefulWidget {
   final MaterialStateProperty<Color?>? overlayColor;
   final double? splashRadius;
   final FocusNode? focusNode;
-  final Function(bool)? onFocusChange;
+  final ValueChanged<bool>? onFocusChange;
   final bool autofocus;
   final Size size;
 
@@ -1311,6 +1309,7 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  final TextPainter _textPainter = TextPainter();
   Color? _cachedThumbColor;
   ImageProvider? _cachedThumbImage;
   ImageErrorListener? _cachedThumbErrorListener;
@@ -1596,16 +1595,15 @@ class _SwitchPainter extends ToggleablePainter {
             shadows: iconShadows,
           ),
         );
-        final TextPainter textPainter = TextPainter(
-          textDirection: textDirection,
-          text: textSpan,
-        );
-        textPainter.layout();
+        _textPainter
+          ..textDirection = textDirection
+          ..text = textSpan;
+        _textPainter.layout();
         final double additionalHorizontalOffset = (thumbSize.width - iconSize) / 2;
         final double additionalVerticalOffset = (thumbSize.height - iconSize) / 2;
         final Offset offset = thumbPaintOffset + Offset(additionalHorizontalOffset, additionalVerticalOffset);
 
-        textPainter.paint(canvas, offset);
+        _textPainter.paint(canvas, offset);
       }
     } finally {
       _isPainting = false;
@@ -1614,6 +1612,7 @@ class _SwitchPainter extends ToggleablePainter {
 
   @override
   void dispose() {
+    _textPainter.dispose();
     _cachedThumbPainter?.dispose();
     _cachedThumbPainter = null;
     _cachedThumbColor = null;

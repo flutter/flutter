@@ -59,6 +59,16 @@ abstract class DotEnvRegex {
   static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
 }
 
+abstract class _HttpRegex {
+  // https://datatracker.ietf.org/doc/html/rfc7230#section-3.2
+  static const String _vchar = r'\x21-\x7E';
+  static const String _spaceOrTab = r'\x20\x09';
+  static const String _nonDelimiterVchar = r'\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x39\x41-\x5A\x5E-\x7A\x7C\x7E';
+
+  // --web-header is provided as key=value for consistency with --dart-define
+  static final RegExp httpHeader = RegExp('^([$_nonDelimiterVchar]+)' r'\s*=\s*' '([$_vchar$_spaceOrTab]+)' r'$');
+}
+
 enum ExitStatus {
   success,
   warning,
@@ -112,6 +122,7 @@ class FlutterCommandResult {
 
 /// Common flutter command line options.
 abstract final class FlutterOptions {
+  static const String kFrontendServerStarterPath = 'frontend-server-starter-path';
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
@@ -217,6 +228,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebOptions({ required bool verboseHelp }) {
+    argParser.addMultiOption('web-header',
+      help: 'Additional key-value pairs that will added by the web server '
+            'as headers to all responses. Multiple headers can be passed by '
+            'repeating "--web-header" multiple times.',
+      valueHelp: 'X-Custom-Header=header-value',
+      splitCommas: false,
+      hide: !verboseHelp,
+    );
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help:
@@ -637,10 +656,10 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    useDartDefineFromFileOption();
+    _usesDartDefineFromFileOption();
   }
 
-  void useDartDefineFromFileOption() {
+  void _usesDartDefineFromFileOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
       help:
@@ -846,6 +865,18 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help: 'This flag is deprecated as only null-safe code is supported.',
       hide: true,
+    );
+  }
+
+  void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
+    argParser.addOption(
+      FlutterOptions.kFrontendServerStarterPath,
+      help: 'When this value is provided, the frontend server will be started '
+            'in JIT mode from the specified file, instead of from the AOT '
+            'snapshot shipped with the Dart SDK. The specified file can either '
+            'be a Dart source file, or an AppJIT snapshot. This option does '
+            'not affect web builds.',
+      hide: !verboseHelp,
     );
   }
 
@@ -1234,11 +1265,25 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    final String? flavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    if (flavor != null) {
+      if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
+        throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.');
+      }
+      if (dartDefines.any((String define) => define.startsWith('FLUTTER_APP_FLAVOR'))) {
+        throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be '
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}');
+      }
+      dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
+    }
+
     return BuildInfo(buildMode,
-      argParser.options.containsKey('flavor')
-        ? stringArg('flavor')
-        : null,
+      flavor,
       trackWidgetCreation: trackWidgetCreation,
+      frontendServerStarterPath: argParser.options
+              .containsKey(FlutterOptions.kFrontendServerStarterPath)
+          ? stringArg(FlutterOptions.kFrontendServerStarterPath)
+          : null,
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty
         ? extraFrontEndOptions
         : null,
@@ -1259,7 +1304,6 @@ abstract class FlutterCommand extends Command<void> {
       dartExperiments: experiments,
       webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
-      dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
@@ -1396,9 +1440,10 @@ abstract class FlutterCommand extends Command<void> {
             dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions
-              .kDartDefineFromFileOption}=$path" format err, '
-              'please fix first! format err:\n$err');
+          throwToolExit('Unable to parse the file at path "$path" due to a formatting error. '
+            'Ensure that the file contains valid JSON.\n'
+            'Error details: $err'
+          );
         }
       }
     }
@@ -1492,6 +1537,31 @@ abstract class FlutterCommand extends Command<void> {
     }
     dartDefinesSet.addAll(webRenderer.dartDefines);
     return dartDefinesSet.toList();
+  }
+
+
+  Map<String, String> extractWebHeaders() {
+    final Map<String, String> webHeaders = <String, String>{};
+
+    if (argParser.options.containsKey('web-header')) {
+      final List<String> candidates = stringsArg('web-header');
+      final List<String> invalidHeaders = <String>[];
+      for (final String candidate in candidates) {
+        final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
+          if (keyValueMatch == null) {
+            invalidHeaders.add(candidate);
+            continue;
+          }
+
+          webHeaders[keyValueMatch.group(1)!] = keyValueMatch.group(2)!;
+      }
+
+      if (invalidHeaders.isNotEmpty) {
+        throwToolExit('Invalid web headers: ${invalidHeaders.join(', ')}');
+      }
+    }
+
+    return webHeaders;
   }
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {

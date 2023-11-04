@@ -49,8 +49,6 @@ const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 ///  * [TextFormField], a convenience widget that wraps a [TextField] widget in a [FormField].
 class Form extends StatefulWidget {
   /// Creates a container for form fields.
-  ///
-  /// The [child] argument must not be null.
   const Form({
     super.key,
     required this.child,
@@ -410,8 +408,6 @@ typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 ///  * [TextField], which is a commonly used form field for entering text.
 class FormField<T> extends StatefulWidget {
   /// Creates a single form field.
-  ///
-  /// The [builder] argument must not be null.
   const FormField({
     super.key,
     required this.builder,
@@ -466,7 +462,7 @@ class FormField<T> extends StatefulWidget {
   /// will auto-validate even without user interaction. If
   /// [AutovalidateMode.disabled], auto-validation will be disabled.
   ///
-  /// Defaults to [AutovalidateMode.disabled], cannot be null.
+  /// Defaults to [AutovalidateMode.disabled].
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
 
@@ -554,6 +550,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void _validate() {
     if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
+    } else {
+      _errorText.value = null;
     }
   }
 

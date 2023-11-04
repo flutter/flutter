@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Color green = Color(0xFF00FF00);
 const Color yellow = Color(0xFFFFFF00);
 
 void main() {
-  testWidgets('SlottedRenderObjectWidget test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SlottedRenderObjectWidget test', (WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
         height: 100,
@@ -137,7 +138,7 @@ void main() {
     expect(_RenderTest().publicNameForSlot(slot), slot.toString());
   });
 
-  testWidgets('key reparenting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('key reparenting', (WidgetTester tester) async {
     const Widget widget1 = SizedBox(key: ValueKey<String>('smol'), height: 10, width: 10);
     const Widget widget2 = SizedBox(key: ValueKey<String>('big'), height: 100, width: 100);
     const Widget nullWidget = SizedBox(key: ValueKey<String>('null'), height: 50, width: 50);
@@ -203,7 +204,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugDescribeChildren', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugDescribeChildren', (WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
       topLeft: const SizedBox(
         height: 100,

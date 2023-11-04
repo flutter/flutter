@@ -202,8 +202,6 @@ class MaterialApp extends StatefulWidget {
   /// unsupported route.
   ///
   /// This class creates an instance of [WidgetsApp].
-  ///
-  /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const MaterialApp({
     super.key,
     this.navigatorKey,
