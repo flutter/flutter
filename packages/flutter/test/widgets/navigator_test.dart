@@ -2367,6 +2367,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2437,6 +2439,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2506,6 +2510,7 @@ void main() {
           ),
         );
       };
+    addTearDown(spy1.dispose);
     final List<NavigatorObservation> observations2 = <NavigatorObservation>[];
     final HeroControllerSpy spy2 = HeroControllerSpy()
       ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
@@ -2517,6 +2522,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy2.dispose);
+
     await tester.pumpWidget(
       TestDependencies(
         child: Stack(
@@ -2633,6 +2640,8 @@ void main() {
 
   testWidgetsWithLeakTracking('hero controller subscribes to multiple navigators does throw', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2671,6 +2680,8 @@ void main() {
 
   testWidgetsWithLeakTracking('hero controller throws has correct error message', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
