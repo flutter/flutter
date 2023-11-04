@@ -1108,6 +1108,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
@@ -1159,6 +1160,8 @@ void main() {
       null,
       'localhost',
       0,
+      null,
+      null,
       null,
       true,
       true,
