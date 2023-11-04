@@ -26,10 +26,6 @@ import 'utils/leaking_classes.dart'; // ignore: implementation_imports
 /// * `group` of test file
 /// * parameter `experimentalLeakTesting` of `testWidgets`
 void main() {
-  // setUpAll(() {print('2 - setUpAll1');});
-
-  // testWidgets('test1', (_) async {print('3 - t1');});
-
   group('gr1', () {
     testWidgets('test11', (_) async {
       print('5 - test11');
@@ -41,4 +37,6 @@ void main() {
       print('5 - test11');
     });
   });
+
+  tearDownAll(() {});
 }
