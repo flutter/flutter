@@ -28,7 +28,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   bool setStateCalled = false;
 
   void showBottomSheet() {
-    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
