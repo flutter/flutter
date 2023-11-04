@@ -25,9 +25,9 @@ class GenL10nProject extends Project {
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
     writeFile(fileSystem.path.join(dir.path, 'analysis_options.yaml'), analysisOptions);
     writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
-          useDeferredLoading: useDeferredLoading,
-          useSyntheticPackage: useSyntheticPackage,
-        ));
+      useDeferredLoading: useDeferredLoading,
+      useSyntheticPackage: useSyntheticPackage,
+    ));
     return super.setUpIn(dir);
   }
 
