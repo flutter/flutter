@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
@@ -607,15 +608,20 @@ class AndroidProject extends FlutterProjectPlatform {
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
         gradleV: gradleVersion, agpV: agpVersion);
 
-    final bool compatibleJavaGradle = gradle.validateJavaAndGradle(globals.logger,
-        javaV: javaVersion, gradleV: gradleVersion);
+    final bool compatibleJavaGradle = gradle.validateJavaAndGradle(
+        globals.logger,
+        javaV: javaVersion,
+        gradleV: gradleVersion);
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
+      final String gradleDescription = agpVersion != null
+          ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
+          : '';
       description = '''
 Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
-Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
+$gradleDescription\n
 See the link below for more information:
 $gradleAgpCompatUrl
 ''';
@@ -761,8 +767,19 @@ The detected reason was:
 ''');
     if (deprecationBehavior == DeprecationBehavior.ignore) {
       BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      globals.analytics.send(
+        Event.flutterBuildInfo(
+        label: 'deprecated-v1-android-embedding-ignored',
+        buildType: 'gradle',
+      ));
+
     } else { // DeprecationBehavior.exit
-      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      globals.analytics.send(
+        Event.flutterBuildInfo(
+        label: 'deprecated-v1-android-embedding-failed',
+        buildType: 'gradle',
+      ));
+
       throwToolExit(
         'Build failed due to use of deprecated Android v1 embedding.',
         exitCode: 1,
