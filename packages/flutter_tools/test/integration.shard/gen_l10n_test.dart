@@ -171,8 +171,8 @@ void main() {
       '#l10n 115 (ES 419 - Hello World)\n'
       '#l10n 116 (ES 419 - Hello two worlds)\n'
       '#l10n END\n'
-    
-    );
+      
+      );
   }
 
   // TODO(jsimmons): need a localization test that uses deferred loading
@@ -186,7 +186,7 @@ void main() {
 
   // Analyze generated l10n file
   // (see https://github.com/flutter/flutter/issues/137313)
-  testUsingContext('generated l10n file without require_trailing_commas and no_leading_underscores_for_local_identifiers problems', () async {
+  testUsingContext('generated l10n file without problems', () async {
     if (!fileSystem.file('${tempDir.path}/pubspec.yaml').existsSync()) {
       await project.setUpIn(tempDir);
     }
@@ -199,7 +199,6 @@ void main() {
       workingDirectory: tempDir.path,
     );
     final String analyzeResults = result.stdout as String;
-
     for (final String line in analyzeResults.split('\n')) {
       final List<String> parts = line.trim().split(' ').reversed.toList();
       if (parts.length < 3) {
@@ -222,6 +221,11 @@ void main() {
           assert(
             false,
             'found use_super_parameters problem in ${parts[2]}',
+          );
+        } else if (parts[0] == 'require_trailing_commas') {
+          assert(
+            false,
+            'found require_trailing_commas problem in ${parts[2]}',
           );
         }
       }
