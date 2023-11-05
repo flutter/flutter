@@ -438,6 +438,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.ellipsisValue,
   }) : textSpan = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -474,6 +475,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.ellipsisValue
   }) : data = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -537,6 +539,11 @@ class Text extends StatelessWidget {
   /// If this is null [TextStyle.overflow] will be used, otherwise the value
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
+
+
+  /// By default the TextOverflow.ellipsis shows "..."
+  /// Use [ellipsisValue] to show custom String
+  final String? ellipsisValue;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [textScaler] instead.
@@ -635,6 +642,7 @@ class Text extends StatelessWidget {
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       selectionRegistrar: registrar,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+      ellipsisValue: ellipsisValue,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

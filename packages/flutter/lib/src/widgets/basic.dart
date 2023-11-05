@@ -5771,6 +5771,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textHeightBehavior,
     this.selectionRegistrar,
     this.selectionColor,
+    this.ellipsisValue,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
        assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
@@ -5814,6 +5815,10 @@ class RichText extends MultiChildRenderObjectWidget {
 
   /// How visual overflow should be handled.
   final TextOverflow overflow;
+
+  /// By default the TextOverflow.ellipsis shows "..."
+  /// Use [ellipsisValue] to show custom String
+  final String? ellipsisValue;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [textScaler] instead.
@@ -5880,6 +5885,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
+      ellipsisValue: ellipsisValue,
       textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,
@@ -5899,6 +5905,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textAlign = textAlign
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
+      ..ellipsis = ellipsisValue
       ..overflow = overflow
       ..textScaler = textScaler
       ..maxLines = maxLines

@@ -262,6 +262,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     required TextDirection textDirection,
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
+    String? ellipsisValue,
     @Deprecated(
       'Use textScaler instead. '
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -292,7 +293,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
          textDirection: textDirection,
          textScaler: textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
          maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         ellipsis: overflow == TextOverflow.ellipsis ?  ellipsisValue ?? _kEllipsis : null,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -500,6 +501,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
+    markNeedsLayout();
+  }
+
+  /// TextOverflow.ellipsis's value.
+  String? get ellipsis => _textPainter.ellipsis;
+  set ellipsis(String? value) {
+    _textPainter.ellipsis = value;
     markNeedsLayout();
   }
 
