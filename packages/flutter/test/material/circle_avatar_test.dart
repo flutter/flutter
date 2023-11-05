@@ -95,6 +95,78 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
+
+  testWidgetsWithLeakTracking('CircleAvatar with image foreground decoration', (WidgetTester tester) async {
+    const BoxFit imageFit = BoxFit.contain;
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          foregroundDecorationImage: DecorationImage(
+              image: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+              fit: imageFit),
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(imageFit));
+  });
+
+
+  testWidgetsWithLeakTracking('CircleAvatar with image background decoration', (WidgetTester tester) async {
+    const BoxFit imageFit = BoxFit.contain;
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          backgroundDecorationImage: DecorationImage(
+              image: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+              fit: imageFit),
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(imageFit));
+  });
+
+
+  testWidgetsWithLeakTracking('CircleAvatar backgroundDecorationImage is used as a fallback for foregroundDecorationImage', (WidgetTester tester) async {
+    const BoxFit imageFit = BoxFit.contain;
+    final ErrorImageProvider errorImage = ErrorImageProvider();
+    bool caughtForegroundImageError = false;
+    await tester.pumpWidget(
+      wrap(
+        child: RepaintBoundary(
+          child: CircleAvatar(
+          foregroundDecorationImage: DecorationImage(image: errorImage, onError:  (_,__) => caughtForegroundImageError = true, fit: imageFit,),
+          backgroundDecorationImage: DecorationImage(image: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+          fit: imageFit),
+          radius: 50.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(caughtForegroundImageError, true);
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(imageFit));
+    await expectLater(
+      find.byType(CircleAvatar),
+      matchesGoldenFile('circle_avatar.fallback.png'),
+    );
+  });
+
   testWidgetsWithLeakTracking('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
     final ErrorImageProvider errorImage = ErrorImageProvider();
     bool caughtForegroundImageError = false;

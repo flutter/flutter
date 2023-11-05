@@ -63,15 +63,29 @@ class CircleAvatar extends StatelessWidget {
     super.key,
     this.child,
     this.backgroundColor,
+    @Deprecated(
+      'Use backgroundDecorationImage instead. '
+      'backgroundDecorationImage was introduced in order to give better control over image fit and alignment. '
+      'This feature was deprecated after v3.17.0-1.0.pre.'
+    )
     this.backgroundImage,
+    @Deprecated(
+      'Use foregroundDecorationImage instead. '
+      'foregroundDecorationImage was introduced in order to give better control over image fit and alignment. '
+      'This feature was deprecated after v3.17.0-1.0.pre.'
+    )
     this.foregroundImage,
     this.onBackgroundImageError,
     this.onForegroundImageError,
+    this.foregroundDecorationImage,
+    this.backgroundDecorationImage,
     this.foregroundColor,
     this.radius,
     this.minRadius,
     this.maxRadius,
   }) : assert(radius == null || (minRadius == null && maxRadius == null)),
+       assert(backgroundDecorationImage == null || backgroundImage== null),
+       assert(foregroundDecorationImage == null || foregroundImage== null),
        assert(backgroundImage != null || onBackgroundImageError == null),
        assert(foregroundImage != null || onForegroundImageError== null);
 
@@ -107,12 +121,35 @@ class CircleAvatar extends StatelessWidget {
   /// Typically used as a fallback image for [foregroundImage].
   ///
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
+  @Deprecated(
+    'Use backgroundDecorationImage instead. '
+    'backgroundDecorationImage was introduced in order to give better control over image fit and alignment. '
+    'This feature was deprecated after v3.17.0-1.0.pre.'
+  )
   final ImageProvider? backgroundImage;
 
   /// The foreground image of the circle.
   ///
   /// Typically used as profile image. For fallback use [backgroundImage].
+  @Deprecated(
+    'Use foregroundDecorationImage instead. '
+    'foregroundDecorationImage was introduced in order to give better control over image fit and alignment. '
+    'This feature was deprecated after v3.17.0-1.0.pre.'
+  )
   final ImageProvider? foregroundImage;
+
+  /// The foreground image of the circle.
+  ///
+  /// Typically used as profile image. For fallback use [backgroundDecorationImage].
+  final DecorationImage? foregroundDecorationImage;
+
+  /// The background image of the circle. Changing the background
+  /// image will cause the avatar to animate to the new image.
+  ///
+  /// Typically used as a fallback image for [foregroundImage].
+  ///
+  /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
+  final DecorationImage? backgroundDecorationImage;
 
   /// An optional error callback for errors emitted when loading
   /// [backgroundImage].
@@ -230,8 +267,8 @@ class CircleAvatar extends StatelessWidget {
       duration: kThemeChangeDuration,
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
-        image: backgroundImage != null
-          ? DecorationImage(
+        image: backgroundImage != null || backgroundDecorationImage != null
+          ? backgroundDecorationImage ?? DecorationImage(
               image: backgroundImage!,
               onError: onBackgroundImageError,
               fit: BoxFit.cover,
@@ -239,9 +276,9 @@ class CircleAvatar extends StatelessWidget {
           : null,
         shape: BoxShape.circle,
       ),
-      foregroundDecoration: foregroundImage != null
+      foregroundDecoration: foregroundImage != null || foregroundDecorationImage != null
           ? BoxDecoration(
-              image: DecorationImage(
+              image: foregroundDecorationImage ?? DecorationImage(
                 image: foregroundImage!,
                 onError: onForegroundImageError,
                 fit: BoxFit.cover,
