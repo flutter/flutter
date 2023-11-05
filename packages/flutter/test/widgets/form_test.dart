@@ -274,7 +274,7 @@ void main() {
   );
 
   testWidgetsWithLeakTracking(
-    'validateGranularly returns correct values for fields with keys and ignores fields without keys',
+    'validateGranularly returns a set containing all, and only, invalid fields',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final UniqueKey validFieldsKey = UniqueKey();
@@ -326,7 +326,7 @@ void main() {
 
       await tester.pumpWidget(builder());
 
-      final List<FormFieldState<dynamic>> validationResult = formKey.currentState!.validateGranularly();
+      final Set<FormFieldState<dynamic>> validationResult = formKey.currentState!.validateGranularly();
 
       expect(validationResult.length, equals(2));
       expect(validationResult.where((FormFieldState<dynamic> field) => field.widget.key == invalidFieldsKey).length, equals(2));

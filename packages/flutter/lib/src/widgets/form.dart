@@ -293,8 +293,8 @@ class FormState extends State<Form> {
   /// The form will rebuild to report the results.
   ///
   /// See also:
-  ///  * [validateGranularly], which returns a [Map] describing the validation
-  /// status for each [FormField]
+  ///  * [validateGranularly], which also validates descendant [FormField]s,
+  /// but instead returns a [Set] of fields with errors
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
@@ -302,24 +302,26 @@ class FormState extends State<Form> {
   }
 
 
-  /// Validates every [FormField]s that is a descendant of this [Form], and
-  /// returns a [List] of [FormFieldState] of the invalid field(s) only, if any.
+  /// Validates every [FormField] that is a descendant of this [Form], and
+  /// returns a [Set] of [FormFieldState] of the invalid field(s) only, if any.
   ///
-  /// To get the absolute validation value of the Form, Consider using [validate]
-  ///
-  /// Common usage of this method is when you need draw the user's attention
-  /// to the invalid field(s) using their widget key(s).
+  /// This method can be useful to highlight field(s) with errors,
+  /// possibly using their widget key(s).
   ///
   /// The form will rebuild to report the results.
-  List<FormFieldState<dynamic>> validateGranularly() {
-    final List<FormFieldState<dynamic>> invalidFields = List<FormFieldState<dynamic>>.empty(growable: true);
+  ///
+  /// See also:
+  ///  * [validate], which also validates descendant [FormField]s,
+  /// and return true if there are no errors
+  Set<FormFieldState<Object?>> validateGranularly() {
+    final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
     _validate(invalidFields);
     return invalidFields;
   }
 
-  bool _validate([List<FormFieldState<dynamic>>? invalidFields]) {
+  bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
