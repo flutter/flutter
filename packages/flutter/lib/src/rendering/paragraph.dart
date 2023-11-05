@@ -293,7 +293,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
          textDirection: textDirection,
          textScaler: textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
          maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ?  ellipsisValue ?? _kEllipsis : null,
+         ellipsis: overflow == TextOverflow.ellipsis ? ellipsisValue ?? _kEllipsis : null,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -507,8 +507,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// TextOverflow.ellipsis's value.
   String? get ellipsis => _textPainter.ellipsis;
   set ellipsis(String? value) {
-    _textPainter.ellipsis = value;
-    markNeedsLayout();
+    if(value != null){
+      _textPainter.ellipsis = value;
+      markNeedsLayout();
+    }
   }
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
