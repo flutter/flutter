@@ -741,16 +741,14 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         effectiveMaxExtent);
 
     // Expands the header if needed, with animation.
-    if (targetExtent > childExtent) {
+    if (targetExtent > childExtent && _controller?.status != AnimationStatus.forward) {
       final double targetScrollOffset = maxExtent - targetExtent;
       assert(
         vsync != null,
         'vsync must not be null if the floating header changes size animatedly.',
       );
       _updateAnimation(duration, targetScrollOffset, curve);
-      if(_animation.status != AnimationStatus.forward) {
-        _controller?.forward(from: 0.0);
-      }
+      _controller?.forward(from: 0.0);
     }
 
     super.showOnScreen(
