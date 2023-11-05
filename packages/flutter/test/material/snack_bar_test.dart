@@ -3824,7 +3824,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     const String buttonAboveContent = 'Snackbar Above Fab';
     const String buttonBelowContent = 'Snackbar Below Fab';
 
-    const Duration snackbarDuration = Duration(seconds: 1);
+    const Duration snackbarDuration = Duration(milliseconds: 500);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3904,7 +3904,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     const String buttonAboveContent = 'Snackbar Above Fab';
     const String buttonBelowContent = 'Snackbar Below Fab';
 
-    const Duration snackbarDuration = Duration(seconds: 1);
+    const Duration snackbarDuration = Duration(milliseconds: 500);
 
     await tester.pumpWidget(
       MaterialApp(
