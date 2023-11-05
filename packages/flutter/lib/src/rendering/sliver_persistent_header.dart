@@ -748,7 +748,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         'vsync must not be null if the floating header changes size animatedly.',
       );
       _updateAnimation(duration, targetScrollOffset, curve);
-      _controller?.forward(from: 0.0);
+      if(_animation.status != AnimationStatus.forward) {
+        _controller?.forward(from: 0.0);
+      }
     }
 
     super.showOnScreen(
