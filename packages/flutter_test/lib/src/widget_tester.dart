@@ -277,13 +277,14 @@ Future<void> _mayBeFinalizeLeakTracking() async {
 
   LeakTracking.declareNotDisposedObjectsAsLeaks();
   await forceGC(fullGcCycles: defaultNumberOfGcCycles);
-  // final Leaks leaks = await LeakTracking.collectLeaks();
+  final Leaks leaks = await LeakTracking.collectLeaks();
   LeakTracking.stop();
 
-  // throw 'leaks found';
-
-  // expect(leaks, isLeakFree);
+  if (leaks.total == 0) return;
+  experimentalCollectedLeaksReporter(leaks);
 }
+
+LeaksCallback experimentalCollectedLeaksReporter = (Leaks leaks) => expect(leaks, isLeakFree);
 
 /// An abstract base class for describing test environment variants.
 ///

@@ -20,23 +20,23 @@ import 'package:matcher/src/expect/async_matcher.dart';
 
 import 'utils/leaking_classes.dart'; // ignore: implementation_imports
 
-/// You can set global settings in:
-/// * flutter_test_config.dart
-/// * `main` of test file
-/// * `group` of test file
-/// * parameter `experimentalLeakTesting` of `testWidgets`
 void main() {
+  late final Leaks reportedLeaks;
+  experimentalCollectedLeaksReporter = (Leaks leaks) => reportedLeaks = leaks;
+  LeakTesting.settings = LeakTesting.settings.copyWith(ignoredLeaks: const IgnoredLeaks(), ignore: false);
+
   group('gr1', () {
     testWidgets('test11', (_) async {
-      print('5 - test11');
     });
   });
 
   group('gr2', () {
     testWidgets('test11', (_) async {
-      print('5 - test11');
+      StatelessLeakingWidget();
     });
   });
 
-  tearDownAll(() {});
+  tearDownAll(() {
+    print(reportedLeaks.total);
+  });
 }
