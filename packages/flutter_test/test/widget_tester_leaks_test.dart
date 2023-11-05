@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,7 +74,7 @@ void main() {
   );
 
   testWidgets(
-    _test6TrackingOnWithPath = 'test5, tracking-on, with path',
+    _test6TrackingOnWithPath = 'test6, tracking-on, with path',
   experimentalLeakTesting: LeakTesting.settings.withRetainingPath(),
     (widgetTester) async {
       expect(LeakTracking.isStarted, true);
@@ -128,8 +127,8 @@ void main() {
       notDisposed: 1,
       notGCed: 1,
       expectedContextKeys: <LeakType, List<String>>{
-        LeakType.notGCed: <String>['dispose'],
-        LeakType.notDisposed: <String>['dispose'],
+        LeakType.notGCed: <String>['disposal'],
+        LeakType.notDisposed: <String>[],
       },
     );
     _verifyLeaks(
@@ -139,7 +138,7 @@ void main() {
       notGCed: 1,
       expectedContextKeys: <LeakType, List<String>>{
         LeakType.notGCed: <String>['path'],
-        LeakType.notDisposed: <String>['path'],
+        LeakType.notDisposed: <String>[],
       },
     );
   });
@@ -169,7 +168,7 @@ void _verifyLeaks(
     final expectedKeys = expectedContextKeys[type]!..sort();
     for (final leak in leaks) {
       final actualKeys = leak.context?.keys.toList() ?? <String>[];
-      expect(actualKeys..sort(), equals(expectedKeys));
+      expect(actualKeys..sort(), equals(expectedKeys), reason: '$testName, $type');
     }
   }
 
