@@ -3824,7 +3824,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     const String buttonAboveContent = 'Snackbar Above Fab';
     const String buttonBelowContent = 'Snackbar Below Fab';
 
-    const Duration snackbarDuration = Duration(milliseconds: 500);
+    const Duration snackbarDuration = Duration(seconds: 1);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3877,7 +3877,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     expect(fabFinder, findsOne);
 
     await tester.tap(find.text(buttonBelowContent));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 750));
 
     final Finder snackbarBelowFinder = find.text(snackbarBelowContent);
     expect(snackbarBelowFinder, findsOne);
@@ -3887,7 +3887,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     expect(snackBarBelowOffset.dy, greaterThan(fabFinderOffset.dy));
 
     await tester.tap(find.text(buttonAboveContent));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 750));
 
     final Finder snackbarAboveFinder = find.text(snackbarAboveContent);
     expect(snackbarAboveFinder, findsOne);
@@ -3904,7 +3904,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     const String buttonAboveContent = 'Snackbar Above Fab';
     const String buttonBelowContent = 'Snackbar Below Fab';
 
-    const Duration snackbarDuration = Duration(milliseconds: 500);
+    const Duration snackbarDuration = Duration(seconds: 1);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3957,7 +3957,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     expect(fabFinder, findsOne);
 
     await tester.tap(find.text(buttonBelowContent));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 750));
 
     final Finder snackbarBelowFinder = find.text(snackbarBelowContent);
     expect(snackbarBelowFinder, findsOne);
@@ -3967,7 +3967,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     expect(snackBarOffset.dy, greaterThan(fabFinderOffset.dy));
 
     await tester.tap(find.text(buttonAboveContent));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 750));
 
     final Finder snackbarAboveFinder = find.text(snackbarAboveContent);
     expect(snackbarAboveFinder, findsOne);
