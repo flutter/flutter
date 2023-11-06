@@ -329,6 +329,10 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
+  ///
+  /// If [allowedPlugins] is non-null, all plugins with method channels in the
+  /// project's pubspec.yaml will be validated to be in that set, or else a
+  /// [ToolExit] will be thrown.
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,

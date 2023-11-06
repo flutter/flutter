@@ -27,6 +27,7 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../web/compile.dart';
@@ -1669,7 +1670,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      // TODO
       final Environment environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,
@@ -1696,10 +1696,11 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         checkUpToDate: cachePubGet,
       );
 
+      // null implicitly means all plugins are allowed
       List<String>? allowedPlugins;
       if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
         // The preview device does not currently support any plugins.
-        allowedPlugins = const <String>[];
+        allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
       await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
       if (reportNullSafety) {
