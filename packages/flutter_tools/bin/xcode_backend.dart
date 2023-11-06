@@ -409,11 +409,14 @@ class Context {
       '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
       '-dAction=${environment['ACTION'] ?? ''}',
       '-dFrontendServerStarterPath=${environment['FRONTEND_SERVER_STARTER_PATH'] ?? ''}',
-      '-dFlavor=${environment['FLAVOR'] ?? ''}',
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
     ]);
+
+    if (environment['FLAVOR'] != null && environment['FLAVOR']!.isNotEmpty) {
+      flutterArgs.add('-dFlavor=${environment['FLAVOR']}');
+    }
 
     if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null && environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
       flutterArgs.add('--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');
