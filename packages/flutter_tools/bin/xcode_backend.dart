@@ -414,7 +414,7 @@ class Context {
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
     ]);
 
-    if (environment['FLAVOR'] != null && environment['FLAVOR']!.isNotEmpty) {
+    if (environment['FLAVOR'] != null) {
       flutterArgs.add('-dFlavor=${environment['FLAVOR']}');
     }
 
