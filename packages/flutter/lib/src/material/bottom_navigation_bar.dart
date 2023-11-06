@@ -1159,7 +1159,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   removeBottom: true,
                   child: DefaultTextStyle.merge(
                     overflow: TextOverflow.ellipsis,
-                    child:  Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: _createTiles(layout),
                     ),
