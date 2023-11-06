@@ -107,7 +107,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
@@ -164,7 +164,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -196,7 +196,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return DraggableScrollableSheet(
         expand: false,
         shouldCloseOnMinExtent: false,
@@ -234,7 +234,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -269,7 +269,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -423,7 +423,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -472,7 +472,7 @@ void main() {
     ));
 
     int buildCount = 0;
-    showBottomSheet<void>(
+    showBottomSheet(
       context: key.currentContext!,
       builder: (BuildContext context) {
         return Builder(
@@ -510,7 +510,7 @@ void main() {
 
     await tester.pump();
 
-    showBottomSheet<void>(
+    showBottomSheet(
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
@@ -627,7 +627,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -657,7 +657,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);

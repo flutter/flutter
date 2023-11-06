@@ -2178,7 +2178,7 @@ typedef ConditionalElementVisitor = bool Function(Element element);
 ///         return TextButton(
 ///           child: const Text('BUTTON'),
 ///           onPressed: () {
-///             Scaffold.of(context).showBottomSheet<void>(
+///             Scaffold.of(context).showBottomSheet(
 ///               (BuildContext context) {
 ///                 return Container(
 ///                   alignment: Alignment.center,
@@ -4488,7 +4488,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       for (final InheritedElement dependency in _dependencies!) {
-        dependency._dependents.remove(this);
+        dependency.removeDependent(this);
       }
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
@@ -6022,6 +6022,19 @@ class InheritedElement extends ProxyElement {
   @protected
   void notifyDependent(covariant InheritedWidget oldWidget, Element dependent) {
     dependent.didChangeDependencies();
+  }
+
+  /// Called by [Element.deactivate] to remove the provided `dependent` [Element] from this [InheritedElement].
+  ///
+  /// After the dependent is removed, [Element.didChangeDependencies] will no
+  /// longer be called on it when this [InheritedElement] notifies its dependents.
+  ///
+  /// Subclasses can override this method to release any resources retained for
+  /// a given [dependent].
+  @protected
+  @mustCallSuper
+  void removeDependent(Element dependent) {
+    _dependents.remove(dependent);
   }
 
   /// Calls [Element.didChangeDependencies] of all dependent elements, if
