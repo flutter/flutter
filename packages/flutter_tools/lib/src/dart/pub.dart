@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -111,6 +112,7 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Analytics analytics,
   }) = _DefaultPub;
 
   /// Create a [Pub] instance with a mocked [stdio].
@@ -122,6 +124,7 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Analytics analytics,
     required Stdio stdio,
   }) = _DefaultPub.test;
 
@@ -202,11 +205,13 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Analytics analytics,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
        _usage = usage,
+       _analytics = analytics,
        _processUtils = ProcessUtils(
          logger: logger,
          processManager: processManager,
@@ -222,12 +227,14 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+    required Analytics analytics,
     required Stdio stdio,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
        _usage = usage,
+       _analytics = analytics,
        _processUtils = ProcessUtils(
          logger: logger,
          processManager: processManager,
@@ -241,6 +248,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
+  final Analytics _analytics;
   final ProcessManager _processManager;
   final Stdio? _stdio;
 
@@ -437,6 +445,10 @@ class _DefaultPub implements Pub {
       result: result,
       usage: _usage,
     ).send();
+    _analytics.send(Event.flutterPubResult(
+      context: context.toAnalyticsString(),
+      result: result,
+    ));
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
@@ -503,6 +515,10 @@ class _DefaultPub implements Pub {
       result: result,
       usage: _usage,
     ).send();
+    _analytics.send(Event.flutterPubResult(
+      context: context.toAnalyticsString(),
+      result: result,
+    ));
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');

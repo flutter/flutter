@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -38,6 +39,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -93,6 +95,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
+        analytics: NoOpAnalytics(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -148,6 +151,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
+        analytics: NoOpAnalytics(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -202,6 +206,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
+        analytics: NoOpAnalytics(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -235,6 +240,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
+        analytics: NoOpAnalytics(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -274,6 +280,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -320,6 +327,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -365,6 +373,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -413,6 +422,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -458,6 +468,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -503,6 +514,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -551,6 +563,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -597,6 +610,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: mockStdio,
       processManager: processManager,
@@ -676,6 +690,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
       processManager: processManager,
@@ -734,6 +749,7 @@ exit code: 66
     final Pub pub = Pub.test(
       platform: FakePlatform(),
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -785,6 +801,7 @@ exit code: 66
     final Pub pub = Pub.test(
       platform: FakePlatform(),
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
@@ -856,6 +873,7 @@ exit code: 66
     final Pub pub = Pub.test(
       platform: platform,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -928,6 +946,7 @@ exit code: 66
     final Pub pub = Pub.test(
       platform: platform,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -988,6 +1007,7 @@ exit code: 66
       logger: BufferLogger.test(),
       processManager: processManager,
       usage: TestUsage(),
+      analytics: NoOpAnalytics(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: mockStdio,
       platform: FakePlatform(
@@ -1015,6 +1035,10 @@ exit code: 66
   testWithoutContext('analytics sent on success', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TestUsage usage = TestUsage();
+    final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
     final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -1022,6 +1046,7 @@ exit code: 66
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
       usage: usage,
+      analytics: fakeAnalytics,
       platform: FakePlatform(environment: const <String, String>{
         'PUB_CACHE': 'custom/pub-cache/path',
       }),
@@ -1041,6 +1066,14 @@ exit code: 66
         contains(
           const TestUsageEvent('pub-result', 'flutter-tests', label: 'success'),
         ));
+    expect(
+        fakeAnalytics.sentEvents,
+        unorderedEquals(<Event>[
+          Event.flutterPubResult(
+            context: 'flutter-tests',
+            result: 'success',
+          )
+        ]));
   });
 
   testWithoutContext(
@@ -1048,6 +1081,10 @@ exit code: 66
       () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TestUsage usage = TestUsage();
+    final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
     final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -1055,6 +1092,7 @@ exit code: 66
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
       usage: usage,
+      analytics: fakeAnalytics,
       platform: FakePlatform(environment: const <String, String>{
         'PUB_CACHE': 'custom/pub-cache/path',
       }),
@@ -1093,6 +1131,10 @@ exit code: 66
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
     final TestUsage usage = TestUsage();
+    final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
 
     final FakeProcessManager processManager =
         FakeProcessManager.list(<FakeCommand>[
@@ -1112,6 +1154,7 @@ exit code: 66
 
     final Pub pub = Pub.test(
       usage: usage,
+      analytics: fakeAnalytics,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
@@ -1138,6 +1181,14 @@ exit code: 66
           const TestUsageEvent('pub-result', 'flutter-tests', label: 'failure'),
         ));
     expect(processManager, hasNoRemainingExpectations);
+    expect(
+        fakeAnalytics.sentEvents,
+        unorderedEquals(<Event>[
+          Event.flutterPubResult(
+            context: 'flutter-tests',
+            result: 'failure',
+          )
+        ]));
   });
 
   testWithoutContext('Pub error handling', () async {
@@ -1198,6 +1249,7 @@ exit code: 66
     ]);
     final Pub pub = Pub.test(
         usage: TestUsage(),
+        analytics: NoOpAnalytics(),
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
