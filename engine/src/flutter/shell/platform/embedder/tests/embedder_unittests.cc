@@ -2082,7 +2082,7 @@ typedef struct {
 //
 // It performs a revesed mapping from `_serializeKeyEventType`
 // in shell/platform/embedder/fixtures/main.dart.
-FlutterKeyEventType UnserializeKeyEventKind(uint64_t kind) {
+FlutterKeyEventType UnserializeKeyEventType(uint64_t kind) {
   switch (kind) {
     case 1:
       return kFlutterKeyEventTypeUp;
@@ -2096,6 +2096,28 @@ FlutterKeyEventType UnserializeKeyEventKind(uint64_t kind) {
   }
 }
 
+// Convert `source` in integer form to its enum form.
+//
+// It performs a revesed mapping from `_serializeKeyEventDeviceType`
+// in shell/platform/embedder/fixtures/main.dart.
+FlutterKeyEventDeviceType UnserializeKeyEventDeviceType(uint64_t source) {
+  switch (source) {
+    case 1:
+      return kFlutterKeyEventDeviceTypeKeyboard;
+    case 2:
+      return kFlutterKeyEventDeviceTypeDirectionalPad;
+    case 3:
+      return kFlutterKeyEventDeviceTypeGamepad;
+    case 4:
+      return kFlutterKeyEventDeviceTypeJoystick;
+    case 5:
+      return kFlutterKeyEventDeviceTypeHdmi;
+    default:
+      FML_UNREACHABLE();
+      return kFlutterKeyEventDeviceTypeKeyboard;
+  }
+}
+
 // Checks the equality of two `FlutterKeyEvent` by each of their members except
 // for `character`. The `character` must be checked separately.
 void ExpectKeyEventEq(const FlutterKeyEvent& subject,
@@ -2105,16 +2127,18 @@ void ExpectKeyEventEq(const FlutterKeyEvent& subject,
   EXPECT_EQ(subject.physical, baseline.physical);
   EXPECT_EQ(subject.logical, baseline.logical);
   EXPECT_EQ(subject.synthesized, baseline.synthesized);
+  EXPECT_EQ(subject.device_type, baseline.device_type);
 }
 
 TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
   uint64_t echoed_char;
   FlutterKeyEvent echoed_event;
+  echoed_event.struct_size = sizeof(FlutterKeyEvent);
 
   auto native_echo_event = [&](Dart_NativeArguments args) {
     echoed_event.type =
-        UnserializeKeyEventKind(tonic::DartConverter<uint64_t>::FromDart(
+        UnserializeKeyEventType(tonic::DartConverter<uint64_t>::FromDart(
             Dart_GetNativeArgument(args, 0)));
     echoed_event.timestamp =
         static_cast<double>(tonic::DartConverter<uint64_t>::FromDart(
@@ -2127,6 +2151,9 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
         Dart_GetNativeArgument(args, 4));
     echoed_event.synthesized =
         tonic::DartConverter<bool>::FromDart(Dart_GetNativeArgument(args, 5));
+    echoed_event.device_type =
+        UnserializeKeyEventDeviceType(tonic::DartConverter<uint64_t>::FromDart(
+            Dart_GetNativeArgument(args, 6)));
 
     message_latch->Signal();
   };
@@ -2157,6 +2184,7 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
       .logical = 0x00000000061,
       .character = "A",
       .synthesized = false,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   FlutterEngineSendKeyEvent(engine.get(), &down_event_upper_a, nullptr,
                             nullptr);
@@ -2174,6 +2202,7 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
       .logical = 0x00000000062,
       .character = "∆",
       .synthesized = false,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   FlutterEngineSendKeyEvent(engine.get(), &repeat_event_wide_char, nullptr,
                             nullptr);
@@ -2191,6 +2220,7 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
       .logical = 0x00000000063,
       .character = nullptr,
       .synthesized = true,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   FlutterEngineSendKeyEvent(engine.get(), &up_event, nullptr, nullptr);
   message_latch->Wait();
@@ -2209,7 +2239,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
             static_cast<double>(tonic::DartConverter<uint64_t>::FromDart(
                 Dart_GetNativeArgument(args, 1))),
         .type =
-            UnserializeKeyEventKind(tonic::DartConverter<uint64_t>::FromDart(
+            UnserializeKeyEventType(tonic::DartConverter<uint64_t>::FromDart(
                 Dart_GetNativeArgument(args, 0))),
         .physical = tonic::DartConverter<uint64_t>::FromDart(
             Dart_GetNativeArgument(args, 2)),
@@ -2217,6 +2247,9 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
             Dart_GetNativeArgument(args, 3)),
         .synthesized = tonic::DartConverter<bool>::FromDart(
             Dart_GetNativeArgument(args, 5)),
+        .device_type = UnserializeKeyEventDeviceType(
+            tonic::DartConverter<uint64_t>::FromDart(
+                Dart_GetNativeArgument(args, 6))),
     });
 
     message_latch->Signal();
@@ -2246,6 +2279,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
       .logical = 0x00000000061,
       .character = "A",
       .synthesized = false,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
 
   // Send an event.
@@ -2329,6 +2363,7 @@ TEST_F(EmbedderTest, KeyDataResponseIsCorrectlyInvoked) {
       .physical = 0x00070005,
       .logical = 0x00000000062,
       .character = nullptr,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
 
   KeyEventUserData user_data1{
@@ -2405,6 +2440,7 @@ TEST_F(EmbedderTest, BackToBackKeyEventResponsesCorrectlyInvoked) {
       .logical = 0x00000000062,
       .character = nullptr,
       .synthesized = false,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
 
   // Dispatch two events back to back, using the same callback on different

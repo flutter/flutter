@@ -60,7 +60,7 @@ void testMain() {
       character: 'A',
       timeStamp: Duration.zero,
       synthesized: false,
-    ).toString(), 'KeyData(type: down, physical: 0x700e5, logical: 0x61 (Unicode), character: "A" (0x41))');
+    ).toString(), 'KeyData(Key Down, physical: 0x700e5, logical: 0x61 (Unicode), character: "A" (0x41))');
 
     expect(const ui.KeyData(
       type: ui.KeyEventType.up,
@@ -69,7 +69,7 @@ void testMain() {
       character: '\n',
       timeStamp: Duration.zero,
       synthesized: true,
-    ).toString(), r'KeyData(type: up, physical: 0x700e6, logical: 0x100000061 (Unprintable), character: "\n" (0x0a), synthesized)');
+    ).toString(), r'KeyData(Key Up, physical: 0x700e6, logical: 0x100000061 (Unprintable), character: "\n" (0x0a), synthesized)');
 
     expect(const ui.KeyData(
       type: ui.KeyEventType.repeat,
@@ -78,7 +78,7 @@ void testMain() {
       character: null,
       timeStamp: Duration.zero,
       synthesized: false,
-    ).toString(), 'KeyData(type: repeat, physical: 0x700e7, logical: 0x9900000071, character: <none>)');
+    ).toString(), 'KeyData(Key Repeat, physical: 0x700e7, logical: 0x9900000071, character: <none>)');
   });
 
   test('Single key press, repeat, and release', () {
@@ -93,6 +93,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 1),
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -103,6 +104,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 1, microseconds: 500),
       type: ui.KeyEventType.repeat,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -113,6 +115,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(seconds: 1, milliseconds: 500),
       type: ui.KeyEventType.repeat,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -123,6 +126,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(seconds: 2, microseconds: 500),
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: null,
@@ -143,6 +147,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 1),
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyL,
       logical: kLogicalKeyL,
       character: 'l̥',
@@ -160,6 +165,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -169,6 +175,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('KeyA', 'A', kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'A',
@@ -178,6 +185,7 @@ void testMain() {
     converter.handleEvent(keyRepeatedDownEvent('KeyA', 'A', kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.repeat,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'A',
@@ -187,6 +195,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('ShiftLeft', 'Shift', 0, kLocationLeft));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -196,6 +205,7 @@ void testMain() {
     converter.handleEvent(keyRepeatedDownEvent('KeyA', 'a'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.repeat,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -205,6 +215,7 @@ void testMain() {
     converter.handleEvent(keyRepeatedDownEvent('KeyA', 'a'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.repeat,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -214,6 +225,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('KeyA', 'a'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: null,
@@ -231,6 +243,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -239,6 +252,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ShiftRight', 'Shift', kShift, kLocationRight));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftRight,
       logical: kLogicalShiftRight,
       character: null,
@@ -247,6 +261,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -255,6 +270,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('ShiftRight', 'Shift', 0, kLocationRight));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftRight,
       logical: kLogicalShiftRight,
       character: null,
@@ -271,6 +287,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('', 'Shift', kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalShiftLeft,
       character: null,
@@ -279,6 +296,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('', 'Shift', kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalShiftLeft,
       character: null,
@@ -287,6 +305,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('', 'Control', kCtrl));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalCtrlLeft,
       character: null,
@@ -295,6 +314,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('', 'Control', kCtrl));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalCtrlLeft,
       character: null,
@@ -303,6 +323,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('', 'Alt', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalAltLeft,
       character: null,
@@ -311,6 +332,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('', 'Alt', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalAltLeft,
       character: null,
@@ -319,6 +341,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('', 'Meta', kMeta));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalMetaLeft,
       character: null,
@@ -327,6 +350,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('', 'Meta', kMeta));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalEmptyCode,
       logical: kLogicalMetaLeft,
       character: null,
@@ -343,6 +367,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('Digit1', '1'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalDigit1,
       logical: kLogicalDigit1,
       character: '1',
@@ -351,6 +376,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('Numpad1', '1', 0, kLocationNumpad));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalNumpad1,
       logical: kLogicalNumpad1,
       character: '1',
@@ -359,6 +385,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('Digit1', '1'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalDigit1,
       logical: kLogicalDigit1,
       character: null,
@@ -367,6 +394,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('Numpad1', '1', 0, kLocationNumpad));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalNumpad1,
       logical: kLogicalNumpad1,
       character: null,
@@ -393,6 +421,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('KeyE', 'Dead', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyE,
       logical: kLogicalAltE,
       character: null,
@@ -401,6 +430,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('KeyE', 'Dead', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyE,
       logical: kLogicalAltE,
       character: null,
@@ -409,6 +439,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('KeyU', 'Dead', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyU,
       logical: kLogicalAltU,
       character: null,
@@ -417,6 +448,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('KeyU', 'Dead', kAlt));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyU,
       logical: kLogicalAltU,
       character: null,
@@ -429,6 +461,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('KeyE', 'Dead', kAlt | kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyE,
       logical: kLogicalAltShiftE,
       character: null,
@@ -439,6 +472,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('KeyE', 'e', kShift));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyE,
       logical: kLogicalAltShiftE,
       character: null,
@@ -463,6 +497,7 @@ void testMain() {
     expect(keyDataList, hasLength(2));
     expectKeyData(keyDataList.first,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -470,6 +505,7 @@ void testMain() {
     );
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -481,6 +517,7 @@ void testMain() {
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -527,6 +564,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('KeyA', 'a'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -535,6 +573,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('KeyU', 'u'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyU,
       logical: kLogicalKeyU,
       character: 'u',
@@ -554,6 +593,7 @@ void testMain() {
       expect(keyDataList, hasLength(1));
       expectKeyData(keyDataList.last,
         type: ui.KeyEventType.down,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalCapsLock,
         logical: kLogicalCapsLock,
         character: null,
@@ -565,6 +605,7 @@ void testMain() {
       expect(keyDataList, hasLength(1));
       expectKeyData(keyDataList.last,
         type: ui.KeyEventType.up,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalCapsLock,
         logical: kLogicalCapsLock,
         character: null,
@@ -577,6 +618,7 @@ void testMain() {
       expect(keyDataList, hasLength(1));
       expectKeyData(keyDataList.last,
         type: ui.KeyEventType.down,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalCapsLock,
         logical: kLogicalCapsLock,
         character: null,
@@ -588,6 +630,7 @@ void testMain() {
       expect(keyDataList, hasLength(1));
       expectKeyData(keyDataList.last,
         type: ui.KeyEventType.up,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalCapsLock,
         logical: kLogicalCapsLock,
         character: null,
@@ -601,6 +644,7 @@ void testMain() {
       expect(keyDataList, hasLength(1));
       expectKeyData(keyDataList.last,
         type: ui.KeyEventType.down,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalCapsLock,
         logical: kLogicalCapsLock,
         character: null,
@@ -626,6 +670,7 @@ void testMain() {
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalCapsLock,
       logical: kLogicalCapsLock,
       character: null,
@@ -639,6 +684,7 @@ void testMain() {
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalCapsLock,
       logical: kLogicalCapsLock,
       character: null,
@@ -651,6 +697,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('CapsLock', 'CapsLock'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalCapsLock,
       logical: kLogicalCapsLock,
       character: null,
@@ -659,6 +706,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('CapsLock', 'CapsLock'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalCapsLock,
       logical: kLogicalCapsLock,
       character: null,
@@ -680,18 +728,20 @@ void testMain() {
       expectKeyData(keyDataList.last,
         timeStamp: const Duration(milliseconds: 200),
         type: ui.KeyEventType.down,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalKeyA,
         logical: kLogicalKeyA,
         character: 'a',
       );
       keyDataList.clear();
 
-      // Keyup of KeyA is omitted due to being a shortcut.
+      // Key Up of KeyA is omitted due to being a shortcut.
 
       async.elapse(const Duration(milliseconds: 2500));
       expectKeyData(keyDataList.last,
         timeStamp: const Duration(milliseconds: 2200),
         type: ui.KeyEventType.up,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalKeyA,
         logical: kLogicalKeyA,
         character: null,
@@ -703,6 +753,7 @@ void testMain() {
       expectKeyData(keyDataList.last,
         timeStamp: const Duration(milliseconds: 2700),
         type: ui.KeyEventType.up,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalMetaLeft,
         logical: kLogicalMetaLeft,
         character: null,
@@ -714,6 +765,7 @@ void testMain() {
       expectKeyData(keyDataList.last,
         timeStamp: const Duration(milliseconds: 2800),
         type: ui.KeyEventType.down,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalKeyA,
         logical: kLogicalKeyA,
         character: 'a',
@@ -724,6 +776,7 @@ void testMain() {
       expectKeyData(keyDataList.last,
         timeStamp: const Duration(milliseconds: 2900),
         type: ui.KeyEventType.up,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: kPhysicalKeyA,
         logical: kLogicalKeyA,
         character: null,
@@ -750,12 +803,13 @@ void testMain() {
     async.elapse(const Duration(milliseconds: 50));
     converter.handleEvent(keyRepeatedDownEvent('KeyA', 'a', kMeta)..timeStamp = 700);
 
-    // Keyup of KeyA is omitted due to being a shortcut.
+    // Key Up of KeyA is omitted due to being a shortcut.
 
     async.elapse(const Duration(milliseconds: 2000));
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 2700),
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: null,
@@ -767,6 +821,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 3200),
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalMetaLeft,
       logical: kLogicalMetaLeft,
       character: null,
@@ -778,6 +833,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 3300),
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -788,6 +844,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 3400),
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: null,
@@ -808,6 +865,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 200),
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -822,6 +880,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 800),
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: null,
@@ -835,6 +894,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 2800),
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -845,6 +905,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 2900),
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: null,
@@ -865,6 +926,7 @@ void testMain() {
     expectKeyData(keyDataList.last,
       timeStamp: const Duration(milliseconds: 200),
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -886,6 +948,7 @@ void testMain() {
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalScrollLock,
       logical: kLogicalScrollLock,
       character: null,
@@ -899,6 +962,7 @@ void testMain() {
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalScrollLock,
       logical: kLogicalScrollLock,
       character: null,
@@ -908,6 +972,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ScrollLock', 'ScrollLock'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalScrollLock,
       logical: kLogicalScrollLock,
       character: null,
@@ -916,6 +981,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('ScrollLock', 'ScrollLock'));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalScrollLock,
       logical: kLogicalScrollLock,
       character: null,
@@ -932,6 +998,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ShiftRight', 'Shift', kShift, kLocationRight));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftRight,
       logical: kLogicalShiftRight,
       character: null,
@@ -940,6 +1007,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -952,6 +1020,7 @@ void testMain() {
     expect(keyDataList, hasLength(3));
     expectKeyData(keyDataList[0],
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -959,6 +1028,7 @@ void testMain() {
     );
     expectKeyData(keyDataList[1],
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftRight,
       logical: kLogicalShiftRight,
       character: null,
@@ -966,6 +1036,7 @@ void testMain() {
     );
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalKeyA,
       logical: kLogicalKeyA,
       character: 'a',
@@ -988,6 +1059,7 @@ void testMain() {
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -999,6 +1071,7 @@ void testMain() {
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.first,
       type: ui.KeyEventType.down,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalMetaLeft,
       logical: kLogicalMetaLeft,
       character: null,
@@ -1010,6 +1083,7 @@ void testMain() {
     expect(keyDataList, hasLength(1));
     expectKeyData(keyDataList.first,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalMetaLeft,
       logical: kLogicalMetaLeft,
       character: null,
@@ -1019,6 +1093,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('ShiftLeft', 'Shift', 0, kLocationLeft));
     expectKeyData(keyDataList.last,
       type: ui.KeyEventType.up,
+      deviceType: ui.KeyEventDeviceType.keyboard,
       physical: kPhysicalShiftLeft,
       logical: kLogicalShiftLeft,
       character: null,
@@ -1084,6 +1159,7 @@ const int kScrollLock = 0x4;
 void expectKeyData(
   ui.KeyData target, {
   required ui.KeyEventType type,
+  required ui.KeyEventDeviceType deviceType,
   required int physical,
   required int logical,
   required String? character,

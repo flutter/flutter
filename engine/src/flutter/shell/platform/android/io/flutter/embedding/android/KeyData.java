@@ -30,7 +30,11 @@ public class KeyData {
   public static final String CHANNEL = "flutter/keydata";
 
   // The number of fields except for `character`.
-  private static final int FIELD_COUNT = 5;
+  // If this value changes, update the code in the following files:
+  //
+  //  * key_data.h (kKeyDataFieldCount)
+  //  * platform_dispatcher.dart (_kKeyDataFieldCount)
+  private static final int FIELD_COUNT = 6;
   private static final int BYTES_PER_FIELD = 8;
 
   /** The action type of the key data. */
@@ -63,6 +67,42 @@ public class KeyData {
     }
   }
 
+  /** The device type of the key data. */
+  public enum DeviceType {
+    kKeyboard(0),
+    kDirectionalPad(1),
+    kGamepad(2),
+    kJoystick(3),
+    kHdmi(4);
+
+    private long value;
+
+    private DeviceType(long value) {
+      this.value = value;
+    }
+
+    public long getValue() {
+      return value;
+    }
+
+    static DeviceType fromLong(long value) {
+      switch ((int) value) {
+        case 0:
+          return kKeyboard;
+        case 1:
+          return kDirectionalPad;
+        case 2:
+          return kGamepad;
+        case 3:
+          return kJoystick;
+        case 4:
+          return kHdmi;
+        default:
+          throw new AssertionError("Unexpected DeviceType value");
+      }
+    }
+  }
+
   /** Creates an empty {@link KeyData}. */
   public KeyData() {}
 
@@ -78,6 +118,7 @@ public class KeyData {
     this.physicalKey = buffer.getLong();
     this.logicalKey = buffer.getLong();
     this.synthesized = buffer.getLong() != 0;
+    this.deviceType = DeviceType.fromLong(buffer.getLong());
 
     if (buffer.remaining() != charSize) {
       throw new AssertionError(
@@ -102,6 +143,7 @@ public class KeyData {
   long physicalKey;
   long logicalKey;
   boolean synthesized;
+  DeviceType deviceType;
 
   /** The character of this key data encoded in UTF-8. */
   @Nullable String character;
@@ -131,6 +173,7 @@ public class KeyData {
     packet.putLong(physicalKey);
     packet.putLong(logicalKey);
     packet.putLong(synthesized ? 1L : 0L);
+    packet.putLong(deviceType.getValue());
     if (charBytes != null) {
       packet.put(charBytes);
     }

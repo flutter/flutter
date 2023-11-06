@@ -592,6 +592,7 @@ void testMain() {
         expect(keyDataList.length, 1);
         expectKeyData(keyDataList.last,
           type: ui.KeyEventType.down,
+          deviceType: ui.KeyEventDeviceType.keyboard,
           physical: physicalLeft,
           logical: logicalLeft,
           character: null,
@@ -714,6 +715,7 @@ void testMain() {
         expect(keyDataList.length, 1);
         expectKeyData(keyDataList.last,
           type: ui.KeyEventType.up,
+          deviceType: ui.KeyEventDeviceType.keyboard,
           physical: physicalLeft,
           logical: logicalLeft,
           character: null,
@@ -743,6 +745,7 @@ void testMain() {
         expect(keyDataList.length, 1);
         expectKeyData(keyDataList.last,
           type: ui.KeyEventType.up,
+          deviceType: ui.KeyEventDeviceType.keyboard,
           physical: physicalRight,
           logical: logicalRight,
           character: null,
@@ -832,6 +835,7 @@ void testMain() {
       expect(keyDataList.length, 1);
       expectKeyData(keyDataList.last,
         type: ui.KeyEventType.up,
+        deviceType: ui.KeyEventDeviceType.keyboard,
         physical: physicalAltRight,
         logical: logicalAltGraph,
         character: null,
