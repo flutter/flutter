@@ -44,6 +44,15 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/gn',
   r'flutter/third_party/imgui',
   r'flutter/third_party/ninja', // build system
+  r'flutter/third_party/pkg/archive', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/pkg/equatable',
+  r'flutter/third_party/pkg/flutter_packages',
+  r'flutter/third_party/pkg/gcloud',
+  r'flutter/third_party/pkg/googleapis',
+  r'flutter/third_party/pkg/platform',
+  r'flutter/third_party/pkg/process',
+  r'flutter/third_party/pkg/process_runner',
+  r'flutter/third_party/pkg/vector_math',
   r'flutter/third_party/rapidjson/contrib', // contains nothing that ends up in the binary executable
   r'flutter/third_party/rapidjson/doc', // documentation
   r'flutter/third_party/shaderc/third_party/LICENSE.glslang', // unclear what the purpose of this file is
@@ -152,17 +161,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/perfetto/src/traced', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/src/tracing', // contains nothing that ends up in the binary executable
   r'third_party/protobuf', // build-time dependency only
-  r'third_party/pkg/archive', // contains nothing that ends up in the binary executable
-  r'third_party/pkg/equatable',
-  r'third_party/pkg/file',
-  r'third_party/pkg/flutter_packages',
-  r'third_party/pkg/gcloud',
-  r'third_party/pkg/googleapis',
-  r'third_party/pkg/platform',
-  r'third_party/pkg/process',
-  r'third_party/pkg/process_runner',
-  r'third_party/pkg/quiver',
-  r'third_party/pkg/vector_math',
   r'third_party/pyyaml', // build-time dependency only
   r'third_party/root_certificates/certdata.pem',
   r'third_party/root_certificates/certdata.txt',
