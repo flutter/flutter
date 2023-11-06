@@ -199,6 +199,8 @@ class NativeAssets extends Target {
         case TargetPlatform.android_x64:
         case TargetPlatform.android_x86:
         case TargetPlatform.android:
+          final String? isBuildingAarEnvironment =
+              environment.defines[kIsBuildingAar];
           final String? androidArchsEnvironment =
               environment.defines[kAndroidArchs];
           final List<AndroidArch> androidArchs = _androidArchs(
@@ -214,7 +216,8 @@ class NativeAssets extends Target {
             fileSystem: fileSystem,
             buildRunner: buildRunner,
             androidArchs: androidArchs,
-            targetAndroidNdkApi: targetAndroidNdkApi
+            targetAndroidNdkApi: targetAndroidNdkApi,
+            isBuildingAar: isBuildingAarEnvironment == 'true',
           );
         case TargetPlatform.fuchsia_arm64:
         case TargetPlatform.fuchsia_x64:

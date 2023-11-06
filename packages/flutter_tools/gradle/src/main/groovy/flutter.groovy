@@ -1032,6 +1032,9 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            // We build an AAR when this property is defined.
+            boolean isBuildingAarValue = project.hasProperty('is-plugin')
+
             String variantBuildMode = buildModeFor(variant.buildType)
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             // Be careful when configuring task below, Groovy has bizarre
@@ -1069,6 +1072,7 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory codeSizeDirectoryValue
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
+                isBuildingAar isBuildingAarValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -1098,13 +1102,11 @@ class FlutterPlugin implements Plugin<Project> {
             addApiDependencies(project, variant.name, project.files {
                 packFlutterAppAotTask
             })
-            // We build an AAR when this property is defined.
-            boolean isBuildingAar = project.hasProperty('is-plugin')
             // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
             // We know that `:flutter` is used as a subproject when these tasks exists and we aren't building an AAR.
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
-            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
+            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAarValue
             Task copyFlutterAssetsTask = project.tasks.create(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
                 type: Copy,
@@ -1331,6 +1333,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean deferredComponents
     @Optional @Input
     Boolean validateDeferredComponents
+    @Optional @Input
+    Boolean isBuildingAar
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -1422,6 +1426,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args "-dAndroidArchs=${targetPlatformValues.join(' ')}"
             args "-dMinSdkVersion=${minSdkVersion}"
+            if (isBuildingAar != null) {
+                args "-dIsBuildingAar=${isBuildingAar}"
+            }
             args ruleNames
         }
     }
