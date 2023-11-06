@@ -17,7 +17,7 @@ import 'cache.dart';
 import 'globals.dart' as globals;
 
 enum Artifact {
-  /// The tool which compiles a dart kernel file into native code.
+  /// The tool which compiles a dart kernel file into native  code.
   genSnapshot,
   /// The flutter tester binary.
   flutterTester,
