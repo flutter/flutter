@@ -95,7 +95,9 @@ class Adaptation<T> {
   ///
   /// {@tool dartpad}
   /// This sample shows how to create and use subclasses of [Adaptation] that
-  /// define adaptive [SwitchThemeData]s.
+  /// define adaptive [SwitchThemeData]s. The [adapt] method in this example is
+  /// overridden to only customize cupertino-style switches, but it can also be
+  /// used to customize any other platforms.
   ///
   /// ** See code in examples/api/lib/material/switch/switch.4.dart **
   /// {@end-tool}
