@@ -1387,7 +1387,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args "assemble"
             args "--no-version-check"
-            args "--flavor", "${flavor}"
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
             if (performanceMeasurementFile != null) {
