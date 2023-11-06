@@ -93,7 +93,7 @@ struct DartConverter<
     T*,
     typename std::enable_if<
         std::is_convertible<T*, const DartWrappable*>::value>::type> {
-  using FfiType = T*;
+  using FfiType = DartWrappable*;
   static constexpr const char* kFfiRepresentation = "Pointer";
   static constexpr const char* kDartRepresentation = "Pointer";
   static constexpr bool kAllowedInLeafCall = true;
@@ -145,7 +145,7 @@ struct DartConverter<
         DartConverterWrappable::FromArguments(args, index, exception));
   }
 
-  static T* FromFfi(FfiType val) { return val; }
+  static T* FromFfi(FfiType val) { return static_cast<T*>(val); }
   static FfiType ToFfi(T* val) { return val; }
   static const char* GetFfiRepresentation() { return kFfiRepresentation; }
   static const char* GetDartRepresentation() { return kDartRepresentation; }
