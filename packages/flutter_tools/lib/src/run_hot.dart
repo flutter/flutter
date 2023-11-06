@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
@@ -94,17 +95,20 @@ class HotRunner extends ResidentRunner {
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     NativeAssetsBuildRunner? buildRunner,
-  }) : _stopwatchFactory = stopwatchFactory,
-       _reloadSourcesHelper = reloadSourcesHelper,
-       _reassembleHelper = reassembleHelper,
+    required Analytics analytics,
+  })  : _stopwatchFactory = stopwatchFactory,
+        _reloadSourcesHelper = reloadSourcesHelper,
+        _reassembleHelper = reassembleHelper,
         _buildRunner = buildRunner,
-       super(
+        _analytics = analytics,
+        super(
           hotMode: true,
         );
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
   final ReassembleHelper _reassembleHelper;
+  final Analytics _analytics;
 
   final bool benchmarkMode;
   final File? applicationBinary;
@@ -429,15 +433,29 @@ class HotRunner extends ResidentRunner {
       }));
     }
 
-    unawaited(appStartedCompleter?.future.then((_) => HotEvent('reload-ready',
-      targetPlatform: _targetPlatform!,
-      sdkName: _sdkName!,
-      emulator: _emulator!,
-      fullRestart: false,
-      overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
-      compileTimeInMs: totalCompileTime.inMilliseconds,
-      transferTimeInMs: totalLaunchAppTime.inMilliseconds,
-    ).send()));
+    unawaited(appStartedCompleter?.future.then((_) {
+      HotEvent(
+        'reload-ready',
+        targetPlatform: _targetPlatform!,
+        sdkName: _sdkName!,
+        emulator: _emulator!,
+        fullRestart: false,
+        overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
+        compileTimeInMs: totalCompileTime.inMilliseconds,
+        transferTimeInMs: totalLaunchAppTime.inMilliseconds,
+      ).send();
+
+      _analytics.send(Event.hotRunnerInfo(
+        label: 'reload-ready',
+        targetPlatform: _targetPlatform!,
+        sdkName: _sdkName!,
+        emulator: _emulator!,
+        fullRestart: false,
+        overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
+        compileTimeInMs: totalCompileTime.inMilliseconds,
+        transferTimeInMs: totalLaunchAppTime.inMilliseconds,
+      ));
+    }));
 
     try {
       final List<bool> results = await Future.wait(startupTasks);
@@ -828,6 +846,21 @@ class HotRunner extends ResidentRunner {
           findInvalidatedTimeInMs: result.updateFSReport?.findInvalidatedDuration.inMilliseconds,
           scannedSourcesCount: result.updateFSReport?.scannedSourcesCount,
         ).send();
+        _analytics.send(Event.hotRunnerInfo(
+          label: 'restart',
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: emulator,
+          fullRestart: true,
+          reason: reason,
+          overallTimeInMs: restartTimer.elapsed.inMilliseconds,
+          syncedBytes: result.updateFSReport?.syncedBytes,
+          invalidatedSourcesCount: result.updateFSReport?.invalidatedSourcesCount,
+          transferTimeInMs: result.updateFSReport?.transferDuration.inMilliseconds,
+          compileTimeInMs: result.updateFSReport?.compileDuration.inMilliseconds,
+          findInvalidatedTimeInMs: result.updateFSReport?.findInvalidatedDuration.inMilliseconds,
+          scannedSourcesCount: result.updateFSReport?.scannedSourcesCount,
+        ));
       }
     } on vm_service.SentinelException catch (err, st) {
       restartEvent = 'exception';
@@ -846,6 +879,14 @@ class HotRunner extends ResidentRunner {
           fullRestart: true,
           reason: reason,
         ).send();
+        _analytics.send(Event.hotRunnerInfo(
+          label: restartEvent,
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: emulator,
+          fullRestart: true,
+          reason: reason,
+        ));
       }
       status?.cancel();
     }
@@ -895,6 +936,14 @@ class HotRunner extends ResidentRunner {
           fullRestart: false,
           reason: reason,
         ).send();
+        _analytics.send(Event.hotRunnerInfo(
+          label: 'reload-barred',
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: emulator,
+          fullRestart: false,
+          reason: reason,
+        ));
       } else {
         HotEvent('exception',
           targetPlatform: targetPlatform!,
@@ -903,6 +952,14 @@ class HotRunner extends ResidentRunner {
           fullRestart: false,
           reason: reason,
         ).send();
+        _analytics.send(Event.hotRunnerInfo(
+          label: 'exception',
+          targetPlatform: targetPlatform,
+          sdkName: sdkName,
+          emulator: emulator,
+          fullRestart: false,
+          reason: reason,
+        ));
       }
       return OperationResult(errorCode, errorMessage, fatal: true);
     } finally {
@@ -965,6 +1022,7 @@ class HotRunner extends ResidentRunner {
         emulator,
         reason,
         globals.flutterUsage,
+        globals.analytics,
       );
       if (result.code != 0) {
         return result;
@@ -1024,6 +1082,27 @@ class HotRunner extends ResidentRunner {
       reassembleTimeInMs: reassembleTimer.elapsed.inMilliseconds,
       reloadVMTimeInMs: reloadVMTimer.elapsed.inMilliseconds,
     ).send();
+    _analytics.send(Event.hotRunnerInfo(
+      label: 'reload',
+      targetPlatform: targetPlatform,
+      sdkName: sdkName,
+      emulator: emulator,
+      fullRestart: false,
+      reason: reason,
+      overallTimeInMs: reloadInMs,
+      finalLibraryCount: firstReloadDetails['finalLibraryCount'] as int? ?? 0,
+      syncedLibraryCount: firstReloadDetails['receivedLibraryCount'] as int? ?? 0,
+      syncedClassesCount: firstReloadDetails['receivedClassesCount'] as int? ?? 0,
+      syncedProceduresCount: firstReloadDetails['receivedProceduresCount'] as int? ?? 0,
+      syncedBytes: updatedDevFS.syncedBytes,
+      invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
+      transferTimeInMs: updatedDevFS.transferDuration.inMilliseconds,
+      compileTimeInMs: updatedDevFS.compileDuration.inMilliseconds,
+      findInvalidatedTimeInMs: updatedDevFS.findInvalidatedDuration.inMilliseconds,
+      scannedSourcesCount: updatedDevFS.scannedSourcesCount,
+      reassembleTimeInMs: reassembleTimer.elapsed.inMilliseconds,
+      reloadVMTimeInMs: reloadVMTimer.elapsed.inMilliseconds,
+    ));
 
     if (shouldReportReloadTime) {
       globals.printTrace('Hot reload performed in ${getElapsedAsMilliseconds(reloadDuration)}.');
@@ -1186,6 +1265,7 @@ typedef ReloadSourcesHelper = Future<OperationResult> Function(
   bool? emulator,
   String? reason,
   Usage usage,
+  Analytics analytics,
 );
 
 @visibleForTesting
@@ -1199,6 +1279,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   bool? emulator,
   String? reason,
   Usage usage,
+  Analytics analytics,
 ) async {
   final Stopwatch vmReloadTimer = Stopwatch()..start();
   const String entryPath = 'main.dart.incremental.dill';
@@ -1239,6 +1320,14 @@ Future<OperationResult> defaultReloadSourcesHelper(
       reason: reason,
       usage: usage,
     ).send();
+    analytics.send(Event.hotRunnerInfo(
+      label: 'reload-reject',
+      targetPlatform: targetPlatform,
+      sdkName: sdkName,
+      emulator: emulator,
+      fullRestart: false,
+      reason: reason,
+    ));
     // Reset devFS lastCompileTime to ensure the file will still be marked
     // as dirty on subsequent reloads.
     _resetDevFSCompileTime(flutterDevices);
