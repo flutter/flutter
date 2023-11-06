@@ -143,6 +143,7 @@ TaskFunction createBackdropFilterPerfTest({
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
     saveTraceFile: true,
     enableImpeller: enableImpeller,
+    disablePartialRepaint: true,
   ).run;
 }
 
@@ -767,6 +768,51 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
   return tally;
 }
 
+/// Opens the file at testDirectory + 'ios/Runner/Info.plist'
+/// and adds the following entry to the application.
+/// <FTLDisablePartialRepaint/>
+/// <true/>
+void _disablePartialRepaint(String testDirectory) {
+  final String manifestPath = path.join(
+      testDirectory, 'ios', 'Runner', 'Info.plist');
+  final File file = File(manifestPath);
+
+  if (!file.existsSync()) {
+    throw Exception('Info.plist not found at $manifestPath');
+  }
+
+  final String xmlStr = file.readAsStringSync();
+  final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('FLTDisablePartialRepaint', 'true'),
+  ];
+
+  final XmlElement applicationNode =
+      xmlDoc.findAllElements('dict').first;
+
+  // Check if the meta-data node already exists.
+  for (final (String key, String value) in keyPairs) {
+    applicationNode.children.add(XmlElement(XmlName('key'), <XmlAttribute>[], <XmlNode>[
+      XmlText(key)
+    ], false));
+    applicationNode.children.add(XmlElement(XmlName(value)));
+  }
+
+  file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
+}
+
+Future<void> _resetPlist(String testDirectory) async {
+  final String manifestPath = path.join(
+      testDirectory, 'ios', 'Runner', 'Info.plist');
+  final File file = File(manifestPath);
+
+  if (!file.existsSync()) {
+    throw Exception('Info.plist not found at $manifestPath');
+  }
+
+  await exec('git', <String>['checkout', file.path]);
+}
+
 /// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
 /// and adds the following entry to the application.
 /// <meta-data
@@ -1124,6 +1170,7 @@ class PerfTest {
     this.timeoutSeconds,
     this.enableImpeller,
     this.forceOpenGLES,
+    this.disablePartialRepaint = false,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -1142,6 +1189,7 @@ class PerfTest {
     this.timeoutSeconds,
     this.enableImpeller,
     this.forceOpenGLES,
+    this.disablePartialRepaint = false,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -1180,6 +1228,9 @@ class PerfTest {
 
   /// Whether the perf test force Impeller's OpenGLES backend.
   final bool? forceOpenGLES;
+
+  /// Whether partial repaint functionality should be disabled (iOS only).
+  final bool disablePartialRepaint;
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
@@ -1236,6 +1287,11 @@ class PerfTest {
         _addOpenGLESToManifest(testDirectory);
         manifestReset = () => _resetManifest(testDirectory);
       }
+      Future<void> Function()? plistReset;
+      if (disablePartialRepaint) {
+        _disablePartialRepaint(testDirectory);
+        plistReset = () => _resetPlist(testDirectory);
+      }
 
       try {
         final List<String> options = <String>[
@@ -1280,6 +1336,9 @@ class PerfTest {
       } finally {
         if (manifestReset != null) {
           await manifestReset();
+        }
+        if (plistReset != null) {
+          await plistReset();
         }
       }
 
