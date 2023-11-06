@@ -140,25 +140,30 @@ void main() {
       },
       shouldHaveErrors: true,
     );
+    final bool isWindows = Platform.isWindows;
     final String lines = <String>[
       '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
       '║ The following examples are not linked from any source file API doc comments:',
-      '║   examples/api/lib/animation/curves/curve2_d.0.dart',
-      '║   examples/api/lib/layer/foo_example.0.dart',
-      '║   examples/api/lib/layer/bar_example.0.dart',
+      if (!isWindows) '║   examples/api/lib/animation/curves/curve2_d.0.dart',
+      if (!isWindows) '║   examples/api/lib/layer/foo_example.0.dart',
+      if (!isWindows) '║   examples/api/lib/layer/bar_example.0.dart',
+      if (isWindows) r'║   examples\api\lib\animation\curves\curve2_d.0.dart',
+      if (isWindows) r'║   examples\api\lib\layer\foo_example.0.dart',
+      if (isWindows) r'║   examples\api\lib\layer\bar_example.0.dart',
       '║ Either link them to a source file API doc comment, or remove them.',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
       '║ The following malformed links were found in API doc comments:',
-      '║   /flutter sdk/packages/flutter/lib/src/animation/curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
-      '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
-      '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/animation/curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
+      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
+      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\animation\curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
+      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\foo.dart:6: ///*See Code *',
+      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
       '║ Correct the formatting of these links so that they match the exact pattern:',
       r"║   r'\*\* See code in (?<path>.+) \*\*'",
       '╚═══════════════════════════════════════════════════════════════════════════════',
-    ].map((String line) {
-      return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-    }).join('\n');
+    ].join('\n');
     expect(result, equals('$lines\n'));
     expect(success, equals(false));
   });
