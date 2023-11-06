@@ -264,12 +264,24 @@ impeller_component("entity") {
   deps = [ "//flutter/fml" ]
 }
 
+impeller_component("entity_test_helpers") {
+  testonly = true
+
+  sources = [
+    "contents/test/contents_test_helpers.cc",
+    "contents/test/contents_test_helpers.h",
+  ]
+
+  deps = [ ":entity" ]
+}
+
 impeller_component("entity_unittests") {
   testonly = true
 
   sources = [
     "contents/checkerboard_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
+    "contents/vertices_contents_unittests.cc",
     "entity_playground.cc",
     "entity_playground.h",
     "entity_unittests.cc",
@@ -278,6 +290,7 @@ impeller_component("entity_unittests") {
 
   deps = [
     ":entity",
+    ":entity_test_helpers",
     "../geometry:geometry_asserts",
     "../playground:playground_test",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
