@@ -1459,7 +1459,7 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list, but got blah (String).\n');
+    expect(logger.errorText, 'Expected "assets" to be a list, but got blah (String).\n');
   });
 
   testWithoutContext('FlutterManifest parses asset-only deferred components', () async {
