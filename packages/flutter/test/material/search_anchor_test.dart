@@ -11,45 +11,46 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-// Returns the RenderEditable at the given index, or the first if not given.
-RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
-  final RenderObject root = tester.renderObject(find.byType(EditableText).at(index));
-  expect(root, isNotNull);
-
-  late RenderEditable renderEditable;
-  void recursiveFinder(RenderObject child) {
-    if (child is RenderEditable) {
-      renderEditable = child;
-      return;
-    }
-    child.visitChildren(recursiveFinder);
-  }
-  root.visitChildren(recursiveFinder);
-  expect(renderEditable, isNotNull);
-  return renderEditable;
-}
-
-List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-  return points.map<TextSelectionPoint>((TextSelectionPoint point) {
-    return TextSelectionPoint(
-      box.localToGlobal(point.point),
-      point.direction,
-    );
-  }).toList();
-}
-
-Offset _textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
-  final RenderEditable renderEditable = findRenderEditable(tester, index: index);
-  final List<TextSelectionPoint> endpoints = globalize(
-    renderEditable.getEndpointsForSelection(
-      TextSelection.collapsed(offset: offset),
-    ),
-    renderEditable,
-  );
-  expect(endpoints.length, 1);
-  return endpoints[0].point + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
-}
 void main() {
+  // Returns the RenderEditable at the given index, or the first if not given.
+  RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
+    final RenderObject root = tester.renderObject(find.byType(EditableText).at(index));
+    expect(root, isNotNull);
+
+    late RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderEditable, isNotNull);
+    return renderEditable;
+  }
+
+  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+      return TextSelectionPoint(
+        box.localToGlobal(point.point),
+        point.direction,
+      );
+    }).toList();
+  }
+
+  Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
+    final RenderEditable renderEditable = findRenderEditable(tester, index: index);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(
+        TextSelection.collapsed(offset: offset),
+      ),
+      renderEditable,
+    );
+    expect(endpoints.length, 1);
+    return endpoints[0].point + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
+  }
+
   testWidgetsWithLeakTracking('SearchBar defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -2390,7 +2391,7 @@ void main() {
       expect(find.text(defaultText), findsOneWidget);
 
       final TestGesture gesture = await tester.startGesture(
-        _textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0),
+        textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0),
         kind: PointerDeviceKind.mouse,
         buttons: kSecondaryMouseButton,
       );
@@ -2424,13 +2425,13 @@ void main() {
       expect(find.text(defaultText), findsOneWidget);
 
       final TestGesture gesture = await _pointGestureToSearchBar(tester);
-      await gesture.down(_textOffsetToPosition(tester, 2) + const Offset(0.0, -9.0));
+      await gesture.down(textOffsetToPosition(tester, 2) + const Offset(0.0, -9.0));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
       expect(controller.value.selection, const TextSelection.collapsed(offset: 2));
 
-      await gesture.down(_textOffsetToPosition(tester, 9, index: 1) + const Offset(0.0, -9.0));
+      await gesture.down(textOffsetToPosition(tester, 9, index: 1) + const Offset(0.0, -9.0));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
@@ -2461,13 +2462,13 @@ void main() {
       expect(find.text(defaultText), findsOneWidget);
 
       final TestGesture gesture = await _pointGestureToSearchBar(tester);
-      final Offset targetPosition = _textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0);
+      final Offset targetPosition = textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0);
       await gesture.down(targetPosition);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
 
-      final Offset targetPositionAfterViewOpened = _textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
+      final Offset targetPositionAfterViewOpened = textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
       await gesture.down(targetPositionAfterViewOpened);
       await tester.pumpAndSettle();
       await gesture.up();
@@ -2504,13 +2505,13 @@ void main() {
       expect(find.text(defaultText), findsOneWidget);
 
       final TestGesture gesture = await _pointGestureToSearchBar(tester);
-      final Offset targetPosition = _textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0);
+      final Offset targetPosition = textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0);
       await gesture.down(targetPosition);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
 
-      final Offset targetPositionAfterViewOpened = _textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
+      final Offset targetPositionAfterViewOpened = textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
       await gesture.down(targetPositionAfterViewOpened);
       await tester.pump();
       await gesture.up();
