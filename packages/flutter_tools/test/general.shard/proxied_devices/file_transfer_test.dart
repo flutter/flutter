@@ -187,4 +187,26 @@ void main() {
       expect(file.readAsStringSync(), content2);
     });
   });
+
+  group('BlockHashes', () {
+    test('json conversion works normally', () {
+      const String json = '''
+{
+  "blockSize":4,
+  "totalSize":18,
+  "adler32":"7ACcAu0AoALuAKQC7wCoApQA+gA=",
+  "md5": [
+    "zB0S8R/fGt05GcI5v8AjIQ==",
+    "uZCZ4i/LUGFYAD+K1ZD0Wg==",
+    "6kbZGS8T1NJl/naWODQcNw==",
+    "kKh/aA2XAhR/r0HdZa3Bxg==",
+    "34eF7Bs/OhfoJ5+sAw0zyw=="
+  ],
+  "fileMd5":"VT/gkSEdctzUEUJCxclxuQ=="
+}
+''';
+      final Map<String, Object?> decodedJson = jsonDecode(json) as Map<String, Object?>;
+      expect(BlockHashes.fromJson(decodedJson).toJson(), decodedJson);
+    });
+  });
 }
