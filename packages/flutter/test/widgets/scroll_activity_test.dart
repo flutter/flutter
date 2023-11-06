@@ -212,6 +212,16 @@ void main() {
     expect(lastTapped, equals(3));
     await tester.pumpAndSettle();
   });
+
+  test('$ScrollActivity dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => _ScrollActivity(_ScrollActivityDelegate()).dispose(),
+        _ScrollActivity,
+      ),
+      areCreateAndDispose,
+    );
+  });
 }
 
 class PageView62209 extends StatefulWidget {
@@ -358,4 +368,34 @@ class _Carousel62209State extends State<Carousel62209> {
       ),
     );
   }
+}
+
+class _ScrollActivity extends ScrollActivity {
+  _ScrollActivity(super.delegate);
+
+  @override
+  bool get isScrolling => false;
+
+  @override
+  bool get shouldIgnorePointer => true;
+
+  @override
+  double get velocity => 0.0;
+}
+
+class _ScrollActivityDelegate extends ScrollActivityDelegate {
+  @override
+  void applyUserOffset(double delta) {}
+
+  @override
+  AxisDirection get axisDirection => AxisDirection.down;
+
+  @override
+  void goBallistic(double velocity) {}
+
+  @override
+  void goIdle() {}
+
+  @override
+  double setPixels(double pixels) => 0.0;
 }
