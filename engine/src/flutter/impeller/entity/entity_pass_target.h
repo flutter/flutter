@@ -14,7 +14,8 @@ class InlinePassContext;
 class EntityPassTarget {
  public:
   explicit EntityPassTarget(const RenderTarget& render_target,
-                            bool supports_read_from_resolve);
+                            bool supports_read_from_resolve,
+                            bool supports_implicit_msaa);
 
   /// @brief  Flips the backdrop and returns a readable texture that can be
   ///         bound/sampled to restore the previous pass.
@@ -34,6 +35,7 @@ class EntityPassTarget {
   std::shared_ptr<Texture> secondary_color_texture_;
 
   bool supports_read_from_resolve_;
+  bool supports_implicit_msaa_;
 
   friend InlinePassContext;
 

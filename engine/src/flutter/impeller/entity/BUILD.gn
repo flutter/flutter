@@ -282,10 +282,12 @@ impeller_component("entity_unittests") {
     "contents/checkerboard_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
     "contents/vertices_contents_unittests.cc",
+    "entity_pass_target_unittests.cc",
     "entity_playground.cc",
     "entity_playground.h",
     "entity_unittests.cc",
     "geometry/geometry_unittests.cc",
+    "render_target_cache_unittests.cc",
   ]
 
   deps = [
@@ -294,16 +296,5 @@ impeller_component("entity_unittests") {
     "../geometry:geometry_asserts",
     "../playground:playground_test",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
-  ]
-}
-
-impeller_component("render_target_cache_unittests") {
-  testonly = true
-
-  sources = [ "render_target_cache_unittests.cc" ]
-
-  deps = [
-    ":entity",
-    "//flutter/testing:testing_lib",
   ]
 }

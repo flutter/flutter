@@ -98,7 +98,6 @@ impeller_component("impeller_unittests") {
       "aiks:aiks_unittests",
       "display_list:display_list_unittests",
       "entity:entity_unittests",
-      "entity:render_target_cache_unittests",
       "fixtures",
       "geometry:geometry_unittests",
       "image:image_unittests",
