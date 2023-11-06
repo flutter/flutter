@@ -2424,13 +2424,13 @@ void main() {
       expect(find.text(defaultText), findsOneWidget);
 
       final TestGesture gesture = await _pointGestureToSearchBar(tester);
-      await gesture.down(_textOffsetToPosition(tester, 4) + const Offset(0.0, -9.0));
+      await gesture.down(_textOffsetToPosition(tester, 2) + const Offset(0.0, -9.0));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
-      expect(controller.value.selection, const TextSelection.collapsed(offset: 4));
+      expect(controller.value.selection, const TextSelection.collapsed(offset: 2));
 
-      await gesture.down(_textOffsetToPosition(tester, 9) + Offset(0.0, -9.0));
+      await gesture.down(_textOffsetToPosition(tester, 9, index: 1) + const Offset(0.0, -9.0));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
@@ -2467,12 +2467,13 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
 
-      await gesture.down(targetPosition);
+      final Offset targetPositionAfterViewOpened = _textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
+      await gesture.down(targetPositionAfterViewOpened);
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pump();
   
-      await gesture.down(targetPosition);
+      await gesture.down(targetPositionAfterViewOpened);
       await tester.pump();
       await gesture.up();
       await tester.pump();
@@ -2509,17 +2510,18 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle(kDoubleTapTimeout);
 
-      await gesture.down(targetPosition);
+      final Offset targetPositionAfterViewOpened = _textOffsetToPosition(tester, 4, index: 1) + const Offset(0.0, -9.0);
+      await gesture.down(targetPositionAfterViewOpened);
       await tester.pump();
       await gesture.up();
       await tester.pump();
 
-      await gesture.down(targetPosition);
+      await gesture.down(targetPositionAfterViewOpened);
       await tester.pump();
       await gesture.up();
       await tester.pump();
 
-      await gesture.down(targetPosition);
+      await gesture.down(targetPositionAfterViewOpened);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
