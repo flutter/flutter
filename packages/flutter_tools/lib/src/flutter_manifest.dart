@@ -603,33 +603,34 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
 }
 
 bool _validateAssets(Object? yaml, List<String> errors) {
-  final List<String> assetsErrors = <String>[];
-  _computeAssetsSafe(yaml, assetsErrors);
-  errors.addAll(assetsErrors);
-  return assetsErrors.isEmpty;
+  final (_, List<String> errors) = _computeAssetsSafe(yaml);
+  return errors.isEmpty;
 }
 
-List<AssetsEntry> _computeAssetsSafe(Object? yaml, List<String> errors) {
+(List<AssetsEntry>, List<String> errors) _computeAssetsSafe(Object? yaml) {
   if (yaml == null) {
-    return const <AssetsEntry>[];
+    return (const <AssetsEntry>[], const <String>[]);
   }
   if (yaml is! YamlList) {
-    errors.add('Expected "assets" to be a list, but got $yaml (${yaml.runtimeType})');
-    return const <AssetsEntry>[];
+    final String error = 'Expected "assets" to be a list, but got $yaml (${yaml.runtimeType})';
+    return (const <AssetsEntry>[], <String>[error]);
   }
   final List<AssetsEntry> results = <AssetsEntry>[];
+  final List<String> errors = <String>[];
   for (final Object? rawAssetEntry in yaml) {
-    final AssetsEntry? parsed = AssetsEntry.parseFromYamlSafe(rawAssetEntry, errors: errors);
+    final (AssetsEntry? parsed, String? error) = AssetsEntry.parseFromYamlSafe(rawAssetEntry);
     if (parsed != null) {
       results.add(parsed);
     }
+    if (error != null) {
+      errors.add(error);
+    }
   }
-  return results;
+  return (results, errors);
 }
 
 List<AssetsEntry> _computeAssets(Object? assetsSection) {
-  final List<String> errors = <String>[];
-  final List<AssetsEntry> result = _computeAssetsSafe(assetsSection, errors);
+  final (List<AssetsEntry> result, List<String> errors) = _computeAssetsSafe(assetsSection);
   if (errors.isNotEmpty) {
     throw Exception('Uncaught error(s) in assets section: '
       '${errors.join('\n')}');
@@ -706,66 +707,57 @@ class AssetsEntry {
   static const String _flavorKey = 'flavor';
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
-    final List<String> errors = <String>[];
-    final AssetsEntry? value = parseFromYamlSafe(
-      yaml,
-      errors: errors,
-    );
-    if (errors.isNotEmpty) {
+    final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
+    if (error != null) {
       throw Exception('Unexpected error when parsing assets entry');
     }
     return value!;
   }
 
-  static AssetsEntry? parseFromYamlSafe(Object? yaml, {
-    required List<String> errors,
-  }) {
-    Uri? tryParseUri(String uri) {
+  static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
+    (Uri?, String?)  tryParseUri(String uri) {
       try {
-        return Uri(pathSegments: uri.split('/'));
+        return (Uri(pathSegments: uri.split('/')), null);
       } on FormatException {
-        errors.add('Asset manifest contains invalid uri: $uri.');
-        return null;
+        return (null, 'Asset manifest contains invalid uri: $uri.');
       }
     }
 
     if (yaml == null || yaml == '') {
-      errors.add('Asset manifest contains a null or empty uri.');
-      return null;
+      return (null, 'Asset manifest contains a null or empty uri.');
     }
 
     if (yaml is String) {
-      final Uri? uri = tryParseUri(yaml);
-      return uri == null ? null : AssetsEntry(uri: uri);
+      final (Uri? uri, String? error) = tryParseUri(yaml);
+      return uri == null ? (null, error) : (AssetsEntry(uri: uri), null);
     } else if (yaml is Map) {
       if (yaml.keys.isEmpty) {
-        return null;
+        return (null, null);
       }
       final Object? path = yaml[_pathKey];
       final Object? flavor = yaml[_flavorKey];
 
       if (path == null || path is! String) {
-        errors.add('Asset manifest entry is malformed. '
+        return (null, 'Asset manifest entry is malformed. '
           'Expected asset entry to be either a string or a map '
           'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
-        return null;
       }
 
       if (flavor != null && flavor is! String) {
-        errors.add('Asset manifest entry is malformed. '
+        return( null, 'Asset manifest entry is malformed. '
           'Expected "$_flavorKey" entry to be a string. Got ${flavor.runtimeType} instead.');
-        return null;
       }
 
-      return AssetsEntry(
+      final AssetsEntry entry = AssetsEntry(
         uri: Uri(pathSegments: path.split('/')),
         flavor: flavor as String?,
       );
+
+      return (entry, null);
     }
 
-    errors.add('Assets entry had unexpected shape. '
+    return (null, 'Assets entry had unexpected shape. '
       'Expected a string or an object. Got ${yaml.runtimeType} instead.');
-    return null;
   }
 
   @override
