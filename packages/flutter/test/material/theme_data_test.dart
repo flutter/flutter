@@ -1284,6 +1284,102 @@ void main() {
     // Ensure they are all there.
     expect(propertyNames, expectedPropertyNames);
   });
+
+  testWidgetsWithLeakTracking(
+    'ThemeData.brightness not matching ColorScheme.brightness throws a helpful error message', (WidgetTester tester) async {
+      AssertionError? error;
+
+      // Test `ColorScheme.light()` and `ThemeData.brightness == Brightness.dark`.
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              colorScheme: const ColorScheme.light(),
+              brightness: Brightness.dark,
+            ),
+            home: const Placeholder(),
+          ),
+        );
+      } on AssertionError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error?.message, contains(
+          'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+        ));
+      }
+
+      // Test `ColorScheme.dark()` and `ThemeData.brightness == Brightness.light`.
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              colorScheme: const ColorScheme.dark(),
+              brightness: Brightness.light,
+            ),
+            home: const Placeholder(),
+          ),
+        );
+      } on AssertionError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error?.message, contains(
+          'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+        ));
+      }
+
+      // Test `ColorScheme.fromSeed()` and `ThemeData.brightness == Brightness.dark`.
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xffff0000)),
+              brightness: Brightness.dark,
+            ),
+            home: const Placeholder(),
+          ),
+        );
+      } on AssertionError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error?.message, contains(
+          'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+        ));
+      }
+
+      // Test `ColorScheme.fromSeed()` using `Brightness.dark` and `ThemeData.brightness == Brightness.light`.
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xffff0000),
+                brightness: Brightness.dark,
+              ),
+              brightness: Brightness.light,
+            ),
+            home: const Placeholder(),
+          ),
+        );
+      } on AssertionError catch (e) {
+        error = e;
+      } finally {
+        expect(error, isNotNull);
+        expect(error?.message, contains(
+          'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+        ));
+      }
+  });
 }
 
 @immutable
