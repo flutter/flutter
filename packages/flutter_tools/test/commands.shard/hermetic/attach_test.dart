@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
@@ -1199,6 +1200,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    Analytics? analytics,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {
