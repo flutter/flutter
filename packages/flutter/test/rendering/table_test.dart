@@ -278,13 +278,13 @@ void main() {
   });
 
 
-test('TableRows with differents constraints, but vertically fill', () {
+  test('TableRows with differents constraints, but vertically with intrisicHeight', () {
     const BoxConstraints firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
     const BoxConstraints secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
 
     final RenderTable table = RenderTable(
       textDirection: TextDirection.rtl,
-      defaultVerticalAlignment: TableCellVerticalAlignment.fill,
+      defaultVerticalAlignment: TableCellVerticalAlignment.intrisicHeight,
       children: <List<RenderBox>>[
         <RenderBox>[
           RenderConstrainedBox(additionalConstraints: firstConstraints),
@@ -302,8 +302,8 @@ test('TableRows with differents constraints, but vertically fill', () {
     // Layout the table with a fixed size.
     layout(table, constraints: BoxConstraints.tight(size));
 
-    // Check if the table has a size and the children are vertically filled.
+    // Make sure the table has a size and that the children are filled vertically to the highest cell.
     expect(table.size, equals(size));
-    expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.fill);
+    expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrisicHeight);
   });
 }

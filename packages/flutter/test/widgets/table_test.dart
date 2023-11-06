@@ -1079,27 +1079,26 @@ void main() {
     );
   });
 
-    testWidgets('Set defaultVerticalAlignment to fill vertically and check their heights', (WidgetTester tester) async {
-
+    testWidgets('Set defaultVerticalAlignment to intrisic height and check their heights', (WidgetTester tester) async {
     final Widget table = Directionality(
       textDirection: TextDirection.ltr,
       child: Table(
-          defaultVerticalAlignment: TableCellVerticalAlignment.fill,
-          children: const <TableRow>[
-            TableRow(
-              children: <Widget>[
-                 SizedBox(height: 100, child: Text('A')),
-                 SizedBox(height: 200, child: Text('B')),
-              ],
-            ),
-            TableRow(
-              children: <Widget>[
-                 SizedBox(height: 200, child: Text('C')),
-                 SizedBox(height: 300, child: Text('D')),
-              ],
-            ),
-          ],
-        ),
+        defaultVerticalAlignment: TableCellVerticalAlignment.intrisicHeight,
+        children: const <TableRow>[
+          TableRow(
+            children: <Widget>[
+              SizedBox(height: 100, child: Text('A')),
+              SizedBox(height: 200, child: Text('B')),
+            ],
+          ),
+          TableRow(
+            children: <Widget>[
+              SizedBox(height: 200, child: Text('C')),
+              SizedBox(height: 300, child: Text('D')),
+            ],
+          ),
+        ],
+      ),
     );
 
     // load and check if render object was created.
