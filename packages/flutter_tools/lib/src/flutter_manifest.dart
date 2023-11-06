@@ -642,7 +642,7 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
       if (valueMap.containsKey('assets')) {
         final Object? assets = valueMap['assets'];
         if (assets is! YamlList) {
-          errors.add('Expected "assets" key in the $i element of "${kvp.key}" to be a list, but got $assets (${assets.runtimeType}).');
+          errors.add('Expected "assets" to be a list, but got $assets (${assets.runtimeType}).');
         } else {
           _validateListType<String>(assets, errors, '"assets" key in the $i element of "${kvp.key}"', 'file paths');
         }
