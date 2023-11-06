@@ -5875,16 +5875,48 @@ void main() {
     );
 
     testWidgetsWithLeakTracking(
-      'not sent with selection',
+      'set to selection start on forward selection',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(
           text: 'a' * 100,
-          selection: const TextSelection(baseOffset: 0, extentOffset: 10),
+          selection: const TextSelection(baseOffset: 10, extentOffset: 30),
         );
         await tester.pumpWidget(builder());
         await tester.showKeyboard(find.byType(EditableText));
 
-        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
+      },
+    );
+
+    testWidgetsWithLeakTracking(
+      'set to selection start on reversed selection',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(
+          text: 'a' * 100,
+          selection: const TextSelection(baseOffset: 30, extentOffset: 10),
+        );
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
       },
     );
   });
