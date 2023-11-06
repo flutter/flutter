@@ -72,7 +72,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  bool get onTapAlwaysCalled => _state.widget.onTapAlwaysCalled;
+  bool get onUserTapAlwaysCalled => _state.widget.onTapAlwaysCalled;
 
   @override
   void onUserTap() {

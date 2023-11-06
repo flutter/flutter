@@ -2271,7 +2271,7 @@ class TextSelectionGestureDetectorBuilder {
   /// Whether the user provided [onUserTap] callback should be dispatched on every
   /// tap or only non-consecutive taps.
   @protected
-  bool get onTapAlwaysCalled => false;
+  bool get onUserTapAlwaysCalled => false;
 
   /// Handler for [TextSelectionGestureDetector.onUserTap].
   ///
@@ -2279,7 +2279,7 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onUserTap], which triggers this
   ///    callback.
-  ///  * [TextSelectionGestureDetector.onTapAlwaysCalled], which controls
+  ///  * [TextSelectionGestureDetector.onUserTapAlwaysCalled], which controls
   ///     whether this callback is called only on the first tap in a series
   ///     of taps.
   @protected
@@ -3018,7 +3018,7 @@ class TextSelectionGestureDetectorBuilder {
       onDragSelectionStart: onDragSelectionStart,
       onDragSelectionUpdate: onDragSelectionUpdate,
       onDragSelectionEnd: onDragSelectionEnd,
-      onTapAlwaysCalled: onTapAlwaysCalled,
+      onUserTapAlwaysCalled: onUserTapAlwaysCalled,
       behavior: behavior,
       child: child,
     );
@@ -3061,7 +3061,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onDragSelectionStart,
     this.onDragSelectionUpdate,
     this.onDragSelectionEnd,
-    this.onTapAlwaysCalled = false,
+    this.onUserTapAlwaysCalled = false,
     this.behavior,
     required this.child,
   });
@@ -3104,10 +3104,10 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// another gesture from the touch is recognized.
   final GestureCancelCallback? onSingleTapCancel;
 
-  /// Called for the first tap in a series of taps when [onTapAlwaysCalled] is
+  /// Called for the first tap in a series of taps when [onUserTapAlwaysCalled] is
   /// disabled.
   ///
-  /// When [onTapAlwaysCalled] is enabled, this will be called for every tap,
+  /// When [onUserTapAlwaysCalled] is enabled, this will be called for every tap,
   /// including consecutive taps.
   final GestureTapCallback? onUserTap;
 
@@ -3145,7 +3145,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// a series of taps.
   ///
   /// When enabled [onUserTap] will be called for consecutive taps.
-  final bool onTapAlwaysCalled;
+  final bool onUserTapAlwaysCalled;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -3226,7 +3226,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 1) {
       widget.onSingleTapUp?.call(details);
       widget.onUserTap?.call();
-    } else if (widget.onTapAlwaysCalled) {
+    } else if (widget.onUserTapAlwaysCalled) {
       widget.onUserTap?.call();
     }
   }
