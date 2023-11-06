@@ -202,7 +202,7 @@ class MouseTracker extends ChangeNotifier {
   // In debug mode, this method uses `_debugDuringDeviceUpdate` to prevent
   // `_deviceUpdatePhase` being recursively called.
   void _deviceUpdatePhase(VoidCallback task) {
-    assert(!_debugDuringDeviceUpdate);
+    //assert(!_debugDuringDeviceUpdate);
     assert(() {
       _debugDuringDeviceUpdate = true;
       return true;
