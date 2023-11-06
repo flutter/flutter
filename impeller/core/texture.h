@@ -6,7 +6,6 @@
 
 #include <string_view>
 
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
