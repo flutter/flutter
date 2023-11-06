@@ -1143,7 +1143,7 @@ class RenderTable extends RenderBox {
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               rowHeight = math.max(rowHeight, child.size.height);
             case TableCellVerticalAlignment.fill:
-            break;
+              break;
           }
         }
       }
