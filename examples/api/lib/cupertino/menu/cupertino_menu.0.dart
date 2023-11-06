@@ -39,11 +39,6 @@ class _CupertinoMenuExampleState extends State<CupertinoMenuExample> {
           width: 100,
           height: 100,
           child:  CupertinoMenuButton<String>(
-            onSelect: (String value) {
-              setState(() {
-                _checkedValue = value;
-              });
-            },
             itemBuilder: (BuildContext context) {
               return <CupertinoMenuEntry<String>>[
                 CupertinoStickyMenuHeader(
@@ -109,9 +104,15 @@ class _CupertinoMenuExampleState extends State<CupertinoMenuExample> {
                       child: const Text('Feline'),
                     ),
                     CupertinoCheckedMenuItem<String>(
-                      value: '🐱',
-                      checked: _checkedValue == '🐱',
-                      child: const Text('🐱, and pop the menu'),
+                      value: 'Kitten',
+                      checked: _checkedValue == 'Kitten',
+                      onTap: (){
+                        setState(() {
+                          _checkedValue = 'Kitten';
+                        });
+                      },
+                      shouldPopMenuOnPressed: false,
+                      child: const Text('Kitten'),
                     ),
                   ],
                   subtitle:  Text(_checkedValue),
