@@ -3797,7 +3797,7 @@ targets:
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true # TEST CHANGE ONLY
     runIf:
       - dev/**
     timeout: 60
