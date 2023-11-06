@@ -3107,7 +3107,7 @@ void main() {
     final double firstItemLeft = itemFullWith / 2 - firstItemContentWidth / 2;
     final double secondLabelWidth = tester.getSize(find.text('Title1')).width;
     final double secondItemContentWidth = iconWidth + separatorWidth + secondLabelWidth;
-    final double secondItemLeft = itemFullWith + itemFullWith / 2 - secondItemContentWidth / 2;    //const double firstLabelCenter = firstItemLeft +  itemWidth / 2; // 250
+    final double secondItemLeft = itemFullWith + itemFullWith / 2 - secondItemContentWidth / 2;
 
     expect(tester.getRect(
       find.text('Title0')),
