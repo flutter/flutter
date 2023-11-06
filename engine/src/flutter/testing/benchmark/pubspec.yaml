@@ -26,7 +26,7 @@ dev_dependencies:
 
 dependency_overrides:
   _discoveryapis_commons:
-    path: ../../../third_party/pkg/googleapis/discoveryapis_commons
+    path: ../../third_party/pkg/googleapis/discoveryapis_commons
   args:
     path: ../../../third_party/dart/third_party/pkg/args
   async_helper:
@@ -40,15 +40,15 @@ dependency_overrides:
   crypto :
     path: ../../../third_party/dart/third_party/pkg/crypto
   equatable:
-    path: ../../../third_party/pkg/equatable
+    path: ../../third_party/pkg/equatable
   expect:
     path: ../../../third_party/dart/pkg/expect
   gcloud:
-    path: ../../../third_party/pkg/gcloud
+    path: ../../third_party/pkg/gcloud
   googleapis:
-    path: ../../../third_party/pkg/googleapis/generated/googleapis
+    path: ../../third_party/pkg/googleapis/generated/googleapis
   googleapis_auth:
-    path: ../../../third_party/pkg/googleapis/googleapis_auth
+    path: ../../third_party/pkg/googleapis/googleapis_auth
   http:
     path: ../../../third_party/dart/third_party/pkg/http/pkgs/http
   http_parser:
@@ -60,7 +60,7 @@ dependency_overrides:
   meta:
     path: ../../../third_party/dart/pkg/meta
   metrics_center:
-    path: ../../../third_party/pkg/flutter_packages/packages/metrics_center
+    path: ../../third_party/pkg/flutter_packages/packages/metrics_center
   path:
     path: ../../../third_party/dart/third_party/pkg/path
   smith:

@@ -30,6 +30,6 @@ dependency_overrides:
   path:
     path: ../../../third_party/dart/third_party/pkg/path
   platform:
-    path: ../../../third_party/pkg/platform
+    path: ../../third_party/pkg/platform
   process:
-    path: ../../../third_party/pkg/process
+    path: ../../third_party/pkg/process
