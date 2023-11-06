@@ -3039,16 +3039,20 @@ class _RouteEntry extends RouteTransitionRecord {
     {
       // Move focus back to the last focused node.
       poppedRoute._disposeCompleter.future.then((dynamic result) {
-        // In the Android platform, we have to wait for the system refocus to complete before
-        // sending the refocus message. Otherwise, the refocus message will be ignored.
-        if (defaultTargetPlatform == TargetPlatform.android) {
-          final int? reFocusNode = lastFocusNode;
-          unawaited(Future<void>(() async {
-            await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
-            SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: reFocusNode));
-          }));
-        } else {
-          SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: lastFocusNode));
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+            // In the Android platform, we have to wait for the system refocus to complete before
+            // sending the refocus message. Otherwise, the refocus message will be ignored.
+            // TODO(hangyujin): update this logic if Android provide a better way to do so.
+            final int? reFocusNode = lastFocusNode;
+            unawaited(Future<void>(() async {
+              await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
+              SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: reFocusNode));
+            }));
+          case TargetPlatform.iOS:
+            SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: lastFocusNode));
+          case _:
+            break ;
         }
       });
     }
