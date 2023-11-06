@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+import 'colors.dart';
+import 'constants.dart';
+import 'icons.dart';
+import 'menu.dart';
 
 /// A mixin that specifies that a widget can be used in a [CupertinoMenu] or a
 /// [CupertinoNestedMenu].
