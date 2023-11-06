@@ -1281,19 +1281,42 @@ class PerfTest {
       final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
-      Future<void> Function()? manifestReset;
-      if (forceOpenGLES ?? false) {
-        assert(enableImpeller!);
-        _addOpenGLESToManifest(testDirectory);
-        manifestReset = () => _resetManifest(testDirectory);
+      bool changedPlist = false;
+      bool changedManifest = false;
+
+      Future<void> resetManifest() async {
+        if (!changedManifest) {
+          return;
+        }
+        try {
+          await _resetManifest(testDirectory);
+        } catch (err) {
+          print('Caught exception while trying to reset AndroidManifest: $err');
+        }
       }
-      Future<void> Function()? plistReset;
-      if (disablePartialRepaint) {
-        _disablePartialRepaint(testDirectory);
-        plistReset = () => _resetPlist(testDirectory);
+
+      Future<void> resetPlist() async {
+        if (!changedPlist) {
+          return;
+        }
+        try {
+          await _resetPlist(testDirectory);
+        } catch (err) {
+           print('Caught exception while trying to reset Info.plist: $err');
+        }
       }
 
       try {
+        if (forceOpenGLES ?? false) {
+          assert(enableImpeller!);
+          changedManifest = true;
+          _addOpenGLESToManifest(testDirectory);
+        }
+        if (disablePartialRepaint) {
+          changedPlist = true;
+          _disablePartialRepaint(testDirectory);
+        }
+
         final List<String> options = <String>[
           if (localEngine != null) ...<String>['--local-engine', localEngine],
           if (localEngineHost != null) ...<String>[
@@ -1334,12 +1357,8 @@ class PerfTest {
           await flutter('drive', options: options);
         }
       } finally {
-        if (manifestReset != null) {
-          await manifestReset();
-        }
-        if (plistReset != null) {
-          await plistReset();
-        }
+        await resetManifest();
+        await resetPlist();
       }
 
       final Map<String, dynamic> data = json.decode(
