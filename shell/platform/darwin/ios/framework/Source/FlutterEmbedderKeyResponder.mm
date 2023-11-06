@@ -611,6 +611,7 @@ void HandleResponse(bool handled, void* user_data);
       .logical = kCapsLockLogicalKey,
       .character = nil,
       .synthesized = true,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   _sendEvent(flutterEvent, nullptr, nullptr);
 
@@ -645,6 +646,7 @@ void HandleResponse(bool handled, void* user_data);
       .logical = 0,
       .character = nil,
       .synthesized = false,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   _sendEvent(event, nil, nil);
 }
@@ -665,6 +667,7 @@ void HandleResponse(bool handled, void* user_data);
       .logical = logicalKey,
       .character = nil,
       .synthesized = true,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   [self updateKey:physicalKey asPressed:isDownEvent ? logicalKey : 0];
   _sendEvent(flutterEvent, nullptr, nullptr);
@@ -711,6 +714,7 @@ void HandleResponse(bool handled, void* user_data);
       .character =
           specialKey != nil ? nil : getEventCharacters(press.key.characters, press.key.keyCode),
       .synthesized = false,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   [self sendPrimaryFlutterEvent:flutterEvent callback:callback];
 }
@@ -744,6 +748,7 @@ void HandleResponse(bool handled, void* user_data);
       .logical = [pressedLogicalKey unsignedLongLongValue],
       .character = nil,
       .synthesized = false,
+      .device_type = kFlutterKeyEventDeviceTypeKeyboard,
   };
   [self sendPrimaryFlutterEvent:flutterEvent callback:callback];
 }
