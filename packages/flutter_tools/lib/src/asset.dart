@@ -1008,9 +1008,7 @@ class ManifestAssetBundle implements AssetBundle {
     final List<_Asset> variants = <_Asset>[];
     final File assetFile = asset.lookupAssetFile(_fileSystem);
 
-    final List<String> relevantFiles =  cache.variantsFor(assetFile.path);
-
-    for (final String path in relevantFiles) {
+    for (final String path in cache.variantsFor(assetFile.path)) {
       final String relativePath = _fileSystem.path.relative(path, from: asset.baseDir);
       final Uri relativeUri = _fileSystem.path.toUri(relativePath);
       final Uri? entryUri = asset.symbolicPrefixUri == null
