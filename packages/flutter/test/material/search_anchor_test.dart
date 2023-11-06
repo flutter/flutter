@@ -2473,7 +2473,7 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pump();
-  
+
       await gesture.down(targetPositionAfterViewOpened);
       await tester.pump();
       await gesture.up();
