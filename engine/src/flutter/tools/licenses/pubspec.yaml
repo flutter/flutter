@@ -30,7 +30,7 @@ dev_dependencies:
 
 dependency_overrides:
   archive:
-    path: ../../../third_party/pkg/archive
+    path: ../../third_party/pkg/archive
   args:
     path: ../../../third_party/dart/third_party/pkg/args
   async_helper:

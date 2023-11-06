@@ -48,10 +48,10 @@ dependency_overrides:
   path:
     path: ../../third_party/dart/third_party/pkg/path
   platform:
-    path: ../../third_party/pkg/platform
+    path: ../third_party/pkg/platform
   process:
-    path: ../../third_party/pkg/process
+    path: ../third_party/pkg/process
   process_runner:
-    path: ../../third_party/pkg/process_runner
+    path: ../third_party/pkg/process_runner
   smith:
     path: ../../third_party/dart/pkg/smith

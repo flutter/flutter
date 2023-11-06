@@ -47,9 +47,9 @@ dependency_overrides:
   path:
     path: ../../../third_party/dart/third_party/pkg/path
   platform:
-    path: ../../../third_party/pkg/platform
+    path: ../../third_party/pkg/platform
   process:
-    path: ../../../third_party/pkg/process
+    path: ../../third_party/pkg/process
   protobuf:
     path: ../../../third_party/dart/third_party/pkg/protobuf/protobuf
   smith:
@@ -61,7 +61,7 @@ dependency_overrides:
   typed_data:
     path: ../../../third_party/dart/third_party/pkg/typed_data
   vector_math:
-    path: ../../../third_party/pkg/vector_math
+    path: ../../third_party/pkg/vector_math
   vm_service:
     path: ../../../third_party/dart/pkg/vm_service
   vm_service_protos:

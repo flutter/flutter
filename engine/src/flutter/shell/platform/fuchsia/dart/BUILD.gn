@@ -364,7 +364,7 @@ dart_library("quiver") {
 }
 
 dart_library("vector_math") {
-  package_root = "//third_party/pkg/vector_math"
+  package_root = "//flutter/third_party/pkg/vector_math"
   package_name = "vector_math"
 
   pubspec = "$package_root/pubspec.yaml"

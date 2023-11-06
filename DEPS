@@ -682,31 +682,31 @@ deps = {
    Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + '61833f2c057a2b1993d871e8c51156aed1dd4354',
 
    # Dart packages
-  'src/third_party/pkg/archive':
+  'src/flutter/third_party/pkg/archive':
   Var('github_git') + '/brendan-duncan/archive.git' + '@' + '9de7a0544457c6aba755ccb65abb41b0dc1db70d', # 3.1.2
 
-  'src/third_party/pkg/equatable':
+  'src/flutter/third_party/pkg/equatable':
   Var('github_git') + '/felangel/equatable.git' + '@' + '2117551ff3054f8edb1a58f63ffe1832a8d25623', # 2.0.5
 
-  'src/third_party/pkg/flutter_packages':
+  'src/flutter/third_party/pkg/flutter_packages':
   Var('flutter_git') + '/mirrors/packages' + '@' + '25454e63851fe7933f04d025606e68c1eac4fe0f', # various
 
-  'src/third_party/pkg/gcloud':
+  'src/flutter/third_party/pkg/gcloud':
   Var('github_git') + '/dart-lang/gcloud.git' + '@' + 'a5276b85c4714378e84b1fb478b8feeeb686ac26', # 0.8.6-dev
 
-  'src/third_party/pkg/googleapis':
+  'src/flutter/third_party/pkg/googleapis':
   Var('github_git') + '/google/googleapis.dart.git' + '@' + '526011f56d98eab183cc6075ee1392e8303e43e2', # various
 
-  'src/third_party/pkg/platform':
+  'src/flutter/third_party/pkg/platform':
   Var('dart_git') + '/platform.dart' + '@' + '1ffad63428bbd1b3ecaa15926bacfb724023648c', # 3.1.0
 
-  'src/third_party/pkg/process':
+  'src/flutter/third_party/pkg/process':
   Var('dart_git') + '/process.dart' + '@' + '0c9aeac86dcc4e3a6cf760b76fed507107e244d5', # 4.2.1
 
-  'src/third_party/pkg/process_runner':
+  'src/flutter/third_party/pkg/process_runner':
   Var('github_git') + '/google/process_runner.git' + '@' + 'f24c69efdcaf109168f23d381fa281453d2bc9b1', # 4.1.2
 
-  'src/third_party/pkg/vector_math':
+  'src/flutter/third_party/pkg/vector_math':
   Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
 
   'src/flutter/third_party/imgui':
