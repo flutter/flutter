@@ -350,7 +350,7 @@ enum TableCellVerticalAlignment {
   fill,
 
   /// Cells with this alignment are sized to be the same height as the tallest cell in the row.
-  intrisicHeight,
+  intrisicHeight
 }
 
 /// A table where the columns and rows are sized to fit the contents of the cells.
