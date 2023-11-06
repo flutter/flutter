@@ -1286,6 +1286,47 @@ void main() {
       expect(mockLogger.traceText, 'Oooh, I do I do I do\n');
       expect(mockLogger.errorText, 'Helpless!\n$stackTrace\n');
     });
+
+    testWithoutContext('Animations are disabled when, uh, disabled.', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: _kNoAnsiPlatform,
+          isCliAnimationEnabled: false,
+        ),
+        stdio: fakeStdio,
+        stopwatchFactory: FakeStopwatchFactory(stopwatch: FakeStopwatch()),
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
+      );
+      logger.startProgress('po').stop();
+      expect(outputStderr(), <String>['']);
+      expect(outputStdout(), <String>[
+          'po                                                                   0ms',
+          '',
+      ]);
+      logger.startProgress('ta')
+        ..pause()
+        ..resume()
+        ..stop();
+      expect(outputStderr(), <String>['']);
+      expect(outputStdout(), <String>[
+          'po                                                                   0ms',
+          'ta                                                              ',
+          'ta                                                                   0ms',
+          '',
+      ]);
+      logger.startSpinner()
+        ..pause()
+        ..resume()
+        ..stop();
+      expect(outputStderr(), <String>['']);
+      expect(outputStdout(), <String>[
+          'po                                                                   0ms',
+          'ta                                                              ',
+          'ta                                                                   0ms',
+          '',
+      ]);
+    });
   });
 }
 

@@ -239,6 +239,9 @@ class FakeTerminal implements Terminal {
   bool get supportsColor => terminal.supportsColor;
 
   @override
+  bool get isCliAnimationEnabled => terminal.isCliAnimationEnabled;
+
+  @override
   bool get supportsEmoji => terminal.supportsEmoji;
 
   @override

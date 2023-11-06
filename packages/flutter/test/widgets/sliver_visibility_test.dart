@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
@@ -30,7 +30,7 @@ class _TestStateState extends State<TestState> {
 }
 
 void main() {
-  testWidgets('SliverVisibility', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverVisibility', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<String> log = <String>[];
     const Key anchor = Key('drag');

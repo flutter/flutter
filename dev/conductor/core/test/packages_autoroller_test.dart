@@ -11,8 +11,8 @@ import 'package:conductor_core/packages_autoroller.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import './common.dart';
 import '../bin/packages_autoroller.dart' show run;
+import 'common.dart';
 
 void main() {
   const String flutterRoot = '/flutter';
@@ -170,7 +170,7 @@ void main() {
     await expectLater(
       () async {
         final Future<void> rollFuture = autoroller.roll();
-        await controller.stream.drain();
+        await controller.stream.drain<Object?>();
         await rollFuture;
       },
       throwsA(isA<Exception>().having(
@@ -214,7 +214,7 @@ void main() {
       ], stdout: '[{"number": 123}]'),
     ]);
     final Future<void> rollFuture = autoroller.roll();
-    await controller.stream.drain();
+    await controller.stream.drain<Object?>();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
     expect(stdio.stdout, contains('flutter-pub-roller-bot already has open tool PRs'));
@@ -312,7 +312,7 @@ void main() {
       ]),
     ]);
     final Future<void> rollFuture = autoroller.roll();
-    await controller.stream.drain();
+    await controller.stream.drain<Object?>();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
   });

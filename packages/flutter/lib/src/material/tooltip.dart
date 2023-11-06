@@ -106,6 +106,17 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
 /// the tooltip is shown when the widget is long pressed.
 ///
+/// This tooltip will default to showing above the [Text] instead of below
+/// because its ambient [TooltipThemeData.preferBelow] is false.
+/// (See the use of [MaterialApp.theme].)
+/// Setting that piece of theme data is recommended to avoid having a finger or
+/// cursor hide the tooltip. For other ways to set that piece of theme data see:
+///
+/// * [Theme.data], [ThemeData.tooltipTheme]
+/// * [TooltipTheme.data]
+///
+/// or it can be set directly on each tooltip with [Tooltip.preferBelow].
+///
 /// ** See code in examples/api/lib/material/tooltip/tooltip.0.dart **
 /// {@end-tool}
 ///
@@ -113,9 +124,9 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
 /// `height` has been used to set a specific height of the Tooltip.
-/// `preferBelow` is false, the tooltip will prefer showing above [Tooltip]'s child widget.
-/// However, it may show the tooltip below if there's not enough space
-/// above the widget.
+/// `preferBelow` is true; the tooltip will prefer showing below [Tooltip]'s child widget.
+/// However, it may show the tooltip above if there's not enough space
+/// below the widget.
 /// `textStyle` has been used to set the font size of the 'message'.
 /// `showDuration` accepts a Duration to continue showing the message after the long
 /// press has been released or the mouse pointer exits the child widget.
@@ -231,9 +242,15 @@ class Tooltip extends StatefulWidget {
 
   /// Whether the tooltip defaults to being displayed below the widget.
   ///
-  /// Defaults to true. If there is insufficient space to display the tooltip in
+  /// If there is insufficient space to display the tooltip in
   /// the preferred direction, the tooltip will be displayed in the opposite
   /// direction.
+  ///
+  /// If this property is null, then [TooltipThemeData.preferBelow] is used.
+  /// If that is also null, the default value is true.
+  ///
+  /// Applying [TooltipThemeData.preferBelow]: `false` for the entire app
+  /// is recommended to avoid having a finger or cursor hide a tooltip.
   final bool? preferBelow;
 
   /// Whether the tooltip's [message] or [richMessage] should be excluded from
@@ -482,13 +499,16 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _scheduleDismissTooltip({ required Duration withDelay }) {
     assert(mounted);
     assert(
-      !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
+      !(_timer?.isActive ?? false) || _backingController?.status != AnimationStatus.reverse,
       'timer must not be active when the tooltip is fading out',
     );
 
     _timer?.cancel();
     _timer = null;
-    switch (_controller.status) {
+    // Use _backingController instead of _controller to prevent the lazy getter
+    // from instaniating an AnimationController unnecessarily.
+    switch (_backingController?.status) {
+      case null:
       case AnimationStatus.reverse:
       case AnimationStatus.dismissed:
         break;
@@ -740,7 +760,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
 
     final TooltipThemeData tooltipTheme = _tooltipTheme;
-    return _TooltipOverlay(
+    final _TooltipOverlay overlayChild = _TooltipOverlay(
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
       height: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
       padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),
@@ -755,13 +775,23 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       verticalOffset: widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
     );
+
+    return SelectionContainer.maybeOf(context) == null
+      ? overlayChild
+      : SelectionContainer.disabled(child: overlayChild);
   }
 
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     Tooltip._openedTooltips.remove(this);
+    // _longPressRecognizer.dispose() and _tapRecognizer.dispose() may call
+    // their registered onCancel callbacks if there's a gesture in progress.
+    // Remove the onCancel callbacks to prevent the registered callbacks from
+    // triggering unnecessary side effects (such as animations).
+    _longPressRecognizer?.onLongPressCancel = null;
     _longPressRecognizer?.dispose();
+    _tapRecognizer?.onTapCancel = null;
     _tapRecognizer?.dispose();
     _timer?.cancel();
     _backingController?.dispose();
@@ -807,8 +837,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 /// below a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
-  ///
-  /// The arguments must not be null.
   _TooltipPositionDelegate({
     required this.target,
     required this.verticalOffset,
@@ -890,17 +918,20 @@ class _TooltipOverlay extends StatelessWidget {
         constraints: BoxConstraints(minHeight: height),
         child: DefaultTextStyle(
           style: Theme.of(context).textTheme.bodyMedium!,
-          child: Container(
-            decoration: decoration,
-            padding: padding,
-            margin: margin,
-            child: Center(
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: Text.rich(
-                richMessage,
-                style: textStyle,
-                textAlign: textAlign,
+          child: Semantics(
+            container: true,
+            child: Container(
+              decoration: decoration,
+              padding: padding,
+              margin: margin,
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: Text.rich(
+                  richMessage,
+                  style: textStyle,
+                  textAlign: textAlign,
+                ),
               ),
             ),
           ),

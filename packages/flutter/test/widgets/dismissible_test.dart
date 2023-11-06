@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const DismissDirection defaultDismissDirection = DismissDirection.horizontal;
 const double crossAxisEndOffset = 0.5;
@@ -252,7 +253,7 @@ void main() {
     dismissedItems = <int>[];
   });
 
-  testWidgets('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Horizontal drag triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(),
     );
@@ -269,7 +270,7 @@ void main() {
     expect(reportedDismissDirection, DismissDirection.endToStart);
   });
 
-  testWidgets('Horizontal fling triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Horizontal fling triggers dismiss scrollDirection=vertical', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(),
     );
@@ -286,7 +287,7 @@ void main() {
     expect(reportedDismissDirection, DismissDirection.endToStart);
   });
 
-  testWidgets('Horizontal fling does not trigger at zero offset, but does otherwise', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Horizontal fling does not trigger at zero offset, but does otherwise', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         startToEndThreshold: 0.95,
@@ -313,7 +314,7 @@ void main() {
     expect(reportedDismissDirection, DismissDirection.endToStart);
   });
 
-  testWidgets('Vertical drag triggers dismiss scrollDirection=horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Vertical drag triggers dismiss scrollDirection=horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         scrollDirection: Axis.horizontal,
@@ -333,7 +334,7 @@ void main() {
     expect(reportedDismissDirection, DismissDirection.down);
   });
 
-  testWidgets('drag-left with DismissDirection.endToStart triggers dismiss (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('drag-left with DismissDirection.endToStart triggers dismiss (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         dismissDirection: DismissDirection.endToStart,
@@ -352,7 +353,7 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.left);
   });
 
-  testWidgets('drag-right with DismissDirection.startToEnd triggers dismiss (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('drag-right with DismissDirection.startToEnd triggers dismiss (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         dismissDirection: DismissDirection.startToEnd,
@@ -369,7 +370,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('drag-right with DismissDirection.endToStart triggers dismiss (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('drag-right with DismissDirection.endToStart triggers dismiss (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         textDirection: TextDirection.rtl,
@@ -388,7 +389,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('drag-left with DismissDirection.startToEnd triggers dismiss (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('drag-left with DismissDirection.startToEnd triggers dismiss (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         textDirection: TextDirection.rtl,
@@ -408,7 +409,7 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.left);
   });
 
-  testWidgets('fling-left with DismissDirection.endToStart triggers dismiss (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling-left with DismissDirection.endToStart triggers dismiss (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         dismissDirection: DismissDirection.endToStart,
@@ -427,7 +428,7 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.left);
   });
 
-  testWidgets('fling-right with DismissDirection.startToEnd triggers dismiss (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling-right with DismissDirection.startToEnd triggers dismiss (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         dismissDirection: DismissDirection.startToEnd,
@@ -445,7 +446,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('fling-right with DismissDirection.endToStart triggers dismiss (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling-right with DismissDirection.endToStart triggers dismiss (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         textDirection: TextDirection.rtl,
@@ -463,7 +464,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('fling-left with DismissDirection.startToEnd triggers dismiss (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling-left with DismissDirection.startToEnd triggers dismiss (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         textDirection: TextDirection.rtl,
@@ -483,7 +484,7 @@ void main() {
     await dismissItem(tester, 1, mechanism: flingElement, gestureDirection: AxisDirection.left);
   });
 
-  testWidgets('drag-up with DismissDirection.up triggers dismiss', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('drag-up with DismissDirection.up triggers dismiss', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         scrollDirection: Axis.horizontal,
@@ -501,7 +502,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('drag-down with DismissDirection.down triggers dismiss', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('drag-down with DismissDirection.down triggers dismiss', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         scrollDirection: Axis.horizontal,
@@ -519,7 +520,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('fling-up with DismissDirection.up triggers dismiss', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling-up with DismissDirection.up triggers dismiss', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         scrollDirection: Axis.horizontal,
@@ -537,7 +538,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('fling-down with DismissDirection.down triggers dismiss', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling-down with DismissDirection.down triggers dismiss', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         scrollDirection: Axis.horizontal,
@@ -555,7 +556,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('drag-left has no effect on dismissible with a high dismiss threshold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('drag-left has no effect on dismissible with a high dismiss threshold', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         startToEndThreshold: 1.0,
@@ -572,7 +573,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('fling-left has no effect on dismissible with a high dismiss threshold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('fling-left has no effect on dismissible with a high dismiss threshold', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         startToEndThreshold: 1.0,
@@ -595,7 +596,7 @@ void main() {
   // now since we migrated to the new repo. The bug was fixed by
   // https://github.com/flutter/engine/pull/1134 at the time, and later made
   // irrelevant by fn3, but just in case...
-  testWidgets('Verify that drag-move events do not assert', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that drag-move events do not assert', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         scrollDirection: Axis.horizontal,
@@ -622,7 +623,7 @@ void main() {
   // died in the migration to the new repo). Don't copy this test; it doesn't
   // actually remove the dismissed widget, which is a violation of the
   // Dismissible contract. This is not an example of good practice.
-  testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -654,7 +655,7 @@ void main() {
     expect(find.text('2'), findsNothing);
   });
 
-  testWidgets('Dismissible starts from the full size when collapsing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dismissible starts from the full size when collapsing', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         background: const Text('background'),
@@ -672,7 +673,7 @@ void main() {
     expect(backgroundBox.size.height, equals(100.0));
   });
 
-  testWidgets('Checking fling item before movementDuration completes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checking fling item before movementDuration completes', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
@@ -683,7 +684,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
   });
 
-  testWidgets('Checking fling item after movementDuration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checking fling item after movementDuration', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
@@ -694,7 +695,7 @@ void main() {
     expect(find.text('0'), findsNothing);
   });
 
-  testWidgets('Horizontal fling less than threshold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Horizontal fling less than threshold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest(scrollDirection: Axis.horizontal));
     expect(dismissedItems, isEmpty);
 
@@ -707,7 +708,7 @@ void main() {
     expect(dismissedItems, isEmpty);
   });
 
-  testWidgets('Vertical fling less than threshold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Vertical fling less than threshold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
@@ -720,7 +721,7 @@ void main() {
     expect(dismissedItems, isEmpty);
   });
 
-  testWidgets('confirmDismiss returns values: true, false, null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('confirmDismiss returns values: true, false, null', (WidgetTester tester) async {
     late DismissDirection confirmDismissDirection;
 
     Widget buildFrame(bool? confirmDismissValue) {
@@ -777,7 +778,7 @@ void main() {
     expect(confirmDismissDirection, DismissDirection.endToStart);
   });
 
-  testWidgets('Pending confirmDismiss does not cause errors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Pending confirmDismiss does not cause errors', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54990
 
     late Completer<bool?> completer;
@@ -839,7 +840,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Dismissible cannot be dragged with pending confirmDismiss', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dismissible cannot be dragged with pending confirmDismiss', (WidgetTester tester) async {
     final Completer<bool?> completer = Completer<bool?>();
     await tester.pumpWidget(
       buildTest(
@@ -863,7 +864,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), position);
   });
 
-  testWidgets('Drag to end and release - items does not get stuck if confirmDismiss returns false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag to end and release - items does not get stuck if confirmDismiss returns false', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/87556
 
     final Completer<bool?> completer = Completer<bool?>();
@@ -882,7 +883,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), position);
   });
 
-  testWidgets('Dismissible with null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dismissible with null resizeDuration calls onDismissed immediately', (WidgetTester tester) async {
     bool resized = false;
     bool dismissed = false;
 
@@ -914,7 +915,7 @@ void main() {
     expect(resized, false);
   });
 
-  testWidgets('setState that does not remove the Dismissible from tree should throw Error', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('setState that does not remove the Dismissible from tree should throw Error', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: StatefulBuilder(
@@ -971,7 +972,7 @@ void main() {
     );
   });
 
-  testWidgets('Dismissible.behavior should behave correctly during hit testing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dismissible.behavior should behave correctly during hit testing', (WidgetTester tester) async {
     bool didReceivePointerDown = false;
 
     Widget buildStack({required Widget child}) {
@@ -1040,7 +1041,7 @@ void main() {
     expect(didReceivePointerDown, isTrue);
   });
 
-  testWidgets('DismissDirection.none does not trigger dismiss', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DismissDirection.none does not trigger dismiss', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest(
       dismissDirection: DismissDirection.none,
       scrollPhysics: const NeverScrollableScrollPhysics(),
@@ -1054,7 +1055,7 @@ void main() {
     expect(find.text('0'), findsOneWidget);
   });
 
-  testWidgets('DismissDirection.none does not prevent scrolling', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DismissDirection.none does not prevent scrolling', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
 
     await tester.pumpWidget(
@@ -1077,7 +1078,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('onUpdate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onUpdate', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest(
       scrollDirection: Axis.horizontal,
     ));
@@ -1131,7 +1132,7 @@ void main() {
     expect(reportedDismissUpdateProgress, 0.0);
   });
 
-  testWidgets('Change direction does not lose child state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Change direction does not lose child state', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/108961
     Widget buildFrame(DismissDirection direction) {
       return Directionality(

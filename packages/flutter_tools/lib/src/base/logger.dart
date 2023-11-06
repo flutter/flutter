@@ -36,7 +36,7 @@ abstract class Logger {
   /// If true, silences the logger output.
   bool quiet = false;
 
-  /// If true, this logger supports color output.
+  /// If true, this logger supports ANSI sequences and animations are enabled.
   bool get supportsColor;
 
   /// If true, this logger is connected to a terminal.
@@ -443,7 +443,7 @@ class StdoutLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  bool get supportsColor => terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor && terminal.isCliAnimationEnabled;
 
   @override
   bool get hasTerminal => _stdio.stdinHasTerminal;
@@ -772,7 +772,7 @@ class BufferLogger extends Logger {
   bool get isVerbose => _verbose;
 
   @override
-  bool get supportsColor => terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor && terminal.isCliAnimationEnabled;
 
   final StringBuffer _error = StringBuffer();
   final StringBuffer _warning = StringBuffer();

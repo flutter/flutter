@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'base/common.dart';
@@ -68,6 +69,9 @@ enum Artifact {
 
   /// The location of file generators.
   flutterToolsFileGenerators,
+
+  /// Pre-built desktop debug app.
+  flutterPreviewDevice,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -189,7 +193,7 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
     case Artifact.wasmOptBinary:
       return 'wasm-opt$exe';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
-      return 'frontend_server.dart.snapshot';
+      return 'frontend_server_aot.dart.snapshot';
     case Artifact.linuxDesktopPath:
       return '';
     case Artifact.linuxHeaders:
@@ -212,6 +216,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'const_finder.dart.snapshot';
     case Artifact.flutterToolsFileGenerators:
       return '';
+    case Artifact.flutterPreviewDevice:
+      return 'flutter_preview$exe';
   }
 }
 
@@ -283,15 +289,40 @@ class EngineBuildPaths {
   final String? webSdk;
 }
 
-/// Information about a local engine build
+/// Information about a local engine build (i.e. `--local-engine[-host]=...`).
+///
+/// See https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool
+/// for more information about local engine builds.
 class LocalEngineInfo {
+  /// Creates a reference to a local engine build.
+  ///
+  /// The [targetOutPath] and [hostOutPath] are assumed to be resolvable
+  /// paths to the built engine artifacts for the target (device) and host
+  /// (build) platforms, respectively.
   const LocalEngineInfo({
-    required this.engineOutPath,
-    required this.localEngineName,
+    required this.targetOutPath,
+    required this.hostOutPath,
   });
 
-  final String engineOutPath;
-  final String localEngineName;
+  /// The path to the engine artifacts for the target (device) platform.
+  ///
+  /// For example, if the target platform is Android debug, this would be a path
+  /// like `/path/to/engine/src/out/android_debug_unopt`. To retrieve just the
+  /// name (platform), see [localTargetName].
+  final String targetOutPath;
+
+  /// The path to the engine artifacts for the host (build) platform.
+  ///
+  /// For example, if the host platform is debug, this would be a path like
+  /// `/path/to/engine/src/out/host_debug_unopt`. To retrieve just the name
+  /// (platform), see [localHostName].
+  final String hostOutPath;
+
+  /// The name of the target (device) platform, i.e. `android_debug_unopt`.
+  String get localTargetName => globals.fs.path.basename(targetOutPath);
+
+  /// The name of the host (build) platform, e.g. `host_debug_unopt`.
+  String get localHostName => globals.fs.path.basename(hostOutPath);
 }
 
 // Manages the engine artifacts of Flutter.
@@ -302,12 +333,23 @@ abstract class Artifacts {
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
   ///
   /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
-  factory Artifacts.test({String? localEngine, FileSystem? fileSystem}) {
-    fileSystem ??= MemoryFileSystem.test();
-    if (localEngine != null) {
-      return _TestLocalEngine(localEngine, fileSystem);
-    }
-    return _TestArtifacts(fileSystem);
+  @visibleForTesting
+  factory Artifacts.test({FileSystem? fileSystem}) {
+    return _TestArtifacts(fileSystem ?? MemoryFileSystem.test());
+  }
+
+  /// A test-specific implementation of artifacts that returns stable paths for
+  /// all artifacts, and uses a local engine.
+  ///
+  /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
+  @visibleForTesting
+  factory Artifacts.testLocalEngine({
+    required String localEngine,
+    required String localEngineHost,
+    FileSystem? fileSystem,
+  }) {
+    return _TestLocalEngine(
+        localEngine, localEngineHost, fileSystem ?? MemoryFileSystem.test());
   }
 
   static Artifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
@@ -536,6 +578,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
+      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -575,6 +618,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
+      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -626,6 +670,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
+      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -708,6 +753,9 @@ class CachedArtifacts implements Artifacts {
         throw StateError('Artifact $artifact not available for platform $platform.');
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.flutterPreviewDevice:
+        assert(platform == TargetPlatform.windows_x64);
+        return _cache.getArtifactDirectory('flutter_preview').childFile('flutter_preview.exe').path;
     }
   }
 
@@ -810,8 +858,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }) : _fileSystem = fileSystem,
        localEngineInfo =
          LocalEngineInfo(
-           engineOutPath: engineOutPath,
-           localEngineName: fileSystem.path.basename(engineOutPath)
+           targetOutPath: engineOutPath,
+           hostOutPath: _hostEngineOutPath,
          ),
        _cache = cache,
        _processManager = processManager,
@@ -922,28 +970,28 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _flutterTesterPath(platform!);
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
-        return _fileSystem.path.join(localEngineInfo.engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', artifactFileName);
+        return _fileSystem.path.join(localEngineInfo.targetOutPath, 'gen', 'flutter', 'lib', 'snapshot', artifactFileName);
       case Artifact.icuData:
       case Artifact.flutterXcframework:
       case Artifact.flutterMacOSFramework:
-        return _fileSystem.path.join(localEngineInfo.engineOutPath, artifactFileName);
+        return _fileSystem.path.join(localEngineInfo.targetOutPath, artifactFileName);
       case Artifact.platformKernelDill:
         if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
-          return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter_runner_patched_sdk', artifactFileName);
+          return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_runner_patched_sdk', artifactFileName);
         }
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), artifactFileName);
       case Artifact.platformLibrariesJson:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
       case Artifact.flutterFramework:
         return _getIosEngineArtifactPath(
-            localEngineInfo.engineOutPath, environmentType, _fileSystem, _platform);
+            localEngineInfo.targetOutPath, environmentType, _fileSystem, _platform);
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of
         // what was specified in [mode] argument because local engine will
         // have only one flutter_patched_sdk in standard location, that
         // is happen to be what debug(non-release) mode is using.
         if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
-          return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter_runner_patched_sdk');
+          return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_runner_patched_sdk');
         }
         return _getFlutterPatchedSdkPath(BuildMode.debug);
       case Artifact.skyEnginePath:
@@ -952,11 +1000,11 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         final String modeName = mode!.isRelease ? 'release' : mode.toString();
         final String dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
-        return _fileSystem.path.join(localEngineInfo.engineOutPath, 'host_bundle', dartBinaries, 'kernel_compiler.dart.snapshot');
+        return _fileSystem.path.join(localEngineInfo.targetOutPath, 'host_bundle', dartBinaries, 'kernel_compiler.dart.snapshot');
       case Artifact.fuchsiaFlutterRunner:
         final String jitOrAot = mode!.isJit ? '_jit' : '_aot';
         final String productOrNo = mode.isRelease ? '_product' : '';
-        return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter$jitOrAot${productOrNo}_runner-0.far');
+        return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter$jitOrAot${productOrNo}_runner-0.far');
       case Artifact.fontSubset:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.constFinder:
@@ -979,16 +1027,18 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'utils', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.flutterPreviewDevice:
+        throw UnimplementedError('The preview device is not supported with local engine builds');
     }
   }
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode? mode ]) {
-    return _fileSystem.path.basename(localEngineInfo.engineOutPath);
+    return _fileSystem.path.basename(localEngineInfo.targetOutPath);
   }
 
   String _getFlutterPatchedSdkPath(BuildMode? buildMode) {
-    return _fileSystem.path.join(localEngineInfo.engineOutPath,
+    return _fileSystem.path.join(localEngineInfo.targetOutPath,
         buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
   }
 
@@ -1038,14 +1088,14 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }
 
   String _getFlutterWebSdkPath() {
-    return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter_web_sdk');
+    return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_web_sdk');
   }
 
   String _genSnapshotPath() {
     const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386', 'clang_arm64'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot, _platform)!;
     for (final String clangDir in clangDirs) {
-      final String genSnapshotPath = _fileSystem.path.join(localEngineInfo.engineOutPath, clangDir, genSnapshotName);
+      final String genSnapshotPath = _fileSystem.path.join(localEngineInfo.targetOutPath, clangDir, genSnapshotName);
       if (_processManager.canRun(genSnapshotPath)) {
         return genSnapshotPath;
       }
@@ -1055,11 +1105,11 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
   String _flutterTesterPath(TargetPlatform platform) {
     if (_platform.isLinux) {
-      return _fileSystem.path.join(localEngineInfo.engineOutPath, _artifactToFileName(Artifact.flutterTester, _platform));
+      return _fileSystem.path.join(localEngineInfo.targetOutPath, _artifactToFileName(Artifact.flutterTester, _platform));
     } else if (_platform.isMacOS) {
-      return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter_tester');
+      return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_tester');
     } else if (_platform.isWindows) {
-      return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter_tester.exe');
+      return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_tester.exe');
     }
     throw Exception('Unsupported platform $platform.');
   }
@@ -1080,7 +1130,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
        _fileSystem = fileSystem,
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils;
-
 
   final Artifacts _parent;
   final String _webSdkPath;
@@ -1132,6 +1181,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fontSubset:
         case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
+        case Artifact.flutterPreviewDevice:
           break;
       }
     }
@@ -1365,11 +1415,13 @@ class _TestArtifacts implements Artifacts {
 }
 
 class _TestLocalEngine extends _TestArtifacts {
-  _TestLocalEngine(String engineOutPath, super.fileSystem) :
-    localEngineInfo =
-      LocalEngineInfo(
-        engineOutPath: engineOutPath,
-        localEngineName: fileSystem.path.basename(engineOutPath)
+  _TestLocalEngine(
+    String engineOutPath,
+    String engineHostOutPath,
+    super.fileSystem,
+  ) : localEngineInfo = LocalEngineInfo(
+        targetOutPath: engineOutPath,
+        hostOutPath: engineHostOutPath,
       );
 
   @override

@@ -4,13 +4,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('runs animations', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('runs animations', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(Center(
       child: DualTransitionBuilder(
@@ -74,11 +76,12 @@ void main() {
     expect(_getOpacity(tester), 1.0);
   });
 
-  testWidgets('keeps state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keeps state', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -138,11 +141,13 @@ void main() {
     expect(state, same(tester.state(find.byType(_StatefulTestWidget))));
   });
 
-  testWidgets('does not jump when interrupted - forward', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('does not jump when interrupted - forward', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(Center(
       child: DualTransitionBuilder(
         animation: controller,
@@ -202,12 +207,14 @@ void main() {
     expect(_getOpacity(tester), 1.0);
   });
 
-  testWidgets('does not jump when interrupted - reverse', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('does not jump when interrupted - reverse', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       value: 1.0,
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(Center(
       child: DualTransitionBuilder(
         animation: controller,

@@ -7,6 +7,7 @@ import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'convert.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'ios/code_signing.dart';
@@ -67,8 +68,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   /// The 'Runner.xcscheme' file of [xcodeProject].
-  File get xcodeProjectSchemeFile =>
-      xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('Runner.xcscheme');
+  File xcodeProjectSchemeFile({String? scheme}) {
+    final String schemeName = scheme ?? 'Runner';
+    return xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('$schemeName.xcscheme');
+  }
 
   File get xcodeProjectWorkspaceData =>
       xcodeProject
@@ -104,11 +107,14 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
   /// The CocoaPods generated 'Pods-Runner-frameworks.sh'.
-  File get podRunnerFrameworksScript => hostAppRoot
+  File get podRunnerFrameworksScript => podRunnerTargetSupportFiles
+      .childFile('Pods-Runner-frameworks.sh');
+
+  /// The CocoaPods generated directory 'Pods-Runner'.
+  Directory get podRunnerTargetSupportFiles => hostAppRoot
       .childDirectory('Pods')
       .childDirectory('Target Support Files')
-      .childDirectory('Pods-Runner')
-      .childFile('Pods-Runner-frameworks.sh');
+      .childDirectory('Pods-Runner');
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -211,22 +217,29 @@ class IosProject extends XcodeBasedProject {
     return parent.isModule || _editableDirectory.existsSync();
   }
 
-  Future<XcodeUniversalLinkSettings> universalLinkSettings({
+  /// Outputs universal link related project settings of the iOS sub-project into
+  /// a json file.
+  ///
+  /// The return future will resolve to string path to the output file.
+  Future<String> outputsUniversalLinkSettings({
     required String configuration,
-    required String scheme,
     required String target,
   }) async {
     final XcodeProjectBuildContext context = XcodeProjectBuildContext(
       configuration: configuration,
-      scheme: scheme,
       target: target,
     );
+    final File file = await parent.buildDirectory
+        .childDirectory('deeplink_data')
+        .childFile('universal-link-settings-$configuration-$target.json')
+        .create(recursive: true);
 
-    return XcodeUniversalLinkSettings(
-      bundleIdentifier: await _productBundleIdentifierWithBuildContext(context),
-      teamIdentifier: await _getTeamIdentifier(context),
-      associatedDomains: await _getAssociatedDomains(context),
-    );
+    await file.writeAsString(jsonEncode(<String, Object?>{
+      'bundleIdentifier': await _productBundleIdentifierWithBuildContext(context),
+      'teamIdentifier': await _getTeamIdentifier(context),
+      'associatedDomains': await _getAssociatedDomains(context),
+    }));
+    return file.absolute.path;
   }
 
   /// The product bundle identifier of the host app, or null if not set or if

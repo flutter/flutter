@@ -6,20 +6,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+    int _creations = 0;
+    int _disposals = 0;
+
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
-  setUp(() {
-    assert(!ma.hasListeners);
-  });
-
   test('Publishers dispatch events in debug mode', () async {
-    int eventCount = 0;
-    void listener(ObjectEvent event) => eventCount++;
+    void listener(ObjectEvent event) {
+      if (event is ObjectDisposed) {
+        _disposals++;
+      }
+      if (event is ObjectCreated) {
+        _creations++;
+      }
+    }
     ma.addListener(listener);
 
-    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
-    expect(eventCount, expectedEventCount);
+    final _EventStats actual = await _activateFlutterObjectsAndReturnCountOfEvents();
+    expect(actual.creations, _creations);
+    expect(actual.disposals, _disposals);
 
     ma.removeListener(listener);
     expect(ma.hasListeners, isFalse);
@@ -28,6 +34,8 @@ void main() {
   testWidgets('State dispatches events in debug mode', (WidgetTester tester) async {
     bool stateCreated = false;
     bool stateDisposed = false;
+
+    expect(ma.hasListeners, false);
 
     void listener(ObjectEvent event) {
       if (event is ObjectCreated && event.object is State) {
@@ -47,7 +55,7 @@ void main() {
     expect(stateCreated, isTrue);
     expect(stateDisposed, isTrue);
     ma.removeListener(listener);
-    expect(ma.hasListeners, isFalse);
+    expect(ma.hasListeners, false);
   });
 }
 
@@ -62,7 +70,8 @@ class _TestElement extends RenderObjectElement with RootElementMixin {
   _TestElement(): super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {
-    assignOwner(BuildOwner(focusManager: FocusManager()));
+    final FocusManager newFocusManager = FocusManager();
+    assignOwner(BuildOwner(focusManager: newFocusManager));
     mount(null, null);
     deactivate();
   }
@@ -109,15 +118,22 @@ class _TestStatefulWidgetState extends State<_TestStatefulWidget> {
   }
 }
 
+
+class _EventStats {
+  int creations = 0;
+  int disposals = 0;
+}
+
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
-  int count = 0;
+Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
+  final _EventStats result = _EventStats();
 
-  final _TestElement element = _TestElement(); count++;
-  final RenderObject renderObject = _TestRenderObject(); count++;
+  final _TestElement element = _TestElement(); result.creations++;
+  final RenderObject renderObject = _TestRenderObject(); result.creations++;
 
-  element.makeInactive(); element.unmount(); count += 3;
-  renderObject.dispose(); count++;
+  element.makeInactive(); result.creations += 3; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode
+  element.unmount(); result.disposals += 2; // 1 for the old BuildOwner, 1 for the element
+  renderObject.dispose(); result.disposals += 1;
 
-  return count;
+  return result;
 }

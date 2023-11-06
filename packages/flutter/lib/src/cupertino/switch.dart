@@ -64,8 +64,7 @@ import 'thumb_painter.dart';
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
   ///
-  /// The [value] parameter must not be null.
-  /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start] and must not be null.
+  /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start].
   const CupertinoSwitch({
     super.key,
     required this.value,
@@ -75,6 +74,8 @@ class CupertinoSwitch extends StatefulWidget {
     this.thumbColor,
     this.applyTheme,
     this.focusColor,
+    this.onLabelColor,
+    this.offLabelColor,
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
@@ -82,8 +83,6 @@ class CupertinoSwitch extends StatefulWidget {
   });
 
   /// Whether this switch is on or off.
-  ///
-  /// Must not be null.
   final bool value;
 
   /// Called when the user toggles with switch on or off.
@@ -132,6 +131,17 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to a slightly transparent [activeColor].
   final Color? focusColor;
+
+  /// The color to use for the accessibility label when the switch is on.
+  ///
+  /// Defaults to [CupertinoColors.white] when null.
+  final Color? onLabelColor;
+
+  /// The color to use for the accessibility label when the switch is off.
+  ///
+  /// Defaults to [Color.fromARGB(255, 179, 179, 179)]
+  /// (or [Color.fromARGB(255, 255, 255, 255)] in high contrast) when null.
+  final Color? offLabelColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -357,6 +367,19 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       ?? CupertinoColors.systemGreen,
       context,
     );
+    final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
+        MediaQuery.onOffSwitchLabelsOf(context)
+            ? (
+                CupertinoDynamicColor.resolve(
+                  widget.onLabelColor ?? CupertinoColors.white,
+                  context,
+                ),
+                CupertinoDynamicColor.resolve(
+                  widget.offLabelColor ?? _kOffLabelColor,
+                  context,
+                ),
+              )
+            : null;
     if (needsPositionAnimation) {
       _resumePositionAnimation();
     }
@@ -389,6 +412,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             textDirection: Directionality.of(context),
             isFocused: isFocused,
             state: this,
+            onOffLabelColors: onOffLabelColors,
           ),
         ),
       ),
@@ -417,6 +441,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.textDirection,
     required this.isFocused,
     required this.state,
+    required this.onOffLabelColors,
   });
 
   final bool value;
@@ -428,6 +453,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final _CupertinoSwitchState state;
   final TextDirection textDirection;
   final bool isFocused;
+  final (Color onLabelColor, Color offLabelColor)? onOffLabelColors;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
@@ -441,6 +467,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: textDirection,
       isFocused: isFocused,
       state: state,
+      onOffLabelColors: onOffLabelColors,
     );
   }
 
@@ -467,6 +494,24 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
+// Label sizes and padding taken from xcode inspector.
+// See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360
+const double _kOnLabelWidth = 1.0;
+const double _kOnLabelHeight = 10.0;
+const double _kOnLabelPaddingHorizontal = 11.0;
+const double _kOffLabelWidth = 1.0;
+const double _kOffLabelPaddingHorizontal = 12.0;
+const double _kOffLabelRadius = 5.0;
+const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
+  debugLabel: 'offSwitchLabel',
+  // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
+  color: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
+  darkColor: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
+  highContrastColor: Color.fromARGB(255, 255, 255, 255),
+  darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+);
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
@@ -484,6 +529,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required TextDirection textDirection,
     required bool isFocused,
     required _CupertinoSwitchState state,
+    required (Color onLabelColor, Color offLabelColor)? onOffLabelColors,
   }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
@@ -493,6 +539,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _textDirection = textDirection,
        _isFocused = isFocused,
        _state = state,
+       _onOffLabelColors = onOffLabelColors,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
          state.position.addListener(markNeedsPaint);
          state._reaction.addListener(markNeedsPaint);
@@ -584,6 +631,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
+  (Color onLabelColor, Color offLabelColor)? get onOffLabelColors => _onOffLabelColors;
+  (Color onLabelColor, Color offLabelColor)? _onOffLabelColors;
+  set onOffLabelColors((Color onLabelColor, Color offLabelColor)? value) {
+    if (value == _onOffLabelColors) {
+      return;
+    }
+    _onOffLabelColors = value;
+    markNeedsPaint();
+  }
+
   bool get isInteractive => onChanged != null;
 
   @override
@@ -647,6 +704,52 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         ..strokeWidth = 3.5;
 
       canvas.drawRRect(borderTrackRRect, borderPaint);
+    }
+
+    if (_onOffLabelColors != null) {
+      final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
+
+      final double leftLabelOpacity = visualPosition * (1.0 - currentReactionValue);
+      final double rightLabelOpacity = (1.0 - visualPosition) * (1.0 - currentReactionValue);
+      final (double onLabelOpacity, double offLabelOpacity) =
+          switch (textDirection) {
+        TextDirection.ltr => (leftLabelOpacity, rightLabelOpacity),
+        TextDirection.rtl => (rightLabelOpacity, leftLabelOpacity),
+      };
+
+      final (Offset onLabelOffset, Offset offLabelOffset) =
+          switch (textDirection) {
+        TextDirection.ltr => (
+            trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0),
+            trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0),
+          ),
+        TextDirection.rtl => (
+            trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0),
+            trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0),
+          ),
+      };
+
+      // Draws '|' label
+      final Rect onLabelRect = Rect.fromCenter(
+        center: onLabelOffset,
+        width: _kOnLabelWidth,
+        height: _kOnLabelHeight,
+      );
+      final Paint onLabelPaint = Paint()
+        ..color = onLabelColor.withOpacity(onLabelOpacity)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(onLabelRect, onLabelPaint);
+
+      // Draws 'O' label
+      final Paint offLabelPaint = Paint()
+        ..color = offLabelColor.withOpacity(offLabelOpacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _kOffLabelWidth;
+      canvas.drawCircle(
+        offLabelOffset,
+        _kOffLabelRadius,
+        offLabelPaint,
+      );
     }
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;

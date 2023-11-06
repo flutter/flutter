@@ -819,8 +819,6 @@ mixin _CopyPointerAddedEvent on PointerEvent {
 /// made contact with the surface of the device.
 class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _CopyPointerAddedEvent {
   /// Creates a pointer added event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerAddedEvent({
     super.viewId,
     super.timeStamp,
@@ -914,8 +912,6 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
 /// detection range or might have been disconnected from the system entirely.
 class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _CopyPointerRemovedEvent {
   /// Creates a pointer removed event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerRemovedEvent({
     super.viewId,
     super.timeStamp,
@@ -1024,8 +1020,6 @@ mixin _CopyPointerHoverEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _CopyPointerHoverEvent {
   /// Creates a pointer hover event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerHoverEvent({
     super.viewId,
     super.timeStamp,
@@ -1143,8 +1137,6 @@ mixin _CopyPointerEnterEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _CopyPointerEnterEvent {
   /// Creates a pointer enter event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerEnterEvent({
     super.viewId,
     super.timeStamp,
@@ -1293,8 +1285,6 @@ mixin _CopyPointerExitEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerExitEvent extends PointerEvent with _PointerEventDescription, _CopyPointerExitEvent {
   /// Creates a pointer exit event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerExitEvent({
     super.viewId,
     super.timeStamp,
@@ -1435,8 +1425,6 @@ mixin _CopyPointerDownEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerDownEvent extends PointerEvent with _PointerEventDescription, _CopyPointerDownEvent {
   /// Creates a pointer down event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerDownEvent({
     super.viewId,
     super.timeStamp,
@@ -1551,8 +1539,6 @@ mixin _CopyPointerMoveEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _CopyPointerMoveEvent {
   /// Creates a pointer move event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerMoveEvent({
     super.viewId,
     super.timeStamp,
@@ -1668,8 +1654,6 @@ mixin _CopyPointerUpEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPointerUpEvent {
   /// Creates a pointer up event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerUpEvent({
     super.viewId,
     super.timeStamp,
@@ -1802,8 +1786,6 @@ mixin _CopyPointerScrollEvent on PointerEvent {
 ///    participating agents may disambiguate an event's target.
 class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScrollEvent {
   /// Creates a pointer scroll event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerScrollEvent({
     super.viewId,
     super.timeStamp,
@@ -1905,8 +1887,6 @@ mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
 ///    participating agents may disambiguate an event's target.
 class PointerScrollInertiaCancelEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScrollInertiaCancelEvent {
   /// Creates a pointer scroll-inertia cancel event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerScrollInertiaCancelEvent({
     super.viewId,
     super.timeStamp,
@@ -1994,8 +1974,6 @@ mixin _CopyPointerScaleEvent on PointerEvent {
 ///    participating agents may disambiguate an event's target.
 class PointerScaleEvent extends PointerSignalEvent with _PointerEventDescription, _CopyPointerScaleEvent {
   /// Creates a pointer scale event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerScaleEvent({
     super.viewId,
     super.timeStamp,
@@ -2080,8 +2058,6 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescription, _CopyPointerPanZoomStartEvent {
   /// Creates a pointer pan/zoom start event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerPanZoomStartEvent({
     super.viewId,
     super.timeStamp,
@@ -2183,8 +2159,6 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescription, _CopyPointerPanZoomUpdateEvent {
   /// Creates a pointer pan/zoom update event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerPanZoomUpdateEvent({
     super.viewId,
     super.timeStamp,
@@ -2303,8 +2277,6 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription, _CopyPointerPanZoomEndEvent {
   /// Creates a pointer pan/zoom end event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerPanZoomEndEvent({
     super.viewId,
     super.timeStamp,
@@ -2397,8 +2369,6 @@ mixin _CopyPointerCancelEvent on PointerEvent {
 ///    events in a widget tree.
 class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _CopyPointerCancelEvent {
   /// Creates a pointer cancel event.
-  ///
-  /// All of the arguments must be non-null.
   const PointerCancelEvent({
     super.viewId,
     super.timeStamp,
