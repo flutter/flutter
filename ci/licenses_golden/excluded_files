@@ -136,6 +136,8 @@
 ../../../flutter/impeller/docs
 ../../../flutter/impeller/entity/contents/checkerboard_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/filters/inputs/filter_input_unittests.cc
+../../../flutter/impeller/entity/contents/test
+../../../flutter/impeller/entity/contents/vertices_contents_unittests.cc
 ../../../flutter/impeller/entity/entity_unittests.cc
 ../../../flutter/impeller/entity/geometry/geometry_unittests.cc
 ../../../flutter/impeller/entity/render_target_cache_unittests.cc
