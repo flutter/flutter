@@ -356,11 +356,11 @@ struct FfiDispatcher<C, Return (C::*)(Args...), method> {
 
   // Static C entry-point with Dart FFI signature.
   static FfiReturn Call(
-      C* receiver,
+      DartWrappable* receiver,
       typename DartConverter<typename std::remove_const<
           typename std::remove_reference<Args>::type>::type>::FfiType... args) {
     // Call C++ method on receiver, forwarding converted native arguments.
-    return DartConverter<Return>::ToFfi((receiver->*method)(
+    return DartConverter<Return>::ToFfi((static_cast<C*>(receiver)->*method)(
         DartConverter<typename std::remove_const<typename std::remove_reference<
             Args>::type>::type>::FromFfi(args)...));
   }
@@ -408,11 +408,11 @@ struct FfiDispatcher<C, Return (C::*)(Args...) const, method> {
 
   // Static C entry-point with Dart FFI signature.
   static FfiReturn Call(
-      C* receiver,
+      DartWrappable* receiver,
       typename DartConverter<typename std::remove_const<
           typename std::remove_reference<Args>::type>::type>::FfiType... args) {
     // Call C++ method on receiver, forwarding converted native arguments.
-    return DartConverter<Return>::ToFfi((receiver->*method)(
+    return DartConverter<Return>::ToFfi((static_cast<C*>(receiver)->*method)(
         DartConverter<typename std::remove_const<typename std::remove_reference<
             Args>::type>::type>::FromFfi(args)...));
   }
@@ -501,11 +501,11 @@ struct FfiDispatcher<C, void (C::*)(Args...), method> {
 
   // Static C entry-point with Dart FFI signature.
   static void Call(
-      C* receiver,
+      DartWrappable* receiver,
       typename DartConverter<typename std::remove_const<
           typename std::remove_reference<Args>::type>::type>::FfiType... args) {
     // Call C++ method on receiver, forwarding converted native arguments.
-    (receiver->*method)(
+    (static_cast<C*>(receiver)->*method)(
         DartConverter<typename std::remove_const<typename std::remove_reference<
             Args>::type>::type>::FromFfi(args)...);
   }
