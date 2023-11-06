@@ -3478,8 +3478,8 @@ class _MenuLayerShadowPainter extends CustomPainter {
     if (depth != 0) {
       final ui.Rect concentratedShadowRect = Rect.fromCenter(
         center: center,
-        width: size.width - 20,
-        height: size.height + 100 + 25 * shadowOpacity,
+        width: size.width - 12,
+        height: size.height + 50 * shadowOpacity,
       );
       // Paints a vertical gradient that mimicks a concentrated vertical shadow
       // above this menu layer. A blurred mask filter is used to feather the
@@ -3487,7 +3487,7 @@ class _MenuLayerShadowPainter extends CustomPainter {
       final Paint concentratedShadow = Paint()
         ..maskFilter = MaskFilter.blur(
           BlurStyle.normal,
-          shadowOpacity * 10,
+          shadowOpacity * 8,
         )
         ..shader = LinearGradient(
           begin: Alignment.topCenter,

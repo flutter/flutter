@@ -4,9 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for [CupertinoContextMenu].
 
-void main() => runApp(const CupertinoMenuApp());
 
 class CupertinoMenuApp extends StatelessWidget {
   const CupertinoMenuApp({super.key});
@@ -34,7 +32,8 @@ class _CupertinoMenuExampleState extends State<CupertinoMenuExample> {
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoContextMenu Sample'),
       ),
-      child: Center(
+      child: Align(
+        alignment: const Alignment(0, -0.5),
         child: SizedBox(
           width: 100,
           height: 100,
@@ -47,11 +46,19 @@ class _CupertinoMenuExampleState extends State<CupertinoMenuExample> {
             itemBuilder: (BuildContext context) {
               return <CupertinoMenuEntry<String>>[
                 CupertinoStickyMenuHeader(
-                  leading: const SizedBox(
+                  leading: Container(
                     width: 42,
                     height: 42,
-                    child: Image(
-                      image: AssetImage('assets/file.png'),
+                    decoration:  ShapeDecoration(
+                      shape: const CircleBorder(),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[
+                          CupertinoColors.activeBlue,
+                          CupertinoColors.activeBlue.withOpacity(0.5),
+                        ],
+                      ),
                     ),
                   ),
                   trailing: CupertinoButton(
