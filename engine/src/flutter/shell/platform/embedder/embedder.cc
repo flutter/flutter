@@ -2352,6 +2352,23 @@ static inline flutter::KeyEventType MapKeyEventType(
   return flutter::KeyEventType::kUp;
 }
 
+static inline flutter::KeyEventDeviceType MapKeyEventDeviceType(
+    FlutterKeyEventDeviceType event_kind) {
+  switch (event_kind) {
+    case kFlutterKeyEventDeviceTypeKeyboard:
+      return flutter::KeyEventDeviceType::kKeyboard;
+    case kFlutterKeyEventDeviceTypeDirectionalPad:
+      return flutter::KeyEventDeviceType::kDirectionalPad;
+    case kFlutterKeyEventDeviceTypeGamepad:
+      return flutter::KeyEventDeviceType::kGamepad;
+    case kFlutterKeyEventDeviceTypeJoystick:
+      return flutter::KeyEventDeviceType::kJoystick;
+    case kFlutterKeyEventDeviceTypeHdmi:
+      return flutter::KeyEventDeviceType::kHdmi;
+  }
+  return flutter::KeyEventDeviceType::kKeyboard;
+}
+
 // Send a platform message to the framework.
 //
 // The `data_callback` will be invoked with `user_data`, and must not be empty.
@@ -2414,6 +2431,9 @@ FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
   key_data.physical = SAFE_ACCESS(event, physical, 0);
   key_data.logical = SAFE_ACCESS(event, logical, 0);
   key_data.synthesized = SAFE_ACCESS(event, synthesized, false);
+  key_data.device_type = MapKeyEventDeviceType(SAFE_ACCESS(
+      event, device_type,
+      FlutterKeyEventDeviceType::kFlutterKeyEventDeviceTypeKeyboard));
 
   auto packet = std::make_unique<flutter::KeyDataPacket>(key_data, character);
 

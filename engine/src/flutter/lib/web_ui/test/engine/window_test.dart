@@ -323,7 +323,7 @@ Future<void> testMain() async {
 
   // Regression test for https://github.com/flutter/flutter/issues/88269
   test('sets preferred screen orientation', () async {
-    final DomScreen original = domWindow.screen!;
+    final DomScreen? original = domWindow.screen;
 
     final List<String> lockCalls = <String>[];
     int unlockCount = 0;
@@ -397,7 +397,7 @@ Future<void> testMain() async {
 
   /// Regression test for https://github.com/flutter/flutter/issues/66128.
   test("setPreferredOrientation responds even if browser doesn't support api", () async {
-    final DomScreen original = domWindow.screen!;
+    final DomScreen? original = domWindow.screen;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
     js_util.setProperty(domWindow, 'screen', js_util.jsify(<Object?, Object?>{
