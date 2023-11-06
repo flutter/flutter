@@ -4,8 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 
-
-
+/// Flutter code sample for [CupertinoMenuButton]
+///
+void main() => runApp(const CupertinoMenuApp());
 class CupertinoMenuApp extends StatelessWidget {
   const CupertinoMenuApp({super.key});
   @override
