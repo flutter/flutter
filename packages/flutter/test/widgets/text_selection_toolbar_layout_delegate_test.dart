@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 43.0;
     const double anchorBelowY = 500.0;
