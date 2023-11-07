@@ -209,11 +209,14 @@ enum AnimationBehavior {
 /// [State.dispose], as described in the previous section.)
 ///
 /// {@tool dartpad}
-/// This example shows how to use [AnimationController] and [SlideTransition] to create an
-/// animated digit like you might find on a digital clock.  New digit values slide
-/// into place from below, as the old value slides upwards and out of view. Taps that occur
-/// while the controller is already animating cause the controller's [AnimationController.duration]
-/// to be reduced so that the visuals don't fall behind.
+/// This example shows how to use [AnimationController] and
+/// [SlideTransition] to create an animated digit like you might find
+/// on an old pinball machine our your car's odometer.  New digit
+/// values slide into place from below, as the old value slides
+/// upwards and out of view. Taps that occur while the controller is
+/// already animating cause the controller's
+/// [AnimationController.duration] to be reduced so that the visuals
+/// don't fall behind.
 ///
 /// ** See code in examples/api/lib/animation/animation_controller/animated_digit.0.dart **
 /// {@end-tool}
