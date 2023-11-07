@@ -18,23 +18,9 @@ void log(String message) {
   }
 }
 
-class Commit {
-  Commit(this.hash, this.timestamp);
-
-  final String hash;
-  final DateTime timestamp;
-
-  static String formatArgument = '--format=%H %cI';
-
-  static Commit parse(String line) {
-    final int space = line.indexOf(' ');
-    return Commit(line.substring(0, space), DateTime.parse(line.substring(space+1, line.length).trimRight()));
-  }
-
-  static List<Commit> parseList(String lines) {
-    return lines.split('\n').where((String line) => line.isNotEmpty).map(parse).toList().reversed.toList();
-  }
-}
+const _commitTimestampFormat = '--format=%cI';
+DateTime _parseTimestamp(String line) => DateTime.parse(line.trim());
+int _countLines(String output) => output.trim().split('/n').where((String line) => line.isNotEmpty).length;
 
 String findCommit({
   required String primaryRepoDirectory,
@@ -43,28 +29,28 @@ String findCommit({
   required String secondaryRepoDirectory,
   required String secondaryBranch,
 }) {
-  final Commit anchor;
+  final DateTime anchor;
   if (primaryBranch == primaryTrunk) {
-    log('on $primaryTrunk, using last commit as anchor');
-    anchor = Commit.parse(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', primaryBranch, '--']));
+    log('on $primaryTrunk, using last commit time');
+    anchor = _parseTimestamp(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, '--max-count=1', primaryBranch, '--']));
   } else {
     final String mergeBase = git(primaryRepoDirectory, <String>['merge-base', primaryBranch, primaryTrunk], allowFailure: true).trim();
     if (mergeBase.isEmpty) {
       throw StateError('Branch $primaryBranch does not seem to have a common history with trunk $primaryTrunk.');
     }
-    anchor = Commit.parse(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', mergeBase, '--']));
-    final List<Commit> missingTrunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryTrunk, '^$primaryBranch', '--']));
-    final List<Commit> extraCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '^$primaryTrunk', '--']));
-    if (missingTrunkCommits.isEmpty && extraCommits.isEmpty) {
+    anchor = _parseTimestamp(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, '--max-count=1', mergeBase, '--']));
+    final int missingTrunkCommits = _countLines(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, primaryTrunk, '^$primaryBranch', '--']));
+    final int extraCommits = _countLines(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, primaryBranch, '^$primaryTrunk', '--']));
+    if (missingTrunkCommits == 0 && extraCommits == 0) {
       log('$primaryBranch is even with $primaryTrunk at $mergeBase');
     } else {
-      log('$primaryBranch branched from $primaryTrunk ${missingTrunkCommits.length} commits ago, trunk has advanced by ${extraCommits.length} commits since then.');
+      log('$primaryBranch branched from $primaryTrunk $missingTrunkCommits commits ago, trunk has advanced by $extraCommits commits since then.');
     }
   }
   return git(secondaryRepoDirectory, <String>[
     'log',
     '--format=%H',
-    '--until=${anchor.timestamp.toIso8601String()}',
+    '--until=${anchor.toIso8601String()}',
     '--max-count=1',
     secondaryBranch,
     '--',
