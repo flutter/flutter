@@ -15,12 +15,10 @@ import 'package:path/path.dart' as path;
 import 'utils.dart';
 
 final String _scriptLocation = path.fromUri(Platform.script);
-final String _flutterRoot =
-    path.dirname(path.dirname(path.dirname(_scriptLocation)));
+final String _flutterRoot = path.dirname(path.dirname(path.dirname(_scriptLocation)));
 final String _exampleDirectoryPath = path.join(_flutterRoot, 'examples', 'api');
 final String _packageDirectoryPath = path.join(_flutterRoot, 'packages');
-final String _dartUIDirectoryPath =
-    path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib');
+final String _dartUIDirectoryPath = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib');
 
 final List<String> _knownUnlinkedExamples = <String>[
   // These are template files that aren't expected to be linked.
@@ -46,15 +44,13 @@ void main(List<String> args) {
     'packages',
     valueHelp: 'path',
     defaultsTo: _packageDirectoryPath,
-    help:
-        'A location where the source code that should link the API doc examples is found.',
+    help: 'A location where the source code that should link the API doc examples is found.',
   );
   argParser.addOption(
     'dart-ui',
     valueHelp: 'path',
     defaultsTo: _dartUIDirectoryPath,
-    help:
-        'A location where the source code that should link the API doc examples is found.',
+    help: 'A location where the source code that should link the API doc examples is found.',
   );
   argParser.addOption(
     'flutter-root',
@@ -83,14 +79,10 @@ void main(List<String> args) {
   }
 
   const FileSystem filesystem = LocalFileSystem();
-  final Directory examples =
-      filesystem.directory(parsedArgs['examples']! as String);
-  final Directory packages =
-      filesystem.directory(parsedArgs['packages']! as String);
-  final Directory dartUIPath =
-      filesystem.directory(parsedArgs['dart-ui']! as String);
-  final Directory flutterRoot =
-      filesystem.directory(parsedArgs['flutter-root']! as String);
+  final Directory examples = filesystem.directory(parsedArgs['examples']! as String);
+  final Directory packages = filesystem.directory(parsedArgs['packages']! as String);
+  final Directory dartUIPath = filesystem.directory(parsedArgs['dart-ui']! as String);
+  final Directory flutterRoot = filesystem.directory(parsedArgs['flutter-root']! as String);
 
   final SampleChecker checker = SampleChecker(
     examples: examples,
@@ -133,41 +125,33 @@ class SampleChecker {
     exampleLinks.addAll(getExampleLinks(dartUIPath));
 
     // Get a list of the filenames that were not found in the source files.
-    final List<String> missingFilenames =
-        checkForMissingLinks(exampleFilenames, exampleLinks);
+    final List<String> missingFilenames = checkForMissingLinks(exampleFilenames, exampleLinks);
 
     // Get a list of any tests that are missing, as well as any that used to be
     // missing, but have been implemented.
-    final (List<File> missingTests, List<File> noLongerMissing) =
-        checkForMissingTests(exampleFilenames);
+    final (List<File> missingTests, List<File> noLongerMissing) = checkForMissingTests(exampleFilenames);
 
     // Remove any that we know are exceptions (examples that aren't expected to be
     // linked into any source files). These are typically template files used to
     // generate new examples.
-    missingFilenames
-        .removeWhere((String file) => _knownUnlinkedExamples.contains(file));
+    missingFilenames.removeWhere((String file) => _knownUnlinkedExamples.contains(file));
 
-    if (missingFilenames.isEmpty &&
-        missingTests.isEmpty &&
-        noLongerMissing.isEmpty) {
+    if (missingFilenames.isEmpty && missingTests.isEmpty && noLongerMissing.isEmpty) {
       return true;
     }
 
     if (noLongerMissing.isNotEmpty) {
-      final StringBuffer buffer =
-          StringBuffer('The following tests have been implemented! Huzzah!:\n');
+      final StringBuffer buffer = StringBuffer('The following tests have been implemented! Huzzah!:\n');
       for (final File name in noLongerMissing) {
         buffer.writeln('  ${getRelativePath(name)}');
       }
-      buffer.writeln(
-          'However, they now need to be removed from the _knownMissingTests');
+      buffer.writeln('However, they now need to be removed from the _knownMissingTests');
       buffer.write('list in the script $_scriptLocation.');
       foundError(buffer.toString().split('\n'));
     }
 
     if (missingTests.isNotEmpty) {
-      final StringBuffer buffer =
-          StringBuffer('The following example test files are missing:\n');
+      final StringBuffer buffer = StringBuffer('The following example test files are missing:\n');
       for (final File name in missingTests) {
         buffer.writeln('  ${getRelativePath(name)}');
       }
@@ -175,13 +159,12 @@ class SampleChecker {
     }
 
     if (missingFilenames.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer(
-          'The following examples are not linked from any source file API doc comments:\n');
+      final StringBuffer buffer =
+          StringBuffer('The following examples are not linked from any source file API doc comments:\n');
       for (final String name in missingFilenames) {
         buffer.writeln('  $name');
       }
-      buffer.write(
-          'Either link them to a source file API doc comment, or remove them.');
+      buffer.write('Either link them to a source file API doc comment, or remove them.');
       foundError(buffer.toString().split('\n'));
     }
     return false;
@@ -203,9 +186,7 @@ class SampleChecker {
           }
         })
         .where((File? filename) =>
-            filename != null &&
-            (filenamePattern == null ||
-                filename.absolute.path.contains(filenamePattern)))
+            filename != null && (filenamePattern == null || filename.absolute.path.contains(filenamePattern)))
         .map<File>((File? s) => s!)
         .toList();
     return filenames;
@@ -225,10 +206,7 @@ class SampleChecker {
     for (final File file in files) {
       final String contents = file.readAsStringSync();
       searchStrings.addAll(
-        contents
-            .split('\n')
-            .where((String s) => s.contains(exampleRe))
-            .map<String>(
+        contents.split('\n').where((String s) => s.contains(exampleRe)).map<String>(
           (String e) {
             return exampleRe.firstMatch(e)!.namedGroup('path')!;
           },
@@ -238,8 +216,7 @@ class SampleChecker {
     return searchStrings;
   }
 
-  List<String> checkForMissingLinks(
-      List<File> exampleFilenames, Set<String> searchStrings) {
+  List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {
     final List<String> missingFilenames = <String>[];
     for (final File example in exampleFilenames) {
       final String relativePath = getRelativePath(example);
@@ -265,10 +242,8 @@ class SampleChecker {
     final List<File> missingTests = <File>[];
     final List<File> noLongerMissingTests = <File>[];
     for (final File example in exampleFilenames) {
-      final File testFile =
-          filesystem.file(getTestNameForExample(example, examples));
-      final String name = path.relative(testFile.absolute.path,
-          from: flutterRoot.absolute.path);
+      final File testFile = filesystem.file(getTestNameForExample(example, examples));
+      final String name = path.relative(testFile.absolute.path, from: flutterRoot.absolute.path);
       if (!testFile.existsSync()) {
         missingTests.add(testFile);
       } else if (_knownMissingTests.contains(name.replaceAll(r'\', '/'))) {
@@ -278,9 +253,7 @@ class SampleChecker {
     // Skip any that we know are missing.
     missingTests.removeWhere(
       (File test) {
-        final String name = path
-            .relative(test.absolute.path, from: flutterRoot.absolute.path)
-            .replaceAll(r'\', '/');
+        final String name = path.relative(test.absolute.path, from: flutterRoot.absolute.path).replaceAll(r'\', '/');
         return _knownMissingTests.contains(name);
       },
     );

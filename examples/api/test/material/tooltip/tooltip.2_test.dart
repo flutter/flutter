@@ -8,17 +8,14 @@ import 'package:flutter_api_samples/material/tooltip/tooltip.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tooltip is visible when hovering over text',
-      (WidgetTester tester) async {
-    const String tooltipText =
-        'I am a rich tooltip. I am another span of this rich tooltip';
+  testWidgets('Tooltip is visible when hovering over text', (WidgetTester tester) async {
+    const String tooltipText = 'I am a rich tooltip. I am another span of this rich tooltip';
 
     await tester.pumpWidget(
       const example.TooltipExampleApp(),
     );
 
-    TestGesture? gesture =
-        await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       if (gesture != null) {
         return gesture.removePointer();

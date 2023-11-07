@@ -24,8 +24,7 @@ class CheckboxListTileExample extends StatefulWidget {
   const CheckboxListTileExample({super.key});
 
   @override
-  State<CheckboxListTileExample> createState() =>
-      _CheckboxListTileExampleState();
+  State<CheckboxListTileExample> createState() => _CheckboxListTileExampleState();
 }
 
 class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {

@@ -60,10 +60,7 @@ void main() {
       const String homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
       for (final String dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem
-            .directory(homePath)
-            .childDirectory(dir)
-            .createSync(recursive: true);
+        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
 
@@ -91,32 +88,22 @@ void main() {
       final MockFlutterProject project = MockFlutterProject(ios);
       const List<String> targets = <String>['target1', 'target2'];
       const List<String> configs = <String>['config1', 'config2'];
-      ios.expectedProjectInfo =
-          XcodeProjectInfo(targets, configs, const <String>[], logger);
+      ios.expectedProjectInfo = XcodeProjectInfo(targets, configs, const <String>[], logger);
       await IOSAnalyze(
         project: project,
         option: IOSAnalyzeOption.listBuildOptions,
         logger: logger,
       ).analyze();
-      final Map<String, Object?> jsonOutput =
-          jsonDecode(logger.statusText) as Map<String, Object?>;
+      final Map<String, Object?> jsonOutput = jsonDecode(logger.statusText) as Map<String, Object?>;
       expect(jsonOutput['targets'], unorderedEquals(targets));
       expect(jsonOutput['configurations'], unorderedEquals(configs));
     });
 
     testUsingContext('throws if provide multiple path', () async {
-      final Directory tempDir =
-          fileSystem.systemTempDirectory.createTempSync('someTemp');
-      final Directory anotherTempDir =
-          fileSystem.systemTempDirectory.createTempSync('another');
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('someTemp');
+      final Directory anotherTempDir = fileSystem.systemTempDirectory.createTempSync('another');
       await expectLater(
-        runner.run(<String>[
-          'analyze',
-          '--ios',
-          '--list-build-options',
-          tempDir.path,
-          anotherTempDir.path
-        ]),
+        runner.run(<String>['analyze', '--ios', '--list-build-options', tempDir.path, anotherTempDir.path]),
         throwsA(
           isA<Exception>().having(
             (Exception e) => e.toString(),
@@ -128,15 +115,9 @@ void main() {
     });
 
     testUsingContext('throws if not enough parameters', () async {
-      final Directory tempDir =
-          fileSystem.systemTempDirectory.createTempSync('someTemp');
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('someTemp');
       await expectLater(
-        runner.run(<String>[
-          'analyze',
-          '--ios',
-          '--output-universal-link-settings',
-          tempDir.path
-        ]),
+        runner.run(<String>['analyze', '--ios', '--output-universal-link-settings', tempDir.path]),
         throwsA(
           isA<Exception>().having(
             (Exception e) => e.toString(),
@@ -163,13 +144,12 @@ class MockIosProject extends Fake implements IosProject {
   late XcodeProjectInfo expectedProjectInfo;
 
   @override
-  Future<String> outputsUniversalLinkSettings(
-      {required String configuration, required String target}) async {
+  Future<String> outputsUniversalLinkSettings({required String configuration, required String target}) async {
     outputConfiguration = configuration;
     outputTarget = target;
     return outputFileLocation;
   }
-
   @override
   Future<XcodeProjectInfo> projectInfo() async => expectedProjectInfo;
+
 }

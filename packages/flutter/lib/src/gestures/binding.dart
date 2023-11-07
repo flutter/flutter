@@ -20,8 +20,7 @@ import 'resampler.dart';
 
 export 'dart:ui' show Offset;
 
-export 'package:flutter/foundation.dart'
-    show DiagnosticsNode, InformationCollector;
+export 'package:flutter/foundation.dart' show DiagnosticsNode, InformationCollector;
 
 export 'arena.dart' show GestureArenaManager;
 export 'events.dart' show PointerEvent;
@@ -48,12 +47,10 @@ class SamplingClock {
 // SchedulerBinding's `currentSystemFrameTimeStamp` is used to determine
 // sample time.
 class _Resampler {
-  _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged,
-      this._samplingInterval);
+  _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged, this._samplingInterval);
 
   // Resamplers used to filter incoming pointer events.
-  final Map<int, PointerEventResampler> _resamplers =
-      <int, PointerEventResampler>{};
+  final Map<int, PointerEventResampler> _resamplers = <int, PointerEventResampler>{};
 
   // Flag to track if a frame callback has been scheduled.
   bool _frameCallbackScheduled = false;
@@ -126,8 +123,7 @@ class _Resampler {
     // updated into account. This allows us to advance sample
     // time without having to receive frame callbacks.
     final int samplingIntervalUs = _samplingInterval.inMicroseconds;
-    final int elapsedIntervals =
-        _frameTimeAge.elapsedMicroseconds ~/ samplingIntervalUs;
+    final int elapsedIntervals = _frameTimeAge.elapsedMicroseconds ~/ samplingIntervalUs;
     final int elapsedUs = elapsedIntervals * samplingIntervalUs;
     final Duration frameTime = _frameTime + Duration(microseconds: elapsedUs);
 
@@ -176,8 +172,7 @@ class _Resampler {
         _frameTimeAge.reset();
         // Reset timer to match phase of latest frame callback.
         _timer?.cancel();
-        _timer =
-            Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
+        _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
         // Trigger an immediate sample time change.
         _onSampleTimeChanged();
       }, debugLabel: 'Resampler.startTimer');
@@ -264,8 +259,7 @@ const Duration _samplingInterval = Duration(microseconds: 16667);
 ///
 /// When a [PointerUpEvent] is received, the [GestureArenaManager.sweep] method
 /// is invoked to force the gesture arena logic to terminate if necessary.
-mixin GestureBinding on BindingBase
-    implements HitTestable, HitTestDispatcher, HitTestTarget {
+mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
   @override
   void initInstances() {
     super.initInstances();
@@ -293,8 +287,7 @@ mixin GestureBinding on BindingBase
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
     try {
-      _pendingPointerEvents.addAll(
-          PointerEventConverter.expand(packet.data, _devicePixelRatioForView));
+      _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, _devicePixelRatioForView));
       if (!locked) {
         _flushPointerEventQueue();
       }
@@ -385,12 +378,8 @@ mixin GestureBinding on BindingBase
 
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
-    if (event is PointerDownEvent ||
-        event is PointerSignalEvent ||
-        event is PointerHoverEvent ||
-        event is PointerPanZoomStartEvent) {
-      assert(!_hitTests.containsKey(event.pointer),
-          'Pointer of ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly has a HitTestResult associated with it.');
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
+      assert(!_hitTests.containsKey(event.pointer), 'Pointer of ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
       hitTestInView(hitTestResult, event.position, event.viewId);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
@@ -398,14 +387,11 @@ mixin GestureBinding on BindingBase
       }
       assert(() {
         if (debugPrintHitTestResults) {
-          debugPrint(
-              '${event.toString(minLevel: DiagnosticLevel.debug)}: $hitTestResult');
+          debugPrint('${event.toString(minLevel: DiagnosticLevel.debug)}: $hitTestResult');
         }
         return true;
       }());
-    } else if (event is PointerUpEvent ||
-        event is PointerCancelEvent ||
-        event is PointerPanZoomEndEvent) {
+    } else if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down || event is PointerPanZoomUpdateEvent) {
       // Because events that occur with the pointer down (like
@@ -468,12 +454,10 @@ mixin GestureBinding on BindingBase
           exception: exception,
           stack: stack,
           library: 'gesture library',
-          context: ErrorDescription(
-              'while dispatching a non-hit-tested pointer event'),
+          context: ErrorDescription('while dispatching a non-hit-tested pointer event'),
           event: event,
           informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<PointerEvent>('Event', event,
-                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
           ],
         ));
       }
@@ -491,10 +475,8 @@ mixin GestureBinding on BindingBase
           event: event,
           hitTestEntry: entry,
           informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<PointerEvent>('Event', event,
-                style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<HitTestTarget>('Target', entry.target,
-                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty),
           ],
         ));
       }
@@ -533,7 +515,8 @@ mixin GestureBinding on BindingBase
     if (!locked) {
       if (resamplingEnabled) {
         _resampler.sample(samplingOffset, _samplingClock);
-      } else {
+      }
+      else {
         _resampler.stop();
       }
     }

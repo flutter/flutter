@@ -4,10 +4,8 @@
 
 import 'dart:async';
 
-import 'package:test_core/src/executable.dart'
-    as test; // ignore: implementation_imports
-import 'package:test_core/src/platform.dart' as hack
-    show registerPlatformPlugin; // ignore: implementation_imports
+import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
+import 'package:test_core/src/platform.dart' as hack show registerPlatformPlugin; // ignore: implementation_imports
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 
 export 'package:test_api/backend.dart' show Runtime;
@@ -17,8 +15,7 @@ abstract class TestWrapper {
   const factory TestWrapper() = _DefaultTestWrapper;
 
   Future<void> main(List<String> args);
-  void registerPlatformPlugin(Iterable<Runtime> runtimes,
-      FutureOr<PlatformPlugin> Function() platforms);
+  void registerPlatformPlugin(Iterable<Runtime> runtimes, FutureOr<PlatformPlugin> Function() platforms);
 }
 
 class _DefaultTestWrapper implements TestWrapper {
@@ -30,8 +27,7 @@ class _DefaultTestWrapper implements TestWrapper {
   }
 
   @override
-  void registerPlatformPlugin(Iterable<Runtime> runtimes,
-      FutureOr<PlatformPlugin> Function() platforms) {
+  void registerPlatformPlugin(Iterable<Runtime> runtimes, FutureOr<PlatformPlugin> Function() platforms) {
     hack.registerPlatformPlugin(runtimes, platforms);
   }
 }

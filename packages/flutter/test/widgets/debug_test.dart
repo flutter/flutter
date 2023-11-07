@@ -65,8 +65,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasTable control test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasTable control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -97,8 +96,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasMediaQuery control test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
@@ -118,29 +116,33 @@ void main() {
             expect(
               error.diagnostics.last.toStringDeep(),
               equalsIgnoringHashCodes(
-                  'No MediaQuery ancestor could be found starting from the context\n'
-                  'that was passed to MediaQuery.of(). This can happen because the\n'
-                  'context used is not a descendant of a View widget, which\n'
-                  'introduces a MediaQuery.\n'),
+                'No MediaQuery ancestor could be found starting from the context\n'
+                'that was passed to MediaQuery.of(). This can happen because the\n'
+                'context used is not a descendant of a View widget, which\n'
+                'introduces a MediaQuery.\n'
+              ),
             );
             expect(
               error.toStringDeep(),
-              startsWith('FlutterError\n'
-                  '   No MediaQuery widget ancestor found.\n'
-                  '   Builder widgets require a MediaQuery widget ancestor.\n'
-                  '   The specific widget that could not find a MediaQuery ancestor\n'
-                  '   was:\n'
-                  '     Builder\n'
-                  '   The ownership chain for the affected widget is: "Builder ←' // Full chain omitted, not relevant for test.
-                  ),
+              startsWith(
+                'FlutterError\n'
+                '   No MediaQuery widget ancestor found.\n'
+                '   Builder widgets require a MediaQuery widget ancestor.\n'
+                '   The specific widget that could not find a MediaQuery ancestor\n'
+                '   was:\n'
+                '     Builder\n'
+                '   The ownership chain for the affected widget is: "Builder ←' // Full chain omitted, not relevant for test.
+              ),
             );
             expect(
               error.toStringDeep(),
-              endsWith('[root]"\n' // End of ownership chain.
-                  '   No MediaQuery ancestor could be found starting from the context\n'
-                  '   that was passed to MediaQuery.of(). This can happen because the\n'
-                  '   context used is not a descendant of a View widget, which\n'
-                  '   introduces a MediaQuery.\n'),
+              endsWith(
+                '[root]"\n' // End of ownership chain.
+                '   No MediaQuery ancestor could be found starting from the context\n'
+                '   that was passed to MediaQuery.of(). This can happen because the\n'
+                '   context used is not a descendant of a View widget, which\n'
+                '   introduces a MediaQuery.\n'
+              ),
             );
           }
           return View(
@@ -230,8 +232,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasWidgetsLocalizations throws',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -250,8 +251,7 @@ void main() {
     );
 
     expect(
-      () => debugCheckHasWidgetsLocalizations(
-          noLocalizationsAvailable.currentContext!),
+      () => debugCheckHasWidgetsLocalizations(noLocalizationsAvailable.currentContext!),
       throwsA(isAssertionError.having(
         (AssertionError e) => e.message,
         'message',
@@ -259,18 +259,14 @@ void main() {
       )),
     );
 
-    expect(
-        debugCheckHasWidgetsLocalizations(
-            localizationsAvailable.currentContext!),
-        isTrue);
+    expect(debugCheckHasWidgetsLocalizations(localizationsAvailable.currentContext!), isTrue);
   });
 
   test('debugAssertAllWidgetVarsUnset', () {
     debugHighlightDeprecatedWidgets = true;
     late FlutterError error;
     try {
-      debugAssertAllWidgetVarsUnset(
-          'The value of a widget debug variable was changed by the test.');
+      debugAssertAllWidgetVarsUnset('The value of a widget debug variable was changed by the test.');
     } on FlutterError catch (e) {
       error = e;
     } finally {
@@ -285,8 +281,7 @@ void main() {
     debugHighlightDeprecatedWidgets = false;
   });
 
-  testWidgetsWithLeakTracking('debugCreator of layers should not be null',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCreator of layers should not be null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -295,8 +290,7 @@ void main() {
             child: Stack(
               children: <Widget>[
                 const ColorFiltered(
-                  colorFilter:
-                      ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
+                  colorFilter: ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
                   child: Placeholder(),
                 ),
                 const Opacity(
@@ -314,13 +308,13 @@ void main() {
                 ShaderMask(
                   shaderCallback: (Rect bounds) => const RadialGradient(
                     radius: 0.05,
-                    colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
+                    colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
                     tileMode: TileMode.mirror,
                   ).createShader(bounds),
                   child: const Placeholder(),
                 ),
                 CompositedTransformFollower(
-                  link: LayerLink(),
+                 link: LayerLink(),
                 ),
               ],
             ),
@@ -346,14 +340,12 @@ void main() {
     renderObject = tester.firstRenderObject(find.byType(ShaderMask));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
 
-    renderObject =
-        tester.firstRenderObject(find.byType(CompositedTransformFollower));
+    renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
   });
 }
 
-Future<void> pumpWidgetWithoutViewWrapper(
-    {required WidgetTester tester, required Widget widget}) {
+Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();

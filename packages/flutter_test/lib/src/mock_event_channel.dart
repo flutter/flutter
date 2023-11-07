@@ -23,8 +23,7 @@ abstract class MockStreamHandler {
   factory MockStreamHandler.inline({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
-  }) =>
-      _InlineMockStreamHandler(onListen: onListen, onCancel: onCancel);
+  }) => _InlineMockStreamHandler(onListen: onListen, onCancel: onCancel);
 
   /// Handler for the listen event.
   void onListen(Object? arguments, MockStreamHandlerEventSink events);
@@ -34,8 +33,7 @@ abstract class MockStreamHandler {
 }
 
 /// Typedef for the inline onListen callback.
-typedef MockStreamHandlerOnListenCallback = void Function(
-    Object? arguments, MockStreamHandlerEventSink events);
+typedef MockStreamHandlerOnListenCallback = void Function(Object? arguments, MockStreamHandlerEventSink events);
 
 /// Typedef for the inline onCancel callback.
 typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
@@ -51,8 +49,7 @@ class _InlineMockStreamHandler extends MockStreamHandler {
   final MockStreamHandlerOnCancelCallback? _onCancelInline;
 
   @override
-  void onListen(Object? arguments, MockStreamHandlerEventSink events) =>
-      _onListenInline(arguments, events);
+  void onListen(Object? arguments, MockStreamHandlerEventSink events) => _onListenInline(arguments, events);
 
   @override
   void onCancel(Object? arguments) => _onCancelInline?.call(arguments);
@@ -75,9 +72,7 @@ class MockStreamHandlerEventSink {
     required String code,
     String? message,
     Object? details,
-  }) =>
-      _sink.addError(
-          PlatformException(code: code, message: message, details: details));
+  }) => _sink.addError(PlatformException(code: code, message: message, details: details));
 
   /// Send an end of stream event.
   void endOfStream() => _sink.close();

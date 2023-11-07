@@ -13,8 +13,7 @@ const Color green = Color(0xFF00FF00);
 const Color yellow = Color(0xFFFFFF00);
 
 void main() {
-  testWidgetsWithLeakTracking('SlottedRenderObjectWidget test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SlottedRenderObjectWidget test', (WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
         height: 100,
@@ -32,19 +31,17 @@ void main() {
 
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsOneWidget);
-    expect(tester.getSize(find.byType(_Diagonal)),
-        const Size(80 + 110, 100 + 120));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 80, 100),
-            color: yellow,
-          )
-          ..rect(
-            rect: const Rect.fromLTWH(80, 100, 110, 120),
-            color: green,
-          ));
+    expect(tester.getSize(find.byType(_Diagonal)), const Size(80 + 110, 100 + 120));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 80, 100),
+        color: yellow,
+      )
+      ..rect(
+        rect: const Rect.fromLTWH(80, 100, 110, 120),
+        color: green,
+      )
+    );
 
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
@@ -63,19 +60,17 @@ void main() {
 
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsOneWidget);
-    expect(tester.getSize(find.byType(_Diagonal)),
-        const Size(100 + 210, 200 + 220));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 100, 200),
-            color: yellow,
-          )
-          ..rect(
-            rect: const Rect.fromLTWH(100, 200, 210, 220),
-            color: green,
-          ));
+    expect(tester.getSize(find.byType(_Diagonal)), const Size(100 + 210, 200 + 220));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 100, 200),
+        color: yellow,
+      )
+      ..rect(
+        rect: const Rect.fromLTWH(100, 200, 210, 220),
+        color: green,
+      )
+    );
 
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
@@ -95,19 +90,17 @@ void main() {
 
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsOneWidget);
-    expect(tester.getSize(find.byType(_Diagonal)),
-        const Size(100 + 220, 200 + 230));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 100, 200),
-            color: yellow,
-          )
-          ..rect(
-            rect: const Rect.fromLTWH(100, 200, 220, 230),
-            color: green,
-          ));
+    expect(tester.getSize(find.byType(_Diagonal)), const Size(100 + 220, 200 + 230));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 100, 200),
+        color: yellow,
+      )
+      ..rect(
+        rect: const Rect.fromLTWH(100, 200, 220, 230),
+        color: green,
+      )
+    );
 
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
@@ -121,13 +114,12 @@ void main() {
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsNothing);
     expect(tester.getSize(find.byType(_Diagonal)), const Size(100, 200));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 100, 200),
-            color: yellow,
-          ));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 100, 200),
+        color: yellow,
+      )
+    );
 
     await tester.pumpWidget(buildWidget());
     expect(find.text('topLeft'), findsNothing);
@@ -140,26 +132,19 @@ void main() {
   });
 
   test('nameForSlot', () {
-    expect(_RenderDiagonal().publicNameForSlot(_DiagonalSlot.bottomRight),
-        'bottomRight');
-    expect(
-        _RenderDiagonal().publicNameForSlot(_DiagonalSlot.topLeft), 'topLeft');
+    expect(_RenderDiagonal().publicNameForSlot(_DiagonalSlot.bottomRight), 'bottomRight');
+    expect(_RenderDiagonal().publicNameForSlot(_DiagonalSlot.topLeft), 'topLeft');
     final _Slot slot = _Slot();
     expect(_RenderTest().publicNameForSlot(slot), slot.toString());
   });
 
   testWidgetsWithLeakTracking('key reparenting', (WidgetTester tester) async {
-    const Widget widget1 =
-        SizedBox(key: ValueKey<String>('smol'), height: 10, width: 10);
-    const Widget widget2 =
-        SizedBox(key: ValueKey<String>('big'), height: 100, width: 100);
-    const Widget nullWidget =
-        SizedBox(key: ValueKey<String>('null'), height: 50, width: 50);
+    const Widget widget1 = SizedBox(key: ValueKey<String>('smol'), height: 10, width: 10);
+    const Widget widget2 = SizedBox(key: ValueKey<String>('big'), height: 100, width: 100);
+    const Widget nullWidget = SizedBox(key: ValueKey<String>('null'), height: 50, width: 50);
 
-    await tester.pumpWidget(buildWidget(
-        topLeft: widget1, bottomRight: widget2, nullSlot: nullWidget));
-    final _RenderDiagonal renderObject =
-        tester.renderObject(find.byType(_Diagonal));
+    await tester.pumpWidget(buildWidget(topLeft: widget1, bottomRight: widget2, nullSlot: nullWidget));
+    final _RenderDiagonal renderObject = tester.renderObject(find.byType(_Diagonal));
     expect(renderObject._topLeft!.size, const Size(10, 10));
     expect(renderObject._bottomRight!.size, const Size(100, 100));
     expect(renderObject._nullSlot!.size, const Size(50, 50));
@@ -169,8 +154,7 @@ void main() {
     final Element nullWidgetElement = tester.element(find.byWidget(nullWidget));
 
     // Swapping 1 and 2.
-    await tester.pumpWidget(buildWidget(
-        topLeft: widget2, bottomRight: widget1, nullSlot: nullWidget));
+    await tester.pumpWidget(buildWidget(topLeft: widget2, bottomRight: widget1, nullSlot: nullWidget));
     expect(renderObject._topLeft!.size, const Size(100, 100));
     expect(renderObject._bottomRight!.size, const Size(10, 10));
     expect(renderObject._nullSlot!.size, const Size(50, 50));
@@ -179,8 +163,7 @@ void main() {
     expect(nullWidgetElement, same(tester.element(find.byWidget(nullWidget))));
 
     // Shifting slots
-    await tester.pumpWidget(buildWidget(
-        topLeft: nullWidget, bottomRight: widget2, nullSlot: widget1));
+    await tester.pumpWidget(buildWidget(topLeft: nullWidget, bottomRight: widget2, nullSlot: widget1));
     expect(renderObject._topLeft!.size, const Size(50, 50));
     expect(renderObject._bottomRight!.size, const Size(100, 100));
     expect(renderObject._nullSlot!.size, const Size(10, 10));
@@ -205,29 +188,23 @@ void main() {
   });
 
   testWidgets('duplicated key error message', (WidgetTester tester) async {
-    const Widget widget1 =
-        SizedBox(key: ValueKey<String>('widget 1'), height: 10, width: 10);
-    const Widget widget2 =
-        SizedBox(key: ValueKey<String>('widget 1'), height: 100, width: 100);
-    const Widget widget3 =
-        SizedBox(key: ValueKey<String>('widget 1'), height: 50, width: 50);
+    const Widget widget1 = SizedBox(key: ValueKey<String>('widget 1'), height: 10, width: 10);
+    const Widget widget2 = SizedBox(key: ValueKey<String>('widget 1'), height: 100, width: 100);
+    const Widget widget3 = SizedBox(key: ValueKey<String>('widget 1'), height: 50, width: 50);
 
-    await tester.pumpWidget(
-        buildWidget(topLeft: widget1, bottomRight: widget2, nullSlot: widget3));
+    await tester.pumpWidget(buildWidget(topLeft: widget1, bottomRight: widget2, nullSlot: widget3));
 
-    expect(
-        (tester.takeException() as FlutterError).toString(),
-        equalsIgnoringHashCodes(
-            'Multiple widgets used the same key in _Diagonal.\n'
-            "The key [<'widget 1'>] was used by multiple widgets. The offending widgets were:\n"
-            "  - SizedBox-[<'widget 1'>](width: 50.0, height: 50.0, renderObject: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT)\n"
-            "  - SizedBox-[<'widget 1'>](width: 10.0, height: 10.0, renderObject: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT)\n"
-            "  - SizedBox-[<'widget 1'>](width: 100.0, height: 100.0, renderObject: RenderConstrainedBox#a4685 NEEDS-LAYOUT NEEDS-PAINT)\n"
-            'A key can only be specified on one widget at a time in the same parent widget.'));
+    expect((tester.takeException() as FlutterError).toString(), equalsIgnoringHashCodes(
+     'Multiple widgets used the same key in _Diagonal.\n'
+     "The key [<'widget 1'>] was used by multiple widgets. The offending widgets were:\n"
+     "  - SizedBox-[<'widget 1'>](width: 50.0, height: 50.0, renderObject: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT)\n"
+     "  - SizedBox-[<'widget 1'>](width: 10.0, height: 10.0, renderObject: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT)\n"
+     "  - SizedBox-[<'widget 1'>](width: 100.0, height: 100.0, renderObject: RenderConstrainedBox#a4685 NEEDS-LAYOUT NEEDS-PAINT)\n"
+     'A key can only be specified on one widget at a time in the same parent widget.'
+    ));
   });
 
-  testWidgetsWithLeakTracking('debugDescribeChildren',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugDescribeChildren', (WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
       topLeft: const SizedBox(
         height: 100,
@@ -240,37 +217,38 @@ void main() {
     ));
 
     expect(
-        tester.renderObject(find.byType(_Diagonal)).toStringDeep(),
-        equalsIgnoringHashCodes(
-          '_RenderDiagonal#00000 relayoutBoundary=up1\n'
-          ' │ creator: _Diagonal ← Align ← Directionality ← MediaQuery ←\n'
-          ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
-          ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-          ' │   [root]\n'
-          ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
-          ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
-          ' │ size: Size(190.0, 220.0)\n'
-          ' │\n'
-          ' ├─topLeft: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
-          ' │   creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
-          ' │     MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
-          ' │     _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
-          ' │     TestFlutterView#00000] ← View ← [root]\n'
-          ' │   parentData: offset=Offset(0.0, 0.0) (can use size)\n'
-          ' │   constraints: BoxConstraints(unconstrained)\n'
-          ' │   size: Size(80.0, 100.0)\n'
-          ' │   additionalConstraints: BoxConstraints(w=80.0, h=100.0)\n'
-          ' │\n'
-          ' └─bottomRight: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
-          '     creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
-          '       MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
-          '       _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
-          '       TestFlutterView#00000] ← View ← [root]\n'
-          '     parentData: offset=Offset(80.0, 100.0) (can use size)\n'
-          '     constraints: BoxConstraints(unconstrained)\n'
-          '     size: Size(110.0, 120.0)\n'
-          '     additionalConstraints: BoxConstraints(w=110.0, h=120.0)\n',
-        ));
+      tester.renderObject(find.byType(_Diagonal)).toStringDeep(),
+      equalsIgnoringHashCodes(
+        '_RenderDiagonal#00000 relayoutBoundary=up1\n'
+        ' │ creator: _Diagonal ← Align ← Directionality ← MediaQuery ←\n'
+        ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
+        ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+        ' │   [root]\n'
+        ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
+        ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
+        ' │ size: Size(190.0, 220.0)\n'
+        ' │\n'
+        ' ├─topLeft: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
+        ' │   creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
+        ' │     MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
+        ' │     _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+        ' │     TestFlutterView#00000] ← View ← [root]\n'
+        ' │   parentData: offset=Offset(0.0, 0.0) (can use size)\n'
+        ' │   constraints: BoxConstraints(unconstrained)\n'
+        ' │   size: Size(80.0, 100.0)\n'
+        ' │   additionalConstraints: BoxConstraints(w=80.0, h=100.0)\n'
+        ' │\n'
+        ' └─bottomRight: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
+        '     creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
+        '       MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
+        '       _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+        '       TestFlutterView#00000] ← View ← [root]\n'
+        '     parentData: offset=Offset(80.0, 100.0) (can use size)\n'
+        '     constraints: BoxConstraints(unconstrained)\n'
+        '     size: Size(110.0, 120.0)\n'
+        '     additionalConstraints: BoxConstraints(w=110.0, h=120.0)\n',
+      )
+    );
   });
 }
 
@@ -293,8 +271,7 @@ enum _DiagonalSlot {
   bottomRight,
 }
 
-class _Diagonal extends RenderObjectWidget
-    with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot?, RenderBox> {
+class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot?, RenderBox> {
   const _Diagonal({
     this.topLeft,
     this.bottomRight,
@@ -306,8 +283,7 @@ class _Diagonal extends RenderObjectWidget
   final Widget? nullSlot;
 
   @override
-  Iterable<_DiagonalSlot?> get slots =>
-      <_DiagonalSlot?>[null, ..._DiagonalSlot.values];
+  Iterable<_DiagonalSlot?> get slots => <_DiagonalSlot?>[null, ..._DiagonalSlot.values];
 
   @override
   Widget? childForSlot(_DiagonalSlot? slot) {
@@ -322,16 +298,14 @@ class _Diagonal extends RenderObjectWidget
   }
 
   @override
-  SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox>
-      createRenderObject(
+  SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox> createRenderObject(
     BuildContext context,
   ) {
     return _RenderDiagonal();
   }
 }
 
-class _RenderDiagonal extends RenderBox
-    with SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox> {
+class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox> {
   RenderBox? get _topLeft => childForSlot(_DiagonalSlot.topLeft);
   RenderBox? get _bottomRight => childForSlot(_DiagonalSlot.bottomRight);
   RenderBox? get _nullSlot => childForSlot(null);
@@ -398,7 +372,6 @@ class _Slot {
   String toString() => describeIdentity(this);
 }
 
-class _RenderTest extends RenderBox
-    with SlottedContainerRenderObjectMixin<_Slot, RenderBox> {
+class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot, RenderBox> {
   String publicNameForSlot(_Slot slot) => debugNameForSlot(slot);
 }

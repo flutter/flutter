@@ -62,8 +62,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _dropdownValue = newValue;
               });
             },
-            items: <String>['One', 'Two', 'Free', 'Four']
-                .map<DropdownMenuItem<String>>((String value) {
+            items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
@@ -168,8 +167,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                       child: ListBody(
                         children: <Widget>[
                           Text('DropdownButtonFormField: "$_dropdownValue"'),
-                          Text(
-                              'TextFormField: "${_textEditingController.text}"'),
+                          Text('TextFormField: "${_textEditingController.text}"'),
                           Text('RawAutocomplete: "$_autocompleteSelection"'),
                         ],
                       ),

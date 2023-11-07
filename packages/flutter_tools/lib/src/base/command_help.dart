@@ -18,10 +18,10 @@ class CommandHelp {
     required AnsiTerminal terminal,
     required Platform platform,
     required OutputPreferences outputPreferences,
-  })  : _logger = logger,
-        _terminal = terminal,
-        _platform = platform,
-        _outputPreferences = outputPreferences;
+  }) : _logger = logger,
+       _terminal = terminal,
+       _platform = platform,
+       _outputPreferences = outputPreferences;
 
   final Logger _logger;
 
@@ -103,8 +103,10 @@ class CommandHelp {
     'debugDumpFocusTree',
   );
 
-  late final CommandHelpOption g =
-      _makeOption('g', 'Run source code generators.');
+  late final CommandHelpOption g = _makeOption(
+    'g',
+    'Run source code generators.'
+  );
 
   late final CommandHelpOption hWithDetails = _makeOption(
     'h',
@@ -179,9 +181,7 @@ class CommandHelp {
   // When updating the list above, see the notes above the list regarding order
   // and tests.
 
-  CommandHelpOption _makeOption(
-    String key,
-    String description, [
+  CommandHelpOption _makeOption(String key, String description, [
     String inParenthesis = '',
   ]) {
     return CommandHelpOption(
@@ -206,10 +206,10 @@ class CommandHelpOption {
     required Terminal terminal,
     required Platform platform,
     required OutputPreferences outputPreferences,
-  })  : _logger = logger,
-        _terminal = terminal,
-        _platform = platform,
-        _outputPreferences = outputPreferences;
+  }) : _logger = logger,
+       _terminal = terminal,
+       _platform = platform,
+       _outputPreferences = outputPreferences;
 
   final Logger _logger;
 
@@ -221,10 +221,8 @@ class CommandHelpOption {
 
   /// The key associated with this command.
   final String key;
-
   /// A description of what this command does.
   final String description;
-
   /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
@@ -245,8 +243,9 @@ class CommandHelpOption {
       _outputPreferences.wrapColumn,
       maxLineWidth,
     );
-    final int adjustedMessageLength =
-        _platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length;
+    final int adjustedMessageLength = _platform.stdoutSupportsAnsi
+      ? _rawMessageLength + 1
+      : message.length;
     int width = maxWidth - adjustedMessageLength;
     final String parentheticalText = '($inParenthesis)';
     if (width < parentheticalText.length) {

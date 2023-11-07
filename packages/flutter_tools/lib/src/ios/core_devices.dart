@@ -27,8 +27,7 @@ class IOSCoreDeviceControl {
     required Xcode xcode,
     required FileSystem fileSystem,
   })  : _logger = logger,
-        _processUtils =
-            ProcessUtils(logger: logger, processManager: processManager),
+        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
         _xcode = xcode,
         _fileSystem = fileSystem;
 
@@ -62,8 +61,7 @@ class IOSCoreDeviceControl {
       validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
     }
 
-    final Directory tempDirectory =
-        _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_list.json');
     output.createSync();
 
@@ -85,21 +83,18 @@ class IOSCoreDeviceControl {
       _logger.printTrace(stringOutput);
 
       try {
-        final Object? decodeResult =
-            (json.decode(stringOutput) as Map<String, Object?>)['result'];
+        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
         if (decodeResult is Map<String, Object?>) {
           final Object? decodeDevices = decodeResult['devices'];
           if (decodeDevices is List<Object?>) {
             return decodeDevices;
           }
         }
-        _logger.printError(
-            'devicectl returned unexpected JSON response: $stringOutput');
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return <Object?>[];
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger
-            .printError('devicectl returned non-JSON response: $stringOutput');
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
         return <Object?>[];
       }
     } on ProcessException catch (err) {
@@ -115,8 +110,7 @@ class IOSCoreDeviceControl {
   }) async {
     final List<IOSCoreDevice> devices = <IOSCoreDevice>[];
 
-    final List<Object?> devicesSection =
-        await _listCoreDevices(timeout: timeout);
+    final List<Object?> devicesSection = await _listCoreDevices(timeout: timeout);
     for (final Object? deviceObject in devicesSection) {
       if (deviceObject is Map<String, Object?>) {
         devices.add(IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger));
@@ -137,8 +131,7 @@ class IOSCoreDeviceControl {
       return <Object?>[];
     }
 
-    final Directory tempDirectory =
-        _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_app_list.json');
     output.createSync();
 
@@ -150,8 +143,9 @@ class IOSCoreDeviceControl {
       'apps',
       '--device',
       deviceId,
-      if (bundleId != null) '--bundle-id',
-      bundleId!,
+      if (bundleId != null)
+        '--bundle-id',
+        bundleId!,
       '--json-output',
       output.path,
     ];
@@ -162,21 +156,18 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
 
       try {
-        final Object? decodeResult =
-            (json.decode(stringOutput) as Map<String, Object?>)['result'];
+        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
         if (decodeResult is Map<String, Object?>) {
           final Object? decodeApps = decodeResult['apps'];
           if (decodeApps is List<Object?>) {
             return decodeApps;
           }
         }
-        _logger.printError(
-            'devicectl returned unexpected JSON response: $stringOutput');
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return <Object?>[];
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger
-            .printError('devicectl returned non-JSON response: $stringOutput');
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
         return <Object?>[];
       }
     } on ProcessException catch (err) {
@@ -194,8 +185,7 @@ class IOSCoreDeviceControl {
   }) async {
     final List<IOSCoreDeviceInstalledApp> apps = <IOSCoreDeviceInstalledApp>[];
 
-    final List<Object?> appsData =
-        await _listInstalledApps(deviceId: deviceId, bundleId: bundleId);
+    final List<Object?> appsData = await _listInstalledApps(deviceId: deviceId, bundleId: bundleId);
     for (final Object? appObject in appsData) {
       if (appObject is Map<String, Object?>) {
         apps.add(IOSCoreDeviceInstalledApp.fromBetaJson(appObject));
@@ -227,8 +217,7 @@ class IOSCoreDeviceControl {
       return false;
     }
 
-    final Directory tempDirectory =
-        _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('install_results.json');
     output.createSync();
 
@@ -250,19 +239,15 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
 
       try {
-        final Object? decodeResult =
-            (json.decode(stringOutput) as Map<String, Object?>)['info'];
-        if (decodeResult is Map<String, Object?> &&
-            decodeResult['outcome'] == 'success') {
+        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['info'];
+        if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
           return true;
         }
-        _logger.printError(
-            'devicectl returned unexpected JSON response: $stringOutput');
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger
-            .printError('devicectl returned non-JSON response: $stringOutput');
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
         return false;
       }
     } on ProcessException catch (err) {
@@ -284,8 +269,7 @@ class IOSCoreDeviceControl {
       return false;
     }
 
-    final Directory tempDirectory =
-        _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('uninstall_results.json');
     output.createSync();
 
@@ -307,19 +291,15 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
 
       try {
-        final Object? decodeResult =
-            (json.decode(stringOutput) as Map<String, Object?>)['info'];
-        if (decodeResult is Map<String, Object?> &&
-            decodeResult['outcome'] == 'success') {
+        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['info'];
+        if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
           return true;
         }
-        _logger.printError(
-            'devicectl returned unexpected JSON response: $stringOutput');
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger
-            .printError('devicectl returned non-JSON response: $stringOutput');
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
         return false;
       }
     } on ProcessException catch (err) {
@@ -340,8 +320,7 @@ class IOSCoreDeviceControl {
       return false;
     }
 
-    final Directory tempDirectory =
-        _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('launch_results.json');
     output.createSync();
 
@@ -364,19 +343,15 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
 
       try {
-        final Object? decodeResult =
-            (json.decode(stringOutput) as Map<String, Object?>)['info'];
-        if (decodeResult is Map<String, Object?> &&
-            decodeResult['outcome'] == 'success') {
+        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['info'];
+        if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
           return true;
         }
-        _logger.printError(
-            'devicectl returned unexpected JSON response: $stringOutput');
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger
-            .printError('devicectl returned non-JSON response: $stringOutput');
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
         return false;
       }
     } on ProcessException catch (err) {
@@ -417,23 +392,19 @@ class IOSCoreDevice {
     Map<String, Object?> data, {
     required Logger logger,
   }) {
-    final List<_IOSCoreDeviceCapability> capabilitiesList =
-        <_IOSCoreDeviceCapability>[];
+    final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[];
     if (data['capabilities'] is List<Object?>) {
-      final List<Object?> capabilitiesData =
-          data['capabilities']! as List<Object?>;
+      final List<Object?> capabilitiesData = data['capabilities']! as List<Object?>;
       for (final Object? capabilityData in capabilitiesData) {
         if (capabilityData != null && capabilityData is Map<String, Object?>) {
-          capabilitiesList
-              .add(_IOSCoreDeviceCapability.fromBetaJson(capabilityData));
+          capabilitiesList.add(_IOSCoreDeviceCapability.fromBetaJson(capabilityData));
         }
       }
     }
 
     _IOSCoreDeviceConnectionProperties? connectionProperties;
     if (data['connectionProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> connectionPropertiesData =
-          data['connectionProperties']! as Map<String, Object?>;
+      final Map<String, Object?> connectionPropertiesData = data['connectionProperties']! as Map<String, Object?>;
       connectionProperties = _IOSCoreDeviceConnectionProperties.fromBetaJson(
         connectionPropertiesData,
         logger: logger,
@@ -442,16 +413,13 @@ class IOSCoreDevice {
 
     IOSCoreDeviceProperties? deviceProperties;
     if (data['deviceProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> devicePropertiesData =
-          data['deviceProperties']! as Map<String, Object?>;
-      deviceProperties =
-          IOSCoreDeviceProperties.fromBetaJson(devicePropertiesData);
+      final Map<String, Object?> devicePropertiesData = data['deviceProperties']! as Map<String, Object?>;
+      deviceProperties = IOSCoreDeviceProperties.fromBetaJson(devicePropertiesData);
     }
 
     _IOSCoreDeviceHardwareProperties? hardwareProperties;
     if (data['hardwareProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> hardwarePropertiesData =
-          data['hardwareProperties']! as Map<String, Object?>;
+      final Map<String, Object?> hardwarePropertiesData = data['hardwareProperties']! as Map<String, Object?>;
       hardwareProperties = _IOSCoreDeviceHardwareProperties.fromBetaJson(
         hardwarePropertiesData,
         logger: logger,
@@ -496,6 +464,7 @@ class IOSCoreDevice {
   final String? coreDeviceIdentifer;
   final String? visibilityClass;
 }
+
 
 class _IOSCoreDeviceCapability {
   _IOSCoreDeviceCapability._({
@@ -590,9 +559,7 @@ class _IOSCoreDeviceConnectionProperties {
     }
     return _IOSCoreDeviceConnectionProperties._(
       authenticationType: data['authenticationType']?.toString(),
-      isMobileDeviceOnly: data['isMobileDeviceOnly'] is bool?
-          ? data['isMobileDeviceOnly'] as bool?
-          : null,
+      isMobileDeviceOnly: data['isMobileDeviceOnly'] is bool? ? data['isMobileDeviceOnly'] as bool? : null,
       lastConnectionDate: data['lastConnectionDate']?.toString(),
       localHostnames: localHostnames,
       pairingState: data['pairingState']?.toString(),
@@ -651,24 +618,16 @@ class IOSCoreDeviceProperties {
   /// }
   factory IOSCoreDeviceProperties.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceProperties._(
-      bootedFromSnapshot: data['bootedFromSnapshot'] is bool?
-          ? data['bootedFromSnapshot'] as bool?
-          : null,
+      bootedFromSnapshot: data['bootedFromSnapshot'] is bool? ? data['bootedFromSnapshot'] as bool? : null,
       bootedSnapshotName: data['bootedSnapshotName']?.toString(),
       bootState: data['bootState']?.toString(),
-      ddiServicesAvailable: data['ddiServicesAvailable'] is bool?
-          ? data['ddiServicesAvailable'] as bool?
-          : null,
+      ddiServicesAvailable: data['ddiServicesAvailable'] is bool? ? data['ddiServicesAvailable'] as bool? : null,
       developerModeStatus: data['developerModeStatus']?.toString(),
-      hasInternalOSBuild: data['hasInternalOSBuild'] is bool?
-          ? data['hasInternalOSBuild'] as bool?
-          : null,
+      hasInternalOSBuild: data['hasInternalOSBuild'] is bool? ? data['hasInternalOSBuild'] as bool? : null,
       name: data['name']?.toString(),
       osBuildUpdate: data['osBuildUpdate']?.toString(),
       osVersionNumber: data['osVersionNumber']?.toString(),
-      rootFileSystemIsWritable: data['rootFileSystemIsWritable'] is bool?
-          ? data['rootFileSystemIsWritable'] as bool?
-          : null,
+      rootFileSystemIsWritable: data['rootFileSystemIsWritable'] is bool? ? data['rootFileSystemIsWritable'] as bool? : null,
       screenViewingURL: data['screenViewingURL']?.toString(),
     );
   }
@@ -746,8 +705,7 @@ class _IOSCoreDeviceHardwareProperties {
   }) {
     _IOSCoreDeviceCPUType? cpuType;
     if (data['cpuType'] is Map<String, Object?>) {
-      cpuType = _IOSCoreDeviceCPUType.fromBetaJson(
-          data['cpuType']! as Map<String, Object?>);
+      cpuType = _IOSCoreDeviceCPUType.fromBetaJson(data['cpuType']! as Map<String, Object?>);
     }
 
     List<_IOSCoreDeviceCPUType>? supportedCPUTypes;
@@ -764,13 +722,11 @@ class _IOSCoreDeviceHardwareProperties {
 
     List<int>? supportedDeviceFamilies;
     if (data['supportedDeviceFamilies'] is List<Object?>) {
-      final List<Object?> values =
-          data['supportedDeviceFamilies']! as List<Object?>;
+      final List<Object?> values = data['supportedDeviceFamilies']! as List<Object?>;
       try {
         supportedDeviceFamilies = List<int>.from(values);
       } on TypeError {
-        logger
-            .printTrace('Error parsing supportedDeviceFamilies value: $values');
+        logger.printTrace('Error parsing supportedDeviceFamilies value: $values');
       }
     }
 
@@ -779,9 +735,7 @@ class _IOSCoreDeviceHardwareProperties {
       deviceType: data['deviceType']?.toString(),
       ecid: data['ecid'] is int? ? data['ecid'] as int? : null,
       hardwareModel: data['hardwareModel']?.toString(),
-      internalStorageCapacity: data['internalStorageCapacity'] is int?
-          ? data['internalStorageCapacity'] as int?
-          : null,
+      internalStorageCapacity: data['internalStorageCapacity'] is int? ? data['internalStorageCapacity'] as int? : null,
       marketingName: data['marketingName']?.toString(),
       platform: data['platform']?.toString(),
       productType: data['productType']?.toString(),
@@ -873,16 +827,12 @@ class IOSCoreDeviceInstalledApp {
   factory IOSCoreDeviceInstalledApp.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceInstalledApp._(
       appClip: data['appClip'] is bool? ? data['appClip'] as bool? : null,
-      builtByDeveloper: data['builtByDeveloper'] is bool?
-          ? data['builtByDeveloper'] as bool?
-          : null,
+      builtByDeveloper: data['builtByDeveloper'] is bool? ? data['builtByDeveloper'] as bool? : null,
       bundleIdentifier: data['bundleIdentifier']?.toString(),
       bundleVersion: data['bundleVersion']?.toString(),
-      defaultApp:
-          data['defaultApp'] is bool? ? data['defaultApp'] as bool? : null,
+      defaultApp: data['defaultApp'] is bool? ? data['defaultApp'] as bool? : null,
       hidden: data['hidden'] is bool? ? data['hidden'] as bool? : null,
-      internalApp:
-          data['internalApp'] is bool? ? data['internalApp'] as bool? : null,
+      internalApp: data['internalApp'] is bool? ? data['internalApp'] as bool? : null,
       name: data['name']?.toString(),
       removable: data['removable'] is bool? ? data['removable'] as bool? : null,
       url: data['url']?.toString(),

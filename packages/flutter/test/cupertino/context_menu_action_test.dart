@@ -83,8 +83,7 @@ void main() {
     expect(wasPressed, true);
   });
 
-  testWidgetsWithLeakTracking('turns grey when pressed and held',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('turns grey when pressed and held', (WidgetTester tester) async {
     await tester.pumpWidget(getApp());
     expect(find.byType(CupertinoContextMenuAction),
         paints..rect(color: kBackgroundColor.color));
@@ -119,16 +118,14 @@ void main() {
         paints..rect(color: kBackgroundColor.darkColor));
   });
 
-  testWidgetsWithLeakTracking(
-      'icon and textStyle colors are correct out of the box',
+  testWidgetsWithLeakTracking('icon and textStyle colors are correct out of the box',
       (WidgetTester tester) async {
     await tester.pumpWidget(getApp());
     expect(getTextStyle(tester).color, CupertinoColors.label);
     expect(getIcon(tester).color, CupertinoColors.label);
   });
 
-  testWidgetsWithLeakTracking(
-      'icon and textStyle colors are correct for destructive actions',
+  testWidgetsWithLeakTracking('icon and textStyle colors are correct for destructive actions',
       (WidgetTester tester) async {
     await tester.pumpWidget(getApp(isDestructiveAction: true));
     expect(getTextStyle(tester).color, kDestructiveActionColor);

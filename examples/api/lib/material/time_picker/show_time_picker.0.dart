@@ -130,8 +130,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                 maxCrossAxisExtent: 350,
                 mainAxisSpacing: 4,
                 // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
-                mainAxisExtent:
-                    200 * MediaQuery.textScalerOf(context).textScaleFactor,
+                mainAxisExtent: 200 * MediaQuery.textScalerOf(context).textScaleFactor,
                 crossAxisSpacing: 4,
               ),
               children: <Widget>[
@@ -160,8 +159,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                   value: orientation,
                   title: '$Orientation',
                   choiceLabels: <Orientation?, String>{
-                    for (final Orientation choice in Orientation.values)
-                      choice: choice.name,
+                    for (final Orientation choice in Orientation.values) choice: choice.name,
                     null: 'from MediaQuery',
                   },
                   onChanged: _orientationChanged,
@@ -232,8 +230,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                     },
                   ),
                 ),
-                if (selectedTime != null)
-                  Text('Selected time: ${selectedTime!.format(context)}'),
+                if (selectedTime != null) Text('Selected time: ${selectedTime!.format(context)}'),
               ],
             ),
           ),
@@ -354,8 +351,7 @@ class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
             onChanged: widget.onChanged,
           ),
         ),
-        GestureDetector(
-            onTap: () => widget.onChanged(widget.value), child: widget.child),
+        GestureDetector(onTap: () => widget.onChanged(widget.value), child: widget.child),
       ],
     );
   }

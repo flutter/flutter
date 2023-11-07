@@ -10,13 +10,10 @@ import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 
-const double _kOffset =
-    40.0; // distance to bottom of banner, at a 45 degree angle inwards
+const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
 const double _kHeight = 12.0; // height of banner
-const double _kBottomOffset =
-    _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
-const Rect _kRect =
-    Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
+const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
+const Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
 
 const Color _kColor = Color(0xA0B71C1C);
 const TextStyle _kTextStyle = TextStyle(
@@ -143,7 +140,8 @@ class BannerPainter extends CustomPainter {
 
   void _prepare() {
     _paintShadow = _shadow.toPaint();
-    _paintBanner = Paint()..color = color;
+    _paintBanner = Paint()
+      ..color = color;
     _textPainter?.dispose();
     _textPainter = TextPainter(
       text: TextSpan(style: textStyle, text: message),
@@ -165,18 +163,15 @@ class BannerPainter extends CustomPainter {
       ..drawRect(_kRect, _paintBanner);
     const double width = _kOffset * 2.0;
     _textPainter!.layout(minWidth: width, maxWidth: width);
-    _textPainter!.paint(
-        canvas,
-        _kRect.topLeft +
-            Offset(0.0, (_kRect.height - _textPainter!.height) / 2.0));
+    _textPainter!.paint(canvas, _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter!.height) / 2.0));
   }
 
   @override
   bool shouldRepaint(BannerPainter oldDelegate) {
-    return message != oldDelegate.message ||
-        location != oldDelegate.location ||
-        color != oldDelegate.color ||
-        textStyle != oldDelegate.textStyle;
+    return message != oldDelegate.message
+        || location != oldDelegate.location
+        || color != oldDelegate.color
+        || textStyle != oldDelegate.textStyle;
   }
 
   @override
@@ -325,8 +320,7 @@ class _BannerState extends State<Banner> {
 
   @override
   Widget build(BuildContext context) {
-    assert((widget.textDirection != null && widget.layoutDirection != null) ||
-        debugCheckHasDirectionality(context));
+    assert((widget.textDirection != null && widget.layoutDirection != null) || debugCheckHasDirectionality(context));
 
     _painter?.dispose();
     _painter = BannerPainter(
@@ -348,13 +342,9 @@ class _BannerState extends State<Banner> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('message', widget.message, showName: false));
-    properties.add(EnumProperty<TextDirection>(
-        'textDirection', widget.textDirection,
-        defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', widget.textDirection, defaultValue: null));
     properties.add(EnumProperty<BannerLocation>('location', widget.location));
-    properties.add(EnumProperty<TextDirection>(
-        'layoutDirection', widget.layoutDirection,
-        defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('layoutDirection', widget.layoutDirection, defaultValue: null));
     properties.add(ColorProperty('color', widget.color, showName: false));
     widget.textStyle.debugFillProperties(properties, prefix: 'text ');
   }

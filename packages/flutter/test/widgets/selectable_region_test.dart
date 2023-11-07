@@ -615,18 +615,19 @@ void main() {
       'fine day?'
     ];
 
-    // init
+      // init
+
 
     testWidgets(
         'iterively gather offsets 0 through the last character of each Text widget',
         (WidgetTester tester) async {
-      TextSelection? currentSelection;
+ TextSelection? currentSelection = null;
 
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      final MaterialApp widget = MaterialApp(
+      final widget = MaterialApp(
         home: SelectableRegion(
-          onSelectionChanged: (SelectedContent? content) {
+          onSelectionChanged: (content) {
             currentSelection = content?.textSelection;
           },
           focusNode: focusNode,
@@ -642,6 +643,7 @@ void main() {
           ),
         ),
       );
+
 
       await tester.pumpWidget(widget);
 
@@ -684,16 +686,16 @@ void main() {
       await gesture.up();
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets(
+   testWidgets(
         'iterively gather offsets 1 through the last character - 1 of each Text widget',
         (WidgetTester tester) async {
-      TextSelection? currentSelection;
+ TextSelection? currentSelection = null;
 
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      final MaterialApp widget = MaterialApp(
+      final widget = MaterialApp(
         home: SelectableRegion(
-          onSelectionChanged: (SelectedContent? content) {
+          onSelectionChanged: (content) {
             currentSelection = content?.textSelection;
           },
           focusNode: focusNode,
@@ -709,6 +711,7 @@ void main() {
           ),
         ),
       );
+
 
       await tester.pumpWidget(widget);
 
@@ -733,6 +736,7 @@ void main() {
 
       await gesture.up();
     }, variant: TargetPlatformVariant.all());
+
   });
 
   group('SelectionArea integration', () {
@@ -4414,10 +4418,12 @@ class RenderSelectionSpy extends RenderProxyBox
     return const TextSelection(baseOffset: 0, extentOffset: 0);
   }
 
-  @override
+   @override
   int? getContentLength() {
     return 0;
   }
+
+
 
   @override
   final SelectionGeometry value = const SelectionGeometry(
@@ -4504,7 +4510,7 @@ class RenderSelectAll extends RenderProxyBox
     return const TextSelection(baseOffset: 0, extentOffset: 0);
   }
 
-  @override
+    @override
   int? getContentLength() {
     return 0;
   }

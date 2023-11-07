@@ -4,13 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/material/list_tile/list_tile.3.dart'
-    as example;
+import 'package:flutter_api_samples/material/list_tile/list_tile.3.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTile color properties respect Material state color',
-      (WidgetTester tester) async {
+  testWidgets('ListTile color properties respect Material state color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListTileApp(),
     );

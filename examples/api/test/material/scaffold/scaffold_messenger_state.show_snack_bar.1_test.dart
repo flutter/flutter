@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart'
-    as example;
+import 'package:flutter_api_samples/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -27,11 +26,11 @@ void main() {
 
     final AssertionError exception = tester.takeException() as AssertionError;
     const String message = 'Floating SnackBar presented off screen.\n'
-        'A SnackBar with behavior property set to SnackBarBehavior.floating is fully '
-        'or partially off screen because some or all the widgets provided to '
-        'Scaffold.floatingActionButton, Scaffold.persistentFooterButtons and '
-        'Scaffold.bottomNavigationBar take up too much vertical space.\n'
-        'Consider constraining the size of these widgets to allow room for the SnackBar to be visible.';
+      'A SnackBar with behavior property set to SnackBarBehavior.floating is fully '
+      'or partially off screen because some or all the widgets provided to '
+      'Scaffold.floatingActionButton, Scaffold.persistentFooterButtons and '
+      'Scaffold.bottomNavigationBar take up too much vertical space.\n'
+      'Consider constraining the size of these widgets to allow room for the SnackBar to be visible.';
     expect(exception.message, message);
   });
 }

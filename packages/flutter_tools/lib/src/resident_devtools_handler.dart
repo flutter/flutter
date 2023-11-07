@@ -12,11 +12,9 @@ import 'build_info.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
-typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(
-    DevtoolsLauncher?, ResidentRunner, Logger);
+typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(DevtoolsLauncher?, ResidentRunner, Logger);
 
-ResidentDevtoolsHandler createDefaultHandler(
-    DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
+ResidentDevtoolsHandler createDefaultHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
   return FlutterResidentDevtoolsHandler(launcher, runner, logger);
 }
 
@@ -46,8 +44,7 @@ abstract class ResidentDevtoolsHandler {
 }
 
 class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
-  FlutterResidentDevtoolsHandler(
-      this._devToolsLauncher, this._residentRunner, this._logger);
+  FlutterResidentDevtoolsHandler(this._devToolsLauncher, this._residentRunner, this._logger);
 
   static const Duration launchInBrowserTimeout = Duration(seconds: 15);
 
@@ -62,8 +59,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   DevToolsServerAddress? get activeDevToolsServer {
-    assert(
-        !_readyToAnnounce || _devToolsLauncher?.activeDevToolsServer != null);
+    assert(!_readyToAnnounce || _devToolsLauncher?.activeDevToolsServer != null);
     return _devToolsLauncher?.activeDevToolsServer;
   }
 
@@ -108,12 +104,13 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
 
     Future<void> callServiceExtensions() async {
-      final List<FlutterDevice?> devicesWithExtension =
-          await _devicesWithExtensions(flutterDevices);
-      await Future.wait(<Future<void>>[
-        _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
-        _callConnectedVmServiceUriExtension(devicesWithExtension)
-      ]);
+      final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
+      await Future.wait(
+        <Future<void>>[
+          _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
+          _callConnectedVmServiceUriExtension(devicesWithExtension)
+        ]
+      );
     }
 
     // If the application is starting paused, we can't invoke service extensions
@@ -166,12 +163,9 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     assert(activeDevToolsServer != null);
     for (final FlutterDevice? device in flutterDevices) {
       final String devToolsUrl = activeDevToolsServer!.uri!.replace(
-        queryParameters: <String, dynamic>{
-          'uri': '${device!.vmService!.httpAddress}'
-        },
+        queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
       ).toString();
-      _logger.printStatus(
-          'Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
+      _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
       unawaited(Chrome.start(<String>[devToolsUrl]));
     }
     launchedInBrowser = true;
@@ -208,17 +202,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
   }
 
-  Future<List<FlutterDevice?>> _devicesWithExtensions(
-      List<FlutterDevice?> flutterDevices) async {
+  Future<List<FlutterDevice?>> _devicesWithExtensions(List<FlutterDevice?> flutterDevices) async {
     return Future.wait(<Future<FlutterDevice?>>[
-      for (final FlutterDevice? device in flutterDevices)
-        _waitForExtensionsForDevice(device!),
+      for (final FlutterDevice? device in flutterDevices) _waitForExtensionsForDevice(device!),
     ]);
   }
 
   /// Returns null if the service extension cannot be found on the device.
-  Future<FlutterDevice?> _waitForExtensionsForDevice(
-      FlutterDevice flutterDevice) async {
+  Future<FlutterDevice?> _waitForExtensionsForDevice(FlutterDevice flutterDevice) async {
     const String extension = 'ext.flutter.connectedVmServiceUri';
     try {
       await flutterDevice.vmService?.findExtensionIsolate(
@@ -235,18 +226,15 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
   }
 
-  Future<void> _callConnectedVmServiceUriExtension(
-      List<FlutterDevice?> flutterDevices) async {
+  Future<void> _callConnectedVmServiceUriExtension(List<FlutterDevice?> flutterDevices) async {
     await Future.wait(<Future<void>>[
       for (final FlutterDevice? device in flutterDevices)
-        if (device?.vmService != null)
-          _callConnectedVmServiceExtension(device!),
+        if (device?.vmService != null) _callConnectedVmServiceExtension(device!),
     ]);
   }
 
   Future<void> _callConnectedVmServiceExtension(FlutterDevice device) async {
-    final Uri? uri =
-        device.vmService!.httpAddress ?? device.vmService!.wsAddress;
+    final Uri? uri = device.vmService!.httpAddress ?? device.vmService!.wsAddress;
     if (uri == null) {
       return;
     }
@@ -292,8 +280,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   Future<void> hotRestart(List<FlutterDevice?> flutterDevices) async {
-    final List<FlutterDevice?> devicesWithExtension =
-        await _devicesWithExtensions(flutterDevices);
+    final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await Future.wait(<Future<void>>[
       _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
       _callConnectedVmServiceUriExtension(devicesWithExtension),
@@ -312,8 +299,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 }
 
 @visibleForTesting
-NoOpDevtoolsHandler createNoOpHandler(
-    DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
+NoOpDevtoolsHandler createNoOpHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
   return NoOpDevtoolsHandler();
 }
 
@@ -359,8 +345,6 @@ String urlToDisplayString(Uri uri) {
   final StringBuffer base = StringBuffer(uri.replace(
     queryParameters: <String, String>{},
   ).toString());
-  base.write(uri.queryParameters.keys
-      .map((String key) => '$key=${uri.queryParameters[key]}')
-      .join('&'));
+  base.write(uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&'));
   return base.toString();
 }

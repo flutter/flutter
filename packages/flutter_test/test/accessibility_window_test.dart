@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Fails correctly with configured screen size - small',
-      (WidgetTester tester) async {
+  testWidgets('Fails correctly with configured screen size - small', (WidgetTester tester) async {
     tester.view.devicePixelRatio = 1.2;
     tester.view.physicalSize = const Size(250, 300);
     addTearDown(tester.view.reset);
@@ -26,8 +25,7 @@ void main() {
     expect(result.passed, false);
   });
 
-  testWidgets('Fails correctly with configured screen size - large',
-      (WidgetTester tester) async {
+  testWidgets('Fails correctly with configured screen size - large', (WidgetTester tester) async {
     tester.view.devicePixelRatio = 4.2;
     tester.view.physicalSize = const Size(2500, 3000);
     addTearDown(tester.view.reset);

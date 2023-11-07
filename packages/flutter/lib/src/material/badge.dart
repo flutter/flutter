@@ -161,14 +161,11 @@ class Badge extends StatelessWidget {
 
     final BadgeThemeData badgeTheme = BadgeTheme.of(context);
     final BadgeThemeData defaults = _BadgeDefaultsM3(context);
-    final double effectiveSmallSize =
-        smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
-    final double effectiveLargeSize =
-        largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
+    final double effectiveSmallSize = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
+    final double effectiveLargeSize = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
 
     final Widget badge = DefaultTextStyle(
-      style:
-          (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
+      style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
         color: textColor ?? badgeTheme.textColor ?? defaults.textColor!,
       ),
       child: IntrinsicWidth(
@@ -176,17 +173,12 @@ class Badge extends StatelessWidget {
           height: label == null ? effectiveSmallSize : effectiveLargeSize,
           clipBehavior: Clip.antiAlias,
           decoration: ShapeDecoration(
-            color: backgroundColor ??
-                badgeTheme.backgroundColor ??
-                defaults.backgroundColor!,
+            color: backgroundColor ?? badgeTheme.backgroundColor ?? defaults.backgroundColor!,
             shape: const StadiumBorder(),
           ),
-          padding: label == null
-              ? null
-              : (padding ?? badgeTheme.padding ?? defaults.padding!),
+          padding: label == null ? null : (padding ?? badgeTheme.padding ?? defaults.padding!),
           alignment: label == null ? null : Alignment.center,
-          child: label ??
-              SizedBox(width: effectiveSmallSize, height: effectiveSmallSize),
+          child: label ?? SizedBox(width: effectiveSmallSize, height: effectiveSmallSize),
         ),
       ),
     );
@@ -195,28 +187,26 @@ class Badge extends StatelessWidget {
       return badge;
     }
 
-    final AlignmentGeometry effectiveAlignment =
-        alignment ?? badgeTheme.alignment ?? defaults.alignment!;
+    final AlignmentGeometry effectiveAlignment = alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final Offset defaultOffset = textDirection == TextDirection.ltr
-        ? const Offset(4, -4)
-        : const Offset(-4, -4);
+    final Offset defaultOffset = textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
     final Offset effectiveOffset = offset ?? badgeTheme.offset ?? defaultOffset;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        child!,
-        Positioned.fill(
-          child: _Badge(
-            alignment: effectiveAlignment,
-            offset: label == null ? Offset.zero : effectiveOffset,
-            textDirection: textDirection,
-            child: badge,
+    return
+      Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          child!,
+          Positioned.fill(
+            child: _Badge(
+              alignment: effectiveAlignment,
+              offset: label == null ? Offset.zero : effectiveOffset,
+              textDirection: textDirection,
+              child: badge,
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
   }
 }
 
@@ -252,8 +242,7 @@ class _Badge extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 }
@@ -286,11 +275,10 @@ class _RenderBadge extends RenderAligningShiftedBox {
     final double badgeSize = child!.size.height;
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset = offset +
-        resolvedAlignment.alongOffset(
-            Offset(size.width - badgeSize, size.height - badgeSize));
+    childParentData.offset = offset + resolvedAlignment.alongOffset(Offset(size.width - badgeSize, size.height - badgeSize));
   }
 }
+
 
 // BEGIN GENERATED TOKEN PROPERTIES - Badge
 
@@ -300,13 +288,12 @@ class _RenderBadge extends RenderAligningShiftedBox {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _BadgeDefaultsM3 extends BadgeThemeData {
-  _BadgeDefaultsM3(this.context)
-      : super(
-          smallSize: 6.0,
-          largeSize: 16.0,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          alignment: AlignmentDirectional.topEnd,
-        );
+  _BadgeDefaultsM3(this.context) : super(
+    smallSize: 6.0,
+    largeSize: 16.0,
+    padding: const EdgeInsets.symmetric(horizontal: 4),
+    alignment: AlignmentDirectional.topEnd,
+  );
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);

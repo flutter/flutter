@@ -12,8 +12,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   final RenderObject target = key.currentContext!.findRenderObject()!;
   expect(target.parent, isA<RenderViewport>());
-  final SliverPhysicalParentData parentData =
-      target.parentData! as SliverPhysicalParentData;
+  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
 }
@@ -35,18 +34,14 @@ void main() {
         ),
       ),
     );
-    final ScrollPosition position =
-        tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    const double max = RenderBigSliver.height * 3.0 +
-        (RenderOverlappingSliver.totalHeight) * 2.0 -
-        600.0; // 600 is the height of the test viewport
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    const double max = RenderBigSliver.height * 3.0 + (RenderOverlappingSliver.totalHeight) * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);
     expect(position.pixels, 0.0);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    position.animateTo(10000.0,
-        curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 10));
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
@@ -61,8 +56,7 @@ void main() {
 
 class RenderBigSliver extends RenderSliver {
   static const double height = 550.0;
-  double get paintExtent => (height - constraints.scrollOffset)
-      .clamp(0.0, constraints.remainingPaintExtent);
+  double get paintExtent => (height - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
 
   @override
   void performLayout() {
@@ -75,7 +69,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  const BigSliver({super.key});
+  const BigSliver({ super.key });
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
     return RenderBigSliver();
@@ -88,17 +82,16 @@ class RenderOverlappingSliver extends RenderSliver {
 
   double get paintExtent {
     return math.min(
-      math.max(
-        fixedHeight,
-        totalHeight - constraints.scrollOffset,
-      ),
-      constraints.remainingPaintExtent,
-    );
+             math.max(
+               fixedHeight,
+               totalHeight - constraints.scrollOffset,
+             ),
+             constraints.remainingPaintExtent,
+           );
   }
 
   double get layoutExtent {
-    return (totalHeight - constraints.scrollOffset)
-        .clamp(0.0, constraints.remainingPaintExtent);
+    return (totalHeight - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
   }
 
   @override
@@ -113,7 +106,7 @@ class RenderOverlappingSliver extends RenderSliver {
 }
 
 class OverlappingSliver extends LeafRenderObjectWidget {
-  const OverlappingSliver({super.key});
+  const OverlappingSliver({ super.key });
   @override
   RenderOverlappingSliver createRenderObject(BuildContext context) {
     return RenderOverlappingSliver();

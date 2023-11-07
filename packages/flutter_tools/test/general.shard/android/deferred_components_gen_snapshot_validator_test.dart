@@ -21,9 +21,7 @@ void main() {
   late Environment env;
 
   Environment createEnvironment() {
-    final Map<String, String> defines = <String, String>{
-      kDeferredComponents: 'true'
-    };
+    final Map<String, String> defines = <String, String>{ kDeferredComponents: 'true' };
     final Environment result = Environment.test(
       fileSystem.directory('/project'),
       defines: defines,
@@ -42,8 +40,7 @@ void main() {
   });
 
   testWithoutContext('No checks passes', () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -54,13 +51,11 @@ void main() {
   });
 
   testWithoutContext('writeCache passes', () async {
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     if (cacheFile.existsSync()) {
       cacheFile.deleteSync();
     }
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -76,11 +71,11 @@ void main() {
 
     expect(logger.statusText, 'test check passed.\n');
 
-    final File expectedFile =
-        env.projectDir.childFile('deferred_components_loading_units.yaml');
+    final File expectedFile = env.projectDir.childFile('deferred_components_loading_units.yaml');
 
     expect(expectedFile.existsSync(), true);
-    const String expectedContents = '''
+    const String expectedContents =
+'''
 loading-units:
   - id: 2
     libraries:
@@ -94,14 +89,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitCache identical passes', () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -113,10 +106,12 @@ loading-units:
       - lib2
       - lib3
 ''');
-    validator.checkAgainstLoadingUnitsCache(<LoadingUnit>[
-      LoadingUnit(id: 2, libraries: <String>['lib1']),
-      LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
-    ]);
+    validator.checkAgainstLoadingUnitsCache(
+      <LoadingUnit>[
+        LoadingUnit(id: 2, libraries: <String>['lib1']),
+        LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
+      ]
+    );
     validator.displayResults();
     validator.attemptToolExit();
 
@@ -124,14 +119,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitCache finds new loading units', () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -149,21 +142,16 @@ loading-units:
     validator.displayResults();
     validator.attemptToolExit();
 
-    expect(
-        logger.statusText,
-        contains(
-            'New loading units were found:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
+    expect(logger.statusText, contains('New loading units were found:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
   });
 
   testWithoutContext('loadingUnitCache finds missing loading units', () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -183,16 +171,11 @@ loading-units:
     validator.displayResults();
     validator.attemptToolExit();
 
-    expect(
-        logger.statusText,
-        contains(
-            'Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
+    expect(logger.statusText, contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
   });
 
-  testWithoutContext('missing cache file counts as all new loading units',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('missing cache file counts as all new loading units', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -205,23 +188,16 @@ loading-units:
     validator.displayResults();
     validator.attemptToolExit();
 
-    expect(
-        logger.statusText,
-        contains(
-            'New loading units were found:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
+    expect(logger.statusText, contains('New loading units were found:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'));
   });
 
-  testWithoutContext(
-      'loadingUnitCache validator detects malformed file: missing main entry',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('loadingUnitCache validator detects malformed file: missing main entry', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units-spelled-wrong:
@@ -242,28 +218,18 @@ loading-units-spelled-wrong:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(
-        logger.statusText,
-        contains(
-            "Invalid loading units yaml file, 'loading-units' entry did not exist."));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'loading-units' entry did not exist."));
 
-    expect(
-        logger.statusText.contains(
-            'Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'),
-        false);
+    expect(logger.statusText.contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), false);
   });
 
-  testWithoutContext(
-      'loadingUnitCache validator detects malformed file: not a list',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units: hello
@@ -277,23 +243,16 @@ loading-units: hello
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(
-        logger.statusText,
-        contains(
-            "Invalid loading units yaml file, 'loading-units' is not a list."));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'loading-units' is not a list."));
   });
 
-  testWithoutContext(
-      'loadingUnitCache validator detects malformed file: not a list',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -309,23 +268,16 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(
-        logger.statusText,
-        contains(
-            "Invalid loading units yaml file, 'loading-units' is not a list of maps."));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'loading-units' is not a list of maps."));
   });
 
-  testWithoutContext(
-      'loadingUnitCache validator detects malformed file: missing id',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('loadingUnitCache validator detects malformed file: missing id', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -345,23 +297,16 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(
-        logger.statusText,
-        contains(
-            "Invalid loading units yaml file, all loading units must have an 'id'"));
+    expect(logger.statusText, contains("Invalid loading units yaml file, all loading units must have an 'id'"));
   });
 
-  testWithoutContext(
-      'loadingUnitCache validator detects malformed file: libraries is list',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -380,23 +325,16 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(
-        logger.statusText,
-        contains(
-            "Invalid loading units yaml file, 'libraries' is not a list."));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'libraries' is not a list."));
   });
 
-  testWithoutContext(
-      'loadingUnitCache validator detects malformed file: libraries is list of strings',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list of strings', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -417,23 +355,16 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Errors checking the following files:'));
-    expect(
-        logger.statusText,
-        contains(
-            "Invalid loading units yaml file, 'libraries' is not a list of strings."));
+    expect(logger.statusText, contains("Invalid loading units yaml file, 'libraries' is not a list of strings."));
   });
 
-  testWithoutContext(
-      'loadingUnitCache validator detects malformed file: empty libraries allowed',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('loadingUnitCache validator detects malformed file: empty libraries allowed', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File cacheFile = env.projectDir
-        .childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
     cacheFile.createSync(recursive: true);
     cacheFile.writeAsStringSync('''
 loading-units:
@@ -451,23 +382,17 @@ loading-units:
     validator.displayResults();
     validator.attemptToolExit();
 
-    expect(logger.statusText.contains('Errors checking the following files:'),
-        false);
+    expect(logger.statusText.contains('Errors checking the following files:'), false);
   });
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final Directory baseModuleDir =
-        env.projectDir.childDirectory('android').childDirectory('app');
-    final File manifest = baseModuleDir
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     if (manifest.existsSync()) {
       manifest.deleteSync();
     }
@@ -501,8 +426,7 @@ loading-units:
     validator.checkAppAndroidManifestComponentLoadingUnitMapping(
       <DeferredComponent>[
         DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(
-            name: 'component2', libraries: <String>['lib1', 'lib4']),
+        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
       ],
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
@@ -514,50 +438,29 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Modified android files:\n'));
-    expect(
-        logger.statusText,
-        contains(
-            'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
+    expect(logger.statusText, contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
 
     final File manifestOutput = env.projectDir
-        .childDirectory('build')
-        .childDirectory(
-            DeferredComponentsValidator.kDeferredComponentsTempDirectory)
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+      .childDirectory('build')
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(
-        manifestOutput.readAsStringSync().contains(
-            '<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'),
-        true);
-    expect(
-        manifestOutput
-            .readAsStringSync()
-            .contains('android:value="invalidmapping"'),
-        false);
-    expect(
-        manifestOutput
-            .readAsStringSync()
-            .contains("<!-- Don't delete the meta-data below."),
-        true);
+    expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
+    expect(manifestOutput.readAsStringSync().contains('android:value="invalidmapping"'), false);
+    expect(manifestOutput.readAsStringSync().contains("<!-- Don't delete the meta-data below."), true);
   });
 
-  testWithoutContext(
-      'androidStringMapping adds mapping when no existing mapping', () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('androidStringMapping adds mapping when no existing mapping', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final Directory baseModuleDir =
-        env.projectDir.childDirectory('android').childDirectory('app');
-    final File manifest = baseModuleDir
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     manifest.createSync(recursive: true);
     manifest.writeAsStringSync('''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -582,8 +485,7 @@ loading-units:
     validator.checkAppAndroidManifestComponentLoadingUnitMapping(
       <DeferredComponent>[
         DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(
-            name: 'component2', libraries: <String>['lib1', 'lib4']),
+        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
       ],
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
@@ -595,44 +497,29 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Modified android files:\n'));
-    expect(
-        logger.statusText,
-        contains(
-            'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
+    expect(logger.statusText, contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
 
     final File manifestOutput = env.projectDir
-        .childDirectory('build')
-        .childDirectory(
-            DeferredComponentsValidator.kDeferredComponentsTempDirectory)
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+      .childDirectory('build')
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(
-        manifestOutput.readAsStringSync(),
-        contains(
-            '<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
-    expect(manifestOutput.readAsStringSync(),
-        contains("<!-- Don't delete the meta-data below."));
+    expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
+    expect(manifestOutput.readAsStringSync(), contains("<!-- Don't delete the meta-data below."));
   });
 
   // The mapping is incorrectly placed in the activity instead of application.
-  testWithoutContext(
-      'androidStringMapping detects improperly placed metadata mapping',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('androidStringMapping detects improperly placed metadata mapping', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final Directory baseModuleDir =
-        env.projectDir.childDirectory('android').childDirectory('app');
-    final File manifest = baseModuleDir
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     manifest.createSync(recursive: true);
     manifest.writeAsStringSync('''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -659,8 +546,7 @@ loading-units:
     validator.checkAppAndroidManifestComponentLoadingUnitMapping(
       <DeferredComponent>[
         DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(
-            name: 'component2', libraries: <String>['lib1', 'lib4']),
+        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
       ],
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
@@ -672,43 +558,28 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Modified android files:\n'));
-    expect(
-        logger.statusText,
-        contains(
-            'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
+    expect(logger.statusText, contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
 
     final File manifestOutput = env.projectDir
-        .childDirectory('build')
-        .childDirectory(
-            DeferredComponentsValidator.kDeferredComponentsTempDirectory)
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+      .childDirectory('build')
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(
-        manifestOutput.readAsStringSync(),
-        contains(
-            '<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
-    expect(manifestOutput.readAsStringSync(),
-        contains("<!-- Don't delete the meta-data below."));
+    expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'));
+    expect(manifestOutput.readAsStringSync(), contains("<!-- Don't delete the meta-data below."));
   });
 
-  testWithoutContext(
-      'androidStringMapping generates base module loading unit mapping',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('androidStringMapping generates base module loading unit mapping', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final Directory baseModuleDir =
-        env.projectDir.childDirectory('android').childDirectory('app');
-    final File manifest = baseModuleDir
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     manifest.createSync(recursive: true);
     manifest.writeAsStringSync('''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -733,8 +604,7 @@ loading-units:
     validator.checkAppAndroidManifestComponentLoadingUnitMapping(
       <DeferredComponent>[
         DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(
-            name: 'component2', libraries: <String>['lib1', 'lib4']),
+        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
       ],
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
@@ -749,43 +619,29 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Modified android files:\n'));
-    expect(
-        logger.statusText,
-        contains(
-            'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
+    expect(logger.statusText, contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
 
     final File manifestOutput = env.projectDir
-        .childDirectory('build')
-        .childDirectory(
-            DeferredComponentsValidator.kDeferredComponentsTempDirectory)
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+      .childDirectory('build')
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(
-        manifestOutput.readAsStringSync(),
-        contains(
-            '<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2,5:,6:"/>'));
-    expect(manifestOutput.readAsStringSync(),
-        contains("<!-- Don't delete the meta-data below."));
+    expect(manifestOutput.readAsStringSync(), contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2,5:,6:"/>'));
+    expect(manifestOutput.readAsStringSync(), contains("<!-- Don't delete the meta-data below."));
   });
 
   // Tests if all of the regexp whitespace detection is working.
-  testWithoutContext('androidStringMapping handles whitespace within entry',
-      () async {
-    final DeferredComponentsGenSnapshotValidator validator =
-        DeferredComponentsGenSnapshotValidator(
+  testWithoutContext('androidStringMapping handles whitespace within entry', () async {
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final Directory baseModuleDir =
-        env.projectDir.childDirectory('android').childDirectory('app');
-    final File manifest = baseModuleDir
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
+    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     manifest.createSync(recursive: true);
     manifest.writeAsStringSync('''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -817,8 +673,7 @@ loading-units:
     validator.checkAppAndroidManifestComponentLoadingUnitMapping(
       <DeferredComponent>[
         DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(
-            name: 'component2', libraries: <String>['lib1', 'lib4']),
+        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
       ],
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
@@ -830,33 +685,18 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText, contains('Modified android files:\n'));
-    expect(
-        logger.statusText,
-        contains(
-            'build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
+    expect(logger.statusText, contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'));
 
     final File manifestOutput = env.projectDir
-        .childDirectory('build')
-        .childDirectory(
-            DeferredComponentsValidator.kDeferredComponentsTempDirectory)
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+      .childDirectory('build')
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     expect(manifestOutput.existsSync(), true);
-    expect(
-        manifestOutput.readAsStringSync().contains(
-            '<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'),
-        true);
-    expect(
-        manifestOutput
-            .readAsStringSync()
-            .contains(RegExp(r'android:value[\s\n]*=[\s\n]*"invalidmapping"')),
-        false);
-    expect(
-        manifestOutput
-            .readAsStringSync()
-            .contains("<!-- Don't delete the meta-data below."),
-        true);
+    expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
+    expect(manifestOutput.readAsStringSync().contains(RegExp(r'android:value[\s\n]*=[\s\n]*"invalidmapping"')), false);
+    expect(manifestOutput.readAsStringSync().contains("<!-- Don't delete the meta-data below."), true);
   });
 }

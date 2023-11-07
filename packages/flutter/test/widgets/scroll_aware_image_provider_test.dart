@@ -11,6 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../painting/image_test_utils.dart';
 
 void main() {
+
   late ui.Image testImage;
 
   setUpAll(() async {
@@ -26,28 +27,21 @@ void main() {
   });
 
   T findPhysics<T extends ScrollPhysics>(WidgetTester tester) {
-    return Scrollable.of(find.byType(TestWidget).evaluate().first)
-        .position
-        .physics as T;
+    return Scrollable.of(find.byType(TestWidget).evaluate().first).position.physics as T;
   }
 
   ScrollMetrics findMetrics(WidgetTester tester) {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
   }
 
-  testWidgetsWithLeakTracking(
-      'ScrollAwareImageProvider does not delay if widget is not in scrollable',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollAwareImageProvider does not delay if widget is not in scrollable', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
-    final DisposableBuildContext context =
-        DisposableBuildContext(key.currentState!);
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider =
-        TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
     );
@@ -68,9 +62,7 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgetsWithLeakTracking(
-      'ScrollAwareImageProvider does not delay if in scrollable that is not scrolling',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -82,13 +74,10 @@ void main() {
       ),
     ));
 
-    final DisposableBuildContext context =
-        DisposableBuildContext(key.currentState!);
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider =
-        TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
     );
@@ -110,11 +99,8 @@ void main() {
     expect(findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
   });
 
-  testWidgetsWithLeakTracking(
-      'ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly',
-      (WidgetTester tester) async {
-    final List<GlobalKey<TestWidgetState>> keys =
-        <GlobalKey<TestWidgetState>>[];
+  testWidgetsWithLeakTracking('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
+    final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
@@ -130,13 +116,10 @@ void main() {
       ),
     ));
 
-    final DisposableBuildContext context =
-        DisposableBuildContext(keys.last.currentState!);
+    final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider =
-        TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
     );
@@ -175,11 +158,8 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgetsWithLeakTracking(
-      'ScrollAwareImageProvider delays if in scrollable that is scrolling fast',
-      (WidgetTester tester) async {
-    final List<GlobalKey<TestWidgetState>> keys =
-        <GlobalKey<TestWidgetState>>[];
+  testWidgetsWithLeakTracking('ScrollAwareImageProvider delays if in scrollable that is scrolling fast', (WidgetTester tester) async {
+    final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
@@ -195,13 +175,10 @@ void main() {
       ),
     ));
 
-    final DisposableBuildContext context =
-        DisposableBuildContext(keys.last.currentState!);
+    final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider =
-        TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
     );
@@ -250,11 +227,8 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgetsWithLeakTracking(
-      'ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed',
-      (WidgetTester tester) async {
-    final List<GlobalKey<TestWidgetState>> keys =
-        <GlobalKey<TestWidgetState>>[];
+  testWidgetsWithLeakTracking('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed', (WidgetTester tester) async {
+    final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(Directionality(
@@ -270,13 +244,10 @@ void main() {
       ),
     ));
 
-    final DisposableBuildContext context =
-        DisposableBuildContext(keys.last.currentState!);
+    final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider =
-        TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
     );
@@ -327,9 +298,7 @@ void main() {
     expect(imageCache.currentSize, 0);
   });
 
-  testWidgetsWithLeakTracking(
-      'ScrollAwareImageProvider resolves from ImageCache and does not set completer twice',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -342,13 +311,10 @@ void main() {
       ),
     ));
 
-    final DisposableBuildContext context =
-        DisposableBuildContext(key.currentState!);
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider =
-        TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
     );
@@ -356,8 +322,7 @@ void main() {
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
 
-    final ControllablePhysics physics =
-        findPhysics<ControllablePhysics>(tester);
+    final ControllablePhysics physics = findPhysics<ControllablePhysics>(tester);
     physics.recommendDeferredLoadingValue = true;
 
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -372,10 +337,7 @@ void main() {
     // If we miss the early return, we will fail.
     testImageProvider.complete();
 
-    imageCache.putIfAbsent(
-        testImageProvider,
-        () => testImageProvider.loadImage(testImageProvider,
-            PaintingBinding.instance.instantiateImageCodecWithSize));
+    imageCache.putIfAbsent(testImageProvider, () => testImageProvider.loadImage(testImageProvider, PaintingBinding.instance.instantiateImageCodecWithSize));
     // We've stopped scrolling fast.
     physics.recommendDeferredLoadingValue = false;
     await tester.idle();
@@ -386,9 +348,7 @@ void main() {
     expect(stream.completer, null);
   });
 
-  testWidgetsWithLeakTracking(
-      'ScrollAwareImageProvider does not block LRU updates to image cache',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollAwareImageProvider does not block LRU updates to image cache', (WidgetTester tester) async {
     final int oldSize = imageCache.maximumSize;
     imageCache.maximumSize = 1;
 
@@ -404,13 +364,10 @@ void main() {
       ),
     ));
 
-    final DisposableBuildContext context =
-        DisposableBuildContext(key.currentState!);
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider =
-        TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
+    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
     );
@@ -418,8 +375,7 @@ void main() {
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
 
-    final ControllablePhysics physics =
-        findPhysics<ControllablePhysics>(tester);
+    final ControllablePhysics physics = findPhysics<ControllablePhysics>(tester);
     physics.recommendDeferredLoadingValue = true;
 
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -429,8 +385,7 @@ void main() {
     expect(imageCache.currentSize, 0);
 
     // Occupy the only slot in the cache with another image.
-    final TestImageProvider testImageProvider2 =
-        TestImageProvider(testImage.clone());
+    final TestImageProvider testImageProvider2 = TestImageProvider(testImage.clone());
     testImageProvider2.complete();
     await precacheImage(testImageProvider2, context.context!);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -439,8 +394,7 @@ void main() {
 
     // Complete the original image while we're still scrolling fast.
     testImageProvider.complete();
-    stream.setCompleter(testImageProvider.loadImage(testImageProvider,
-        PaintingBinding.instance.instantiateImageCodecWithSize));
+    stream.setCompleter(testImageProvider.loadImage(testImageProvider, PaintingBinding.instance.instantiateImageCodecWithSize));
 
     // Verify that this hasn't changed the cache state yet
     expect(imageCache.containsKey(testImageProvider), false);
@@ -474,7 +428,7 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 class RecordingPhysics extends ScrollPhysics {
-  RecordingPhysics({super.parent});
+  RecordingPhysics({ super.parent });
 
   final List<double> velocities = <double>[];
 
@@ -484,8 +438,7 @@ class RecordingPhysics extends ScrollPhysics {
   }
 
   @override
-  bool recommendDeferredLoading(
-      double velocity, ScrollMetrics metrics, BuildContext context) {
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
     velocities.add(velocity);
     return super.recommendDeferredLoading(velocity, metrics, context);
   }
@@ -495,7 +448,7 @@ class RecordingPhysics extends ScrollPhysics {
 // times without worrying about actual scrolling mechanics.
 // ignore: must_be_immutable
 class ControllablePhysics extends ScrollPhysics {
-  ControllablePhysics({super.parent});
+  ControllablePhysics({ super.parent });
 
   bool recommendDeferredLoadingValue = false;
 
@@ -505,8 +458,7 @@ class ControllablePhysics extends ScrollPhysics {
   }
 
   @override
-  bool recommendDeferredLoading(
-      double velocity, ScrollMetrics metrics, BuildContext context) {
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
     return recommendDeferredLoadingValue;
   }
 }

@@ -19,15 +19,13 @@ enum ColorItem {
 }
 
 class DropdownMenuEntryLabelWidgetExample extends StatefulWidget {
-  const DropdownMenuEntryLabelWidgetExample({super.key});
+  const DropdownMenuEntryLabelWidgetExample({ super.key });
 
   @override
-  State<DropdownMenuEntryLabelWidgetExample> createState() =>
-      _DropdownMenuEntryLabelWidgetExampleState();
+  State<DropdownMenuEntryLabelWidgetExample> createState() => _DropdownMenuEntryLabelWidgetExampleState();
 }
 
-class _DropdownMenuEntryLabelWidgetExampleState
-    extends State<DropdownMenuEntryLabelWidgetExample> {
+class _DropdownMenuEntryLabelWidgetExampleState extends State<DropdownMenuEntryLabelWidgetExample> {
   late final TextEditingController controller;
 
   @override
@@ -45,8 +43,7 @@ class _DropdownMenuEntryLabelWidgetExampleState
   @override
   Widget build(BuildContext context) {
     // Created by Google Bard from 'create a lyrical phrase of about 25 words that begins with "is a color"'.
-    const String longText =
-        'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
+    const String longText = 'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
 
     return Scaffold(
       body: Center(
@@ -58,8 +55,7 @@ class _DropdownMenuEntryLabelWidgetExampleState
           onSelected: (ColorItem? color) {
             print('Selected $color');
           },
-          dropdownMenuEntries: ColorItem.values
-              .map<DropdownMenuEntry<ColorItem>>((ColorItem item) {
+          dropdownMenuEntries: ColorItem.values.map<DropdownMenuEntry<ColorItem>>((ColorItem item) {
             final String labelText = '${item.label} $longText\n';
             return DropdownMenuEntry<ColorItem>(
               value: item,
@@ -80,7 +76,7 @@ class _DropdownMenuEntryLabelWidgetExampleState
 }
 
 class DropdownMenuEntryLabelWidgetExampleApp extends StatelessWidget {
-  const DropdownMenuEntryLabelWidgetExampleApp({super.key});
+  const DropdownMenuEntryLabelWidgetExampleApp({ super.key });
 
   @override
   Widget build(BuildContext context) {

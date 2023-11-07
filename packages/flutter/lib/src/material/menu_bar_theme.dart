@@ -42,8 +42,7 @@ class MenuBarThemeData extends MenuThemeData {
   const MenuBarThemeData({super.style});
 
   /// Linearly interpolate between two [MenuBar] themes.
-  static MenuBarThemeData? lerp(
-      MenuBarThemeData? a, MenuBarThemeData? b, double t) {
+  static MenuBarThemeData? lerp(MenuBarThemeData? a, MenuBarThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -102,8 +101,7 @@ class MenuBarTheme extends InheritedTheme {
   /// }
   /// ```
   static MenuBarThemeData of(BuildContext context) {
-    final MenuBarTheme? menuBarTheme =
-        context.dependOnInheritedWidgetOfExactType<MenuBarTheme>();
+    final MenuBarTheme? menuBarTheme = context.dependOnInheritedWidgetOfExactType<MenuBarTheme>();
     return menuBarTheme?.data ?? Theme.of(context).menuBarTheme;
   }
 

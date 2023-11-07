@@ -77,11 +77,13 @@ void main() {
     fileCache.diffFileList(<File>[file]);
     fileCache.persist();
     final String? currentHash = fileCache.currentAssetKeys[file.path];
-    final Uint8List buffer = cacheFile.readAsBytesSync();
+    final Uint8List buffer = cacheFile
+        .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
     expect(fileStorage.files.single.path, file.path);
+
 
     final FileStore newfileCache = FileStore(
       cacheFile: cacheFile,
@@ -89,7 +91,7 @@ void main() {
     );
     newfileCache.initialize();
     expect(newfileCache.currentAssetKeys, isEmpty);
-    expect(newfileCache.previousAssetKeys['foo.dart'], currentHash);
+    expect(newfileCache.previousAssetKeys['foo.dart'],  currentHash);
     newfileCache.persist();
 
     // Still persisted correctly.
@@ -101,9 +103,8 @@ void main() {
 
   testWithoutContext('FileStore handles changed format', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File cacheFile = fileSystem.file(FileStore.kFileCache)
-      ..writeAsStringSync(
-          '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}');
+    final File cacheFile = fileSystem.file(FileStore.kFileCache)..writeAsStringSync(
+      '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}');
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
       logger: BufferLogger.test(),
@@ -113,12 +114,11 @@ void main() {
     expect(cacheFile, isNot(exists));
   });
 
-  testWithoutContext(
-      'FileStore handles persisting with a missing build directory', () async {
+  testWithoutContext('FileStore handles persisting with a missing build directory', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem
-        .directory('example')
-        .childFile(FileStore.kFileCache)
+      .directory('example')
+      .childFile(FileStore.kFileCache)
       ..createSync(recursive: true);
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
@@ -145,25 +145,21 @@ void main() {
     );
     fileCache.initialize();
 
-    final List<File> results =
-        fileCache.diffFileList(<File>[fileSystem.file('hello.dart')]);
+    final List<File> results = fileCache.diffFileList(<File>[fileSystem.file('hello.dart')]);
 
     expect(results, hasLength(1));
     expect(results.single.path, 'hello.dart');
-    expect(fileCache.currentAssetKeys,
-        isNot(contains(fileSystem.path.absolute('hello.dart'))));
+    expect(fileCache.currentAssetKeys, isNot(contains(fileSystem.path.absolute('hello.dart'))));
   });
 
-  testWithoutContext('FileStore handles failure to persist file cache',
-      () async {
+  testWithoutContext('FileStore handles failure to persist file cache', () async {
     final FileExceptionHandler handler = FileExceptionHandler();
-    final FileSystem fileSystem =
-        MemoryFileSystem.test(opHandle: handler.opHandle);
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final BufferLogger logger = BufferLogger.test();
 
-    final File cacheFile = fileSystem.file('foo')..createSync();
-    handler.addError(cacheFile, FileSystemOp.write,
-        const FileSystemException('Out of space!'));
+    final File cacheFile = fileSystem.file('foo')
+      ..createSync();
+    handler.addError(cacheFile, FileSystemOp.write, const FileSystemException('Out of space!'));
 
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
@@ -176,16 +172,14 @@ void main() {
     expect(logger.errorText, contains('Out of space!'));
   });
 
-  testWithoutContext('FileStore handles failure to restore file cache',
-      () async {
+  testWithoutContext('FileStore handles failure to restore file cache', () async {
     final FileExceptionHandler handler = FileExceptionHandler();
-    final FileSystem fileSystem =
-        MemoryFileSystem.test(opHandle: handler.opHandle);
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final BufferLogger logger = BufferLogger.test();
 
-    final File cacheFile = fileSystem.file('foo')..createSync();
-    handler.addError(cacheFile, FileSystemOp.read,
-        const FileSystemException('Out of space!'));
+    final File cacheFile = fileSystem.file('foo')
+      ..createSync();
+    handler.addError(cacheFile, FileSystemOp.read, const FileSystemException('Out of space!'));
 
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
@@ -197,12 +191,11 @@ void main() {
     expect(logger.errorText, contains('Out of space!'));
   });
 
-  testWithoutContext('FileStore handles chunked conversion of a file',
-      () async {
+  testWithoutContext('FileStore handles chunked conversion of a file', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem
-        .directory('example')
-        .childFile(FileStore.kFileCache)
+      .directory('example')
+      .childFile(FileStore.kFileCache)
       ..createSync(recursive: true);
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
@@ -217,7 +210,6 @@ void main() {
 
     fileCache.diffFileList(<File>[file]);
 
-    expect(fileCache.currentAssetKeys['foo.dart'],
-        '5d41402abc4b2a76b9719d911017c592');
+    expect(fileCache.currentAssetKeys['foo.dart'], '5d41402abc4b2a76b9719d911017c592');
   });
 }

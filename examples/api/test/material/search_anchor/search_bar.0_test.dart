@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/search_anchor/search_bar.0.dart'
-    as example;
+import 'package:flutter_api_samples/material/search_anchor/search_bar.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,15 +17,13 @@ void main() {
     expect(find.byIcon(Icons.search), findsOneWidget);
     expect(searchBar.trailing, isNotEmpty);
     expect(searchBar.trailing?.length, equals(1));
-    final Finder trailingButtonFinder =
-        find.widgetWithIcon(IconButton, Icons.wb_sunny_outlined);
+    final Finder trailingButtonFinder = find.widgetWithIcon(IconButton, Icons.wb_sunny_outlined);
     expect(trailingButtonFinder, findsOneWidget);
 
     await tester.tap(trailingButtonFinder);
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithIcon(IconButton, Icons.brightness_2_outlined),
-        findsOneWidget);
+    expect(find.widgetWithIcon(IconButton, Icons.brightness_2_outlined), findsOneWidget);
 
     await tester.tap(searchBarFinder);
     await tester.pumpAndSettle();

@@ -20,7 +20,8 @@ import 'build_info.dart';
 import 'convert.dart';
 
 /// Opt-in changes to the dart compilers.
-const List<String> kDartCompilerExperiments = <String>[];
+const List<String> kDartCompilerExperiments = <String>[
+];
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -64,8 +65,7 @@ class TargetModel {
 }
 
 class CompilerOutput {
-  const CompilerOutput(this.outputFilename, this.errorCount, this.sources,
-      {this.expressionData});
+  const CompilerOutput(this.outputFilename, this.errorCount, this.sources, {this.expressionData});
 
   final String outputFilename;
   final int errorCount;
@@ -82,8 +82,8 @@ class StdoutHandler {
   StdoutHandler({
     required Logger logger,
     required FileSystem fileSystem,
-  })  : _logger = logger,
-        _fileSystem = fileSystem {
+  }) : _logger = logger,
+       _fileSystem = fileSystem {
     reset();
   }
 
@@ -118,10 +118,8 @@ class StdoutHandler {
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
-      final String fileName =
-          message.substring(messageBoundaryKey.length + 1, spaceDelimiter);
-      final int errorCount =
-          int.parse(message.substring(spaceDelimiter + 1).trim());
+      final String fileName = message.substring(messageBoundaryKey.length + 1, spaceDelimiter);
+      final int errorCount = int.parse(message.substring(spaceDelimiter + 1).trim());
       Uint8List? expressionData;
       if (_readFile) {
         expressionData = _fileSystem.file(fileName).readAsBytesSync();
@@ -156,10 +154,7 @@ class StdoutHandler {
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset(
-      {bool suppressCompilerMessages = false,
-      bool expectSources = true,
-      bool readFile = false}) {
+  void reset({ bool suppressCompilerMessages = false, bool expectSources = true, bool readFile = false }) {
     boundaryKey = null;
     compilerOutput = Completer<CompilerOutput?>();
     _suppressCompilerMessages = suppressCompilerMessages;
@@ -175,22 +170,18 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
       BuildMode.debug => <String>[
           // These checks allow the CLI to override the value of this define for unit
           // testing the framework.
-          if (!dartDefines
-              .any((String define) => define.startsWith('dart.vm.profile')))
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
             '-Ddart.vm.profile=false',
-          if (!dartDefines
-              .any((String define) => define.startsWith('dart.vm.product')))
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
             '-Ddart.vm.product=false',
           '--enable-asserts',
         ],
       BuildMode.profile => <String>[
           // These checks allow the CLI to override the value of this define for
           // benchmarks with most timeline traces disabled.
-          if (!dartDefines
-              .any((String define) => define.startsWith('dart.vm.profile')))
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
             '-Ddart.vm.profile=true',
-          if (!dartDefines
-              .any((String define) => define.startsWith('dart.vm.product')))
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
             '-Ddart.vm.product=false',
           ...kDartCompilerExperiments,
         ],
@@ -212,14 +203,13 @@ class KernelCompiler {
     required List<String> fileSystemRoots,
     String? fileSystemScheme,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  })  : _logger = logger,
-        _fileSystem = fileSystem,
-        _artifacts = artifacts,
-        _processManager = processManager,
-        _fileSystemScheme = fileSystemScheme,
-        _fileSystemRoots = fileSystemRoots,
-        _stdoutHandler = stdoutHandler ??
-            StdoutHandler(logger: logger, fileSystem: fileSystem);
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _artifacts = artifacts,
+       _processManager = processManager,
+       _fileSystemScheme = fileSystemScheme,
+       _fileSystemRoots = fileSystemRoots,
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem);
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -253,9 +243,7 @@ class KernelCompiler {
     required PackageConfig packageConfig,
     String? nativeAssets,
   }) async {
-    final TargetPlatform? platform = targetModel == TargetModel.dartdevc
-        ? TargetPlatform.web_javascript
-        : null;
+    final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
@@ -266,8 +254,7 @@ class KernelCompiler {
     if (packagesPath != null) {
       mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
     }
-    mainUri ??= toMultiRootPath(mainFileUri, _fileSystemScheme,
-        _fileSystemRoots, _fileSystem.path.separator == r'\');
+    mainUri ??= toMultiRootPath(mainFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
@@ -281,17 +268,13 @@ class KernelCompiler {
     String? dartPluginRegistrantUri;
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
-      dartPluginRegistrantUri =
-          packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
-              toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme,
-                  _fileSystemRoots, _fileSystem.path.separator == r'\');
+      dartPluginRegistrantUri = packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
+        toMultiRootPath(dartPluginRegistrantFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     }
 
     final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null &&
-        frontendServerStarterPath.isNotEmpty) {
-      final String engineDartPath = _artifacts
-          .getArtifactPath(Artifact.engineDartBinary, platform: platform);
+    if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
+      final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
       if (!_processManager.canRun(engineDartPath)) {
         throwToolExit('Unable to find Dart binary at $engineDartPath');
       }
@@ -301,11 +284,9 @@ class KernelCompiler {
         frontendServerStarterPath,
       ];
     } else {
-      final String engineDartAotRuntimePath = _artifacts
-          .getArtifactPath(Artifact.engineDartAotRuntime, platform: platform);
+      final String engineDartAotRuntimePath = _artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform);
       if (!_processManager.canRun(engineDartAotRuntimePath)) {
-        throwToolExit(
-            'Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
+        throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
       }
       commandToStartFrontendServer = <String>[
         engineDartAotRuntimePath,
@@ -317,81 +298,82 @@ class KernelCompiler {
       ];
     }
 
-    final List<String> command = commandToStartFrontendServer +
-        <String>[
-          '--sdk-root',
-          sdkRoot,
-          '--target=$targetModel',
-          '--no-print-incremental-dependencies',
-          for (final Object dartDefine in dartDefines) '-D$dartDefine',
-          ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
-          if (!linkPlatformKernelIn) '--no-link-platform',
-          if (aot) ...<String>[
-            '--aot',
-            '--tfa',
-            // The --target-os flag only makes sense for whole program compilation.
-            if (targetOS != null) ...<String>[
-              '--target-os',
-              targetOS,
-            ],
-          ],
-          if (packagesPath != null) ...<String>[
-            '--packages',
-            packagesPath,
-          ],
-          if (outputFilePath != null) ...<String>[
-            '--output-dill',
-            outputFilePath,
-          ],
-          if (depFilePath != null &&
-              (fileSystemRoots == null || fileSystemRoots.isEmpty)) ...<String>[
-            '--depfile',
-            depFilePath,
-          ],
-          if (fileSystemRoots != null)
-            for (final String root in fileSystemRoots) ...<String>[
-              '--filesystem-root',
-              root,
-            ],
-          if (fileSystemScheme != null) ...<String>[
-            '--filesystem-scheme',
-            fileSystemScheme,
-          ],
-          if (initializeFromDill != null) ...<String>[
-            '--incremental',
-            '--initialize-from-dill',
-            initializeFromDill,
-          ],
-          if (platformDill != null) ...<String>[
-            '--platform',
-            platformDill,
-          ],
-          if (dartPluginRegistrantUri != null) ...<String>[
-            '--source',
-            dartPluginRegistrantUri,
-            '--source',
-            'package:flutter/src/dart_plugin_registrant.dart',
-            '-Dflutter.dart_plugin_registrant=$dartPluginRegistrantUri',
-          ],
-          if (nativeAssets != null) ...<String>[
-            '--native-assets',
-            nativeAssets,
-          ],
-          // See: https://github.com/flutter/flutter/issues/103994
-          '--verbosity=error',
-          ...?extraFrontEndOptions,
-          mainUri,
-        ];
+    final List<String> command = commandToStartFrontendServer + <String>[
+      '--sdk-root',
+      sdkRoot,
+      '--target=$targetModel',
+      '--no-print-incremental-dependencies',
+      for (final Object dartDefine in dartDefines)
+        '-D$dartDefine',
+      ...buildModeOptions(buildMode, dartDefines),
+      if (trackWidgetCreation) '--track-widget-creation',
+      if (!linkPlatformKernelIn) '--no-link-platform',
+      if (aot) ...<String>[
+        '--aot',
+        '--tfa',
+        // The --target-os flag only makes sense for whole program compilation.
+        if (targetOS != null) ...<String>[
+          '--target-os',
+          targetOS,
+        ],
+      ],
+      if (packagesPath != null) ...<String>[
+        '--packages',
+        packagesPath,
+      ],
+      if (outputFilePath != null) ...<String>[
+        '--output-dill',
+        outputFilePath,
+      ],
+      if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) ...<String>[
+        '--depfile',
+        depFilePath,
+      ],
+      if (fileSystemRoots != null)
+        for (final String root in fileSystemRoots) ...<String>[
+          '--filesystem-root',
+          root,
+        ],
+      if (fileSystemScheme != null) ...<String>[
+        '--filesystem-scheme',
+        fileSystemScheme,
+      ],
+      if (initializeFromDill != null) ...<String>[
+        '--incremental',
+        '--initialize-from-dill',
+        initializeFromDill,
+      ],
+      if (platformDill != null) ...<String>[
+        '--platform',
+        platformDill,
+      ],
+      if (dartPluginRegistrantUri != null) ...<String>[
+        '--source',
+        dartPluginRegistrantUri,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=$dartPluginRegistrantUri',
+      ],
+      if (nativeAssets != null) ...<String>[
+        '--native-assets',
+        nativeAssets,
+      ],
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
+      ...?extraFrontEndOptions,
+      mainUri,
+    ];
 
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    server.stderr.transform<String>(utf8.decoder).listen(_logger.printError);
+    server.stderr
+      .transform<String>(utf8.decoder)
+      .listen(_logger.printError);
     server.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_stdoutHandler.handler);
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
       return _stdoutHandler.compilerOutput?.future;
@@ -508,8 +490,7 @@ class _RejectRequest extends _CompilationRequest {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 abstract class ResidentCompiler {
-  factory ResidentCompiler(
-    String sdkRoot, {
+  factory ResidentCompiler(String sdkRoot, {
     required BuildMode buildMode,
     required Logger logger,
     required ProcessManager processManager,
@@ -647,16 +628,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<String>? dartDefines,
     this.librariesSpec,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  })  : _logger = logger,
-        _processManager = processManager,
-        _stdoutHandler = stdoutHandler ??
-            StdoutHandler(logger: logger, fileSystem: fileSystem),
-        _platform = platform,
-        dartDefines = dartDefines ?? const <String>[],
-        // This is a URI, not a file path, so the forward slash is correct even on Windows.
-        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
-        // Make a copy, we might need to modify it later.
-        fileSystemRoots = List<String>.from(fileSystemRoots);
+  }) : _logger = logger,
+       _processManager = processManager,
+       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
+       _platform = platform,
+       dartDefines = dartDefines ?? const <String>[],
+       // This is a URI, not a file path, so the forward slash is correct even on Windows.
+       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
+       // Make a copy, we might need to modify it later.
+       fileSystemRoots = List<String>.from(fileSystemRoots);
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -697,8 +677,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final StdoutHandler _stdoutHandler;
   bool _compileRequestNeedsConfirmation = false;
 
-  final StreamController<_CompilationRequest> _controller =
-      StreamController<_CompilationRequest>();
+  final StreamController<_CompilationRequest> _controller = StreamController<_CompilationRequest>();
 
   @override
   Future<CompilerOutput?> recompile(
@@ -718,9 +697,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
     Uri? additionalSourceUri;
     // `dart_plugin_registrant.dart` contains the Dart plugin registry.
-    if (checkDartPluginRegistry &&
-        dartPluginRegistrant != null &&
-        dartPluginRegistrant.existsSync()) {
+    if (checkDartPluginRegistry && dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       additionalSourceUri = dartPluginRegistrant.uri;
     }
     final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
@@ -742,18 +719,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _compileRequestNeedsConfirmation = true;
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
-    final String mainUri =
-        request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
-            toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots,
-                _platform.isWindows);
+    final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
+      toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
 
     String? additionalSourceUri;
     if (request.additionalSourceUri != null) {
-      additionalSourceUri = request.packageConfig
-              .toPackageUri(request.additionalSourceUri!)
-              ?.toString() ??
-          toMultiRootPath(request.additionalSourceUri!, fileSystemScheme,
-              fileSystemRoots, _platform.isWindows);
+      additionalSourceUri = request.packageConfig.toPackageUri(request.additionalSourceUri!)?.toString() ??
+        toMultiRootPath(request.additionalSourceUri!, fileSystemScheme, fileSystemRoots, _platform.isWindows);
     }
 
     final String? nativeAssets = request.nativeAssetsYamlUri?.toString();
@@ -782,8 +754,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           message = fileUri.toString();
         } else {
           message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
-              toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots,
-                  _platform.isWindows);
+              toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
         }
         server.stdin.writeln(message);
         _logger.printTrace(message);
@@ -818,22 +789,17 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? additionalSourceUri,
     String? nativeAssetsUri,
   }) async {
-    final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
-        ? TargetPlatform.web_javascript
-        : null;
+    final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
     late final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null &&
-        frontendServerStarterPath!.isNotEmpty) {
+    if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
       commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary,
-            platform: platform),
+        artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
         '--disable-dart-dev',
         frontendServerStarterPath!,
       ];
     } else {
       commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartAotRuntime,
-            platform: platform),
+        artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
         '--disable-dart-dev',
         artifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
@@ -842,86 +808,88 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ];
     }
 
-    final List<String> command = commandToStartFrontendServer +
-        <String>[
-          '--sdk-root',
-          sdkRoot,
-          '--incremental',
-          if (testCompilation) '--no-print-incremental-dependencies',
-          '--target=$targetModel',
-          // TODO(annagrin): remove once this becomes the default behavior
-          // in the frontend_server.
-          // https://github.com/flutter/flutter/issues/59902
-          '--experimental-emit-debug-metadata',
-          for (final Object dartDefine in dartDefines) '-D$dartDefine',
-          if (outputPath != null) ...<String>[
-            '--output-dill',
-            outputPath,
-          ],
-          // If we have a platform dill, we don't need to pass the libraries spec,
-          // since the information is embedded in the .dill file.
-          if (librariesSpec != null && platformDill == null) ...<String>[
-            '--libraries-spec',
-            librariesSpec!,
-          ],
-          if (packagesPath != null) ...<String>[
-            '--packages',
-            packagesPath!,
-          ],
-          ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
-          for (final String root in fileSystemRoots) ...<String>[
-            '--filesystem-root',
-            root,
-          ],
-          if (fileSystemScheme != null) ...<String>[
-            '--filesystem-scheme',
-            fileSystemScheme!,
-          ],
-          if (initializeFromDill != null) ...<String>[
-            '--initialize-from-dill',
-            initializeFromDill!,
-          ],
-          if (assumeInitializeFromDillUpToDate)
-            '--assume-initialize-from-dill-up-to-date',
-          if (additionalSourceUri != null) ...<String>[
-            '--source',
-            additionalSourceUri,
-            '--source',
-            'package:flutter/src/dart_plugin_registrant.dart',
-            '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
-          ],
-          if (nativeAssetsUri != null) ...<String>[
-            '--native-assets',
-            nativeAssetsUri,
-          ],
-          if (platformDill != null) ...<String>[
-            '--platform',
-            platformDill!,
-          ],
-          if (unsafePackageSerialization) '--unsafe-package-serialization',
-          // See: https://github.com/flutter/flutter/issues/103994
-          '--verbosity=error',
-          ...?extraFrontEndOptions,
-        ];
+    final List<String> command = commandToStartFrontendServer + <String>[
+      '--sdk-root',
+      sdkRoot,
+      '--incremental',
+      if (testCompilation)
+        '--no-print-incremental-dependencies',
+      '--target=$targetModel',
+      // TODO(annagrin): remove once this becomes the default behavior
+      // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/59902
+      '--experimental-emit-debug-metadata',
+      for (final Object dartDefine in dartDefines)
+        '-D$dartDefine',
+      if (outputPath != null) ...<String>[
+        '--output-dill',
+        outputPath,
+      ],
+      // If we have a platform dill, we don't need to pass the libraries spec,
+      // since the information is embedded in the .dill file.
+      if (librariesSpec != null && platformDill == null) ...<String>[
+        '--libraries-spec',
+        librariesSpec!,
+      ],
+      if (packagesPath != null) ...<String>[
+        '--packages',
+        packagesPath!,
+      ],
+      ...buildModeOptions(buildMode, dartDefines),
+      if (trackWidgetCreation) '--track-widget-creation',
+      for (final String root in fileSystemRoots) ...<String>[
+        '--filesystem-root',
+        root,
+      ],
+      if (fileSystemScheme != null) ...<String>[
+        '--filesystem-scheme',
+        fileSystemScheme!,
+      ],
+      if (initializeFromDill != null) ...<String>[
+        '--initialize-from-dill',
+        initializeFromDill!,
+      ],
+      if (assumeInitializeFromDillUpToDate) '--assume-initialize-from-dill-up-to-date',
+      if (additionalSourceUri != null) ...<String>[
+        '--source',
+        additionalSourceUri,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
+      ],
+      if (nativeAssetsUri != null) ...<String>[
+        '--native-assets',
+        nativeAssetsUri,
+      ],
+      if (platformDill != null) ...<String>[
+        '--platform',
+        platformDill!,
+      ],
+      if (unsafePackageSerialization) '--unsafe-package-serialization',
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
+      ...?extraFrontEndOptions,
+    ];
     _logger.printTrace(command.join(' '));
     _server = await _processManager.start(command);
     _server?.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_stdoutHandler.handler, onDone: () {
-      // when outputFilename future is not completed, but stdout is closed
-      // process has died unexpectedly.
-      if (_stdoutHandler.compilerOutput?.isCompleted == false) {
-        _stdoutHandler.compilerOutput?.complete();
-        throwToolExit('the Dart compiler exited unexpectedly.');
-      }
-    });
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(
+        _stdoutHandler.handler,
+        onDone: () {
+          // when outputFilename future is not completed, but stdout is closed
+          // process has died unexpectedly.
+          if (_stdoutHandler.compilerOutput?.isCompleted == false) {
+            _stdoutHandler.compilerOutput?.complete();
+            throwToolExit('the Dart compiler exited unexpectedly.');
+          }
+        });
 
     _server?.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_logger.printError);
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(_logger.printError);
 
     unawaited(_server?.exitCode.then((int code) {
       if (code != 0) {
@@ -958,26 +926,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
-    final _CompileExpressionRequest request = _CompileExpressionRequest(
-        completer,
-        expression,
-        definitions,
-        definitionTypes,
-        typeDefinitions,
-        typeBounds,
-        typeDefaults,
-        libraryUri,
-        klass,
-        method,
-        isStatic);
+    final _CompileExpressionRequest request =  _CompileExpressionRequest(
+        completer, expression, definitions, definitionTypes, typeDefinitions,
+        typeBounds, typeDefaults, libraryUri, klass, method, isStatic);
     _controller.add(request);
     return completer.future;
   }
 
-  Future<CompilerOutput?> _compileExpression(
-      _CompileExpressionRequest request) async {
-    _stdoutHandler.reset(
-        suppressCompilerMessages: true, expectSources: false, readFile: true);
+  Future<CompilerOutput?> _compileExpression(_CompileExpressionRequest request) async {
+    _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false, readFile: true);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
@@ -1024,13 +981,14 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
-    _controller.add(_CompileExpressionToJsRequest(completer, libraryUri, line,
-        column, jsModules, jsFrameValues, moduleName, expression));
+    _controller.add(
+        _CompileExpressionToJsRequest(
+            completer, libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression)
+    );
     return completer.future;
   }
 
-  Future<CompilerOutput?> _compileExpressionToJs(
-      _CompileExpressionToJsRequest request) async {
+  Future<CompilerOutput?> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
     _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
 
     // 'compile-expression-to-js' should be invoked after compiler has been started,
@@ -1046,13 +1004,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ..writeln(request.libraryUri ?? '')
       ..writeln(request.line)
       ..writeln(request.column);
-    request.jsModules?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
+    request.jsModules?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
     server.stdin.writeln(inputKey);
-    request.jsFrameValues?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
+    request.jsFrameValues?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
     server.stdin
       ..writeln(inputKey)
       ..writeln(request.moduleName ?? '')
@@ -1114,8 +1068,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 /// Convert a file URI into a multi-root scheme URI if provided, otherwise
 /// return unmodified.
 @visibleForTesting
-String toMultiRootPath(
-    Uri fileUri, String? scheme, List<String> fileSystemRoots, bool windows) {
+String toMultiRootPath(Uri fileUri, String? scheme, List<String> fileSystemRoots, bool windows) {
   if (scheme == null || fileSystemRoots.isEmpty || fileUri.scheme != 'file') {
     return fileUri.toString();
   }

@@ -23,8 +23,7 @@ const Platform _kPlatform = LocalPlatform();
 
 FutureOr<dynamic> main() async {
   if (!_kPlatform.isLinux && !_kPlatform.isWindows && !_kPlatform.isMacOS) {
-    stderr.writeln(
-        'Example smoke tests are only designed to run on desktop platforms');
+    stderr.writeln('Example smoke tests are only designed to run on desktop platforms');
     exitCode = 4;
     return;
   }
@@ -37,14 +36,10 @@ FutureOr<dynamic> main() async {
       ),
     ),
   );
-  final Directory apiDir =
-      flutterDir.childDirectory('examples').childDirectory('api');
+  final Directory apiDir = flutterDir.childDirectory('examples').childDirectory('api');
   final File integrationTest = await generateTest(apiDir);
   try {
-    await runSmokeTests(
-        flutterDir: flutterDir,
-        integrationTest: integrationTest,
-        apiDir: apiDir);
+    await runSmokeTests(flutterDir: flutterDir, integrationTest: integrationTest, apiDir: apiDir);
   } finally {
     await cleanUp(integrationTest);
   }
@@ -67,15 +62,13 @@ Future<void> runSmokeTests({
   required File integrationTest,
   required Directory apiDir,
 }) async {
-  final File flutterExe = flutterDir
-      .childDirectory('bin')
-      .childFile(_kPlatform.isWindows ? 'flutter.bat' : 'flutter');
+  final File flutterExe =
+      flutterDir.childDirectory('bin').childFile(_kPlatform.isWindows ? 'flutter.bat' : 'flutter');
   final List<String> cmd = <String>[
     // If we're in a container with no X display, then use the virtual framebuffer.
     if (_kPlatform.isLinux &&
         (_kPlatform.environment['DISPLAY'] == null ||
-            _kPlatform.environment['DISPLAY']!.isEmpty))
-      '/usr/bin/xvfb-run',
+         _kPlatform.environment['DISPLAY']!.isEmpty)) '/usr/bin/xvfb-run',
     flutterExe.absolute.path,
     'test',
     '--reporter=expanded',
@@ -91,17 +84,15 @@ class ExampleInfo {
   ExampleInfo(File file, Directory examplesLibDir)
       : importPath = _getImportPath(file, examplesLibDir),
         importName = '' {
-    importName = importPath
-        .replaceAll(RegExp(r'\.dart$'), '')
-        .replaceAll(RegExp(r'\W'), '_');
+    importName = importPath.replaceAll(RegExp(r'\.dart$'), '').replaceAll(RegExp(r'\W'), '_');
   }
 
   final String importPath;
   String importName;
 
   static String _getImportPath(File example, Directory examplesLibDir) {
-    final String relativePath = path.relative(example.absolute.path,
-        from: examplesLibDir.absolute.path);
+    final String relativePath =
+        path.relative(example.absolute.path, from: examplesLibDir.absolute.path);
     // So that Windows paths are proper URIs in the import statements.
     return path.toUri(relativePath).toFilePath(windows: false);
   }
@@ -117,13 +108,11 @@ Future<File> generateTest(Directory apiDir) async {
     <String>['git', 'ls-files', '**/*.dart'],
     workingDirectory: examplesLibDir,
     quiet: true,
-  ))
-      .replaceAll(r'\', '/')
-      .trim()
-      .split('\n');
+  )).replaceAll(r'\', '/')
+    .trim()
+    .split('\n');
   final Iterable<File> examples = gitFiles.map<File>((String examplePath) {
-    return _kFilesystem
-        .file(path.join(examplesLibDir.absolute.path, examplePath));
+    return _kFilesystem.file(path.join(examplesLibDir.absolute.path, examplePath));
   });
 
   // Collect the examples, and import them all as separate symbols.
@@ -136,12 +125,10 @@ Future<File> generateTest(Directory apiDir) async {
   for (final File example in examples) {
     final ExampleInfo info = ExampleInfo(example, examplesLibDir);
     infoList.add(info);
-    imports.add(
-        '''import 'package:flutter_api_samples/${info.importPath}' as ${info.importName};''');
+    imports.add('''import 'package:flutter_api_samples/${info.importPath}' as ${info.importName};''');
   }
   imports.sort();
-  infoList.sort(
-      (ExampleInfo a, ExampleInfo b) => a.importPath.compareTo(b.importPath));
+  infoList.sort((ExampleInfo a, ExampleInfo b) => a.importPath.compareTo(b.importPath));
 
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('// Temporary generated file. Do not commit.');
@@ -186,9 +173,8 @@ void main() {
   }
   buffer.writeln('}');
 
-  final File integrationTest = apiDir
-      .childDirectory('integration_test')
-      .childFile('smoke_integration_test.dart');
+  final File integrationTest =
+      apiDir.childDirectory('integration_test').childFile('smoke_integration_test.dart');
   integrationTest.createSync(recursive: true);
   integrationTest.writeAsStringSync(buffer.toString());
   return integrationTest;
@@ -254,8 +240,7 @@ Future<String> runCommand(
 
   final int processExitCode = await allComplete();
   if (processExitCode != 0) {
-    stderr.writeln(
-        'Running "${cmd.join(' ')}" in ${workingDirectory.path} exited with code $processExitCode');
+    stderr.writeln('Running "${cmd.join(' ')}" in ${workingDirectory.path} exited with code $processExitCode');
     exitCode = processExitCode;
   }
 

@@ -5,10 +5,7 @@
 import 'template.dart';
 
 class TabsTemplate extends TokenTemplate {
-  const TabsTemplate(
-    super.blockName,
-    super.fileName,
-    super.tokens, {
+  const TabsTemplate(super.blockName, super.fileName, super.tokens, {
     super.colorSchemePrefix = '_colors.',
     super.textThemePrefix = '_textTheme.',
   });
@@ -147,4 +144,5 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 }
 ''';
+
 }

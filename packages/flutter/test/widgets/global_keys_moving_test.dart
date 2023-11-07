@@ -13,28 +13,24 @@ class Item {
   @override
   String toString() => 'Item($key1, $key2)';
 }
-
 List<Item> items = <Item>[Item(), Item()];
 
 class StatefulLeaf extends StatefulWidget {
-  const StatefulLeaf({GlobalKey? key}) : super(key: key);
+  const StatefulLeaf({ GlobalKey? key }) : super(key: key);
 
   @override
   StatefulLeafState createState() => StatefulLeafState();
 }
 
 class StatefulLeafState extends State<StatefulLeaf> {
-  void markNeedsBuild() {
-    setState(() {});
-  }
+  void markNeedsBuild() { setState(() { }); }
 
   @override
-  Widget build(BuildContext context) =>
-      const Text('leaf', textDirection: TextDirection.ltr);
+  Widget build(BuildContext context) => const Text('leaf', textDirection: TextDirection.ltr);
 }
 
 class KeyedWrapper extends StatelessWidget {
-  const KeyedWrapper(this.key1, this.key2, {super.key});
+  const KeyedWrapper(this.key1, this.key2, { super.key });
 
   final Key key1;
   final GlobalKey key2;
@@ -60,8 +56,7 @@ Widget builder() {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('moving subtrees with global keys - smoketest',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(builder());
     final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
     leaf.markNeedsBuild();
@@ -69,7 +64,6 @@ void main() {
     final Item lastItem = items[1];
     items.remove(lastItem);
     items.insert(0, lastItem);
-    await tester
-        .pumpWidget(builder()); // this marks the app dirty and rebuilds it
+    await tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
   });
 }

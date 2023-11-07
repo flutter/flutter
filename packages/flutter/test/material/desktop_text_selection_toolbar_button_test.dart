@@ -30,8 +30,7 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgetsWithLeakTracking('passing null to onPressed disables the button',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('passing null to onPressed disables the button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(

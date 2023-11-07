@@ -154,16 +154,13 @@ class AndroidSemanticsNode {
 
   /// Gets a list of [AndroidSemanticsActions] which are defined for the node.
   List<AndroidSemanticsAction> getActions() {
-    final List<int>? actions =
-        (_values['actions'] as List<dynamic>?)?.cast<int>();
+    final List<int>? actions = (_values['actions'] as List<dynamic>?)?.cast<int>();
     if (actions == null) {
       return const <AndroidSemanticsAction>[];
     }
-    final List<AndroidSemanticsAction> convertedActions =
-        <AndroidSemanticsAction>[];
+    final List<AndroidSemanticsAction> convertedActions = <AndroidSemanticsAction>[];
     for (final int id in actions) {
-      final AndroidSemanticsAction? action =
-          AndroidSemanticsAction.deserialize(id);
+      final AndroidSemanticsAction? action = AndroidSemanticsAction.deserialize(id);
       if (action != null) {
         convertedActions.add(action);
       }
@@ -176,6 +173,7 @@ class AndroidSemanticsNode {
     return _values.toString();
   }
 }
+
 
 /// A Dart VM implementation of a rectangle.
 ///
@@ -207,11 +205,11 @@ class Rect {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is Rect &&
-        other.top == top &&
-        other.left == left &&
-        other.right == right &&
-        other.bottom == bottom;
+    return other is Rect
+        && other.top == top
+        && other.left == left
+        && other.right == right
+        && other.bottom == bottom;
   }
 
   @override
@@ -240,7 +238,9 @@ class Size {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is Size && other.width == width && other.height == height;
+    return other is Size
+        && other.width == width
+        && other.height == height;
   }
 
   @override

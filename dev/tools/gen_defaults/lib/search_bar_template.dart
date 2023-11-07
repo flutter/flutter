@@ -5,9 +5,10 @@
 import 'template.dart';
 
 class SearchBarTemplate extends TokenTemplate {
-  const SearchBarTemplate(super.blockName, super.fileName, super.tokens,
-      {super.colorSchemePrefix = '_colors.',
-      super.textThemePrefix = '_textTheme.'});
+  const SearchBarTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   @override
   String generate() => '''

@@ -120,13 +120,12 @@ class ScrollBehavior {
   /// Defaults to [LogicalKeyboardKey.shiftLeft],
   /// [LogicalKeyboardKey.shiftRight].
   Set<LogicalKeyboardKey> get pointerAxisModifiers => <LogicalKeyboardKey>{
-        LogicalKeyboardKey.shiftLeft,
-        LogicalKeyboardKey.shiftRight,
-      };
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+  };
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
-  Widget buildScrollbar(
-      BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
@@ -147,8 +146,7 @@ class ScrollBehavior {
 
   /// Applies a [GlowingOverscrollIndicator] to the child widget on
   /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
-  Widget buildOverscrollIndicator(
-      BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
@@ -186,11 +184,9 @@ class ScrollBehavior {
   GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-        return (PointerEvent event) =>
-            IOSScrollViewFlingVelocityTracker(event.kind);
+        return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.macOS:
-        return (PointerEvent event) =>
-            MacOSScrollViewFlingVelocityTracker(event.kind);
+        return (PointerEvent event) => MacOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -199,13 +195,12 @@ class ScrollBehavior {
     }
   }
 
-  static const ScrollPhysics _bouncingPhysics =
-      BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
   static const ScrollPhysics _bouncingDesktopPhysics = BouncingScrollPhysics(
-      decelerationRate: ScrollDecelerationRate.fast,
-      parent: RangeMaintainingScrollPhysics());
-  static const ScrollPhysics _clampingPhysics =
-      ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+    decelerationRate: ScrollDecelerationRate.fast,
+    parent: RangeMaintainingScrollPhysics()
+  );
+  static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 
   /// The scroll physics to use for the platform given by [getPlatform].
   ///
@@ -253,8 +248,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
-  })  : _dragDevices = dragDevices,
-        _pointerAxisModifiers = pointerAxisModifiers;
+  }) : _dragDevices = dragDevices,
+       _pointerAxisModifiers = pointerAxisModifiers;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -265,16 +260,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
 
   @override
-  Set<PointerDeviceKind> get dragDevices =>
-      _dragDevices ?? delegate.dragDevices;
+  Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
-  Set<LogicalKeyboardKey> get pointerAxisModifiers =>
-      _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
 
   @override
-  Widget buildOverscrollIndicator(
-      BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     if (overscroll) {
       return delegate.buildOverscrollIndicator(context, child, details);
     }
@@ -282,8 +274,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
-  Widget buildScrollbar(
-      BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     if (scrollbars) {
       return delegate.buildScrollbar(context, child, details);
     }
@@ -321,15 +312,14 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
-    return oldDelegate.delegate.runtimeType != delegate.runtimeType ||
-        oldDelegate.scrollbars != scrollbars ||
-        oldDelegate.overscroll != overscroll ||
-        !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices) ||
-        !setEquals<LogicalKeyboardKey>(
-            oldDelegate.pointerAxisModifiers, pointerAxisModifiers) ||
-        oldDelegate.physics != physics ||
-        oldDelegate.platform != platform ||
-        delegate.shouldNotify(oldDelegate.delegate);
+    return oldDelegate.delegate.runtimeType != delegate.runtimeType
+        || oldDelegate.scrollbars != scrollbars
+        || oldDelegate.overscroll != overscroll
+        || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
+        || !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers)
+        || oldDelegate.physics != physics
+        || oldDelegate.platform != platform
+        || delegate.shouldNotify(oldDelegate.delegate);
   }
 
   @override
@@ -361,16 +351,14 @@ class ScrollConfiguration extends InheritedWidget {
   /// If no [ScrollConfiguration] widget is in scope of the given `context`,
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
-    final ScrollConfiguration? configuration =
-        context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
+    final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
     return configuration?.behavior ?? const ScrollBehavior();
   }
 
   @override
   bool updateShouldNotify(ScrollConfiguration oldWidget) {
-    return behavior.runtimeType != oldWidget.behavior.runtimeType ||
-        (behavior != oldWidget.behavior &&
-            behavior.shouldNotify(oldWidget.behavior));
+    return behavior.runtimeType != oldWidget.behavior.runtimeType
+        || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
 
   @override

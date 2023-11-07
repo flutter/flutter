@@ -17,15 +17,15 @@ bool _dateIntlDataInitialized = false;
 void loadDateIntlDataIfNotLoaded() {
   if (!_dateIntlDataInitialized) {
     date_localizations.dateSymbols
-        .forEach((String locale, intl.DateSymbols symbols) {
-      // Perform initialization.
-      assert(date_localizations.datePatterns.containsKey(locale));
-      date_symbol_data_custom.initializeDateFormattingCustom(
-        locale: locale,
-        symbols: symbols,
-        patterns: date_localizations.datePatterns[locale],
-      );
-    });
+      .forEach((String locale, intl.DateSymbols symbols) {
+        // Perform initialization.
+        assert(date_localizations.datePatterns.containsKey(locale));
+        date_symbol_data_custom.initializeDateFormattingCustom(
+          locale: locale,
+          symbols: symbols,
+          patterns: date_localizations.datePatterns[locale],
+        );
+      });
     _dateIntlDataInitialized = true;
   }
 }

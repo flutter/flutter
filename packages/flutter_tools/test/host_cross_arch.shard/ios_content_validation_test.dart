@@ -80,10 +80,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    for (final BuildMode buildMode in <BuildMode>[
-      BuildMode.debug,
-      BuildMode.release
-    ]) {
+    for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
       group('build in ${buildMode.cliName} mode', () {
         late Directory outputPath;
         late Directory outputApp;
@@ -121,18 +118,13 @@ void main() {
           outputApp = outputPath.childDirectory('Runner.app');
 
           frameworkDirectory = outputApp.childDirectory('Frameworks');
-          outputFlutterFramework =
-              frameworkDirectory.childDirectory('Flutter.framework');
-          outputFlutterFrameworkBinary =
-              outputFlutterFramework.childFile('Flutter');
+          outputFlutterFramework = frameworkDirectory.childDirectory('Flutter.framework');
+          outputFlutterFrameworkBinary = outputFlutterFramework.childFile('Flutter');
 
-          outputAppFramework =
-              frameworkDirectory.childDirectory('App.framework');
+          outputAppFramework = frameworkDirectory.childDirectory('App.framework');
           outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
-          outputPluginFrameworkBinary = frameworkDirectory
-              .childDirectory('hello.framework')
-              .childFile('hello');
+          outputPluginFrameworkBinary = frameworkDirectory.childDirectory('hello.framework').childFile('hello');
 
           buildPath = fileSystem.directory(fileSystem.path.join(
             projectRoot,
@@ -141,10 +133,8 @@ void main() {
             '${sentenceCase(buildMode.cliName)}-iphoneos',
           ));
 
-          buildAppFrameworkDsym =
-              buildPath.childDirectory('App.framework.dSYM');
-          buildAppFrameworkDsymBinary =
-              buildAppFrameworkDsym.childFile('Contents/Resources/DWARF/App');
+          buildAppFrameworkDsym = buildPath.childDirectory('App.framework.dSYM');
+          buildAppFrameworkDsymBinary = buildAppFrameworkDsym.childFile('Contents/Resources/DWARF/App');
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
@@ -158,8 +148,7 @@ void main() {
           expect(outputAppFrameworkBinary, exists);
           expect(outputAppFramework.childFile('Info.plist'), exists);
 
-          expect(buildAppFrameworkDsymBinary.existsSync(),
-              buildMode != BuildMode.debug);
+          expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
 
           final File vmSnapshot = fileSystem.file(fileSystem.path.join(
             outputAppFramework.path,
@@ -170,10 +159,7 @@ void main() {
           expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
 
           // Builds should not contain deprecated bitcode.
-          expect(
-              _containsBitcode(
-                  outputFlutterFrameworkBinary.path, processManager),
-              isFalse);
+          expect(_containsBitcode(outputFlutterFrameworkBinary.path, processManager), isFalse);
         });
 
         testWithoutContext('Info.plist dart VM Service Bonjour service', () {
@@ -192,8 +178,7 @@ void main() {
               infoPlistPath,
             ],
           );
-          final bool bonjourServicesFound = (bonjourServices.stdout as String)
-              .contains('_dartVmService._tcp');
+          final bool bonjourServicesFound = (bonjourServices.stdout as String).contains('_dartVmService._tcp');
           expect(bonjourServicesFound, buildMode == BuildMode.debug);
 
           final ProcessResult localNetworkUsage = processManager.runSync(
@@ -226,8 +211,8 @@ void main() {
             // dSYM is not created for a debug build.
             expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
           } else {
-            final List<String> symbols = AppleTestUtils.getExportedSymbols(
-                buildAppFrameworkDsymBinary.path);
+            final List<String> symbols =
+                AppleTestUtils.getExportedSymbols(buildAppFrameworkDsymBinary.path);
             expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
             // The actual number of symbols is going to vary but there should
             // be "many" in the dSYM. At the time of writing, it was 7656.
@@ -280,10 +265,7 @@ void main() {
           expect(xcodeBackendResult.exitCode, 0);
           expect(outputFlutterFrameworkBinary.existsSync(), isTrue);
           expect(outputAppFrameworkBinary.existsSync(), isTrue);
-        },
-            skip: !platform.isMacOS ||
-                buildMode !=
-                    BuildMode.release); // [intended] only makes sense on macos.
+        }, skip: !platform.isMacOS || buildMode != BuildMode.release); // [intended] only makes sense on macos.
 
         testWithoutContext('validate obfuscation', () {
           // HelloPlugin class is present in project.
@@ -337,14 +319,11 @@ void main() {
       final ProcessResult archs = processManager.runSync(
         <String>['file', pluginFrameworkBinary.path],
       );
-      expect(archs.stdout,
-          contains('Mach-O 64-bit dynamically linked shared library x86_64'));
-      expect(archs.stdout,
-          contains('Mach-O 64-bit dynamically linked shared library arm64'));
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
 
-    testWithoutContext('build for simulator with all available architectures',
-        () {
+    testWithoutContext('build for simulator with all available architectures', () {
       final ProcessResult buildSimulator = processManager.runSync(
         <String>[
           flutterBin,
@@ -363,8 +342,7 @@ void main() {
       // This test case would fail if arm64 or x86_64 simulators could not build.
       expect(buildSimulator.exitCode, 0);
 
-      final File simulatorAppFrameworkBinary =
-          fileSystem.file(fileSystem.path.join(
+      final File simulatorAppFrameworkBinary = fileSystem.file(fileSystem.path.join(
         projectRoot,
         'build',
         'ios',
@@ -378,15 +356,12 @@ void main() {
       final ProcessResult archs = processManager.runSync(
         <String>['file', simulatorAppFrameworkBinary.path],
       );
-      expect(archs.stdout,
-          contains('Mach-O 64-bit dynamically linked shared library x86_64'));
-      expect(archs.stdout,
-          contains('Mach-O 64-bit dynamically linked shared library arm64'));
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
-  },
-      skip:
-          !platform.isMacOS, // [intended] only makes sense for macos platform.
-      timeout: const Timeout(Duration(minutes: 7)));
+  }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
+     timeout: const Timeout(Duration(minutes: 7))
+  );
 }
 
 bool _containsBitcode(String pathToBinary, ProcessManager processManager) {

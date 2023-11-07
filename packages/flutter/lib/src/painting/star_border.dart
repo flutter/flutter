@@ -206,10 +206,8 @@ class StarBorder extends OutlinedBorder {
       return StarBorder(
         side: BorderSide.lerp(a.side, side, t),
         points: ui.lerpDouble(a.points, points, t)!,
-        rotation: ui.lerpDouble(a._rotationRadians, _rotationRadians, t)! *
-            _kRadToDeg,
-        innerRadiusRatio:
-            ui.lerpDouble(a.innerRadiusRatio, innerRadiusRatio, t)!,
+        rotation: ui.lerpDouble(a._rotationRadians, _rotationRadians, t)! * _kRadToDeg,
+        innerRadiusRatio: ui.lerpDouble(a.innerRadiusRatio, innerRadiusRatio, t)!,
         pointRounding: ui.lerpDouble(a.pointRounding, pointRounding, t)!,
         valleyRounding: ui.lerpDouble(a.valleyRounding, valleyRounding, t)!,
         squash: ui.lerpDouble(a.squash, squash, t)!,
@@ -224,8 +222,7 @@ class StarBorder extends OutlinedBorder {
           points: lerpedPoints,
           squash: ui.lerpDouble(a.eccentricity, squash, t)!,
           rotation: rotation,
-          innerRadiusRatio: ui.lerpDouble(
-              math.cos(math.pi / lerpedPoints), innerRadiusRatio, t)!,
+          innerRadiusRatio: ui.lerpDouble(math.cos(math.pi / lerpedPoints), innerRadiusRatio, t)!,
           pointRounding: ui.lerpDouble(1.0, pointRounding, t)!,
           valleyRounding: ui.lerpDouble(0.0, valleyRounding, t)!,
         );
@@ -269,8 +266,7 @@ class StarBorder extends OutlinedBorder {
           return _twoPhaseLerp(
             t,
             0.5,
-            (double t) => StadiumBorder(side: lerpedSide)
-                .lerpTo(CircleBorder(side: lerpedSide), t),
+            (double t) => StadiumBorder(side: lerpedSide).lerpTo(CircleBorder(side: lerpedSide), t),
             (double t) => lerpFrom(CircleBorder(side: lerpedSide), t),
           );
         },
@@ -291,10 +287,8 @@ class StarBorder extends OutlinedBorder {
       return StarBorder(
         side: BorderSide.lerp(side, b.side, t),
         points: ui.lerpDouble(points, b.points, t)!,
-        rotation: ui.lerpDouble(_rotationRadians, b._rotationRadians, t)! *
-            _kRadToDeg,
-        innerRadiusRatio:
-            ui.lerpDouble(innerRadiusRatio, b.innerRadiusRatio, t)!,
+        rotation: ui.lerpDouble(_rotationRadians, b._rotationRadians, t)! * _kRadToDeg,
+        innerRadiusRatio: ui.lerpDouble(innerRadiusRatio, b.innerRadiusRatio, t)!,
         pointRounding: ui.lerpDouble(pointRounding, b.pointRounding, t)!,
         valleyRounding: ui.lerpDouble(valleyRounding, b.valleyRounding, t)!,
         squash: ui.lerpDouble(squash, b.squash, t)!,
@@ -310,8 +304,7 @@ class StarBorder extends OutlinedBorder {
           points: lerpedPoints,
           squash: ui.lerpDouble(squash, b.eccentricity, t)!,
           rotation: rotation,
-          innerRadiusRatio: ui.lerpDouble(
-              innerRadiusRatio, math.cos(math.pi / lerpedPoints), t)!,
+          innerRadiusRatio: ui.lerpDouble(innerRadiusRatio, math.cos(math.pi / lerpedPoints), t)!,
           pointRounding: ui.lerpDouble(pointRounding, 1.0, t)!,
           valleyRounding: ui.lerpDouble(valleyRounding, 0.0, t)!,
         );
@@ -349,8 +342,7 @@ class StarBorder extends OutlinedBorder {
             t,
             0.5,
             (double t) => lerpTo(CircleBorder(side: lerpedSide), t),
-            (double t) => StadiumBorder(side: lerpedSide)
-                .lerpFrom(CircleBorder(side: lerpedSide), t),
+            (double t) => StadiumBorder(side: lerpedSide).lerpFrom(CircleBorder(side: lerpedSide), t),
           );
         },
         (double t) {
@@ -431,14 +423,14 @@ class StarBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StarBorder &&
-        other.side == side &&
-        other.points == points &&
-        other._innerRadiusRatio == _innerRadiusRatio &&
-        other.pointRounding == pointRounding &&
-        other.valleyRounding == valleyRounding &&
-        other._rotationRadians == _rotationRadians &&
-        other.squash == squash;
+    return other is StarBorder
+        && other.side == side
+        && other.points == points
+        && other._innerRadiusRatio == _innerRadiusRatio
+        && other.pointRounding == pointRounding
+        && other.valleyRounding == valleyRounding
+        && other._rotationRadians == _rotationRadians
+        && other.squash == squash;
   }
 
   @override
@@ -507,8 +499,7 @@ class _StarGenerator {
     // length of the conicTo is small enough that it can render it as a straight
     // line, even though it will be scaled up later. This maps the range from
     // [0, 1] to [minInnerRadiusRatio, 1].
-    final double mappedInnerRadiusRatio =
-        (innerRadiusRatio * (1.0 - minInnerRadiusRatio)) + minInnerRadiusRatio;
+    final double mappedInnerRadiusRatio = (innerRadiusRatio * (1.0 - minInnerRadiusRatio)) + minInnerRadiusRatio;
 
     // First, generate the "points" of the star.
     final List<_PointInfo> points = <_PointInfo>[];
@@ -533,12 +524,10 @@ class _StarGenerator {
     // Scale the border so that it matches the size of the widget rectangle, so
     // that "rotation" of the shape doesn't affect how much of the rectangle it
     // covers.
-    final Matrix4 squashMatrix =
-        Matrix4.translationValues(rect.center.dx, rect.center.dy, 0);
+    final Matrix4 squashMatrix = Matrix4.translationValues(rect.center.dx, rect.center.dy, 0);
     squashMatrix.multiply(Matrix4.diagonal3Values(scale.dx, scale.dy, 1));
     squashMatrix.multiply(Matrix4.rotationZ(rotation));
-    squashMatrix.multiply(
-        Matrix4.translationValues(-rect.center.dx, -rect.center.dy, 0));
+    squashMatrix.multiply(Matrix4.translationValues(-rect.center.dx, -rect.center.dy, 0));
     return path.transform(squashMatrix.storage);
   }
 
@@ -560,8 +549,7 @@ class _StarGenerator {
     // point, taking into account the rounding of the points and the weight of
     // the corner point. This effectively is evaluating the rational quadratic
     // bezier at the midpoint of the curve.
-    Offset getCurveMidpoint(
-        Offset a, Offset b, Offset c, Offset a1, Offset c1) {
+    Offset getCurveMidpoint(Offset a, Offset b, Offset c, Offset a1, Offset c1) {
       final double angle = _getAngle(a, b, c);
       final double w = _getWeight(angle) / 2;
       return (a1 / 4 + b * w + c1 / 4) / (0.5 + w);
@@ -586,8 +574,7 @@ class _StarGenerator {
       final Offset valleyArc1 = valley + (point - valley) * valleyRounding;
       final Offset pointArc1 = point + (valley - point) * pointRounding;
       final Offset pointArc2 = point + (nextValley - point) * pointRounding;
-      final Offset valleyArc2 =
-          nextValley + (point - nextValley) * valleyRounding;
+      final Offset valleyArc2 = nextValley + (point - nextValley) * valleyRounding;
 
       pointList.add(_PointInfo(
         valley: valley,
@@ -613,18 +600,10 @@ class _StarGenerator {
     final _PointInfo thisPoint = pointList[0];
     final _PointInfo nextPoint = pointList[1];
 
-    final Offset pointMidpoint = getCurveMidpoint(
-        thisPoint.valley,
-        thisPoint.point,
-        nextPoint.valley,
-        thisPoint.pointArc1,
-        thisPoint.pointArc2);
+    final Offset pointMidpoint =
+        getCurveMidpoint(thisPoint.valley, thisPoint.point, nextPoint.valley, thisPoint.pointArc1, thisPoint.pointArc2);
     final Offset valleyMidpoint = getCurveMidpoint(
-        thisPoint.point,
-        nextPoint.valley,
-        nextPoint.point,
-        thisPoint.valleyArc2,
-        nextPoint.valleyArc1);
+        thisPoint.point, nextPoint.valley, nextPoint.point, thisPoint.valleyArc2, nextPoint.valleyArc1);
     valleyRadius = (valleyMidpoint - center).distance;
     pointRadius = (pointMidpoint - center).distance;
 
@@ -632,8 +611,7 @@ class _StarGenerator {
     // account for.
     if (!hasIntegerSides) {
       final double effectiveInnerRadius = math.max(valleyRadius, innerRadius);
-      final double endingRadius =
-          effectiveInnerRadius + remainder * (radius - effectiveInnerRadius);
+      final double endingRadius = effectiveInnerRadius + remainder * (radius - effectiveInnerRadius);
       addPoint(angle, step * remainder, endingRadius, innerRadius);
     }
 
@@ -643,18 +621,15 @@ class _StarGenerator {
     // valley and the point radii, and pick the largest. Also, since this value
     // is used later to determine the scale, we need to keep it finite and
     // non-zero.
-    return clampDouble(math.max(valleyRadius, pointRadius), double.minPositive,
-        double.maxFinite);
+    return clampDouble(math.max(valleyRadius, pointRadius), double.minPositive, double.maxFinite);
   }
 
   void _drawPoints(Path path, List<_PointInfo> points) {
     final Offset startingPoint = points.first.pointArc1;
     path.moveTo(startingPoint.dx, startingPoint.dy);
-    final double pointAngle =
-        _getAngle(points[0].valley, points[0].point, points[1].valley);
+    final double pointAngle = _getAngle(points[0].valley, points[0].point, points[1].valley);
     final double pointWeight = _getWeight(pointAngle);
-    final double valleyAngle =
-        _getAngle(points[1].point, points[1].valley, points[0].point);
+    final double valleyAngle = _getAngle(points[1].point, points[1].valley, points[0].point);
     final double valleyWeight = _getWeight(valleyAngle);
 
     for (int i = 0; i < points.length; i += 1) {
@@ -662,15 +637,14 @@ class _StarGenerator {
       final _PointInfo nextPoint = points[(i + 1) % points.length];
       path.lineTo(point.pointArc1.dx, point.pointArc1.dy);
       if (pointAngle != 180 && pointAngle != 0) {
-        path.conicTo(point.point.dx, point.point.dy, point.pointArc2.dx,
-            point.pointArc2.dy, pointWeight);
+        path.conicTo(point.point.dx, point.point.dy, point.pointArc2.dx, point.pointArc2.dy, pointWeight);
       } else {
         path.lineTo(point.pointArc2.dx, point.pointArc2.dy);
       }
       path.lineTo(point.valleyArc2.dx, point.valleyArc2.dy);
       if (valleyAngle != 180 && valleyAngle != 0) {
-        path.conicTo(nextPoint.valley.dx, nextPoint.valley.dy,
-            nextPoint.valleyArc1.dx, nextPoint.valleyArc1.dy, valleyWeight);
+        path.conicTo(
+            nextPoint.valley.dx, nextPoint.valley.dy, nextPoint.valleyArc1.dx, nextPoint.valleyArc1.dy, valleyWeight);
       } else {
         path.lineTo(nextPoint.valleyArc1.dx, nextPoint.valleyArc1.dy);
       }

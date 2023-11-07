@@ -3,20 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/basic/physical_shape.0.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/basic/physical_shape.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PhysicalShape is an ancestor of the text widget',
-      (WidgetTester tester) async {
+  testWidgets('PhysicalShape is an ancestor of the text widget', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.PhysicalShapeApp()),
     );
 
     final PhysicalShape physicalShape = tester.widget<PhysicalShape>(
       find.ancestor(
-        of: find.text('Hello, World!'),
+        of:find.text('Hello, World!'),
         matching: find.byType(PhysicalShape),
       ),
     );

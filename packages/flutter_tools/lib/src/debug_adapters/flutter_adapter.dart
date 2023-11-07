@@ -17,8 +17,7 @@ import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
-class FlutterDebugAdapter extends FlutterBaseDebugAdapter
-    with VmServiceInfoFileUtils {
+class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFileUtils {
   FlutterDebugAdapter(
     super.channel, {
     required super.fileSystem,
@@ -49,8 +48,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
 
   /// Outstanding requests that have been sent to the Flutter run daemon and
   /// their handlers.
-  final Map<int, Completer<Object?>> _flutterRequestCompleters =
-      <int, Completer<Object?>>{};
+  final Map<int, Completer<Object?>> _flutterRequestCompleters = <int, Completer<Object?>>{};
 
   /// A list of reverse-requests from `flutter run --machine` that should be forwarded to the client.
   static const Set<String> _requestsToForwardToClient = <String>{
@@ -76,8 +74,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
   };
 
   /// Completers for reverse requests from Flutter that may need to be handled by the client.
-  final Map<Object, Completer<Object?>> _reverseRequestCompleters =
-      <Object, Completer<Object?>>{};
+  final Map<Object, Completer<Object?>> _reverseRequestCompleters = <Object, Completer<Object?>>{};
 
   /// Whether or not the user requested debugging be enabled.
   ///
@@ -93,8 +90,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
   /// Functionality provided via the daemon (hot reload/restart) will still be
   /// available.
   @override
-  bool get enableDebugger =>
-      super.enableDebugger && !profileMode && !releaseMode;
+  bool get enableDebugger => super.enableDebugger && !profileMode && !releaseMode;
 
   /// Whether the launch configuration arguments specify `--profile`.
   ///
@@ -125,8 +121,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
   Future<void> attachImpl() async {
-    final FlutterAttachRequestArguments args =
-        this.args as FlutterAttachRequestArguments;
+    final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
     String? vmServiceUri = args.vmServiceUri;
     final String? vmServiceInfoFile = args.vmServiceInfoFile;
 
@@ -145,8 +140,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
     );
 
     if (vmServiceUri == null && vmServiceInfoFile != null) {
-      final Uri uriFromFile = await waitForVmServiceInfoFile(
-          logger, globals.fs.file(vmServiceInfoFile));
+      final Uri uriFromFile = await waitForVmServiceInfoFile(logger, globals.fs.file(vmServiceInfoFile));
       vmServiceUri = uriFromFile.toString();
     }
 
@@ -154,7 +148,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
       'attach',
       '--machine',
       if (!enableFlutterDds) '--no-dds',
-      if (vmServiceUri != null) ...<String>['--debug-uri', vmServiceUri],
+      if (vmServiceUri != null)
+      ...<String>['--debug-uri', vmServiceUri],
     ];
 
     await _startProcess(
@@ -241,8 +236,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
   /// breakpoints, and resume.
   @override
   Future<void> launchImpl() async {
-    final FlutterLaunchRequestArguments args =
-        this.args as FlutterLaunchRequestArguments;
+    final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
 
     launchProgress = startProgressNotification(
       'launch',
@@ -283,9 +277,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
     List<String>? userArgs,
   }) async {
     // Handle customTool and deletion of any arguments for it.
-    final String executable = customTool ??
-        fileSystem.path.join(Cache.flutterRoot!, 'bin',
-            platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable = customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
     final int? removeArgs = customToolReplacesArgs;
     if (customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
@@ -385,23 +377,23 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
 
   /// Connects to the VM Service if the app.started event has fired, and a VM Service URI is available.
   Future<void> _connectDebugger(Uri vmServiceUri) async {
-    if (enableDebugger) {
-      await connectDebugger(vmServiceUri);
-    } else {
-      // Usually, `connectDebugger` (in the base Dart adapter) will send this
-      // event when it connects a debugger. Since we're not connecting a
-      // debugger we send this ourselves, to allow clients to connect to the
-      // VM Service for things like starting DevTools, even if debugging is
-      // not available.
-      // TODO(dantup): Switch this to call `sendDebuggerUris()` on the base
-      //   adapter once rolled into Flutter.
-      sendEvent(
-        RawEventBody(<String, Object?>{
-          'vmServiceUri': vmServiceUri.toString(),
-        }),
-        eventType: 'dart.debuggerUris',
-      );
-    }
+      if (enableDebugger) {
+        await connectDebugger(vmServiceUri);
+      } else {
+        // Usually, `connectDebugger` (in the base Dart adapter) will send this
+        // event when it connects a debugger. Since we're not connecting a
+        // debugger we send this ourselves, to allow clients to connect to the
+        // VM Service for things like starting DevTools, even if debugging is
+        // not available.
+        // TODO(dantup): Switch this to call `sendDebuggerUris()` on the base
+        //   adapter once rolled into Flutter.
+        sendEvent(
+          RawEventBody(<String, Object?>{
+            'vmServiceUri': vmServiceUri.toString(),
+          }),
+          eventType: 'dart.debuggerUris',
+        );
+      }
   }
 
   /// Handles the app.start event from Flutter.
@@ -415,8 +407,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
     // clicks restart, instead of terminating and re-starting its own debug
     // session (which is much slower, but required for profile/release mode).
     final bool supportsRestart = (params['supportsRestart'] as bool?) ?? false;
-    sendEvent(CapabilitiesEventBody(
-        capabilities: Capabilities(supportsRestartRequest: supportsRestart)));
+    sendEvent(CapabilitiesEventBody(capabilities: Capabilities(supportsRestartRequest: supportsRestart)));
 
     // Send a custom event so the editor has info about the app starting.
     //
@@ -517,22 +508,24 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
     Map<String, Object?>? params,
   ) {
     /// A helper to send a client response to Flutter.
-    void sendResponseToFlutter(Object? id, Object? value,
-        {bool error = false}) {
+    void sendResponseToFlutter(Object? id, Object? value, { bool error = false }) {
       sendFlutterMessage(<String, Object?>{
         'id': id,
-        if (error) 'error': value else 'result': value
+        if (error)
+          'error': value
+        else
+          'result': value
       });
     }
 
     // Set up a completer to forward the response back to `flutter` when it arrives.
     final Completer<Object?> completer = Completer<Object?>();
     _reverseRequestCompleters[id] = completer;
-    completer.future.then(
-      (Object? value) => sendResponseToFlutter(id, value),
-      onError: (Object? e) =>
-          sendResponseToFlutter(id, e.toString(), error: true),
-    );
+    completer.future
+        .then(
+          (Object? value) => sendResponseToFlutter(id, value),
+          onError: (Object? e) => sendResponseToFlutter(id, e.toString(), error: true),
+        );
 
     if (_requestsToForwardToClient.contains(method)) {
       // Forward the request to the client in an event.
@@ -545,8 +538,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
         eventType: 'flutter.forwardedRequest',
       );
     } else {
-      completer.completeError(
-          ArgumentError.value(method, 'Unknown request method.'));
+      completer.completeError(ArgumentError.value(method, 'Unknown request method.'));
     }
   }
 
@@ -557,8 +549,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
     final Object? error = args?.args['error'];
     final Completer<Object?>? completer = _reverseRequestCompleters[id];
     if (error != null) {
-      completer?.completeError(DebugAdapterException(
-          'Client reported an error handling reverse-request $error'));
+      completer?.completeError(DebugAdapterException('Client reported an error handling reverse-request $error'));
     } else {
       completer?.complete(result);
     }
@@ -630,8 +621,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
       // we're waiting for the user to do something.
       if (data.contains('Waiting for connection from Dart debug extension')) {
         launchProgress?.update(
-          message:
-              'Please click the Dart Debug extension button in the spawned browser window',
+          message: 'Please click the Dart Debug extension button in the spawned browser window',
         );
       }
 
@@ -657,9 +647,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
     final Object? id = payload['id'];
     if (event is String && params is Map<String, Object?>?) {
       _handleJsonEvent(event, params);
-    } else if (id != null &&
-        method is String &&
-        params is Map<String, Object?>?) {
+    } else if (id != null && method is String && params is Map<String, Object?>?) {
       _handleJsonRequest(id, method, params);
     } else if (id is int && _flutterRequestCompleters.containsKey(id)) {
       _handleJsonResponse(id, payload);
@@ -697,8 +685,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter
     }
 
     final String progressId = fullRestart ? 'hotRestart' : 'hotReload';
-    final String progressMessage =
-        fullRestart ? 'Hot restarting…' : 'Hot reloading…';
+    final String progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
     final DapProgressReporter progress = startProgressNotification(
       progressId,
       'Flutter',

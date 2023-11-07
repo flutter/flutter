@@ -12,8 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Flutter Logo golden test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Flutter Logo golden test', (WidgetTester tester) async {
     final Key logo = UniqueKey();
     await tester.pumpWidget(FlutterLogo(key: logo));
 

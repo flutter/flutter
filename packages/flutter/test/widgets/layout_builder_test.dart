@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('LayoutBuilder parent size',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder parent size', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     final Key childKey = UniqueKey();
     final Key parentKey = UniqueKey();
@@ -40,8 +39,7 @@ void main() {
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
-  testWidgetsWithLeakTracking('SliverLayoutBuilder parent geometry',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey1 = UniqueKey();
@@ -58,18 +56,14 @@ void main() {
               key: parentKey1,
               builder: (BuildContext context, SliverConstraints constraint) {
                 parentConstraints1 = constraint;
-                return SliverPadding(
-                    key: childKey1,
-                    padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+                return SliverPadding(key: childKey1, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
             SliverLayoutBuilder(
               key: parentKey2,
               builder: (BuildContext context, SliverConstraints constraint) {
                 parentConstraints2 = constraint;
-                return SliverPadding(
-                    key: childKey2,
-                    padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
+                return SliverPadding(key: childKey2, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
           ],
@@ -82,25 +76,20 @@ void main() {
 
     expect(parentConstraints2.crossAxisExtent, 800);
     expect(parentConstraints2.remainingPaintExtent, 600 - 2 - 4);
-    final RenderSliver parentSliver1 =
-        tester.renderObject(find.byKey(parentKey1));
-    final RenderSliver parentSliver2 =
-        tester.renderObject(find.byKey(parentKey2));
+    final RenderSliver parentSliver1 = tester.renderObject(find.byKey(parentKey1));
+    final RenderSliver parentSliver2 = tester.renderObject(find.byKey(parentKey2));
 
     // scrollExtent == top + bottom.
     expect(parentSliver1.geometry!.scrollExtent, 2 + 4);
     expect(parentSliver2.geometry!.scrollExtent, 7 + 13);
 
-    final RenderSliver childSliver1 =
-        tester.renderObject(find.byKey(childKey1));
-    final RenderSliver childSliver2 =
-        tester.renderObject(find.byKey(childKey2));
+    final RenderSliver childSliver1 = tester.renderObject(find.byKey(childKey1));
+    final RenderSliver childSliver2 = tester.renderObject(find.byKey(childKey2));
     expect(childSliver1.geometry, parentSliver1.geometry);
     expect(childSliver2.geometry, parentSliver2.geometry);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder stateful child',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder stateful child', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -146,8 +135,7 @@ void main() {
     expect(childBox.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking('SliverLayoutBuilder stateful descendants',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
     late StateSetter setState;
     double childWidth = 10.0;
     double childHeight = 20.0;
@@ -216,8 +204,7 @@ void main() {
     expect(parentSliver.geometry!.paintExtent, 600);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder stateful parent',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder stateful parent', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -261,9 +248,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking(
-      'LayoutBuilder and Inherited -- do not rebuild when not using inherited',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -286,9 +271,7 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgetsWithLeakTracking(
-      'LayoutBuilder and Inherited -- do rebuild when using inherited',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -312,9 +295,7 @@ void main() {
     expect(built, 2);
   });
 
-  testWidgetsWithLeakTracking(
-      'SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,
@@ -333,14 +314,14 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(size: Size(400.0, 300.0)),
-      child: target,
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
     ));
     expect(built, 1);
 
     await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(size: Size(300.0, 400.0)),
-      child: target,
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
     ));
     expect(built, 1);
   });
@@ -367,21 +348,20 @@ void main() {
       expect(built, 0);
 
       await tester.pumpWidget(MediaQuery(
-        data: const MediaQueryData(size: Size(400.0, 300.0)),
-        child: target,
+          data: const MediaQueryData(size: Size(400.0, 300.0)),
+          child: target,
       ));
       expect(built, 1);
 
       await tester.pumpWidget(MediaQuery(
-        data: const MediaQueryData(size: Size(300.0, 400.0)),
-        child: target,
+          data: const MediaQueryData(size: Size(300.0, 400.0)),
+          child: target,
       ));
       expect(built, 2);
     },
   );
 
-  testWidgetsWithLeakTracking('nested SliverLayoutBuilder',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('nested SliverLayoutBuilder', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey = UniqueKey();
@@ -399,12 +379,9 @@ void main() {
                 parentConstraints1 = constraint;
                 return SliverLayoutBuilder(
                   key: parentKey2,
-                  builder:
-                      (BuildContext context, SliverConstraints constraint) {
+                  builder: (BuildContext context, SliverConstraints constraint) {
                     parentConstraints2 = constraint;
-                    return SliverPadding(
-                        key: childKey,
-                        padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+                    return SliverPadding(key: childKey, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
                   },
                 );
               },
@@ -419,10 +396,8 @@ void main() {
     expect(parentConstraints1.crossAxisExtent, 800);
     expect(parentConstraints1.remainingPaintExtent, 600);
 
-    final RenderSliver parentSliver1 =
-        tester.renderObject(find.byKey(parentKey1));
-    final RenderSliver parentSliver2 =
-        tester.renderObject(find.byKey(parentKey2));
+    final RenderSliver parentSliver1 = tester.renderObject(find.byKey(parentKey1));
+    final RenderSliver parentSliver2 = tester.renderObject(find.byKey(parentKey2));
     // scrollExtent == top + bottom.
     expect(parentSliver1.geometry!.scrollExtent, 2 + 4);
 
@@ -431,8 +406,7 @@ void main() {
     expect(parentSliver1.geometry, parentSliver2.geometry);
   });
 
-  testWidgetsWithLeakTracking('localToGlobal works with SliverLayoutBuilder',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
     final Key childKey1 = UniqueKey();
     final Key childKey2 = UniqueKey();
     final ScrollController scrollController = ScrollController();
@@ -448,8 +422,7 @@ void main() {
               child: SizedBox(height: 300),
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) =>
-                  SliverToBoxAdapter(
+              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
                 child: SizedBox(key: childKey1, height: 200),
               ),
             ),
@@ -490,11 +463,10 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('hitTest works within SliverLayoutBuilder',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    List<int> hitCounts = <int>[0, 0, 0];
+    List<int> hitCounts = <int> [0, 0, 0];
 
     await tester.pumpWidget(
       Directionality(
@@ -511,8 +483,7 @@ void main() {
                 ),
               ),
               SliverLayoutBuilder(
-                builder: (BuildContext context, SliverConstraints constraint) =>
-                    SliverToBoxAdapter(
+                builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
                   child: SizedBox(
                     height: 200,
                     child: GestureDetector(onTap: () => hitCounts[1]++),
@@ -534,57 +505,57 @@ void main() {
     // Tap item 1.
     await tester.tapAt(const Offset(300, 50.0 + 100));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 0, 0]);
+    expect(hitCounts, const <int> [1, 0, 0]);
 
     // Tap item 2.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 0]);
+    expect(hitCounts, const <int> [1, 1, 0]);
 
     // Tap item 3. Shift the touch point up to ensure the touch lands within the viewport.
     await tester.tapAt(const Offset(300, 50.0 + 200 + 200 + 10));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 1]);
+    expect(hitCounts, const <int> [1, 1, 1]);
 
     // Scrolling doesn't break it.
-    hitCounts = <int>[0, 0, 0];
+    hitCounts = <int> [0, 0, 0];
     scrollController.jumpTo(100);
     await tester.pump();
 
     // Tap item 1.
     await tester.tapAt(const Offset(300, 50.0 + 100 - 100));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 0, 0]);
+    expect(hitCounts, const <int> [1, 0, 0]);
 
     // Tap item 2.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200 - 100));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 0]);
+    expect(hitCounts, const <int> [1, 1, 0]);
 
     // Tap item 3.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200 + 200 - 100));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 1]);
+    expect(hitCounts, const <int> [1, 1, 1]);
 
     // Tapping outside of the viewport shouldn't do anything.
     await tester.tapAt(const Offset(300, 1));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 1]);
+    expect(hitCounts, const <int> [1, 1, 1]);
 
     await tester.tapAt(const Offset(300, 599));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 1]);
+    expect(hitCounts, const <int> [1, 1, 1]);
 
     await tester.tapAt(const Offset(1, 100));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 1]);
+    expect(hitCounts, const <int> [1, 1, 1]);
 
     await tester.tapAt(const Offset(799, 100));
     await tester.pump();
-    expect(hitCounts, const <int>[1, 1, 1]);
+    expect(hitCounts, const <int> [1, 1, 1]);
 
     // Tap the no-content area in the viewport shouldn't do anything
-    hitCounts = <int>[0, 0, 0];
+    hitCounts = <int> [0, 0, 0];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -598,8 +569,7 @@ void main() {
               ),
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) =>
-                  SliverToBoxAdapter(
+              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
                 child: SizedBox(
                   height: 100,
                   child: GestureDetector(onTap: () => hitCounts[1]++),
@@ -619,12 +589,10 @@ void main() {
 
     await tester.tapAt(const Offset(300, 301));
     await tester.pump();
-    expect(hitCounts, const <int>[0, 0, 0]);
+    expect(hitCounts, const <int> [0, 0, 0]);
   });
 
-  testWidgetsWithLeakTracking(
-      'LayoutBuilder does not call builder when layout happens but layout constraints do not change',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
     int builderInvocationCount = 0;
 
     Future<void> pumpTestWidget(Size size) async {
@@ -633,8 +601,7 @@ void main() {
         Center(
           child: SizedBox.fromSize(
             size: size,
-            child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               builderInvocationCount += 1;
               return const _LayoutSpy();
             }),
@@ -701,9 +668,7 @@ void main() {
     expect(spy.performResizeCount, 2);
   });
 
-  testWidgetsWithLeakTracking(
-      'LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
     Size? childSize;
     int buildCount = 0;
 
@@ -713,12 +678,10 @@ void main() {
         Center(
           child: SizedBox.fromSize(
             size: size,
-            child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               buildCount++;
               if (buildCount > 1) {
-                final _RenderLayoutSpy spy =
-                    tester.renderObject(find.byType(_LayoutSpy));
+                final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
                 childSize = spy.size;
               }
               return const ColoredBox(
@@ -737,9 +700,7 @@ void main() {
     expect(childSize, const Size(10.0, 10.0));
   });
 
-  testWidgetsWithLeakTracking(
-      'LayoutBuilder will only invoke builder if updateShouldRebuild returns true',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder will only invoke builder if updateShouldRebuild returns true', (WidgetTester tester) async {
     int buildCount = 0;
     int paintCount = 0;
     Offset? mostRecentOffset;
@@ -819,11 +780,10 @@ class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, _RenderSmartLayoutBuilder renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSmartLayoutBuilder renderObject) {
     renderObject
-      ..offsetPercentage = offsetPercentage
-      ..onChildWasPainted = onChildWasPainted;
+        ..offsetPercentage = offsetPercentage
+        ..onChildWasPainted = onChildWasPainted;
   }
 }
 

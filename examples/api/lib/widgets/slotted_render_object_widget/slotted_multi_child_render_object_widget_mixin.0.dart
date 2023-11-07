@@ -16,8 +16,7 @@ enum DiagonalSlot {
 /// A widget that demonstrates the usage of
 /// [SlottedMultiChildRenderObjectWidget] by providing slots for two
 /// children that will be arranged diagonally.
-class Diagonal
-    extends SlottedMultiChildRenderObjectWidget<DiagonalSlot, RenderBox> {
+class Diagonal extends SlottedMultiChildRenderObjectWidget<DiagonalSlot, RenderBox> {
   const Diagonal({
     super.key,
     this.topLeft,
@@ -71,9 +70,7 @@ class Diagonal
 /// [SlottedContainerRenderObjectMixin] by providing slots for two children that
 /// will be arranged diagonally.
 class RenderDiagonal extends RenderBox
-    with
-        SlottedContainerRenderObjectMixin<DiagonalSlot, RenderBox>,
-        DebugOverflowIndicatorMixin {
+    with SlottedContainerRenderObjectMixin<DiagonalSlot, RenderBox>, DebugOverflowIndicatorMixin {
   RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
 
   // Getters and setters to configure the [RenderObject] with the configuration
@@ -218,47 +215,37 @@ class RenderDiagonal extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double topLeftWidth =
-        _topLeft?.getMinIntrinsicWidth(double.infinity) ?? 0;
-    final double bottomRightWith =
-        _bottomRight?.getMinIntrinsicWidth(double.infinity) ?? 0;
+    final double topLeftWidth = _topLeft?.getMinIntrinsicWidth(double.infinity) ?? 0;
+    final double bottomRightWith = _bottomRight?.getMinIntrinsicWidth(double.infinity) ?? 0;
     return topLeftWidth + bottomRightWith;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double topLeftWidth =
-        _topLeft?.getMaxIntrinsicWidth(double.infinity) ?? 0;
-    final double bottomRightWith =
-        _bottomRight?.getMaxIntrinsicWidth(double.infinity) ?? 0;
+    final double topLeftWidth = _topLeft?.getMaxIntrinsicWidth(double.infinity) ?? 0;
+    final double bottomRightWith = _bottomRight?.getMaxIntrinsicWidth(double.infinity) ?? 0;
     return topLeftWidth + bottomRightWith;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    final double topLeftHeight =
-        _topLeft?.getMinIntrinsicHeight(double.infinity) ?? 0;
-    final double bottomRightHeight =
-        _bottomRight?.getMinIntrinsicHeight(double.infinity) ?? 0;
+    final double topLeftHeight = _topLeft?.getMinIntrinsicHeight(double.infinity) ?? 0;
+    final double bottomRightHeight = _bottomRight?.getMinIntrinsicHeight(double.infinity) ?? 0;
     return topLeftHeight + bottomRightHeight;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    final double topLeftHeight =
-        _topLeft?.getMaxIntrinsicHeight(double.infinity) ?? 0;
-    final double bottomRightHeight =
-        _bottomRight?.getMaxIntrinsicHeight(double.infinity) ?? 0;
+    final double topLeftHeight = _topLeft?.getMaxIntrinsicHeight(double.infinity) ?? 0;
+    final double bottomRightHeight = _bottomRight?.getMaxIntrinsicHeight(double.infinity) ?? 0;
     return topLeftHeight + bottomRightHeight;
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     const BoxConstraints childConstraints = BoxConstraints();
-    final Size topLeftSize =
-        _topLeft?.computeDryLayout(childConstraints) ?? Size.zero;
-    final Size bottomRightSize =
-        _bottomRight?.computeDryLayout(childConstraints) ?? Size.zero;
+    final Size topLeftSize = _topLeft?.computeDryLayout(childConstraints) ?? Size.zero;
+    final Size bottomRightSize = _bottomRight?.computeDryLayout(childConstraints) ?? Size.zero;
     return constraints.constrain(Size(
       topLeftSize.width + bottomRightSize.width,
       topLeftSize.height + bottomRightSize.height,

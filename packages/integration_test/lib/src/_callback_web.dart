@@ -44,10 +44,8 @@ class _WebCallbackManager implements CallbackManager {
   ///
   /// See: https://www.w3.org/TR/webdriver/#screen-capture.
   @override
-  Future<Map<String, dynamic>> takeScreenshot(String screenshotName,
-      [Map<String, Object?>? args]) async {
-    await _sendWebDriverCommand(
-        WebDriverCommand.screenshot(screenshotName, args));
+  Future<Map<String, dynamic>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
+    await _sendWebDriverCommand(WebDriverCommand.screenshot(screenshotName, args));
     return <String, dynamic>{
       'screenshotName': screenshotName,
       // Flutter Web doesn't provide the bytes.
@@ -70,8 +68,7 @@ class _WebCallbackManager implements CallbackManager {
             'driver side');
       }
     } catch (exception) {
-      throw Exception(
-          'Web Driver Command failed: ${command.type} with exception $exception');
+      throw Exception('Web Driver Command failed: ${command.type} with exception $exception');
     } finally {
       // Reset the completer.
       _driverCommandComplete = Completer<bool>();
@@ -115,8 +112,7 @@ class _WebCallbackManager implements CallbackManager {
       final WebDriverCommand command = await _webDriverCommandPipe.future;
       switch (command.type) {
         case WebDriverCommandType.screenshot:
-          final Map<String, dynamic> data =
-              Map<String, dynamic>.from(command.values);
+          final Map<String, dynamic> data = Map<String, dynamic>.from(command.values);
           data.addAll(
               WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
           response = <String, String>{
@@ -146,8 +142,7 @@ class _WebCallbackManager implements CallbackManager {
     };
   }
 
-  Future<Map<String, dynamic>> _requestData(
-      IntegrationTestResults testRunner) async {
+  Future<Map<String, dynamic>> _requestData(IntegrationTestResults testRunner) async {
     final bool allTestsPassed = await testRunner.allTestsPassed.future;
     final Map<String, String> response = <String, String>{
       'message': allTestsPassed

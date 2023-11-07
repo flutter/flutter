@@ -379,6 +379,7 @@ const String kSampleResultJsonWithProvisionIssue = r'''
 }
 ''';
 
+
 /// An example xcresult bundle json that contains action issues.
 const String kSampleResultJsonWithActionIssues = r'''
 {

@@ -10,8 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-const CupertinoDynamicColor _kScrollbarColor =
-    CupertinoDynamicColor.withBrightness(
+const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x59000000),
   darkColor: Color(0x80FFFFFF),
 );
@@ -22,58 +21,45 @@ void main() {
   const Duration kScrollbarResizeDuration = Duration(milliseconds: 100);
   const Duration kLongPressDuration = Duration(milliseconds: 100);
 
-  testWidgetsWithLeakTracking('Scrollbar never goes away until finger lift',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: MediaQueryData(),
           child: CupertinoScrollbar(
-            child: SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)),
+            child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
           ),
         ),
       ),
     );
-    final TestGesture gesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -10.0));
     await tester.pump();
     // Scrollbar fully showing
     await tester.pump(const Duration(milliseconds: 500));
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
 
     await tester.pump(const Duration(seconds: 3));
     await tester.pump(const Duration(seconds: 3));
     // Still there.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
 
     await gesture.up();
     await tester.pump(kScrollbarTimeToFade);
     await tester.pump(kScrollbarFadeDuration * 0.5);
 
     // Opacity going down now.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color.withAlpha(69),
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color.withAlpha(69),
+    ));
   });
 
-  testWidgetsWithLeakTracking('Scrollbar dark mode',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar dark mode', (WidgetTester tester) async {
     Brightness brightness = Brightness.light;
     late StateSetter setState;
     await tester.pumpWidget(
@@ -85,8 +71,7 @@ void main() {
             return MediaQuery(
               data: MediaQueryData(platformBrightness: brightness),
               child: const CupertinoScrollbar(
-                child: SingleChildScrollView(
-                    child: SizedBox(width: 4000.0, height: 4000.0)),
+                child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
               ),
             );
           },
@@ -94,34 +79,24 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, 10.0));
     await tester.pump();
     // Scrollbar fully showing
     await tester.pumpAndSettle();
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
 
-    setState(() {
-      brightness = Brightness.dark;
-    });
+    setState(() { brightness = Brightness.dark; });
     await tester.pump();
 
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.darkColor,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.darkColor,
+    ));
   });
 
-  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged with long press',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged with long press', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -132,8 +107,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: const CupertinoScrollbar(
-              child: SingleChildScrollView(
-                  child: SizedBox(width: 4000.0, height: 4000.0)),
+              child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
             ),
           ),
         ),
@@ -144,27 +118,22 @@ void main() {
 
     // Scroll a bit.
     const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     // Scroll down by swiping up.
     await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     // Scrollbar thumb is fully showing and scroll offset has moved by
     // scrollAmount.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
     expect(scrollController.offset, scrollAmount);
     await scrollGesture.up();
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -173,8 +142,7 @@ void main() {
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(796.0, 50.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
     await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
     await tester.pump(kScrollbarResizeDuration);
@@ -192,21 +160,16 @@ void main() {
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     // The scrollbar thumb is still fully visible.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
 
     // Let the thumb fade out so all timers have resolved.
     await tester.pump(kScrollbarTimeToFade);
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgetsWithLeakTracking(
-      'Scrollbar thumb can be dragged with long press - reverse',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged with long press - reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -231,27 +194,22 @@ void main() {
 
     // Scroll a bit.
     const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     // Scroll up by swiping down.
     await scrollGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     // Scrollbar thumb is fully showing and scroll offset has moved by
     // scrollAmount.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
     expect(scrollController.offset, scrollAmount);
     await scrollGesture.up();
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -260,8 +218,7 @@ void main() {
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(796.0, 550.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 550.0));
     await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
     await tester.pump(kScrollbarResizeDuration);
@@ -279,21 +236,16 @@ void main() {
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     // The scrollbar thumb is still fully visible.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
 
     // Let the thumb fade out so all timers have resolved.
     await tester.pump(kScrollbarTimeToFade);
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgetsWithLeakTracking(
-      'Scrollbar changes thickness and radius when dragged',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar changes thickness and radius when dragged', (WidgetTester tester) async {
     const double thickness = 20;
     const double thicknessWhileDragging = 40;
     const double radius = 10;
@@ -301,8 +253,7 @@ void main() {
 
     const double inset = 3;
     const double scaleFactor = 2;
-    final Size screenSize =
-        tester.view.physicalSize / tester.view.devicePixelRatio;
+    final Size screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
 
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -335,8 +286,7 @@ void main() {
     // Scroll a bit to cause the scrollbar thumb to be shown;
     // undo the scroll to put the thumb back at the top.
     const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -346,55 +296,45 @@ void main() {
     await tester.pump();
 
     // Long press on the scrollbar thumb and expect it to grow
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(780.0, 50.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(780.0, 50.0));
     await tester.pump(kLongPressDuration);
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              Rect.fromLTWH(
-                screenSize.width - inset - thickness,
-                inset,
-                thickness,
-                (screenSize.height - 2 * inset) / scaleFactor,
-              ),
-              const Radius.circular(radius),
-            ),
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - thickness,
+          inset,
+          thickness,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(radius),
+      ),
+    ));
     await tester.pump(kScrollbarResizeDuration ~/ 2);
     const double midpointThickness = (thickness + thicknessWhileDragging) / 2;
     const double midpointRadius = (radius + radiusWhileDragging) / 2;
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              Rect.fromLTWH(
-                screenSize.width - inset - midpointThickness,
-                inset,
-                midpointThickness,
-                (screenSize.height - 2 * inset) / scaleFactor,
-              ),
-              const Radius.circular(midpointRadius),
-            ),
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - midpointThickness,
+          inset,
+          midpointThickness,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(midpointRadius),
+      ),
+    ));
     await tester.pump(kScrollbarResizeDuration ~/ 2);
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              Rect.fromLTWH(
-                screenSize.width - inset - thicknessWhileDragging,
-                inset,
-                thicknessWhileDragging,
-                (screenSize.height - 2 * inset) / scaleFactor,
-              ),
-              const Radius.circular(radiusWhileDragging),
-            ),
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          screenSize.width - inset - thicknessWhileDragging,
+          inset,
+          thicknessWhileDragging,
+          (screenSize.height - 2 * inset) / scaleFactor,
+        ),
+        const Radius.circular(radiusWhileDragging),
+      ),
+    ));
 
     // Let the thumb fade out so all timers have resolved.
     await dragScrollbarGesture.up();
@@ -403,9 +343,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgetsWithLeakTracking(
-    'When thumbVisibility is true, must pass a controller or find PrimaryScrollController',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
       Widget viewWithScroll() {
         return const Directionality(
           textDirection: TextDirection.ltr,
@@ -430,9 +368,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-    'When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       Widget viewWithScroll() {
@@ -467,9 +403,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-    'When thumbVisibility is true, must pass a controller or find PrimaryScrollController',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
       Widget viewWithScroll() {
         return const Directionality(
           textDirection: TextDirection.ltr,
@@ -494,9 +428,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-    'When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       Widget viewWithScroll() {
@@ -531,9 +463,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-    'On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       Widget viewWithScroll() {
@@ -568,9 +498,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-      'On first render with thumbVisibility: true, the thumb shows',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     Widget viewWithScroll() {
@@ -604,9 +532,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
-  testWidgetsWithLeakTracking(
-    'On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       Widget viewWithScroll() {
@@ -641,9 +567,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-      'On first render with thumbVisibility: true, the thumb shows',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     Widget viewWithScroll() {
@@ -677,9 +601,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
-  testWidgetsWithLeakTracking(
-      'On first render with thumbVisibility: false, the thumb is hidden',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('On first render with thumbVisibility: false, the thumb is hidden', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     Widget viewWithScroll() {
@@ -708,9 +630,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), isNot(paints..rect()));
   });
 
-  testWidgetsWithLeakTracking(
-    'With thumbVisibility: true, fling a scroll. While it is still scrolling, set thumbVisibility: false. The thumb should not fade out until the scrolling stops.',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('With thumbVisibility: true, fling a scroll. While it is still scrolling, set thumbVisibility: false. The thumb should not fade out until the scrolling stops.', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       bool thumbVisibility = true;
@@ -884,8 +804,7 @@ void main() {
       expect(find.byType(CupertinoScrollbar), paints..rrect());
 
       // Wait for the timer delay to expire.
-      await tester
-          .pump(const Duration(milliseconds: 600)); // kScrollbarTimeToFade
+      await tester.pump(const Duration(milliseconds: 600)); // kScrollbarTimeToFade
       await tester.pumpAndSettle();
       // Scrollbar thumb is showing after scroll finishes and timer ends.
       expect(find.byType(CupertinoScrollbar), paints..rrect());
@@ -948,9 +867,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-      'Scrollbar thumb can be dragged with long press - horizontal axis',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged with long press - horizontal axis', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -974,27 +891,22 @@ void main() {
 
     // Scroll a bit.
     const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     // Scroll right by swiping left.
     await scrollGesture.moveBy(const Offset(-scrollAmount, 0.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     // Scrollbar thumb is fully showing and scroll offset has moved by
     // scrollAmount.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
     expect(scrollController.offset, scrollAmount);
     await scrollGesture.up();
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -1003,8 +915,7 @@ void main() {
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(50.0, 596.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(50.0, 596.0));
     await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
     await tester.pump(kScrollbarResizeDuration);
@@ -1022,21 +933,16 @@ void main() {
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     // The scrollbar thumb is still fully visible.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
 
     // Let the thumb fade out so all timers have resolved.
     await tester.pump(kScrollbarTimeToFade);
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgetsWithLeakTracking(
-      'Scrollbar thumb can be dragged with long press - horizontal axis, reverse',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged with long press - horizontal axis, reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -1061,27 +967,22 @@ void main() {
 
     // Scroll a bit.
     const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     // Scroll right by swiping right.
     await scrollGesture.moveBy(const Offset(scrollAmount, 0.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     // Scrollbar thumb is fully showing and scroll offset has moved by
     // scrollAmount.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
     expect(scrollController.offset, scrollAmount);
     await scrollGesture.up();
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -1090,8 +991,7 @@ void main() {
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(750.0, 596.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(750.0, 596.0));
     await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
     await tester.pump(kScrollbarResizeDuration);
@@ -1109,20 +1009,16 @@ void main() {
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
     // The scrollbar thumb is still fully visible.
-    expect(
-        find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            color: _kScrollbarColor.color,
-          ));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: _kScrollbarColor.color,
+    ));
 
     // Let the thumb fade out so all timers have resolved.
     await tester.pump(kScrollbarTimeToFade);
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgetsWithLeakTracking('Tapping the track area pages the Scroll View',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -1146,12 +1042,10 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(CupertinoScrollbar),
-      paints
-        ..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromLTRBR(
-              794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
-        ),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+      ),
     );
 
     // Tap on the track area below the thumb.
@@ -1161,14 +1055,13 @@ void main() {
     expect(scrollController.offset, 400.0);
     expect(
       find.byType(CupertinoScrollbar),
-      paints
-        ..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(794.0, 240.6, 797.0, 597.0),
-            const Radius.circular(1.5),
-          ),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 240.6, 797.0, 597.0),
+          const Radius.circular(1.5),
         ),
+      ),
     );
 
     // Tap on the track area above the thumb.
@@ -1178,18 +1071,14 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(CupertinoScrollbar),
-      paints
-        ..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromLTRBR(
-              794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
-        ),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+      ),
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'Throw if interactive with the bar when no position attached',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Throw if interactive with the bar when no position attached', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -1234,9 +1123,7 @@ void main() {
     FlutterError.onError = handler;
   });
 
-  testWidgetsWithLeakTracking(
-      'Interactive scrollbars should have a valid scroll controller',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     final ScrollController scrollController = ScrollController();
@@ -1249,8 +1136,8 @@ void main() {
           data: const MediaQueryData(),
           child: PrimaryScrollController(
             controller: primaryScrollController,
-            child: CupertinoScrollbar(
-              child: SingleChildScrollView(
+              child: CupertinoScrollbar(
+                child: SingleChildScrollView(
                 controller: scrollController,
                 child: const SizedBox(
                   height: 1000.0,
@@ -1269,21 +1156,17 @@ void main() {
     // The scrollbar is not visible and cannot be interacted with, so no assertion.
     expect(exception, isNull);
     // Scroll to trigger the scrollbar to come into view.
-    final TestGesture gesture = await tester
-        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -20.0));
     exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
     expect(
       exception.message,
-      contains(
-          "The Scrollbar's ScrollController has no ScrollPosition attached."),
+      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'Simultaneous dragging and pointer scrolling does not cause a crash',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -1305,9 +1188,8 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(
-      find.byType(CupertinoScrollbar),
-      paints
-        ..rrect(
+        find.byType(CupertinoScrollbar),
+        paints..rrect(
           rrect: RRect.fromRectAndRadius(
             const Rect.fromLTRB(794.0, 3.0, 797.0, 92.1),
             const Radius.circular(1.5),
@@ -1315,8 +1197,7 @@ void main() {
           color: _kScrollbarColor.color,
         ),
     );
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(796.0, 50.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
     await tester.pump(kLongPressDuration);
     await tester.pump(kScrollbarResizeDuration);
 
@@ -1327,14 +1208,13 @@ void main() {
     final double previousOffset = scrollController.offset;
     expect(
       find.byType(CupertinoScrollbar),
-      paints
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
-            const Radius.circular(4.0),
-          ),
-          color: _kScrollbarColor.color,
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
+          const Radius.circular(4.0),
         ),
+        color: _kScrollbarColor.color,
+      ),
     );
 
     // Execute a pointer scroll while dragging (drag gesture has not come up yet)
@@ -1350,19 +1230,19 @@ void main() {
       expect(scrollController.offset, previousOffset);
       expect(
         find.byType(CupertinoScrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
-              const Radius.circular(4.0),
-            ),
-            color: _kScrollbarColor.color,
+        paints..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(789.0, 13.0, 797.0, 102.1),
+            const Radius.circular(4.0),
           ),
+          color: _kScrollbarColor.color,
+        ),
       );
     } else {
       expect(pointer.location, const Offset(793.0, 15.0));
       expect(scrollController.offset, previousOffset + 20.0);
     }
+
 
     // Drag is still being held, move pointer to be hovering over another area
     // of the scrollable (not over the scrollbar) and execute another pointer scroll
@@ -1374,14 +1254,13 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(CupertinoScrollbar),
-      paints
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(789.0, 3.0, 797.0, 92.1),
-            const Radius.circular(4.0),
-          ),
-          color: _kScrollbarColor.color,
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(789.0, 3.0, 797.0, 92.1),
+          const Radius.circular(4.0),
         ),
+        color: _kScrollbarColor.color,
+      ),
     );
 
     await dragScrollbarGesture.up();
@@ -1389,20 +1268,17 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(CupertinoScrollbar),
-      paints
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(794.0, 3.0, 797.0, 92.1),
-            const Radius.circular(1.5),
-          ),
-          color: _kScrollbarColor.color,
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 3.0, 797.0, 92.1),
+          const Radius.circular(1.5),
         ),
+        color: _kScrollbarColor.color,
+      ),
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'CupertinoScrollbar scrollOrientation works correctly',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoScrollbar scrollOrientation works correctly', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -1436,9 +1312,7 @@ void main() {
           strokeWidth: 1.0,
         )
         ..rrect(
-          rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(3.0, 3.0, 6.0, 92.1),
-              const Radius.circular(1.5)),
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(3.0, 3.0, 6.0, 92.1), const Radius.circular(1.5)),
           color: _kScrollbarColor.color,
         ),
     );

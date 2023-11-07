@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('TapRegionSurface detects outside taps',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface detects outside taps', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -103,9 +102,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking(
-      'TapRegionSurface consumes outside taps when asked',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -210,8 +207,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('TapRegionSurface detects inside taps',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface detects inside taps', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -298,9 +294,7 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  testWidgetsWithLeakTracking(
-      'TapRegionSurface detects inside taps correctly with behavior',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface detects inside taps correctly with behavior', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     const ValueKey<String> noGroupKey = ValueKey<String>('No Group');
     const ValueKey<String> group1AKey = ValueKey<String>('Group 1 A');
@@ -315,8 +309,7 @@ void main() {
               child: Row(
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints:
-                        const BoxConstraints.tightFor(width: 100, height: 100),
+                    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
                     child: TapRegion(
                       onTapInside: (PointerEvent event) {
                         tappedInside.add(noGroupKey.value);
@@ -325,8 +318,7 @@ void main() {
                     ),
                   ),
                   ConstrainedBox(
-                    constraints:
-                        const BoxConstraints.tightFor(width: 100, height: 100),
+                    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
                     child: TapRegion(
                       groupId: 1,
                       behavior: HitTestBehavior.opaque,
@@ -337,8 +329,7 @@ void main() {
                     ),
                   ),
                   ConstrainedBox(
-                    constraints:
-                        const BoxConstraints.tightFor(width: 100, height: 100),
+                    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
                     child: TapRegion(
                       groupId: 1,
                       behavior: HitTestBehavior.translucent,
@@ -385,13 +376,11 @@ void main() {
     tappedInside.clear();
 
     await click(find.byKey(group1BKey));
-    expect(tappedInside,
-        isEmpty); // No hittable children while translucent, so no hit.
+    expect(tappedInside, isEmpty); // No hittable children while translucent, so no hit.
     tappedInside.clear();
   });
 
-  testWidgetsWithLeakTracking('Setting the group updates the registration',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Setting the group updates the registration', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(

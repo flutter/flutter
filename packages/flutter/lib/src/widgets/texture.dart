@@ -59,8 +59,7 @@ class Texture extends LeafRenderObjectWidget {
   final FilterQuality filterQuality;
 
   @override
-  TextureBox createRenderObject(BuildContext context) => TextureBox(
-      textureId: textureId, freeze: freeze, filterQuality: filterQuality);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, freeze: freeze, filterQuality: filterQuality);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {

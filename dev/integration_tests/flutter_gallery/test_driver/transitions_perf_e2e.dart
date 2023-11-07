@@ -16,16 +16,13 @@ import 'run_demos.dart';
 //
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
-List<String> _allDemos = kAllGalleryDemos
-    .map(
-      (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
-    )
-    .toList();
+List<String> _allDemos = kAllGalleryDemos.map(
+  (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
+).toList();
 
 void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   group('flutter gallery transitions on e2e', () {
     testWidgets('find.bySemanticsLabel', (WidgetTester tester) async {

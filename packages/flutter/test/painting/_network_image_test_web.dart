@@ -11,7 +11,6 @@ import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
 import '_test_http_request.dart';
-
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
@@ -43,12 +42,12 @@ void runTests() {
     assert(mapEquals(testHttpRequest.responseHeaders, headers), true);
   });
 
-  testWidgetsWithLeakTracking(
-      'loads an image from the network with unsuccessful HTTP code',
+  testWidgetsWithLeakTracking('loads an image from the network with unsuccessful HTTP code',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
       ..mockEvent = MockEvent('error', web.Event('test error'));
+
 
     httpRequestFactory = () {
       return testHttpRequest.getMock();
@@ -68,8 +67,7 @@ void runTests() {
     expect((tester.takeException() as web.ProgressEvent).type, 'test error');
   });
 
-  testWidgetsWithLeakTracking(
-      'loads an image from the network with empty response',
+  testWidgetsWithLeakTracking('loads an image from the network with empty response',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200

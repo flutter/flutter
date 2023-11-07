@@ -8,6 +8,7 @@ import 'package:flutter_api_samples/widgets/gesture_detector/gesture_detector.2.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+
   void expectBorders(
     WidgetTester tester, {
     required bool expectGreenHasBorder,
@@ -18,30 +19,22 @@ void main() {
     final Finder yellowFinder = containerFinder.last;
 
     final Container greenContainer = tester.firstWidget<Container>(greenFinder);
-    final BoxDecoration? greenDecoration =
-        greenContainer.decoration as BoxDecoration?;
+    final BoxDecoration? greenDecoration = greenContainer.decoration as BoxDecoration?;
     expect(greenDecoration?.border, expectGreenHasBorder ? isNot(null) : null);
 
-    final Container yellowContainer =
-        tester.firstWidget<Container>(yellowFinder);
-    final BoxDecoration? yellowDecoration =
-        yellowContainer.decoration as BoxDecoration?;
-    expect(
-        yellowDecoration?.border, expectYellowHasBorder ? isNot(null) : null);
+    final Container yellowContainer = tester.firstWidget<Container>(yellowFinder);
+    final BoxDecoration? yellowDecoration = yellowContainer.decoration as BoxDecoration?;
+    expect(yellowDecoration?.border, expectYellowHasBorder ? isNot(null) : null);
   }
 
-  void expectInnerGestureDetectorBehavior(
-      WidgetTester tester, HitTestBehavior behavior) {
+  void expectInnerGestureDetectorBehavior(WidgetTester tester, HitTestBehavior behavior) {
     // There is a third GestureDetector added by Scaffold.
-    final Finder innerGestureDetectorFinder =
-        find.byType(GestureDetector).at(1);
-    final GestureDetector innerGestureDetector =
-        tester.firstWidget<GestureDetector>(innerGestureDetectorFinder);
+    final Finder innerGestureDetectorFinder = find.byType(GestureDetector).at(1);
+    final GestureDetector innerGestureDetector = tester.firstWidget<GestureDetector>(innerGestureDetectorFinder);
     expect(innerGestureDetector.behavior, behavior);
   }
 
-  testWidgets('Only the green Container shows a red border when tapped',
-      (WidgetTester tester) async {
+  testWidgets('Only the green Container shows a red border when tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.NestedGestureDetectorsApp(),
     );
@@ -50,8 +43,7 @@ void main() {
     final Offset greenTopLeftCorner = tester.getTopLeft(greenFinder);
     await tester.tapAt(greenTopLeftCorner);
     await tester.pumpAndSettle();
-    expectBorders(tester,
-        expectGreenHasBorder: true, expectYellowHasBorder: false);
+    expectBorders(tester, expectGreenHasBorder: true, expectYellowHasBorder: false);
 
     // Tap on the button to toggle inner GestureDetector.behavior
     final Finder toggleBehaviorFinder = find.byType(ElevatedButton).last;
@@ -62,8 +54,7 @@ void main() {
     // Tap again on the green container, expect nothing changed
     await tester.tapAt(greenTopLeftCorner);
     await tester.pump();
-    expectBorders(tester,
-        expectGreenHasBorder: true, expectYellowHasBorder: false);
+    expectBorders(tester, expectGreenHasBorder: true, expectYellowHasBorder: false);
 
     // Tap on the reset button
     final Finder resetFinder = find.byType(ElevatedButton).first;
@@ -72,8 +63,7 @@ void main() {
     expectInnerGestureDetectorBehavior(tester, HitTestBehavior.opaque);
   });
 
-  testWidgets('Only the yellow Container shows a red border when tapped',
-      (WidgetTester tester) async {
+  testWidgets('Only the yellow Container shows a red border when tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.NestedGestureDetectorsApp(),
     );
@@ -82,8 +72,7 @@ void main() {
     final Offset yellowTopLeftCorner = tester.getTopLeft(yellowFinder);
     await tester.tapAt(yellowTopLeftCorner);
     await tester.pump();
-    expectBorders(tester,
-        expectGreenHasBorder: false, expectYellowHasBorder: true);
+    expectBorders(tester, expectGreenHasBorder: false, expectYellowHasBorder: true);
 
     // Tap on the button to toggle inner GestureDetector.behavior
     final Finder toggleBehaviorFinder = find.byType(ElevatedButton).last;
@@ -94,8 +83,7 @@ void main() {
     // Tap again on the yellow container, expect nothing changed
     await tester.tapAt(yellowTopLeftCorner);
     await tester.pump();
-    expectBorders(tester,
-        expectGreenHasBorder: false, expectYellowHasBorder: true);
+    expectBorders(tester, expectGreenHasBorder: false, expectYellowHasBorder: true);
 
     // Tap on the reset button
     final Finder resetFinder = find.byType(ElevatedButton).first;

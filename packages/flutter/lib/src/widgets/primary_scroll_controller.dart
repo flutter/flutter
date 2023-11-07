@@ -59,9 +59,9 @@ class PrimaryScrollController extends InheritedWidget {
   const PrimaryScrollController.none({
     super.key,
     required super.child,
-  })  : automaticallyInheritForPlatforms = const <TargetPlatform>{},
-        scrollDirection = null,
-        controller = null;
+  }) : automaticallyInheritForPlatforms = const <TargetPlatform>{},
+       scrollDirection = null,
+       controller = null;
 
   /// The [ScrollController] associated with the subtree.
   ///
@@ -113,14 +113,12 @@ class PrimaryScrollController extends InheritedWidget {
   /// not called by ScrollView as it will have determined whether or not to
   /// inherit the PrimaryScrollController.
   static bool shouldInherit(BuildContext context, Axis scrollDirection) {
-    final PrimaryScrollController? result =
-        context.findAncestorWidgetOfExactType<PrimaryScrollController>();
+    final PrimaryScrollController? result = context.findAncestorWidgetOfExactType<PrimaryScrollController>();
     if (result == null) {
       return false;
     }
 
-    final TargetPlatform platform =
-        ScrollConfiguration.of(context).getPlatform(context);
+    final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
     if (result.automaticallyInheritForPlatforms.contains(platform)) {
       return result.scrollDirection == scrollDirection;
     }
@@ -141,8 +139,7 @@ class PrimaryScrollController extends InheritedWidget {
   /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
   ///   asserts if no [PrimaryScrollController] ancestor is found.
   static ScrollController? maybeOf(BuildContext context) {
-    final PrimaryScrollController? result =
-        context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
+    final PrimaryScrollController? result = context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     return result?.controller;
   }
 
@@ -180,14 +177,11 @@ class PrimaryScrollController extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(PrimaryScrollController oldWidget) =>
-      controller != oldWidget.controller;
+  bool updateShouldNotify(PrimaryScrollController oldWidget) => controller != oldWidget.controller;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ScrollController>(
-        'controller', controller,
-        ifNull: 'no controller', showName: false));
+    properties.add(DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
   }
 }

@@ -32,8 +32,7 @@ class SegmentedControlExample extends StatefulWidget {
   const SegmentedControlExample({super.key});
 
   @override
-  State<SegmentedControlExample> createState() =>
-      _SegmentedControlExampleState();
+  State<SegmentedControlExample> createState() => _SegmentedControlExampleState();
 }
 
 class _SegmentedControlExampleState extends State<SegmentedControlExample> {

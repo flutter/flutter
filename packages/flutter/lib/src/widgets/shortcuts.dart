@@ -39,7 +39,7 @@ class KeySet<T extends KeyboardKey> {
     T? key2,
     T? key3,
     T? key4,
-  ]) : _keys = HashSet<T>()..add(key1) {
+  ])  : _keys = HashSet<T>()..add(key1) {
     int count = 1;
     if (key2 != null) {
       _keys.add(key2);
@@ -62,8 +62,7 @@ class KeySet<T extends KeyboardKey> {
         return true;
       }());
     }
-    assert(_keys.length == count,
-        'Two or more provided keys are identical. Each key must appear only once.');
+    assert(_keys.length == count, 'Two or more provided keys are identical. Each key must appear only once.');
   }
 
   /// Create a [KeySet] from a set of [KeyboardKey]s.
@@ -85,7 +84,8 @@ class KeySet<T extends KeyboardKey> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is KeySet<T> && setEquals<T>(other._keys, _keys);
+    return other is KeySet<T>
+        && setEquals<T>(other._keys, _keys);
   }
 
   // Cached hash code value. Improves [hashCode] performance by 27%-900%,
@@ -94,17 +94,8 @@ class KeySet<T extends KeyboardKey> {
   late final int hashCode = _computeHashCode(_keys);
 
   // Arrays used to temporarily store hash codes for sorting.
-  static final List<int> _tempHashStore3 = <int>[
-    0,
-    0,
-    0
-  ]; // used to sort exactly 3 keys
-  static final List<int> _tempHashStore4 = <int>[
-    0,
-    0,
-    0,
-    0
-  ]; // used to sort exactly 4 keys
+  static final List<int> _tempHashStore3 = <int>[0, 0, 0]; // used to sort exactly 3 keys
+  static final List<int> _tempHashStore4 = <int>[0, 0, 0, 0]; // used to sort exactly 4 keys
   static int _computeHashCode<T>(Set<T> keys) {
     // Compute order-independent hash and cache it.
     final int length = keys.length;
@@ -123,13 +114,16 @@ class KeySet<T extends KeyboardKey> {
     final int h2 = iterator.current.hashCode;
     if (length == 2) {
       // No need to sort if there's two keys, just compare them.
-      return h1 < h2 ? Object.hash(h1, h2) : Object.hash(h2, h1);
+      return h1 < h2
+        ? Object.hash(h1, h2)
+        : Object.hash(h2, h1);
     }
 
     // Sort key hash codes and feed to Object.hashAll to ensure the aggregate
     // hash code does not depend on the key order.
-    final List<int> sortedHashes =
-        length == 3 ? _tempHashStore3 : _tempHashStore4;
+    final List<int> sortedHashes = length == 3
+      ? _tempHashStore3
+      : _tempHashStore4;
     sortedHashes[0] = h1;
     sortedHashes[1] = h2;
     iterator.moveNext();
@@ -221,8 +215,8 @@ abstract class ShortcutActivator {
   /// If the keyboard `state` isn't supplied, then it defaults to using
   /// [RawKeyboard.instance].
   static bool isActivatedBy(ShortcutActivator activator, RawKeyEvent event) {
-    return (activator.triggers?.contains(event.logicalKey) ?? true) &&
-        activator.accepts(event, RawKeyboard.instance);
+    return (activator.triggers?.contains(event.logicalKey) ?? true)
+        && activator.accepts(event, RawKeyboard.instance);
   }
 
   /// Returns a description of the key set that is short and readable.
@@ -262,8 +256,7 @@ abstract class ShortcutActivator {
 /// comparison from an identity comparison to a contents comparison so that
 /// non-identical sets with the same keys in them will compare as equal.
 
-class LogicalKeySet extends KeySet<LogicalKeyboardKey>
-    with Diagnosticable
+class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     implements ShortcutActivator {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
   ///
@@ -284,25 +277,19 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey>
 
   @override
   Iterable<LogicalKeyboardKey> get triggers => _triggers;
-  late final Set<LogicalKeyboardKey> _triggers = keys
-      .expand(
-        (LogicalKeyboardKey key) =>
-            _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key],
-      )
-      .toSet();
+  late final Set<LogicalKeyboardKey> _triggers = keys.expand(
+    (LogicalKeyboardKey key) => _unmapSynonyms[key] ?? <LogicalKeyboardKey>[key],
+  ).toSet();
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     if (event is! RawKeyDownEvent) {
       return false;
     }
-    final Set<LogicalKeyboardKey> collapsedRequired =
-        LogicalKeyboardKey.collapseSynonyms(keys);
-    final Set<LogicalKeyboardKey> collapsedPressed =
-        LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
-    final bool keysEqual =
-        collapsedRequired.difference(collapsedPressed).isEmpty &&
-            collapsedRequired.length == collapsedPressed.length;
+    final Set<LogicalKeyboardKey> collapsedRequired = LogicalKeyboardKey.collapseSynonyms(keys);
+    final Set<LogicalKeyboardKey> collapsedPressed = LogicalKeyboardKey.collapseSynonyms(state.keysPressed);
+    final bool keysEqual = collapsedRequired.difference(collapsedPressed).isEmpty
+      && collapsedRequired.length == collapsedPressed.length;
     return keysEqual;
   }
 
@@ -312,61 +299,42 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey>
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
   };
-  static final Map<LogicalKeyboardKey, List<LogicalKeyboardKey>>
-      _unmapSynonyms = <LogicalKeyboardKey, List<LogicalKeyboardKey>>{
-    LogicalKeyboardKey.control: <LogicalKeyboardKey>[
-      LogicalKeyboardKey.controlLeft,
-      LogicalKeyboardKey.controlRight
-    ],
-    LogicalKeyboardKey.shift: <LogicalKeyboardKey>[
-      LogicalKeyboardKey.shiftLeft,
-      LogicalKeyboardKey.shiftRight
-    ],
-    LogicalKeyboardKey.alt: <LogicalKeyboardKey>[
-      LogicalKeyboardKey.altLeft,
-      LogicalKeyboardKey.altRight
-    ],
-    LogicalKeyboardKey.meta: <LogicalKeyboardKey>[
-      LogicalKeyboardKey.metaLeft,
-      LogicalKeyboardKey.metaRight
-    ],
+  static final Map<LogicalKeyboardKey, List<LogicalKeyboardKey>> _unmapSynonyms = <LogicalKeyboardKey, List<LogicalKeyboardKey>>{
+    LogicalKeyboardKey.control: <LogicalKeyboardKey>[LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight],
+    LogicalKeyboardKey.shift: <LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight],
+    LogicalKeyboardKey.alt: <LogicalKeyboardKey>[LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight],
+    LogicalKeyboardKey.meta: <LogicalKeyboardKey>[LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight],
   };
 
   @override
   String debugDescribeKeys() {
     final List<LogicalKeyboardKey> sortedKeys = keys.toList()
       ..sort((LogicalKeyboardKey a, LogicalKeyboardKey b) {
-        // Put the modifiers first. If it has a synonym, then it's something
-        // like shiftLeft, altRight, etc.
-        final bool aIsModifier =
-            a.synonyms.isNotEmpty || _modifiers.contains(a);
-        final bool bIsModifier =
-            b.synonyms.isNotEmpty || _modifiers.contains(b);
-        if (aIsModifier && !bIsModifier) {
-          return -1;
-        } else if (bIsModifier && !aIsModifier) {
-          return 1;
-        }
-        return a.debugName!.compareTo(b.debugName!);
-      });
-    return sortedKeys
-        .map<String>((LogicalKeyboardKey key) => key.debugName.toString())
-        .join(' + ');
+          // Put the modifiers first. If it has a synonym, then it's something
+          // like shiftLeft, altRight, etc.
+          final bool aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
+          final bool bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
+          if (aIsModifier && !bIsModifier) {
+            return -1;
+          } else if (bIsModifier && !aIsModifier) {
+            return 1;
+          }
+          return a.debugName!.compareTo(b.debugName!);
+        });
+    return sortedKeys.map<String>((LogicalKeyboardKey key) => key.debugName.toString()).join(' + ');
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keys', _keys,
-        description: debugDescribeKeys()));
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keys', _keys, description: debugDescribeKeys()));
   }
 }
 
 /// A [DiagnosticsProperty] which handles formatting a `Map<LogicalKeySet, Intent>`
 /// (the same type as the [Shortcuts.shortcuts] property) so that its
 /// diagnostic output is human-readable.
-class ShortcutMapProperty
-    extends DiagnosticsProperty<Map<ShortcutActivator, Intent>> {
+class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Intent>> {
   /// Create a diagnostics property for `Map<ShortcutActivator, Intent>` objects,
   /// which are the same type as the [Shortcuts.shortcuts] property.
   ShortcutMapProperty(
@@ -419,9 +387,7 @@ class ShortcutMapProperty
 ///
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
-class SingleActivator
-    with Diagnosticable, MenuSerializableShortcut
-    implements ShortcutActivator {
+class SingleActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
   /// The [trigger] should be the non-modifier key that is pressed after all the
@@ -449,23 +415,23 @@ class SingleActivator
     this.meta = false,
     this.includeRepeats = true,
   }) : // The enumerated check with `identical` is cumbersome but the only way
-        // since const constructors can not call functions such as `==` or
-        // `Set.contains`. Checking with `identical` might not work when the
-        // key object is created from ID, but it covers common cases.
-        assert(
-          !identical(trigger, LogicalKeyboardKey.control) &&
-              !identical(trigger, LogicalKeyboardKey.controlLeft) &&
-              !identical(trigger, LogicalKeyboardKey.controlRight) &&
-              !identical(trigger, LogicalKeyboardKey.shift) &&
-              !identical(trigger, LogicalKeyboardKey.shiftLeft) &&
-              !identical(trigger, LogicalKeyboardKey.shiftRight) &&
-              !identical(trigger, LogicalKeyboardKey.alt) &&
-              !identical(trigger, LogicalKeyboardKey.altLeft) &&
-              !identical(trigger, LogicalKeyboardKey.altRight) &&
-              !identical(trigger, LogicalKeyboardKey.meta) &&
-              !identical(trigger, LogicalKeyboardKey.metaLeft) &&
-              !identical(trigger, LogicalKeyboardKey.metaRight),
-        );
+       // since const constructors can not call functions such as `==` or
+       // `Set.contains`. Checking with `identical` might not work when the
+       // key object is created from ID, but it covers common cases.
+       assert(
+         !identical(trigger, LogicalKeyboardKey.control) &&
+         !identical(trigger, LogicalKeyboardKey.controlLeft) &&
+         !identical(trigger, LogicalKeyboardKey.controlRight) &&
+         !identical(trigger, LogicalKeyboardKey.shift) &&
+         !identical(trigger, LogicalKeyboardKey.shiftLeft) &&
+         !identical(trigger, LogicalKeyboardKey.shiftRight) &&
+         !identical(trigger, LogicalKeyboardKey.alt) &&
+         !identical(trigger, LogicalKeyboardKey.altLeft) &&
+         !identical(trigger, LogicalKeyboardKey.altRight) &&
+         !identical(trigger, LogicalKeyboardKey.meta) &&
+         !identical(trigger, LogicalKeyboardKey.metaLeft) &&
+         !identical(trigger, LogicalKeyboardKey.metaRight),
+       );
 
   /// The non-modifier key of the shortcut that is pressed after all modifiers
   /// to activate the shortcut.
@@ -538,20 +504,12 @@ class SingleActivator
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     final Set<LogicalKeyboardKey> pressed = state.keysPressed;
-    return event is RawKeyDownEvent &&
-        (includeRepeats || !event.repeat) &&
-        (control ==
-            (pressed.contains(LogicalKeyboardKey.controlLeft) ||
-                pressed.contains(LogicalKeyboardKey.controlRight))) &&
-        (shift ==
-            (pressed.contains(LogicalKeyboardKey.shiftLeft) ||
-                pressed.contains(LogicalKeyboardKey.shiftRight))) &&
-        (alt ==
-            (pressed.contains(LogicalKeyboardKey.altLeft) ||
-                pressed.contains(LogicalKeyboardKey.altRight))) &&
-        (meta ==
-            (pressed.contains(LogicalKeyboardKey.metaLeft) ||
-                pressed.contains(LogicalKeyboardKey.metaRight)));
+    return event is RawKeyDownEvent
+      && (includeRepeats || !event.repeat)
+      && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
+      && (shift == (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)))
+      && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
+      && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
   @override
@@ -590,8 +548,7 @@ class SingleActivator
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(MessageProperty('keys', debugDescribeKeys()));
-    properties.add(FlagProperty('includeRepeats',
-        value: includeRepeats, ifFalse: 'excluding repeats'));
+    properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
 
@@ -652,12 +609,9 @@ class SingleActivator
 ///
 ///  * [SingleActivator], an activator that represents a single key combined
 ///    with modifiers, such as `Ctrl+C` or `Ctrl-Right Arrow`.
-class CharacterActivator
-    with Diagnosticable, MenuSerializableShortcut
-    implements ShortcutActivator {
+class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the key event yields the given character.
-  const CharacterActivator(
-    this.character, {
+  const CharacterActivator(this.character, {
     this.alt = false,
     this.control = false,
     this.meta = false,
@@ -729,18 +683,12 @@ class CharacterActivator
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     final Set<LogicalKeyboardKey> pressed = state.keysPressed;
-    return event is RawKeyDownEvent &&
-        event.character == character &&
-        (includeRepeats || !event.repeat) &&
-        (alt ==
-            (pressed.contains(LogicalKeyboardKey.altLeft) ||
-                pressed.contains(LogicalKeyboardKey.altRight))) &&
-        (control ==
-            (pressed.contains(LogicalKeyboardKey.controlLeft) ||
-                pressed.contains(LogicalKeyboardKey.controlRight))) &&
-        (meta ==
-            (pressed.contains(LogicalKeyboardKey.metaLeft) ||
-                pressed.contains(LogicalKeyboardKey.metaRight)));
+    return event is RawKeyDownEvent
+      && event.character == character
+      && (includeRepeats || !event.repeat)
+      && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
+      && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
+      && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
   @override
@@ -761,16 +709,14 @@ class CharacterActivator
 
   @override
   ShortcutSerialization serializeForMenu() {
-    return ShortcutSerialization.character(character,
-        alt: alt, control: control, meta: meta);
+    return ShortcutSerialization.character(character, alt: alt, control: control, meta: meta);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(MessageProperty('character', debugDescribeKeys()));
-    properties.add(FlagProperty('includeRepeats',
-        value: includeRepeats, ifFalse: 'excluding repeats'));
+    properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
 
@@ -782,8 +728,7 @@ class _ActivatorIntentPair with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>(
-        'activator', activator.debugDescribeKeys()));
+    properties.add(DiagnosticsProperty<String>('activator', activator.debugDescribeKeys()));
     properties.add(DiagnosticsProperty<Intent>('intent', intent));
   }
 }
@@ -800,10 +745,9 @@ class _ActivatorIntentPair with Diagnosticable {
 class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// Constructs a [ShortcutManager].
   ShortcutManager({
-    Map<ShortcutActivator, Intent> shortcuts =
-        const <ShortcutActivator, Intent>{},
+    Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
-  }) : _shortcuts = shortcuts {
+  })  : _shortcuts = shortcuts {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
@@ -837,19 +781,14 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
     }
   }
 
-  static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(
-      Map<ShortcutActivator, Intent> source) {
-    final Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> result =
-        <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
+  static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(Map<ShortcutActivator, Intent> source) {
+    final Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> result = <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
     source.forEach((ShortcutActivator activator, Intent intent) {
       // This intermediate variable is necessary to comply with Dart analyzer.
-      final Iterable<LogicalKeyboardKey?>? nullableTriggers =
-          activator.triggers;
-      for (final LogicalKeyboardKey? trigger
-          in nullableTriggers ?? <LogicalKeyboardKey?>[null]) {
-        result
-            .putIfAbsent(trigger, () => <_ActivatorIntentPair>[])
-            .add(_ActivatorIntentPair(activator, intent));
+      final Iterable<LogicalKeyboardKey?>? nullableTriggers = activator.triggers;
+      for (final LogicalKeyboardKey? trigger in nullableTriggers ?? <LogicalKeyboardKey?>[null]) {
+        result.putIfAbsent(trigger, () => <_ActivatorIntentPair>[])
+          .add(_ActivatorIntentPair(activator, intent));
       }
     });
     return result;
@@ -869,10 +808,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed`
   /// is not supplied.
   Intent? _find(RawKeyEvent event, RawKeyboard state) {
-    final List<_ActivatorIntentPair>? candidatesByKey =
-        _indexedShortcuts[event.logicalKey];
-    final List<_ActivatorIntentPair>? candidatesByNull =
-        _indexedShortcuts[null];
+    final List<_ActivatorIntentPair>? candidatesByKey = _indexedShortcuts[event.logicalKey];
+    final List<_ActivatorIntentPair>? candidatesByNull = _indexedShortcuts[null];
     final List<_ActivatorIntentPair> candidates = <_ActivatorIntentPair>[
       if (candidatesByKey != null) ...candidatesByKey,
       if (candidatesByNull != null) ...candidatesByNull,
@@ -911,11 +848,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
           intent: matchedIntent,
         );
         if (action != null) {
-          final (bool enabled, Object? invokeResult) =
-              Actions.of(primaryContext).invokeActionIfEnabled(
-            action,
-            matchedIntent,
-            primaryContext,
+          final (bool enabled, Object? invokeResult) = Actions.of(primaryContext).invokeActionIfEnabled(
+            action, matchedIntent, primaryContext,
           );
           if (enabled) {
             return action.toKeyEventResult(matchedIntent, invokeResult);
@@ -923,18 +857,14 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
         }
       }
     }
-    return modal
-        ? KeyEventResult.skipRemainingHandlers
-        : KeyEventResult.ignored;
+    return modal ? KeyEventResult.skipRemainingHandlers : KeyEventResult.ignored;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Map<ShortcutActivator, Intent>>(
-        'shortcuts', shortcuts));
-    properties.add(FlagProperty('modal',
-        value: modal, ifTrue: 'modal', defaultValue: false));
+    properties.add(DiagnosticsProperty<Map<ShortcutActivator, Intent>>('shortcuts', shortcuts));
+    properties.add(FlagProperty('modal', value: modal, ifTrue: 'modal', defaultValue: false));
   }
 }
 
@@ -1011,8 +941,8 @@ class Shortcuts extends StatefulWidget {
     required Map<ShortcutActivator, Intent> shortcuts,
     required this.child,
     this.debugLabel,
-  })  : _shortcuts = shortcuts,
-        manager = null;
+  }) : _shortcuts = shortcuts,
+       manager = null;
 
   /// Creates a const [Shortcuts] widget that uses the [manager] to
   /// manage the map of shortcuts.
@@ -1045,7 +975,6 @@ class Shortcuts extends StatefulWidget {
   Map<ShortcutActivator, Intent> get shortcuts {
     return manager == null ? _shortcuts : manager!.shortcuts;
   }
-
   final Map<ShortcutActivator, Intent> _shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
@@ -1068,10 +997,8 @@ class Shortcuts extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager,
-        defaultValue: null));
-    properties.add(ShortcutMapProperty('shortcuts', shortcuts,
-        description: debugLabel?.isNotEmpty ?? false ? debugLabel : null));
+    properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager, defaultValue: null));
+    properties.add(ShortcutMapProperty('shortcuts', shortcuts, description: debugLabel?.isNotEmpty ?? false ? debugLabel : null));
   }
 }
 
@@ -1213,9 +1140,7 @@ class CallbackShortcuts extends StatelessWidget {
         KeyEventResult result = KeyEventResult.ignored;
         // Activates all key bindings that match, returns "handled" if any handle it.
         for (final ShortcutActivator activator in bindings.keys) {
-          result = _applyKeyBinding(activator, event)
-              ? KeyEventResult.handled
-              : result;
+          result = _applyKeyBinding(activator, event) ? KeyEventResult.handled : result;
         }
         return result;
       },
@@ -1300,15 +1225,13 @@ class ShortcutRegistry with ChangeNotifier {
   Map<ShortcutActivator, Intent> get shortcuts {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     return <ShortcutActivator, Intent>{
-      for (final MapEntry<ShortcutRegistryEntry,
-          Map<ShortcutActivator, Intent>> entry in _registeredShortcuts.entries)
+      for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> entry in _registeredShortcuts.entries)
         ...entry.value,
     };
   }
 
-  final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>>
-      _registeredShortcuts =
-      <ShortcutRegistryEntry, Map<ShortcutActivator, Intent>>{};
+  final Map<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> _registeredShortcuts =
+    <ShortcutRegistryEntry, Map<ShortcutActivator, Intent>>{};
 
   /// Adds all the given shortcut bindings to this [ShortcutRegistry], and
   /// returns a entry for managing those bindings.
@@ -1374,7 +1297,7 @@ class ShortcutRegistry with ChangeNotifier {
   ///    it doesn't find a [ShortcutRegistrar] ancestor.
   static ShortcutRegistry of(BuildContext context) {
     final _ShortcutRegistrarScope? inherited =
-        context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
     assert(() {
       if (inherited == null) {
         throw FlutterError(
@@ -1409,14 +1332,13 @@ class ShortcutRegistry with ChangeNotifier {
   ///    [ShortcutRegistrar] ancestor.
   static ShortcutRegistry? maybeOf(BuildContext context) {
     final _ShortcutRegistrarScope? inherited =
-        context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
     return inherited?.registry;
   }
 
   // Replaces all the shortcuts associated with the given entry from this
   // registry.
-  void _replaceAll(
-      ShortcutRegistryEntry entry, Map<ShortcutActivator, Intent> value) {
+  void _replaceAll(ShortcutRegistryEntry entry, Map<ShortcutActivator, Intent> value) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(_debugCheckEntryIsValid(entry));
     _registeredShortcuts[entry] = value;
@@ -1428,8 +1350,7 @@ class ShortcutRegistry with ChangeNotifier {
   // registry.
   void _disposeEntry(ShortcutRegistryEntry entry) {
     assert(_debugCheckEntryIsValid(entry));
-    final Map<ShortcutActivator, Intent>? removedShortcut =
-        _registeredShortcuts.remove(entry);
+    final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
     if (removedShortcut != null) {
       _notifyListenersNextFrame();
     }
@@ -1439,29 +1360,26 @@ class ShortcutRegistry with ChangeNotifier {
     if (!_registeredShortcuts.containsKey(entry)) {
       if (entry.registry == this) {
         throw FlutterError('entry ${describeIdentity(entry)} is invalid.\n'
-            'The entry has already been disposed of. Tokens are not valid after '
-            'dispose is called on them, and should no longer be used.');
+          'The entry has already been disposed of. Tokens are not valid after '
+          'dispose is called on them, and should no longer be used.');
       } else {
         throw FlutterError('Foreign entry ${describeIdentity(entry)} used.\n'
-            'This entry was not created by this registry, it was created by '
-            '${describeIdentity(entry.registry)}, and should be used with that '
-            'registry instead.');
+          'This entry was not created by this registry, it was created by '
+          '${describeIdentity(entry.registry)}, and should be used with that '
+          'registry instead.');
       }
     }
     return true;
   }
 
   bool _debugCheckForDuplicates() {
-    final Map<ShortcutActivator, ShortcutRegistryEntry?> previous =
-        <ShortcutActivator, ShortcutRegistryEntry?>{};
-    for (final MapEntry<ShortcutRegistryEntry,
-            Map<ShortcutActivator, Intent>> tokenEntry
-        in _registeredShortcuts.entries) {
+    final Map<ShortcutActivator, ShortcutRegistryEntry?> previous = <ShortcutActivator, ShortcutRegistryEntry?>{};
+    for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry in _registeredShortcuts.entries) {
       for (final ShortcutActivator shortcut in tokenEntry.value.keys) {
         if (previous.containsKey(shortcut)) {
           throw FlutterError(
-              '$ShortcutRegistry: Received a duplicate registration for the '
-              'shortcut $shortcut in ${describeIdentity(tokenEntry.key)} and ${previous[shortcut]}.');
+            '$ShortcutRegistry: Received a duplicate registration for the '
+            'shortcut $shortcut in ${describeIdentity(tokenEntry.key)} and ${previous[shortcut]}.');
         }
         previous[shortcut] = tokenEntry.key;
       }

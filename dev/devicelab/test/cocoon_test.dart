@@ -40,8 +40,7 @@ void main() {
       fs = MemoryFileSystem();
       mockClient = MockClient((Request request) async => Response('{}', 200));
 
-      final File serviceAccountFile = fs.file(serviceAccountTokenPath)
-        ..createSync();
+      final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
     });
 
@@ -114,9 +113,7 @@ void main() {
           return Response('{}', 200);
         }
 
-        return Response(
-            'Expected: $uploadMetricsRequestWithSpaces\nReceived: ${request.body}',
-            500);
+        return Response('Expected: $uploadMetricsRequestWithSpaces\nReceived: ${request.body}', 500);
       });
       cocoon = Cocoon(
         fs: fs,
@@ -199,8 +196,7 @@ void main() {
         requestCount++;
         if (requestCount == 1) {
           await Future<void>.delayed(const Duration(seconds: timeoutValue + 2));
-          throw Exception(
-              'Should not reach this, because timeout should trigger');
+          throw Exception('Should not reach this, because timeout should trigger');
         } else {
           return Response('{}', 200);
         }
@@ -237,8 +233,7 @@ void main() {
           await Future<void>.delayed(const Duration(seconds: timeoutValue - 1));
           return Response('{}', 200);
         } else {
-          throw Exception(
-              'This iteration should not be reached, since timeout should not happen.');
+          throw Exception('This iteration should not be reached, since timeout should not happen.');
         }
       });
 
@@ -293,8 +288,7 @@ void main() {
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      expect(() => cocoon.sendTaskStatus(resultsPath: resultsPath),
-          throwsA(isA<ClientException>()));
+      expect(() => cocoon.sendTaskStatus(resultsPath: resultsPath), throwsA(isA<ClientException>()));
     });
 
     test('throws client exception on non-200 responses', () async {
@@ -316,8 +310,7 @@ void main() {
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      expect(() => cocoon.sendTaskStatus(resultsPath: resultsPath),
-          throwsA(isA<ClientException>()));
+      expect(() => cocoon.sendTaskStatus(resultsPath: resultsPath), throwsA(isA<ClientException>()));
     });
 
     test('does not upload results on non-supported branches', () async {
@@ -367,8 +360,7 @@ void main() {
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
 
       // This will fail if it decided to upload results
-      await cocoon.sendTaskStatus(
-          resultsPath: resultsPath, builderBucket: 'staging');
+      await cocoon.sendTaskStatus(resultsPath: resultsPath, builderBucket: 'staging');
     });
   });
 
@@ -377,31 +369,25 @@ void main() {
 
     setUp(() {
       fs = MemoryFileSystem();
-      final File serviceAccountFile = fs.file(serviceAccountTokenPath)
-        ..createSync();
+      final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
     });
 
     test('reads token from service account file', () {
-      final AuthenticatedCocoonClient client =
-          AuthenticatedCocoonClient(serviceAccountTokenPath, filesystem: fs);
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountTokenPath, filesystem: fs);
       expect(client.serviceAccountToken, serviceAccountToken);
     });
 
     test('reads token from service account file with whitespace', () {
-      final File serviceAccountFile = fs.file(serviceAccountTokenPath)
-        ..createSync();
+      final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync('$serviceAccountToken \n');
-      final AuthenticatedCocoonClient client =
-          AuthenticatedCocoonClient(serviceAccountTokenPath, filesystem: fs);
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient(serviceAccountTokenPath, filesystem: fs);
       expect(client.serviceAccountToken, serviceAccountToken);
     });
 
     test('throws error when service account file not found', () {
-      final AuthenticatedCocoonClient client =
-          AuthenticatedCocoonClient('idontexist', filesystem: fs);
-      expect(() => client.serviceAccountToken,
-          throwsA(isA<FileSystemException>()));
+      final AuthenticatedCocoonClient client = AuthenticatedCocoonClient('idontexist', filesystem: fs);
+      expect(() => client.serviceAccountToken, throwsA(isA<FileSystemException>()));
     });
   });
 }

@@ -45,10 +45,8 @@ void main() {
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
-    logger = BufferLogger(
-        outputPreferences: OutputPreferences.test(), terminal: terminal);
-    tempDir =
-        fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
+    logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
+    tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
     mockStdio = FakeStdio();
   });
 
@@ -56,17 +54,16 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  void createSampleProject(Directory directory, {bool brokenCode = false}) {
-    final File pubspecFile =
-        fileSystem.file(fileSystem.path.join(directory.path, 'pubspec.yaml'));
+
+  void createSampleProject(Directory directory, { bool brokenCode = false }) {
+    final File pubspecFile = fileSystem.file(fileSystem.path.join(directory.path, 'pubspec.yaml'));
     pubspecFile.writeAsStringSync('''
   name: foo_project
   environment:
     sdk: '>=3.2.0-0 <4.0.0'
   ''');
 
-    final File dartFile = fileSystem
-        .file(fileSystem.path.join(directory.path, 'lib', 'main.dart'));
+    final File dartFile = fileSystem.file(fileSystem.path.join(directory.path, 'lib', 'main.dart'));
     dartFile.parent.createSync();
     dartFile.writeAsStringSync('''
   void main() {
@@ -106,10 +103,8 @@ void main() {
       );
 
       int errorCount = 0;
-      final Future<bool> onDone =
-          server.onAnalyzing.where((bool analyzing) => !analyzing).first;
-      server.onErrors.listen(
-          (FileAnalysisErrors errors) => errorCount += errors.errors.length);
+      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
+      server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
       await server.start();
       await onDone;
@@ -149,8 +144,7 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone =
-        server.onAnalyzing.where((bool analyzing) => !analyzing).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
@@ -178,8 +172,7 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone =
-        server.onAnalyzing.where((bool analyzing) => !analyzing).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
@@ -189,24 +182,23 @@ void main() {
     await server.dispose();
   });
 
-  testUsingContext('Can run AnalysisService without suppressing analytics',
-      () async {
+  testUsingContext('Can run AnalysisService without suppressing analytics', () async {
     final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>[
-          'Artifact.engineDartSdkPath/bin/dart',
-          '--disable-dart-dev',
-          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--disable-server-feature-completion',
-          '--disable-server-feature-search',
-          '--sdk',
-          'Artifact.engineDartSdkPath',
-        ],
-        stdin: IOSink(stdin.sink),
-      ),
-    ]);
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            '--disable-dart-dev',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'Artifact.engineDartSdkPath',
+          ],
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
 
     final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(
@@ -228,25 +220,24 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Can run AnalysisService with customized cache location',
-      () async {
+  testUsingContext('Can run AnalysisService with customized cache location', () async {
     final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>[
-          'Artifact.engineDartSdkPath/bin/dart',
-          '--disable-dart-dev',
-          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--disable-server-feature-completion',
-          '--disable-server-feature-search',
-          '--sdk',
-          'Artifact.engineDartSdkPath',
-          '--suppress-analytics',
-        ],
-        stdin: IOSink(stdin.sink),
-      ),
-    ]);
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            '--disable-dart-dev',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
+          ],
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
 
     final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(
@@ -268,22 +259,17 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
-      'Can run AnalysisService with customized cache location --watch',
-      () async {
+  testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem
-        .directory('directoryA')
-        .childFile('foo')
-        .createSync(recursive: true);
+    fileSystem.directory('directoryA').childFile('foo').createSync(recursive: true);
 
     final BufferLogger logger = BufferLogger.test();
 
     final Completer<void> completer = Completer<void>();
     final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
           command: const <String>[
             'Artifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
@@ -299,8 +285,9 @@ void main() {
 {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
 {"event":"analysis.errors","params":{"file":"/directoryA/foo","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/foo","startLine": 100,"startColumn":5,"offset":0}}]}}
 {"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
-'''),
-    ]);
+'''
+        ),
+      ]);
 
     final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(
@@ -325,38 +312,37 @@ void main() {
       completer.complete();
       return completer.future;
     });
-    expect(logger.statusText,
-        contains("warning • It's an error • directoryA/foo:100:5 • 500"));
+    expect(logger.statusText, contains("warning • It's an error • directoryA/foo:100:5 • 500"));
     expect(logger.statusText, contains('1 issue found. (1 new)'));
     expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AnalysisService --watch skips errors from non-files',
-      () async {
+  testUsingContext('AnalysisService --watch skips errors from non-files', () async {
     final BufferLogger logger = BufferLogger.test();
     final Completer<void> completer = Completer<void>();
     final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            '--disable-dart-dev',
-            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--sdk',
-            'Artifact.engineDartSdkPath',
-            '--suppress-analytics',
-          ],
-          stdin: IOSink(stdin.sink),
-          stdout: '''
+    final FakeProcessManager processManager = FakeProcessManager.list(
+        <FakeCommand>[
+          FakeCommand(
+              command: const <String>[
+                'Artifact.engineDartSdkPath/bin/dart',
+                '--disable-dart-dev',
+                'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+                '--disable-server-feature-completion',
+                '--disable-server-feature-search',
+                '--sdk',
+                'Artifact.engineDartSdkPath',
+                '--suppress-analytics',
+              ],
+              stdin: IOSink(stdin.sink),
+              stdout: '''
 {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
 {"event":"analysis.errors","params":{"file":"/directoryA/bar","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/bar","startLine":100,"startColumn":5,"offset":0}}]}}
 {"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
-'''),
-    ]);
+'''
+          ),
+        ]);
 
     final Artifacts artifacts = Artifacts.test();
     final AnalyzeCommand command = AnalyzeCommand(

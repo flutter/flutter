@@ -179,13 +179,13 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  List<E> toList({bool growable = true}) {
+  List<E> toList({ bool growable = true }) {
     _precacheEntireList();
     return List<E>.of(_results, growable: growable);
   }
 
   void _precacheEntireList() {
-    while (_fillNext()) {}
+    while (_fillNext()) { }
   }
 
   bool _fillNext() {
@@ -207,8 +207,7 @@ class _LazyListIterator<E> implements Iterator<E> {
   E get current {
     assert(_index >= 0); // called "current" before "moveNext()"
     if (_index < 0 || _index == _owner._results.length) {
-      throw StateError(
-          'current can not be call after moveNext has returned false');
+      throw StateError('current can not be call after moveNext has returned false');
     }
     return _owner._results[_index];
   }
@@ -246,7 +245,6 @@ class Factory<T> {
 /// Linearly interpolate between two `Duration`s.
 Duration lerpDuration(Duration a, Duration b, double t) {
   return Duration(
-    microseconds:
-        (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t).round(),
+    microseconds: (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t).round(),
   );
 }

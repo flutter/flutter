@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('toString control test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('toString control test', (WidgetTester tester) async {
     const Widget widget = FadeTransition(
       opacity: kAlwaysCompleteAnimation,
       child: Text('Ready', textDirection: TextDirection.ltr),
@@ -50,7 +49,8 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('decoration test', (WidgetTester tester) async {
-      final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
+      final DecoratedBoxTransition transitionUnderTest =
+      DecoratedBoxTransition(
         decoration: decorationTween.animate(controller),
         child: const Text(
           "Doesn't matter",
@@ -59,8 +59,7 @@ void main() {
       );
 
       await tester.pumpWidget(transitionUnderTest);
-      RenderDecoratedBox actualBox =
-          tester.renderObject(find.byType(DecoratedBox));
+      RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
       BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, const Color(0xFFFFFFFF));
@@ -80,8 +79,7 @@ void main() {
       expect(border.left.width, 2.5);
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF101010));
-      expect(actualDecoration.borderRadius,
-          const BorderRadius.all(Radius.circular(5.0)));
+      expect(actualDecoration.borderRadius, const BorderRadius.all(Radius.circular(5.0)));
       expect(actualDecoration.shape, BoxShape.rectangle);
       expect(actualDecoration.boxShadow![0].blurRadius, 5.0);
       expect(actualDecoration.boxShadow![0].spreadRadius, 2.0);
@@ -98,10 +96,9 @@ void main() {
       expect(actualDecoration.boxShadow, null);
     });
 
-    testWidgetsWithLeakTracking('animations work with curves test',
-        (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('animations work with curves test', (WidgetTester tester) async {
       final Animation<Decoration> curvedDecorationAnimation =
-          decorationTween.animate(CurvedAnimation(
+        decorationTween.animate(CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,
       ));
@@ -117,8 +114,7 @@ void main() {
 
       await tester.pumpWidget(transitionUnderTest);
 
-      RenderDecoratedBox actualBox =
-          tester.renderObject(find.byType(DecoratedBox));
+      RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
       BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, const Color(0xFFFFFFFF));
@@ -140,23 +136,17 @@ void main() {
       expect(border.left.width, moreOrLessEquals(1.9, epsilon: 0.1));
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF151515));
-      expect(
-          actualDecoration.borderRadius!.resolve(TextDirection.ltr).topLeft.x,
-          moreOrLessEquals(6.8, epsilon: 0.1));
+      expect(actualDecoration.borderRadius!.resolve(TextDirection.ltr).topLeft.x, moreOrLessEquals(6.8, epsilon: 0.1));
       expect(actualDecoration.shape, BoxShape.rectangle);
-      expect(actualDecoration.boxShadow![0].blurRadius,
-          moreOrLessEquals(3.1, epsilon: 0.1));
-      expect(actualDecoration.boxShadow![0].spreadRadius,
-          moreOrLessEquals(1.2, epsilon: 0.1));
+      expect(actualDecoration.boxShadow![0].blurRadius, moreOrLessEquals(3.1, epsilon: 0.1));
+      expect(actualDecoration.boxShadow![0].spreadRadius, moreOrLessEquals(1.2, epsilon: 0.1));
       // Scaling a shadow doesn't change the color.
       expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
     });
   });
 
-  testWidgetsWithLeakTracking('AlignTransition animates',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('AlignTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
@@ -169,8 +159,7 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    final RenderPositionedBox actualPositionedBox =
-        tester.renderObject(find.byType(Align));
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
 
     Alignment actualAlignment = actualPositionedBox.alignment as Alignment;
     expect(actualAlignment, Alignment.centerLeft);
@@ -181,10 +170,8 @@ void main() {
     expect(actualAlignment, const Alignment(0.0, 0.5));
   });
 
-  testWidgetsWithLeakTracking('RelativePositionedTransition animates',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('RelativePositionedTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<Rect?> rectTween = RectTween(
       begin: const Rect.fromLTWH(0, 0, 30, 40),
@@ -230,10 +217,8 @@ void main() {
     expect(renderBox.size, equals(const Size(665, 420)));
   });
 
-  testWidgetsWithLeakTracking('AlignTransition keeps width and height factors',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('AlignTransition keeps width and height factors', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
@@ -254,16 +239,12 @@ void main() {
     expect(actualAlign.heightFactor, 0.4);
   });
 
-  testWidgetsWithLeakTracking(
-      'SizeTransition clamps negative size factors - vertical axis',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('SizeTransition clamps negative size factors - vertical axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
-    final Animation<double> animation =
-        Tween<double>(begin: -1.0, end: 1.0).animate(controller);
+    final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget = Directionality(
+    final Widget widget =  Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         sizeFactor: animation,
@@ -274,8 +255,7 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    final RenderPositionedBox actualPositionedBox =
-        tester.renderObject(find.byType(Align));
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.heightFactor, 0.0);
     expect(actualPositionedBox.widthFactor, 2.0);
 
@@ -295,16 +275,12 @@ void main() {
     expect(actualPositionedBox.widthFactor, 2.0);
   });
 
-  testWidgetsWithLeakTracking(
-      'SizeTransition clamps negative size factors - horizontal axis',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
-    final Animation<double> animation =
-        Tween<double>(begin: -1.0, end: 1.0).animate(controller);
+    final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget = Directionality(
+    final Widget widget =  Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         axis: Axis.horizontal,
@@ -316,8 +292,7 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    final RenderPositionedBox actualPositionedBox =
-        tester.renderObject(find.byType(Align));
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.widthFactor, 0.0);
     expect(actualPositionedBox.heightFactor, 1.0);
 
@@ -337,18 +312,14 @@ void main() {
     expect(actualPositionedBox.heightFactor, 1.0);
   });
 
-  testWidgetsWithLeakTracking(
-      'SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
-    final Animation<double> animation =
-        Tween<double>(begin: 0, end: 1.0).animate(controller);
+    final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
 
     const Key key = Key('key');
 
-    final Widget widget = Directionality(
+    final Widget widget =  Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
         child: SizedBox(
@@ -364,8 +335,7 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    final RenderPositionedBox actualPositionedBox =
-        tester.renderObject(find.byType(Align));
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.heightFactor, 0.0);
     expect(actualPositionedBox.widthFactor, 1.0);
     expect(tester.getSize(find.byKey(key)), const Size(100, 0));
@@ -401,18 +371,14 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(100, 0));
   });
 
-  testWidgetsWithLeakTracking(
-      'SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
-    final Animation<double> animation =
-        Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+    final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
 
     const Key key = Key('key');
 
-    final Widget widget = Directionality(
+    final Widget widget =  Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
         child: SizedBox(
@@ -429,8 +395,7 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    final RenderPositionedBox actualPositionedBox =
-        tester.renderObject(find.byType(Align));
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.heightFactor, 1.0);
     expect(actualPositionedBox.widthFactor, 0.0);
     expect(tester.getSize(find.byKey(key)), const Size(0, 100));
@@ -466,15 +431,12 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(0, 100));
   });
 
-  testWidgetsWithLeakTracking('MatrixTransition animates',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('MatrixTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
-      onTransform: (double value) =>
-          Matrix4.translationValues(value, value, value),
+      onTransform: (double value) => Matrix4.translationValues(value, value, value),
       animation: controller,
       child: const Text(
         'Matrix',
@@ -491,60 +453,27 @@ void main() {
     await tester.pump();
     actualTransformedBox = tester.widget(find.byType(Transform));
     actualTransform = actualTransformedBox.transform;
-    expect(
-        actualTransform,
-        Matrix4.fromList(<double>[
-          1.0,
-          0.0,
-          0.0,
-          0.5,
-          0.0,
-          1.0,
-          0.0,
-          0.5,
-          0.0,
-          0.0,
-          1.0,
-          0.5,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])
-          ..transpose());
+    expect(actualTransform, Matrix4.fromList(<double>[
+      1.0,  0.0, 0.0, 0.5,
+      0.0,  1.0, 0.0, 0.5,
+      0.0,  0.0, 1.0, 0.5,
+      0.0,  0.0, 0.0, 1.0,
+    ])..transpose());
 
     controller.value = 0.75;
     await tester.pump();
     actualTransformedBox = tester.widget(find.byType(Transform));
     actualTransform = actualTransformedBox.transform;
-    expect(
-        actualTransform,
-        Matrix4.fromList(<double>[
-          1.0,
-          0.0,
-          0.0,
-          0.75,
-          0.0,
-          1.0,
-          0.0,
-          0.75,
-          0.0,
-          0.0,
-          1.0,
-          0.75,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])
-          ..transpose());
+    expect(actualTransform, Matrix4.fromList(<double>[
+      1.0, 0.0, 0.0, 0.75,
+      0.0, 1.0, 0.0, 0.75,
+      0.0, 0.0, 1.0, 0.75,
+      0.0, 0.0, 0.0, 1.0,
+    ])..transpose());
   });
 
-  testWidgetsWithLeakTracking(
-      'MatrixTransition maintains chosen alignment during animation',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('MatrixTransition maintains chosen alignment during animation', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
@@ -554,8 +483,7 @@ void main() {
     );
 
     await tester.pumpWidget(widget);
-    MatrixTransition actualTransformedBox =
-        tester.widget(find.byType(MatrixTransition));
+    MatrixTransition actualTransformedBox = tester.widget(find.byType(MatrixTransition));
     Alignment actualAlignment = actualTransformedBox.alignment;
     expect(actualAlignment, Alignment.topRight);
 
@@ -566,10 +494,8 @@ void main() {
     expect(actualAlignment, Alignment.topRight);
   });
 
-  testWidgetsWithLeakTracking('RotationTransition animates',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('RotationTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
@@ -589,60 +515,27 @@ void main() {
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(
-        actualTurns,
-        matrixMoreOrLessEquals(Matrix4.fromList(<double>[
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])
-          ..transpose()));
+    expect(actualTurns, matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+     -1.0,  0.0, 0.0, 0.0,
+      0.0, -1.0, 0.0, 0.0,
+      0.0,  0.0, 1.0, 0.0,
+      0.0,  0.0, 0.0, 1.0,
+    ])..transpose()));
 
     controller.value = 0.75;
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(
-        actualTurns,
-        matrixMoreOrLessEquals(Matrix4.fromList(<double>[
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])
-          ..transpose()));
+    expect(actualTurns, matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+      0.0, 1.0, 0.0, 0.0,
+     -1.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 1.0,
+    ])..transpose()));
   });
 
-  testWidgetsWithLeakTracking(
-      'RotationTransition maintains chosen alignment during animation',
-      (WidgetTester tester) async {
-    final AnimationController controller =
-        AnimationController(vsync: const TestVSync());
+  testWidgetsWithLeakTracking('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
@@ -651,8 +544,7 @@ void main() {
     );
 
     await tester.pumpWidget(widget);
-    RotationTransition actualRotatedBox =
-        tester.widget(find.byType(RotationTransition));
+    RotationTransition actualRotatedBox = tester.widget(find.byType(RotationTransition));
     Alignment actualAlignment = actualRotatedBox.alignment;
     expect(actualAlignment, Alignment.topRight);
 
@@ -666,23 +558,18 @@ void main() {
   group('FadeTransition', () {
     double getOpacity(WidgetTester tester, String textValue) {
       final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-        find
-            .ancestor(
-              of: find.text(textValue),
-              matching: find.byType(FadeTransition),
-            )
-            .first,
+        find.ancestor(
+          of: find.text(textValue),
+          matching: find.byType(FadeTransition),
+        ).first,
       );
       return opacityWidget.opacity.value;
     }
-
     testWidgetsWithLeakTracking('animates', (WidgetTester tester) async {
-      final AnimationController controller =
-          AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
-      final Animation<double> animation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-      final Widget widget = Directionality(
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
         child: FadeTransition(
           opacity: animation,
@@ -714,24 +601,18 @@ void main() {
 
   group('SliverFadeTransition', () {
     double getOpacity(WidgetTester tester, String textValue) {
-      final SliverFadeTransition opacityWidget =
-          tester.widget<SliverFadeTransition>(
-        find
-            .ancestor(
-              of: find.text(textValue),
-              matching: find.byType(SliverFadeTransition),
-            )
-            .first,
+      final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
+        find.ancestor(
+          of: find.text(textValue),
+          matching: find.byType(SliverFadeTransition),
+        ).first,
       );
       return opacityWidget.opacity.value;
     }
-
     testWidgetsWithLeakTracking('animates', (WidgetTester tester) async {
-      final AnimationController controller =
-          AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
-      final Animation<double> animation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Localizations(
         locale: const Locale('en', 'us'),
         delegates: const <LocalizationsDelegate<dynamic>>[
@@ -779,14 +660,10 @@ void main() {
   });
 
   group('MatrixTransition', () {
-    testWidgetsWithLeakTracking(
-        'uses ImageFilter when provided with FilterQuality argument',
-        (WidgetTester tester) async {
-      final AnimationController controller =
-          AnimationController(vsync: const TestVSync());
+    testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
-      final Animation<double> animation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: MatrixTransition(
@@ -806,36 +683,36 @@ void main() {
       await tester.pump();
 
       expect(
-        tester.layers,
-        contains(isA<ImageFilterLayer>().having(
-          (ImageFilterLayer layer) => layer.imageFilter.toString(),
-          'image filter',
-          startsWith('ImageFilter.matrix('),
-        )),
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )),
       );
 
       controller.value = 0.5;
       await tester.pump();
 
       expect(
-        tester.layers,
-        contains(isA<ImageFilterLayer>().having(
-          (ImageFilterLayer layer) => layer.imageFilter.toString(),
-          'image filter',
-          startsWith('ImageFilter.matrix('),
-        )),
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )),
       );
 
       controller.value = 0.75;
       await tester.pump();
 
       expect(
-        tester.layers,
-        contains(isA<ImageFilterLayer>().having(
-          (ImageFilterLayer layer) => layer.imageFilter.toString(),
-          'image filter',
-          startsWith('ImageFilter.matrix('),
-        )),
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )),
       );
 
       controller.value = 1;
@@ -847,15 +724,11 @@ void main() {
   });
 
   group('ScaleTransition', () {
-    testWidgetsWithLeakTracking(
-        'uses ImageFilter when provided with FilterQuality argument',
-        (WidgetTester tester) async {
-      final AnimationController controller =
-          AnimationController(vsync: const TestVSync());
+    testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
-      final Animation<double> animation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-      final Widget widget = Directionality(
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
         child: ScaleTransition(
           scale: animation,
@@ -872,35 +745,29 @@ void main() {
       controller.value = 0.25;
       await tester.pump();
 
-      expect(
-          tester.layers,
-          contains(isA<ImageFilterLayer>().having(
-            (ImageFilterLayer layer) => layer.imageFilter.toString(),
-            'image filter',
-            startsWith('ImageFilter.matrix('),
-          )));
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
 
       controller.value = 0.5;
       await tester.pump();
 
-      expect(
-          tester.layers,
-          contains(isA<ImageFilterLayer>().having(
-            (ImageFilterLayer layer) => layer.imageFilter.toString(),
-            'image filter',
-            startsWith('ImageFilter.matrix('),
-          )));
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
 
       controller.value = 0.75;
       await tester.pump();
 
-      expect(
-          tester.layers,
-          contains(isA<ImageFilterLayer>().having(
-            (ImageFilterLayer layer) => layer.imageFilter.toString(),
-            'image filter',
-            startsWith('ImageFilter.matrix('),
-          )));
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
 
       controller.value = 1;
       await tester.pump();
@@ -911,15 +778,11 @@ void main() {
   });
 
   group('RotationTransition', () {
-    testWidgetsWithLeakTracking(
-        'uses ImageFilter when provided with FilterQuality argument',
-        (WidgetTester tester) async {
-      final AnimationController controller =
-          AnimationController(vsync: const TestVSync());
+    testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
-      final Animation<double> animation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-      final Widget widget = Directionality(
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
         child: RotationTransition(
           turns: animation,
@@ -936,35 +799,29 @@ void main() {
       controller.value = 0.25;
       await tester.pump();
 
-      expect(
-          tester.layers,
-          contains(isA<ImageFilterLayer>().having(
-            (ImageFilterLayer layer) => layer.imageFilter.toString(),
-            'image filter',
-            startsWith('ImageFilter.matrix('),
-          )));
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
 
       controller.value = 0.5;
       await tester.pump();
 
-      expect(
-          tester.layers,
-          contains(isA<ImageFilterLayer>().having(
-            (ImageFilterLayer layer) => layer.imageFilter.toString(),
-            'image filter',
-            startsWith('ImageFilter.matrix('),
-          )));
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
 
       controller.value = 0.75;
       await tester.pump();
 
-      expect(
-          tester.layers,
-          contains(isA<ImageFilterLayer>().having(
-            (ImageFilterLayer layer) => layer.imageFilter.toString(),
-            'image filter',
-            startsWith('ImageFilter.matrix('),
-          )));
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
 
       controller.value = 1;
       await tester.pump();
@@ -975,10 +832,8 @@ void main() {
   });
 
   group('Builders', () {
-    testWidgetsWithLeakTracking('AnimatedBuilder rebuilds when changed',
-        (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey =
-          GlobalKey<RedrawCounterState>();
+    testWidgetsWithLeakTracking('AnimatedBuilder rebuilds when changed', (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
@@ -1007,12 +862,9 @@ void main() {
       expect(redrawKey.currentState!.redraws, equals(2));
     });
 
-    testWidgetsWithLeakTracking("AnimatedBuilder doesn't rebuild the child",
-        (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey =
-          GlobalKey<RedrawCounterState>();
-      final GlobalKey<RedrawCounterState> redrawKeyChild =
-          GlobalKey<RedrawCounterState>();
+    testWidgetsWithLeakTracking("AnimatedBuilder doesn't rebuild the child", (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
+      final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
@@ -1046,10 +898,8 @@ void main() {
       expect(redrawKeyChild.currentState!.redraws, equals(1));
     });
 
-    testWidgetsWithLeakTracking('ListenableBuilder rebuilds when changed',
-        (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey =
-          GlobalKey<RedrawCounterState>();
+    testWidgetsWithLeakTracking('ListenableBuilder rebuilds when changed', (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
@@ -1078,12 +928,9 @@ void main() {
       expect(redrawKey.currentState!.redraws, equals(2));
     });
 
-    testWidgetsWithLeakTracking("ListenableBuilder doesn't rebuild the child",
-        (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey =
-          GlobalKey<RedrawCounterState>();
-      final GlobalKey<RedrawCounterState> redrawKeyChild =
-          GlobalKey<RedrawCounterState>();
+    testWidgetsWithLeakTracking("ListenableBuilder doesn't rebuild the child", (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
+      final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
@@ -1120,7 +967,7 @@ void main() {
 }
 
 class RedrawCounter extends StatefulWidget {
-  const RedrawCounter({super.key, this.child});
+  const RedrawCounter({ super.key, this.child });
 
   final Widget? child;
 

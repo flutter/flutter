@@ -18,12 +18,10 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
   const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<EditableTextToolbarBuilderExampleApp> createState() =>
-      _EditableTextToolbarBuilderExampleAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() => _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _EditableTextToolbarBuilderExampleAppState
-    extends State<EditableTextToolbarBuilderExampleApp> {
+class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
     text: text,
   );
@@ -32,8 +30,7 @@ class _EditableTextToolbarBuilderExampleAppState
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) =>
-            const AlertDialog(title: Text('You clicked send email!')),
+        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked send email!')),
       ),
     );
   }
@@ -69,10 +66,8 @@ class _EditableTextToolbarBuilderExampleAppState
               Container(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context,
-                    EditableTextState editableTextState) {
-                  final List<ContextMenuButtonItem> buttonItems =
-                      editableTextState.contextMenuButtonItems;
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  final List<ContextMenuButtonItem> buttonItems = editableTextState.contextMenuButtonItems;
                   // Here we add an "Email" button to the default TextField
                   // context menu for the current platform, but only if an email
                   // address is currently selected.

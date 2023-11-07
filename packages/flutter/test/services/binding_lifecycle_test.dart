@@ -14,21 +14,16 @@ class _TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   }
 
   @override
-  TestDefaultBinaryMessenger get defaultBinaryMessenger =>
-      super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+  TestDefaultBinaryMessenger get defaultBinaryMessenger => super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
 
   @override
   TestDefaultBinaryMessenger createBinaryMessenger() {
     Future<ByteData?> keyboardHandler(ByteData? message) async {
-      return const StandardMethodCodec()
-          .encodeSuccessEnvelope(<int, int>{1: 1});
+      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{1:1});
     }
-
     return TestDefaultBinaryMessenger(
       super.createBinaryMessenger(),
-      outboundHandlers: <String, MessageHandler>{
-        'flutter/keyboard': keyboardHandler
-      },
+      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
     );
   }
 }
@@ -38,8 +33,7 @@ void main() {
 
   test('can send message on completion of binding initialization', () async {
     bool called = false;
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform, (MethodCall method) async {
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall method) async {
       if (method.method == 'System.initializationComplete') {
         called = true;
       }

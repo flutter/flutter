@@ -23,9 +23,7 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
-  testWidgetsWithLeakTracking(
-      'Persistent draggableScrollableSheet localHistoryEntries test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Persistent draggableScrollableSheet localHistoryEntries test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/110123
     Widget buildFrame(Widget? bottomSheet) {
       return MaterialApp(
@@ -40,7 +38,6 @@ void main() {
         ),
       );
     }
-
     final Widget draggableScrollableSheet = DraggableScrollableSheet(
       expand: false,
       snap: true,
@@ -82,8 +79,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/83668
-  testWidgetsWithLeakTracking('Scaffold.bottomSheet update test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.bottomSheet update test', (WidgetTester tester) async {
     Widget buildFrame(Widget? bottomSheet) {
       return MaterialApp(
         home: Scaffold(
@@ -100,9 +96,7 @@ void main() {
     await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     int buildCount = 0;
 
@@ -113,8 +107,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet =
-        scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
@@ -125,14 +118,12 @@ void main() {
 
     await tester.pump();
     expect(buildCount, equals(1));
-    bottomSheet.setState!(() {});
+    bottomSheet.setState!(() { });
     await tester.pump();
     expect(buildCount, equals(2));
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify that a persistent BottomSheet cannot be dismissed',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: const Center(child: Text('body')),
@@ -163,9 +154,7 @@ void main() {
     expect(find.text('Two'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify that a scrollable BottomSheet can be dismissed',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -197,9 +186,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -234,11 +221,10 @@ void main() {
     await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
     await tester.pumpAndSettle();
 
-    expect(find.text('Two'), findsOneWidget);
+     expect(find.text('Two'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Verify that a BottomSheet animates non-linearly',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a BottomSheet animates non-linearly', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -273,9 +259,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify that a scrollControlled BottomSheet can be dismissed',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a scrollControlled BottomSheet can be dismissed', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -314,9 +298,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify that a persistent BottomSheet can fling up and hide the fab',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -366,9 +348,7 @@ void main() {
     expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify that a back button resets a persistent BottomSheet',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -429,9 +409,7 @@ void main() {
     expect(find.text('Item 22'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
-      'Verify that a scrollable BottomSheet hides the fab when scrolled up',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -509,8 +487,7 @@ void main() {
     expect(buildCount, equals(1));
   });
 
-  testWidgetsWithLeakTracking('Scaffold removes top MediaQuery padding',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold removes top MediaQuery padding', (WidgetTester tester) async {
     late BuildContext scaffoldContext;
     late BuildContext bottomSheetContext;
 
@@ -553,8 +530,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Scaffold.bottomSheet',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.bottomSheet', (WidgetTester tester) async {
     final Key bottomSheetKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -573,8 +549,7 @@ void main() {
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
-                      builder: (BuildContext context) =>
-                          const Text('modal bottom sheet'),
+                      builder: (BuildContext context) => const Text('modal bottom sheet'),
                     );
                   },
                 );
@@ -586,10 +561,8 @@ void main() {
     );
 
     expect(find.text('showModalBottomSheet'), findsOneWidget);
-    expect(
-        tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 200.0));
-    expect(tester.getTopLeft(find.byKey(bottomSheetKey)),
-        const Offset(0.0, 400.0));
+    expect(tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 200.0));
+    expect(tester.getTopLeft(find.byKey(bottomSheetKey)), const Offset(0.0, 400.0));
 
     // Show the modal bottomSheet
     await tester.tap(find.text('showModalBottomSheet'));
@@ -630,26 +603,21 @@ void main() {
       }
 
       await tester.pumpWidget(buildFrame('I love Flutter!'));
-      final RenderParagraph renderBeforeUpdate =
-          tester.renderObject(find.text('I love Flutter!'));
+      final RenderParagraph renderBeforeUpdate = tester.renderObject(find.text('I love Flutter!'));
 
       await tester.pumpWidget(buildFrame('Flutter is the best!'));
       await tester.pumpAndSettle();
-      final RenderParagraph renderAfterUpdate =
-          tester.renderObject(find.text('Flutter is the best!'));
+      final RenderParagraph renderAfterUpdate = tester.renderObject(find.text('Flutter is the best!'));
 
       expect(renderBeforeUpdate, renderAfterUpdate);
     },
   );
 
-  testWidgetsWithLeakTracking(
-      'Verify that visual properties are passed through',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that visual properties are passed through', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
     const double elevation = 9.0;
-    const ShapeBorder shape = BeveledRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)));
+    const ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
     const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(MaterialApp(
@@ -669,11 +637,7 @@ void main() {
           SizedBox(height: 100.0, child: Text('Three')),
         ],
       );
-    },
-        backgroundColor: color,
-        elevation: elevation,
-        shape: shape,
-        clipBehavior: clipBehavior);
+    }, backgroundColor: color, elevation: elevation, shape: shape, clipBehavior: clipBehavior);
 
     await tester.pumpAndSettle();
 
@@ -684,9 +648,7 @@ void main() {
     expect(bottomSheet.clipBehavior, clipBehavior);
   });
 
-  testWidgetsWithLeakTracking(
-      'PersistentBottomSheetController.close dismisses the bottom sheet',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PersistentBottomSheetController.close dismisses the bottom sheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -695,8 +657,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet =
-        scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);

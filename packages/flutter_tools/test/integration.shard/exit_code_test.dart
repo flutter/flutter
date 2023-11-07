@@ -21,7 +21,8 @@ void main() {
   });
 
   testWithoutContext('dart.sh/bat can return a zero exit code', () async {
-    tempDir.childFile('main.dart').writeAsStringSync('''
+    tempDir.childFile('main.dart')
+      .writeAsStringSync('''
 import 'dart:io';
 void main() {
   exit(0);
@@ -37,7 +38,8 @@ void main() {
   });
 
   testWithoutContext('dart.sh/bat can return a non-zero exit code', () async {
-    tempDir.childFile('main.dart').writeAsStringSync('''
+    tempDir.childFile('main.dart')
+      .writeAsStringSync('''
 import 'dart:io';
 void main() {
   exit(1);

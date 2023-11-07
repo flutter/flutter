@@ -20,23 +20,15 @@ final XmlElement pureHttpIntentFilter = XmlElement(
   <XmlElement>[
     XmlElement(
       XmlName('action'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.DEFAULT')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.BROWSABLE')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
     ),
     XmlElement(
       XmlName('data'),
@@ -54,23 +46,15 @@ final XmlElement nonHttpIntentFilter = XmlElement(
   <XmlElement>[
     XmlElement(
       XmlName('action'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.DEFAULT')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.BROWSABLE')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
     ),
     XmlElement(
       XmlName('data'),
@@ -88,23 +72,15 @@ final XmlElement hybridIntentFilter = XmlElement(
   <XmlElement>[
     XmlElement(
       XmlName('action'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.DEFAULT')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.BROWSABLE')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
     ),
     XmlElement(
       XmlName('data'),
@@ -128,23 +104,15 @@ final XmlElement nonAutoVerifyIntentFilter = XmlElement(
   <XmlElement>[
     XmlElement(
       XmlName('action'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.DEFAULT')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
     ),
     XmlElement(
       XmlName('category'),
-      <XmlAttribute>[
-        XmlAttribute(
-            XmlName('name', 'android'), 'android.intent.category.BROWSABLE')
-      ],
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
     ),
     XmlElement(
       XmlName('data'),
@@ -175,11 +143,10 @@ void main() {
   }
 
   testWithoutContext(
-      'gradle task outputs<mode>AppLinkSettings works when a project has app links',
-      () async {
+      'gradle task outputs<mode>AppLinkSettings works when a project has app links', () async {
     // Create a new flutter project.
     final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -188,19 +155,15 @@ void main() {
     ], workingDirectory: tempDir.path);
     expect(result, const ProcessResultMatcher());
     // Adds intent filters for app links
-    final String androidManifestPath = fileSystem.path.join(
-        tempDir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+    final String androidManifestPath =  fileSystem.path.join(tempDir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
     final io.File androidManifestFile = io.File(androidManifestPath);
-    final XmlDocument androidManifest =
-        XmlDocument.parse(androidManifestFile.readAsStringSync());
-    final XmlElement activity =
-        androidManifest.findAllElements('activity').first;
+    final XmlDocument androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
+    final XmlElement activity = androidManifest.findAllElements('activity').first;
     activity.children.add(pureHttpIntentFilter);
     activity.children.add(nonHttpIntentFilter);
     activity.children.add(hybridIntentFilter);
     activity.children.add(nonAutoVerifyIntentFilter);
-    androidManifestFile.writeAsStringSync(androidManifest.toString(),
-        flush: true);
+    androidManifestFile.writeAsStringSync(androidManifest.toString(), flush: true);
 
     // Ensure that gradle files exists from templates.
     result = await processManager.run(<String>[
@@ -221,13 +184,9 @@ void main() {
 
     expect(result, const ProcessResultMatcher());
 
-    final io.File fileDump = tempDir
-        .childDirectory('build')
-        .childDirectory('app')
-        .childFile('app-link-settings-debug.json');
+    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
     expect(fileDump.existsSync(), true);
-    final Map<String, dynamic> json =
-        jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+    final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
     expect(json['applicationId'], 'com.example.testapp');
     final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
     expect(deeplinks.length, 5);
@@ -239,11 +198,10 @@ void main() {
   });
 
   testWithoutContext(
-      'gradle task outputs<mode>AppLinkSettings works when a project does not have app link',
-      () async {
+      'gradle task outputs<mode>AppLinkSettings works when a project does not have app link', () async {
     // Create a new flutter project.
     final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -271,13 +229,9 @@ void main() {
 
     expect(result, const ProcessResultMatcher());
 
-    final io.File fileDump = tempDir
-        .childDirectory('build')
-        .childDirectory('app')
-        .childFile('app-link-settings-debug.json');
+    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
     expect(fileDump.existsSync(), true);
-    final Map<String, dynamic> json =
-        jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+    final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
     expect(json['applicationId'], 'com.example.testapp');
     final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
     expect(deeplinks.length, 0);

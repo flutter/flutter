@@ -17,8 +17,7 @@ import 'image_stream.dart';
 typedef HttpRequestFactory = web.XMLHttpRequest Function();
 
 // Method signature for _loadAsync decode callbacks.
-typedef _SimpleDecoderCallback = Future<ui.Codec> Function(
-    ui.ImmutableBuffer buffer);
+typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
 
 /// Default HTTP client.
 web.XMLHttpRequest _httpClient() {
@@ -53,14 +52,12 @@ class NetworkImage
   final Map<String, String>? headers;
 
   @override
-  Future<NetworkImage> obtainKey(
-      image_provider.ImageConfiguration configuration) {
+  Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
     return SynchronousFuture<NetworkImage>(this);
   }
 
   @override
-  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key,
-      image_provider.DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -77,13 +74,11 @@ class NetworkImage
   }
 
   @override
-  ImageStreamCompleter loadImage(image_provider.NetworkImage key,
-      image_provider.ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(image_provider.NetworkImage key, image_provider.ImageDecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents =
-        StreamController<ImageChunkEvent>();
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
@@ -94,15 +89,13 @@ class NetworkImage
     );
   }
 
-  InformationCollector? _imageStreamInformationCollector(
-      image_provider.NetworkImage key) {
+  InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<image_provider.ImageProvider>(
-                'Image provider', this),
-            DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-          ];
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+      ];
       return true;
     }());
     return collector;
@@ -137,35 +130,32 @@ class NetworkImage
         });
       }
 
-      request.addEventListener(
-          'load',
-          (web.Event e) {
-            final int status = request.status;
-            final bool accepted = status >= 200 && status < 300;
-            final bool fileUri = status == 0; // file:// URIs have status of 0.
-            final bool notModified = status == 304;
-            final bool unknownRedirect = status > 307 && status < 400;
-            final bool success =
-                accepted || fileUri || notModified || unknownRedirect;
+      request.addEventListener('load', (web.Event e) {
+        final int status = request.status;
+        final bool accepted = status >= 200 && status < 300;
+        final bool fileUri = status == 0; // file:// URIs have status of 0.
+        final bool notModified = status == 304;
+        final bool unknownRedirect = status > 307 && status < 400;
+        final bool success =
+            accepted || fileUri || notModified || unknownRedirect;
 
-            if (success) {
-              completer.complete(request);
-            } else {
-              completer.completeError(e);
-              throw image_provider.NetworkImageLoadException(
-                  statusCode: status, uri: resolved);
-            }
-          }.toJS);
+        if (success) {
+          completer.complete(request);
+        } else {
+          completer.completeError(e);
+          throw image_provider.NetworkImageLoadException(
+              statusCode: status, uri: resolved);
+        }
+      }.toJS);
 
-      request.addEventListener(
-          'error', ((JSObject e) => completer.completeError(e)).toJS);
+      request.addEventListener('error',
+          ((JSObject e) => completer.completeError(e)).toJS);
 
       request.send();
 
       await completer.future;
 
-      final Uint8List bytes =
-          (request.response! as JSArrayBuffer).toDart.asUint8List();
+      final Uint8List bytes = (request.response! as JSArrayBuffer).toDart.asUint8List();
 
       if (bytes.lengthInBytes == 0) {
         throw image_provider.NetworkImageLoadException(
@@ -195,6 +185,5 @@ class NetworkImage
   int get hashCode => Object.hash(url, scale);
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
 }

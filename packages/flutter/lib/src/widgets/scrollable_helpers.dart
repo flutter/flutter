@@ -33,10 +33,12 @@ class ScrollableDetails {
     required this.direction,
     this.controller,
     this.physics,
-    @Deprecated('Migrate to decorationClipBehavior. '
-        'This property was deprecated so that its application is clearer. This clip '
-        'applies to decorators, and does not directly clip a scroll view. '
-        'This feature was deprecated after v3.9.0-1.0.pre.')
+    @Deprecated(
+      'Migrate to decorationClipBehavior. '
+      'This property was deprecated so that its application is clearer. This clip '
+      'applies to decorators, and does not directly clip a scroll view. '
+      'This feature was deprecated after v3.9.0-1.0.pre.'
+    )
     Clip? clipBehavior,
     Clip? decorationClipBehavior,
   }) : decorationClipBehavior = clipBehavior ?? decorationClipBehavior;
@@ -79,10 +81,12 @@ class ScrollableDetails {
   final Clip? decorationClipBehavior;
 
   /// Deprecated getter for [decorationClipBehavior].
-  @Deprecated('Migrate to decorationClipBehavior. '
-      'This property was deprecated so that its application is clearer. This clip '
-      'applies to decorators, and does not directly clip a scroll view. '
-      'This feature was deprecated after v3.9.0-1.0.pre.')
+  @Deprecated(
+    'Migrate to decorationClipBehavior. '
+    'This property was deprecated so that its application is clearer. This clip '
+    'applies to decorators, and does not directly clip a scroll view. '
+    'This feature was deprecated after v3.9.0-1.0.pre.'
+  )
   Clip? get clipBehavior => decorationClipBehavior;
 
   /// Copy the current [ScrollableDetails] with the given values replacing the
@@ -97,8 +101,7 @@ class ScrollableDetails {
       direction: direction ?? this.direction,
       controller: controller ?? this.controller,
       physics: physics ?? this.physics,
-      decorationClipBehavior:
-          decorationClipBehavior ?? this.decorationClipBehavior,
+      decorationClipBehavior: decorationClipBehavior ?? this.decorationClipBehavior,
     );
   }
 
@@ -112,7 +115,6 @@ class ScrollableDetails {
         description.add(prefix + value.toString());
       }
     }
-
     addIfNonNull('scroll controller: ', controller);
     addIfNonNull('scroll physics: ', physics);
     addIfNonNull('decorationClipBehavior: ', decorationClipBehavior);
@@ -121,11 +123,11 @@ class ScrollableDetails {
 
   @override
   int get hashCode => Object.hash(
-        direction,
-        controller,
-        physics,
-        decorationClipBehavior,
-      );
+    direction,
+    controller,
+    physics,
+    decorationClipBehavior,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -135,11 +137,11 @@ class ScrollableDetails {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ScrollableDetails &&
-        other.direction == direction &&
-        other.controller == controller &&
-        other.physics == physics &&
-        other.decorationClipBehavior == decorationClipBehavior;
+    return other is ScrollableDetails
+      && other.direction == direction
+      && other.controller == controller
+      && other.physics == physics
+      && other.decorationClipBehavior == decorationClipBehavior;
   }
 }
 
@@ -211,8 +213,7 @@ class EdgeDraggingAutoScroller {
   /// previous dragTarget to the new value and continues scrolling if necessary.
   void startAutoScrollIfNecessary(Rect dragTarget) {
     final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
-    _dragTargetRelatedToScrollOrigin =
-        dragTarget.translate(deltaToOrigin.dx, deltaToOrigin.dy);
+    _dragTargetRelatedToScrollOrigin = dragTarget.translate(deltaToOrigin.dx, deltaToOrigin.dy);
     if (_scrolling) {
       // The change will be picked up in the next scroll.
       return;
@@ -227,17 +228,14 @@ class EdgeDraggingAutoScroller {
   }
 
   Future<void> _scroll() async {
-    final RenderBox scrollRenderBox =
-        scrollable.context.findRenderObject()! as RenderBox;
+    final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
     final Rect globalRect = MatrixUtils.transformRect(
       scrollRenderBox.getTransformTo(null),
-      Rect.fromLTWH(
-          0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height),
+      Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height),
     );
     assert(
       globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
-          globalRect.size.height >=
-              _dragTargetRelatedToScrollOrigin.size.height,
+        globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
       'Drag target size is larger than scrollable size, which may cause bouncing',
     );
     _scrolling = true;
@@ -245,56 +243,39 @@ class EdgeDraggingAutoScroller {
     const double overDragMax = 20.0;
 
     final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
-    final Offset viewportOrigin =
-        globalRect.topLeft.translate(deltaToOrigin.dx, deltaToOrigin.dy);
-    final double viewportStart =
-        _offsetExtent(viewportOrigin, _scrollDirection);
-    final double viewportEnd =
-        viewportStart + _sizeExtent(globalRect.size, _scrollDirection);
+    final Offset viewportOrigin = globalRect.topLeft.translate(deltaToOrigin.dx, deltaToOrigin.dy);
+    final double viewportStart = _offsetExtent(viewportOrigin, _scrollDirection);
+    final double viewportEnd = viewportStart + _sizeExtent(globalRect.size, _scrollDirection);
 
-    final double proxyStart = _offsetExtent(
-        _dragTargetRelatedToScrollOrigin.topLeft, _scrollDirection);
-    final double proxyEnd = _offsetExtent(
-        _dragTargetRelatedToScrollOrigin.bottomRight, _scrollDirection);
+    final double proxyStart = _offsetExtent(_dragTargetRelatedToScrollOrigin.topLeft, _scrollDirection);
+    final double proxyEnd = _offsetExtent(_dragTargetRelatedToScrollOrigin.bottomRight, _scrollDirection);
     switch (_axisDirection) {
       case AxisDirection.up:
       case AxisDirection.left:
-        if (proxyEnd > viewportEnd &&
-            scrollable.position.pixels > scrollable.position.minScrollExtent) {
+        if (proxyEnd > viewportEnd && scrollable.position.pixels > scrollable.position.minScrollExtent) {
           final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
-          newOffset = math.max(scrollable.position.minScrollExtent,
-              scrollable.position.pixels - overDrag);
-        } else if (proxyStart < viewportStart &&
-            scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-          final double overDrag =
-              math.min(viewportStart - proxyStart, overDragMax);
-          newOffset = math.min(scrollable.position.maxScrollExtent,
-              scrollable.position.pixels + overDrag);
+          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
+        } else if (proxyStart < viewportStart && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
+          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
         }
       case AxisDirection.right:
       case AxisDirection.down:
-        if (proxyStart < viewportStart &&
-            scrollable.position.pixels > scrollable.position.minScrollExtent) {
-          final double overDrag =
-              math.min(viewportStart - proxyStart, overDragMax);
-          newOffset = math.max(scrollable.position.minScrollExtent,
-              scrollable.position.pixels - overDrag);
-        } else if (proxyEnd > viewportEnd &&
-            scrollable.position.pixels < scrollable.position.maxScrollExtent) {
+        if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
+          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
+        } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
           final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
-          newOffset = math.min(scrollable.position.maxScrollExtent,
-              scrollable.position.pixels + overDrag);
+          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
         }
     }
 
-    if (newOffset == null ||
-        (newOffset - scrollable.position.pixels).abs() < 1.0) {
+    if (newOffset == null || (newOffset - scrollable.position.pixels).abs() < 1.0) {
       // Drag should not trigger scroll.
       _scrolling = false;
       return;
     }
-    final Duration duration =
-        Duration(milliseconds: (1000 / velocityScalar).round());
+    final Duration duration = Duration(milliseconds: (1000 / velocityScalar).round());
     await scrollable.position.animateTo(
       newOffset,
       duration: duration,
@@ -314,8 +295,7 @@ class EdgeDraggingAutoScroller {
 ///
 /// This function is used as the type for [Scrollable.incrementCalculator],
 /// which is called from a [ScrollAction].
-typedef ScrollIncrementCalculator = double Function(
-    ScrollIncrementDetails details);
+typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails details);
 
 /// Describes the type of scroll increment that will be performed by a
 /// [ScrollAction] on a [Scrollable].
@@ -413,10 +393,8 @@ class ScrollAction extends ContextAction<ScrollIntent> {
     if (Scrollable.maybeOf(context) != null) {
       return true;
     }
-    final ScrollController? primaryScrollController =
-        PrimaryScrollController.maybeOf(context);
-    return (primaryScrollController != null) &&
-        (primaryScrollController.hasClients);
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
+    return (primaryScrollController != null) && (primaryScrollController.hasClients);
   }
 
   /// Returns the scroll increment for a single scroll request, for use when
@@ -426,11 +404,9 @@ class ScrollAction extends ContextAction<ScrollIntent> {
   /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
   /// null. The widget must have already been laid out so that the position
   /// fields are valid.
-  static double _calculateScrollIncrement(ScrollableState state,
-      {ScrollIncrementType type = ScrollIncrementType.line}) {
+  static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(state.position.hasPixels);
-    assert(state.resolvedPhysics == null ||
-        state.resolvedPhysics!.shouldAcceptUserOffset(state.position));
+    assert(state.resolvedPhysics == null || state.resolvedPhysics!.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator!(
         ScrollIncrementDetails(
@@ -449,10 +425,8 @@ class ScrollAction extends ContextAction<ScrollIntent> {
 
   /// Find out how much of an increment to move by, taking the different
   /// directions into account.
-  static double getDirectionalIncrement(
-      ScrollableState state, ScrollIntent intent) {
-    final double increment =
-        _calculateScrollIncrement(state, type: intent.type);
+  static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
+    final double increment = _calculateScrollIncrement(state, type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
         switch (state.axisDirection) {
@@ -502,9 +476,8 @@ class ScrollAction extends ContextAction<ScrollIntent> {
     assert(context != null, 'Cannot scroll without a context.');
     ScrollableState? state = Scrollable.maybeOf(context!);
     if (state == null) {
-      final ScrollController primaryScrollController =
-          PrimaryScrollController.of(context);
-      assert(() {
+      final ScrollController primaryScrollController = PrimaryScrollController.of(context);
+      assert (() {
         if (primaryScrollController.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
@@ -527,24 +500,17 @@ class ScrollAction extends ContextAction<ScrollIntent> {
         return true;
       }());
 
-      if (primaryScrollController.position.context.notificationContext ==
-              null &&
-          Scrollable.maybeOf(primaryScrollController
-                  .position.context.notificationContext!) ==
-              null) {
+      if (primaryScrollController.position.context.notificationContext == null
+          && Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!) == null) {
         return;
       }
-      state = Scrollable.maybeOf(
-          primaryScrollController.position.context.notificationContext!);
+      state = Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!);
     }
-    assert(state != null,
-        '$ScrollAction was invoked on a context that has no scrollable parent');
-    assert(state!.position.hasPixels,
-        'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
+    assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state!.resolvedPhysics != null &&
-        !state.resolvedPhysics!.shouldAcceptUserOffset(state.position)) {
+    if (state!.resolvedPhysics != null && !state.resolvedPhysics!.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = getDirectionalIncrement(state, intent);

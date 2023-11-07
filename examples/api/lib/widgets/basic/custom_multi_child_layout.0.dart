@@ -64,12 +64,10 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           positionChild(color, childPosition - Offset(currentSize.width, 0));
-          childPosition +=
-              Offset(-currentSize.width, currentSize.height - overlap);
+          childPosition += Offset(-currentSize.width, currentSize.height - overlap);
         case TextDirection.ltr:
           positionChild(color, childPosition);
-          childPosition +=
-              Offset(currentSize.width, currentSize.height - overlap);
+          childPosition += Offset(currentSize.width, currentSize.height - overlap);
       }
     }
   }
@@ -80,8 +78,7 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   // automatically cause a relayout, like any other widget.
   @override
   bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) {
-    return oldDelegate.textDirection != textDirection ||
-        oldDelegate.overlap != overlap;
+    return oldDelegate.textDirection != textDirection || oldDelegate.overlap != overlap;
   }
 }
 

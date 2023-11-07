@@ -23,12 +23,10 @@ class TextEditingControllerExample extends StatefulWidget {
   const TextEditingControllerExample({super.key});
 
   @override
-  State<TextEditingControllerExample> createState() =>
-      _TextEditingControllerExampleState();
+  State<TextEditingControllerExample> createState() => _TextEditingControllerExampleState();
 }
 
-class _TextEditingControllerExampleState
-    extends State<TextEditingControllerExample> {
+class _TextEditingControllerExampleState extends State<TextEditingControllerExample> {
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -38,8 +36,7 @@ class _TextEditingControllerExampleState
       final String text = _controller.text.toLowerCase();
       _controller.value = _controller.value.copyWith(
         text: text,
-        selection:
-            TextSelection(baseOffset: text.length, extentOffset: text.length),
+        selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
         composing: TextRange.empty,
       );
     });

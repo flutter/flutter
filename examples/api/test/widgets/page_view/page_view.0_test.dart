@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/page_view/page_view.0.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/page_view/page_view.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PageView swipe gestures on mobile platforms',
-      (WidgetTester tester) async {
+  testWidgets('PageView swipe gestures on mobile platforms', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PageViewExampleApp(),
     );
@@ -18,23 +16,19 @@ void main() {
     expect(find.text('First Page'), findsOneWidget);
 
     // Swipe to the left.
-    await tester.fling(
-        find.text('First Page'), const Offset(-300.0, 0.0), 3000);
+    await tester.fling(find.text('First Page'), const Offset(-300.0, 0.0), 3000);
     await tester.pumpAndSettle();
     // Verify that the second page is shown.
     expect(find.text('Second Page'), findsOneWidget);
 
     // Swipe back to the right.
-    await tester.fling(
-        find.text('Second Page'), const Offset(300.0, 0.0), 3000);
+    await tester.fling(find.text('Second Page'), const Offset(300.0, 0.0), 3000);
     await tester.pumpAndSettle();
     // Verify that first page is shown.
     expect(find.text('First Page'), findsOneWidget);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgets(
-      'PageView navigation using forward/backward buttons on desktop platforms',
-      (WidgetTester tester) async {
+  testWidgets('PageView navigation using forward/backward buttons on desktop platforms', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PageViewExampleApp(),
     );
@@ -50,8 +44,7 @@ void main() {
     expect(find.text('Second Page'), findsOneWidget);
 
     // Verify that page indicator index is updated.
-    final TabPageSelector pageIndicator =
-        tester.widget<TabPageSelector>(find.byType(TabPageSelector));
+    final TabPageSelector pageIndicator = tester.widget<TabPageSelector>(find.byType(TabPageSelector));
     expect(pageIndicator.controller?.index, 1);
 
     // Verify that page view index is also updated with same index to page indicator.

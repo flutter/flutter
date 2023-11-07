@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('widget moves scopes during restore',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('widget moves scopes during restore', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
       child: Directionality(
@@ -17,12 +16,7 @@ void main() {
       ),
     ));
 
-    expect(
-        tester
-            .state<TestWidgetWithCounterChildState>(
-                find.byType(TestWidgetWithCounterChild))
-            .restoreChild,
-        true);
+    expect(tester.state<TestWidgetWithCounterChildState>(find.byType(TestWidgetWithCounterChild)).restoreChild, true);
     expect(find.text('Counter: 0'), findsOneWidget);
     await tester.tap(find.text('Counter: 0'));
     await tester.pump();
@@ -30,24 +24,15 @@ void main() {
 
     final TestRestorationData dataWithChild = await tester.getRestorationData();
 
-    tester
-        .state<TestWidgetWithCounterChildState>(
-            find.byType(TestWidgetWithCounterChild))
-        .restoreChild = false;
+    tester.state<TestWidgetWithCounterChildState>(find.byType(TestWidgetWithCounterChild)).restoreChild = false;
     await tester.pump();
-    expect(
-        tester
-            .state<TestWidgetWithCounterChildState>(
-                find.byType(TestWidgetWithCounterChild))
-            .restoreChild,
-        false);
+    expect(tester.state<TestWidgetWithCounterChildState>(find.byType(TestWidgetWithCounterChild)).restoreChild, false);
 
     await tester.tap(find.text('Counter: 1'));
     await tester.pump();
     expect(find.text('Counter: 2'), findsOneWidget);
 
-    final TestRestorationData dataWithoutChild =
-        await tester.getRestorationData();
+    final TestRestorationData dataWithoutChild = await tester.getRestorationData();
 
     // Child moves from outside to inside scope.
     await tester.restoreFrom(dataWithChild);
@@ -81,16 +66,10 @@ void main() {
     await tester.restoreFrom(dataWithoutChild);
     expect(find.text('Counter: 7'), findsOneWidget);
 
-    expect(
-        tester
-            .state<TestWidgetWithCounterChildState>(
-                find.byType(TestWidgetWithCounterChild))
-            .toggleCount,
-        0);
+    expect(tester.state<TestWidgetWithCounterChildState>(find.byType(TestWidgetWithCounterChild)).toggleCount, 0);
   });
 
-  testWidgetsWithLeakTracking('restoration is turned on later',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('restoration is turned on later', (WidgetTester tester) async {
     tester.binding.restorationManager.disableRestoration();
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
@@ -102,8 +81,7 @@ void main() {
       ),
     ));
 
-    final TestWidgetState state =
-        tester.state<TestWidgetState>(find.byType(TestWidget));
+    final TestWidgetState state = tester.state<TestWidgetState>(find.byType(TestWidget));
     expect(find.text('hello'), findsOneWidget);
     expect(state.buckets.single, isNull);
     expect(state.flags.single, isTrue);
@@ -137,12 +115,10 @@ class TestWidgetWithCounterChild extends StatefulWidget {
   const TestWidgetWithCounterChild({super.key});
 
   @override
-  State<TestWidgetWithCounterChild> createState() =>
-      TestWidgetWithCounterChildState();
+  State<TestWidgetWithCounterChild> createState() => TestWidgetWithCounterChildState();
 }
 
-class TestWidgetWithCounterChildState extends State<TestWidgetWithCounterChild>
-    with RestorationMixin {
+class TestWidgetWithCounterChildState extends State<TestWidgetWithCounterChild> with RestorationMixin {
   final RestorableBool childRestorationEnabled = RestorableBool(true);
 
   int toggleCount = 0;

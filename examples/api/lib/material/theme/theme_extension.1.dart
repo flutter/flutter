@@ -51,8 +51,7 @@ class ThemeExtensionExampleApp extends StatefulWidget {
   const ThemeExtensionExampleApp({super.key});
 
   @override
-  State<ThemeExtensionExampleApp> createState() =>
-      _ThemeExtensionExampleAppState();
+  State<ThemeExtensionExampleApp> createState() => _ThemeExtensionExampleAppState();
 }
 
 class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {

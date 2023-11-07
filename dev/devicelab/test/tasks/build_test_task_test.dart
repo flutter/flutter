@@ -63,10 +63,8 @@ void main() {
       ),
     );
     final String capturedPrint = capturedPrintLines.toString();
-    expect(
-        capturedPrint,
-        contains(
-            'with environment {FLUTTER_DEVICELAB_DEVICEID: FAKE_SUCCESS, BOT: true, LANG: en_US.UTF-8}'));
+    expect(capturedPrint,
+        contains('with environment {FLUTTER_DEVICELAB_DEVICEID: FAKE_SUCCESS, BOT: true, LANG: en_US.UTF-8}'));
     expect(capturedPrint, contains('Process terminated with exit code 0.'));
   });
 
@@ -77,12 +75,10 @@ void main() {
       deviceId: 'FAKE_SUCCESS',
       isolateParams: isolateParams,
     );
-    expect(result.message,
-        'Task failed: Exception: Both build and test should not be passed. Pass only one.');
+    expect(result.message, 'Task failed: Exception: Both build and test should not be passed. Pass only one.');
   });
 
-  test('copies artifacts when build and application binary arg are given',
-      () async {
+  test('copies artifacts when build and application binary arg are given', () async {
     final TaskResult result = await runTask(
       'smoke_test_build_test',
       taskArgs: <String>['--build', '--application-binary-path=test'],

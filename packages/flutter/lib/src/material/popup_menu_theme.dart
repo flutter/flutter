@@ -17,7 +17,6 @@ import 'theme.dart';
 enum PopupMenuPosition {
   /// Menu is positioned over the anchor.
   over,
-
   /// Menu is positioned under the anchor.
   under,
 }
@@ -141,8 +140,7 @@ class PopupMenuThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static PopupMenuThemeData? lerp(
-      PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
+  static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -153,8 +151,7 @@ class PopupMenuThemeData with Diagnosticable {
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
-      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(
-          a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
+      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       position: t < 0.5 ? a?.position : b?.position,
@@ -165,19 +162,19 @@ class PopupMenuThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        color,
-        shape,
-        elevation,
-        shadowColor,
-        surfaceTintColor,
-        textStyle,
-        labelTextStyle,
-        enableFeedback,
-        mouseCursor,
-        position,
-        iconColor,
-        iconSize,
-      );
+    color,
+    shape,
+    elevation,
+    shadowColor,
+    surfaceTintColor,
+    textStyle,
+    labelTextStyle,
+    enableFeedback,
+    mouseCursor,
+    position,
+    iconColor,
+    iconSize,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -187,44 +184,34 @@ class PopupMenuThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is PopupMenuThemeData &&
-        other.color == color &&
-        other.shape == shape &&
-        other.elevation == elevation &&
-        other.shadowColor == shadowColor &&
-        other.surfaceTintColor == surfaceTintColor &&
-        other.textStyle == textStyle &&
-        other.labelTextStyle == labelTextStyle &&
-        other.enableFeedback == enableFeedback &&
-        other.mouseCursor == mouseCursor &&
-        other.position == position &&
-        other.iconColor == iconColor &&
-        other.iconSize == iconSize;
+    return other is PopupMenuThemeData
+        && other.color == color
+        && other.shape == shape
+        && other.elevation == elevation
+        && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
+        && other.textStyle == textStyle
+        && other.labelTextStyle == labelTextStyle
+        && other.enableFeedback == enableFeedback
+        && other.mouseCursor == mouseCursor
+        && other.position == position
+        && other.iconColor == iconColor
+        && other.iconSize == iconSize;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties
-        .add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
-    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
-        'labelTextStyle', labelTextStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
-        'mouseCursor', mouseCursor,
-        defaultValue: null));
-    properties.add(EnumProperty<PopupMenuPosition?>('position', position,
-        defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(EnumProperty<PopupMenuPosition?>('position', position, defaultValue: null));
     properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(DoubleProperty('iconSize', iconSize, defaultValue: null));
   }
@@ -257,8 +244,7 @@ class PopupMenuTheme extends InheritedTheme {
   /// PopupMenuThemeData theme = PopupMenuTheme.of(context);
   /// ```
   static PopupMenuThemeData of(BuildContext context) {
-    final PopupMenuTheme? popupMenuTheme =
-        context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
+    final PopupMenuTheme? popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
     return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
   }
 

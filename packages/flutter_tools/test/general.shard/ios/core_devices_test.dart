@@ -30,8 +30,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      final XcodeProjectInterpreter xcodeProjectInterpreter =
-          XcodeProjectInterpreter.test(
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter.test(
         processManager: fakeProcessManager,
         version: Version(14, 0, 0),
       );
@@ -49,32 +48,28 @@ void main() {
 
     group('devicectl is not installed', () {
       testWithoutContext('fails to get device list', () async {
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(devices.isEmpty, isTrue);
       });
 
       testWithoutContext('fails to install app', () async {
-        final bool status = await deviceControl.installApp(
-            deviceId: 'device-id', bundlePath: '/path/to/bundle');
+        final bool status = await deviceControl.installApp(deviceId: 'device-id', bundlePath: '/path/to/bundle');
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(status, isFalse);
       });
 
       testWithoutContext('fails to launch app', () async {
-        final bool status = await deviceControl.launchApp(
-            deviceId: 'device-id', bundleId: 'com.example.flutterApp');
+        final bool status = await deviceControl.launchApp(deviceId: 'device-id', bundleId: 'com.example.flutterApp');
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(status, isFalse);
       });
 
       testWithoutContext('fails to check if app is installed', () async {
-        final bool status = await deviceControl.isAppInstalled(
-            deviceId: 'device-id', bundleId: 'com.example.flutterApp');
+        final bool status = await deviceControl.isAppInstalled(deviceId: 'device-id', bundleId: 'com.example.flutterApp');
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(status, isFalse);
@@ -222,29 +217,30 @@ void main() {
             .childDirectory('core_devices.rand0')
             .childFile('install_results.json');
         fakeProcessManager.addCommand(FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'install',
-              'app',
-              '--device',
-              deviceId,
-              bundlePath,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: () {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-            exitCode: 1,
-            stderr: '''
+          command: <String>[
+            'xcrun',
+            'devicectl',
+            'device',
+            'install',
+            'app',
+            '--device',
+            deviceId,
+            bundlePath,
+            '--json-output',
+            tempFile.path,
+          ],
+          onRun: () {
+            expect(tempFile, exists);
+            tempFile.writeAsStringSync(deviceControlOutput);
+          },
+          exitCode: 1,
+          stderr: '''
 ERROR: Could not obtain access to one or more requested file system resources because CoreDevice was unable to create bookmark data. (com.apple.dt.CoreDeviceError error 1005.)
          NSURL = file:///path/to/app
 --------------------------------------------------------------------------------
 ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDomain error 260.)
-'''));
+'''
+        ));
 
         final bool status = await deviceControl.installApp(
           deviceId: deviceId,
@@ -252,10 +248,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(
-            logger.errorText,
-            contains(
-                'ERROR: Could not obtain access to one or more requested file system'));
+        expect(logger.errorText, contains('ERROR: Could not obtain access to one or more requested file system'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -294,8 +287,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText,
-            contains('devicectl returned unexpected JSON response'));
+        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -332,8 +324,7 @@ invalid JSON
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(
-            logger.errorText, contains('devicectl returned non-JSON response'));
+        expect(logger.errorText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -455,29 +446,30 @@ invalid JSON
             .childDirectory('core_devices.rand0')
             .childFile('uninstall_results.json');
         fakeProcessManager.addCommand(FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'uninstall',
-              'app',
-              '--device',
-              deviceId,
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: () {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-            exitCode: 1,
-            stderr: '''
+          command: <String>[
+            'xcrun',
+            'devicectl',
+            'device',
+            'uninstall',
+            'app',
+            '--device',
+            deviceId,
+            bundleId,
+            '--json-output',
+            tempFile.path,
+          ],
+          onRun: () {
+            expect(tempFile, exists);
+            tempFile.writeAsStringSync(deviceControlOutput);
+          },
+          exitCode: 1,
+          stderr: '''
 ERROR: Could not obtain access to one or more requested file system resources because CoreDevice was unable to create bookmark data. (com.apple.dt.CoreDeviceError error 1005.)
          NSURL = file:///path/to/app
 --------------------------------------------------------------------------------
 ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDomain error 260.)
-'''));
+'''
+        ));
 
         final bool status = await deviceControl.uninstallApp(
           deviceId: deviceId,
@@ -485,16 +477,12 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(
-            logger.errorText,
-            contains(
-                'ERROR: Could not obtain access to one or more requested file system'));
+        expect(logger.errorText, contains('ERROR: Could not obtain access to one or more requested file system'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
 
-      testWithoutContext('fails uninstall because of unexpected JSON',
-          () async {
+      testWithoutContext('fails uninstall because of unexpected JSON', () async {
         const String deviceControlOutput = '''
 {
   "valid_unexpected_json": true
@@ -528,8 +516,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText,
-            contains('devicectl returned unexpected JSON response'));
+        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -566,8 +553,7 @@ invalid JSON
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(
-            logger.errorText, contains('devicectl returned non-JSON response'));
+        expect(logger.errorText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -792,28 +778,29 @@ invalid JSON
             .childDirectory('core_devices.rand0')
             .childFile('launch_results.json');
         fakeProcessManager.addCommand(FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'process',
-              'launch',
-              '--device',
-              deviceId,
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: () {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-            exitCode: 1,
-            stderr: '''
+          command: <String>[
+            'xcrun',
+            'devicectl',
+            'device',
+            'process',
+            'launch',
+            '--device',
+            deviceId,
+            bundleId,
+            '--json-output',
+            tempFile.path,
+          ],
+          onRun: () {
+            expect(tempFile, exists);
+            tempFile.writeAsStringSync(deviceControlOutput);
+          },
+          exitCode: 1,
+          stderr: '''
 ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatusErrorDomain error -10814.)
     _LSFunction = runEvaluator
     _LSLine = 1608
-'''));
+'''
+        ));
 
         final bool status = await deviceControl.launchApp(
           deviceId: deviceId,
@@ -821,8 +808,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText,
-            contains('ERROR: The operation couldn?t be completed.'));
+        expect(logger.errorText, contains('ERROR: The operation couldn?t be completed.'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -855,14 +841,14 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
           },
         ));
 
+
         final bool status = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText,
-            contains('devicectl returned unexpected JSON response'));
+        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -899,8 +885,7 @@ invalid JSON
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(
-            logger.errorText, contains('devicectl returned non-JSON response'));
+        expect(logger.errorText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -995,8 +980,7 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDeviceInstalledApp> apps =
-            await deviceControl.getInstalledApps(
+        final List<IOSCoreDeviceInstalledApp> apps = await deviceControl.getInstalledApps(
           deviceId: deviceId,
           bundleId: bundleId,
         );
@@ -1015,8 +999,7 @@ invalid JSON
         expect(apps[0].internalApp, isFalse);
         expect(apps[0].name, 'Bundle');
         expect(apps[0].removable, isTrue);
-        expect(apps[0].url,
-            'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/');
+        expect(apps[0].url, 'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/');
         expect(apps[0].version, '1.0.0');
 
         expect(apps[1].appClip, isTrue);
@@ -1028,10 +1011,10 @@ invalid JSON
         expect(apps[1].internalApp, isTrue);
         expect(apps[1].name, 'Bundle 2');
         expect(apps[1].removable, isFalse);
-        expect(apps[1].url,
-            'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/');
+        expect(apps[1].url, 'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/');
         expect(apps[1].version, '1.0.0');
       });
+
 
       testWithoutContext('Successfully find installed app', () async {
         const String deviceControlOutput = '''
@@ -1224,27 +1207,28 @@ invalid JSON
             .childDirectory('core_devices.rand0')
             .childFile('core_device_app_list.json');
         fakeProcessManager.addCommand(FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'info',
-              'apps',
-              '--device',
-              deviceId,
-              '--bundle-id',
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: () {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-            exitCode: 1,
-            stderr: '''
+          command: <String>[
+            'xcrun',
+            'devicectl',
+            'device',
+            'info',
+            'apps',
+            '--device',
+            deviceId,
+            '--bundle-id',
+            bundleId,
+            '--json-output',
+            tempFile.path,
+          ],
+          onRun: () {
+            expect(tempFile, exists);
+            tempFile.writeAsStringSync(deviceControlOutput);
+          },
+          exitCode: 1,
+          stderr: '''
 ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1000.)
-'''));
+'''
+        ));
 
         final bool status = await deviceControl.isAppInstalled(
           deviceId: deviceId,
@@ -1252,8 +1236,7 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText,
-            contains('ERROR: The specified device was not found.'));
+        expect(logger.errorText, contains('ERROR: The specified device was not found.'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -1287,14 +1270,14 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
           },
         ));
 
+
         final bool status = await deviceControl.isAppInstalled(
           deviceId: deviceId,
           bundleId: bundleId,
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText,
-            contains('devicectl returned unexpected JSON response'));
+        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -1332,8 +1315,7 @@ invalid JSON
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(
-            logger.errorText, contains('devicectl returned non-JSON response'));
+        expect(logger.errorText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -1386,8 +1368,7 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(devices.isEmpty, isTrue);
       });
@@ -1449,24 +1430,21 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
 
         expect(devices[0].capabilities, isNotNull);
         expect(devices[0].connectionProperties, isNotNull);
         expect(devices[0].deviceProperties, isNotNull);
         expect(devices[0].hardwareProperties, isNotNull);
-        expect(devices[0].coreDeviceIdentifer,
-            '123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(devices[0].coreDeviceIdentifer, '123456BB5-AEDE-7A22-B890-1234567890DD');
         expect(devices[0].visibilityClass, 'default');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(tempFile, isNot(exists));
       });
 
-      testWithoutContext('All sections parsed, device missing sections',
-          () async {
+      testWithoutContext('All sections parsed, device missing sections', () async {
         const String deviceControlOutput = '''
 {
   "info" : {
@@ -1515,16 +1493,14 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
 
         expect(devices[0].capabilities, isEmpty);
         expect(devices[0].connectionProperties, isNull);
         expect(devices[0].deviceProperties, isNull);
         expect(devices[0].hardwareProperties, isNull);
-        expect(devices[0].coreDeviceIdentifer,
-            '123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(devices[0].coreDeviceIdentifer, '123456BB5-AEDE-7A22-B890-1234567890DD');
         expect(devices[0].visibilityClass, 'default');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1573,16 +1549,13 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
 
         expect(devices[0].capabilities.length, 2);
-        expect(devices[0].capabilities[0].featureIdentifier,
-            'com.apple.coredevice.feature.spawnexecutable');
+        expect(devices[0].capabilities[0].featureIdentifier, 'com.apple.coredevice.feature.spawnexecutable');
         expect(devices[0].capabilities[0].name, 'Spawn Executable');
-        expect(devices[0].capabilities[1].featureIdentifier,
-            'com.apple.coredevice.feature.launchapplication');
+        expect(devices[0].capabilities[1].featureIdentifier, 'com.apple.coredevice.feature.launchapplication');
         expect(devices[0].capabilities[1].name, 'Launch Application');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1640,15 +1613,12 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
 
-        expect(devices[0].connectionProperties?.authenticationType,
-            'manualPairing');
+        expect(devices[0].connectionProperties?.authenticationType, 'manualPairing');
         expect(devices[0].connectionProperties?.isMobileDeviceOnly, false);
-        expect(devices[0].connectionProperties?.lastConnectionDate,
-            '2023-06-15T15:29:00.082Z');
+        expect(devices[0].connectionProperties?.lastConnectionDate, '2023-06-15T15:29:00.082Z');
         expect(
           devices[0].connectionProperties?.localHostnames,
           <String>[
@@ -1663,8 +1633,7 @@ invalid JSON
           '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
         ]);
         expect(devices[0].connectionProperties?.transportType, 'wired');
-        expect(devices[0].connectionProperties?.tunnelIPAddress,
-            'fdf1:23c4:cd56::1');
+        expect(devices[0].connectionProperties?.tunnelIPAddress, 'fdf1:23c4:cd56::1');
         expect(devices[0].connectionProperties?.tunnelState, 'connected');
         expect(devices[0].connectionProperties?.tunnelTransportProtocol, 'tcp');
 
@@ -1717,13 +1686,11 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
 
         expect(devices[0].deviceProperties?.bootedFromSnapshot, true);
-        expect(devices[0].deviceProperties?.bootedSnapshotName,
-            'com.apple.os.update-123456');
+        expect(devices[0].deviceProperties?.bootedSnapshotName, 'com.apple.os.update-123456');
         expect(devices[0].deviceProperties?.bootState, 'booted');
         expect(devices[0].deviceProperties?.ddiServicesAvailable, true);
         expect(devices[0].deviceProperties?.developerModeStatus, 'enabled');
@@ -1732,8 +1699,7 @@ invalid JSON
         expect(devices[0].deviceProperties?.osBuildUpdate, '21A5248v');
         expect(devices[0].deviceProperties?.osVersionNumber, '17.0');
         expect(devices[0].deviceProperties?.rootFileSystemIsWritable, false);
-        expect(devices[0].deviceProperties?.screenViewingURL,
-            'coredevice-devices:/viewDeviceByUUID?uuid=123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(devices[0].deviceProperties?.screenViewingURL, 'coredevice-devices:/viewDeviceByUUID?uuid=123456BB5-AEDE-7A22-B890-1234567890DD');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(tempFile, isNot(exists));
@@ -1804,8 +1770,7 @@ invalid JSON
           },
         ));
 
-        final List<IOSCoreDevice> devices =
-            await deviceControl.getCoreDevices();
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
 
         expect(devices[0].hardwareProperties?.cpuType, isNotNull);
@@ -1815,31 +1780,22 @@ invalid JSON
         expect(devices[0].hardwareProperties?.deviceType, 'iPad');
         expect(devices[0].hardwareProperties?.ecid, 12345678903408542);
         expect(devices[0].hardwareProperties?.hardwareModel, 'J617AP');
-        expect(devices[0].hardwareProperties?.internalStorageCapacity,
-            128000000000);
-        expect(devices[0].hardwareProperties?.marketingName,
-            'iPad Pro (11-inch) (4th generation)"');
+        expect(devices[0].hardwareProperties?.internalStorageCapacity, 128000000000);
+        expect(devices[0].hardwareProperties?.marketingName, 'iPad Pro (11-inch) (4th generation)"');
         expect(devices[0].hardwareProperties?.platform, 'iOS');
         expect(devices[0].hardwareProperties?.productType, 'iPad14,3');
         expect(devices[0].hardwareProperties?.serialNumber, 'HC123DHCQV');
         expect(devices[0].hardwareProperties?.supportedCPUTypes, isNotNull);
-        expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].name,
-            'arm64e');
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].name, 'arm64e');
         expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].subType, 2);
-        expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].cpuType,
-            16777228);
-        expect(
-            devices[0].hardwareProperties?.supportedCPUTypes?[1].name, 'arm64');
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].cpuType, 16777228);
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[1].name, 'arm64');
         expect(devices[0].hardwareProperties?.supportedCPUTypes?[1].subType, 0);
-        expect(devices[0].hardwareProperties?.supportedCPUTypes?[1].cpuType,
-            16777228);
-        expect(devices[0].hardwareProperties?.supportedDeviceFamilies,
-            <int>[1, 2]);
-        expect(
-            devices[0].hardwareProperties?.thinningProductType, 'iPad14,3-A');
+        expect(devices[0].hardwareProperties?.supportedCPUTypes?[1].cpuType, 16777228);
+        expect(devices[0].hardwareProperties?.supportedDeviceFamilies, <int>[1, 2]);
+        expect(devices[0].hardwareProperties?.thinningProductType, 'iPad14,3-A');
 
-        expect(
-            devices[0].hardwareProperties?.udid, '00001234-0001234A3C03401E');
+        expect(devices[0].hardwareProperties?.udid, '00001234-0001234A3C03401E');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(tempFile, isNot(exists));
@@ -1869,12 +1825,10 @@ invalid JSON
             },
           ));
 
-          final List<IOSCoreDevice> devices =
-              await deviceControl.getCoreDevices();
+          final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
           expect(devices.isEmpty, isTrue);
           expect(fakeProcessManager, hasNoRemainingExpectations);
-          expect(logger.errorText,
-              contains('devicectl returned non-JSON response: Invalid JSON'));
+          expect(logger.errorText, contains('devicectl returned non-JSON response: Invalid JSON'));
         });
 
         testWithoutContext('unexpected json', () async {
@@ -1921,16 +1875,13 @@ invalid JSON
             },
           ));
 
-          final List<IOSCoreDevice> devices =
-              await deviceControl.getCoreDevices();
+          final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
           expect(devices.isEmpty, isTrue);
           expect(fakeProcessManager, hasNoRemainingExpectations);
-          expect(logger.errorText,
-              contains('devicectl returned unexpected JSON response:'));
+          expect(logger.errorText, contains('devicectl returned unexpected JSON response:'));
         });
 
-        testWithoutContext('When timeout is below minimum, default to minimum',
-            () async {
+        testWithoutContext('When timeout is below minimum, default to minimum', () async {
           const String deviceControlOutput = '''
 {
   "info" : {
@@ -1979,8 +1930,7 @@ invalid JSON
             },
           ));
 
-          final List<IOSCoreDevice> devices =
-              await deviceControl.getCoreDevices(
+          final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices(
             timeout: const Duration(seconds: 2),
           );
           expect(devices.isNotEmpty, isTrue);
@@ -1993,5 +1943,7 @@ invalid JSON
         });
       });
     });
+
+
   });
 }

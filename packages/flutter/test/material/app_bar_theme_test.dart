@@ -30,14 +30,12 @@ void main() {
   );
 
   ScrollController primaryScrollController(WidgetTester tester) {
-    return PrimaryScrollController.of(
-        tester.element(find.byType(CustomScrollView)));
+    return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
   }
 
   test('AppBarTheme copyWith, ==, hashCode basics', () {
     expect(const AppBarTheme(), const AppBarTheme().copyWith());
-    expect(
-        const AppBarTheme().hashCode, const AppBarTheme().copyWith().hashCode);
+    expect(const AppBarTheme().hashCode, const AppBarTheme().copyWith().hashCode);
   });
 
   test('AppBarTheme lerp special cases', () {
@@ -45,9 +43,7 @@ void main() {
     expect(identical(AppBarTheme.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material2 - Passing no AppBarTheme returns defaults',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
@@ -55,7 +51,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
           ),
         ),
@@ -68,8 +64,7 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness,
-        SystemUiOverlayStyle.light.statusBarBrightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
@@ -78,19 +73,12 @@ void main() {
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style!.color, Colors.white);
-    expect(
-        text.style,
-        Typography.material2014()
-            .englishLike
-            .bodyMedium!
-            .merge(Typography.material2014().white.bodyMedium));
+    expect(text.style, Typography.material2014().englishLike.bodyMedium!.merge(Typography.material2014().white.bodyMedium));
     expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - Passing no AppBarTheme returns defaults',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -98,7 +86,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
           ),
         ),
@@ -117,28 +105,20 @@ void main() {
     expect(widget.shadowColor, Colors.transparent);
     expect(widget.surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(widget.shape, null);
-    expect(iconTheme.data,
-        IconThemeData(color: theme.colorScheme.onSurface, size: 24));
-    expect(actionsIconTheme.data,
-        IconThemeData(color: theme.colorScheme.onSurfaceVariant, size: 24));
-    expect(
-        actionIconText.text.style!.color, theme.colorScheme.onSurfaceVariant);
+    expect(iconTheme.data, IconThemeData(color: theme.colorScheme.onSurface, size: 24));
+    expect(actionsIconTheme.data, IconThemeData(color: theme.colorScheme.onSurfaceVariant, size: 24));
+    expect(actionIconText.text.style!.color, theme.colorScheme.onSurfaceVariant);
     expect(
       text.style,
-      Typography.material2021()
-          .englishLike
-          .bodyMedium!
-          .merge(Typography.material2021().black.bodyMedium)
-          .copyWith(
-              color: theme.colorScheme.onSurface,
-              decorationColor: theme.colorScheme.onSurface),
+      Typography.material2021().englishLike.bodyMedium!
+        .merge(Typography.material2021().black.bodyMedium)
+        .copyWith(color: theme.colorScheme.onSurface, decorationColor: theme.colorScheme.onSurface),
     );
     expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
-  testWidgetsWithLeakTracking('AppBar uses values from AppBarTheme',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
     final AppBarTheme appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(
@@ -148,7 +128,7 @@ void main() {
           appBar: AppBar(
             title: const Text('App Bar Title'),
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
           ),
         ),
@@ -169,17 +149,13 @@ void main() {
     expect(widget.shape, const StadiumBorder());
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
-    expect(
-        actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
+    expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
     expect(text.style, appBarTheme.toolbarTextStyle);
-    expect(
-        tester.getSize(find.byType(AppBar)).height, appBarTheme.toolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).height, appBarTheme.toolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar widget properties take priority over theme',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar widget properties take priority over theme', (WidgetTester tester) async {
     const Brightness brightness = Brightness.dark;
     const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light;
     const Color color = Colors.orange;
@@ -188,8 +164,7 @@ void main() {
     const Color surfaceTintColor = Colors.brown;
     const ShapeBorder shape = RoundedRectangleBorder();
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
-    const IconThemeData actionsIconThemeData =
-        IconThemeData(color: Colors.lightBlue);
+    const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
     const TextStyle toolbarTextStyle = TextStyle(color: Colors.pink);
     const TextStyle titleTextStyle = TextStyle(color: Colors.orange);
 
@@ -211,7 +186,7 @@ void main() {
             toolbarTextStyle: toolbarTextStyle,
             titleTextStyle: titleTextStyle,
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
           ),
         ),
@@ -236,23 +211,18 @@ void main() {
     expect(text.style, toolbarTextStyle);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar icon color takes priority over everything',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar icon color takes priority over everything', (WidgetTester tester) async {
     const Color color = Colors.lime;
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
-    const IconThemeData actionsIconThemeData =
-        IconThemeData(color: Colors.lightBlue);
+    const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.from(colorScheme: const ColorScheme.light()),
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[
-          IconButton(
-              icon: const Icon(Icons.share), color: color, onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () { }),
         ],
       )),
     ));
@@ -261,19 +231,17 @@ void main() {
     expect(actionIconText.text.style!.color, color);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBarTheme properties take priority over ThemeData properties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
     final AppBarTheme appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light())
-            .copyWith(appBarTheme: _appBarTheme()),
+          .copyWith(appBarTheme: _appBarTheme()),
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
           ),
         ),
@@ -293,18 +261,13 @@ void main() {
     expect(widget.surfaceTintColor, appBarTheme.surfaceTintColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
-    expect(
-        actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
+    expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
     expect(text.style, appBarTheme.toolbarTextStyle);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material2 - ThemeData colorScheme is used when no AppBarTheme is set',
-      (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.from(
-        colorScheme: const ColorScheme.light(), useMaterial3: false);
-    final ThemeData darkTheme = ThemeData.from(
-        colorScheme: const ColorScheme.dark(), useMaterial3: false);
+  testWidgetsWithLeakTracking('Material2 - ThemeData colorScheme is used when no AppBarTheme is set', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false);
+    final ThemeData darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
     Widget buildFrame(ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
@@ -313,7 +276,7 @@ void main() {
             return Scaffold(
               appBar: AppBar(
                 actions: <Widget>[
-                  IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+                  IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                 ],
               ),
             );
@@ -338,8 +301,7 @@ void main() {
     RichText actionIconText = _getAppBarIconRichText(tester);
     DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness,
-        SystemUiOverlayStyle.light.statusBarBrightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
     expect(widget.color, lightTheme.colorScheme.primary);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
@@ -347,13 +309,7 @@ void main() {
     expect(iconTheme.data.color, lightTheme.colorScheme.onPrimary);
     expect(actionsIconTheme.data.color, lightTheme.colorScheme.onPrimary);
     expect(actionIconText.text.style!.color, lightTheme.colorScheme.onPrimary);
-    expect(
-        text.style,
-        Typography.material2014()
-            .englishLike
-            .bodyMedium!
-            .merge(Typography.material2014().black.bodyMedium)
-            .copyWith(color: lightTheme.colorScheme.onPrimary));
+    expect(text.style, Typography.material2014().englishLike.bodyMedium!.merge(Typography.material2014().black.bodyMedium).copyWith(color: lightTheme.colorScheme.onPrimary));
 
     // AppBar M2 defaults for dark themes:
     // - elevation: 4
@@ -372,8 +328,7 @@ void main() {
     actionIconText = _getAppBarIconRichText(tester);
     text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness,
-        SystemUiOverlayStyle.light.statusBarBrightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
     expect(widget.color, darkTheme.colorScheme.surface);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
@@ -381,22 +336,12 @@ void main() {
     expect(iconTheme.data.color, darkTheme.colorScheme.onSurface);
     expect(actionsIconTheme.data.color, darkTheme.colorScheme.onSurface);
     expect(actionIconText.text.style!.color, darkTheme.colorScheme.onSurface);
-    expect(
-        text.style,
-        Typography.material2014()
-            .englishLike
-            .bodyMedium!
-            .merge(Typography.material2014().black.bodyMedium)
-            .copyWith(color: darkTheme.colorScheme.onSurface));
+    expect(text.style, Typography.material2014().englishLike.bodyMedium!.merge(Typography.material2014().black.bodyMedium).copyWith(color: darkTheme.colorScheme.onSurface));
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - ThemeData colorScheme is used when no AppBarTheme is set',
-      (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.from(
-        colorScheme: const ColorScheme.light(), useMaterial3: true);
-    final ThemeData darkTheme = ThemeData.from(
-        colorScheme: const ColorScheme.dark(), useMaterial3: true);
+  testWidgetsWithLeakTracking('Material3 - ThemeData colorScheme is used when no AppBarTheme is set', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true);
+    final ThemeData darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: true);
     Widget buildFrame(ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
@@ -405,7 +350,7 @@ void main() {
             return Scaffold(
               appBar: AppBar(
                 actions: <Widget>[
-                  IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+                  IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                 ],
               ),
             );
@@ -438,13 +383,7 @@ void main() {
     expect(iconTheme.data.color, lightTheme.colorScheme.onSurface);
     expect(actionsIconTheme.data.color, lightTheme.colorScheme.onSurface);
     expect(actionIconText.text.style!.color, lightTheme.colorScheme.onSurface);
-    expect(
-        text.style,
-        Typography.material2021()
-            .englishLike
-            .bodyMedium!
-            .merge(Typography.material2021().black.bodyMedium)
-            .copyWith(color: lightTheme.colorScheme.onSurface));
+    expect(text.style, Typography.material2021().englishLike.bodyMedium!.merge(Typography.material2021().black.bodyMedium).copyWith(color: lightTheme.colorScheme.onSurface));
 
     // M3 AppBar defaults for dark themes:
     // - elevation: 0
@@ -471,23 +410,13 @@ void main() {
     expect(iconTheme.data.color, darkTheme.colorScheme.onSurface);
     expect(actionsIconTheme.data.color, darkTheme.colorScheme.onSurface);
     expect(actionIconText.text.style!.color, darkTheme.colorScheme.onSurface);
-    expect(
-        text.style,
-        Typography.material2021()
-            .englishLike
-            .bodyMedium!
-            .merge(Typography.material2021().black.bodyMedium)
-            .copyWith(
-                color: darkTheme.colorScheme.onSurface,
-                decorationColor: darkTheme.colorScheme.onSurface));
+    expect(text.style, Typography.material2021().englishLike.bodyMedium!.merge(Typography.material2021().black.bodyMedium).copyWith(color: darkTheme.colorScheme.onSurface, decorationColor: darkTheme.colorScheme.onSurface));
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar iconTheme with color=null defers to outer IconTheme',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar iconTheme with color=null defers to outer IconTheme', (WidgetTester tester) async {
     // Verify claim made in https://github.com/flutter/flutter/pull/71184#issuecomment-737419215
 
-    Widget buildFrame({Color? appIconColor, Color? appBarIconColor}) {
+    Widget buildFrame({ Color? appIconColor, Color? appBarIconColor }) {
       return MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: IconTheme(
@@ -498,7 +427,7 @@ void main() {
                 appBar: AppBar(
                   iconTheme: IconThemeData(color: appBarIconColor),
                   actions: <Widget>[
-                    IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+                    IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                   ],
                 ),
               );
@@ -520,30 +449,23 @@ void main() {
     await tester.pumpWidget(buildFrame(appIconColor: Colors.lime));
     expect(getIconText().text.style!.color, Colors.lime);
 
-    await tester.pumpWidget(
-        buildFrame(appIconColor: Colors.lime, appBarIconColor: Colors.purple));
+    await tester.pumpWidget(buildFrame(appIconColor: Colors.lime, appBarIconColor: Colors.purple));
     expect(getIconText().text.style!.color, Colors.purple);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar uses AppBarTheme.centerTitle when centerTitle is null',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         title: const Text('Title'),
       )),
     ));
 
-    final NavigationToolbar navToolBar =
-        tester.widget(find.byType(NavigationToolbar));
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.centerMiddle, true);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar.centerTitle takes priority over AppBarTheme.centerTitle',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar.centerTitle takes priority over AppBarTheme.centerTitle', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
@@ -554,33 +476,26 @@ void main() {
       ),
     ));
 
-    final NavigationToolbar navToolBar =
-        tester.widget(find.byType(NavigationToolbar));
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     // The AppBar.centerTitle should be used instead of AppBarTheme.centerTitle.
     expect(navToolBar.centerMiddle, false);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         title: const Text('Title'),
       )),
     ));
 
-    final NavigationToolbar navToolBar =
-        tester.widget(find.byType(NavigationToolbar));
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     // When ThemeData.platform is TargetPlatform.iOS, and AppBarTheme is null,
     // the value of NavigationToolBar.centerMiddle should be true.
     expect(navToolBar.centerMiddle, true);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar.shadowColor takes priority over AppBarTheme.shadowColor',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar.shadowColor takes priority over AppBarTheme.shadowColor', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
       home: Scaffold(
@@ -596,12 +511,9 @@ void main() {
     expect(appBar.shadowColor, Colors.yellow);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-          appBarTheme: const AppBarTheme(surfaceTintColor: Colors.red)),
+      theme: ThemeData(appBarTheme: const AppBarTheme(surfaceTintColor: Colors.red)),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Title'),
@@ -615,9 +527,7 @@ void main() {
     expect(appBar.surfaceTintColor, Colors.yellow);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - AppBarTheme.iconTheme.color takes priority over IconButtonTheme.foregroundColor',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AppBarTheme.iconTheme.color takes priority over IconButtonTheme.foregroundColor', (WidgetTester tester) async {
     const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow);
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -629,16 +539,8 @@ void main() {
       ),
       home: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {},
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {},
-            )
-          ],
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
           title: const Text('Title'),
         ),
       ),
@@ -651,9 +553,7 @@ void main() {
     expect(actionIconButtonColor, overallIconTheme.color);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - AppBarTheme.iconTheme.size takes priority over IconButtonTheme.iconSize',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AppBarTheme.iconTheme.size takes priority over IconButtonTheme.iconSize', (WidgetTester tester) async {
     const IconThemeData overallIconTheme = IconThemeData(size: 30.0);
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -665,33 +565,22 @@ void main() {
       ),
       home: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {},
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {},
-            )
-          ],
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
           title: const Text('Title'),
         ),
       ),
     ));
 
-    final double? leadingIconButtonSize =
-        _iconStyle(tester, Icons.menu)?.fontSize;
-    final double? actionIconButtonSize =
-        _iconStyle(tester, Icons.add)?.fontSize;
+    final double? leadingIconButtonSize = _iconStyle(tester, Icons.menu)?.fontSize;
+    final double? actionIconButtonSize = _iconStyle(tester, Icons.add)?.fontSize;
 
     expect(leadingIconButtonSize, overallIconTheme.size);
     expect(actionIconButtonSize, overallIconTheme.size);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - AppBarTheme.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor',
-      (WidgetTester tester) async {
+
+  testWidgetsWithLeakTracking('Material3 - AppBarTheme.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor', (WidgetTester tester) async {
     const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow);
     final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
       style: IconButton.styleFrom(foregroundColor: Colors.red),
@@ -705,16 +594,8 @@ void main() {
       ),
       home: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {},
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {},
-            )
-          ],
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
           title: const Text('Title'),
         ),
       ),
@@ -723,14 +604,11 @@ void main() {
     final Color? leadingIconButtonColor = _iconStyle(tester, Icons.menu)?.color;
     final Color? actionIconButtonColor = _iconStyle(tester, Icons.add)?.color;
 
-    expect(leadingIconButtonColor,
-        Colors.red); // leading color should come from iconButtonTheme
+    expect(leadingIconButtonColor, Colors.red); // leading color should come from iconButtonTheme
     expect(actionIconButtonColor, actionsIconTheme.color);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize', (WidgetTester tester) async {
     const IconThemeData actionsIconTheme = IconThemeData(size: 30.0);
     final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
       style: IconButton.styleFrom(iconSize: 32.0),
@@ -743,34 +621,21 @@ void main() {
       ),
       home: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {},
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {},
-            )
-          ],
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
           title: const Text('Title'),
         ),
       ),
     ));
 
-    final double? leadingIconButtonSize =
-        _iconStyle(tester, Icons.menu)?.fontSize;
-    final double? actionIconButtonSize =
-        _iconStyle(tester, Icons.add)?.fontSize;
+    final double? leadingIconButtonSize = _iconStyle(tester, Icons.menu)?.fontSize;
+    final double? actionIconButtonSize = _iconStyle(tester, Icons.add)?.fontSize;
 
-    expect(leadingIconButtonSize,
-        32.0); // The size of leading icon button should come from iconButtonTheme
+    expect(leadingIconButtonSize, 32.0); // The size of leading icon button should come from iconButtonTheme
     expect(actionIconButtonSize, actionsIconTheme.size);
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - AppBarTheme.foregroundColor takes priority over IconButtonTheme.foregroundColor',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AppBarTheme.foregroundColor takes priority over IconButtonTheme.foregroundColor', (WidgetTester tester) async {
     final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
       style: IconButton.styleFrom(foregroundColor: Colors.red),
     );
@@ -805,12 +670,10 @@ void main() {
     expect(actionIconButtonColor, appBarTheme.foregroundColor);
   });
 
-  testWidgetsWithLeakTracking('AppBar uses AppBarTheme.titleSpacing',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-          appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Title'),
@@ -818,18 +681,14 @@ void main() {
       ),
     ));
 
-    final NavigationToolbar navToolBar =
-        tester.widget(find.byType(NavigationToolbar));
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, kTitleSpacing);
   });
 
-  testWidgetsWithLeakTracking(
-      'AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-          appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Title'),
@@ -838,17 +697,14 @@ void main() {
       ),
     ));
 
-    final NavigationToolbar navToolBar =
-        tester.widget(find.byType(NavigationToolbar));
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, 40);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar uses AppBarTheme.titleSpacing',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-          appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
@@ -858,18 +714,14 @@ void main() {
       ),
     ));
 
-    final NavigationToolbar navToolBar =
-        tester.widget(find.byType(NavigationToolbar));
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, kTitleSpacing);
   });
 
-  testWidgetsWithLeakTracking(
-      'SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-          appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
@@ -880,13 +732,11 @@ void main() {
       ),
     ));
 
-    final NavigationToolbar navToolbar =
-        tester.widget(find.byType(NavigationToolbar));
+    final NavigationToolbar navToolbar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolbar.middleSpacing, 40);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.medium uses AppBarTheme properties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar.medium uses AppBarTheme properties', (WidgetTester tester) async {
     const String title = 'Medium App Bar';
 
     await tester.pumpWidget(MaterialApp(
@@ -913,10 +763,8 @@ void main() {
 
     // Test title.
     final RichText titleText = tester.firstWidget(find.byType(RichText));
-    expect(
-        titleText.text.style!.fontSize, appBarTheme.titleTextStyle!.fontSize);
-    expect(
-        titleText.text.style!.fontStyle, appBarTheme.titleTextStyle!.fontStyle);
+    expect(titleText.text.style!.fontSize, appBarTheme.titleTextStyle!.fontSize);
+    expect(titleText.text.style!.fontStyle,  appBarTheme.titleTextStyle!.fontStyle);
 
     // Test background color, shadow color, and shape.
     final Material material = tester.widget<Material>(
@@ -940,26 +788,20 @@ void main() {
     // Test title spacing.
     final Finder collapsedTitle = find.text(title).last;
     final Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    final Offset iconOffset = tester.getTopRight(find.ancestor(
-        of: find.widgetWithIcon(IconButton, Icons.menu),
-        matching: find.byType(ConstrainedBox)));
+    final Offset iconOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconOffset.dx + appBarTheme.titleSpacing!);
   });
 
-  testWidgetsWithLeakTracking(
-      'SliverAppBar.medium properties take priority over AppBarTheme properties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar.medium properties take priority over AppBarTheme properties', (WidgetTester tester) async {
     const String title = 'Medium App Bar';
     const Color backgroundColor = Color(0xff000099);
     const Color foregroundColor = Color(0xff00ff98);
     const Color shadowColor = Color(0xff00ff97);
     const ShapeBorder shape = RoundedRectangleBorder(
-      borderRadius:
-          BorderRadiusDirectional.only(bottomStart: Radius.circular(12.0)),
+      borderRadius: BorderRadiusDirectional.only(bottomStart: Radius.circular(12.0)),
     );
     const IconThemeData iconTheme = IconThemeData(color: Color(0xff00ff96));
-    const IconThemeData actionsIconTheme =
-        IconThemeData(color: Color(0xff00ff95));
+    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xff00ff95));
     const double titleSpacing = 18.0;
     const TextStyle titleTextStyle = TextStyle(
       fontSize: 22.9,
@@ -1023,14 +865,11 @@ void main() {
     // Test title spacing.
     final Finder collapsedTitle = find.text(title).last;
     final Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    final Offset iconOffset = tester.getTopRight(find.ancestor(
-        of: find.widgetWithIcon(IconButton, Icons.menu),
-        matching: find.byType(ConstrainedBox)));
+    final Offset iconOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconOffset.dx + titleSpacing);
   });
 
-  testWidgetsWithLeakTracking('SliverAppBar.large uses AppBarTheme properties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar.large uses AppBarTheme properties', (WidgetTester tester) async {
     const String title = 'Large App Bar';
 
     await tester.pumpWidget(MaterialApp(
@@ -1057,10 +896,8 @@ void main() {
 
     // Test title.
     final RichText titleText = tester.firstWidget(find.byType(RichText));
-    expect(
-        titleText.text.style!.fontSize, appBarTheme.titleTextStyle!.fontSize);
-    expect(
-        titleText.text.style!.fontStyle, appBarTheme.titleTextStyle!.fontStyle);
+    expect(titleText.text.style!.fontSize, appBarTheme.titleTextStyle!.fontSize);
+    expect(titleText.text.style!.fontStyle,  appBarTheme.titleTextStyle!.fontStyle);
 
     // Test background color, shadow color, and shape.
     final Material material = tester.widget<Material>(
@@ -1084,26 +921,20 @@ void main() {
     // Test title spacing.
     final Finder collapsedTitle = find.text(title).last;
     final Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    final Offset iconOffset = tester.getTopRight(find.ancestor(
-        of: find.widgetWithIcon(IconButton, Icons.menu),
-        matching: find.byType(ConstrainedBox)));
+    final Offset iconOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconOffset.dx + appBarTheme.titleSpacing!);
   });
 
-  testWidgetsWithLeakTracking(
-      'SliverAppBar.large properties take priority over AppBarTheme properties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar.large properties take priority over AppBarTheme properties', (WidgetTester tester) async {
     const String title = 'Large App Bar';
     const Color backgroundColor = Color(0xff000099);
     const Color foregroundColor = Color(0xff00ff98);
     const Color shadowColor = Color(0xff00ff97);
     const ShapeBorder shape = RoundedRectangleBorder(
-      borderRadius:
-          BorderRadiusDirectional.only(bottomStart: Radius.circular(12.0)),
+      borderRadius: BorderRadiusDirectional.only(bottomStart: Radius.circular(12.0)),
     );
     const IconThemeData iconTheme = IconThemeData(color: Color(0xff00ff96));
-    const IconThemeData actionsIconTheme =
-        IconThemeData(color: Color(0xff00ff95));
+    const IconThemeData actionsIconTheme = IconThemeData(color: Color(0xff00ff95));
     const double titleSpacing = 18.0;
     const TextStyle titleTextStyle = TextStyle(
       fontSize: 22.9,
@@ -1167,21 +998,17 @@ void main() {
     // Test title spacing.
     final Finder collapsedTitle = find.text(title).last;
     final Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    final Offset iconOffset = tester.getTopRight(find.ancestor(
-        of: find.widgetWithIcon(IconButton, Icons.menu),
-        matching: find.byType(ConstrainedBox)));
+    final Offset iconOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconOffset.dx + titleSpacing);
   });
 
   testWidgetsWithLeakTracking(
-      'SliverAppBar medium & large supports foregroundColor',
-      (WidgetTester tester) async {
+    'SliverAppBar medium & large supports foregroundColor', (WidgetTester tester) async {
     const String title = 'AppBar title';
-    const AppBarTheme appBarTheme =
-        AppBarTheme(foregroundColor: Color(0xff00ff20));
+    const AppBarTheme appBarTheme = AppBarTheme(foregroundColor: Color(0xff00ff20));
     const Color foregroundColor = Color(0xff001298);
 
-    Widget buildWidget({Color? color, AppBarTheme? appBarTheme}) {
+    Widget buildWidget({ Color? color, AppBarTheme? appBarTheme }) {
       return MaterialApp(
         theme: ThemeData(appBarTheme: appBarTheme),
         home: CustomScrollView(
@@ -1208,8 +1035,8 @@ void main() {
     RichText largeTitle = tester.widget(find.byType(RichText).first);
     expect(largeTitle.text.style!.color, appBarTheme.foregroundColor);
 
-    await tester.pumpWidget(
-      buildWidget(color: foregroundColor, appBarTheme: appBarTheme),
+    await tester.pumpWidget(buildWidget(
+      color: foregroundColor, appBarTheme: appBarTheme),
     );
 
     // Test foregroundColor parameter.
@@ -1219,21 +1046,19 @@ void main() {
     expect(largeTitle.text.style!.color, foregroundColor);
   });
 
-  testWidgetsWithLeakTracking('Default AppBarTheme debugFillProperties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('AppBarTheme implements debugFillProperties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
       backgroundColor: Color(0xff000000),
@@ -1255,9 +1080,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(
       description,
@@ -1288,14 +1113,11 @@ void main() {
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
 
   // This is a regression test for https://github.com/flutter/flutter/issues/130485.
-  testWidgetsWithLeakTracking(
-      'Material3 - AppBarTheme.iconTheme correctly applies custom white color in dark mode',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AppBarTheme.iconTheme correctly applies custom white color in dark mode', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      appBarTheme:
-          const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
+      appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -1344,63 +1166,52 @@ AppBarTheme _appBarTheme() {
 
 Material _getAppBarMaterial(WidgetTester tester) {
   return tester.widget<Material>(
-    find
-        .descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(Material),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ).first,
   );
 }
 
 IconTheme _getAppBarIconTheme(WidgetTester tester) {
   return tester.widget<IconTheme>(
-    find
-        .descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(IconTheme),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(IconTheme),
+    ).first,
   );
 }
 
 IconTheme _getAppBarActionsIconTheme(WidgetTester tester) {
   return tester.widget<IconTheme>(
-    find
-        .descendant(
-          of: find.byType(NavigationToolbar),
-          matching: find.byType(IconTheme),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(NavigationToolbar),
+      matching: find.byType(IconTheme),
+    ).first,
   );
 }
 
 RichText _getAppBarIconRichText(WidgetTester tester) {
   return tester.widget<RichText>(
-    find
-        .descendant(
-          of: find.byType(Icon),
-          matching: find.byType(RichText),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(Icon),
+      matching: find.byType(RichText),
+    ).first,
   );
 }
 
 DefaultTextStyle _getAppBarText(WidgetTester tester) {
   return tester.widget<DefaultTextStyle>(
-    find
-        .descendant(
-          of: find.byType(CustomSingleChildLayout),
-          matching: find.byType(DefaultTextStyle),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(CustomSingleChildLayout),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
   );
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
-    find.descendant(
-        of: find.byIcon(icon).first, matching: find.byType(RichText)),
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
   );
   return iconRichText.text.style;
 }

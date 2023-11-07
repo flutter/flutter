@@ -81,8 +81,7 @@ const List<Feature> allFeatures = <Feature>[
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures =>
-    allFeatures.where((Feature feature) => feature.configSetting != null);
+Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -200,14 +199,15 @@ const Feature previewDevice = Feature(
 /// settings.
 class Feature {
   /// Creates a [Feature].
-  const Feature(
-      {required this.name,
-      this.environmentOverride,
-      this.configSetting,
-      this.extraHelpText,
-      this.master = const FeatureChannelSetting(),
-      this.beta = const FeatureChannelSetting(),
-      this.stable = const FeatureChannelSetting()});
+  const Feature({
+    required this.name,
+    this.environmentOverride,
+    this.configSetting,
+    this.extraHelpText,
+    this.master = const FeatureChannelSetting(),
+    this.beta = const FeatureChannelSetting(),
+    this.stable = const FeatureChannelSetting()
+  });
 
   /// Creates a [Feature] that is fully enabled across channels.
   const Feature.fullyEnabled(
@@ -272,11 +272,9 @@ class Feature {
     ];
     // Add channel info for settings only on some channels.
     if (channels.length == 1) {
-      buffer.write(
-          '\nThis setting applies only to the ${channels.single} channel.');
+      buffer.write('\nThis setting applies only to the ${channels.single} channel.');
     } else if (channels.length == 2) {
-      buffer.write(
-          '\nThis setting applies only to the ${channels.join(' and ')} channels.');
+      buffer.write('\nThis setting applies only to the ${channels.join(' and ')} channels.');
     }
     if (extraHelpText != null) {
       buffer.write(' $extraHelpText');

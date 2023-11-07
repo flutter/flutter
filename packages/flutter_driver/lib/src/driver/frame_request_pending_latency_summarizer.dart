@@ -27,8 +27,7 @@ class FrameRequestPendingLatencySummarizer {
       return 0;
     }
 
-    final double total =
-        frameRequestPendingLatencies.reduce((double a, double b) => a + b);
+    final double total = frameRequestPendingLatencies.reduce((double a, double b) => a + b);
     return total / frameRequestPendingLatencies.length;
   }
 

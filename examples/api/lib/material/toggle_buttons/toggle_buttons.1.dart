@@ -24,7 +24,6 @@ class ToggleButtonsApp extends StatelessWidget {
 }
 
 enum ShirtSize { extraSmall, small, medium, large, extraLarge }
-
 const List<(ShirtSize, String)> shirtSizeOptions = <(ShirtSize, String)>[
   (ShirtSize.extraSmall, 'XS'),
   (ShirtSize.small, 'S'),
@@ -41,8 +40,7 @@ class ToggleButtonsExample extends StatefulWidget {
 }
 
 class _ToggleButtonsExampleState extends State<ToggleButtonsExample> {
-  final List<bool> _toggleButtonsSelection =
-      ShirtSize.values.map((ShirtSize e) => e == ShirtSize.medium).toList();
+  final List<bool> _toggleButtonsSelection = ShirtSize.values.map((ShirtSize e) => e == ShirtSize.medium).toList();
   Set<ShirtSize> _segmentedButtonSelection = <ShirtSize>{ShirtSize.medium};
 
   @override
@@ -60,8 +58,7 @@ class _ToggleButtonsExampleState extends State<ToggleButtonsExample> {
             // This callback return the index of the child that was pressed.
             onPressed: (int index) {
               setState(() {
-                _toggleButtonsSelection[index] =
-                    !_toggleButtonsSelection[index];
+                _toggleButtonsSelection[index] = !_toggleButtonsSelection[index];
               });
             },
             // Constraints are used to determine the size of each child widget.
@@ -71,8 +68,8 @@ class _ToggleButtonsExampleState extends State<ToggleButtonsExample> {
             ),
             // ToggleButtons uses a List<Widget> to build its children.
             children: shirtSizeOptions
-                .map(((ShirtSize, String) shirt) => Text(shirt.$2))
-                .toList(),
+              .map(((ShirtSize, String) shirt) => Text(shirt.$2))
+              .toList(),
           ),
           const SizedBox(height: 20),
           const Text('SegmentedButton'),
@@ -96,10 +93,10 @@ class _ToggleButtonsExampleState extends State<ToggleButtonsExample> {
             // SegmentedButton uses a List<ButtonSegment<T>> to build its children
             // instead of a List<Widget> like ToggleButtons.
             segments: shirtSizeOptions
-                .map<ButtonSegment<ShirtSize>>(((ShirtSize, String) shirt) {
-              return ButtonSegment<ShirtSize>(
-                  value: shirt.$1, label: Text(shirt.$2));
-            }).toList(),
+              .map<ButtonSegment<ShirtSize>>(((ShirtSize, String) shirt) {
+                return ButtonSegment<ShirtSize>(value: shirt.$1, label: Text(shirt.$2));
+              })
+              .toList(),
           ),
         ],
       ),

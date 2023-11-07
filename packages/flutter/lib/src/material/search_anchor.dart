@@ -29,29 +29,25 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 const int _kOpenViewMilliseconds = 600;
-const Duration _kOpenViewDuration =
-    Duration(milliseconds: _kOpenViewMilliseconds);
+const Duration _kOpenViewDuration = Duration(milliseconds: _kOpenViewMilliseconds);
 const Duration _kAnchorFadeDuration = Duration(milliseconds: 150);
-const Curve _kViewFadeOnInterval = Interval(0.0, 1 / 2);
-const Curve _kViewIconsFadeOnInterval = Interval(1 / 6, 2 / 6);
-const Curve _kViewDividerFadeOnInterval = Interval(0.0, 1 / 6);
-const Curve _kViewListFadeOnInterval =
-    Interval(133 / _kOpenViewMilliseconds, 233 / _kOpenViewMilliseconds);
+const Curve _kViewFadeOnInterval = Interval(0.0, 1/2);
+const Curve _kViewIconsFadeOnInterval = Interval(1/6, 2/6);
+const Curve _kViewDividerFadeOnInterval = Interval(0.0, 1/6);
+const Curve _kViewListFadeOnInterval = Interval(133 / _kOpenViewMilliseconds, 233 / _kOpenViewMilliseconds);
 
 /// Signature for a function that creates a [Widget] which is used to open a search view.
 ///
 /// The `controller` callback provided to [SearchAnchor.builder] can be used
 /// to open the search view and control the editable field on the view.
-typedef SearchAnchorChildBuilder = Widget Function(
-    BuildContext context, SearchController controller);
+typedef SearchAnchorChildBuilder = Widget Function(BuildContext context, SearchController controller);
 
 /// Signature for a function that creates a [Widget] to build the suggestion list
 /// based on the input in the search bar.
 ///
 /// The `controller` callback provided to [SearchAnchor.suggestionsBuilder] can be used
 /// to close the search view and control the editable field on the view.
-typedef SuggestionsBuilder = FutureOr<Iterable<Widget>> Function(
-    BuildContext context, SearchController controller);
+typedef SuggestionsBuilder = FutureOr<Iterable<Widget>> Function(BuildContext context, SearchController controller);
 
 /// Signature for a function that creates a [Widget] to layout the suggestion list.
 ///
@@ -146,36 +142,36 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/material/search_anchor/search_anchor.0.dart **
   /// {@end-tool}
-  factory SearchAnchor.bar(
-          {Widget? barLeading,
-          Iterable<Widget>? barTrailing,
-          String? barHintText,
-          GestureTapCallback? onTap,
-          MaterialStateProperty<double?>? barElevation,
-          MaterialStateProperty<Color?>? barBackgroundColor,
-          MaterialStateProperty<Color?>? barOverlayColor,
-          MaterialStateProperty<BorderSide?>? barSide,
-          MaterialStateProperty<OutlinedBorder?>? barShape,
-          MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
-          MaterialStateProperty<TextStyle?>? barTextStyle,
-          MaterialStateProperty<TextStyle?>? barHintStyle,
-          Widget? viewLeading,
-          Iterable<Widget>? viewTrailing,
-          String? viewHintText,
-          Color? viewBackgroundColor,
-          double? viewElevation,
-          BorderSide? viewSide,
-          OutlinedBorder? viewShape,
-          TextStyle? viewHeaderTextStyle,
-          TextStyle? viewHeaderHintStyle,
-          Color? dividerColor,
-          BoxConstraints? constraints,
-          BoxConstraints? viewConstraints,
-          bool? isFullScreen,
-          SearchController searchController,
-          TextCapitalization textCapitalization,
-          required SuggestionsBuilder suggestionsBuilder}) =
-      _SearchAnchorWithSearchBar;
+  factory SearchAnchor.bar({
+    Widget? barLeading,
+    Iterable<Widget>? barTrailing,
+    String? barHintText,
+    GestureTapCallback? onTap,
+    MaterialStateProperty<double?>? barElevation,
+    MaterialStateProperty<Color?>? barBackgroundColor,
+    MaterialStateProperty<Color?>? barOverlayColor,
+    MaterialStateProperty<BorderSide?>? barSide,
+    MaterialStateProperty<OutlinedBorder?>? barShape,
+    MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    MaterialStateProperty<TextStyle?>? barTextStyle,
+    MaterialStateProperty<TextStyle?>? barHintStyle,
+    Widget? viewLeading,
+    Iterable<Widget>? viewTrailing,
+    String? viewHintText,
+    Color? viewBackgroundColor,
+    double? viewElevation,
+    BorderSide? viewSide,
+    OutlinedBorder? viewShape,
+    TextStyle? viewHeaderTextStyle,
+    TextStyle? viewHeaderHintStyle,
+    Color? dividerColor,
+    BoxConstraints? constraints,
+    BoxConstraints? viewConstraints,
+    bool? isFullScreen,
+    SearchController searchController,
+    TextCapitalization textCapitalization,
+    required SuggestionsBuilder suggestionsBuilder
+  }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
   /// [SearchAnchor] is tapped.
@@ -315,9 +311,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   final GlobalKey _anchorKey = GlobalKey();
   bool get _viewIsOpen => !_anchorIsVisible;
   SearchController? _internalSearchController;
-  SearchController get _searchController =>
-      widget.searchController ??
-      (_internalSearchController ??= SearchController());
+  SearchController get _searchController => widget.searchController ?? (_internalSearchController ??= SearchController());
 
   @override
   void initState() {
@@ -377,8 +371,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
       textCapitalization: widget.textCapitalization,
-      capturedThemes:
-          InheritedTheme.capture(from: context, to: navigator.context),
+      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     ));
   }
 
@@ -493,8 +486,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
       final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
       final Size boxSize = searchBarBox.size;
       final NavigatorState navigator = Navigator.of(context);
-      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero,
-          ancestor: navigator.context.findRenderObject());
+      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero, ancestor: navigator.context.findRenderObject());
       return boxLocation & boxSize;
     }
     return null;
@@ -518,25 +510,20 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   void updateViewConfig(BuildContext context) {
-    viewDefaults =
-        _SearchViewDefaultsM3(context, isFullScreen: showFullScreenView);
+    viewDefaults = _SearchViewDefaultsM3(context, isFullScreen: showFullScreenView);
     viewTheme = SearchViewTheme.of(context);
   }
 
   void updateTweens(BuildContext context) {
-    final RenderBox navigator =
-        Navigator.of(context).context.findRenderObject()! as RenderBox;
+    final RenderBox navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
     final Size screenSize = navigator.size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
-    final BoxConstraints effectiveConstraints =
-        viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
+    final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
     _rectTween.begin = anchorRect;
 
-    final double viewWidth = clampDouble(anchorRect.width,
-        effectiveConstraints.minWidth, effectiveConstraints.maxWidth);
-    final double viewHeight = clampDouble(screenSize.height * 2 / 3,
-        effectiveConstraints.minHeight, effectiveConstraints.maxHeight);
+    final double viewWidth = clampDouble(anchorRect.width, effectiveConstraints.minWidth, effectiveConstraints.maxWidth);
+    final double viewHeight = clampDouble(screenSize.height * 2 / 3, effectiveConstraints.minHeight, effectiveConstraints.maxHeight);
 
     switch (textDirection ?? TextDirection.ltr) {
       case TextDirection.ltr:
@@ -548,90 +535,83 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         // If the window is smaller than the view, then we resize the view to fit the window.
         Offset topLeft = anchorRect.topLeft;
         if (viewLeftToScreenRight < viewWidth) {
-          topLeft = Offset(
-              screenSize.width - math.min(viewWidth, screenSize.width),
-              topLeft.dy);
+          topLeft = Offset(screenSize.width - math.min(viewWidth, screenSize.width), topLeft.dy);
         }
         if (viewTopToScreenBottom < viewHeight) {
-          topLeft = Offset(topLeft.dx,
-              screenSize.height - math.min(viewHeight, screenSize.height));
+          topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
         final Size endSize = Size(viewWidth, viewHeight);
-        _rectTween.end =
-            showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
+        _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
         return;
       case TextDirection.rtl:
         final double viewRightToScreenLeft = anchorRect.right;
         final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
 
         // Make sure the search view doesn't go off the screen.
-        Offset topLeft =
-            Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
+        Offset topLeft = Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
         if (viewRightToScreenLeft < viewWidth) {
           topLeft = Offset(0.0, topLeft.dy);
         }
         if (viewTopToScreenBottom < viewHeight) {
-          topLeft = Offset(topLeft.dx,
-              screenSize.height - math.min(viewHeight, screenSize.height));
+          topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
         final Size endSize = Size(viewWidth, viewHeight);
-        _rectTween.end =
-            showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
+        _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
     }
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+
     return Directionality(
       textDirection: textDirection ?? TextDirection.ltr,
       child: AnimatedBuilder(
-          animation: animation,
-          builder: (BuildContext context, Widget? child) {
-            final Animation<double> curvedAnimation = CurvedAnimation(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          final Animation<double> curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOutCubicEmphasized,
+            reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+          );
+
+          final Rect viewRect = _rectTween.evaluate(curvedAnimation)!;
+          final double topPadding = showFullScreenView
+            ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation.value)!
+            : 0.0;
+
+          return FadeTransition(
+            opacity: CurvedAnimation(
               parent: animation,
-              curve: Curves.easeInOutCubicEmphasized,
-              reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
-            );
-
-            final Rect viewRect = _rectTween.evaluate(curvedAnimation)!;
-            final double topPadding = showFullScreenView
-                ? lerpDouble(0.0, MediaQuery.paddingOf(context).top,
-                    curvedAnimation.value)!
-                : 0.0;
-
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: _kViewFadeOnInterval,
-                reverseCurve: _kViewFadeOnInterval.flipped,
+              curve: _kViewFadeOnInterval,
+              reverseCurve: _kViewFadeOnInterval.flipped,
+            ),
+            child: capturedThemes.wrap(
+              _ViewContent(
+                viewLeading: viewLeading,
+                viewTrailing: viewTrailing,
+                viewHintText: viewHintText,
+                viewBackgroundColor: viewBackgroundColor,
+                viewElevation: viewElevation,
+                viewSurfaceTintColor: viewSurfaceTintColor,
+                viewSide: viewSide,
+                viewShape: viewShape,
+                viewHeaderTextStyle: viewHeaderTextStyle,
+                viewHeaderHintStyle: viewHeaderHintStyle,
+                dividerColor: dividerColor,
+                showFullScreenView: showFullScreenView,
+                animation: curvedAnimation,
+                topPadding: topPadding,
+                viewMaxWidth: _rectTween.end!.width,
+                viewRect: viewRect,
+                viewBuilder: viewBuilder,
+                searchController: searchController,
+                suggestionsBuilder: suggestionsBuilder,
+                textCapitalization: textCapitalization,
               ),
-              child: capturedThemes.wrap(
-                _ViewContent(
-                  viewLeading: viewLeading,
-                  viewTrailing: viewTrailing,
-                  viewHintText: viewHintText,
-                  viewBackgroundColor: viewBackgroundColor,
-                  viewElevation: viewElevation,
-                  viewSurfaceTintColor: viewSurfaceTintColor,
-                  viewSide: viewSide,
-                  viewShape: viewShape,
-                  viewHeaderTextStyle: viewHeaderTextStyle,
-                  viewHeaderHintStyle: viewHeaderHintStyle,
-                  dividerColor: dividerColor,
-                  showFullScreenView: showFullScreenView,
-                  animation: curvedAnimation,
-                  topPadding: topPadding,
-                  viewMaxWidth: _rectTween.end!.width,
-                  viewRect: viewRect,
-                  viewBuilder: viewBuilder,
-                  searchController: searchController,
-                  suggestionsBuilder: suggestionsBuilder,
-                  textCapitalization: textCapitalization,
-                ),
-              ),
-            );
-          }),
+            ),
+          );
+        }
+      ),
     );
   }
 
@@ -743,15 +723,16 @@ class _ViewContentState extends State<_ViewContent> {
       return MediaQuery.removePadding(
         context: context,
         removeTop: true,
-        child: ListView(children: suggestions.toList()),
+        child: ListView(
+          children: suggestions.toList()
+        ),
       );
     }
     return widget.viewBuilder!(suggestions);
   }
 
   Future<void> updateSuggestions() async {
-    final Iterable<Widget> suggestions =
-        await widget.suggestionsBuilder(context, _controller);
+    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
     if (mounted) {
       setState(() {
         result = suggestions;
@@ -763,9 +744,7 @@ class _ViewContentState extends State<_ViewContent> {
   Widget build(BuildContext context) {
     final Widget defaultLeading = IconButton(
       icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        Navigator.of(context).pop();
-      },
+      onPressed: () { Navigator.of(context).pop(); },
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
     );
 
@@ -778,38 +757,40 @@ class _ViewContentState extends State<_ViewContent> {
       ),
     ];
 
-    final SearchViewThemeData viewDefaults =
-        _SearchViewDefaultsM3(context, isFullScreen: widget.showFullScreenView);
+    final SearchViewThemeData viewDefaults = _SearchViewDefaultsM3(context, isFullScreen: widget.showFullScreenView);
     final SearchViewThemeData viewTheme = SearchViewTheme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
 
-    final Color effectiveBackgroundColor = widget.viewBackgroundColor ??
-        viewTheme.backgroundColor ??
-        viewDefaults.backgroundColor!;
-    final Color effectiveSurfaceTint = widget.viewSurfaceTintColor ??
-        viewTheme.surfaceTintColor ??
-        viewDefaults.surfaceTintColor!;
-    final double effectiveElevation =
-        widget.viewElevation ?? viewTheme.elevation ?? viewDefaults.elevation!;
-    final BorderSide? effectiveSide =
-        widget.viewSide ?? viewTheme.side ?? viewDefaults.side;
-    OutlinedBorder effectiveShape =
-        widget.viewShape ?? viewTheme.shape ?? viewDefaults.shape!;
+    final Color effectiveBackgroundColor = widget.viewBackgroundColor
+      ?? viewTheme.backgroundColor
+      ?? viewDefaults.backgroundColor!;
+    final Color effectiveSurfaceTint = widget.viewSurfaceTintColor
+      ?? viewTheme.surfaceTintColor
+      ?? viewDefaults.surfaceTintColor!;
+    final double effectiveElevation = widget.viewElevation
+      ?? viewTheme.elevation
+      ?? viewDefaults.elevation!;
+    final BorderSide? effectiveSide = widget.viewSide
+      ?? viewTheme.side
+      ?? viewDefaults.side;
+    OutlinedBorder effectiveShape = widget.viewShape
+      ?? viewTheme.shape
+      ?? viewDefaults.shape!;
     if (effectiveSide != null) {
       effectiveShape = effectiveShape.copyWith(side: effectiveSide);
     }
-    final Color effectiveDividerColor = widget.dividerColor ??
-        viewTheme.dividerColor ??
-        dividerTheme.color ??
-        viewDefaults.dividerColor!;
-    final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle ??
-        viewTheme.headerTextStyle ??
-        viewDefaults.headerTextStyle;
-    final TextStyle? effectiveHintStyle = widget.viewHeaderHintStyle ??
-        viewTheme.headerHintStyle ??
-        widget.viewHeaderTextStyle ??
-        viewTheme.headerTextStyle ??
-        viewDefaults.headerHintStyle;
+    final Color effectiveDividerColor = widget.dividerColor
+      ?? viewTheme.dividerColor
+      ?? dividerTheme.color
+      ?? viewDefaults.dividerColor!;
+    final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle
+      ?? viewTheme.headerTextStyle
+      ?? viewDefaults.headerTextStyle;
+    final TextStyle? effectiveHintStyle = widget.viewHeaderHintStyle
+      ?? viewTheme.headerHintStyle
+      ?? widget.viewHeaderTextStyle
+      ?? viewTheme.headerTextStyle
+      ?? viewDefaults.headerHintStyle;
 
     final Widget viewDivider = DividerTheme(
       data: dividerTheme.copyWith(color: effectiveDividerColor),
@@ -850,26 +831,16 @@ class _ViewContentState extends State<_ViewContent> {
                           top: false,
                           bottom: false,
                           child: SearchBar(
-                            constraints: widget.showFullScreenView
-                                ? BoxConstraints(
-                                    minHeight: _SearchViewDefaultsM3
-                                        .fullScreenBarHeight)
-                                : null,
+                            constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
                             focusNode: _focusNode,
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
-                            backgroundColor:
-                                const MaterialStatePropertyAll<Color>(
-                                    Colors.transparent),
-                            overlayColor: const MaterialStatePropertyAll<Color>(
-                                Colors.transparent),
-                            elevation:
-                                const MaterialStatePropertyAll<double>(0.0),
-                            textStyle: MaterialStatePropertyAll<TextStyle?>(
-                                effectiveTextStyle),
-                            hintStyle: MaterialStatePropertyAll<TextStyle?>(
-                                effectiveHintStyle),
+                            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            elevation: const MaterialStatePropertyAll<double>(0.0),
+                            textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                            hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
                             controller: _controller,
                             onChanged: (_) {
                               updateSuggestions();
@@ -879,12 +850,12 @@ class _ViewContentState extends State<_ViewContent> {
                         ),
                       ),
                       FadeTransition(
-                          opacity: CurvedAnimation(
-                            parent: widget.animation,
-                            curve: _kViewDividerFadeOnInterval,
-                            reverseCurve: _kViewFadeOnInterval.flipped,
-                          ),
-                          child: viewDivider),
+                        opacity: CurvedAnimation(
+                          parent: widget.animation,
+                          curve: _kViewDividerFadeOnInterval,
+                          reverseCurve: _kViewFadeOnInterval.flipped,
+                        ),
+                        child: viewDivider),
                       Expanded(
                         child: FadeTransition(
                           opacity: CurvedAnimation(
@@ -908,66 +879,65 @@ class _ViewContentState extends State<_ViewContent> {
 }
 
 class _SearchAnchorWithSearchBar extends SearchAnchor {
-  _SearchAnchorWithSearchBar(
-      {Widget? barLeading,
-      Iterable<Widget>? barTrailing,
-      String? barHintText,
-      GestureTapCallback? onTap,
-      MaterialStateProperty<double?>? barElevation,
-      MaterialStateProperty<Color?>? barBackgroundColor,
-      MaterialStateProperty<Color?>? barOverlayColor,
-      MaterialStateProperty<BorderSide?>? barSide,
-      MaterialStateProperty<OutlinedBorder?>? barShape,
-      MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
-      MaterialStateProperty<TextStyle?>? barTextStyle,
-      MaterialStateProperty<TextStyle?>? barHintStyle,
-      super.viewLeading,
-      super.viewTrailing,
-      String? viewHintText,
-      super.viewBackgroundColor,
-      super.viewElevation,
-      super.viewSide,
-      super.viewShape,
-      TextStyle? viewHeaderTextStyle,
-      TextStyle? viewHeaderHintStyle,
-      super.dividerColor,
-      BoxConstraints? constraints,
-      super.viewConstraints,
-      super.isFullScreen,
-      super.searchController,
-      super.textCapitalization,
-      required super.suggestionsBuilder})
-      : super(
-            viewHintText: viewHintText ?? barHintText,
-            headerTextStyle: viewHeaderTextStyle,
-            headerHintStyle: viewHeaderHintStyle,
-            builder: (BuildContext context, SearchController controller) {
-              return SearchBar(
-                constraints: constraints,
-                controller: controller,
-                onTap: () {
-                  controller.openView();
-                  onTap?.call();
-                },
-                onChanged: (_) {
-                  controller.openView();
-                },
-                hintText: barHintText,
-                hintStyle: barHintStyle,
-                textStyle: barTextStyle,
-                elevation: barElevation,
-                backgroundColor: barBackgroundColor,
-                overlayColor: barOverlayColor,
-                side: barSide,
-                shape: barShape,
-                padding: barPadding ??
-                    const MaterialStatePropertyAll<EdgeInsets>(
-                        EdgeInsets.symmetric(horizontal: 16.0)),
-                leading: barLeading ?? const Icon(Icons.search),
-                trailing: barTrailing,
-                textCapitalization: textCapitalization,
-              );
-            });
+  _SearchAnchorWithSearchBar({
+    Widget? barLeading,
+    Iterable<Widget>? barTrailing,
+    String? barHintText,
+    GestureTapCallback? onTap,
+    MaterialStateProperty<double?>? barElevation,
+    MaterialStateProperty<Color?>? barBackgroundColor,
+    MaterialStateProperty<Color?>? barOverlayColor,
+    MaterialStateProperty<BorderSide?>? barSide,
+    MaterialStateProperty<OutlinedBorder?>? barShape,
+    MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    MaterialStateProperty<TextStyle?>? barTextStyle,
+    MaterialStateProperty<TextStyle?>? barHintStyle,
+    super.viewLeading,
+    super.viewTrailing,
+    String? viewHintText,
+    super.viewBackgroundColor,
+    super.viewElevation,
+    super.viewSide,
+    super.viewShape,
+    TextStyle? viewHeaderTextStyle,
+    TextStyle? viewHeaderHintStyle,
+    super.dividerColor,
+    BoxConstraints? constraints,
+    super.viewConstraints,
+    super.isFullScreen,
+    super.searchController,
+    super.textCapitalization,
+    required super.suggestionsBuilder
+  }) : super(
+    viewHintText: viewHintText ?? barHintText,
+    headerTextStyle: viewHeaderTextStyle,
+    headerHintStyle: viewHeaderHintStyle,
+    builder: (BuildContext context, SearchController controller) {
+      return SearchBar(
+        constraints: constraints,
+        controller: controller,
+        onTap: () {
+          controller.openView();
+          onTap?.call();
+        },
+        onChanged: (_) {
+          controller.openView();
+        },
+        hintText: barHintText,
+        hintStyle: barHintStyle,
+        textStyle: barTextStyle,
+        elevation: barElevation,
+        backgroundColor: barBackgroundColor,
+        overlayColor: barOverlayColor,
+        side: barSide,
+        shape: barShape,
+        padding: barPadding ?? const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
+        leading: barLeading ?? const Icon(Icons.search),
+        trailing: barTrailing,
+        textCapitalization: textCapitalization,
+      );
+    }
+  );
 }
 
 /// A controller to manage a search view created by [SearchAnchor].
@@ -1208,8 +1178,7 @@ class SearchBar extends StatefulWidget {
 class _SearchBarState extends State<SearchBar> {
   late final MaterialStatesController _internalStatesController;
   FocusNode? _internalFocusNode;
-  FocusNode get _focusNode =>
-      widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -1241,46 +1210,26 @@ class _SearchBarState extends State<SearchBar> {
       MaterialStateProperty<T>? defaultValue,
     ) {
       final Set<MaterialState> states = _internalStatesController.value;
-      return widgetValue?.resolve(states) ??
-          themeValue?.resolve(states) ??
-          defaultValue?.resolve(states);
+      return widgetValue?.resolve(states) ?? themeValue?.resolve(states) ?? defaultValue?.resolve(states);
     }
 
-    final TextStyle? effectiveTextStyle = resolve<TextStyle?>(
-        widget.textStyle, searchBarTheme.textStyle, defaults.textStyle);
-    final double? effectiveElevation = resolve<double?>(
-        widget.elevation, searchBarTheme.elevation, defaults.elevation);
-    final Color? effectiveShadowColor = resolve<Color?>(
-        widget.shadowColor, searchBarTheme.shadowColor, defaults.shadowColor);
-    final Color? effectiveBackgroundColor = resolve<Color?>(
-        widget.backgroundColor,
-        searchBarTheme.backgroundColor,
-        defaults.backgroundColor);
-    final Color? effectiveSurfaceTintColor = resolve<Color?>(
-        widget.surfaceTintColor,
-        searchBarTheme.surfaceTintColor,
-        defaults.surfaceTintColor);
-    final OutlinedBorder? effectiveShape = resolve<OutlinedBorder?>(
-        widget.shape, searchBarTheme.shape, defaults.shape);
-    final BorderSide? effectiveSide =
-        resolve<BorderSide?>(widget.side, searchBarTheme.side, defaults.side);
-    final EdgeInsetsGeometry? effectivePadding = resolve<EdgeInsetsGeometry?>(
-        widget.padding, searchBarTheme.padding, defaults.padding);
-    final MaterialStateProperty<Color?>? effectiveOverlayColor =
-        widget.overlayColor ??
-            searchBarTheme.overlayColor ??
-            defaults.overlayColor;
-    final TextCapitalization effectiveTextCapitalization =
-        widget.textCapitalization ??
-            searchBarTheme.textCapitalization ??
-            defaults.textCapitalization!;
+    final TextStyle? effectiveTextStyle = resolve<TextStyle?>(widget.textStyle, searchBarTheme.textStyle, defaults.textStyle);
+    final double? effectiveElevation = resolve<double?>(widget.elevation, searchBarTheme.elevation, defaults.elevation);
+    final Color? effectiveShadowColor = resolve<Color?>(widget.shadowColor, searchBarTheme.shadowColor, defaults.shadowColor);
+    final Color? effectiveBackgroundColor = resolve<Color?>(widget.backgroundColor, searchBarTheme.backgroundColor, defaults.backgroundColor);
+    final Color? effectiveSurfaceTintColor = resolve<Color?>(widget.surfaceTintColor, searchBarTheme.surfaceTintColor, defaults.surfaceTintColor);
+    final OutlinedBorder? effectiveShape = resolve<OutlinedBorder?>(widget.shape, searchBarTheme.shape, defaults.shape);
+    final BorderSide? effectiveSide = resolve<BorderSide?>(widget.side, searchBarTheme.side, defaults.side);
+    final EdgeInsetsGeometry? effectivePadding = resolve<EdgeInsetsGeometry?>(widget.padding, searchBarTheme.padding, defaults.padding);
+    final MaterialStateProperty<Color?>? effectiveOverlayColor = widget.overlayColor ?? searchBarTheme.overlayColor ?? defaults.overlayColor;
+    final TextCapitalization effectiveTextCapitalization = widget.textCapitalization ?? searchBarTheme.textCapitalization ?? defaults.textCapitalization!;
 
     final Set<MaterialState> states = _internalStatesController.value;
-    final TextStyle? effectiveHintStyle = widget.hintStyle?.resolve(states) ??
-        searchBarTheme.hintStyle?.resolve(states) ??
-        widget.textStyle?.resolve(states) ??
-        searchBarTheme.textStyle?.resolve(states) ??
-        defaults.hintStyle?.resolve(states);
+    final TextStyle? effectiveHintStyle = widget.hintStyle?.resolve(states)
+      ?? searchBarTheme.hintStyle?.resolve(states)
+      ?? widget.textStyle?.resolve(states)
+      ?? searchBarTheme.textStyle?.resolve(states)
+      ?? defaults.hintStyle?.resolve(states);
 
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     bool isIconThemeColorDefault(Color? color) {
@@ -1294,28 +1243,24 @@ class _SearchBarState extends State<SearchBar> {
     if (widget.leading != null) {
       leading = IconTheme.merge(
         data: isIconThemeColorDefault(iconTheme.color)
-            ? IconThemeData(color: colorScheme.onSurface)
-            : iconTheme,
+          ? IconThemeData(color: colorScheme.onSurface)
+          : iconTheme,
         child: widget.leading!,
       );
     }
 
     List<Widget>? trailing;
     if (widget.trailing != null) {
-      trailing = widget.trailing
-          ?.map((Widget trailing) => IconTheme.merge(
-                data: isIconThemeColorDefault(iconTheme.color)
-                    ? IconThemeData(color: colorScheme.onSurfaceVariant)
-                    : iconTheme,
-                child: trailing,
-              ))
-          .toList();
+      trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
+        data: isIconThemeColorDefault(iconTheme.color)
+          ? IconThemeData(color: colorScheme.onSurfaceVariant)
+          : iconTheme,
+        child: trailing,
+      )).toList();
     }
 
     return ConstrainedBox(
-      constraints: widget.constraints ??
-          searchBarTheme.constraints ??
-          defaults.constraints!,
+      constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
       child: Material(
         elevation: effectiveElevation!,
         shadowColor: effectiveShadowColor,
@@ -1337,34 +1282,35 @@ class _SearchBarState extends State<SearchBar> {
               children: <Widget>[
                 if (leading != null) leading,
                 Expanded(
-                    child: IgnorePointer(
-                  child: Padding(
-                    padding: effectivePadding,
-                    child: TextField(
-                      focusNode: _focusNode,
-                      onChanged: widget.onChanged,
-                      onSubmitted: widget.onSubmitted,
-                      controller: widget.controller,
-                      style: effectiveTextStyle,
-                      decoration: InputDecoration(
-                        hintText: widget.hintText,
-                      ).applyDefaults(InputDecorationTheme(
-                        hintStyle: effectiveHintStyle,
+                  child: IgnorePointer(
+                    child: Padding(
+                      padding: effectivePadding,
+                      child: TextField(
+                        focusNode: _focusNode,
+                        onChanged: widget.onChanged,
+                        onSubmitted: widget.onSubmitted,
+                        controller: widget.controller,
+                        style: effectiveTextStyle,
+                        decoration: InputDecoration(
+                          hintText: widget.hintText,
+                        ).applyDefaults(InputDecorationTheme(
+                          hintStyle: effectiveHintStyle,
 
-                        // The configuration below is to make sure that the text field
-                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                        enabledBorder: InputBorder.none,
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        // Setting `isDense` to true to allow the text field height to be
-                        // smaller than 48.0
-                        isDense: true,
-                      )),
-                      textCapitalization: effectiveTextCapitalization,
+                          // The configuration below is to make sure that the text field
+                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                          enabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          // Setting `isDense` to true to allow the text field height to be
+                          // smaller than 48.0
+                          isDense: true,
+                        )),
+                        textCapitalization: effectiveTextCapitalization,
+                      ),
                     ),
-                  ),
-                )),
+                  )
+                ),
                 if (trailing != null) ...trailing,
               ],
             ),
@@ -1391,59 +1337,56 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-      MaterialStatePropertyAll<Color>(_colors.surface);
+    MaterialStatePropertyAll<Color>(_colors.surface);
 
   @override
   MaterialStateProperty<double>? get elevation =>
-      const MaterialStatePropertyAll<double>(6.0);
+    const MaterialStatePropertyAll<double>(6.0);
 
   @override
   MaterialStateProperty<Color>? get shadowColor =>
-      MaterialStatePropertyAll<Color>(_colors.shadow);
+    MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-      MaterialStatePropertyAll<Color>(_colors.surfaceTint);
+    MaterialStatePropertyAll<Color>(_colors.surfaceTint);
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
-      MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return _colors.onSurface.withOpacity(0.08);
-        }
-        if (states.contains(MaterialState.focused)) {
-          return Colors.transparent;
-        }
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.focused)) {
         return Colors.transparent;
-      });
+      }
+      return Colors.transparent;
+    });
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-      const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
+    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-      const MaterialStatePropertyAll<EdgeInsetsGeometry>(
-          EdgeInsets.symmetric(horizontal: 8.0));
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
-      MaterialStatePropertyAll<TextStyle?>(
-          _textTheme.bodyLarge?.copyWith(color: _colors.onSurface));
+    MaterialStatePropertyAll<TextStyle?>(_textTheme.bodyLarge?.copyWith(color: _colors.onSurface));
 
   @override
   MaterialStateProperty<TextStyle?> get hintStyle =>
-      MaterialStatePropertyAll<TextStyle?>(
-          _textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant));
+    MaterialStatePropertyAll<TextStyle?>(_textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant));
 
   @override
   BoxConstraints get constraints =>
-      const BoxConstraints(minWidth: 360.0, maxWidth: 800.0, minHeight: 56.0);
+    const BoxConstraints(minWidth: 360.0, maxWidth: 800.0, minHeight: 56.0);
 
   @override
   TextCapitalization get textCapitalization => TextCapitalization.none;
@@ -1481,21 +1424,17 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
 
   @override
   OutlinedBorder? get shape => isFullScreen
-      ? const RoundedRectangleBorder()
-      : const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(28.0)));
+    ? const RoundedRectangleBorder()
+    : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
 
   @override
-  TextStyle? get headerTextStyle =>
-      _textTheme.bodyLarge?.copyWith(color: _colors.onSurface);
+  TextStyle? get headerTextStyle => _textTheme.bodyLarge?.copyWith(color: _colors.onSurface);
 
   @override
-  TextStyle? get headerHintStyle =>
-      _textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant);
+  TextStyle? get headerHintStyle => _textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant);
 
   @override
-  BoxConstraints get constraints =>
-      const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+  BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
 
   @override
   Color? get dividerColor => _colors.outline;

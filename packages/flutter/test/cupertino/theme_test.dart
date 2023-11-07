@@ -20,8 +20,7 @@ final Widget singletonThemeSubtree = Builder(
   },
 );
 
-Future<CupertinoThemeData> testTheme(
-    WidgetTester tester, CupertinoThemeData theme) async {
+Future<CupertinoThemeData> testTheme(WidgetTester tester, CupertinoThemeData theme) async {
   await tester.pumpWidget(
     CupertinoTheme(
       data: theme,
@@ -31,8 +30,7 @@ Future<CupertinoThemeData> testTheme(
   return actualTheme!;
 }
 
-Future<IconThemeData> testIconTheme(
-    WidgetTester tester, CupertinoThemeData theme) async {
+Future<IconThemeData> testIconTheme(WidgetTester tester, CupertinoThemeData theme) async {
   await tester.pumpWidget(
     CupertinoTheme(
       data: theme,
@@ -49,10 +47,8 @@ void main() {
     actualIconTheme = null;
   });
 
-  testWidgetsWithLeakTracking('Default theme has defaults',
-      (WidgetTester tester) async {
-    final CupertinoThemeData theme =
-        await testTheme(tester, const CupertinoThemeData());
+  testWidgetsWithLeakTracking('Default theme has defaults', (WidgetTester tester) async {
+    final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData());
 
     expect(theme.brightness, isNull);
     expect(theme.primaryColor, CupertinoColors.activeBlue);
@@ -60,78 +56,63 @@ void main() {
     expect(theme.applyThemeToAll, false);
   });
 
-  testWidgetsWithLeakTracking('Theme attributes cascade',
-      (WidgetTester tester) async {
-    final CupertinoThemeData theme = await testTheme(
-        tester,
-        const CupertinoThemeData(
-          primaryColor: CupertinoColors.systemRed,
-        ));
+  testWidgetsWithLeakTracking('Theme attributes cascade', (WidgetTester tester) async {
+    final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
+      primaryColor: CupertinoColors.systemRed,
+    ));
 
-    expect(theme.textTheme.actionTextStyle.color,
-        isSameColorAs(CupertinoColors.systemRed.color));
+    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemRed.color));
   });
 
-  testWidgetsWithLeakTracking(
-      'Dependent attribute can be overridden from cascaded value',
-      (WidgetTester tester) async {
-    final CupertinoThemeData theme = await testTheme(
-        tester,
-        const CupertinoThemeData(
-          brightness: Brightness.dark,
-          textTheme: CupertinoTextThemeData(
-            textStyle: TextStyle(color: CupertinoColors.black),
-          ),
-        ));
+  testWidgetsWithLeakTracking('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
+    final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
+      brightness: Brightness.dark,
+      textTheme: CupertinoTextThemeData(
+        textStyle: TextStyle(color: CupertinoColors.black),
+      ),
+    ));
 
     // The brightness still cascaded down to the background color.
     expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
     // But not to the font color which we overrode.
-    expect(
-        theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.black));
+    expect(theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.black));
   });
 
   testWidgetsWithLeakTracking(
     'Reading themes creates dependencies',
     (WidgetTester tester) async {
       // Reading the theme creates a dependency.
-      CupertinoThemeData theme = await testTheme(
-          tester,
-          const CupertinoThemeData(
-            // Default brightness is light,
-            barBackgroundColor: Color(0x11223344),
-            textTheme: CupertinoTextThemeData(
-              textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
-            ),
-          ));
+      CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
+        // Default brightness is light,
+        barBackgroundColor: Color(0x11223344),
+        textTheme: CupertinoTextThemeData(
+          textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
+        ),
+      ));
 
       expect(buildCount, 1);
       expect(theme.textTheme.textStyle.fontFamily, 'Skeuomorphic');
 
       // Changing another property also triggers a rebuild.
-      theme = await testTheme(
-          tester,
-          const CupertinoThemeData(
-            brightness: Brightness.light,
-            barBackgroundColor: Color(0x11223344),
-            textTheme: CupertinoTextThemeData(
-              textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
-            ),
-          ));
+      theme = await testTheme(tester, const CupertinoThemeData(
+        brightness: Brightness.light,
+        barBackgroundColor: Color(0x11223344),
+        textTheme: CupertinoTextThemeData(
+          textStyle: TextStyle(fontFamily: 'Skeuomorphic'),
+        ),
+      ));
 
       expect(buildCount, 2);
       // Re-reading the same value doesn't change anything.
       expect(theme.textTheme.textStyle.fontFamily, 'Skeuomorphic');
 
-      theme = await testTheme(
-          tester,
-          const CupertinoThemeData(
-            brightness: Brightness.light,
-            barBackgroundColor: Color(0x11223344),
-            textTheme: CupertinoTextThemeData(
-              textStyle: TextStyle(fontFamily: 'Flat'),
-            ),
-          ));
+      theme = await testTheme(tester, const CupertinoThemeData(
+        brightness: Brightness.light,
+        barBackgroundColor: Color(0x11223344),
+        textTheme: CupertinoTextThemeData(
+          textStyle: TextStyle(fontFamily: 'Flat'),
+        ),
+      ));
 
       expect(buildCount, 3);
       expect(theme.textTheme.textStyle.fontFamily, 'Flat');
@@ -146,35 +127,26 @@ void main() {
         applyThemeToAll: true,
       );
 
-      final CupertinoThemeData theme = await testTheme(
-          tester,
-          originalTheme.copyWith(
-            primaryColor: CupertinoColors.systemGreen,
-            applyThemeToAll: false,
-          ));
+      final CupertinoThemeData theme = await testTheme(tester, originalTheme.copyWith(
+        primaryColor: CupertinoColors.systemGreen,
+        applyThemeToAll: false,
+      ));
 
       expect(theme.brightness, Brightness.dark);
-      expect(theme.primaryColor,
-          isSameColorAs(CupertinoColors.systemGreen.darkColor));
+      expect(theme.primaryColor, isSameColorAs(CupertinoColors.systemGreen.darkColor));
       // Now check calculated derivatives.
-      expect(theme.textTheme.actionTextStyle.color,
-          isSameColorAs(CupertinoColors.systemGreen.darkColor));
-      expect(
-          theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
+      expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemGreen.darkColor));
+      expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
 
       expect(theme.applyThemeToAll, false);
     },
   );
 
-  testWidgetsWithLeakTracking(
-      "Theme has default IconThemeData, which is derived from the theme's primary color",
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
     const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
-    const CupertinoThemeData themeData =
-        CupertinoThemeData(primaryColor: primaryColor);
+    const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
-    final IconThemeData resultingIconTheme =
-        await testIconTheme(tester, themeData);
+    final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
     expect(resultingIconTheme.color, isSameColorAs(primaryColor));
 
@@ -182,34 +154,29 @@ void main() {
     final Color darkColor = (await testIconTheme(
       tester,
       themeData.copyWith(brightness: Brightness.dark),
-    ))
-        .color!;
+    )).color!;
 
     expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });
 
-  testWidgetsWithLeakTracking('IconTheme.of creates a dependency on iconTheme',
-      (WidgetTester tester) async {
-    IconThemeData iconTheme = await testIconTheme(tester,
-        const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
+  testWidgetsWithLeakTracking('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
+    IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
 
     expect(buildCount, 1);
     expect(iconTheme.color, CupertinoColors.destructiveRed);
 
-    iconTheme = await testIconTheme(tester,
-        const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
+    iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
     expect(buildCount, 2);
     expect(iconTheme.color, CupertinoColors.activeOrange);
   });
 
-  testWidgetsWithLeakTracking('CupertinoTheme diagnostics',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoTheme diagnostics', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CupertinoThemeData().debugFillProperties(builder);
 
     final Set<String> description = builder.properties
-        .map((DiagnosticsNode node) => node.name.toString())
-        .toSet();
+      .map((DiagnosticsNode node) => node.name.toString())
+      .toSet();
 
     expect(
       setEquals(
@@ -235,9 +202,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'CupertinoTheme.toStringDeep uses single-line style',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoTheme.toStringDeep uses single-line style', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/47651.
     expect(
       const CupertinoTheme(
@@ -248,10 +213,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('CupertinoThemeData equality',
-      (WidgetTester tester) async {
-    const CupertinoThemeData a =
-        CupertinoThemeData(brightness: Brightness.dark);
+  testWidgetsWithLeakTracking('CupertinoThemeData equality', (WidgetTester tester) async {
+    const CupertinoThemeData a = CupertinoThemeData(brightness: Brightness.dark);
     final CupertinoThemeData b = a.copyWith();
     final CupertinoThemeData c = a.copyWith(brightness: Brightness.light);
     expect(a, equals(b));
@@ -263,8 +226,7 @@ void main() {
   });
 
   late Brightness currentBrightness;
-  void colorMatches(
-      Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
+  void colorMatches(Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
     switch (currentBrightness) {
       case Brightness.light:
         expect(componentColor, isSameColorAs(expectedDynamicColor.color));
@@ -274,49 +236,36 @@ void main() {
   }
 
   void dynamicColorsTestGroup() {
-    testWidgetsWithLeakTracking('CupertinoTheme.of resolves colors',
-        (WidgetTester tester) async {
-      final CupertinoThemeData data = CupertinoThemeData(
-          brightness: currentBrightness,
-          primaryColor: CupertinoColors.systemRed);
+    testWidgetsWithLeakTracking('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
+      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
       final CupertinoThemeData theme = await testTheme(tester, data);
 
       expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed));
       colorMatches(theme.primaryColor, CupertinoColors.systemRed);
     });
 
-    testWidgetsWithLeakTracking('CupertinoTheme.of resolves default values',
-        (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
       const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
-      final CupertinoThemeData data = CupertinoThemeData(
-          brightness: currentBrightness, primaryColor: primaryColor);
+      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: primaryColor);
 
-      const CupertinoDynamicColor barBackgroundColor =
-          CupertinoDynamicColor.withBrightness(
+      const CupertinoDynamicColor barBackgroundColor = CupertinoDynamicColor.withBrightness(
         color: Color(0xF0F9F9F9),
         darkColor: Color(0xF01D1D1D),
       );
 
       final CupertinoThemeData theme = await testTheme(tester, data);
 
-      colorMatches(
-          theme.primaryContrastingColor, CupertinoColors.systemBackground);
+      colorMatches(theme.primaryContrastingColor, CupertinoColors.systemBackground);
       colorMatches(theme.barBackgroundColor, barBackgroundColor);
-      colorMatches(
-          theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
+      colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
       colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
       colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
-      colorMatches(theme.textTheme.tabLabelTextStyle.color,
-          CupertinoColors.inactiveGray);
-      colorMatches(
-          theme.textTheme.navTitleTextStyle.color, CupertinoColors.label);
-      colorMatches(
-          theme.textTheme.navLargeTitleTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);
+      colorMatches(theme.textTheme.navTitleTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.navLargeTitleTextStyle.color, CupertinoColors.label);
       colorMatches(theme.textTheme.navActionTextStyle.color, primaryColor);
-      colorMatches(
-          theme.textTheme.pickerTextStyle.color, CupertinoColors.label);
-      colorMatches(
-          theme.textTheme.dateTimePickerTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.pickerTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.dateTimePickerTextStyle.color, CupertinoColors.label);
     });
   }
 

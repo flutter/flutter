@@ -58,8 +58,7 @@ class Memento extends Object with Diagnosticable {
 class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   // A stack of actions that have been performed. The most recent action
   // performed is at the end of the list.
-  final DoubleLinkedQueue<Memento> _completedActions =
-      DoubleLinkedQueue<Memento>();
+  final DoubleLinkedQueue<Memento> _completedActions = DoubleLinkedQueue<Memento>();
   // A stack of actions that can be redone. The most recent action performed is
   // at the end of the list.
   final List<Memento> _undoneActions = <Memento>[];
@@ -94,11 +93,9 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   }
 
   @override
-  Object? invokeAction(Action<Intent> action, Intent intent,
-      [BuildContext? context]) {
+  Object? invokeAction(Action<Intent> action, Intent intent, [BuildContext? context]) {
     final Object? result = super.invokeAction(action, intent, context);
-    print(
-        'Invoking ${action is UndoableAction ? 'undoable ' : ''}$intent as $action: $this ');
+    print('Invoking ${action is UndoableAction ? 'undoable ' : ''}$intent as $action: $this ');
     if (action is UndoableAction) {
       _completedActions.addLast(result! as Memento);
       _undoneActions.clear();
@@ -179,26 +176,21 @@ class UndoIntent extends Intent {
 class UndoAction extends Action<UndoIntent> {
   @override
   bool isEnabled(UndoIntent intent) {
-    final BuildContext? buildContext =
-        primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return false;
     }
-    final UndoableActionDispatcher manager =
-        Actions.of(buildContext) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 
   @override
   void invoke(UndoIntent intent) {
-    final BuildContext? buildContext =
-        primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return;
     }
-    final UndoableActionDispatcher manager =
-        Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!)
-            as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
     manager.undo();
   }
 }
@@ -210,51 +202,43 @@ class RedoIntent extends Intent {
 class RedoAction extends Action<RedoIntent> {
   @override
   bool isEnabled(RedoIntent intent) {
-    final BuildContext? buildContext =
-        primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return false;
     }
-    final UndoableActionDispatcher manager =
-        Actions.of(buildContext) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 
   @override
   RedoAction invoke(RedoIntent intent) {
-    final BuildContext? buildContext =
-        primaryFocus?.context ?? FocusDemo.appKey.currentContext;
+    final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return this;
     }
-    final UndoableActionDispatcher manager =
-        Actions.of(buildContext) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
     manager.redo();
     return this;
   }
 }
 
 /// An action that can be undone.
-abstract class UndoableAction<T extends Intent> extends Action<T> {}
+abstract class UndoableAction<T extends Intent> extends Action<T> { }
 
 class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
   @override
   @mustCallSuper
   Memento invoke(T intent) {
     final FocusNode? previousFocus = primaryFocus;
-    return Memento(
-        name: previousFocus!.debugLabel!,
-        undo: () {
-          previousFocus.requestFocus();
-        },
-        redo: () {
-          return invoke(intent);
-        });
+    return Memento(name: previousFocus!.debugLabel!, undo: () {
+      previousFocus.requestFocus();
+    }, redo: () {
+      return invoke(intent);
+    });
   }
 }
 
-class UndoableRequestFocusAction
-    extends UndoableFocusActionBase<RequestFocusIntent> {
+class UndoableRequestFocusAction extends UndoableFocusActionBase<RequestFocusIntent> {
   @override
   Memento invoke(RequestFocusIntent intent) {
     final Memento memento = super.invoke(intent);
@@ -273,8 +257,7 @@ class UndoableNextFocusAction extends UndoableFocusActionBase<NextFocusIntent> {
   }
 }
 
-class UndoablePreviousFocusAction
-    extends UndoableFocusActionBase<PreviousFocusIntent> {
+class UndoablePreviousFocusAction extends UndoableFocusActionBase<PreviousFocusIntent> {
   @override
   Memento invoke(PreviousFocusIntent intent) {
     final Memento memento = super.invoke(intent);
@@ -283,8 +266,7 @@ class UndoablePreviousFocusAction
   }
 }
 
-class UndoableDirectionalFocusAction
-    extends UndoableFocusActionBase<DirectionalFocusIntent> {
+class UndoableDirectionalFocusAction extends UndoableFocusActionBase<DirectionalFocusIntent> {
   @override
   Memento invoke(DirectionalFocusIntent intent) {
     final Memento memento = super.invoke(intent);
@@ -326,8 +308,7 @@ class _DemoButtonState extends State<DemoButton> {
       focusNode: _focusNode,
       style: ButtonStyle(
         foregroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
-        overlayColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
+        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return Colors.red;
           }
@@ -403,13 +384,8 @@ class _FocusDemoState extends State<FocusDemo> {
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
           shortcuts: <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.keyZ,
-                meta: Platform.isMacOS,
-                control: !Platform.isMacOS,
-                shift: true): const RedoIntent(),
-            SingleActivator(LogicalKeyboardKey.keyZ,
-                meta: Platform.isMacOS,
-                control: !Platform.isMacOS): const UndoIntent(),
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true): const RedoIntent(),
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS): const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,
@@ -458,8 +434,7 @@ class _FocusDemoState extends State<FocusDemo> {
                               child: ElevatedButton(
                                 onPressed: canUndo
                                     ? () {
-                                        Actions.invoke(
-                                            context, const UndoIntent());
+                                        Actions.invoke(context, const UndoIntent());
                                       }
                                     : null,
                                 child: const Text('UNDO'),
@@ -470,8 +445,7 @@ class _FocusDemoState extends State<FocusDemo> {
                               child: ElevatedButton(
                                 onPressed: canRedo
                                     ? () {
-                                        Actions.invoke(
-                                            context, const RedoIntent());
+                                        Actions.invoke(context, const RedoIntent());
                                       }
                                     : null,
                                 child: const Text('REDO'),

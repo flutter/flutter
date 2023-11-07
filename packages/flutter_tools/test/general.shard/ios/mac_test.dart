@@ -52,8 +52,7 @@ void main() {
         outputFile = MemoryFileSystem.test().file('image.png');
       });
 
-      testWithoutContext('error if idevicescreenshot is not installed',
-          () async {
+      testWithoutContext('error if idevicescreenshot is not installed', () async {
         // Let `idevicescreenshot` fail with exit code 1.
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
@@ -75,28 +74,20 @@ void main() {
           logger: logger,
         );
 
-        expect(
-            () async => iMobileDevice.takeScreenshot(
-                  outputFile,
-                  '1234',
-                  DeviceConnectionInterface.attached,
-                ),
-            throwsA(anything));
+        expect(() async => iMobileDevice.takeScreenshot(
+          outputFile,
+          '1234',
+          DeviceConnectionInterface.attached,
+        ), throwsA(anything));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext(
-          'idevicescreenshot captures and returns USB screenshot', () async {
+      testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
-            'HostArtifact.idevicescreenshot',
-            outputFile.path,
-            '--udid',
-            '1234',
+            'HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234',
           ],
-          environment: const <String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/libraries'
-          },
+          environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
         ));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
@@ -114,20 +105,12 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext(
-          'idevicescreenshot captures and returns network screenshot',
-          () async {
+      testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
-            'HostArtifact.idevicescreenshot',
-            outputFile.path,
-            '--udid',
-            '1234',
-            '--network',
+            'HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234', '--network',
           ],
-          environment: const <String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/libraries'
-          },
+          environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
         ));
 
         final IMobileDevice iMobileDevice = IMobileDevice(
@@ -172,23 +155,20 @@ void main() {
       );
 
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
-      expect(
-          testUsage.events,
-          contains(
-            TestUsageEvent(
-              'build',
-              'ios',
-              label: 'xcode-bitcode-failure',
-              parameters: CustomDimensions(
-                buildEventCommand: buildCommands.toString(),
-                buildEventSettings: buildSettings.toString(),
-              ),
-            ),
-          ));
+      expect(testUsage.events, contains(
+        TestUsageEvent(
+          'build',
+          'ios',
+          label: 'xcode-bitcode-failure',
+          parameters: CustomDimensions(
+            buildEventCommand: buildCommands.toString(),
+            buildEventSettings: buildSettings.toString(),
+          ),
+        ),
+      ));
     });
 
-    testWithoutContext(
-        'fallback to stdout: No provisioning profile shows message', () async {
+    testWithoutContext('fallback to stdout: No provisioning profile shows message', () async {
       final Map<String, String> buildSettingsWithDevTeam = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
         'DEVELOPMENT_TEAM': 'a team',
@@ -339,17 +319,14 @@ Could not build the precompiled application for the device.''',
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
-        contains(
-            'Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
+        contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
     });
 
-    testWithoutContext(
-        'does not show no development team message when other Xcode issues detected',
-        () async {
+    testWithoutContext('does not show no development team message when other Xcode issues detected', () async {
       final XcodeBuildResult buildResult = XcodeBuildResult(
-          success: false,
-          stdout: '''
+        success: false,
+        stdout: '''
 Running "flutter pub get" in flutter_gallery...  0.6s
 Launching lib/main.dart on x in release mode...
 Running pod install...                                1.2s
@@ -371,39 +348,37 @@ Xcode's output:
     [BCEROR]Signing for "Runner" requires a development team. Select a development team in the project editor.
 
 Could not build the precompiled application for the device.''',
-          xcodeBuildExecution: XcodeBuildExecution(
-            buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
-            appDirectory: '/blah/blah',
-            environmentType: EnvironmentType.physical,
-            buildSettings: buildSettings,
-          ),
-          xcResult: XCResult.test(issues: <XCResultIssue>[
-            XCResultIssue.test(
-                message: 'Target aot_assembly_release failed',
-                subType: 'Error'),
-          ]));
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(issues: <XCResultIssue>[
+          XCResultIssue.test(message: 'Target aot_assembly_release failed', subType: 'Error'),
+        ])
+      );
 
       await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
-      expect(logger.errorText,
-          contains('Error (Xcode): Target aot_assembly_release failed'));
-      expect(
-          logger.errorText,
-          isNot(contains(
-              'Building a deployable iOS app requires a selected Development Team')));
+      expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
+      expect(logger.errorText, isNot(contains('Building a deployable iOS app requires a selected Development Team')));
     });
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
-    const String flutterAssetPbxProjLines = '/* flutter_assets */\n'
-        '/* App.framework\n'
-        'another line';
+    const String flutterAssetPbxProjLines =
+      '/* flutter_assets */\n'
+      '/* App.framework\n'
+      'another line';
 
-    const String appFlxPbxProjLines = '/* app.flx\n'
-        '/* App.framework\n'
-        'another line';
+    const String appFlxPbxProjLines =
+      '/* app.flx\n'
+      '/* App.framework\n'
+      'another line';
 
-    const String cleanPbxProjLines = '/* App.framework\n'
-        'another line';
+    const String cleanPbxProjLines =
+      '/* App.framework\n'
+      'another line';
 
     testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final File pbxprojFile = MemoryFileSystem.test().file('project.pbxproj')
@@ -445,8 +420,7 @@ Could not build the precompiled application for the device.''',
     });
 
     testWithoutContext('removes xattr', () async {
-      final FakeProcessManager processManager =
-          FakeProcessManager.list(<FakeCommand>[
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: <String>[
           'xattr',
           '-r',
@@ -456,14 +430,12 @@ Could not build the precompiled application for the device.''',
         ]),
       ]);
 
-      await removeFinderExtendedAttributes(projectDirectory,
-          ProcessUtils(processManager: processManager, logger: logger), logger);
+      await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
       expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('ignores errors', () async {
-      final FakeProcessManager processManager =
-          FakeProcessManager.list(<FakeCommand>[
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             'xattr',
@@ -476,10 +448,8 @@ Could not build the precompiled application for the device.''',
         ),
       ]);
 
-      await removeFinderExtendedAttributes(projectDirectory,
-          ProcessUtils(processManager: processManager, logger: logger), logger);
-      expect(logger.traceText,
-          contains('Failed to remove xattr com.apple.FinderInfo'));
+      await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
       expect(processManager, hasNoRemainingExpectations);
     });
   });
@@ -491,10 +461,8 @@ class FakeIosProject extends Fake implements IosProject {
   final File xcodeProjectInfoFile;
 
   @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async =>
-      'UnitTestRunner.app';
+  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'UnitTestRunner.app';
 
   @override
-  Directory get xcodeProject =>
-      xcodeProjectInfoFile.fileSystem.directory('Runner.xcodeproj');
+  Directory get xcodeProject => xcodeProjectInfoFile.fileSystem.directory('Runner.xcodeproj');
 }

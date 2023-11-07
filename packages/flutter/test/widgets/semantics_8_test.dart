@@ -10,8 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Semantics 8 - Merging with reset',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics 8 - Merging with reset', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -37,22 +36,19 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                label: 'label',
-                textDirection: TextDirection.ltr,
-                rect: TestSemantics.fullScreen,
-              ),
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            label: 'label',
+            textDirection: TextDirection.ltr,
+            rect: TestSemantics.fullScreen,
           ),
-        ));
+        ],
+      ),
+    ));
 
     // switch the order of the inner Semantics node to trigger a reset
     await tester.pumpWidget(
@@ -78,22 +74,19 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                label: 'label',
-                textDirection: TextDirection.ltr,
-                rect: TestSemantics.fullScreen,
-              ),
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            label: 'label',
+            textDirection: TextDirection.ltr,
+            rect: TestSemantics.fullScreen,
           ),
-        ));
+        ],
+      ),
+    ));
 
     semantics.dispose();
   });

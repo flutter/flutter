@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking(
-      'ListView.builder() fixed itemExtent, scroll to end, append, scroll',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {
@@ -32,16 +30,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(4));
     expect(find.text('item 3'), findsNothing);
-    final TestGesture gesture =
-        await tester.startGesture(const Offset(0.0, 300.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(0.0, 300.0));
     await gesture.moveBy(const Offset(0.0, -200.0));
     await tester.pumpAndSettle();
     expect(find.text('item 3'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking(
-      'ListView.builder() fixed itemExtent, scroll to end, append, scroll',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {
@@ -66,8 +61,7 @@ void main() {
     expect(find.text('item 2'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(4));
-    final TestGesture gesture =
-        await tester.startGesture(const Offset(0.0, 300.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(0.0, 300.0));
     await gesture.moveBy(const Offset(0.0, -200.0));
     await tester.pumpAndSettle();
     expect(find.text('item 3'), findsOneWidget);

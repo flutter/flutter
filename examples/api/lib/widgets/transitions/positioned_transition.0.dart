@@ -23,14 +23,12 @@ class PositionedTransitionExample extends StatefulWidget {
   const PositionedTransitionExample({super.key});
 
   @override
-  State<PositionedTransitionExample> createState() =>
-      _PositionedTransitionExampleState();
+  State<PositionedTransitionExample> createState() => _PositionedTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _PositionedTransitionExampleState
-    extends State<PositionedTransitionExample> with TickerProviderStateMixin {
+class _PositionedTransitionExampleState extends State<PositionedTransitionExample> with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
     vsync: this,
@@ -59,8 +57,7 @@ class _PositionedTransitionExampleState
                   biggest,
                 ),
                 end: RelativeRect.fromSize(
-                  Rect.fromLTWH(biggest.width - bigLogo,
-                      biggest.height - bigLogo, bigLogo, bigLogo),
+                  Rect.fromLTWH(biggest.width - bigLogo, biggest.height - bigLogo, bigLogo, bigLogo),
                   biggest,
                 ),
               ).animate(CurvedAnimation(

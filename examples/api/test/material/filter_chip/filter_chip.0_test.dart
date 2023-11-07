@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/filter_chip/filter_chip.0.dart'
-    as example;
+import 'package:flutter_api_samples/material/filter_chip/filter_chip.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

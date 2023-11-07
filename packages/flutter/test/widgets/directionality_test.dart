@@ -49,15 +49,10 @@ void main() {
         child: inner,
       ),
     );
-    expect(log, <TextDirection>[
-      TextDirection.ltr,
-      TextDirection.rtl,
-      TextDirection.ltr
-    ]);
+    expect(log, <TextDirection>[TextDirection.ltr, TextDirection.rtl, TextDirection.ltr]);
   });
 
-  testWidgetsWithLeakTracking('Directionality default',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Directionality default', (WidgetTester tester) async {
     bool good = false;
     await tester.pumpWidget(Builder(
       builder: (BuildContext context) {
@@ -69,8 +64,7 @@ void main() {
     expect(good, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Directionality.maybeOf',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Directionality.maybeOf', (WidgetTester tester) async {
     final GlobalKey hasDirectionality = GlobalKey();
     final GlobalKey noDirectionality = GlobalKey();
     await tester.pumpWidget(
@@ -85,8 +79,7 @@ void main() {
       ),
     );
     expect(Directionality.maybeOf(noDirectionality.currentContext!), isNull);
-    expect(Directionality.maybeOf(hasDirectionality.currentContext!),
-        TextDirection.rtl);
+    expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 
   testWidgetsWithLeakTracking('Directionality.of', (WidgetTester tester) async {
@@ -103,14 +96,11 @@ void main() {
         ),
       ),
     );
-    expect(
-        () => Directionality.of(noDirectionality.currentContext!),
-        throwsA(isAssertionError.having(
-          (AssertionError e) => e.message,
-          'message',
-          contains('No Directionality widget found.'),
-        )));
-    expect(Directionality.of(hasDirectionality.currentContext!),
-        TextDirection.rtl);
+    expect(() => Directionality.of(noDirectionality.currentContext!), throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      contains('No Directionality widget found.'),
+    )));
+    expect(Directionality.of(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 }

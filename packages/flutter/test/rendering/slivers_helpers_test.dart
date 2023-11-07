@@ -6,31 +6,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('applyGrowthDirectionToAxisDirection produces expected AxisDirection',
-      () {
+  test('applyGrowthDirectionToAxisDirection produces expected AxisDirection', () {
     expect(AxisDirection.values.length, 4);
     for (final AxisDirection axisDirection in AxisDirection.values) {
-      expect(
-          applyGrowthDirectionToAxisDirection(
-              axisDirection, GrowthDirection.forward),
-          axisDirection);
+      expect(applyGrowthDirectionToAxisDirection(axisDirection, GrowthDirection.forward), axisDirection);
     }
-    expect(
-        applyGrowthDirectionToAxisDirection(
-            AxisDirection.up, GrowthDirection.reverse),
-        AxisDirection.down);
-    expect(
-        applyGrowthDirectionToAxisDirection(
-            AxisDirection.down, GrowthDirection.reverse),
-        AxisDirection.up);
-    expect(
-        applyGrowthDirectionToAxisDirection(
-            AxisDirection.left, GrowthDirection.reverse),
-        AxisDirection.right);
-    expect(
-        applyGrowthDirectionToAxisDirection(
-            AxisDirection.right, GrowthDirection.reverse),
-        AxisDirection.left);
+    expect(applyGrowthDirectionToAxisDirection(AxisDirection.up, GrowthDirection.reverse), AxisDirection.down);
+    expect(applyGrowthDirectionToAxisDirection(AxisDirection.down, GrowthDirection.reverse), AxisDirection.up);
+    expect(applyGrowthDirectionToAxisDirection(AxisDirection.left, GrowthDirection.reverse), AxisDirection.right);
+    expect(applyGrowthDirectionToAxisDirection(AxisDirection.right, GrowthDirection.reverse), AxisDirection.left);
   });
 
   test('SliverConstraints are the same when copied', () {
@@ -56,9 +40,7 @@ void main() {
     expect(original.normalizedGrowthDirection, equals(GrowthDirection.forward));
   });
 
-  test(
-      'SliverConstraints normalizedGrowthDirection is inferred from AxisDirection and GrowthDirection',
-      () {
+  test('SliverConstraints normalizedGrowthDirection is inferred from AxisDirection and GrowthDirection', () {
     const SliverConstraints a = SliverConstraints(
       axisDirection: AxisDirection.down,
       growthDirection: GrowthDirection.forward,
@@ -108,8 +90,7 @@ void main() {
     final SliverConstraints f = d.copyWith(axisDirection: AxisDirection.left);
     expect(f.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
-    final SliverConstraints g =
-        d.copyWith(growthDirection: GrowthDirection.forward);
+    final SliverConstraints g = d.copyWith(growthDirection: GrowthDirection.forward);
     expect(g.normalizedGrowthDirection, equals(GrowthDirection.reverse));
   });
 
@@ -119,17 +100,13 @@ void main() {
 
   test('SliverGeometry throws error when layoutExtent exceeds paintExtent', () {
     expect(() {
-      const SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0)
-          .debugAssertIsValid();
+      const SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0).debugAssertIsValid();
     }, throwsFlutterError);
   });
 
-  test(
-      'SliverGeometry throws error when maxPaintExtent is less than paintExtent',
-      () {
+  test('SliverGeometry throws error when maxPaintExtent is less than paintExtent', () {
     expect(() {
-      const SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0)
-          .debugAssertIsValid();
+      const SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0).debugAssertIsValid();
     }, throwsFlutterError);
   });
 }

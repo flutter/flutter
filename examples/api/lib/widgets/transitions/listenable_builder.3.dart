@@ -25,8 +25,7 @@ class ListenableBuilderExample extends StatefulWidget {
   const ListenableBuilderExample({super.key});
 
   @override
-  State<ListenableBuilderExample> createState() =>
-      _ListenableBuilderExampleState();
+  State<ListenableBuilderExample> createState() => _ListenableBuilderExampleState();
 }
 
 class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
@@ -40,8 +39,7 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
         appBar: AppBar(title: const Text('ListenableBuilder Example')),
         body: ListBody(listNotifier: _listNotifier),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => _listNotifier.add(_random
-              .nextInt(1 << 31)), // 1 << 31 is the maximum supported value
+          onPressed: () => _listNotifier.add(_random.nextInt(1 << 31)), // 1 << 31 is the maximum supported value
           child: const Icon(Icons.add),
         ),
       ),

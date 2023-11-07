@@ -11,39 +11,29 @@ import 'capture_output.dart';
 void main() {
   test('debugPrint', () {
     expect(
-      captureOutput(() {
-        debugPrintSynchronously('Hello, world');
-      }),
+      captureOutput(() { debugPrintSynchronously('Hello, world'); }),
       equals(<String>['Hello, world']),
     );
 
     expect(
-      captureOutput(() {
-        debugPrintSynchronously('Hello, world', wrapWidth: 10);
-      }),
+      captureOutput(() { debugPrintSynchronously('Hello, world', wrapWidth: 10); }),
       equals(<String>['Hello,\nworld']),
     );
 
     for (int i = 0; i < 14; ++i) {
       expect(
-        captureOutput(() {
-          debugPrintSynchronously('Hello,   world', wrapWidth: i);
-        }),
+        captureOutput(() { debugPrintSynchronously('Hello,   world', wrapWidth: i); }),
         equals(<String>['Hello,\nworld']),
       );
     }
 
     expect(
-      captureOutput(() {
-        debugPrintThrottled('Hello, world');
-      }),
+      captureOutput(() { debugPrintThrottled('Hello, world'); }),
       equals(<String>['Hello, world']),
     );
 
     expect(
-      captureOutput(() {
-        debugPrintThrottled('Hello, world', wrapWidth: 10);
-      }),
+      captureOutput(() { debugPrintThrottled('Hello, world', wrapWidth: 10); }),
       equals(<String>['Hello,', 'world']),
     );
   });
@@ -70,16 +60,12 @@ void main() {
 
   test('debugPrint can print null', () {
     expect(
-      captureOutput(() {
-        debugPrintThrottled(null);
-      }),
+      captureOutput(() { debugPrintThrottled(null); }),
       equals(<String>['null']),
     );
 
     expect(
-      captureOutput(() {
-        debugPrintThrottled(null, wrapWidth: 80);
-      }),
+      captureOutput(() { debugPrintThrottled(null, wrapWidth: 80); }),
       equals(<String>['null']),
     );
   });

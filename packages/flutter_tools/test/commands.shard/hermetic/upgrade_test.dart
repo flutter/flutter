@@ -79,13 +79,7 @@ void main() {
       ),
       // test if there already exists a local beta branch; 0 exit code means yes
       const FakeCommand(
-        command: <String>[
-          'git',
-          'show-ref',
-          '--verify',
-          '--quiet',
-          'refs/heads/beta'
-        ],
+        command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
       ),
       const FakeCommand(
         command: <String>['git', 'checkout', 'beta', '--'],
@@ -99,12 +93,7 @@ void main() {
       // re-enter flutter command with the newer version, so that `doctor`
       // checks will be up to date
       FakeCommand(
-        command: const <String>[
-          'bin/flutter',
-          'upgrade',
-          '--continue',
-          '--no-version-check'
-        ],
+        command: const <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
         onRun: reEnterTool,
         completer: reEntryCompleter,
       ),
@@ -116,12 +105,7 @@ void main() {
         stdout: latestUpstreamTag,
       ),
       const FakeCommand(
-        command: <String>[
-          'bin/flutter',
-          '--no-color',
-          '--no-version-check',
-          'precache'
-        ],
+        command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
       ),
       const FakeCommand(
         command: <String>['bin/flutter', '--no-version-check', 'doctor'],
@@ -129,8 +113,7 @@ void main() {
     ]);
     await runner.run(<String>['upgrade']);
     expect(processManager, hasNoRemainingExpectations);
-    expect(
-        logger.statusText, contains("Transitioning from 'dev' to 'beta'..."));
+    expect(logger.statusText, contains("Transitioning from 'dev' to 'beta'..."));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     FlutterVersion: () => FakeFlutterVersion(branch: 'dev'),
@@ -173,12 +156,7 @@ void main() {
         command: <String>['git', 'reset', '--hard', upstreamHeadRevision],
       ),
       FakeCommand(
-        command: const <String>[
-          'bin/flutter',
-          'upgrade',
-          '--continue',
-          '--no-version-check'
-        ],
+        command: const <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
         onRun: reEnterTool,
         completer: reEntryCompleter,
       ),
@@ -190,12 +168,7 @@ void main() {
         stdout: latestUpstreamTag,
       ),
       const FakeCommand(
-        command: <String>[
-          'bin/flutter',
-          '--no-color',
-          '--no-version-check',
-          'precache'
-        ],
+        command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
       ),
       const FakeCommand(
         command: <String>['bin/flutter', '--no-version-check', 'doctor'],
@@ -203,31 +176,30 @@ void main() {
     ]);
     await runner.run(<String>['upgrade']);
     expect(processManager, hasNoRemainingExpectations);
-    expect(
-        logger.statusText,
-        'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
-        '\n'
-        'Upgrading engine...\n'
-        '\n'
-        "Instance of 'FakeFlutterVersion'\n" // the real FlutterVersion has a better toString, heh
-        '\n'
-        'Running flutter doctor...\n'
-        '\n'
-        'This channel is intended for Flutter contributors. This channel is not as thoroughly '
-        'tested as the "beta" and "stable" channels. We do not recommend using this channel '
-        'for normal use as it more likely to contain serious regressions.\n'
-        '\n'
-        'For information on contributing to Flutter, see our contributing guide:\n'
-        '    https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md\n'
-        '\n'
-        'For the most up to date stable version of flutter, consider using the "beta" channel '
-        'instead. The Flutter "beta" channel enjoys all the same automated testing as the '
-        '"stable" channel, but is updated roughly once a month instead of once a quarter.\n'
-        'To change channel, run the "flutter channel beta" command.\n');
+    expect(logger.statusText,
+      'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
+      '\n'
+      'Upgrading engine...\n'
+      '\n'
+      "Instance of 'FakeFlutterVersion'\n" // the real FlutterVersion has a better toString, heh
+      '\n'
+      'Running flutter doctor...\n'
+      '\n'
+      'This channel is intended for Flutter contributors. This channel is not as thoroughly '
+      'tested as the "beta" and "stable" channels. We do not recommend using this channel '
+      'for normal use as it more likely to contain serious regressions.\n'
+      '\n'
+      'For information on contributing to Flutter, see our contributing guide:\n'
+      '    https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md\n'
+      '\n'
+      'For the most up to date stable version of flutter, consider using the "beta" channel '
+      'instead. The Flutter "beta" channel enjoys all the same automated testing as the '
+      '"stable" channel, but is updated roughly once a month instead of once a quarter.\n'
+      'To change channel, run the "flutter channel beta" command.\n'
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    FlutterVersion: () => FakeFlutterVersion(
-        frameworkVersion: startingTag, engineRevision: 'engine'),
+    FlutterVersion: () => FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
     Logger: () => logger,
     ProcessManager: () => processManager,
   });
@@ -269,12 +241,7 @@ void main() {
         workingDirectory: flutterRoot,
       ),
       FakeCommand(
-        command: const <String>[
-          'bin/flutter',
-          'upgrade',
-          '--continue',
-          '--no-version-check'
-        ],
+        command: const <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
         onRun: reEnterTool,
         completer: reEntryCompleter,
         workingDirectory: flutterRoot,
@@ -288,12 +255,7 @@ void main() {
         workingDirectory: flutterRoot,
       ),
       const FakeCommand(
-        command: <String>[
-          'bin/flutter',
-          '--no-color',
-          '--no-version-check',
-          'precache'
-        ],
+        command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         workingDirectory: flutterRoot,
       ),
       const FakeCommand(
@@ -303,21 +265,18 @@ void main() {
     ]);
     await runner.run(<String>['upgrade']);
     expect(processManager, hasNoRemainingExpectations);
-    expect(
-        logger.statusText,
-        'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
-        '\n'
-        'Upgrading engine...\n'
-        '\n'
-        "Instance of 'FakeFlutterVersion'\n" // the real FlutterVersion has a better toString, heh
-        '\n'
-        'Running flutter doctor...\n');
+    expect(logger.statusText,
+      'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
+      '\n'
+      'Upgrading engine...\n'
+      '\n'
+      "Instance of 'FakeFlutterVersion'\n" // the real FlutterVersion has a better toString, heh
+      '\n'
+      'Running flutter doctor...\n'
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    FlutterVersion: () => FakeFlutterVersion(
-        branch: 'beta',
-        frameworkVersion: startingTag,
-        engineRevision: 'engine'),
+    FlutterVersion: () => FakeFlutterVersion(branch: 'beta', frameworkVersion: startingTag, engineRevision: 'engine'),
     Logger: () => logger,
     ProcessManager: () => processManager,
   });

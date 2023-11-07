@@ -60,8 +60,7 @@ import 'src/web/web_runner.dart';
 /// This function is intended to be used from the `flutter` command line tool.
 Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
-  final bool verbose =
-      args.contains('-v') || args.contains('--verbose') || veryVerbose;
+  final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
   final bool prefixedErrors = args.contains('--prefixed-errors');
   // Support the -? Powershell help idiom.
   final int powershellHelpIndex = args.indexOf('-?');
@@ -71,16 +70,13 @@ Future<void> main(List<String> args) async {
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
       (args.length == 2 && verbose && args.last == 'doctor');
-  final bool help = args.contains('-h') ||
-      args.contains('--help') ||
-      (args.isNotEmpty && args.first == 'help') ||
-      (args.length == 1 && verbose);
+  final bool help = args.contains('-h') || args.contains('--help') ||
+      (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
   final bool daemon = args.contains('daemon');
-  final bool runMachine =
-      (args.contains('--machine') && args.contains('run')) ||
-          (args.contains('--machine') && args.contains('attach'));
+  final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
+                          (args.contains('--machine') && args.contains('attach'));
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real
@@ -109,12 +105,11 @@ Future<void> main(List<String> args) async {
       // The devtools launcher is not supported in google3 because it depends on
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
-            processManager: globals.processManager,
-            dartExecutable:
-                globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
-            logger: globals.logger,
-            botDetector: globals.botDetector,
-          ),
+        processManager: globals.processManager,
+        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        logger: globals.logger,
+        botDetector: globals.botDetector,
+      ),
       Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,
@@ -146,108 +141,106 @@ Future<void> main(List<String> args) async {
 List<FlutterCommand> generateCommands({
   required bool verboseHelp,
   required bool verbose,
-}) =>
-    <FlutterCommand>[
-      AnalyzeCommand(
-        verboseHelp: verboseHelp,
+}) => <FlutterCommand>[
+  AnalyzeCommand(
+    verboseHelp: verboseHelp,
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    processManager: globals.processManager,
+    logger: globals.logger,
+    terminal: globals.terminal,
+    artifacts: globals.artifacts!,
+    // new ProjectValidators should be added here for the --suggestions to run
+    allProjectValidators: <ProjectValidator>[
+      GeneralInfoProjectValidator(),
+      VariableDumpMachineProjectValidator(
+        logger: globals.logger,
         fileSystem: globals.fs,
         platform: globals.platform,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        artifacts: globals.artifacts!,
-        // new ProjectValidators should be added here for the --suggestions to run
-        allProjectValidators: <ProjectValidator>[
-          GeneralInfoProjectValidator(),
-          VariableDumpMachineProjectValidator(
-            logger: globals.logger,
-            fileSystem: globals.fs,
-            platform: globals.platform,
-          ),
-        ],
-        suppressAnalytics: globals.flutterUsage.suppressAnalytics,
       ),
-      AssembleCommand(
-          verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
-      AttachCommand(
-        verboseHelp: verboseHelp,
-        stdio: globals.stdio,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        signals: globals.signals,
-        platform: globals.platform,
-        processInfo: globals.processInfo,
-        fileSystem: globals.fs,
-      ),
-      BuildCommand(
-        artifacts: globals.artifacts!,
-        fileSystem: globals.fs,
-        buildSystem: globals.buildSystem,
-        osUtils: globals.os,
-        processUtils: globals.processUtils,
-        verboseHelp: verboseHelp,
-        androidSdk: globals.androidSdk,
-        logger: globals.logger,
-      ),
-      ChannelCommand(verboseHelp: verboseHelp),
-      CleanCommand(verbose: verbose),
-      ConfigCommand(verboseHelp: verboseHelp),
-      CustomDevicesCommand(
-          customDevicesConfig: globals.customDevicesConfig,
-          operatingSystemUtils: globals.os,
-          terminal: globals.terminal,
-          platform: globals.platform,
-          featureFlags: featureFlags,
-          processManager: globals.processManager,
-          fileSystem: globals.fs,
-          logger: globals.logger),
-      CreateCommand(verboseHelp: verboseHelp),
-      DaemonCommand(hidden: !verboseHelp),
-      DebugAdapterCommand(verboseHelp: verboseHelp),
-      DevicesCommand(verboseHelp: verboseHelp),
-      DoctorCommand(verbose: verbose),
-      DowngradeCommand(verboseHelp: verboseHelp, logger: globals.logger),
-      DriveCommand(
-        verboseHelp: verboseHelp,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        signals: globals.signals,
-      ),
-      EmulatorsCommand(),
-      GenerateCommand(),
-      GenerateLocalizationsCommand(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-      ),
-      InstallCommand(
-        verboseHelp: verboseHelp,
-      ),
-      LogsCommand(),
-      MakeHostAppEditableCommand(),
-      PackagesCommand(),
-      PrecacheCommand(
-        verboseHelp: verboseHelp,
-        cache: globals.cache,
-        logger: globals.logger,
-        platform: globals.platform,
-        featureFlags: featureFlags,
-      ),
-      RunCommand(verboseHelp: verboseHelp),
-      ScreenshotCommand(fs: globals.fs),
-      ShellCompletionCommand(),
-      TestCommand(verboseHelp: verboseHelp, verbose: verbose),
-      UpgradeCommand(verboseHelp: verboseHelp),
-      SymbolizeCommand(
-        stdio: globals.stdio,
-        fileSystem: globals.fs,
-      ),
-      // Development-only commands. These are always hidden,
-      IdeConfigCommand(),
-      UpdatePackagesCommand(),
-    ];
+    ],
+    suppressAnalytics: globals.flutterUsage.suppressAnalytics,
+  ),
+  AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
+  AttachCommand(
+    verboseHelp: verboseHelp,
+    stdio: globals.stdio,
+    logger: globals.logger,
+    terminal: globals.terminal,
+    signals: globals.signals,
+    platform: globals.platform,
+    processInfo: globals.processInfo,
+    fileSystem: globals.fs,
+  ),
+  BuildCommand(
+    artifacts: globals.artifacts!,
+    fileSystem: globals.fs,
+    buildSystem: globals.buildSystem,
+    osUtils: globals.os,
+    processUtils: globals.processUtils,
+    verboseHelp: verboseHelp,
+    androidSdk: globals.androidSdk,
+    logger: globals.logger,
+  ),
+  ChannelCommand(verboseHelp: verboseHelp),
+  CleanCommand(verbose: verbose),
+  ConfigCommand(verboseHelp: verboseHelp),
+  CustomDevicesCommand(
+    customDevicesConfig: globals.customDevicesConfig,
+    operatingSystemUtils: globals.os,
+    terminal: globals.terminal,
+    platform: globals.platform,
+    featureFlags: featureFlags,
+    processManager: globals.processManager,
+    fileSystem: globals.fs,
+    logger: globals.logger
+  ),
+  CreateCommand(verboseHelp: verboseHelp),
+  DaemonCommand(hidden: !verboseHelp),
+  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DevicesCommand(verboseHelp: verboseHelp),
+  DoctorCommand(verbose: verbose),
+  DowngradeCommand(verboseHelp: verboseHelp, logger: globals.logger),
+  DriveCommand(verboseHelp: verboseHelp,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    platform: globals.platform,
+    signals: globals.signals,
+  ),
+  EmulatorsCommand(),
+  GenerateCommand(),
+  GenerateLocalizationsCommand(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    artifacts: globals.artifacts!,
+    processManager: globals.processManager,
+  ),
+  InstallCommand(
+    verboseHelp: verboseHelp,
+  ),
+  LogsCommand(),
+  MakeHostAppEditableCommand(),
+  PackagesCommand(),
+  PrecacheCommand(
+    verboseHelp: verboseHelp,
+    cache: globals.cache,
+    logger: globals.logger,
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  ),
+  RunCommand(verboseHelp: verboseHelp),
+  ScreenshotCommand(fs: globals.fs),
+  ShellCompletionCommand(),
+  TestCommand(verboseHelp: verboseHelp, verbose: verbose),
+  UpgradeCommand(verboseHelp: verboseHelp),
+  SymbolizeCommand(
+    stdio: globals.stdio,
+    fileSystem: globals.fs,
+  ),
+  // Development-only commands. These are always hidden,
+  IdeConfigCommand(),
+  UpdatePackagesCommand(),
+];
 
 /// An abstraction for instantiation of the correct logger type.
 ///
@@ -258,10 +251,10 @@ class LoggerFactory {
     required Stdio stdio,
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  })  : _terminal = terminal,
-        _stdio = stdio,
-        _stopwatchFactory = stopwatchFactory,
-        _outputPreferences = outputPreferences;
+  }) : _terminal = terminal,
+       _stdio = stdio,
+       _stopwatchFactory = stopwatchFactory,
+       _outputPreferences = outputPreferences;
 
   final Terminal _terminal;
   final Stdio _stdio;
@@ -286,10 +279,11 @@ class LoggerFactory {
       );
     } else {
       logger = StdoutLogger(
-          terminal: _terminal,
-          stdio: _stdio,
-          outputPreferences: _outputPreferences,
-          stopwatchFactory: _stopwatchFactory);
+        terminal: _terminal,
+        stdio: _stdio,
+        outputPreferences: _outputPreferences,
+        stopwatchFactory: _stopwatchFactory
+      );
     }
     if (verbose) {
       logger = VerboseLogger(logger, stopwatchFactory: _stopwatchFactory);

@@ -46,7 +46,7 @@ class PersistentHashMap<K extends Object, V> {
   /// Returns value associated with the given [key] or `null` if [key]
   /// is not in the map.
   @pragma('dart2js:as:trust')
-  V? operator [](K key) {
+  V? operator[](K key) {
     if (_root == null) {
       return null;
     }
@@ -97,10 +97,8 @@ class _FullNode extends _TrieNode {
   @override
   _TrieNode put(int bitIndex, Object key, int keyHash, Object? value) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
-    final _TrieNode node =
-        _unsafeCast<_TrieNode?>(descendants[index]) ?? _CompressedNode.empty;
-    final _TrieNode newNode =
-        node.put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
+    final _TrieNode node = _unsafeCast<_TrieNode?>(descendants[index]) ?? _CompressedNode.empty;
+    final _TrieNode newNode = node.put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
     return identical(newNode, node)
         ? this
         : _FullNode(_copy(descendants)..[index] = newNode);
@@ -136,7 +134,8 @@ class _CompressedNode extends _TrieNode {
   factory _CompressedNode.single(int bitIndex, int keyHash, _TrieNode node) {
     final int bit = 1 << _TrieNode.trieIndex(keyHash, bitIndex);
     // A single (null, node) pair.
-    final List<Object?> keyValuePairs = _makeArray(2)..[1] = node;
+    final List<Object?> keyValuePairs = _makeArray(2)
+      ..[1] = node;
     return _CompressedNode(bit, keyValuePairs);
   }
 
@@ -164,8 +163,8 @@ class _CompressedNode extends _TrieNode {
 
       // Is this a (null, trieNode) pair?
       if (identical(keyOrNull, null)) {
-        final _TrieNode newNode = _unsafeCast<_TrieNode>(valueOrNode)
-            .put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
+        final _TrieNode newNode = _unsafeCast<_TrieNode>(valueOrNode).put(
+            bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
         if (newNode == valueOrNode) {
           return this;
         }

@@ -11,15 +11,13 @@ import '../convert.dart';
 ///
 /// The default implementation will create real connections to a device.
 /// Override this in tests with an implementation that returns mock responses.
-Future<Socket> kAndroidConsoleSocketFactory(String host, int port) =>
-    Socket.connect(host, port);
+Future<Socket> kAndroidConsoleSocketFactory(String host, int port) => Socket.connect(host, port);
 
 /// Currently active implementation of the AndroidConsoleFactory.
 ///
 /// The default implementation will create real connections to a device.
 /// Override this in tests with an implementation that returns mock responses.
-typedef AndroidConsoleSocketFactory = Future<Socket> Function(
-    String host, int port);
+typedef AndroidConsoleSocketFactory = Future<Socket> Function(String host, int port);
 
 /// Creates a console connection to an Android emulator that can be used to run
 /// commands such as "avd name" which are not available to ADB.

@@ -17,6 +17,7 @@ const String _javaExecutable = 'java';
 
 /// Represents an installation of Java.
 class Java {
+
   Java({
     required this.javaHome,
     required this.binaryPath,
@@ -25,13 +26,12 @@ class Java {
     required OperatingSystemUtils os,
     required Platform platform,
     required ProcessManager processManager,
-  })  : _logger = logger,
-        _fileSystem = fileSystem,
-        _os = os,
-        _platform = platform,
-        _processManager = processManager,
-        _processUtils =
-            ProcessUtils(processManager: processManager, logger: logger);
+  }): _logger = logger,
+      _fileSystem = fileSystem,
+      _os = os,
+      _platform = platform,
+      _processManager = processManager,
+      _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   /// Within the Java ecosystem, this environment variable is typically set
   /// the install location of a Java Runtime Environment (JRE) or Java
@@ -61,21 +61,24 @@ class Java {
     required ProcessManager processManager,
   }) {
     final OperatingSystemUtils os = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager);
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager
+    );
     final String? home = _findJavaHome(
-        config: config,
-        logger: logger,
-        androidStudio: androidStudio,
-        platform: platform);
+      config: config,
+      logger: logger,
+      androidStudio: androidStudio,
+      platform: platform
+    );
     final String? binary = _findJavaBinary(
-        logger: logger,
-        javaHome: home,
-        fileSystem: fileSystem,
-        operatingSystemUtils: os,
-        platform: platform);
+      logger: logger,
+      javaHome: home,
+      fileSystem: fileSystem,
+      operatingSystemUtils: os,
+      platform: platform
+    );
 
     if (binary == null) {
       return null;
@@ -125,8 +128,8 @@ class Java {
     return <String, String>{
       if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
       'PATH': _fileSystem.path.dirname(binaryPath) +
-          _os.pathVarSeparator +
-          _platform.environment['PATH']!,
+                        _os.pathVarSeparator +
+                        _platform.environment['PATH']!,
     };
   }
 
@@ -139,13 +142,12 @@ class Java {
     );
     if (result.exitCode != 0) {
       _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
-          ' stdout: ${result.stdout} stderr: ${result.stderr}');
+        ' stdout: ${result.stdout} stderr: ${result.stderr}');
     }
     final String rawVersionOutput = result.stdout;
     final List<String> versionLines = rawVersionOutput.split('\n');
     // Should look something like 'openjdk 19.0.2 2023-01-17'.
-    final String longVersionText =
-        versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+    final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
 
     // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
     final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
@@ -197,8 +199,7 @@ String? _findJavaHome({
     return androidStudioJavaPath;
   }
 
-  final String? javaHomeEnv =
-      platform.environment[Java.javaHomeEnvironmentVariable];
+  final String? javaHomeEnv = platform.environment[Java.javaHomeEnvironmentVariable];
   if (javaHomeEnv != null) {
     return javaHomeEnv;
   }
@@ -224,8 +225,8 @@ String? _findJavaBinary({
 // the version of java along with the output.
 String _formatJavaVersionWarning(String javaVersionRaw) {
   return 'Could not parse java version from: \n'
-      '$javaVersionRaw \n'
-      'If there is a version please look for an existing bug '
-      'https://github.com/flutter/flutter/issues/ '
-      'and if one does not exist file a new issue.';
+    '$javaVersionRaw \n'
+    'If there is a version please look for an existing bug '
+    'https://github.com/flutter/flutter/issues/ '
+    'and if one does not exist file a new issue.';
 }

@@ -6,8 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Undo Interactions', () {
     test('UndoManagerClient handleUndo', () async {
@@ -18,8 +17,7 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send handleUndo message with "undo" as the direction.
-      ByteData? messageBytes =
-          const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>['undo'],
         'method': 'UndoManagerClient.handleUndo',
       });
@@ -29,8 +27,7 @@ void main() {
         null,
       );
 
-      expect(
-          client.latestMethodCall, 'handlePlatformUndo(${UndoDirection.undo})');
+      expect(client.latestMethodCall, 'handlePlatformUndo(${UndoDirection.undo})');
 
       // Send handleUndo message with "undo" as the direction.
       messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
@@ -43,8 +40,7 @@ void main() {
         (ByteData? _) {},
       );
 
-      expect(
-          client.latestMethodCall, 'handlePlatformUndo(${UndoDirection.redo})');
+      expect(client.latestMethodCall, 'handlePlatformUndo(${UndoDirection.redo})');
     });
   });
 }

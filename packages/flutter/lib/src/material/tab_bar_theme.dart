@@ -155,12 +155,9 @@ class TabBarTheme with Diagnosticable {
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a.labelPadding, b.labelPadding, t),
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
-      unselectedLabelColor:
-          Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
-      unselectedLabelStyle:
-          TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
-      overlayColor: MaterialStateProperty.lerp<Color?>(
-          a.overlayColor, b.overlayColor, t, Color.lerp),
+      unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
+      unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
+      overlayColor: MaterialStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
@@ -169,21 +166,21 @@ class TabBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        indicator,
-        indicatorColor,
-        indicatorSize,
-        dividerColor,
-        dividerHeight,
-        labelColor,
-        labelPadding,
-        labelStyle,
-        unselectedLabelColor,
-        unselectedLabelStyle,
-        overlayColor,
-        splashFactory,
-        mouseCursor,
-        tabAlignment,
-      );
+    indicator,
+    indicatorColor,
+    indicatorSize,
+    dividerColor,
+    dividerHeight,
+    labelColor,
+    labelPadding,
+    labelStyle,
+    unselectedLabelColor,
+    unselectedLabelStyle,
+    overlayColor,
+    splashFactory,
+    mouseCursor,
+    tabAlignment,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -193,20 +190,20 @@ class TabBarTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TabBarTheme &&
-        other.indicator == indicator &&
-        other.indicatorColor == indicatorColor &&
-        other.indicatorSize == indicatorSize &&
-        other.dividerColor == dividerColor &&
-        other.dividerHeight == dividerHeight &&
-        other.labelColor == labelColor &&
-        other.labelPadding == labelPadding &&
-        other.labelStyle == labelStyle &&
-        other.unselectedLabelColor == unselectedLabelColor &&
-        other.unselectedLabelStyle == unselectedLabelStyle &&
-        other.overlayColor == overlayColor &&
-        other.splashFactory == splashFactory &&
-        other.mouseCursor == mouseCursor &&
-        other.tabAlignment == tabAlignment;
+    return other is TabBarTheme
+        && other.indicator == indicator
+        && other.indicatorColor == indicatorColor
+        && other.indicatorSize == indicatorSize
+        && other.dividerColor == dividerColor
+        && other.dividerHeight == dividerHeight
+        && other.labelColor == labelColor
+        && other.labelPadding == labelPadding
+        && other.labelStyle == labelStyle
+        && other.unselectedLabelColor == unselectedLabelColor
+        && other.unselectedLabelStyle == unselectedLabelStyle
+        && other.overlayColor == overlayColor
+        && other.splashFactory == splashFactory
+        && other.mouseCursor == mouseCursor
+        && other.tabAlignment == tabAlignment;
   }
 }

@@ -19,12 +19,9 @@ void main() {
     position.dispose(); // Should not throw/assert.
   });
 
-  testWidgetsWithLeakTracking(
-      'scrollable in hidden overlay does not crash when unhidden',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('scrollable in hidden overlay does not crash when unhidden', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44269.
-    final TabController controller =
-        TabController(vsync: const TestVSync(), length: 1);
+    final TabController controller = TabController(vsync: const TestVSync(), length: 1);
     addTearDown(controller.dispose);
 
     final OverlayEntry entry1 = OverlayEntry(

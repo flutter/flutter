@@ -34,7 +34,7 @@ const String _after = r'''
 /// See https://github.com/flutter/flutter/issues/119415.
 class ShowWindowMigration extends ProjectMigrator {
   ShowWindowMigration(WindowsProject project, super.logger)
-      : _file = project.runnerFlutterWindowFile;
+    : _file = project.runnerFlutterWindowFile;
 
   final File _file;
 
@@ -63,8 +63,9 @@ This indicates non-trivial changes have been made to the Windows runner in the
     );
     if (originalContents != newContents) {
       logger.printStatus(
-          'windows/runner/flutter_window.cpp does not ensure the show window '
-          'callback is called, updating.');
+        'windows/runner/flutter_window.cpp does not ensure the show window '
+        'callback is called, updating.'
+      );
       _file.writeAsStringSync(newContents);
     }
   }

@@ -5,10 +5,7 @@
 import 'template.dart';
 
 class PopupMenuTemplate extends TokenTemplate {
-  const PopupMenuTemplate(
-    super.blockName,
-    super.fileName,
-    super.tokens, {
+  const PopupMenuTemplate(super.blockName, super.fileName, super.tokens, {
     super.colorSchemePrefix = '_colors.',
     super.textThemePrefix = '_textTheme.',
   });

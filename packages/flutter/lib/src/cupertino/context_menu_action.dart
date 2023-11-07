@@ -43,18 +43,15 @@ class CupertinoContextMenuAction extends StatefulWidget {
   final IconData? trailingIcon;
 
   @override
-  State<CupertinoContextMenuAction> createState() =>
-      _CupertinoContextMenuActionState();
+  State<CupertinoContextMenuAction> createState() => _CupertinoContextMenuActionState();
 }
 
-class _CupertinoContextMenuActionState
-    extends State<CupertinoContextMenuAction> {
+class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {
   static const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFF1F1F1),
     darkColor: Color(0xFF212122),
   );
-  static const Color _kBackgroundColorPressed =
-      CupertinoDynamicColor.withBrightness(
+  static const Color _kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
   );
@@ -101,15 +98,14 @@ class _CupertinoContextMenuActionState
       );
     }
     return _kActionSheetActionStyle.copyWith(
-        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context));
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor: widget.onPressed != null && kIsWeb
-          ? SystemMouseCursors.click
-          : MouseCursor.defer,
+      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
         key: _globalKey,
         onTapDown: onTapDown,
@@ -126,9 +122,8 @@ class _CupertinoContextMenuActionState
             child: Container(
               decoration: BoxDecoration(
                 color: _isPressed
-                    ? CupertinoDynamicColor.resolve(
-                        _kBackgroundColorPressed, context)
-                    : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+                  ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
+                  : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
               ),
               padding: const EdgeInsets.only(
                 top: 8,

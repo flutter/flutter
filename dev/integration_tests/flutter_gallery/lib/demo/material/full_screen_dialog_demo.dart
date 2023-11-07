@@ -16,9 +16,9 @@ enum DismissDialogAction {
 }
 
 class DateTimeItem extends StatelessWidget {
-  DateTimeItem({super.key, required DateTime dateTime, required this.onChanged})
-      : date = DateTime(dateTime.year, dateTime.month, dateTime.day),
-        time = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+  DateTimeItem({ super.key, required DateTime dateTime, required this.onChanged })
+    : date = DateTime(dateTime.year, dateTime.month, dateTime.day),
+      time = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
 
   final DateTime date;
   final TimeOfDay time;
@@ -36,8 +36,8 @@ class DateTimeItem extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               decoration: BoxDecoration(
-                  border:
-                      Border(bottom: BorderSide(color: theme.dividerColor))),
+                border: Border(bottom: BorderSide(color: theme.dividerColor))
+              ),
               child: InkWell(
                 onTap: () {
                   showDatePicker(
@@ -45,10 +45,10 @@ class DateTimeItem extends StatelessWidget {
                     initialDate: date,
                     firstDate: date.subtract(const Duration(days: 30)),
                     lastDate: date.add(const Duration(days: 30)),
-                  ).then((DateTime? value) {
+                  )
+                  .then((DateTime? value) {
                     if (value != null) {
-                      onChanged(DateTime(value.year, value.month, value.day,
-                          time.hour, time.minute));
+                      onChanged(DateTime(value.year, value.month, value.day, time.hour, time.minute));
                     }
                   });
                 },
@@ -66,16 +66,17 @@ class DateTimeItem extends StatelessWidget {
             margin: const EdgeInsets.only(left: 8.0),
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: theme.dividerColor))),
+              border: Border(bottom: BorderSide(color: theme.dividerColor))
+            ),
             child: InkWell(
               onTap: () {
                 showTimePicker(
                   context: context,
                   initialTime: time,
-                ).then((TimeOfDay? value) {
+                )
+                .then((TimeOfDay? value) {
                   if (value != null) {
-                    onChanged(DateTime(date.year, date.month, date.day,
-                        value.hour, value.minute));
+                    onChanged(DateTime(date.year, date.month, date.day, value.hour, value.minute));
                   }
                 });
               },
@@ -115,8 +116,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     }
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.textTheme.titleMedium!
-        .copyWith(color: theme.textTheme.bodySmall!.color);
+    final TextStyle dialogTextStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
 
     final bool? shouldDiscard = await showDialog<bool>(
       context: context,
@@ -164,11 +164,9 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_hasName ? _eventName : 'Event Name TBD'),
-        actions: <Widget>[
+        actions: <Widget> [
           TextButton(
-            child: Text('SAVE',
-                style:
-                    theme.textTheme.bodyMedium!.copyWith(color: Colors.white)),
+            child: Text('SAVE', style: theme.textTheme.bodyMedium!.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             },
@@ -251,10 +249,10 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               ),
               Container(
                 decoration: BoxDecoration(
-                    border:
-                        Border(bottom: BorderSide(color: theme.dividerColor))),
+                  border: Border(bottom: BorderSide(color: theme.dividerColor))
+                ),
                 child: Row(
-                  children: <Widget>[
+                  children: <Widget> [
                     Checkbox(
                       value: _allDayValue,
                       onChanged: (bool? value) {
@@ -268,13 +266,15 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   ],
                 ),
               ),
-            ].map<Widget>((Widget child) {
+            ]
+            .map<Widget>((Widget child) {
               return Container(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 height: 96.0,
                 child: child,
               );
-            }).toList(),
+            })
+            .toList(),
           ),
         ),
       ),

@@ -13,8 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class TestResampleEventFlutterBinding extends BindingBase
-    with GestureBinding, SchedulerBinding {
+class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
   HandleEventCallback? callback;
   FrameCallback? postFrameCallback;
   Duration? frameTime;
@@ -34,8 +33,7 @@ class TestResampleEventFlutterBinding extends BindingBase
   }
 
   @override
-  int addPostFrameCallback(FrameCallback callback,
-      {String debugLabel = 'callback'}) {
+  int addPostFrameCallback(FrameCallback callback, {String debugLabel = 'callback'}) {
     postFrameCallback = callback;
     return 0;
   }
@@ -60,60 +58,58 @@ void testResampleEvent(String description, ResampleEventTest callback) {
       callback(async);
     }, initialTime: DateTime.utc(2015));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87067
-  // Fake clock is not working with the web platform.
+                       // Fake clock is not working with the web platform.
 }
 
 void main() {
-  final TestResampleEventFlutterBinding binding =
-      TestResampleEventFlutterBinding();
+  final TestResampleEventFlutterBinding binding = TestResampleEventFlutterBinding();
   testResampleEvent('Pointer event resampling', (FakeAsync async) {
-    Duration currentTime() =>
-        Duration(milliseconds: clock.now().millisecondsSinceEpoch);
+    Duration currentTime() => Duration(milliseconds: clock.now().millisecondsSinceEpoch);
     final Duration epoch = currentTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(
-          change: ui.PointerChange.add,
-          timeStamp: epoch,
+            change: ui.PointerChange.add,
+            timeStamp: epoch,
         ),
         ui.PointerData(
-          change: ui.PointerChange.down,
-          timeStamp: epoch + const Duration(milliseconds: 10),
+            change: ui.PointerChange.down,
+            timeStamp: epoch + const Duration(milliseconds: 10),
         ),
         ui.PointerData(
-          change: ui.PointerChange.move,
-          physicalX: 10.0,
-          timeStamp: epoch + const Duration(milliseconds: 20),
+            change: ui.PointerChange.move,
+            physicalX: 10.0,
+            timeStamp: epoch + const Duration(milliseconds: 20),
         ),
         ui.PointerData(
-          change: ui.PointerChange.move,
-          physicalX: 20.0,
-          timeStamp: epoch + const Duration(milliseconds: 30),
+            change: ui.PointerChange.move,
+            physicalX: 20.0,
+            timeStamp: epoch + const Duration(milliseconds: 30),
         ),
         ui.PointerData(
-          change: ui.PointerChange.move,
-          physicalX: 30.0,
-          timeStamp: epoch + const Duration(milliseconds: 40),
+            change: ui.PointerChange.move,
+            physicalX: 30.0,
+            timeStamp: epoch + const Duration(milliseconds: 40),
         ),
         ui.PointerData(
-          change: ui.PointerChange.move,
-          physicalX: 40.0,
-          timeStamp: epoch + const Duration(milliseconds: 50),
+            change: ui.PointerChange.move,
+            physicalX: 40.0,
+            timeStamp: epoch + const Duration(milliseconds: 50),
         ),
         ui.PointerData(
-          change: ui.PointerChange.move,
-          physicalX: 50.0,
-          timeStamp: epoch + const Duration(milliseconds: 60),
+            change: ui.PointerChange.move,
+            physicalX: 50.0,
+            timeStamp: epoch + const Duration(milliseconds: 60),
         ),
         ui.PointerData(
-          change: ui.PointerChange.up,
-          physicalX: 50.0,
-          timeStamp: epoch + const Duration(milliseconds: 70),
+            change: ui.PointerChange.up,
+            physicalX: 50.0,
+            timeStamp: epoch + const Duration(milliseconds: 70),
         ),
         ui.PointerData(
-          change: ui.PointerChange.remove,
-          physicalX: 50.0,
-          timeStamp: epoch + const Duration(milliseconds: 70),
+            change: ui.PointerChange.remove,
+            physicalX: 50.0,
+            timeStamp: epoch + const Duration(milliseconds: 70),
         ),
       ],
     );
@@ -127,8 +123,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    GestureBinding.instance.platformDispatcher.onPointerDataPacket
-        ?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
 
     // No pointer events should have been dispatched yet.
     expect(events.length, 0);
@@ -189,5 +184,4 @@ void main() {
   });
 }
 
-double get _devicePixelRatio =>
-    GestureBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
+double get _devicePixelRatio => GestureBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;

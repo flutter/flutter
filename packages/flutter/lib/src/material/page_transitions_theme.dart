@@ -16,22 +16,18 @@ import 'theme.dart';
 // Android O.
 class _FadeUpwardsPageTransition extends StatelessWidget {
   _FadeUpwardsPageTransition({
-    required Animation<double>
-        routeAnimation, // The route's linear 0.0 - 1.0 animation.
+    required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     required this.child,
-  })  : _positionAnimation =
-            routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
-        _opacityAnimation = routeAnimation.drive(_easeInTween);
+  }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
+       _opacityAnimation = routeAnimation.drive(_easeInTween);
 
   // Fractional offset from 1/4 screen below the top to fully on screen.
   static final Tween<Offset> _bottomUpTween = Tween<Offset>(
     begin: const Offset(0.0, 0.25),
     end: Offset.zero,
   );
-  static final Animatable<double> _fastOutSlowInTween =
-      CurveTween(curve: Curves.fastOutSlowIn);
-  static final Animatable<double> _easeInTween =
-      CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
+  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
 
   final Animation<Offset> _positionAnimation;
   final Animation<double> _opacityAnimation;
@@ -102,13 +98,10 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
           end: size.height,
         ).animate(primaryAnimation);
 
-        final Animation<double> opacityAnimation =
-            _scrimOpacityTween.animate(primaryAnimation);
-        final Animation<Offset> primaryTranslationAnimation =
-            _primaryTranslationTween.animate(primaryAnimation);
+        final Animation<double> opacityAnimation = _scrimOpacityTween.animate(primaryAnimation);
+        final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
 
-        final Animation<Offset> secondaryTranslationAnimation =
-            _secondaryTranslationTween.animate(
+        final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
           CurvedAnimation(
             parent: secondaryAnimation,
             curve: _transitionCurve,
@@ -170,21 +163,19 @@ class _ZoomPageTransition extends StatelessWidget {
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
-  static final List<TweenSequenceItem<double>>
-      fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
+  static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.0, end: 0.4)
-          .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
+        .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
       weight: 0.166666,
     ),
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.4, end: 1.0)
-          .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
+        .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
       weight: 1.0 - 0.166666,
     ),
   ];
-  static final TweenSequence<double> _scaleCurveSequence =
-      TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
+  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
 
   /// The animation that drives the [child]'s entrance and exit.
   ///
@@ -267,7 +258,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
+            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
             reverse: true,
             child: child,
           );
@@ -306,8 +297,7 @@ class _ZoomEnterTransition extends StatefulWidget {
   State<_ZoomEnterTransition> createState() => _ZoomEnterTransitionState();
 }
 
-class _ZoomEnterTransitionState extends State<_ZoomEnterTransition>
-    with _ZoomTransitionBase<_ZoomEnterTransition> {
+class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase<_ZoomEnterTransition> {
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
   // support this functionality and the canvaskit backend uses a single thread for UI and raster
   // work which diminishes the impact of this performance improvement.
@@ -338,12 +328,13 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition>
 
   void _updateAnimations() {
     fadeTransition = widget.reverse
-        ? kAlwaysCompleteAnimation
-        : _fadeInTransition.animate(widget.animation);
+      ? kAlwaysCompleteAnimation
+      : _fadeInTransition.animate(widget.animation);
 
-    scaleTransition =
-        (widget.reverse ? _scaleDownTransition : _scaleUpTransition)
-            .animate(widget.animation);
+    scaleTransition = (widget.reverse
+        ? _scaleDownTransition
+        : _scaleUpTransition
+      ).animate(widget.animation);
 
     widget.animation.addListener(onAnimationValueChange);
     widget.animation.addStatusListener(onAnimationStatusChange);
@@ -363,8 +354,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition>
 
   @override
   void didUpdateWidget(covariant _ZoomEnterTransition oldWidget) {
-    if (oldWidget.reverse != widget.reverse ||
-        oldWidget.animation != widget.animation) {
+    if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
       oldWidget.animation.removeListener(onAnimationValueChange);
       oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
@@ -416,8 +406,7 @@ class _ZoomExitTransition extends StatefulWidget {
   State<_ZoomExitTransition> createState() => _ZoomExitTransitionState();
 }
 
-class _ZoomExitTransitionState extends State<_ZoomExitTransition>
-    with _ZoomTransitionBase<_ZoomExitTransition> {
+class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase<_ZoomExitTransition> {
   late _ZoomExitTransitionPainter delegate;
 
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
@@ -443,11 +432,12 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition>
 
   void _updateAnimations() {
     fadeTransition = widget.reverse
-        ? _fadeOutTransition.animate(widget.animation)
-        : kAlwaysCompleteAnimation;
-    scaleTransition =
-        (widget.reverse ? _scaleDownTransition : _scaleUpTransition)
-            .animate(widget.animation);
+      ? _fadeOutTransition.animate(widget.animation)
+      : kAlwaysCompleteAnimation;
+    scaleTransition = (widget.reverse
+      ? _scaleDownTransition
+      : _scaleUpTransition
+    ).animate(widget.animation);
 
     widget.animation.addListener(onAnimationValueChange);
     widget.animation.addStatusListener(onAnimationStatusChange);
@@ -467,8 +457,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition>
 
   @override
   void didUpdateWidget(covariant _ZoomExitTransition oldWidget) {
-    if (oldWidget.reverse != widget.reverse ||
-        oldWidget.animation != widget.animation) {
+    if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
       oldWidget.animation.removeListener(onAnimationValueChange);
       oldWidget.animation.removeStatusListener(onAnimationStatusChange);
       _updateAnimations();
@@ -663,8 +652,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   // Allows devicelab benchmarks to force disable the snapshotting. This is
   // intended to allow us to profile and fix the underlying performance issues
   // for the Impeller backend.
-  static const bool _kProfileForceDisableSnapshotting =
-      bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
+  static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
   @override
   Widget buildTransitions<T>(
@@ -676,16 +664,15 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   ) {
     if (_kProfileForceDisableSnapshotting) {
       return _ZoomPageTransitionNoCache(
-        animation: animation,
-        secondaryAnimation: secondaryAnimation,
-        child: child,
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      child: child,
       );
     }
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      allowSnapshotting:
-          allowSnapshotting && (route?.allowSnapshotting ?? true),
+      allowSnapshotting: allowSnapshotting && (route?.allowSnapshotting ?? true),
       allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
@@ -715,8 +702,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(
-        route, context, animation, secondaryAnimation, child);
+    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 }
 
@@ -755,12 +741,9 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [ZoomPageTransitionsBuilder]
   /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
   /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme(
-      {Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders})
-      : _builders = builders;
+  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
 
-  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
-      <TargetPlatform, PageTransitionsBuilder>{
+  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: ZoomPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
     TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
@@ -789,18 +772,14 @@ class PageTransitionsTheme with Diagnosticable {
     }
 
     final PageTransitionsBuilder matchingBuilder =
-        builders[platform] ?? const ZoomPageTransitionsBuilder();
-    return matchingBuilder.buildTransitions<T>(
-        route, context, animation, secondaryAnimation, child);
+      builders[platform] ?? const ZoomPageTransitionsBuilder();
+    return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for
   // the operator == overload.
-  List<PageTransitionsBuilder?> _all(
-      Map<TargetPlatform, PageTransitionsBuilder> builders) {
-    return TargetPlatform.values
-        .map((TargetPlatform platform) => builders[platform])
-        .toList();
+  List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
+    return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
   }
 
   @override
@@ -814,9 +793,8 @@ class PageTransitionsTheme with Diagnosticable {
     if (other is PageTransitionsTheme && identical(builders, other.builders)) {
       return true;
     }
-    return other is PageTransitionsTheme &&
-        listEquals<PageTransitionsBuilder?>(
-            _all(other.builders), _all(builders));
+    return other is PageTransitionsTheme
+        && listEquals<PageTransitionsBuilder?>(_all(other.builders), _all(builders));
   }
 
   @override
@@ -836,8 +814,7 @@ class PageTransitionsTheme with Diagnosticable {
 }
 
 // Take an image and draw it centered and scaled. The image is already scaled by the [pixelRatio].
-void _drawImageScaledAndCentered(PaintingContext context, ui.Image image,
-    double scale, double opacity, double pixelRatio) {
+void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double scale, double opacity, double pixelRatio) {
   if (scale <= 0.0 || opacity <= 0.0) {
     return;
   }
@@ -850,13 +827,8 @@ void _drawImageScaledAndCentered(PaintingContext context, ui.Image image,
   final double scaledLogicalHeight = logicalHeight * scale;
   final double left = (logicalWidth - scaledLogicalWidth) / 2;
   final double top = (logicalHeight - scaledLogicalHeight) / 2;
-  final Rect dst =
-      Rect.fromLTWH(left, top, scaledLogicalWidth, scaledLogicalHeight);
-  context.canvas.drawImageRect(
-      image,
-      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-      dst,
-      paint);
+  final Rect dst = Rect.fromLTWH(left, top, scaledLogicalWidth, scaledLogicalHeight);
+  context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
 }
 
 void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
@@ -885,11 +857,12 @@ mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {
 
   void onAnimationValueChange() {
     if ((scaleTransition.value == 1.0) &&
-        (fadeTransition.value == 0.0 || fadeTransition.value == 1.0)) {
-      controller.allowSnapshotting = false;
-    } else {
-      controller.allowSnapshotting = useSnapshot;
-    }
+        (fadeTransition.value == 0.0 ||
+         fadeTransition.value == 1.0)) {
+        controller.allowSnapshotting = false;
+      } else {
+        controller.allowSnapshotting = useSnapshot;
+      }
   }
 
   void onAnimationStatusChange(AnimationStatus status) {
@@ -934,8 +907,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
 
   final Matrix4 _transform = Matrix4.zero();
   final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
-  final LayerHandle<TransformLayer> _transformHandler =
-      LayerHandle<TransformLayer>();
+  final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
   void _drawScrim(PaintingContext context, Offset offset, Size size) {
     double scrimOpacity = 0.0;
@@ -950,8 +922,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     // the interrupted reversal of the forward transition to smoothly fade
     // the scrim away. This prevents a disjointed removal of the scrim.
     if (!reverse && animation.status != AnimationStatus.completed) {
-      scrimOpacity =
-          _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
+      scrimOpacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
     }
     assert(!reverse || scrimOpacity == 0.0);
     if (scrimOpacity > 0.0) {
@@ -963,8 +934,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   }
 
   @override
-  void paint(PaintingContext context, ui.Offset offset, Size size,
-      PaintingContextCallback painter) {
+  void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
     switch (animation.status) {
       case AnimationStatus.completed:
       case AnimationStatus.dismissed:
@@ -975,20 +945,15 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
 
     _drawScrim(context, offset, size);
     _updateScaledTransform(_transform, scale.value, size);
-    _transformHandler.layer = context.pushTransform(true, offset, _transform,
-        (PaintingContext context, Offset offset) {
-      _opacityHandle.layer = context.pushOpacity(
-          offset, (fade.value * 255).round(), painter,
-          oldLayer: _opacityHandle.layer);
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+      _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
     }, oldLayer: _transformHandler.layer);
   }
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size,
-      ui.Image image, Size sourceSize, double pixelRatio) {
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
     _drawScrim(context, offset, size);
-    _drawImageScaledAndCentered(
-        context, image, scale.value, fade.value, pixelRatio);
+    _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
 
   @override
@@ -1004,10 +969,10 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
 
   @override
   bool shouldRepaint(covariant _ZoomEnterTransitionPainter oldDelegate) {
-    return oldDelegate.reverse != reverse ||
-        oldDelegate.animation.value != animation.value ||
-        oldDelegate.scale.value != scale.value ||
-        oldDelegate.fade.value != fade.value;
+    return oldDelegate.reverse != reverse
+      || oldDelegate.animation.value != animation.value
+      || oldDelegate.scale.value != scale.value
+      || oldDelegate.fade.value != fade.value;
   }
 }
 
@@ -1033,19 +998,15 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
   final Animation<double> animation;
   final Matrix4 _transform = Matrix4.zero();
   final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
-  final LayerHandle<TransformLayer> _transformHandler =
-      LayerHandle<TransformLayer>();
+  final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size,
-      ui.Image image, Size sourceSize, double pixelRatio) {
-    _drawImageScaledAndCentered(
-        context, image, scale.value, fade.value, pixelRatio);
+  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+    _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
 
   @override
-  void paint(PaintingContext context, ui.Offset offset, Size size,
-      PaintingContextCallback painter) {
+  void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
     switch (animation.status) {
       case AnimationStatus.completed:
       case AnimationStatus.dismissed:
@@ -1056,19 +1017,16 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     }
 
     _updateScaledTransform(_transform, scale.value, size);
-    _transformHandler.layer = context.pushTransform(true, offset, _transform,
-        (PaintingContext context, Offset offset) {
-      _opacityHandle.layer = context.pushOpacity(
-          offset, (fade.value * 255).round(), painter,
-          oldLayer: _opacityHandle.layer);
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+      _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
     }, oldLayer: _transformHandler.layer);
   }
 
   @override
   bool shouldRepaint(covariant _ZoomExitTransitionPainter oldDelegate) {
-    return oldDelegate.reverse != reverse ||
-        oldDelegate.fade.value != fade.value ||
-        oldDelegate.scale.value != scale.value;
+    return oldDelegate.reverse != reverse
+      || oldDelegate.fade.value != fade.value
+      || oldDelegate.scale.value != scale.value;
   }
 
   @override
@@ -1202,18 +1160,17 @@ class _ZoomEnterTransitionNoCache extends StatelessWidget {
     // the interrupted reversal of the forward transition to smoothly fade
     // the scrim away. This prevents a disjointed removal of the scrim.
     if (!reverse && animation.status != AnimationStatus.completed) {
-      opacity =
-          _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
+      opacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
     }
 
     final Animation<double> fadeTransition = reverse
-        ? kAlwaysCompleteAnimation
-        : _ZoomEnterTransitionState._fadeInTransition.animate(animation);
+      ? kAlwaysCompleteAnimation
+      : _ZoomEnterTransitionState._fadeInTransition.animate(animation);
 
     final Animation<double> scaleTransition = (reverse
-            ? _ZoomEnterTransitionState._scaleDownTransition
-            : _ZoomEnterTransitionState._scaleUpTransition)
-        .animate(animation);
+      ? _ZoomEnterTransitionState._scaleDownTransition
+      : _ZoomEnterTransitionState._scaleUpTransition
+    ).animate(animation);
 
     return AnimatedBuilder(
       animation: animation,
@@ -1249,12 +1206,12 @@ class _ZoomExitTransitionNoCache extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Animation<double> fadeTransition = reverse
-        ? _ZoomExitTransitionState._fadeOutTransition.animate(animation)
-        : kAlwaysCompleteAnimation;
+      ? _ZoomExitTransitionState._fadeOutTransition.animate(animation)
+      : kAlwaysCompleteAnimation;
     final Animation<double> scaleTransition = (reverse
-            ? _ZoomExitTransitionState._scaleDownTransition
-            : _ZoomExitTransitionState._scaleUpTransition)
-        .animate(animation);
+      ? _ZoomExitTransitionState._scaleDownTransition
+      : _ZoomExitTransitionState._scaleUpTransition
+    ).animate(animation);
 
     return FadeTransition(
       opacity: fadeTransition,

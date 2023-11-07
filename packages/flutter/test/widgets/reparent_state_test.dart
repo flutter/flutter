@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({super.key, this.child});
+  const StateMarker({ super.key, this.child });
 
   final Widget? child;
 
@@ -28,8 +28,7 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({required Key key, required this.log})
-      : super(key: key);
+  const DeactivateLogger({ required Key key, required this.log }) : super(key: key);
 
   final List<String> log;
 
@@ -52,8 +51,7 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('can reparent state',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can reparent state', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
 
@@ -82,8 +80,7 @@ void main() {
     final StateMarkerState rightState = right.currentState! as StateMarkerState;
     rightState.marker = 'right';
 
-    final StateMarkerState grandchildState =
-        tester.state(find.byWidget(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
@@ -112,8 +109,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals('right'));
 
-    final StateMarkerState newGrandchildState =
-        tester.state(find.byWidget(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals('grandchild'));
@@ -135,8 +131,7 @@ void main() {
     expect(right.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('can reparent state with multichild widgets',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can reparent state with multichild widgets', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
 
@@ -159,8 +154,7 @@ void main() {
     final StateMarkerState rightState = right.currentState! as StateMarkerState;
     rightState.marker = 'right';
 
-    final StateMarkerState grandchildState =
-        tester.state(find.byWidget(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
@@ -183,8 +177,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals('right'));
 
-    final StateMarkerState newGrandchildState =
-        tester.state(find.byWidget(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals('grandchild'));
@@ -206,8 +199,7 @@ void main() {
     expect(right.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('can with scrollable list',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can with scrollable list', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(StateMarker(key: key));
@@ -240,8 +232,7 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgetsWithLeakTracking('Reparent during update children',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Reparent during update children', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(Stack(
@@ -252,7 +243,7 @@ void main() {
       ],
     ));
 
-    final StateMarkerState keyState = key.currentState! as StateMarkerState;
+    final StateMarkerState keyState = key.currentState!as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(Stack(
@@ -278,8 +269,7 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgetsWithLeakTracking('Reparent to child during update children',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Reparent to child during update children', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(Stack(
@@ -341,8 +331,7 @@ void main() {
     expect(keyState.marker, equals('marked'));
   });
 
-  testWidgetsWithLeakTracking('Deactivate implies build',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Deactivate implies build', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final List<String> log = <String>[];
     final DeactivateLogger logger = DeactivateLogger(key: key, log: log);
@@ -364,8 +353,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('Reparenting with multiple moves',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Reparenting with multiple moves', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     final GlobalKey key3 = GlobalKey();

@@ -20,9 +20,7 @@ class TestBinding extends WidgetsFlutterBinding {
   }
 
   @override
-  bool debugCheckZone(String entryPoint) {
-    return true;
-  }
+  bool debugCheckZone(String entryPoint) { return true; }
 
   static TestBinding get instance => BindingBase.checkInstance(_instance);
   static TestBinding? _instance;

@@ -12,9 +12,7 @@ void main() {
   ZoneIgnoringTestBinding.ensureInitialized();
   initTimelineTests();
   test('Widgets with updated keys produce well formed timelines', () async {
-    await runFrame(() {
-      runApp(const TestRoot());
-    });
+    await runFrame(() { runApp(const TestRoot()); });
     await SchedulerBinding.instance.endOfFrame;
 
     debugProfileBuildsEnabled = true;

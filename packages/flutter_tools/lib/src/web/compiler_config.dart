@@ -50,10 +50,8 @@ class JsCompilerConfig extends WebCompilerConfig {
         csp: defines[kCspMode] == 'true',
         dumpInfo: defines[kDart2jsDumpInfo] == 'true',
         nativeNullAssertions: defines[kNativeNullAssertions] == 'true',
-        optimizationLevel:
-            defines[kDart2jsOptimization] ?? kDart2jsDefaultOptimizationLevel,
-        noFrequencyBasedMinification:
-            defines[kDart2jsNoFrequencyBasedMinification] == 'true',
+        optimizationLevel: defines[kDart2jsOptimization] ?? kDart2jsDefaultOptimizationLevel,
+        noFrequencyBasedMinification: defines[kDart2jsNoFrequencyBasedMinification] == 'true',
         sourceMaps: defines[kSourceMapsEnabled] == 'true',
       );
 
@@ -111,8 +109,7 @@ class JsCompilerConfig extends WebCompilerConfig {
         kCspMode: csp.toString(),
         kDart2jsDumpInfo: dumpInfo.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
-        kDart2jsNoFrequencyBasedMinification:
-            noFrequencyBasedMinification.toString(),
+        kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
         kDart2jsOptimization: optimizationLevel,
         kSourceMapsEnabled: sourceMaps.toString(),
       };
@@ -167,24 +164,23 @@ class WasmCompilerConfig extends WebCompilerConfig {
   @override
   bool get isWasm => true;
 
-  bool get runWasmOpt =>
-      wasmOpt == WasmOptLevel.full || wasmOpt == WasmOptLevel.debug;
+  bool get runWasmOpt => wasmOpt == WasmOptLevel.full || wasmOpt == WasmOptLevel.debug;
 
   @override
   Map<String, String> toBuildSystemEnvironment() => <String, String>{
-        kOmitTypeChecks: omitTypeChecks.toString(),
-        kRunWasmOpt: wasmOpt.name,
-      };
+    kOmitTypeChecks: omitTypeChecks.toString(),
+    kRunWasmOpt: wasmOpt.name,
+  };
 
   List<String> toCommandOptions() => <String>[
-        if (omitTypeChecks) '--omit-type-checks',
-      ];
+    if (omitTypeChecks) '--omit-type-checks',
+  ];
 
   @override
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-        ...super.buildEventAnalyticsValues,
-        ...toBuildSystemEnvironment(),
-      };
+    ...super.buildEventAnalyticsValues,
+    ...toBuildSystemEnvironment(),
+  };
 }
 
 enum WasmOptLevel implements CliEnum {
@@ -199,11 +195,8 @@ enum WasmOptLevel implements CliEnum {
 
   @override
   String get helpText => switch (this) {
-        WasmOptLevel.none =>
-          'wasm-opt is not run. Fastest build; bigger, slower output.',
-        WasmOptLevel.debug =>
-          'Similar to `${WasmOptLevel.full.name}`, but member names are preserved. Debugging is easier, but size is a bit bigger.',
-        WasmOptLevel.full =>
-          'wasm-opt is run. Build time is slower, but output is smaller and faster.',
-      };
+    WasmOptLevel.none => 'wasm-opt is not run. Fastest build; bigger, slower output.',
+    WasmOptLevel.debug => 'Similar to `${WasmOptLevel.full.name}`, but member names are preserved. Debugging is easier, but size is a bit bigger.',
+    WasmOptLevel.full => 'wasm-opt is run. Build time is slower, but output is smaller and faster.',
+  };
 }

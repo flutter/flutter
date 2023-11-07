@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class BadgeUseCase extends UseCase {
+
   @override
   String get name => 'Badge';
 

@@ -5,9 +5,10 @@
 import 'template.dart';
 
 class SearchViewTemplate extends TokenTemplate {
-  const SearchViewTemplate(super.blockName, super.fileName, super.tokens,
-      {super.colorSchemePrefix = '_colors.',
-      super.textThemePrefix = '_textTheme.'});
+  const SearchViewTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   @override
   String generate() => '''

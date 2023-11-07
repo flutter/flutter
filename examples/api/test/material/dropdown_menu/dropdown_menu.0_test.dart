@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.0.dart'
-    as example;
+import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -54,8 +53,7 @@ void main() {
     expect(find.text('You selected a Blue Smile'), findsOneWidget);
   });
 
-  testWidgets('DropdownMenu has focus when tapping on the text field',
-      (WidgetTester tester) async {
+  testWidgets('DropdownMenu has focus when tapping on the text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.DropdownMenuExample(),
     );

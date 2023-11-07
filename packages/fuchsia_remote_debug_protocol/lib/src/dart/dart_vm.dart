@@ -43,9 +43,12 @@ Future<vms.VmService> _waitAndConnect(
         (dynamic data) => controller.add(data),
         onDone: () => streamClosedCompleter.complete(),
       );
-      final vms.VmService service = vms.VmService(controller.stream, socket.add,
-          disposeHandler: () => socket.close(),
-          streamClosed: streamClosedCompleter.future);
+      final vms.VmService service = vms.VmService(
+        controller.stream,
+        socket.add,
+        disposeHandler: () => socket.close(),
+        streamClosed: streamClosedCompleter.future
+      );
       // This call is to ensure we are able to establish a connection instead of
       // keeping on trucking and failing farther down the process.
       await service.getVersion();
@@ -55,8 +58,7 @@ Future<vms.VmService> _waitAndConnect(
       // TODO(ianh): Determine which exceptions to catch here.
       await socket.close();
       if (attempts > 5) {
-        _log.warning(
-            'It is taking an unusually long time to connect to the VM...');
+        _log.warning('It is taking an unusually long time to connect to the VM...');
       }
       attempts += 1;
       await Future<void>.delayed(timeout);
@@ -109,8 +111,7 @@ class DartVm {
       uri = uri.replace(scheme: 'ws', path: '/ws');
     }
 
-    final vms.VmService service =
-        await fuchsiaVmServiceConnectionFunction(uri, timeout: timeout);
+    final vms.VmService service = await fuchsiaVmServiceConnectionFunction(uri, timeout: timeout);
     return DartVm._(service, uri);
   }
 
@@ -131,6 +132,7 @@ class DartVm {
     return result;
   }
 
+
   /// Returns a list of [FlutterView] objects running across all Dart VM's.
   ///
   /// If there is no associated isolate with the flutter view (used to determine
@@ -139,11 +141,8 @@ class DartVm {
   /// flutter view has no ID), then the result will not be added to the list.
   Future<List<FlutterView>> getAllFlutterViews() async {
     final List<FlutterView> views = <FlutterView>[];
-    final vms.Response rpcResponse =
-        await _vmService.callMethod('_flutter.listViews');
-    for (final Map<String, dynamic> jsonView
-        in (rpcResponse.json!['views'] as List<dynamic>)
-            .cast<Map<String, dynamic>>()) {
+    final vms.Response rpcResponse = await _vmService.callMethod('_flutter.listViews');
+    for (final Map<String, dynamic> jsonView in (rpcResponse.json!['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       views.add(FlutterView._fromJson(jsonView));
     }
     return views;
@@ -177,8 +176,7 @@ class FlutterView {
   /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
   factory FlutterView._fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic>? isolate =
-        json['isolate'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? isolate = json['isolate'] as Map<String, dynamic>?;
     final String? id = json['id'] as String?;
     String? name;
     if (id == null) {

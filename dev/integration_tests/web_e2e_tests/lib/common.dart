@@ -7,8 +7,7 @@ import 'dart:html';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Whether the current browser is Firefox.
-bool get isFirefox =>
-    window.navigator.userAgent.toLowerCase().contains('firefox');
+bool get isFirefox => window.navigator.userAgent.toLowerCase().contains('firefox');
 
 /// Finds elements in the DOM tree rendered by the Flutter Web engine.
 ///
@@ -20,9 +19,11 @@ List<Node> findElements(String selector) {
   final Element? flutterView = document.querySelector('flutter-view');
 
   if (flutterView == null) {
-    fail('Failed to locate <flutter-view>. Possible reasons:\n'
-        ' - The application failed to start'
-        ' - `findElements` was called before the application started');
+    fail(
+      'Failed to locate <flutter-view>. Possible reasons:\n'
+      ' - The application failed to start'
+      ' - `findElements` was called before the application started'
+    );
   }
 
   return flutterView.querySelectorAll(selector);

@@ -37,9 +37,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   bool _isElevated = true;
   bool _isVisible = true;
 
-  FloatingActionButtonLocation get _fabLocation => _isVisible
-      ? FloatingActionButtonLocation.endContained
-      : FloatingActionButtonLocation.endFloat;
+  FloatingActionButtonLocation get _fabLocation =>
+      _isVisible ? FloatingActionButtonLocation.endContained : FloatingActionButtonLocation.endFloat;
 
   void _listen() {
     final ScrollDirection direction = _controller.position.userScrollDirection;
@@ -134,8 +133,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
               )
             : null,
         floatingActionButtonLocation: _fabLocation,
-        bottomNavigationBar:
-            _DemoBottomAppBar(isElevated: _isElevated, isVisible: _isVisible),
+        bottomNavigationBar: _DemoBottomAppBar(isElevated: _isElevated, isVisible: _isVisible),
       ),
     );
   }

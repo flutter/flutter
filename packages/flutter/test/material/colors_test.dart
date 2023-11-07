@@ -5,18 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const List<int> primaryKeys = <int>[
-  50,
-  100,
-  200,
-  300,
-  400,
-  500,
-  600,
-  700,
-  800,
-  900
-];
+const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 const List<int> accentKeys = <int>[100, 200, 400, 700];
 
 void main() {
@@ -24,7 +13,7 @@ void main() {
     const MaterialColor color = MaterialColor(
       500,
       <int, Color>{
-        50: Color(0x00000050),
+         50: Color(0x00000050),
         100: Color(0x00000100),
         200: Color(0x00000200),
         300: Color(0x00000300),
@@ -64,17 +53,13 @@ void main() {
 
   test('Colors swatches do not contain duplicates', () {
     for (final MaterialColor color in Colors.primaries) {
-      expect(primaryKeys.map<Color>((int key) => color[key]!).toSet().length,
-          primaryKeys.length);
+      expect(primaryKeys.map<Color>((int key) => color[key]!).toSet().length, primaryKeys.length);
     }
 
-    expect(
-        primaryKeys.map<Color>((int key) => Colors.grey[key]!).toSet().length,
-        primaryKeys.length);
+    expect(primaryKeys.map<Color>((int key) => Colors.grey[key]!).toSet().length, primaryKeys.length);
 
     for (final MaterialAccentColor color in Colors.accents) {
-      expect(accentKeys.map<Color>((int key) => color[key]!).toSet().length,
-          accentKeys.length);
+      expect(accentKeys.map<Color>((int key) => color[key]!).toSet().length, accentKeys.length);
     }
   });
 
@@ -98,4 +83,5 @@ void main() {
       }
     }
   });
+
 }

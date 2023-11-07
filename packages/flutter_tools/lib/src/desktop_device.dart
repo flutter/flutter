@@ -21,19 +21,18 @@ import 'protocol_discovery.dart';
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(
-    super.id, {
-    required PlatformType super.platformType,
-    required super.ephemeral,
-    required Logger logger,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  })  : _logger = logger,
-        _processManager = processManager,
-        _fileSystem = fileSystem,
-        _operatingSystemUtils = operatingSystemUtils,
-        super(
+  DesktopDevice(super.id, {
+      required PlatformType super.platformType,
+      required super.ephemeral,
+      required Logger logger,
+      required ProcessManager processManager,
+      required FileSystem fileSystem,
+      required OperatingSystemUtils operatingSystemUtils,
+    }) : _logger = logger,
+         _processManager = processManager,
+         _fileSystem = fileSystem,
+         _operatingSystemUtils = operatingSystemUtils,
+         super(
           category: Category.desktop,
         );
 
@@ -45,8 +44,7 @@ abstract class DesktopDevice extends Device {
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(
-      ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 
@@ -56,8 +54,7 @@ abstract class DesktopDevice extends Device {
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -70,8 +67,7 @@ abstract class DesktopDevice extends Device {
   Future<bool> installApp(
     ApplicationPackage app, {
     String? userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to uninstall the application.
@@ -79,8 +75,7 @@ abstract class DesktopDevice extends Device {
   Future<bool> uninstallApp(
     ApplicationPackage app, {
     String? userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -95,8 +90,7 @@ abstract class DesktopDevice extends Device {
   Future<String> get sdkNameAndVersion async => _operatingSystemUtils.name;
 
   @override
-  bool supportsRuntimeMode(BuildMode buildMode) =>
-      buildMode != BuildMode.jitRelease;
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
   DeviceLogReader getLogReader({
@@ -148,8 +142,7 @@ abstract class DesktopDevice extends Device {
         environment: _computeEnvironment(debuggingOptions, traceStartup, route),
       );
     } on ProcessException catch (e) {
-      _logger
-          .printError('Unable to start executable "${command.join(' ')}": $e');
+      _logger.printError('Unable to start executable "${command.join(' ')}": $e');
       rethrow;
     }
     _runningProcesses.add(process);
@@ -159,8 +152,7 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
-    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(
-      _deviceLogReader,
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: ipv6,
@@ -211,13 +203,11 @@ abstract class DesktopDevice extends Device {
 
   /// Returns the path to the executable to run for [package] on this device for
   /// the given [buildMode].
-  String? executablePathForDevice(
-      ApplicationPackage package, BuildInfo buildInfo);
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
 
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onAttached(
-      ApplicationPackage package, BuildInfo buildInfo, Process process) {}
+  void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
@@ -226,8 +216,7 @@ abstract class DesktopDevice extends Device {
   /// The format of the environment variables is:
   ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
   ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
-  Map<String, String> _computeEnvironment(
-      DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
+  Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     int flags = 0;
     final Map<String, String> environment = <String, String>{};
 
@@ -235,7 +224,6 @@ abstract class DesktopDevice extends Device {
       flags += 1;
       environment['FLUTTER_ENGINE_SWITCH_$flags'] = value;
     }
-
     void finish() {
       environment['FLUTTER_ENGINE_SWITCHES'] = flags.toString();
     }
@@ -323,8 +311,7 @@ abstract class DesktopDevice extends Device {
 /// A log reader for desktop applications that delegates to a [Process] stdout
 /// and stderr streams.
 class DesktopLogReader extends DeviceLogReader {
-  final StreamController<List<int>> _inputController =
-      StreamController<List<int>>.broadcast();
+  final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
@@ -352,8 +339,8 @@ class DesktopLogReader extends DeviceLogReader {
   @override
   Stream<String> get logLines {
     return _inputController.stream
-        .transform(utf8.decoder)
-        .transform(const LineSplitter());
+      .transform(utf8.decoder)
+      .transform(const LineSplitter());
   }
 
   @override

@@ -9,14 +9,11 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('DropdownMenuThemeData copyWith, ==, hashCode basics', () {
-    expect(const DropdownMenuThemeData(),
-        const DropdownMenuThemeData().copyWith());
-    expect(const DropdownMenuThemeData().hashCode,
-        const DropdownMenuThemeData().copyWith().hashCode);
+    expect(const DropdownMenuThemeData(), const DropdownMenuThemeData().copyWith());
+    expect(const DropdownMenuThemeData().hashCode, const DropdownMenuThemeData().copyWith().hashCode);
 
     const DropdownMenuThemeData custom = DropdownMenuThemeData(
-      menuStyle: MenuStyle(
-          backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
+      menuStyle: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
       inputDecorationTheme: InputDecorationTheme(filled: true),
       textStyle: TextStyle(fontSize: 25.0),
     );
@@ -29,15 +26,12 @@ void main() {
   });
 
   test('DropdownMenuThemeData lerp special cases', () {
-    expect(DropdownMenuThemeData.lerp(null, null, 0),
-        const DropdownMenuThemeData());
+    expect(DropdownMenuThemeData.lerp(null, null, 0), const DropdownMenuThemeData());
     const DropdownMenuThemeData data = DropdownMenuThemeData();
     expect(identical(DropdownMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking(
-      'Default DropdownMenuThemeData debugFillProperties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
@@ -49,65 +43,55 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('With no other configuration, defaults are used',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('With no other configuration, defaults are used', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
-    await tester.pumpWidget(MaterialApp(
-      theme: themeData,
-      home: const Scaffold(
-        body: Center(
-          child: DropdownMenu<int>(
-            dropdownMenuEntries: <DropdownMenuEntry<int>>[
-              DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
-              DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
-              DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
-            ],
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: const Scaffold(
+          body: Center(
+            child: DropdownMenu<int>(
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+                DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+                DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
+              ],
+            ),
           ),
         ),
-      ),
-    ));
+      )
+    );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, themeData.textTheme.labelLarge!.color);
-    expect(editableText.style.background,
-        themeData.textTheme.labelLarge!.background);
+    expect(editableText.style.background, themeData.textTheme.labelLarge!.background);
     expect(editableText.style.shadows, themeData.textTheme.labelLarge!.shadows);
-    expect(editableText.style.decoration,
-        themeData.textTheme.labelLarge!.decoration);
+    expect(editableText.style.decoration, themeData.textTheme.labelLarge!.decoration);
     expect(editableText.style.locale, themeData.textTheme.labelLarge!.locale);
-    expect(editableText.style.wordSpacing,
-        themeData.textTheme.labelLarge!.wordSpacing);
+    expect(editableText.style.wordSpacing, themeData.textTheme.labelLarge!.wordSpacing);
 
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.decoration?.border, const OutlineInputBorder());
 
-    await tester
-        .tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find
-        .ancestor(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .at(1);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, themeData.colorScheme.surface);
     expect(material.shadowColor, themeData.colorScheme.shadow);
     expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
     expect(material.elevation, 3.0);
-    expect(
-        material.shape,
-        const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4.0))));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
-    final Finder buttonMaterial = find
-        .descendant(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .last;
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
@@ -116,33 +100,32 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('ThemeData.dropdownMenuTheme overrides defaults',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
-        dropdownMenuTheme: DropdownMenuThemeData(
-      textStyle: TextStyle(
-        color: Colors.orange,
-        backgroundColor: Colors.indigo,
-        fontSize: 30.0,
-        shadows: kElevationToShadow[1],
-        decoration: TextDecoration.underline,
-        wordSpacing: 2.0,
-      ),
-      menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
-        elevation: MaterialStatePropertyAll<double>(10.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: TextStyle(
+          color: Colors.orange,
+          backgroundColor: Colors.indigo,
+          fontSize: 30.0,
+          shadows: kElevationToShadow[1],
+          decoration: TextDecoration.underline,
+          wordSpacing: 2.0,
         ),
-      ),
-      inputDecorationTheme: const InputDecorationTheme(
-          filled: true, fillColor: Colors.lightGreen),
-    ));
+        menuStyle: const MenuStyle(
+          backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
+          shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
+          surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
+          elevation: MaterialStatePropertyAll<double>(10.0),
+          shape: MaterialStatePropertyAll<OutlinedBorder>(
+            RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          ),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
+      )
+    );
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         theme: theme,
         home: const Scaffold(
           body: Center(
@@ -154,7 +137,9 @@ void main() {
               ],
             ),
           ),
-        )));
+        )
+      )
+    );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, Colors.orange);
@@ -167,33 +152,25 @@ void main() {
     expect(textField.decoration?.filled, isTrue);
     expect(textField.decoration?.fillColor, Colors.lightGreen);
 
-    await tester
-        .tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find
-        .ancestor(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .at(1);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.grey);
     expect(material.shadowColor, Colors.brown);
     expect(material.surfaceTintColor, Colors.amberAccent);
     expect(material.elevation, 10.0);
-    expect(
-        material.shape,
-        const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0))));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))));
 
-    final Finder buttonMaterial = find
-        .descendant(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .last;
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
@@ -202,9 +179,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking(
-      'DropdownMenuTheme overrides ThemeData and defaults',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
@@ -220,12 +195,10 @@ void main() {
         surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
         elevation: MaterialStatePropertyAll<double>(10.0),
         shape: MaterialStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
       ),
-      inputDecorationTheme: const InputDecorationTheme(
-          filled: true, fillColor: Colors.lightGreen),
+      inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
     final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
@@ -243,16 +216,15 @@ void main() {
         surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.teal),
         elevation: MaterialStatePropertyAll<double>(15.0),
         shape: MaterialStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
       ),
-      inputDecorationTheme:
-          const InputDecorationTheme(filled: true, fillColor: Colors.blue),
+      inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
     final ThemeData theme = ThemeData(dropdownMenuTheme: global);
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         theme: theme,
         home: DropdownMenuTheme(
           data: dropdownMenuTheme,
@@ -267,7 +239,9 @@ void main() {
               ),
             ),
           ),
-        )));
+        )
+      )
+    );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, Colors.red);
@@ -281,33 +255,25 @@ void main() {
     expect(textField.decoration?.filled, isTrue);
     expect(textField.decoration?.fillColor, Colors.blue);
 
-    await tester
-        .tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find
-        .ancestor(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .at(1);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.yellow);
     expect(material.shadowColor, Colors.green);
     expect(material.surfaceTintColor, Colors.teal);
     expect(material.elevation, 15.0);
-    expect(
-        material.shape,
-        const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8.0))));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))));
 
-    final Finder buttonMaterial = find
-        .descendant(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .last;
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
@@ -316,9 +282,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking(
-      'Widget parameters overrides DropdownMenuTheme, ThemeData and defaults',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
@@ -334,12 +298,10 @@ void main() {
         surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
         elevation: MaterialStatePropertyAll<double>(10.0),
         shape: MaterialStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
       ),
-      inputDecorationTheme: const InputDecorationTheme(
-          filled: true, fillColor: Colors.lightGreen),
+      inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
     final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
@@ -357,16 +319,15 @@ void main() {
         surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.teal),
         elevation: MaterialStatePropertyAll<double>(15.0),
         shape: MaterialStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
       ),
-      inputDecorationTheme:
-          const InputDecorationTheme(filled: true, fillColor: Colors.blue),
+      inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
     final ThemeData theme = ThemeData(dropdownMenuTheme: global);
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         theme: theme,
         home: DropdownMenuTheme(
           data: dropdownMenuTheme,
@@ -382,20 +343,15 @@ void main() {
                   wordSpacing: 3.0,
                 ),
                 menuStyle: const MenuStyle(
-                  backgroundColor:
-                      MaterialStatePropertyAll<Color>(Colors.limeAccent),
-                  shadowColor:
-                      MaterialStatePropertyAll<Color>(Colors.deepOrangeAccent),
-                  surfaceTintColor:
-                      MaterialStatePropertyAll<Color>(Colors.lightBlue),
+                  backgroundColor: MaterialStatePropertyAll<Color>(Colors.limeAccent),
+                  shadowColor: MaterialStatePropertyAll<Color>(Colors.deepOrangeAccent),
+                  surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.lightBlue),
                   elevation: MaterialStatePropertyAll<double>(21.0),
                   shape: MaterialStatePropertyAll<OutlinedBorder>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(15.0))),
+                    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   ),
                 ),
-                inputDecorationTheme: const InputDecorationTheme(
-                    filled: true, fillColor: Colors.deepPurple),
+                inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.deepPurple),
                 dropdownMenuEntries: const <DropdownMenuEntry<int>>[
                   DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
                   DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
@@ -404,7 +360,9 @@ void main() {
               ),
             ),
           ),
-        )));
+        )
+      )
+    );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, Colors.pink);
@@ -418,33 +376,25 @@ void main() {
     expect(textField.decoration?.filled, isTrue);
     expect(textField.decoration?.fillColor, Colors.deepPurple);
 
-    await tester
-        .tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find
-        .ancestor(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .at(1);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.limeAccent);
     expect(material.shadowColor, Colors.deepOrangeAccent);
     expect(material.surfaceTintColor, Colors.lightBlue);
     expect(material.elevation, 21.0);
-    expect(
-        material.shape,
-        const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(15.0))));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))));
 
-    final Finder buttonMaterial = find
-        .descendant(
-          of: find.widgetWithText(TextButton, 'Item 0'),
-          matching: find.byType(Material),
-        )
-        .last;
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);

@@ -5,9 +5,10 @@
 import 'template.dart';
 
 class DatePickerTemplate extends TokenTemplate {
-  const DatePickerTemplate(super.blockName, super.fileName, super.tokens,
-      {super.colorSchemePrefix = '_colors.',
-      super.textThemePrefix = '_textTheme.'});
+  const DatePickerTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   String _layerOpacity(String layerToken) {
     if (tokenAvailable(layerToken)) {
@@ -24,15 +25,15 @@ class DatePickerTemplate extends TokenTemplate {
 
   String _stateColor(String componentToken, String? type, String state) {
     final String baseColor = color(
-        type != null
-            ? '$componentToken.$type.$state.state-layer.color'
-            : '$componentToken.$state.state-layer.color',
-        '');
+      type != null
+        ? '$componentToken.$type.$state.state-layer.color'
+        : '$componentToken.$state.state-layer.color',
+      ''
+    );
     if (baseColor.isEmpty) {
       return 'null';
     }
-    final String opacity =
-        _layerOpacity('$componentToken.$state.state-layer.opacity');
+    final String opacity = _layerOpacity('$componentToken.$state.state-layer.opacity');
     return '$baseColor$opacity';
   }
 

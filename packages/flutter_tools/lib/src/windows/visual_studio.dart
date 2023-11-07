@@ -21,11 +21,10 @@ class VisualStudio {
     required ProcessManager processManager,
     required Platform platform,
     required Logger logger,
-  })  : _platform = platform,
-        _fileSystem = fileSystem,
-        _processUtils =
-            ProcessUtils(processManager: processManager, logger: logger),
-        _logger = logger;
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -33,8 +32,7 @@ class VisualStudio {
   final Logger _logger;
 
   /// Matches the description property from the vswhere.exe JSON output.
-  final RegExp _vswhereDescriptionProperty =
-      RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
+  final RegExp _vswhereDescriptionProperty = RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
 
   /// True if Visual Studio installation was found.
   ///
@@ -45,14 +43,12 @@ class VisualStudio {
 
   bool get isAtLeastMinimumVersion {
     final int? installedMajorVersion = _majorVersion;
-    return installedMajorVersion != null &&
-        installedMajorVersion >= _minimumSupportedVersion;
+    return installedMajorVersion != null && installedMajorVersion >= _minimumSupportedVersion;
   }
 
   /// True if there is a version of Visual Studio with all the components
   /// necessary to build the project.
-  bool get hasNecessaryComponents =>
-      _bestVisualStudioDetails?.isUsable ?? false;
+  bool get hasNecessaryComponents => _bestVisualStudioDetails?.isUsable ?? false;
 
   /// The name of the Visual Studio install.
   ///
@@ -102,8 +98,7 @@ class VisualStudio {
   bool get isPrerelease => _bestVisualStudioDetails?.isPrerelease ?? false;
 
   /// True if a reboot is required to complete the Visual Studio installation.
-  bool get isRebootRequired =>
-      _bestVisualStudioDetails?.isRebootRequired ?? false;
+  bool get isRebootRequired => _bestVisualStudioDetails?.isRebootRequired ?? false;
 
   /// The name of the recommended Visual Studio installer workload.
   String get workloadDescription => 'Desktop development with C++';
@@ -117,22 +112,18 @@ class VisualStudio {
     if (sdkLocation == null) {
       return null;
     }
-    final Directory sdkIncludeDirectory =
-        _fileSystem.directory(sdkLocation).childDirectory('Include');
+    final Directory sdkIncludeDirectory = _fileSystem.directory(sdkLocation).childDirectory('Include');
     if (!sdkIncludeDirectory.existsSync()) {
       return null;
     }
     // The directories in this folder are named by the SDK version.
     Version? highestVersion;
-    for (final FileSystemEntity versionEntry
-        in sdkIncludeDirectory.listSync()) {
+    for (final FileSystemEntity versionEntry in sdkIncludeDirectory.listSync()) {
       if (versionEntry.basename.startsWith('10.')) {
         // Version only handles 3 components; strip off the '10.' to leave three
         // components, since they all start with that.
-        final Version? version =
-            Version.parse(versionEntry.basename.substring(3));
-        if (highestVersion == null ||
-            (version != null && version > highestVersion)) {
+        final Version? version = Version.parse(versionEntry.basename.substring(3));
+        if (highestVersion == null || (version != null && version > highestVersion)) {
           highestVersion = version;
         }
       }
@@ -163,9 +154,7 @@ class VisualStudio {
   /// the components necessary to build.
   String? get cmakePath {
     final VswhereDetails? details = _bestVisualStudioDetails;
-    if (details == null ||
-        !details.isUsable ||
-        details.installationPath == null) {
+    if (details == null || !details.isUsable || details.installationPath == null) {
       return null;
     }
 
@@ -215,10 +204,7 @@ class VisualStudio {
 
   String? _getMsvcBinPath(String executable) {
     final VswhereDetails? details = _bestVisualStudioDetails;
-    if (details == null ||
-        !details.isUsable ||
-        details.installationPath == null ||
-        details.msvcVersion == null) {
+    if (details == null || !details.isUsable || details.installationPath == null || details.msvcVersion == null) {
       return null;
     }
 
@@ -239,9 +225,7 @@ class VisualStudio {
   /// the components necessary to build.
   String? get vcvarsPath {
     final VswhereDetails? details = _bestVisualStudioDetails;
-    if (details == null ||
-        !details.isUsable ||
-        details.installationPath == null) {
+    if (details == null || !details.isUsable || details.installationPath == null) {
       return null;
     }
 
@@ -255,8 +239,7 @@ class VisualStudio {
   }
 
   /// The major version of the Visual Studio install, as an integer.
-  int? get _majorVersion =>
-      fullVersion != null ? int.tryParse(fullVersion!.split('.')[0]) : null;
+  int? get _majorVersion => fullVersion != null ? int.tryParse(fullVersion!.split('.')[0]) : null;
 
   /// The path to vswhere.exe.
   ///
@@ -308,22 +291,19 @@ class VisualStudio {
     // Visual Studio. Since it changes over time, listing a precise version would become
     // wrong after each VC++ toolchain update, so just instruct people to install the
     // latest version.
-    cppToolchainDescription +=
-        '\n   - If there are multiple build tool versions available, install the latest';
+    cppToolchainDescription += '\n   - If there are multiple build tool versions available, install the latest';
     // Things which are required by the workload (e.g., MSBuild) don't need to
     // be included here.
     return <String, String>{
       // The C++ toolchain required by the template.
-      'Microsoft.VisualStudio.Component.VC.Tools.x86.x64':
-          cppToolchainDescription,
+      'Microsoft.VisualStudio.Component.VC.Tools.x86.x64': cppToolchainDescription,
       // CMake
-      'Microsoft.VisualStudio.Component.VC.CMake.Project':
-          'C++ CMake tools for Windows',
+      'Microsoft.VisualStudio.Component.VC.CMake.Project': 'C++ CMake tools for Windows',
     };
   }
 
   /// The minimum supported major version.
-  static const int _minimumSupportedVersion = 16; // '16' is VS 2019.
+  static const int _minimumSupportedVersion = 16;  // '16' is VS 2019.
 
   /// vswhere argument to specify the minimum version.
   static const String _vswhereMinVersionArgument = '-version';
@@ -332,8 +312,7 @@ class VisualStudio {
   static const String _vswherePrereleaseArgument = '-prerelease';
 
   /// The registry path for Windows 10 SDK installation details.
-  static const String _windows10SdkRegistryPath =
-      r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
+  static const String _windows10SdkRegistryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
 
   /// The registry key in _windows10SdkRegistryPath for the folder where the
   /// SDKs are installed.
@@ -343,10 +322,11 @@ class VisualStudio {
   ///
   /// If [validateRequirements] is set, the search will be limited to versions
   /// that have all of the required workloads and components.
-  VswhereDetails? _visualStudioDetails(
-      {bool validateRequirements = false,
+  VswhereDetails? _visualStudioDetails({
+      bool validateRequirements = false,
       List<String>? additionalArguments,
-      String? requiredWorkload}) {
+      String? requiredWorkload
+    }) {
     final List<String> requirementArguments = validateRequirements
         ? <String>[
             if (requiredWorkload != null) ...<String>[
@@ -358,10 +338,8 @@ class VisualStudio {
         : <String>[];
     try {
       final List<String> defaultArguments = <String>[
-        '-format',
-        'json',
-        '-products',
-        '*',
+        '-format', 'json',
+        '-products', '*',
         '-utf8',
         '-latest',
       ];
@@ -375,8 +353,7 @@ class VisualStudio {
         ...requirementArguments,
       ], encoding: encoding);
       if (whereResult.exitCode == 0) {
-        final List<Map<String, dynamic>>? installations =
-            _tryDecodeVswhereJson(whereResult.stdout);
+        final List<Map<String, dynamic>>? installations = _tryDecodeVswhereJson(whereResult.stdout);
         if (installations != null && installations.isNotEmpty) {
           final String? msvcVersion = _findMsvcVersion(installations);
           return VswhereDetails.fromJson(
@@ -395,8 +372,7 @@ class VisualStudio {
   }
 
   String? _findMsvcVersion(List<Map<String, dynamic>> installations) {
-    final String? installationPath =
-        installations[0]['installationPath'] as String?;
+    final String? installationPath = installations[0]['installationPath'] as String?;
     String? msvcVersion;
     if (installationPath != null) {
       final Directory installationDir = _fileSystem.directory(installationPath);
@@ -405,8 +381,7 @@ class VisualStudio {
           .childDirectory('Tools')
           .childDirectory('MSVC');
       if (msvcDir.existsSync()) {
-        final Iterable<Directory> msvcVersionDirs =
-            msvcDir.listSync().whereType<Directory>();
+        final Iterable<Directory> msvcVersionDirs = msvcDir.listSync().whereType<Directory>();
         if (msvcVersionDirs.isEmpty) {
           return null;
         }
@@ -433,7 +408,7 @@ class VisualStudio {
         vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
 
         _logger.printTrace('Failed to decode vswhere.exe JSON output. $error'
-            'Retrying after removing the unused description property:\n$vswhereJson');
+          'Retrying after removing the unused description property:\n$vswhereJson');
 
         originalError = error;
         result = json.decode(vswhereJson) as List<dynamic>;
@@ -441,9 +416,8 @@ class VisualStudio {
     } on FormatException {
       // Removing the description property didn't help.
       // Report the original decoding error on the unprocessed JSON.
-      _logger.printWarning(
-          'Warning: Unexpected vswhere.exe JSON output. $originalError'
-          'To see the full JSON, run flutter doctor -vv.');
+      _logger.printWarning('Warning: Unexpected vswhere.exe JSON output. $originalError'
+        'To see the full JSON, run flutter doctor -vv.');
       return null;
     }
 
@@ -455,7 +429,7 @@ class VisualStudio {
   /// If there's a version that has all the required components, that
   /// will be returned, otherwise returns the latest installed version regardless
   /// of components and version, or null if no such installation is found.
-  late final VswhereDetails? _bestVisualStudioDetails = () {
+  late final VswhereDetails?  _bestVisualStudioDetails = () {
     // First, attempt to find the latest version of Visual Studio that satisfies
     // both the minimum supported version and the required workloads.
     // Check in the order of stable VS, stable BT, pre-release VS, pre-release BT.
@@ -466,18 +440,15 @@ class VisualStudio {
     for (final bool checkForPrerelease in <bool>[false, true]) {
       for (final String requiredWorkload in _requiredWorkloads) {
         final VswhereDetails? result = _visualStudioDetails(
-            validateRequirements: true,
-            additionalArguments: checkForPrerelease
-                ? <String>[
-                    ...minimumVersionArguments,
-                    _vswherePrereleaseArgument
-                  ]
-                : minimumVersionArguments,
-            requiredWorkload: requiredWorkload);
+          validateRequirements: true,
+          additionalArguments: checkForPrerelease
+              ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
+              : minimumVersionArguments,
+          requiredWorkload: requiredWorkload);
 
-        if (result != null) {
-          return result;
-        }
+          if (result != null) {
+            return result;
+          }
       }
     }
 
@@ -530,10 +501,8 @@ class VisualStudio {
       }
       // Version only handles 3 components; strip off the '10.' to leave three
       // components, since they all start with that.
-      final Version? version =
-          Version.parse(versionEntry.basename.substring(3));
-      if (highestVersion == null ||
-          (version != null && version > highestVersion)) {
+      final Version? version = Version.parse(versionEntry.basename.substring(3));
+      if (highestVersion == null || (version != null && version > highestVersion)) {
         highestVersion = version;
       }
     }
@@ -564,8 +533,7 @@ class VswhereDetails {
     Map<String, dynamic> details,
     String? msvcVersion,
   ) {
-    final Map<String, dynamic>? catalog =
-        details['catalog'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
 
     return VswhereDetails(
       meetsRequirements: meetsRequirements,
@@ -581,8 +549,7 @@ class VswhereDetails {
       // Below are strings that are used only for display purposes and are allowed to
       // contain replacement characters.
       displayName: details['displayName'] as String?,
-      catalogDisplayVersion:
-          catalog == null ? null : catalog['productDisplayVersion'] as String?,
+      catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
 
       msvcVersion: msvcVersion,
     );
@@ -597,10 +564,10 @@ class VswhereDetails {
   static String? _validateString(String? value) {
     if (value != null && value.contains('\u{FFFD}')) {
       throwToolExit(
-          'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string: $value. '
-          'The Flutter team would greatly appreciate if you could file a bug explaining '
-          'exactly what you were doing when this happened:\n'
-          'https://github.com/flutter/flutter/issues/new/choose\n');
+        'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string: $value. '
+        'The Flutter team would greatly appreciate if you could file a bug explaining '
+        'exactly what you were doing when this happened:\n'
+        'https://github.com/flutter/flutter/issues/new/choose\n');
     }
 
     return value;

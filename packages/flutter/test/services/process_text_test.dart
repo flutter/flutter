@@ -8,13 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('ProcessTextService.queryTextActions emits correct method call',
-      () async {
+  test('ProcessTextService.queryTextActions emits correct method call', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.processText,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -23,17 +20,13 @@ void main() {
     await processTextService.queryTextActions();
 
     expect(log, hasLength(1));
-    expect(log.single,
-        isMethodCall('ProcessText.queryTextActions', arguments: null));
+    expect(log.single, isMethodCall('ProcessText.queryTextActions', arguments: null));
   });
 
-  test('ProcessTextService.processTextAction emits correct method call',
-      () async {
+  test('ProcessTextService.processTextAction emits correct method call', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.processText,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -41,14 +34,10 @@ void main() {
     final ProcessTextService processTextService = DefaultProcessTextService();
     const String fakeActionId = 'fakeActivity.fakeAction';
     const String textToProcess = 'Flutter';
-    await processTextService.processTextAction(
-        fakeActionId, textToProcess, false);
+    await processTextService.processTextAction(fakeActionId, textToProcess, false);
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall('ProcessText.processTextAction',
-            arguments: <Object>[fakeActionId, textToProcess, false]));
+    expect(log.single, isMethodCall('ProcessText.processTextAction', arguments: <Object>[fakeActionId, textToProcess, false]));
   });
 
   test('ProcessTextService handles engine answers over the channel', () async {
@@ -56,8 +45,7 @@ void main() {
     const String action2Id = 'fakeActivity.fakeAction2';
 
     // Fake channel that simulates responses returned from the engine.
-    final MethodChannel fakeChannel =
-        FakeProcessTextChannel((MethodCall call) async {
+    final MethodChannel fakeChannel = FakeProcessTextChannel((MethodCall call) async {
       if (call.method == 'ProcessText.queryTextActions') {
         return <String, String>{
           action1Id: 'Action1',
@@ -77,23 +65,19 @@ void main() {
       }
     });
 
-    final DefaultProcessTextService processTextService =
-        DefaultProcessTextService();
+    final DefaultProcessTextService processTextService = DefaultProcessTextService();
     processTextService.setChannel(fakeChannel);
 
-    final List<ProcessTextAction> actions =
-        await processTextService.queryTextActions();
+    final List<ProcessTextAction> actions = await processTextService.queryTextActions();
     expect(actions, hasLength(2));
 
     const String textToProcess = 'Flutter';
     String? processedText;
 
-    processedText = await processTextService.processTextAction(
-        action1Id, textToProcess, false);
+    processedText = await processTextService.processTextAction(action1Id, textToProcess, false);
     expect(processedText, 'Flutter!!!');
 
-    processedText = await processTextService.processTextAction(
-        action2Id, textToProcess, false);
+    processedText = await processTextService.processTextAction(action2Id, textToProcess, false);
     expect(processedText, null);
   });
 }
@@ -113,12 +97,10 @@ class FakeProcessTextChannel implements MethodChannel {
   MethodCodec get codec => const StandardMethodCodec();
 
   @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) =>
-      throw UnimplementedError();
+  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) =>
-      throw UnimplementedError();
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
 
   @override
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
@@ -131,6 +113,5 @@ class FakeProcessTextChannel implements MethodChannel {
   String get name => 'flutter/processtext';
 
   @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) =>
-      incoming = handler;
+  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
 }

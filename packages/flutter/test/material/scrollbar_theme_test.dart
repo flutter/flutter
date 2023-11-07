@@ -13,8 +13,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 // The const represents the starting position of the scrollbar thumb for
 // the below tests. The thumb is 90 pixels long, and 8 pixels wide, with a 2
 // pixel margin to the right edge of the viewport.
-const Rect _kMaterialDesignInitialThumbRect =
-    Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
+const Rect _kMaterialDesignInitialThumbRect = Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
 const Radius _kDefaultThumbRadius = Radius.circular(8.0);
 const Color _kDefaultIdleThumbColor = Color(0x1a000000);
 const Color _kDefaultDragThumbColor = Color(0x99000000);
@@ -22,8 +21,7 @@ const Color _kDefaultDragThumbColor = Color(0x99000000);
 void main() {
   test('ScrollbarThemeData copyWith, ==, hashCode basics', () {
     expect(const ScrollbarThemeData(), const ScrollbarThemeData().copyWith());
-    expect(const ScrollbarThemeData().hashCode,
-        const ScrollbarThemeData().copyWith().hashCode);
+    expect(const ScrollbarThemeData().hashCode, const ScrollbarThemeData().copyWith().hashCode);
   });
 
   test('ScrollbarThemeData lerp special cases', () {
@@ -32,119 +30,16 @@ void main() {
     expect(identical(ScrollbarThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking(
-    'Passing no ScrollbarTheme returns defaults',
-    (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: ScrollConfiguration(
-            behavior: const NoScrollbarBehavior(),
-            child: Scrollbar(
-              thumbVisibility: true,
-              showTrackOnHover: true,
-              controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: const SizedBox(width: 4000.0, height: 4000.0),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      // Idle scrollbar behavior
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              _kMaterialDesignInitialThumbRect,
-              _kDefaultThumbRadius,
-            ),
-            color: _kDefaultIdleThumbColor,
-          ),
-      );
-
-      // Drag scrollbar behavior
-      const double scrollAmount = 10.0;
-      final TestGesture dragScrollbarGesture =
-          await tester.startGesture(const Offset(797.0, 45.0));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              _kMaterialDesignInitialThumbRect,
-              _kDefaultThumbRadius,
-            ),
-            // Drag color
-            color: _kDefaultDragThumbColor,
-          ),
-      );
-
-      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.up();
-      await tester.pumpAndSettle();
-
-      // Hover scrollbar behavior
-      final TestGesture gesture =
-          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-      await gesture.addPointer();
-      await gesture.moveTo(const Offset(794.0, 5.0));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rect(
-            rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-            color: const Color(0x08000000),
-          )
-          ..line(
-            p1: const Offset(784.0, 0.0),
-            p2: const Offset(784.0, 600.0),
-            strokeWidth: 1.0,
-            color: const Color(0x1a000000),
-          )
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              // Scrollbar thumb is larger
-              const Rect.fromLTRB(786.0, 10.0, 798.0, 100.0),
-              _kDefaultThumbRadius,
-            ),
-            // Hover color
-            color: const Color(0x80000000),
-          ),
-      );
-
-      scrollController.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-      TargetPlatform.windows,
-      TargetPlatform.fuchsia,
-    }),
-  );
-
-  testWidgetsWithLeakTracking(
-    'Scrollbar uses values from ScrollbarTheme',
-    (WidgetTester tester) async {
-      final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
-      final ScrollController scrollController = ScrollController();
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(
-          scrollbarTheme: scrollbarTheme,
-        ),
+  testWidgetsWithLeakTracking('Passing no ScrollbarTheme returns defaults', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: ScrollConfiguration(
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             thumbVisibility: true,
+            showTrackOnHover: true,
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
@@ -152,83 +47,172 @@ void main() {
             ),
           ),
         ),
-      ));
-      await tester.pumpAndSettle();
-      // Idle scrollbar behavior
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
-              const Radius.circular(6.0),
-            ),
-            color: const Color(0xff4caf50),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          _kMaterialDesignInitialThumbRect,
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    // Drag scrollbar behavior
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          _kMaterialDesignInitialThumbRect,
+          _kDefaultThumbRadius,
+        ),
+        // Drag color
+        color: _kDefaultDragThumbColor,
+      ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // Hover scrollbar behavior
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(786.0, 10.0, 798.0, 100.0),
+            _kDefaultThumbRadius,
           ),
-      );
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
 
-      // Drag scrollbar behavior
-      const double scrollAmount = 10.0;
-      final TestGesture dragScrollbarGesture =
-          await tester.startGesture(const Offset(797.0, 45.0));
-      await tester.pumpAndSettle();
+    scrollController.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
+    }),
+  );
 
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
-              const Radius.circular(6.0),
-            ),
-            // Drag color
-            color: const Color(0xfff44336),
+  testWidgetsWithLeakTracking('Scrollbar uses values from ScrollbarTheme', (WidgetTester tester) async {
+    final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        scrollbarTheme: scrollbarTheme,
+      ),
+      home: ScrollConfiguration(
+        behavior: const NoScrollbarBehavior(),
+        child: Scrollbar(
+          thumbVisibility: true,
+          controller: scrollController,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(width: 4000.0, height: 4000.0),
           ),
-      );
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
+          const Radius.circular(6.0),
+        ),
+        color: const Color(0xff4caf50),
+      ),
+    );
 
-      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.up();
-      await tester.pumpAndSettle();
+    // Drag scrollbar behavior
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
 
-      // Hover scrollbar behavior
-      final TestGesture gesture =
-          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-      await gesture.addPointer();
-      await gesture.moveTo(const Offset(794.0, 15.0));
-      await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
+          const Radius.circular(6.0),
+        ),
+        // Drag color
+        color: const Color(0xfff44336),
+      ),
+    );
 
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rect(
-            rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 600.0),
-            color: const Color(0xff000000),
-          )
-          ..line(
-            p1: const Offset(770.0, 00.0),
-            p2: const Offset(770.0, 600.0),
-            strokeWidth: 1.0,
-            color: const Color(0xffffeb3b),
-          )
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              // Scrollbar thumb is larger
-              const Rect.fromLTRB(775.0, 20.0, 795.0, 107.0),
-              const Radius.circular(6.0),
-            ),
-            // Hover color
-            color: const Color(0xff2196f3),
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // Hover scrollbar behavior
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(794.0, 15.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 600.0),
+          color: const Color(0xff000000),
+        )
+        ..line(
+          p1: const Offset(770.0, 00.0),
+          p2: const Offset(770.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0xffffeb3b),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(775.0, 20.0, 795.0, 107.0),
+            const Radius.circular(6.0),
           ),
-      );
+          // Hover color
+          color: const Color(0xff2196f3),
+        ),
+    );
 
-      scrollController.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-      TargetPlatform.windows,
-      TargetPlatform.fuchsia,
+    scrollController.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
     }),
   );
 
@@ -278,13 +262,10 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('ScrollbarTheme can disable gestures',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollbarTheme can disable gestures', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      theme: ThemeData(useMaterial3: false, scrollbarTheme: const ScrollbarThemeData(interactive: false)),
       home: Scrollbar(
         thumbVisibility: true,
         controller: scrollController,
@@ -298,20 +279,18 @@ void main() {
     // Idle scrollbar behavior
     expect(
       find.byType(Scrollbar),
-      paints
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            _kMaterialDesignInitialThumbRect,
-            _kDefaultThumbRadius,
-          ),
-          color: _kDefaultIdleThumbColor,
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          _kMaterialDesignInitialThumbRect,
+          _kDefaultThumbRadius,
         ),
+        color: _kDefaultIdleThumbColor,
+      ),
     );
 
     // Try to drag scrollbar.
     const double scrollAmount = 10.0;
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(797.0, 45.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
@@ -320,29 +299,22 @@ void main() {
     // Expect no change
     expect(
       find.byType(Scrollbar),
-      paints
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            _kMaterialDesignInitialThumbRect,
-            _kDefaultThumbRadius,
-          ),
-          color: _kDefaultIdleThumbColor,
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          _kMaterialDesignInitialThumbRect,
+          _kDefaultThumbRadius,
         ),
+        color: _kDefaultIdleThumbColor,
+      ),
     );
 
     scrollController.dispose();
-  },
-      variant: const TargetPlatformVariant(
-          <TargetPlatform>{TargetPlatform.fuchsia}));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgetsWithLeakTracking(
-      'Scrollbar.interactive takes priority over ScrollbarTheme',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar.interactive takes priority over ScrollbarTheme', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      theme: ThemeData(useMaterial3: false, scrollbarTheme: const ScrollbarThemeData(interactive: false)),
       home: Scrollbar(
         interactive: true,
         thumbVisibility: true,
@@ -357,20 +329,18 @@ void main() {
     // Idle scrollbar behavior
     expect(
       find.byType(Scrollbar),
-      paints
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            _kMaterialDesignInitialThumbRect,
-            _kDefaultThumbRadius,
-          ),
-          color: _kDefaultIdleThumbColor,
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          _kMaterialDesignInitialThumbRect,
+          _kDefaultThumbRadius,
         ),
+        color: _kDefaultIdleThumbColor,
+      ),
     );
 
     // Drag scrollbar.
     const double scrollAmount = 10.0;
-    final TestGesture dragScrollbarGesture =
-        await tester.startGesture(const Offset(797.0, 45.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
@@ -379,135 +349,123 @@ void main() {
     // Gestures handled by Scrollbar.
     expect(
       find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    scrollController.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
+
+  testWidgetsWithLeakTracking('Scrollbar widget properties take priority over theme', (WidgetTester tester) async {
+    const double thickness = 4.0;
+    const bool showTrackOnHover = true;
+    const Radius radius = Radius.circular(3.0);
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: const ColorScheme.light(),
+        ),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: Scrollbar(
+            thickness: thickness,
+            thumbVisibility: true,
+            showTrackOnHover: showTrackOnHover,
+            radius: radius,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Radius.circular(3.0),
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    // Drag scrollbar behavior
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Radius.circular(3.0),
+        ),
+        // Drag color
+        color: _kDefaultDragThumbColor,
+      ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // Hover scrollbar behavior
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
       paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
-            _kDefaultThumbRadius,
+            const Rect.fromLTRB(786.0, 10.0, 798.0, 100.0),
+            const Radius.circular(3.0),
           ),
-          color: _kDefaultIdleThumbColor,
+          // Hover color
+          color: const Color(0x80000000),
         ),
     );
 
     scrollController.dispose();
-  },
-      variant: const TargetPlatformVariant(
-          <TargetPlatform>{TargetPlatform.fuchsia}));
-
-  testWidgetsWithLeakTracking(
-    'Scrollbar widget properties take priority over theme',
-    (WidgetTester tester) async {
-      const double thickness = 4.0;
-      const bool showTrackOnHover = true;
-      const Radius radius = Radius.circular(3.0);
-      final ScrollController scrollController = ScrollController();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            colorScheme: const ColorScheme.light(),
-          ),
-          home: ScrollConfiguration(
-            behavior: const NoScrollbarBehavior(),
-            child: Scrollbar(
-              thickness: thickness,
-              thumbVisibility: true,
-              showTrackOnHover: showTrackOnHover,
-              radius: radius,
-              controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: const SizedBox(width: 4000.0, height: 4000.0),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      // Idle scrollbar behavior
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
-              const Radius.circular(3.0),
-            ),
-            color: _kDefaultIdleThumbColor,
-          ),
-      );
-
-      // Drag scrollbar behavior
-      const double scrollAmount = 10.0;
-      final TestGesture dragScrollbarGesture =
-          await tester.startGesture(const Offset(797.0, 45.0));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
-              const Radius.circular(3.0),
-            ),
-            // Drag color
-            color: _kDefaultDragThumbColor,
-          ),
-      );
-
-      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.up();
-      await tester.pumpAndSettle();
-
-      // Hover scrollbar behavior
-      final TestGesture gesture =
-          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-      await gesture.addPointer();
-      await gesture.moveTo(const Offset(794.0, 5.0));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rect(
-            rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-            color: const Color(0x08000000),
-          )
-          ..line(
-            p1: const Offset(784.0, 0.0),
-            p2: const Offset(784.0, 600.0),
-            strokeWidth: 1.0,
-            color: const Color(0x1a000000),
-          )
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(786.0, 10.0, 798.0, 100.0),
-              const Radius.circular(3.0),
-            ),
-            // Hover color
-            color: const Color(0x80000000),
-          ),
-      );
-
-      scrollController.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-      TargetPlatform.windows,
-      TargetPlatform.fuchsia,
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
     }),
   );
 
-  testWidgetsWithLeakTracking(
-    'ThemeData colorScheme is used when no ScrollbarTheme is set',
-    (WidgetTester tester) async {
-      (ScrollController, Widget) buildFrame(ThemeData appTheme) {
-        final ScrollController scrollController = ScrollController();
-        return (
+  testWidgetsWithLeakTracking('ThemeData colorScheme is used when no ScrollbarTheme is set', (WidgetTester tester) async {
+    (ScrollController, Widget) buildFrame(ThemeData appTheme) {
+      final ScrollController scrollController = ScrollController();
+      return (
           scrollController,
           MaterialApp(
             theme: appTheme,
@@ -525,239 +483,222 @@ void main() {
             ),
           ),
         );
-      }
+    }
 
-      // Scrollbar defaults for light themes:
-      // - coloring based on ColorScheme.onSurface
-      final (ScrollController controller1, Widget frame1) =
-          buildFrame(ThemeData(
-        colorScheme: const ColorScheme.light(),
-      ));
-      await tester.pumpWidget(frame1);
-      await tester.pumpAndSettle();
-      // Idle scrollbar behavior
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              _kMaterialDesignInitialThumbRect,
-              _kDefaultThumbRadius,
-            ),
-            color: _kDefaultIdleThumbColor,
+    // Scrollbar defaults for light themes:
+    // - coloring based on ColorScheme.onSurface
+    final (ScrollController controller1, Widget frame1) = buildFrame(ThemeData(
+      colorScheme: const ColorScheme.light(),
+    ));
+    await tester.pumpWidget(frame1);
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          _kMaterialDesignInitialThumbRect,
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    // Drag scrollbar behavior
+    const double scrollAmount = 10.0;
+    TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          _kMaterialDesignInitialThumbRect,
+          _kDefaultThumbRadius,
+        ),
+        // Drag color
+        color: _kDefaultDragThumbColor,
+      ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // Hover scrollbar behavior
+    final TestGesture hoverGesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await hoverGesture.addPointer();
+    addTearDown(hoverGesture.removePointer);
+    await hoverGesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(786.0, 10.0, 798.0, 100.0),
+            _kDefaultThumbRadius,
           ),
-      );
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
 
-      // Drag scrollbar behavior
-      const double scrollAmount = 10.0;
-      TestGesture dragScrollbarGesture =
-          await tester.startGesture(const Offset(797.0, 45.0));
-      await tester.pumpAndSettle();
+    await hoverGesture.moveTo(Offset.zero);
 
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              _kMaterialDesignInitialThumbRect,
-              _kDefaultThumbRadius,
-            ),
-            // Drag color
-            color: _kDefaultDragThumbColor,
+    // Scrollbar defaults for dark themes:
+    // - coloring slightly different based on ColorScheme.onSurface
+    final (ScrollController controller2, Widget frame2) = buildFrame(ThemeData(
+      colorScheme: const ColorScheme.dark(),
+    ));
+    await tester.pumpWidget(frame2);
+    await tester.pumpAndSettle(); // Theme change animation
+
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
+          _kDefaultThumbRadius,
+        ),
+        color: const Color(0x4dffffff),
+      ),
+    );
+
+    // Drag scrollbar behavior
+    dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
+          _kDefaultThumbRadius,
+        ),
+        // Drag color
+        color: const Color(0xbfffffff),
+      ),
+    );
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // Hover scrollbar behavior
+    await hoverGesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x0dffffff),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x40ffffff),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(786.0, 20.0, 798.0, 110.0),
+            _kDefaultThumbRadius,
           ),
-      );
+          // Hover color
+          color: const Color(0xa6ffffff),
+        ),
+    );
 
-      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.up();
-      await tester.pumpAndSettle();
-
-      // Hover scrollbar behavior
-      final TestGesture hoverGesture =
-          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-      await hoverGesture.addPointer();
-      addTearDown(hoverGesture.removePointer);
-      await hoverGesture.moveTo(const Offset(794.0, 5.0));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rect(
-            rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-            color: const Color(0x08000000),
-          )
-          ..line(
-            p1: const Offset(784.0, 0.0),
-            p2: const Offset(784.0, 600.0),
-            strokeWidth: 1.0,
-            color: const Color(0x1a000000),
-          )
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              // Scrollbar thumb is larger
-              const Rect.fromLTRB(786.0, 10.0, 798.0, 100.0),
-              _kDefaultThumbRadius,
-            ),
-            // Hover color
-            color: const Color(0x80000000),
-          ),
-      );
-
-      await hoverGesture.moveTo(Offset.zero);
-
-      // Scrollbar defaults for dark themes:
-      // - coloring slightly different based on ColorScheme.onSurface
-      final (ScrollController controller2, Widget frame2) =
-          buildFrame(ThemeData(
-        colorScheme: const ColorScheme.dark(),
-      ));
-      await tester.pumpWidget(frame2);
-      await tester.pumpAndSettle(); // Theme change animation
-
-      // Idle scrollbar behavior
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
-              _kDefaultThumbRadius,
-            ),
-            color: const Color(0x4dffffff),
-          ),
-      );
-
-      // Drag scrollbar behavior
-      dragScrollbarGesture =
-          await tester.startGesture(const Offset(797.0, 45.0));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
-              _kDefaultThumbRadius,
-            ),
-            // Drag color
-            color: const Color(0xbfffffff),
-          ),
-      );
-
-      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.up();
-      await tester.pumpAndSettle();
-
-      // Hover scrollbar behavior
-      await hoverGesture.moveTo(const Offset(794.0, 5.0));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rect(
-            rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-            color: const Color(0x0dffffff),
-          )
-          ..line(
-            p1: const Offset(784.0, 0.0),
-            p2: const Offset(784.0, 600.0),
-            strokeWidth: 1.0,
-            color: const Color(0x40ffffff),
-          )
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(
-              // Scrollbar thumb is larger
-              const Rect.fromLTRB(786.0, 20.0, 798.0, 110.0),
-              _kDefaultThumbRadius,
-            ),
-            // Hover color
-            color: const Color(0xa6ffffff),
-          ),
-      );
-
-      controller1.dispose();
-      controller2.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-      TargetPlatform.windows,
-      TargetPlatform.fuchsia,
+    controller1.dispose();
+    controller2.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
     }),
   );
 
-  testWidgetsWithLeakTracking(
-    'ScrollbarThemeData.trackVisibility test',
-    (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
-      bool? getTrackVisibility(Set<MaterialState> states) {
-        return true;
-      }
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false).copyWith(
-            scrollbarTheme: _scrollbarTheme(
-              trackVisibility:
-                  MaterialStateProperty.resolveWith(getTrackVisibility),
-            ),
+  testWidgetsWithLeakTracking('ScrollbarThemeData.trackVisibility test', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    bool? getTrackVisibility(Set<MaterialState> states) {
+      return true;
+    }
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false).copyWith(
+          scrollbarTheme: _scrollbarTheme(
+            trackVisibility: MaterialStateProperty.resolveWith(getTrackVisibility),
           ),
-          home: ScrollConfiguration(
-            behavior: const NoScrollbarBehavior(),
-            child: Scrollbar(
-              thumbVisibility: true,
-              showTrackOnHover: true,
+        ),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: Scrollbar(
+            thumbVisibility: true,
+            showTrackOnHover: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
               controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: const SizedBox(width: 4000.0, height: 4000.0),
-              ),
+              child: const SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(
-        find.byType(Scrollbar),
-        paints
-          ..rect(color: const Color(0x08000000))
-          ..line(
-            strokeWidth: 1.0,
-            color: const Color(0x1a000000),
-          )
-          ..rrect(color: const Color(0xff4caf50)),
-      );
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(color: const Color(0x08000000))
+        ..line(
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
+        ..rrect(color: const Color(0xff4caf50)),
+    );
 
-      scrollController.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-      TargetPlatform.windows,
-      TargetPlatform.fuchsia,
-    }),
+    scrollController.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }),
   );
 
-  testWidgetsWithLeakTracking('Default ScrollbarTheme debugFillProperties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ScrollbarTheme debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ScrollbarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('ScrollbarTheme implements debugFillProperties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollbarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     ScrollbarThemeData(
       thickness: MaterialStateProperty.resolveWith(_getThickness),
@@ -773,9 +714,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[
       "thumbVisibility: Instance of '_MaterialStatePropertyWith<bool?>'",
@@ -802,9 +743,7 @@ class NoScrollbarBehavior extends ScrollBehavior {
   const NoScrollbarBehavior();
 
   @override
-  Widget buildScrollbar(
-          BuildContext context, Widget child, ScrollableDetails details) =>
-      child;
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 ScrollbarThemeData _scrollbarTheme({
@@ -828,8 +767,7 @@ ScrollbarThemeData _scrollbarTheme({
     radius: radius,
     thumbColor: thumbColor ?? MaterialStateProperty.resolveWith(_getThumbColor),
     trackColor: trackColor ?? MaterialStateProperty.resolveWith(_getTrackColor),
-    trackBorderColor: trackBorderColor ??
-        MaterialStateProperty.resolveWith(_getTrackBorderColor),
+    trackBorderColor: trackBorderColor ?? MaterialStateProperty.resolveWith(_getTrackBorderColor),
     crossAxisMargin: crossAxisMargin,
     mainAxisMargin: mainAxisMargin,
     minThumbLength: minThumbLength,

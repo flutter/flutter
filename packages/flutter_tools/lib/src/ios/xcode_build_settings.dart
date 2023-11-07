@@ -11,8 +11,8 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
-String flutterMacOSFrameworkDir(
-    BuildMode mode, FileSystem fileSystem, Artifacts artifacts) {
+String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
+    Artifacts artifacts) {
   final String flutterMacOSFramework = artifacts.getArtifactPath(
     Artifact.flutterMacOSFramework,
     platform: TargetPlatform.darwin,
@@ -69,12 +69,11 @@ void _updateGeneratedXcodePropertiesFile({
 }) {
   final StringBuffer localsBuffer = StringBuffer();
 
-  localsBuffer.writeln(
-      '// This is a generated file; do not edit or check into version control.');
+  localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
   xcodeBuildSettings.forEach(localsBuffer.writeln);
   final File generatedXcodePropertiesFile = useMacOSConfig
-      ? project.macos.generatedXcodePropertiesFile
-      : project.ios.generatedXcodePropertiesFile;
+    ? project.macos.generatedXcodePropertiesFile
+    : project.ios.generatedXcodePropertiesFile;
 
   generatedXcodePropertiesFile.createSync(recursive: true);
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
@@ -91,18 +90,16 @@ void _updateGeneratedEnvironmentVariablesScript({
   final StringBuffer localsBuffer = StringBuffer();
 
   localsBuffer.writeln('#!/bin/sh');
-  localsBuffer.writeln(
-      '# This is a generated file; do not edit or check into version control.');
+  localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
   for (final String line in xcodeBuildSettings) {
-    if (!line.contains('[')) {
-      // Exported conditional Xcode build settings do not work.
+    if (!line.contains('[')) { // Exported conditional Xcode build settings do not work.
       localsBuffer.writeln('export "$line"');
     }
   }
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
-      ? project.macos.generatedEnvironmentVariableExportScript
-      : project.ios.generatedEnvironmentVariableExportScript;
+    ? project.macos.generatedEnvironmentVariableExportScript
+    : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
   globals.os.chmod(generatedModuleBuildPhaseScript, '755');
@@ -114,8 +111,7 @@ String? parsedBuildName({
   BuildInfo? buildInfo,
 }) {
   final String? buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNameForPlatform(
-      TargetPlatform.ios, buildNameToParse, globals.logger);
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
@@ -157,8 +153,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  xcodeBuildSettings.add(
-      'FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}');
+  xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}');
 
   // Tell CocoaPods behavior to codesign in parallel with rest of scripts to speed it up.
   // Value must be "true", not "YES". https://github.com/CocoaPods/CocoaPods/pull/6088
@@ -170,17 +165,12 @@ Future<List<String>> _xcodeBuildSettingsLines({
   }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
-  xcodeBuildSettings
-      .add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
+  xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
-  final String buildName =
-      parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ??
-          '1.0.0';
+  final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
-  final String buildNumber =
-      parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ??
-          '1';
+  final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
   // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
@@ -193,8 +183,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
   if (localEngineInfo != null) {
     final String engineOutPath = localEngineInfo.targetOutPath;
-    xcodeBuildSettings.add(
-        'FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
+    xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 
     final String localEngineName = localEngineInfo.localTargetName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
@@ -238,13 +227,11 @@ Future<List<String>> _xcodeBuildSettingsLines({
     if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }
-    xcodeBuildSettings
-        .add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
     xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7');
   }
 
-  for (final MapEntry<String, String> config
-      in buildInfo.toEnvironmentConfig().entries) {
+  for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
     xcodeBuildSettings.add('${config.key}=${config.value}');
   }
   return xcodeBuildSettings;

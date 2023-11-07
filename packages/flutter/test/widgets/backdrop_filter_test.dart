@@ -14,9 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking(
-      "Material2 - BackdropFilter's cull rect does not shrink",
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Material2 - BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -54,9 +52,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      "Material3 - BackdropFilter's cull rect does not shrink",
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Material3 - BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -94,9 +90,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'Material2 - BackdropFilter blendMode on saveLayer',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -155,9 +149,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'Material3 - BackdropFilter blendMode on saveLayer',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),

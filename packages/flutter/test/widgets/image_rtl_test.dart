@@ -20,8 +20,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter loadImage(
-      TestImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
     );
@@ -39,9 +38,7 @@ void main() {
     testImage.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'DecorationImage RTL with alignment topEnd and match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage RTL with alignment topEnd and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -63,46 +60,24 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..translate(x: 50.0, y: 0.0)
-        ..scale(x: -1.0, y: 1.0)
-        ..translate(x: -50.0, y: 0.0)
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
-        ..restore(),
+    expect(find.byType(Container), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..translate(x: 50.0, y: 0.0)
+      ..scale(x: -1.0, y: 1.0)
+      ..translate(x: -50.0, y: 0.0)
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
+      ..restore(),
     );
-    expect(
-        find.byType(Container),
-        isNot(paints
-          ..scale()
-          ..scale()));
+    expect(find.byType(Container), isNot(paints..scale()..scale()));
   });
 
-  testWidgetsWithLeakTracking(
-      'DecorationImage LTR with alignment topEnd (and pointless match)',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage LTR with alignment topEnd (and pointless match)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -124,38 +99,21 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
-        ..restore(),
+    expect(find.byType(Container), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
+      ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage RTL with alignment topEnd',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage RTL with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -176,38 +134,21 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(16.0, 0.0, 32.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(32.0, 0.0, 48.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(48.0, 0.0, 64.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(64.0, 0.0, 80.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(80.0, 0.0, 96.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(96.0, 0.0, 112.0, 9.0))
-        ..restore(),
+    expect(find.byType(Container), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(16.0, 0.0, 32.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(32.0, 0.0, 48.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(48.0, 0.0, 64.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(64.0, 0.0, 80.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(80.0, 0.0, 96.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(96.0, 0.0, 112.0, 9.0))
+      ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage LTR with alignment topEnd',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage LTR with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -228,39 +169,21 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
-        ..restore(),
+    expect(find.byType(Container), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
+      ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking(
-      'DecorationImage RTL with alignment center-right and match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage RTL with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -281,32 +204,18 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..translate(x: 50.0, y: 0.0)
-        ..scale(x: -1.0, y: 1.0)
-        ..translate(x: -50.0, y: 0.0)
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(0.0, 20.5, 16.0, 29.5))
-        ..restore(),
+    expect(find.byType(Container), paints
+      ..translate(x: 50.0, y: 0.0)
+      ..scale(x: -1.0, y: 1.0)
+      ..translate(x: -50.0, y: 0.0)
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 20.5, 16.0, 29.5))
+      ..restore(),
     );
-    expect(
-        find.byType(Container),
-        isNot(paints
-          ..scale()
-          ..scale()));
-    expect(
-        find.byType(Container),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(Container), isNot(paints..scale()..scale()));
+    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking(
-      'DecorationImage RTL with alignment center-right and no match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage RTL with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -326,24 +235,14 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+    expect(find.byType(Container), paints
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
-    expect(
-        find.byType(Container),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking(
-      'DecorationImage LTR with alignment center-right and match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage LTR with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -364,24 +263,14 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+    expect(find.byType(Container), paints
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
-    expect(
-        find.byType(Container),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking(
-      'DecorationImage LTR with alignment center-right and no match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecorationImage LTR with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -402,23 +291,14 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(Container),
-      paints
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+    expect(find.byType(Container), paints
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
     expect(find.byType(Container), isNot(paints..scale()));
-    expect(
-        find.byType(Container),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image RTL with alignment topEnd and match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image RTL with alignment topEnd and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -438,46 +318,24 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..translate(x: 50.0, y: 0.0)
-        ..scale(x: -1.0, y: 1.0)
-        ..translate(x: -50.0, y: 0.0)
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
-        ..restore(),
+    expect(find.byType(SizedBox), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..translate(x: 50.0, y: 0.0)
+      ..scale(x: -1.0, y: 1.0)
+      ..translate(x: -50.0, y: 0.0)
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
+      ..restore(),
     );
-    expect(
-        find.byType(SizedBox),
-        isNot(paints
-          ..scale()
-          ..scale()));
+    expect(find.byType(SizedBox), isNot(paints..scale()..scale()));
   });
 
-  testWidgetsWithLeakTracking(
-      'Image LTR with alignment topEnd (and pointless match)',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image LTR with alignment topEnd (and pointless match)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -497,38 +355,21 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
-        ..restore(),
+    expect(find.byType(SizedBox), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
+      ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('Image RTL with alignment topEnd',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image RTL with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -547,38 +388,21 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(16.0, 0.0, 32.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(32.0, 0.0, 48.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(48.0, 0.0, 64.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(64.0, 0.0, 80.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(80.0, 0.0, 96.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(96.0, 0.0, 112.0, 9.0))
-        ..restore(),
+    expect(find.byType(SizedBox), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(16.0, 0.0, 32.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(32.0, 0.0, 48.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(48.0, 0.0, 64.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(64.0, 0.0, 80.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(80.0, 0.0, 96.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(96.0, 0.0, 112.0, 9.0))
+      ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('Image LTR with alignment topEnd',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image LTR with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -597,38 +421,21 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
-        ..restore(),
+    expect(find.byType(SizedBox), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
+      ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('Image RTL with alignment center-right and match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image RTL with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -645,32 +452,18 @@ void main() {
         ),
       ),
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..translate(x: 50.0, y: 0.0)
-        ..scale(x: -1.0, y: 1.0)
-        ..translate(x: -50.0, y: 0.0)
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(0.0, 20.5, 16.0, 29.5))
-        ..restore(),
+    expect(find.byType(SizedBox), paints
+      ..translate(x: 50.0, y: 0.0)
+      ..scale(x: -1.0, y: 1.0)
+      ..translate(x: -50.0, y: 0.0)
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 20.5, 16.0, 29.5))
+      ..restore(),
     );
-    expect(
-        find.byType(SizedBox),
-        isNot(paints
-          ..scale()
-          ..scale()));
-    expect(
-        find.byType(SizedBox),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..scale()..scale()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking(
-      'Image RTL with alignment center-right and no match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image RTL with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -688,23 +481,14 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+    expect(find.byType(SizedBox), paints
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
-    expect(
-        find.byType(SizedBox),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image LTR with alignment center-right and match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image LTR with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -723,24 +507,14 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+    expect(find.byType(SizedBox), paints
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
-    expect(
-        find.byType(SizedBox),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking(
-      'Image LTR with alignment center-right and no match',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image LTR with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -759,23 +533,14 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(
-      find.byType(SizedBox),
-      paints
-        ..drawImageRect(
-            source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
-            destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
+    expect(find.byType(SizedBox), paints
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
-    expect(
-        find.byType(SizedBox),
-        isNot(paints
-          ..drawImageRect()
-          ..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image - Switch needing direction',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image - Switch needing direction', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

@@ -16,8 +16,7 @@ void main() {
     await tester.tapAt(tester.getCenter(find.byType(Slider)));
     await tester.pumpAndSettle();
 
-    final MainWidgetState state =
-        tester.state<MainWidgetState>(find.byType(MainWidget));
+    final MainWidgetState state = tester.state<MainWidgetState>(find.byType(MainWidget));
     expect(state.currentSliderValue, 60);
   });
 }

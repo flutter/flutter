@@ -17,8 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Image filter - blur',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - blur', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: ImageFiltered(
@@ -33,8 +32,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - blur with offset',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - blur with offset', (WidgetTester tester) async {
     final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(
@@ -54,8 +52,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - dilate',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - dilate', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: ImageFiltered(
@@ -70,8 +67,7 @@ void main() {
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
-  testWidgetsWithLeakTracking('Image filter - erode',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - erode', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: ImageFiltered(
@@ -87,8 +83,7 @@ void main() {
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
-  testWidgetsWithLeakTracking('Image filter - matrix',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - matrix', (WidgetTester tester) async {
     final ImageFilter matrix = ImageFilter.matrix(Float64List.fromList(<double>[
       0.5, 0.0, 0.0, 0.0, //
       0.0, 0.5, 0.0, 0.0, //
@@ -107,10 +102,10 @@ void main() {
                 title: const Text('Matrix ImageFilter Test'),
               ),
               body: const Center(
-                child: Text('Hooray!'),
+                child:Text('Hooray!'),
               ),
               floatingActionButton: FloatingActionButton(
-                onPressed: () {},
+                onPressed: () { },
                 tooltip: 'Increment',
                 child: const Icon(Icons.add),
               ),
@@ -125,8 +120,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - matrix with offset',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - matrix with offset', (WidgetTester tester) async {
     final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
     final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
     final Key key = GlobalKey();
@@ -145,10 +139,10 @@ void main() {
                   title: const Text('Matrix ImageFilter Test'),
                 ),
                 body: const Center(
-                  child: Text('Hooray!'),
+                  child:Text('Hooray!'),
                 ),
                 floatingActionButton: FloatingActionButton(
-                  onPressed: () {},
+                  onPressed: () { },
                   tooltip: 'Increment',
                   child: const Icon(Icons.add),
                 ),
@@ -164,8 +158,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - reuses its layer',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithSigma(double sigma) async {
       await tester.pumpWidget(
         RepaintBoundary(
@@ -178,18 +171,15 @@ void main() {
     }
 
     await pumpWithSigma(5.0);
-    final RenderObject renderObject =
-        tester.firstRenderObject(find.byType(ImageFiltered));
-    final ImageFilterLayer originalLayer =
-        renderObject.debugLayer! as ImageFilterLayer;
+    final RenderObject renderObject = tester.firstRenderObject(find.byType(ImageFiltered));
+    final ImageFilterLayer originalLayer = renderObject.debugLayer! as ImageFilterLayer;
 
     // Change blur sigma to force a repaint.
     await pumpWithSigma(10.0);
     expect(renderObject.debugLayer, same(originalLayer));
   });
 
-  testWidgetsWithLeakTracking('Image filter - enabled and disabled',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Image filter - enabled and disabled', (WidgetTester tester) async {
     Future<void> pumpWithEnabledState(bool enabled) async {
       await tester.pumpWidget(
         RepaintBoundary(
@@ -204,6 +194,7 @@ void main() {
 
     await pumpWithEnabledState(false);
     expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
 
     await pumpWithEnabledState(true);
     expect(tester.layers, contains(isA<ImageFilterLayer>()));

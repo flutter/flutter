@@ -23,17 +23,14 @@ class RestorablePushReplacementExample extends StatefulWidget {
   const RestorablePushReplacementExample({super.key});
 
   @override
-  State<RestorablePushReplacementExample> createState() =>
-      _RestorablePushReplacementExampleState();
+  State<RestorablePushReplacementExample> createState() => _RestorablePushReplacementExampleState();
 }
 
-class _RestorablePushReplacementExampleState
-    extends State<RestorablePushReplacementExample> {
+class _RestorablePushReplacementExampleState extends State<RestorablePushReplacementExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) =>
-          const RestorablePushReplacementExample(),
+      builder: (BuildContext context) => const RestorablePushReplacementExample(),
     );
   }
 
@@ -44,8 +41,7 @@ class _RestorablePushReplacementExampleState
         title: const Text('Sample Code'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.restorablePushReplacement(context, _myRouteBuilder),
+        onPressed: () => Navigator.restorablePushReplacement(context, _myRouteBuilder),
         tooltip: 'Increment Counter',
         child: const Icon(Icons.add),
       ),

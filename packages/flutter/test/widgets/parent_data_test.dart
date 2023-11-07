@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'test_widgets.dart';
 
 class TestParentData {
-  TestParentData({this.top, this.right, this.bottom, this.left});
+  TestParentData({ this.top, this.right, this.bottom, this.left });
 
   final double? top;
   final double? right;
@@ -21,8 +21,7 @@ class TestParentData {
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   final MultiChildRenderObjectElement element = tester.element(
-    find.byElementPredicate(
-        (Element element) => element is MultiChildRenderObjectElement),
+    find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement),
   );
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
@@ -33,14 +32,12 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
       expect(child, isA<RenderDecoratedBox>());
       final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.parentData, isA<StackParentData>());
-      final StackParentData parentData =
-          decoratedBox.parentData! as StackParentData;
+      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData? decoratedBoxParentData =
-          decoratedBox.parentData as StackParentData?;
+      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
       child = decoratedBoxParentData?.nextSibling;
     }
     expect(child, isNull);
@@ -53,8 +50,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
 final TestParentData kNonPositioned = TestParentData();
 
 void main() {
-  testWidgetsWithLeakTracking('ParentDataWidget control test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
@@ -101,12 +97,9 @@ void main() {
       kNonPositioned,
     ]);
 
-    const DecoratedBox kDecoratedBoxA =
-        DecoratedBox(decoration: kBoxDecorationA);
-    const DecoratedBox kDecoratedBoxB =
-        DecoratedBox(decoration: kBoxDecorationB);
-    const DecoratedBox kDecoratedBoxC =
-        DecoratedBox(decoration: kBoxDecorationC);
+    const DecoratedBox kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
+    const DecoratedBox kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
+    const DecoratedBox kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
       const Stack(
@@ -257,9 +250,7 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgetsWithLeakTracking(
-      'ParentData overwrite with custom ParentDataWidget subclasses',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentData overwrite with custom ParentDataWidget subclasses', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -347,8 +338,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ParentDataWidget conflicting data',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget conflicting data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -436,8 +426,7 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgetsWithLeakTracking('ParentDataWidget interacts with global keys',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -495,8 +484,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Parent data invalid ancestor',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Parent data invalid ancestor', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
@@ -531,17 +519,13 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'ParentDataWidget can be used with different ancestor RenderObjectWidgets',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
       OneAncestorWidget(
         child: Container(),
       ),
     );
-    DummyParentData parentData = tester
-        .renderObject(find.byType(Container))
-        .parentData! as DummyParentData;
+    DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
@@ -552,8 +536,7 @@ void main() {
         ),
       ),
     );
-    parentData = tester.renderObject(find.byType(Container)).parentData!
-        as DummyParentData;
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Foo');
 
     await tester.pumpWidget(
@@ -564,8 +547,7 @@ void main() {
         ),
       ),
     );
-    parentData = tester.renderObject(find.byType(Container)).parentData!
-        as DummyParentData;
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');
   });
 }
@@ -585,8 +567,7 @@ class SubclassPositioned extends Positioned {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData =
-        renderObject.parentData! as StackParentData;
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
     parentData.bottom = bottom;
   }
 }
@@ -603,8 +584,7 @@ class CustomPositionedWidget extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData =
-        renderObject.parentData! as StackParentData;
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
     parentData.bottom = bottom;
   }
 
@@ -624,8 +604,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is DummyParentData);
-    final DummyParentData parentData =
-        renderObject.parentData! as DummyParentData;
+    final DummyParentData parentData = renderObject.parentData! as DummyParentData;
     parentData.string = string;
   }
 
@@ -676,7 +655,7 @@ class RenderAnother extends RenderProxyBox {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({super.key, required this.child});
+  const DummyWidget({ super.key, required this.child });
 
   final Widget child;
 

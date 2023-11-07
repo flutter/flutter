@@ -25,8 +25,7 @@ class NestedScrollViewExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: NestedScrollView(headerSliverBuilder:
-            (BuildContext context, bool innerBoxIsScrolled) {
+        body: NestedScrollView(headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
       return <Widget>[
         SliverOverlapAbsorber(
           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -46,13 +45,11 @@ class NestedScrollViewExample extends StatelessWidget {
         // If the "controller" property is set, then this scroll view will not
         // be associated with the NestedScrollView.
         slivers: <Widget>[
-          SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
           SliverFixedExtentList(
             itemExtent: 48.0,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) =>
-                  ListTile(title: Text('Item $index')),
+              (BuildContext context, int index) => ListTile(title: Text('Item $index')),
               childCount: 30,
             ),
           ),

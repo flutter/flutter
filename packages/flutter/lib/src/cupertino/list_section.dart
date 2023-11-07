@@ -12,20 +12,16 @@ import 'theme.dart';
 const double _kMarginTop = 22.0;
 
 // Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 6.0);
+const EdgeInsetsDirectional _kDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 6.0);
 
 // Header margin for inset grouped variant, determined from iOS 14.4 Simulator.
-const EdgeInsetsDirectional _kInsetGroupedDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 6.0);
+const EdgeInsetsDirectional _kInsetGroupedDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 6.0);
 
 // Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultFooterMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0);
+const EdgeInsetsDirectional _kDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0);
 
 // Footer margin for inset grouped variant, determined from iOS 14.4 Simulator.
-const EdgeInsetsDirectional _kInsetGroupedDefaultFooterMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kInsetGroupedDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Margin around children in edge-to-edge variant, determined from iOS 14.4
 // Simulator.
@@ -33,19 +29,16 @@ const EdgeInsets _kDefaultRowsMargin = EdgeInsets.only(bottom: 8.0);
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMarginWithHeader =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMarginWithHeader = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
 // iOS 14.2 SDK.
 // TODO(edrisian): This should be a rounded rectangle once that shape is added.
-const BorderRadius _kDefaultInsetGroupedBorderRadius =
-    BorderRadius.all(Radius.circular(10.0));
+const BorderRadius _kDefaultInsetGroupedBorderRadius = BorderRadius.all(Radius.circular(10.0));
 
 // The margin of divider used in base list section. Estimated from iOS 14.4 SDK
 // Settings app.
@@ -219,10 +212,10 @@ class CupertinoListSection extends StatelessWidget {
     this.topMargin = _kMarginTop,
     bool hasLeading = true,
     this.separatorColor,
-  })  : assert((children != null && children.length > 0) || header != null),
-        type = CupertinoListSectionType.base,
-        additionalDividerMargin = additionalDividerMargin ??
-            (hasLeading ? _kBaseAdditionalDividerMargin : 0.0);
+  }) : assert((children != null && children.length > 0) || header != null),
+       type = CupertinoListSectionType.base,
+       additionalDividerMargin = additionalDividerMargin ??
+           (hasLeading ? _kBaseAdditionalDividerMargin : 0.0);
 
   /// Creates a section that mimics standard "Inset Grouped" iOS list section.
   ///
@@ -283,16 +276,13 @@ class CupertinoListSection extends StatelessWidget {
     this.topMargin,
     bool hasLeading = true,
     this.separatorColor,
-  })  : assert((children != null && children.length > 0) || header != null),
-        type = CupertinoListSectionType.insetGrouped,
-        additionalDividerMargin = additionalDividerMargin ??
-            (hasLeading
-                ? _kInsetAdditionalDividerMargin
-                : _kInsetAdditionalDividerMarginWithoutLeading),
-        margin = margin ??
-            (header == null
-                ? _kDefaultInsetGroupedRowsMargin
-                : _kDefaultInsetGroupedRowsMarginWithHeader);
+  }) : assert((children != null && children.length > 0) || header != null),
+       type = CupertinoListSectionType.insetGrouped,
+       additionalDividerMargin = additionalDividerMargin ??
+           (hasLeading
+               ? _kInsetAdditionalDividerMargin
+               : _kInsetAdditionalDividerMarginWithoutLeading),
+       margin = margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader);
 
   /// The type of list section, either base or inset grouped.
   ///
@@ -364,8 +354,7 @@ class CupertinoListSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color dividerColor =
-        separatorColor ?? CupertinoColors.separator.resolveFrom(context);
+    final Color dividerColor = separatorColor ?? CupertinoColors.separator.resolveFrom(context);
     final double dividerHeight = 1.0 / MediaQuery.devicePixelRatioOf(context);
 
     // Long divider is used for wrapping the top and bottom of rows.
@@ -436,8 +425,7 @@ class CupertinoListSection extends StatelessWidget {
       }
 
       final BorderRadius childrenGroupBorderRadius = switch (type) {
-        CupertinoListSectionType.insetGrouped =>
-          _kDefaultInsetGroupedBorderRadius,
+        CupertinoListSectionType.insetGrouped => _kDefaultInsetGroupedBorderRadius,
         CupertinoListSectionType.base => BorderRadius.zero,
       };
 
@@ -482,7 +470,8 @@ class CupertinoListSection extends StatelessWidget {
                 child: headerWidget,
               ),
             ),
-          if (decoratedChildrenGroup != null) decoratedChildrenGroup,
+          if (decoratedChildrenGroup != null)
+            decoratedChildrenGroup,
           if (footerWidget != null)
             Align(
               alignment: AlignmentDirectional.centerStart,

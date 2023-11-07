@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/list_tile/list_tile.selected.0.dart'
-    as example;
+import 'package:flutter_api_samples/material/list_tile/list_tile.selected.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -23,8 +22,7 @@ void main() {
     await tester.pump();
 
     // The first item is no longer selected.
-    expect(
-        tester.widget<ListTile>(find.byType(ListTile).at(0)).selected, false);
+    expect(tester.widget<ListTile>(find.byType(ListTile).at(0)).selected, false);
     expect(tester.widget<ListTile>(find.byType(ListTile).at(5)).selected, true);
   });
 }

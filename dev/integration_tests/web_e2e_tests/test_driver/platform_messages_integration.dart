@@ -20,8 +20,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.textInput, null);
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, null);
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -48,8 +47,7 @@ void main() {
       'id': 567,
       'viewType': 'MyView',
     };
-    await SystemChannels.platform_views
-        .invokeMethod<void>('create', createArgs);
+    await SystemChannels.platform_views.invokeMethod<void>('create', createArgs);
     await SystemChannels.platform_views.invokeMethod<void>('dispose', 567);
     expect(viewInstanceCount, 1);
   });

@@ -48,12 +48,9 @@ class AnimatedAdvancedBlend extends StatefulWidget {
   State<AnimatedAdvancedBlend> createState() => _AnimatedAdvancedBlendState();
 }
 
-class _AnimatedAdvancedBlendState extends State<AnimatedAdvancedBlend>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController controller = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 5000));
-  late final Animation<double> animation =
-      controller.drive(Tween<double>(begin: 0.0, end: 1.0));
+class _AnimatedAdvancedBlendState extends State<AnimatedAdvancedBlend> with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 5000));
+  late final Animation<double> animation = controller.drive(Tween<double>(begin: 0.0, end: 1.0));
   Color _color = const Color.fromARGB(255, 255, 0, 255);
 
   @override

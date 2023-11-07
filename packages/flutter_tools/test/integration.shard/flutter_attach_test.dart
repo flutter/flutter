@@ -15,8 +15,7 @@ import 'test_utils.dart';
 
 Future<int> getFreePort() async {
   int port = 0;
-  final ServerSocket serverSocket =
-      await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
   port = serverSocket.port;
   await serverSocket.close();
   return port;
@@ -38,7 +37,7 @@ void main() {
   group('DDS in flutter run', () {
     late FlutterRunTestDriver flutterRun, flutterAttach;
     setUp(() {
-      flutterRun = FlutterRunTestDriver(tempDir, logPrefix: '   RUN  ');
+      flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
       flutterAttach = FlutterRunTestDriver(
         tempDir,
         logPrefix: 'ATTACH  ',
@@ -85,10 +84,7 @@ void main() {
       await flutterRun.run(
         startPaused: true,
         withDebugger: true,
-        additionalCommandArgs: <String>[
-          '--devtools-server-address',
-          'http://127.0.0.1:9105'
-        ],
+        additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9105'],
       );
       await flutterRun.resume();
       await pollForServiceExtensionValue<String>(
@@ -104,17 +100,13 @@ void main() {
         matches: isNotEmpty,
       );
 
-      final Response response = await flutterRun
-          .callServiceExtension('ext.flutter.connectedVmServiceUri');
+      final Response response = await flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
       final String vmServiceUri = response.json!['value'] as String;
 
       // Attach with a different DevTools server address.
       await flutterAttach.attach(
         flutterRun.vmServicePort!,
-        additionalCommandArgs: <String>[
-          '--devtools-server-address',
-          'http://127.0.0.1:9110'
-        ],
+        additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
       );
       await pollForServiceExtensionValue<String>(
         testDriver: flutterAttach,
@@ -161,8 +153,7 @@ void main() {
         ],
       );
 
-      final Response response = await flutterAttach
-          .callServiceExtension('ext.flutter.connectedVmServiceUri');
+      final Response response = await flutterAttach.callServiceExtension('ext.flutter.connectedVmServiceUri');
       final String vmServiceUriString = response.json!['value'] as String;
       final Uri vmServiceUri = Uri.parse(vmServiceUriString);
       expect(vmServiceUri.port, equals(ddsPort));
@@ -173,7 +164,7 @@ void main() {
     late FlutterRunTestDriver flutterRun, flutterAttach;
 
     setUp(() async {
-      flutterRun = FlutterRunTestDriver(tempDir, logPrefix: '   RUN  ');
+      flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
       flutterAttach = FlutterRunTestDriver(
         tempDir,
         logPrefix: 'ATTACH  ',
@@ -204,11 +195,11 @@ void main() {
     }
 
     testWithoutContext('enables Observatory on run', () async {
-      await flutterRun.run(
-        withDebugger: true,
-        serveObservatory: true,
-      );
-      expect(await isObservatoryAvailable(), true);
+        await flutterRun.run(
+          withDebugger: true,
+          serveObservatory: true,
+        );
+        expect(await isObservatoryAvailable(), true);
     });
 
     testWithoutContext('enables Observatory on attach', () async {

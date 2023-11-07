@@ -30,10 +30,8 @@ class LifeCycleSpy extends StatefulWidget {
   State<LifeCycleSpy> createState() => _LifeCycleSpyState();
 }
 
-class _LifeCycleSpyState extends State<LifeCycleSpy>
-    with WidgetsBindingObserver {
-  final List<AppLifecycleState> _expectedLifeCycleSequence =
-      <AppLifecycleState>[
+class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver {
+  final List<AppLifecycleState> _expectedLifeCycleSequence = <AppLifecycleState>[
     AppLifecycleState.detached,
     AppLifecycleState.inactive,
     AppLifecycleState.resumed,
@@ -44,7 +42,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _actualLifeCycleSequence = <AppLifecycleState?>[
+    _actualLifeCycleSequence =  <AppLifecycleState?>[
       ServicesBinding.instance.lifecycleState,
     ];
   }
@@ -58,16 +56,14 @@ class _LifeCycleSpyState extends State<LifeCycleSpy>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
-      _actualLifeCycleSequence =
-          List<AppLifecycleState>.from(_actualLifeCycleSequence!);
+      _actualLifeCycleSequence = List<AppLifecycleState>.from(_actualLifeCycleSequence!);
       _actualLifeCycleSequence?.add(state);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (const ListEquality<AppLifecycleState?>()
-        .equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
+    if (const ListEquality<AppLifecycleState?>().equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
       // Rewires the semantics harness if test passes.
       SwitchableSemanticsBinding.instance.semanticsEnabled = true;
     }
@@ -79,8 +75,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy>
 }
 
 class SwitchableSemanticsBinding extends WidgetsFlutterBinding {
-  static SwitchableSemanticsBinding get instance =>
-      BindingBase.checkInstance(_instance);
+  static SwitchableSemanticsBinding get instance => BindingBase.checkInstance(_instance);
   static SwitchableSemanticsBinding? _instance;
 
   static SwitchableSemanticsBinding ensureInitialized() {

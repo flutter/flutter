@@ -87,8 +87,7 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
   if (entrypoint.contains('$_messagePrefix $_entrypointName')) {
     return TaskResult.success(null);
   } else {
-    return TaskResult.failure(
-        'expected entrypoint:"$_entrypointName" but found:"$entrypoint"');
+    return TaskResult.failure('expected entrypoint:"$_entrypointName" but found:"$entrypoint"');
   }
 }
 

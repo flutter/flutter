@@ -124,8 +124,7 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationDrawerThemeData? lerp(
-      NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
+  static NavigationDrawerThemeData? lerp(NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -188,8 +187,7 @@ class NavigationDrawerThemeData with Diagnosticable {
     properties.add(
         ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties
-        .add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor,
         defaultValue: null));
     properties.add(

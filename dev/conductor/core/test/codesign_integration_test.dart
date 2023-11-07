@@ -10,8 +10,7 @@ library;
 import 'package:args/command_runner.dart';
 import 'package:conductor_core/src/codesign.dart' show CodesignCommand;
 import 'package:conductor_core/src/globals.dart';
-import 'package:conductor_core/src/repository.dart'
-    show Checkouts, FrameworkRepository;
+import 'package:conductor_core/src/repository.dart' show Checkouts, FrameworkRepository;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
@@ -26,8 +25,7 @@ void main() {
       () async {
     const Platform platform = LocalPlatform();
     const FileSystem fileSystem = LocalFileSystem();
-    final Directory tempDir = fileSystem.systemTempDirectory
-        .createTempSync('flutter_conductor_integration_test.');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
     const ProcessManager processManager = LocalProcessManager();
     final TestStdio stdio = TestStdio(verbose: true);
     final Checkouts checkouts = Checkouts(
@@ -45,11 +43,9 @@ void main() {
     final String currentHead = (processManager.runSync(
       <String>['git', 'rev-parse', 'HEAD'],
       workingDirectory: flutterRoot.path,
-    ).stdout as String)
-        .trim();
+    ).stdout as String).trim();
 
-    final FrameworkRepository framework =
-        FrameworkRepository.localRepoAsUpstream(
+    final FrameworkRepository framework = FrameworkRepository.localRepoAsUpstream(
       checkouts,
       upstreamPath: flutterRoot.path,
       initialRef: currentHead,

@@ -41,16 +41,16 @@ class IconTreeShaker {
     required FileSystem fileSystem,
     required Artifacts artifacts,
     required TargetPlatform targetPlatform,
-  })  : _processManager = processManager,
-        _logger = logger,
-        _fs = fileSystem,
-        _artifacts = artifacts,
-        _fontManifest = fontManifest?.string,
-        _targetPlatform = targetPlatform {
+  }) : _processManager = processManager,
+       _logger = logger,
+       _fs = fileSystem,
+       _artifacts = artifacts,
+       _fontManifest = fontManifest?.string,
+       _targetPlatform = targetPlatform {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError('Font subsetting is not supported in debug mode. The '
-          '--tree-shake-icons flag will be ignored.');
+                         '--tree-shake-icons flag will be ignored.');
     }
   }
 
@@ -68,8 +68,7 @@ class IconTreeShaker {
   ///
   /// See [Target.inputs].
   static const List<Source> inputs = <Source>[
-    Source.pattern(
-        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/icon_tree_shaker.dart'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/icon_tree_shaker.dart'),
     Source.artifact(Artifact.constFinder),
     Source.artifact(Artifact.fontSubset),
   ];
@@ -86,10 +85,9 @@ class IconTreeShaker {
   final TargetPlatform _targetPlatform;
 
   /// Whether font subsetting should be used for this [Environment].
-  bool get enabled =>
-      _fontManifest != null &&
-      _environment.defines[kIconTreeShakerFlag] == 'true' &&
-      _environment.defines[kBuildMode] != 'debug';
+  bool get enabled => _fontManifest != null
+                   && _environment.defines[kIconTreeShakerFlag] == 'true'
+                   && _environment.defines[kBuildMode] != 'debug';
 
   // Fills the [_iconData] map.
   Future<void> _getIconData(Environment environment) async {
@@ -99,8 +97,7 @@ class IconTreeShaker {
 
     final File appDill = environment.buildDir.childFile('app.dill');
     if (!appDill.existsSync()) {
-      throw IconTreeShakerException._(
-          'Expected to find kernel file at ${appDill.path}, but no file found.');
+      throw IconTreeShakerException._('Expected to find kernel file at ${appDill.path}, but no file found.');
     }
     final File constFinder = _fs.file(
       _artifacts.getArtifactPath(Artifact.constFinder),
@@ -132,21 +129,17 @@ class IconTreeShaker {
       );
     }
 
-    final Map<String, _IconTreeShakerData> result =
-        <String, _IconTreeShakerData>{};
+    final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
     const int kSpacePoint = 32;
     for (final MapEntry<String, String> entry in fonts.entries) {
       final List<int>? codePoints = iconData[entry.key];
       if (codePoints == null) {
-        throw IconTreeShakerException._(
-            'Expected to font code points for ${entry.key}, but none were found.');
+        throw IconTreeShakerException._('Expected to font code points for ${entry.key}, but none were found.');
       }
 
       // Add space as an optional code point, as web uses it to measure the font height.
-      final List<int> optionalCodePoints =
-          _targetPlatform == TargetPlatform.web_javascript
-              ? <int>[kSpacePoint]
-              : <int>[];
+      final List<int> optionalCodePoints = _targetPlatform == TargetPlatform.web_javascript
+        ? <int>[kSpacePoint] : <int>[];
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
         relativePath: entry.value,
@@ -194,8 +187,7 @@ class IconTreeShaker {
       _artifacts.getArtifactPath(Artifact.fontSubset),
     );
     if (!fontSubset.existsSync()) {
-      throw IconTreeShakerException._(
-          'The font-subset utility is missing. Run "flutter doctor".');
+      throw IconTreeShakerException._('The font-subset utility is missing. Run "flutter doctor".');
     }
 
     final List<String> cmd = <String>[
@@ -203,16 +195,14 @@ class IconTreeShaker {
       outputPath,
       input.path,
     ];
-    final Iterable<String> requiredCodePointStrings = iconTreeShakerData
-        .codePoints
-        .map((int codePoint) => codePoint.toString());
-    final Iterable<String> optionalCodePointStrings = iconTreeShakerData
-        .optionalCodePoints
-        .map((int codePoint) => 'optional:$codePoint');
-    final String codePointsString =
-        requiredCodePointStrings.followedBy(optionalCodePointStrings).join(' ');
+    final Iterable<String> requiredCodePointStrings = iconTreeShakerData.codePoints
+      .map((int codePoint) => codePoint.toString());
+    final Iterable<String> optionalCodePointStrings = iconTreeShakerData.optionalCodePoints
+      .map((int codePoint) => 'optional:$codePoint');
+    final String codePointsString = requiredCodePointStrings
+      .followedBy(optionalCodePointStrings).join(' ');
     _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
-        'using codepoints $codePointsString');
+                       'using codepoints $codePointsString');
     final Process fontSubsetProcess = await _processManager.start(cmd);
     try {
       fontSubsetProcess.stdin.writeln(codePointsString);
@@ -226,8 +216,7 @@ class IconTreeShaker {
     if (code != 0) {
       _logger.printTrace(await utf8.decodeStream(fontSubsetProcess.stdout));
       _logger.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
-      throw IconTreeShakerException._(
-          'Font subsetting failed with exit code $code.');
+      throw IconTreeShakerException._('Font subsetting failed with exit code $code.');
     }
     _logger.printStatus(getSubsetSummaryMessage(input, _fs.file(outputPath)));
     return true;
@@ -239,8 +228,7 @@ class IconTreeShaker {
     final double inputSize = inputFont.lengthSync().toDouble();
     final double outputSize = outputFont.lengthSync().toDouble();
     final double reductionBytes = inputSize - outputSize;
-    final String reductionPercentage =
-        (reductionBytes / inputSize * 100).toStringAsFixed(1);
+    final String reductionPercentage = (reductionBytes / inputSize * 100).toStringAsFixed(1);
     return 'Font asset "$fontName" was tree-shaken, reducing it from '
         '${inputSize.ceil()} to ${outputSize.ceil()} bytes '
         '($reductionPercentage% reduction). Tree-shaking can be disabled '
@@ -262,8 +250,8 @@ class IconTreeShaker {
       final Object? familyKey = map['family'];
       if (familyKey is! String) {
         throw IconTreeShakerException._(
-            'FontManifest.json invalid: expected the family value to be a string, '
-            'got: ${map['family']}.');
+          'FontManifest.json invalid: expected the family value to be a string, '
+          'got: ${map['family']}.');
       }
       if (!families.contains(familyKey)) {
         continue;
@@ -274,14 +262,14 @@ class IconTreeShaker {
       );
       if (fonts.length != 1) {
         throw IconTreeShakerException._(
-            'This tool cannot process icon fonts with multiple fonts in a '
-            'single family.');
+          'This tool cannot process icon fonts with multiple fonts in a '
+          'single family.');
       }
       final Object? asset = fonts.first['asset'];
       if (asset is! String) {
         throw IconTreeShakerException._(
-            'FontManifest.json invalid: expected "asset" value to be a string, '
-            'got: ${map['assets']}.');
+          'FontManifest.json invalid: expected "asset" value to be a string, '
+          'got: ${map['assets']}.');
       }
       result[familyKey] = asset;
     }
@@ -297,42 +285,30 @@ class IconTreeShaker {
       dart.path,
       '--disable-dart-dev',
       constFinder.path,
-      '--kernel-file',
-      appDill.path,
-      '--class-library-uri',
-      'package:flutter/src/widgets/icon_data.dart',
-      '--class-name',
-      'IconData',
-      '--annotation-class-name',
-      '_StaticIconProvider',
-      '--annotation-class-library-uri',
-      'package:flutter/src/widgets/icon_data.dart',
+      '--kernel-file', appDill.path,
+      '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
+      '--class-name', 'IconData',
+      '--annotation-class-name', '_StaticIconProvider',
+      '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
     ];
     _logger.printTrace('Running command: ${cmd.join(' ')}');
-    final ProcessResult constFinderProcessResult =
-        await _processManager.run(cmd);
+    final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
 
     if (constFinderProcessResult.exitCode != 0) {
-      throw IconTreeShakerException._(
-          'ConstFinder failure: ${constFinderProcessResult.stderr}');
+      throw IconTreeShakerException._('ConstFinder failure: ${constFinderProcessResult.stderr}');
     }
-    final Object? constFinderMap =
-        json.decode(constFinderProcessResult.stdout as String);
+    final Object? constFinderMap = json.decode(constFinderProcessResult.stdout as String);
     if (constFinderMap is! Map<String, Object?>) {
       throw IconTreeShakerException._(
-          'Invalid ConstFinder output: expected a top level JSON object, '
-          'got $constFinderMap.');
+        'Invalid ConstFinder output: expected a top level JSON object, '
+        'got $constFinderMap.');
     }
-    final _ConstFinderResult constFinderResult =
-        _ConstFinderResult(constFinderMap);
+    final _ConstFinderResult constFinderResult = _ConstFinderResult(constFinderMap);
     if (constFinderResult.hasNonConstantLocations) {
-      _logger.printError(
-          'This application cannot tree shake icons fonts. '
-          'It has non-constant instances of IconData at the '
-          'following locations:',
-          emphasis: true);
-      for (final Map<String, Object?> location
-          in constFinderResult.nonConstantLocations) {
+      _logger.printError('This application cannot tree shake icons fonts. '
+                         'It has non-constant instances of IconData at the '
+                         'following locations:', emphasis: true);
+      for (final Map<String, Object?> location in constFinderResult.nonConstantLocations) {
         _logger.printError(
           '- ${location['file']}:${location['line']}:${location['column']}',
           indent: 2,
@@ -340,15 +316,14 @@ class IconTreeShaker {
         );
       }
       throwToolExit('Avoid non-constant invocations of IconData or try to '
-          'build again with --no-tree-shake-icons.');
+                    'build again with --no-tree-shake-icons.');
     }
     return _parseConstFinderResult(constFinderResult);
   }
 
   Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult constants) {
     final Map<String, List<int>> result = <String, List<int>>{};
-    for (final Map<String, Object?> iconDataMap
-        in constants.constantInstances) {
+    for (final Map<String, Object?> iconDataMap in constants.constantInstances) {
       final Object? package = iconDataMap['fontPackage'];
       final Object? fontFamily = iconDataMap['fontFamily'];
       final Object? codePoint = iconDataMap['codePoint'];
@@ -356,12 +331,14 @@ class IconTreeShaker {
           fontFamily is! String ||
           codePoint is! num) {
         throw IconTreeShakerException._(
-            'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
-            '"fontFamily" to be a String, and "codePoint" to be an int, '
-            'got: $iconDataMap.');
+          'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
+          '"fontFamily" to be a String, and "codePoint" to be an int, '
+          'got: $iconDataMap.');
       }
       final String family = fontFamily;
-      final String key = package == null ? family : 'packages/$package/$family';
+      final String key = package == null
+        ? family
+        : 'packages/$package/$family';
       result[key] ??= <int>[];
       result[key]!.add(codePoint.round());
     }
@@ -422,6 +399,6 @@ class IconTreeShakerException implements Exception {
 
   @override
   String toString() => 'IconTreeShakerException: $message\n\n'
-      'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
-      'flutter build command';
+    'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
+    'flutter build command';
 }

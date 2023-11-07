@@ -24,8 +24,7 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// Called by [IconTheme.of] to resolve [color] against the given [BuildContext].
   @override
   IconThemeData resolve(BuildContext context) {
-    final Color? resolvedColor =
-        CupertinoDynamicColor.maybeResolve(color, context);
+    final Color? resolvedColor = CupertinoDynamicColor.maybeResolve(color, context);
     return resolvedColor == color ? this : copyWith(color: resolvedColor);
   }
 
@@ -57,7 +56,6 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(createCupertinoColorProperty('color', color, defaultValue: null));
+    properties.add(createCupertinoColorProperty('color', color, defaultValue: null));
   }
 }

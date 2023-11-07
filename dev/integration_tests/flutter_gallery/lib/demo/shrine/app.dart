@@ -19,8 +19,7 @@ class ShrineApp extends StatefulWidget {
   State<ShrineApp> createState() => _ShrineAppState();
 }
 
-class _ShrineAppState extends State<ShrineApp>
-    with SingleTickerProviderStateMixin {
+class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMixin {
   // Controller to coordinate both the opening/closing of backdrop and sliding
   // of expanding bottom sheet
   late AnimationController _controller;
@@ -42,14 +41,12 @@ class _ShrineAppState extends State<ShrineApp>
       // demos where many scrollables are all attached to the same
       // PrimaryScrollController. The gallery needs to be migrated before
       // enabling this. https://github.com/flutter/gallery/issues/523
-      scrollBehavior:
-          const MaterialScrollBehavior().copyWith(scrollbars: false),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
       title: 'Shrine',
       home: HomePage(
         backdrop: Backdrop(
           frontLayer: const ProductPage(),
-          backLayer:
-              CategoryMenuPage(onCategoryTap: () => _controller.forward()),
+          backLayer: CategoryMenuPage(onCategoryTap: () => _controller.forward()),
           frontTitle: const Text('SHRINE'),
           backTitle: const Text('MENU'),
           controller: _controller,
@@ -91,8 +88,7 @@ ThemeData _buildShrineTheme() {
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
     primaryIconTheme: _customIconTheme(base.iconTheme),
-    inputDecorationTheme:
-        const InputDecorationTheme(border: CutCornersBorder()),
+    inputDecorationTheme: const InputDecorationTheme(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
     primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
     iconTheme: _customIconTheme(base.iconTheme),
@@ -101,23 +97,17 @@ ThemeData _buildShrineTheme() {
 }
 
 TextTheme _buildShrineTextTheme(TextTheme base) {
-  return base
-      .copyWith(
-        headlineSmall:
-            base.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
-        titleLarge: base.titleLarge!.copyWith(fontSize: 18.0),
-        bodySmall: base.bodySmall!
-            .copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
-        bodyLarge: base.bodyLarge!
-            .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
-        labelLarge: base.labelLarge!
-            .copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
-      )
-      .apply(
-        fontFamily: 'Raleway',
-        displayColor: kShrineBrown900,
-        bodyColor: kShrineBrown900,
-      );
+  return base.copyWith(
+    headlineSmall: base.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
+    titleLarge: base.titleLarge!.copyWith(fontSize: 18.0),
+    bodySmall: base.bodySmall!.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
+    bodyLarge: base.bodyLarge!.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+    labelLarge: base.labelLarge!.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
+  ).apply(
+    fontFamily: 'Raleway',
+    displayColor: kShrineBrown900,
+    bodyColor: kShrineBrown900,
+  );
 }
 
 const ColorScheme kShrineColorScheme = ColorScheme(

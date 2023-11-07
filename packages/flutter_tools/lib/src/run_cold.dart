@@ -13,7 +13,6 @@ import 'tracing.dart';
 import 'vmservice.dart';
 
 const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
-
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {
@@ -118,9 +117,7 @@ class ColdRunner extends ResidentRunner {
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
         globals.printStatus('Tracing startup on ${device.device!.name}.');
-        final String outputPath =
-            globals.platform.environment[kFlutterTestOutputsDirEnvName] ??
-                getBuildDirectory();
+        final String outputPath = globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
@@ -165,8 +162,7 @@ class ColdRunner extends ResidentRunner {
       await device!.initLogReader();
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views =
-          await device!.vmService!.getFlutterViews();
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
@@ -214,7 +210,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp({required bool details}) {
+  void printHelp({ required bool details }) {
     globals.printStatus('Flutter run key commands.');
     if (details) {
       printHelpDetails();
@@ -235,8 +231,7 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice? device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device!.vmService == null) {
-        await device.device!
-            .stopApp(device.package, userIdentifier: device.userIdentifier);
+        await device.device!.stopApp(device.package, userIdentifier: device.userIdentifier);
       }
     }
     await super.preExit();

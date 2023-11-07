@@ -23,13 +23,10 @@ void main() {
     test('accounts for device pixel ratio in paintBounds', () {
       layout(RenderAspectRatio(aspectRatio: 1.0));
       pumpFrame();
-      final Size logicalSize =
-          TestRenderingFlutterBinding.instance.renderView.configuration.size;
-      final double devicePixelRatio = TestRenderingFlutterBinding
-          .instance.renderView.configuration.devicePixelRatio;
+      final Size logicalSize = TestRenderingFlutterBinding.instance.renderView.configuration.size;
+      final double devicePixelRatio = TestRenderingFlutterBinding.instance.renderView.configuration.devicePixelRatio;
       final Size physicalSize = logicalSize * devicePixelRatio;
-      expect(TestRenderingFlutterBinding.instance.renderView.paintBounds,
-          Offset.zero & physicalSize);
+      expect(TestRenderingFlutterBinding.instance.renderView.paintBounds, Offset.zero & physicalSize);
     });
 
     test('does not replace the root layer unnecessarily', () {
@@ -57,8 +54,7 @@ void main() {
       view.attach(owner);
       view.prepareInitialFrame();
       final ContainerLayer firstLayer = view.debugLayer!;
-      view.configuration =
-          createViewConfiguration(size: const Size(100.0, 1117.0));
+      view.configuration = createViewConfiguration(size: const Size(100.0, 1117.0));
       expect(identical(view.debugLayer, firstLayer), true);
     });
   });
@@ -66,8 +62,7 @@ void main() {
   test('ViewConfiguration == and hashCode', () {
     final ViewConfiguration viewConfigurationA = createViewConfiguration();
     final ViewConfiguration viewConfigurationB = createViewConfiguration();
-    final ViewConfiguration viewConfigurationC =
-        createViewConfiguration(devicePixelRatio: 3.0);
+    final ViewConfiguration viewConfigurationC = createViewConfiguration(devicePixelRatio: 3.0);
 
     expect(viewConfigurationA == viewConfigurationB, true);
     expect(viewConfigurationA != viewConfigurationC, true);
@@ -76,16 +71,14 @@ void main() {
   });
 
   test('invokes DebugPaintCallback', () {
-    final PaintPattern paintsOrangeRect = paints
-      ..rect(
-        color: orange,
-        rect: orangeRect,
-      );
-    final PaintPattern paintsGreenRect = paints
-      ..rect(
-        color: green,
-        rect: greenRect,
-      );
+    final PaintPattern paintsOrangeRect = paints..rect(
+      color: orange,
+      rect: orangeRect,
+    );
+    final PaintPattern paintsGreenRect = paints..rect(
+      color: green,
+      rect: greenRect,
+    );
     final PaintPattern paintOrangeAndGreenRect = paints
       ..rect(
         color: orange,
@@ -95,8 +88,7 @@ void main() {
         color: green,
         rect: greenRect,
       );
-    void paintCallback(
-        PaintingContext context, Offset offset, RenderView renderView) {
+    void paintCallback(PaintingContext context, Offset offset, RenderView renderView) {
       context.canvas.drawRect(
         greenRect,
         Paint()..color = green,
@@ -130,16 +122,12 @@ void main() {
     );
   });
 
-  test(
-      'Config can be set and changed after instantiation without calling prepareInitialFrame first',
-      () {
+  test('Config can be set and changed after instantiation without calling prepareInitialFrame first', () {
     final RenderView view = RenderView(
       view: RendererBinding.instance.platformDispatcher.views.single,
     );
-    view.configuration =
-        const ViewConfiguration(size: Size(100, 200), devicePixelRatio: 3.0);
-    view.configuration =
-        const ViewConfiguration(size: Size(200, 300), devicePixelRatio: 2.0);
+    view.configuration = const ViewConfiguration(size: Size(100, 200), devicePixelRatio: 3.0);
+    view.configuration = const ViewConfiguration(size: Size(200, 300), devicePixelRatio: 2.0);
     PipelineOwner().rootNode = view;
     view.prepareInitialFrame();
   });

@@ -46,8 +46,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.uriConverter,
   })  : assert(!debuggingOptions.startPaused || enableVmService),
         _gotProcessVmServiceUri = enableVmService
-            ? Completer<Uri?>()
-            : (Completer<Uri?>()..complete());
+            ? Completer<Uri?>() : (Completer<Uri?>()..complete());
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
@@ -87,8 +86,7 @@ class FlutterTesterTestDevice extends TestDevice {
     // Prepare our WebSocket server to talk to the engine subprocess.
     // Let the server choose an unused port.
     _server = await bind(host, /*port*/ 0);
-    logger.printTrace(
-        'test $id: test harness socket server is running at port:${_server!.port}');
+    logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
     final List<String> command = <String>[
       shellPath,
       if (enableVmService) ...<String>[
@@ -101,11 +99,11 @@ class FlutterTesterTestDevice extends TestDevice {
         //
         // I mention this only so that you won't be tempted, as I was, to apply
         // the obvious simplification to this code and remove this entire feature.
-        '--vm-service-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort}',
+        '--vm-service-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort }',
         if (debuggingOptions.startPaused) '--start-paused',
-        if (debuggingOptions.disableServiceAuthCodes)
-          '--disable-service-auth-codes',
-      ] else
+        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+      ]
+      else
         '--disable-vm-service',
       if (host!.type == InternetAddressType.IPv6) '--ipv6',
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
@@ -113,14 +111,16 @@ class FlutterTesterTestDevice extends TestDevice {
       '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
-      if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
+      if (debuggingOptions.enableDartProfiling)
+        '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
       '--packages=${debuggingOptions.buildInfo.packagesPath}',
       if (testAssetDirectory != null)
         '--flutter-assets-dir=$testAssetDirectory',
-      if (debuggingOptions.nullAssertions) '--dart-flags=--null_assertions',
+      if (debuggingOptions.nullAssertions)
+        '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
       entrypointPath,
     ];
@@ -138,22 +138,20 @@ class FlutterTesterTestDevice extends TestDevice {
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
       'SERVER_PORT': _server!.port.toString(),
       'APP_NAME': flutterProject?.manifest.appName ?? '',
-      if (testAssetDirectory != null) 'UNIT_TEST_ASSETS': testAssetDirectory!,
+      if (testAssetDirectory != null)
+        'UNIT_TEST_ASSETS': testAssetDirectory!,
     };
 
-    logger.printTrace(
-        'test $id: Starting flutter_tester process with command=$command, environment=$environment');
+    logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
     _process = await processManager.start(command, environment: environment);
 
     // Unawaited to update state.
     unawaited(_process!.exitCode.then((int exitCode) {
-      logger.printTrace(
-          'test $id: flutter_tester process at pid ${_process!.pid} exited with code=$exitCode');
+      logger.printTrace('test $id: flutter_tester process at pid ${_process!.pid} exited with code=$exitCode');
       _exitCode.complete(exitCode);
     }));
 
-    logger.printTrace(
-        'test $id: Started flutter_tester process at pid ${_process!.pid}');
+    logger.printTrace('test $id: Started flutter_tester process at pid ${_process!.pid}');
 
     // Pipe stdout and stderr from the subprocess to our printStatus console.
     // We also keep track of what VM Service port the engine used, if any.
@@ -174,8 +172,7 @@ class FlutterTesterTestDevice extends TestDevice {
             uriConverter: uriConverter,
           );
           forwardingUri = dds.uri;
-          logger.printTrace(
-              'test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
+          logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {
           forwardingUri = detectedUri;
         }
@@ -186,8 +183,7 @@ class FlutterTesterTestDevice extends TestDevice {
           compileExpression: compileExpression,
           logger: logger,
         );
-        logger.printTrace(
-            'test $id: Successfully connected to service protocol: $forwardingUri');
+        logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         if (debuggingOptions.serveObservatory) {
           try {
             await vmService.callMethodWrapper('_serveObservatory');
@@ -197,12 +193,10 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         if (debuggingOptions.startPaused && !machine!) {
-          logger.printStatus(
-              'The Dart VM service is listening on $forwardingUri');
+          logger.printStatus('The Dart VM service is listening on $forwardingUri');
           await _startDevTools(forwardingUri, dds);
           logger.printStatus('');
-          logger.printStatus(
-              'The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.');
+          logger.printStatus('The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.');
         }
         _gotProcessVmServiceUri.complete(forwardingUri);
       },
@@ -244,25 +238,23 @@ class FlutterTesterTestDevice extends TestDevice {
       // We expect SIGKILL (9) because we could have tried to [kill] it.
       return;
     }
-    throw TestDeviceException(
-        _getExitCodeMessage(exitCode), StackTrace.current);
+    throw TestDeviceException(_getExitCodeMessage(exitCode), StackTrace.current);
   }
 
   Uri get _ddsServiceUri {
     return Uri(
       scheme: 'http',
-      host: (host!.type == InternetAddressType.IPv6
-              ? InternetAddress.loopbackIPv6
-              : InternetAddress.loopbackIPv4)
-          .host,
+      host: (host!.type == InternetAddressType.IPv6 ?
+        InternetAddress.loopbackIPv6 :
+        InternetAddress.loopbackIPv4
+      ).host,
       port: debuggingOptions.hostVmServicePort ?? 0,
     );
   }
 
   @visibleForTesting
   @protected
-  Future<DartDevelopmentService> startDds(Uri uri,
-      {UriConverter? uriConverter}) {
+  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) {
     return DartDevelopmentService.startDartDevelopmentService(
       uri,
       serviceUri: _ddsServiceUri,
@@ -286,20 +278,17 @@ class FlutterTesterTestDevice extends TestDevice {
     );
   }
 
-  Future<void> _startDevTools(
-      Uri forwardingUri, DartDevelopmentService? dds) async {
+  Future<void> _startDevTools(Uri forwardingUri, DartDevelopmentService? dds) async {
     _devToolsLauncher = DevtoolsLauncher.instance;
     logger.printTrace('test $id: Serving DevTools...');
-    final DevToolsServerAddress? devToolsServerAddress =
-        await _devToolsLauncher?.serve();
+    final DevToolsServerAddress? devToolsServerAddress = await _devToolsLauncher?.serve();
 
     if (devToolsServerAddress == null) {
       logger.printTrace('test $id: Failed to start DevTools');
       return;
     }
     await _devToolsLauncher?.ready;
-    logger.printTrace(
-        'test $id: DevTools is being served at ${devToolsServerAddress.uri}');
+    logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress.uri}');
 
     // Notify the DDS instance that there's a DevTools instance available so it can correctly
     // redirect DevTools related requests.
@@ -309,8 +298,7 @@ class FlutterTesterTestDevice extends TestDevice {
       // Use query instead of queryParameters to avoid unnecessary encoding.
       query: 'uri=$forwardingUri',
     );
-    logger.printStatus(
-        'The Flutter DevTools debugger and profiler is available at: $devToolsUri');
+    logger.printStatus('The Flutter DevTools debugger and profiler is available at: $devToolsUri');
   }
 
   /// Binds an [HttpServer] serving from `host` on `port`.
@@ -318,8 +306,7 @@ class FlutterTesterTestDevice extends TestDevice {
   /// Only intended to be overridden in tests.
   @protected
   @visibleForTesting
-  Future<HttpServer> bind(InternetAddress? host, int port) =>
-      HttpServer.bind(host, port);
+  Future<HttpServer> bind(InternetAddress? host, int port) => HttpServer.bind(host, port);
 
   @protected
   @visibleForTesting
@@ -328,12 +315,10 @@ class FlutterTesterTestDevice extends TestDevice {
 
     try {
       final HttpRequest firstRequest = await _server!.first;
-      final WebSocket webSocket =
-          await WebSocketTransformer.upgrade(firstRequest);
+      final WebSocket webSocket = await WebSocketTransformer.upgrade(firstRequest);
       return _webSocketToStreamChannel(webSocket);
     } on Exception catch (error, stackTrace) {
-      throw TestDeviceException(
-          'Unable to connect to flutter_tester process: $error', stackTrace);
+      throw TestDeviceException('Unable to connect to flutter_tester process: $error', stackTrace);
     }
   }
 
@@ -357,7 +342,7 @@ class FlutterTesterTestDevice extends TestDevice {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen(
-        (String line) async {
+            (String line) async {
           logger.printTrace('test $id: Shell: $line');
 
           final Match? match = globals.kVMServiceMessageRegExp.firstMatch(line);
@@ -366,16 +351,15 @@ class FlutterTesterTestDevice extends TestDevice {
               final Uri uri = Uri.parse(match[1]!);
               await reportVmServiceUri(uri);
             } on Exception catch (error) {
-              logger.printError(
-                  'Could not parse shell VM Service port message: $error');
+              logger.printError('Could not parse shell VM Service port message: $error');
             }
           } else {
             logger.printStatus('Shell: $line');
           }
+
         },
         onError: (dynamic error) {
-          logger.printError(
-              'shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
+          logger.printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
         },
         cancelOnError: true,
       );
@@ -403,8 +387,7 @@ String _getExitCodeMessage(int exitCode) {
 }
 
 StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {
-  final StreamChannelController<String> controller =
-      StreamChannelController<String>();
+  final StreamChannelController<String> controller = StreamChannelController<String>();
 
   controller.local.stream
       .map<dynamic>((String message) => message as dynamic)

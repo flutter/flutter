@@ -23,8 +23,7 @@ void main() {
       fakeStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
-    testUsingContext('generates bash initialization script to stdout',
-        () async {
+    testUsingContext('generates bash initialization script to stdout', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       await createTestCommandRunner(command).run(<String>['bash-completion']);
       expect(fakeStdio.writtenToStdout.length, equals(1));
@@ -35,11 +34,9 @@ void main() {
       Stdio: () => fakeStdio,
     });
 
-    testUsingContext('generates bash initialization script to stdout with arg',
-        () async {
+    testUsingContext('generates bash initialization script to stdout with arg', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
-      await createTestCommandRunner(command)
-          .run(<String>['bash-completion', '-']);
+      await createTestCommandRunner(command).run(<String>['bash-completion', '-']);
       expect(fakeStdio.writtenToStdout.length, equals(1));
       expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
@@ -48,16 +45,14 @@ void main() {
       Stdio: () => fakeStdio,
     });
 
-    testUsingContext('generates bash initialization script to output file',
-        () async {
+    testUsingContext('generates bash initialization script to output file', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       const String outputFile = 'bash-setup.sh';
       await createTestCommandRunner(command).run(
         <String>['bash-completion', outputFile],
       );
       expect(globals.fs.isFileSync(outputFile), isTrue);
-      expect(globals.fs.file(outputFile).readAsStringSync(),
-          contains('__flutter_completion'));
+      expect(globals.fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -74,10 +69,8 @@ void main() {
         ),
         throwsA(
           isA<ToolExit>()
-              .having((ToolExit error) => error.exitCode, 'exitCode',
-                  anyOf(isNull, 1))
-              .having((ToolExit error) => error.message, 'message',
-                  contains('Use --overwrite')),
+            .having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))
+            .having((ToolExit error) => error.message, 'message', contains('Use --overwrite')),
         ),
       );
       expect(globals.fs.isFileSync(outputFile), isTrue);
@@ -88,8 +81,7 @@ void main() {
       Stdio: () => fakeStdio,
     });
 
-    testUsingContext('will overwrite existing output file if given --overwrite',
-        () async {
+    testUsingContext('will overwrite existing output file if given --overwrite', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       const String outputFile = 'bash-setup.sh';
       globals.fs.file(outputFile).createSync();
@@ -97,8 +89,7 @@ void main() {
         <String>['bash-completion', '--overwrite', outputFile],
       );
       expect(globals.fs.isFileSync(outputFile), isTrue);
-      expect(globals.fs.file(outputFile).readAsStringSync(),
-          contains('__flutter_completion'));
+      expect(globals.fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

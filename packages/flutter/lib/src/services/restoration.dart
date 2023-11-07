@@ -212,9 +212,7 @@ class RestorationManager extends ChangeNotifier {
     }
     return _pendingRootBucket!.future;
   }
-
-  RestorationBucket?
-      _rootBucket; // May be null to indicate that restoration is turned off.
+  RestorationBucket? _rootBucket; // May be null to indicate that restoration is turned off.
   Completer<RestorationBucket?>? _pendingRootBucket;
   bool _rootBucketIsValid = false;
 
@@ -230,8 +228,7 @@ class RestorationManager extends ChangeNotifier {
   bool _isReplacing = false;
 
   Future<void> _getRootBucketFromEngine() async {
-    final Map<Object?, Object?>? config = await SystemChannels.restoration
-        .invokeMethod<Map<Object?, Object?>>('get');
+    final Map<Object?, Object?>? config = await SystemChannels.restoration.invokeMethod<Map<Object?, Object?>>('get');
     if (_pendingRootBucket == null) {
       // The restoration data was obtained via other means (e.g. by calling
       // [handleRestorationDataUpdate] while the request to the engine was
@@ -242,8 +239,7 @@ class RestorationManager extends ChangeNotifier {
     _parseAndHandleRestorationUpdateFromEngine(config);
   }
 
-  void _parseAndHandleRestorationUpdateFromEngine(
-      Map<Object?, Object?>? update) {
+  void _parseAndHandleRestorationUpdateFromEngine(Map<Object?, Object?>? update) {
     handleRestorationUpdateFromEngine(
       enabled: update != null && update['enabled']! as bool,
       data: update == null ? null : update['data'] as Uint8List?,
@@ -265,8 +261,7 @@ class RestorationManager extends ChangeNotifier {
   /// accessed, [rootBucket] will complete synchronously the next time it is
   /// called.
   @protected
-  void handleRestorationUpdateFromEngine(
-      {required bool enabled, required Uint8List? data}) {
+  void handleRestorationUpdateFromEngine({required bool enabled, required Uint8List? data}) {
     assert(enabled || data == null);
 
     _isReplacing = _rootBucketIsValid && enabled;
@@ -278,8 +273,7 @@ class RestorationManager extends ChangeNotifier {
 
     final RestorationBucket? oldRoot = _rootBucket;
     _rootBucket = enabled
-        ? RestorationBucket.root(
-            manager: this, rawData: _decodeRestorationData(data))
+        ? RestorationBucket.root(manager: this, rawData: _decodeRestorationData(data))
         : null;
     _rootBucketIsValid = true;
     assert(_pendingRootBucket == null || !_pendingRootBucket!.isCompleted);
@@ -314,11 +308,9 @@ class RestorationManager extends ChangeNotifier {
   Future<void> _methodHandler(MethodCall call) async {
     switch (call.method) {
       case 'push':
-        _parseAndHandleRestorationUpdateFromEngine(
-            call.arguments as Map<Object?, Object?>);
+        _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<Object?, Object?>);
       default:
-        throw UnimplementedError(
-            "${call.method} was invoked but isn't implemented by $runtimeType");
+        throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
     }
   }
 
@@ -326,23 +318,19 @@ class RestorationManager extends ChangeNotifier {
     if (data == null) {
       return null;
     }
-    final ByteData encoded =
-        data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
-    return const StandardMessageCodec().decodeMessage(encoded)
-        as Map<Object?, Object?>?;
+    final ByteData encoded = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
+    return const StandardMessageCodec().decodeMessage(encoded) as Map<Object?, Object?>?;
   }
 
   Uint8List _encodeRestorationData(Map<Object?, Object?> data) {
     final ByteData encoded = const StandardMessageCodec().encodeMessage(data)!;
-    return encoded.buffer
-        .asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
+    return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
   }
 
   bool _debugDoingUpdate = false;
   bool _serializationScheduled = false;
 
-  final Set<RestorationBucket> _bucketsNeedingSerialization =
-      <RestorationBucket>{};
+  final Set<RestorationBucket> _bucketsNeedingSerialization = <RestorationBucket>{};
 
   /// Called by a [RestorationBucket] to request serialization for that bucket.
   ///
@@ -362,8 +350,9 @@ class RestorationManager extends ChangeNotifier {
     if (!_serializationScheduled) {
       _serializationScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback(
-          (Duration _) => _doSerialization(),
-          debugLabel: 'RestorationManager.doSerialization');
+        (Duration _) => _doSerialization(),
+        debugLabel: 'RestorationManager.doSerialization'
+      );
     }
   }
 
@@ -518,8 +507,8 @@ class RestorationBucket {
   RestorationBucket.empty({
     required String restorationId,
     required Object? debugOwner,
-  })  : _restorationId = restorationId,
-        _rawData = <String, Object?>{} {
+  }) : _restorationId = restorationId,
+       _rawData = <String, Object?>{} {
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -553,9 +542,9 @@ class RestorationBucket {
   RestorationBucket.root({
     required RestorationManager manager,
     required Map<Object?, Object?>? rawData,
-  })  : _manager = manager,
-        _rawData = rawData ?? <Object?, Object?>{},
-        _restorationId = 'root' {
+  }) : _manager = manager,
+       _rawData = rawData ?? <Object?, Object?>{},
+       _restorationId = 'root' {
     assert(() {
       _debugOwner = manager;
       return true;
@@ -577,11 +566,11 @@ class RestorationBucket {
     required String restorationId,
     required RestorationBucket parent,
     required Object? debugOwner,
-  })  : assert(parent._rawChildren[restorationId] != null),
-        _manager = parent._manager,
-        _parent = parent,
-        _rawData = parent._rawChildren[restorationId]! as Map<Object?, Object?>,
-        _restorationId = restorationId {
+  }) : assert(parent._rawChildren[restorationId] != null),
+       _manager = parent._manager,
+       _parent = parent,
+       _rawData = parent._rawChildren[restorationId]! as Map<Object?, Object?>,
+       _restorationId = restorationId {
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -605,7 +594,6 @@ class RestorationBucket {
     assert(_debugAssertNotDisposed());
     return _debugOwner;
   }
-
   Object? _debugOwner;
 
   RestorationManager? _manager;
@@ -630,17 +618,12 @@ class RestorationBucket {
     assert(_debugAssertNotDisposed());
     return _restorationId;
   }
-
   String _restorationId;
 
   // Maps a restoration ID to the raw map representation of a child bucket.
-  Map<Object?, Object?> get _rawChildren =>
-      _rawData.putIfAbsent(_childrenMapKey, () => <Object?, Object?>{})!
-          as Map<Object?, Object?>;
+  Map<Object?, Object?> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <Object?, Object?>{})! as Map<Object?, Object?>;
   // Maps a restoration ID to a value that is stored in this bucket.
-  Map<Object?, Object?> get _rawValues =>
-      _rawData.putIfAbsent(_valuesMapKey, () => <Object?, Object?>{})!
-          as Map<Object?, Object?>;
+  Map<Object?, Object?> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <Object?, Object?>{})! as Map<Object?, Object?>;
 
   // Get and store values.
 
@@ -680,8 +663,7 @@ class RestorationBucket {
   void write<P>(String restorationId, P value) {
     assert(_debugAssertNotDisposed());
     assert(debugIsSerializableForRestoration(value));
-    if (_rawValues[restorationId] != value ||
-        !_rawValues.containsKey(restorationId)) {
+    if (_rawValues[restorationId] != value || !_rawValues.containsKey(restorationId)) {
       _rawValues[restorationId] = value;
       _markNeedsSerialization();
     }
@@ -729,12 +711,10 @@ class RestorationBucket {
 
   // The restoration IDs and associated buckets of children that have been
   // claimed via [claimChild].
-  final Map<String, RestorationBucket> _claimedChildren =
-      <String, RestorationBucket>{};
+  final Map<String, RestorationBucket> _claimedChildren = <String, RestorationBucket>{};
   // Newly created child buckets whose restoration ID is still in use, see
   // comment in [claimChild] for details.
-  final Map<String, List<RestorationBucket>> _childrenToAdd =
-      <String, List<RestorationBucket>>{};
+  final Map<String, List<RestorationBucket>> _childrenToAdd = <String, List<RestorationBucket>>{};
 
   /// Claims ownership of the child with the provided `restorationId` from this
   /// bucket.
@@ -757,8 +737,7 @@ class RestorationBucket {
   ///
   /// When the returned bucket is no longer needed, it must be [dispose]d to
   /// delete the information stored in it from the app's restoration data.
-  RestorationBucket claimChild(String restorationId,
-      {required Object? debugOwner}) {
+  RestorationBucket claimChild(String restorationId, {required Object? debugOwner}) {
     assert(_debugAssertNotDisposed());
     // There are three cases to consider:
     // 1. Claiming an ID that has already been claimed.
@@ -775,8 +754,7 @@ class RestorationBucket {
     // [_rawChildren].
 
     // Case 1+2: Adopt and return an empty bucket.
-    if (_claimedChildren.containsKey(restorationId) ||
-        !_rawChildren.containsKey(restorationId)) {
+    if (_claimedChildren.containsKey(restorationId) || !_rawChildren.containsKey(restorationId)) {
       final RestorationBucket child = RestorationBucket.empty(
         debugOwner: debugOwner,
         restorationId: restorationId,
@@ -877,23 +855,18 @@ class RestorationBucket {
         return true;
       }
       final List<DiagnosticsNode> error = <DiagnosticsNode>[
-        ErrorSummary(
-            'Multiple owners claimed child RestorationBuckets with the same IDs.'),
-        ErrorDescription(
-            'The following IDs were claimed multiple times from the parent $this:'),
+        ErrorSummary('Multiple owners claimed child RestorationBuckets with the same IDs.'),
+        ErrorDescription('The following IDs were claimed multiple times from the parent $this:'),
       ];
-      for (final MapEntry<String, List<RestorationBucket>> child
-          in _childrenToAdd.entries) {
+      for (final MapEntry<String, List<RestorationBucket>> child in _childrenToAdd.entries) {
         final String id = child.key;
         final List<RestorationBucket> buckets = child.value;
         assert(buckets.isNotEmpty);
         assert(_claimedChildren.containsKey(id));
         error.addAll(<DiagnosticsNode>[
           ErrorDescription(' * "$id" was claimed by:'),
-          ...buckets.map((RestorationBucket bucket) =>
-              ErrorDescription('   * ${bucket.debugOwner}')),
-          ErrorDescription(
-              '   * ${_claimedChildren[id]!.debugOwner} (current owner)'),
+          ...buckets.map((RestorationBucket bucket) => ErrorDescription('   * ${bucket.debugOwner}')),
+          ErrorDescription('   * ${_claimedChildren[id]!.debugOwner} (current owner)'),
         ]);
       }
       throw FlutterError.fromParts(error);
@@ -905,8 +878,7 @@ class RestorationBucket {
     assert(child._parent == this);
     if (_claimedChildren.remove(child.restorationId) == child) {
       _rawChildren.remove(child.restorationId);
-      final List<RestorationBucket>? pendingChildren =
-          _childrenToAdd[child.restorationId];
+      final List<RestorationBucket>? pendingChildren = _childrenToAdd[child.restorationId];
       if (pendingChildren != null) {
         final RestorationBucket toAdd = pendingChildren.removeLast();
         _finalizeAddChildData(toAdd);
@@ -932,9 +904,7 @@ class RestorationBucket {
       // Delay addition until the end of the frame in the hopes that the current
       // owner of the child with the same ID will have given up that child by
       // then.
-      _childrenToAdd
-          .putIfAbsent(child.restorationId, () => <RestorationBucket>[])
-          .add(child);
+      _childrenToAdd.putIfAbsent(child.restorationId, () => <RestorationBucket>[]).add(child);
       _markNeedsSerialization();
       return;
     }
@@ -949,11 +919,9 @@ class RestorationBucket {
     _rawChildren[child.restorationId] = child._rawData;
   }
 
-  void _visitChildren(_BucketVisitor visitor,
-      {bool concurrentModification = false}) {
-    Iterable<RestorationBucket> children = _claimedChildren.values.followedBy(
-        _childrenToAdd.values
-            .expand((List<RestorationBucket> buckets) => buckets));
+  void _visitChildren(_BucketVisitor visitor, {bool concurrentModification = false}) {
+    Iterable<RestorationBucket> children = _claimedChildren.values
+        .followedBy(_childrenToAdd.values.expand((List<RestorationBucket> buckets) => buckets));
     if (concurrentModification) {
       children = children.toList(growable: false);
     }
@@ -1023,16 +991,15 @@ class RestorationBucket {
   }
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'RestorationBucket')}(restorationId: $restorationId, owner: $debugOwner)';
+  String toString() => '${objectRuntimeType(this, 'RestorationBucket')}(restorationId: $restorationId, owner: $debugOwner)';
 
   bool _debugDisposed = false;
   bool _debugAssertNotDisposed() {
     assert(() {
       if (_debugDisposed) {
         throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
+            'A $runtimeType was used after being disposed.\n'
+            'Once you have called dispose() on a $runtimeType, it can no longer be used.',
         );
       }
       return true;

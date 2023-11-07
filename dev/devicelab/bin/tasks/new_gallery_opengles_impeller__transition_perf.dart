@@ -13,15 +13,11 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
 
-  final Directory galleryParentDir =
-      Directory.systemTemp.createTempSync('flutter_new_gallery_test.');
-  final Directory galleryDir =
-      Directory(path.join(galleryParentDir.path, 'gallery'));
+  final Directory galleryParentDir = Directory.systemTemp.createTempSync('flutter_new_gallery_test.');
+  final Directory galleryDir = Directory(path.join(galleryParentDir.path, 'gallery'));
 
   try {
-    await task(NewGalleryPerfTest(galleryDir,
-            enableImpeller: true, forceOpenGLES: true)
-        .run);
+    await task(NewGalleryPerfTest(galleryDir, enableImpeller: true, forceOpenGLES: true).run);
   } finally {
     rmTree(galleryParentDir);
   }

@@ -34,8 +34,7 @@ class AnimatedIconExample extends StatefulWidget {
   State<AnimatedIconExample> createState() => _AnimatedIconExampleState();
 }
 
-class _AnimatedIconExampleState extends State<AnimatedIconExample>
-    with SingleTickerProviderStateMixin {
+class _AnimatedIconExampleState extends State<AnimatedIconExample> with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<double> animation;
 

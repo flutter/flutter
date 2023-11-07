@@ -9,19 +9,15 @@ import 'package:flutter/material.dart';
 // dirty children even without explicit repaint boundaries. These intentionally use
 // text to ensure we don't measure the opacity peephole case.
 class AnimatedBlurBackdropFilter extends StatefulWidget {
-  const AnimatedBlurBackdropFilter({super.key});
+  const AnimatedBlurBackdropFilter({ super.key });
 
   @override
-  State<AnimatedBlurBackdropFilter> createState() =>
-      _AnimatedBlurBackdropFilterState();
+  State<AnimatedBlurBackdropFilter> createState() => _AnimatedBlurBackdropFilterState();
 }
 
-class _AnimatedBlurBackdropFilterState extends State<AnimatedBlurBackdropFilter>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController controller = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 5000));
-  late final Animation<double> animation =
-      controller.drive(Tween<double>(begin: 0.0, end: 1.0));
+class _AnimatedBlurBackdropFilterState extends State<AnimatedBlurBackdropFilter> with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 5000));
+  late final Animation<double> animation = controller.drive(Tween<double>(begin: 0.0, end: 1.0));
   ui.ImageFilter imageFilter = ui.ImageFilter.blur();
 
   @override
@@ -55,8 +51,7 @@ class _AnimatedBlurBackdropFilterState extends State<AnimatedBlurBackdropFilter>
               children: <Widget>[
                 for (int i = 0; i < 30; i++)
                   Center(
-                    child: Transform.scale(
-                        scale: 1.01, child: const ModeratelyComplexWidget()),
+                    child: Transform.scale(scale: 1.01, child: const ModeratelyComplexWidget()),
                   ),
               ],
             ),
@@ -72,7 +67,7 @@ class _AnimatedBlurBackdropFilterState extends State<AnimatedBlurBackdropFilter>
 }
 
 class ModeratelyComplexWidget extends StatelessWidget {
-  const ModeratelyComplexWidget({super.key});
+  const ModeratelyComplexWidget({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +76,7 @@ class ModeratelyComplexWidget extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: ListTile(
         leading: Icon(Icons.abc, size: 24),
-        title: DecoratedBox(
-            decoration: BoxDecoration(color: Colors.red),
-            child: Text('Hello World')),
+        title: DecoratedBox(decoration: BoxDecoration(color: Colors.red), child: Text('Hello World')),
         trailing: FlutterLogo(),
       ),
     );

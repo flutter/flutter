@@ -24,7 +24,7 @@ class _DummyPortForwarder implements PortForwarder {
   String get openPortAddress => InternetAddress.loopbackIPv4.address;
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async { }
 }
 
 class _DummySshCommandRunner implements SshCommandRunner {

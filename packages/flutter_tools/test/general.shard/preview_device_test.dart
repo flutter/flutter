@@ -33,8 +33,7 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = r'C:\path\to\flutter';
-    previewBinary = fs.file(
-        '${Cache.flutterRoot}\\bin\\cache\\artifacts\\flutter_preview\\flutter_preview.exe');
+    previewBinary = fs.file('${Cache.flutterRoot}\\bin\\cache\\artifacts\\flutter_preview\\flutter_preview.exe');
     previewBinary.createSync(recursive: true);
     flutterRootBackup = Cache.flutterRoot;
   });
@@ -62,8 +61,7 @@ void main() {
 
     expect(device.isSupported(), true);
     expect(device.isSupportedForProject(FakeFlutterProject()), true);
-    expect(
-        await device.isLatestBuildInstalled(FakeApplicationPackage()), false);
+    expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), false);
     expect(await device.isAppInstalled(FakeApplicationPackage()), false);
     expect(await device.uninstallApp(FakeApplicationPackage()), true);
   });
@@ -80,20 +78,17 @@ void main() {
           command: const <String>[
             r'C:\.tmp_rand0\flutter_preview.rand0\flutter_preview.exe',
           ],
-          stdout:
-              'The Dart VM service is listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
+          stdout: 'The Dart VM service is listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
           completer: completer,
         ),
       ]),
       logger: logger,
       builderFactory: () => FakeBundleBuilder(fs),
     );
-    final Directory previewDeviceCacheDir = fs.directory(
-        'Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
+    final Directory previewDeviceCacheDir = fs
+      .directory('Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
       ..createSync(recursive: true);
-    previewDeviceCacheDir
-        .childFile('flutter_windows.dll')
-        .writeAsStringSync('1010101');
+    previewDeviceCacheDir.childFile('flutter_windows.dll').writeAsStringSync('1010101');
     previewDeviceCacheDir.childFile('icudtl.dat').writeAsStringSync('1010101');
 
     final LaunchResult result = await device.startApp(
@@ -102,19 +97,16 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(
-        result.vmServiceUri, Uri.parse('http://127.0.0.1:64494/fZ_B2N6JRwY=/'));
+    expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:64494/fZ_B2N6JRwY=/'));
   });
 
   group('PreviewDeviceDiscovery', () {
     late Artifacts artifacts;
     late ProcessManager processManager;
-    final FakePlatform windowsPlatform =
-        FakePlatform(operatingSystem: 'windows');
+    final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
     final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
     final FakePlatform linuxPlatform = FakePlatform();
-    final TestFeatureFlags featureFlags =
-        TestFeatureFlags(isPreviewDeviceEnabled: true);
+    final TestFeatureFlags featureFlags = TestFeatureFlags(isPreviewDeviceEnabled: true);
 
     setUp(() {
       artifacts = Artifacts.test(fileSystem: fs);
@@ -151,13 +143,9 @@ void main() {
       expect(devices, isEmpty);
     });
 
-    testWithoutContext(
-        'PreviewDeviceDiscovery on Windows returns preview when binary exists',
-        () async {
+    testWithoutContext('PreviewDeviceDiscovery on Windows returns preview when binary exists', () async {
       // ensure Flutter preview binary exists in cache.
-      fs
-          .file(artifacts.getArtifactPath(Artifact.flutterPreviewDevice))
-          .writeAsBytesSync(<int>[1, 0, 0, 1]);
+      fs.file(artifacts.getArtifactPath(Artifact.flutterPreviewDevice)).writeAsBytesSync(<int>[1, 0, 0, 1]);
       final PreviewDeviceDiscovery discovery = PreviewDeviceDiscovery(
         artifacts: artifacts,
         fileSystem: fs,
@@ -174,9 +162,7 @@ void main() {
       expect(previewDevice, isA<PreviewDevice>());
     });
 
-    testWithoutContext(
-        'PreviewDeviceDiscovery on Windows returns nothing when binary does not exist',
-        () async {
+    testWithoutContext('PreviewDeviceDiscovery on Windows returns nothing when binary does not exist', () async {
       final PreviewDeviceDiscovery discovery = PreviewDeviceDiscovery(
         artifacts: artifacts,
         fileSystem: fs,
@@ -193,30 +179,29 @@ void main() {
   });
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {}
-
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
-
+class FakeFlutterProject extends Fake implements FlutterProject { }
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   FakeBundleBuilder(this.fileSystem);
 
   final FileSystem fileSystem;
 
   @override
-  Future<void> build(
-      {required TargetPlatform platform,
-      required BuildInfo buildInfo,
-      FlutterProject? project,
-      String? mainPath,
-      String manifestPath = defaultManifestPath,
-      String? applicationKernelFilePath,
-      String? depfilePath,
-      String? assetDirPath,
-      bool buildNativeAssets = true,
-      @visibleForTesting BuildSystem? buildSystem}) async {
+  Future<void> build({
+    required TargetPlatform platform,
+    required BuildInfo buildInfo,
+    FlutterProject? project,
+    String? mainPath,
+    String manifestPath = defaultManifestPath,
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    bool buildNativeAssets = true,
+    @visibleForTesting BuildSystem? buildSystem
+  }) async {
     final Directory assetDirectory = fileSystem
-        .directory(assetDirPath)
-        .childDirectory('flutter_assets')
+      .directory(assetDirPath)
+      .childDirectory('flutter_assets')
       ..createSync(recursive: true);
     assetDirectory.childFile('kernel_blob.bin').createSync();
   }

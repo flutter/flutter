@@ -141,8 +141,7 @@ mixin class ChangeNotifier implements Listenable {
   // keeping runtime type the same during the lifetime of this class lets the
   // compiler to infer concrete type for this property, and thus improves
   // performance.
-  static final List<VoidCallback?> _emptyListeners =
-      List<VoidCallback?>.filled(0, null);
+  static final List<VoidCallback?> _emptyListeners = List<VoidCallback?>.filled(0, null);
   List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
@@ -298,8 +297,7 @@ mixin class ChangeNotifier implements Listenable {
     // of our list.
     _count -= 1;
     if (_count * 2 <= _listeners.length) {
-      final List<VoidCallback?> newListeners =
-          List<VoidCallback?>.filled(_count, null);
+      final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_count, null);
 
       // Listeners before the index are at the same place.
       for (int i = 0; i < index; i++) {
@@ -438,8 +436,7 @@ mixin class ChangeNotifier implements Listenable {
           exception: exception,
           stack: stack,
           library: 'foundation library',
-          context: ErrorDescription(
-              'while dispatching notifications for $runtimeType'),
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
           informationCollector: () => <DiagnosticsNode>[
             DiagnosticsProperty<ChangeNotifier>(
               'The $runtimeType sending notification was',
@@ -459,8 +456,7 @@ mixin class ChangeNotifier implements Listenable {
       if (newLength * 2 <= _listeners.length) {
         // As in _removeAt, we only shrink the list when the real number of
         // listeners is half the length of our list.
-        final List<VoidCallback?> newListeners =
-            List<VoidCallback?>.filled(newLength, null);
+        final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(newLength, null);
 
         int newIndex = 0;
         for (int i = 0; i < _count; i++) {

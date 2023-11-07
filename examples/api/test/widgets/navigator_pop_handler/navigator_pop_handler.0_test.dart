@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_api_samples/widgets/navigator_pop_handler/navigator_pop_handler.0.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/navigator_pop_handler/navigator_pop_handler.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../navigator_utils.dart';
 
 void main() {
-  testWidgets('Can go back with system back gesture',
-      (WidgetTester tester) async {
+  testWidgets('Can go back with system back gesture', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.NavigatorPopHandlerApp(),
     );

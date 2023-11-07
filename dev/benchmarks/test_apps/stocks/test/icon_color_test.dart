@@ -14,7 +14,6 @@ Element? findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
     }
     child.visitChildElements(walker);
   }
-
   try {
     walker(node);
   } on Element catch (result) {
@@ -32,16 +31,13 @@ Element? findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
     }
     return true;
   }
-
   node.visitAncestorElements(walker);
   return result;
 }
 
 void checkIconColor(WidgetTester tester, String label, Color color) {
-  final Element listTile = findElementOfExactWidgetTypeGoingUp(
-      tester.element(find.text(label)), ListTile)!;
-  final Element asset =
-      findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
+  final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile)!;
+  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
   final RichText richText = asset.widget as RichText;
   expect(richText.text.style!.color, equals(color));
 }
@@ -50,8 +46,7 @@ void main() {
   stock_data.StockData.actuallyFetchData = false;
 
   testWidgets('Icon colors', (WidgetTester tester) async {
-    stocks
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    stocks.main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
@@ -63,11 +58,8 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    final Offset left = Offset(0.0,
-        (tester.view.physicalSize / tester.view.devicePixelRatio).height / 2.0);
-    final Offset right = Offset(
-        (tester.view.physicalSize / tester.view.devicePixelRatio).width,
-        left.dy);
+    final Offset left = Offset(0.0, (tester.view.physicalSize / tester.view.devicePixelRatio).height / 2.0);
+    final Offset right = Offset((tester.view.physicalSize / tester.view.devicePixelRatio).width, left.dy);
     final TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);
@@ -84,8 +76,7 @@ void main() {
 
     // switch to dark mode
     await tester.tap(find.text('Pessimistic'));
-    await tester
-        .pump(); // get the tap and send the notification that the theme has changed
+    await tester.pump(); // get the tap and send the notification that the theme has changed
     await tester.pump(); // start the theme transition
     await tester.pump(const Duration(seconds: 5)); // end the transition
 

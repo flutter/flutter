@@ -13,16 +13,13 @@ void main() {
 
   tearDown(() {
     final List<PipelineOwner> children = <PipelineOwner>[];
-    RendererBinding.instance.rootPipelineOwner
-        .visitChildren((PipelineOwner child) {
+    RendererBinding.instance.rootPipelineOwner.visitChildren((PipelineOwner child) {
       children.add(child);
     });
     children.forEach(RendererBinding.instance.rootPipelineOwner.dropChild);
   });
 
-  test(
-      "BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update",
-      () {
+  test("BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update", () {
     final PipelineOwner child = PipelineOwner();
     RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
@@ -36,11 +33,9 @@ void main() {
     expect(MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount, 1);
   });
 
-  test(
-      'Turning global semantics on/off creates semantics owners in PipelineOwner tree',
-      () {
+  test('Turning global semantics on/off creates semantics owners in PipelineOwner tree', () {
     final PipelineOwner child = PipelineOwner(
-      onSemanticsUpdate: (_) {},
+      onSemanticsUpdate: (_) { },
     );
     RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
@@ -50,8 +45,7 @@ void main() {
     final SemanticsHandle handle = SemanticsBinding.instance.ensureSemantics();
 
     expect(child.semanticsOwner, isNotNull);
-    expect(
-        RendererBinding.instance.rootPipelineOwner.semanticsOwner, isNotNull);
+    expect(RendererBinding.instance.rootPipelineOwner.semanticsOwner, isNotNull);
 
     handle.dispose();
 
@@ -61,8 +55,7 @@ void main() {
 }
 
 class MyTestRenderingFlutterBinding extends TestRenderingFlutterBinding {
-  static MyTestRenderingFlutterBinding get instance =>
-      BindingBase.checkInstance(_instance);
+  static MyTestRenderingFlutterBinding get instance => BindingBase.checkInstance(_instance);
   static MyTestRenderingFlutterBinding? _instance;
 
   static MyTestRenderingFlutterBinding ensureInitialized() {
@@ -89,16 +82,16 @@ class MyTestRenderingFlutterBinding extends TestRenderingFlutterBinding {
 
 class TestRenderObject extends RenderObject {
   @override
-  void debugAssertDoesMeetConstraints() {}
+  void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds => Rect.zero;
 
   @override
-  void performLayout() {}
+  void performLayout() { }
 
   @override
-  void performResize() {}
+  void performResize() { }
 
   @override
   Rect get semanticBounds => Rect.zero;

@@ -9,8 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('DefaultTextStyle changes propagate to Text',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextStyle s1 = TextStyle(
       fontSize: 10.0,
@@ -45,9 +44,7 @@ void main() {
     expect(text.maxLines, 3);
   });
 
-  testWidgetsWithLeakTracking(
-      'AnimatedDefaultTextStyle changes propagate to Text',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedDefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextStyle s1 = TextStyle(
       fontSize: 10.0,
@@ -83,8 +80,7 @@ void main() {
       overflow: TextOverflow.fade,
       maxLines: 3,
       textWidthBasis: TextWidthBasis.longestLine,
-      textHeightBehavior:
-          ui.TextHeightBehavior(applyHeightToFirstAscent: false),
+      textHeightBehavior: ui.TextHeightBehavior(applyHeightToFirstAscent: false),
       duration: Duration(milliseconds: 1000),
       child: textWidget,
     ));
@@ -97,8 +93,7 @@ void main() {
     expect(text2.overflow, TextOverflow.fade);
     expect(text2.maxLines, 3);
     expect(text2.textWidthBasis, TextWidthBasis.longestLine);
-    expect(text2.textHeightBehavior,
-        const ui.TextHeightBehavior(applyHeightToFirstAscent: false));
+    expect(text2.textHeightBehavior, const ui.TextHeightBehavior(applyHeightToFirstAscent: false));
 
     await tester.pump(const Duration(milliseconds: 1000));
 
@@ -110,7 +105,6 @@ void main() {
     expect(text3.overflow, TextOverflow.fade);
     expect(text3.maxLines, 3);
     expect(text2.textWidthBasis, TextWidthBasis.longestLine);
-    expect(text2.textHeightBehavior,
-        const ui.TextHeightBehavior(applyHeightToFirstAscent: false));
+    expect(text2.textHeightBehavior, const ui.TextHeightBehavior(applyHeightToFirstAscent: false));
   });
 }

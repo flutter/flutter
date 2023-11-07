@@ -20,8 +20,7 @@ void main() {
 }
 
 void _tests() {
-  testWidgetsWithLeakTracking('excludeFromScrollable works correctly',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('excludeFromScrollable works correctly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const double appBarExpandedHeight = 200.0;
@@ -67,62 +66,58 @@ void _tests() {
     );
 
     // AppBar is child of node with semantic scroll actions.
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                id: 1,
-                textDirection: TextDirection.ltr,
+                id: 2,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 2,
+                    id: 7,
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 7,
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 8,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'Semantics Test with Slivers',
-                            textDirection: TextDirection.ltr,
-                          ),
+                        id: 8,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
                         ],
+                        label: 'Semantics Test with Slivers',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    id: 9,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        id: 9,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        actions: <SemanticsAction>[SemanticsAction.scrollUp],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 3,
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 4,
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 5,
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 6,
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        id: 4,
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        id: 5,
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        id: 6,
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -130,82 +125,76 @@ void _tests() {
               ),
             ],
           ),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
     // Scroll down far enough to reach the pinned state of the app bar.
     scrollController.jumpTo(appBarExpandedHeight);
     await tester.pump();
 
     // App bar is NOT a child of node with semantic scroll actions.
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                id: 1,
-                textDirection: TextDirection.ltr,
+                id: 2,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 2,
+                    id: 7,
+                    tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 7,
-                        tags: <SemanticsTag>[
-                          RenderViewport.excludeFromScrolling
+                        id: 8,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
                         ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 8,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'Semantics Test with Slivers',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'Semantics Test with Slivers',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    id: 9,
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        id: 9,
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 3,
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 4,
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 5,
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 6,
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 10,
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        id: 4,
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        id: 5,
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        id: 6,
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        id: 10,
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 4',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -213,73 +202,71 @@ void _tests() {
               ),
             ],
           ),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
     // Scroll halfway back to the top, app bar is no longer in pinned state.
     scrollController.jumpTo(appBarExpandedHeight / 2);
     await tester.pump();
 
     // AppBar is child of node with semantic scroll actions.
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                id: 1,
-                textDirection: TextDirection.ltr,
+                id: 2,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 2,
+                    id: 7,
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 7,
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 8,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'Semantics Test with Slivers',
-                            textDirection: TextDirection.ltr,
-                          ),
+                        id: 8,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
                         ],
+                        label: 'Semantics Test with Slivers',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    id: 9,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        id: 9,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 3,
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 4,
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 5,
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            id: 6,
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        id: 4,
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        id: 5,
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        id: 6,
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -287,15 +274,16 @@ void _tests() {
               ),
             ],
           ),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Offscreen sliver are hidden in semantics tree',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Offscreen sliver are hidden in semantics tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const double containerHeight = 200.0;
@@ -337,44 +325,40 @@ void _tests() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -382,16 +366,17 @@ void _tests() {
               ),
             ],
           ),
-          ignoreRect: true,
-          ignoreTransform: true,
-          ignoreId: true,
-        ));
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SemanticsNodes of Slivers are in paint order',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticsNodes of Slivers are in paint order', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> slivers = List<Widget>.generate(5, (int i) {
@@ -421,42 +406,38 @@ void _tests() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            label: 'Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'Item 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -464,18 +445,18 @@ void _tests() {
               ),
             ],
           ),
-          ignoreRect: true,
-          ignoreTransform: true,
-          ignoreId: true,
-          childOrder: DebugSemanticsDumpOrder.inverseHitTest,
-        ));
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+      childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
@@ -484,8 +465,7 @@ void _tests() {
         child: Text('Item $i', textDirection: TextDirection.ltr),
       );
     });
-    final ScrollController controller =
-        ScrollController(initialScrollOffset: 280.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     addTearDown(controller.dispose);
     await tester.pumpWidget(Semantics(
       textDirection: TextDirection.ltr,
@@ -517,68 +497,60 @@ void _tests() {
       ),
     ));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
-                        tags: <SemanticsTag>[
-                          RenderViewport.excludeFromScrolling
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
                         ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'AppBar',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'AppBar',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 5',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 5',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -586,21 +558,20 @@ void _tests() {
               ),
             ],
           ),
-          ignoreTransform: true,
-          ignoreId: true,
-          ignoreRect: true,
-        ));
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreId: true,
+      ignoreRect: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'Slivers fully covered by another overlapping sliver are hidden',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slivers fully covered by another overlapping sliver are hidden', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final ScrollController controller =
-        ScrollController(initialScrollOffset: 280.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     addTearDown(controller.dispose);
     final List<Widget> slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
@@ -638,68 +609,60 @@ void _tests() {
       ),
     ));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
-                        tags: <SemanticsTag>[
-                          RenderViewport.excludeFromScrolling
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
                         ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'AppBar',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'AppBar',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 5',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 5',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -707,17 +670,17 @@ void _tests() {
               ),
             ],
           ),
-          ignoreTransform: true,
-          ignoreRect: true,
-          ignoreId: true,
-        ));
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded (reverse)',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded (reverse)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
@@ -726,8 +689,7 @@ void _tests() {
         child: Text('Item $i', textDirection: TextDirection.ltr),
       );
     });
-    final ScrollController controller =
-        ScrollController(initialScrollOffset: 280.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     addTearDown(controller.dispose);
     await tester.pumpWidget(Semantics(
       textDirection: TextDirection.ltr,
@@ -760,68 +722,62 @@ void _tests() {
       ),
     ));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 5',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
                         flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
                         ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 5',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ),
-                      TestSemantics(
-                        tags: <SemanticsTag>[
-                          RenderViewport.excludeFromScrolling
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'AppBar',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'AppBar',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -829,21 +785,20 @@ void _tests() {
               ),
             ],
           ),
-          ignoreTransform: true,
-          ignoreId: true,
-          ignoreRect: true,
-        ));
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreId: true,
+      ignoreRect: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'Slivers fully covered by another overlapping sliver are hidden (reverse)',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slivers fully covered by another overlapping sliver are hidden (reverse)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final ScrollController controller =
-        ScrollController(initialScrollOffset: 280.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     addTearDown(controller.dispose);
     final List<Widget> slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
@@ -882,68 +837,62 @@ void _tests() {
       ),
     ));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 5',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 0',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
                       TestSemantics(
                         flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
                         ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 5',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ),
-                      TestSemantics(
-                        tags: <SemanticsTag>[
-                          RenderViewport.excludeFromScrolling
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'AppBar',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        label: 'AppBar',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -951,21 +900,20 @@ void _tests() {
               ),
             ],
           ),
-          ignoreTransform: true,
-          ignoreId: true,
-          ignoreRect: true,
-        ));
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreId: true,
+      ignoreRect: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'Slivers fully covered by another overlapping sliver are hidden (with center sliver)',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slivers fully covered by another overlapping sliver are hidden (with center sliver)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final ScrollController controller =
-        ScrollController(initialScrollOffset: 280.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     addTearDown(controller.dispose);
     final GlobalKey forwardAppBarKey = GlobalKey(debugLabel: 'forward app bar');
     final List<Widget> forwardChildren = List<Widget>.generate(10, (int i) {
@@ -1006,8 +954,7 @@ void _tests() {
                       pinned: true,
                       expandedHeight: 100.0,
                       flexibleSpace: FlexibleSpaceBar(
-                        title: Text('Backward app bar',
-                            textDirection: TextDirection.ltr),
+                        title: Text('Backward app bar', textDirection: TextDirection.ltr),
                       ),
                     ),
                     SliverAppBar(
@@ -1015,8 +962,7 @@ void _tests() {
                       key: forwardAppBarKey,
                       expandedHeight: 100.0,
                       flexibleSpace: const FlexibleSpaceBar(
-                        title: Text('Forward app bar',
-                            textDirection: TextDirection.ltr),
+                        title: Text('Forward app bar', textDirection: TextDirection.ltr),
                       ),
                     ),
                     SliverList(
@@ -1032,73 +978,65 @@ void _tests() {
     ));
 
     // 'Forward Item 0' is covered by app bar.
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
+                      TestSemantics(),
                       TestSemantics(
-                        tags: <SemanticsTag>[
-                          RenderViewport.excludeFromScrolling
-                        ],
                         children: <TestSemantics>[
-                          TestSemantics(),
                           TestSemantics(
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.namesRoute,
-                                  SemanticsFlag.isHeader,
-                                ],
-                                label: 'Forward app bar',
-                                textDirection: TextDirection.ltr,
-                              ),
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
                             ],
+                            label: 'Forward app bar',
+                            textDirection: TextDirection.ltr,
                           ),
                         ],
                       ),
+                    ],
+                  ),
+                  TestSemantics(
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                    children: <TestSemantics>[
                       TestSemantics(
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Forward Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Forward Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Forward Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Forward Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Forward Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Forward Item 5',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Forward Item 0',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Forward Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Forward Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Forward Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Forward Item 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Forward Item 5',
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -1106,80 +1044,76 @@ void _tests() {
               ),
             ],
           ),
-          ignoreTransform: true,
-          ignoreRect: true,
-          ignoreId: true,
-        ));
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     controller.jumpTo(-880.0);
     await tester.pumpAndSettle();
 
     // 'Backward Item 0' is covered by app bar.
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               TestSemantics(
-                textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.scrollUp,
-                          SemanticsAction.scrollDown,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Backward Item 5',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Backward Item 4',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Backward Item 3',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Backward Item 2',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            label: 'Backward Item 1',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                            label: 'Backward Item 0',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Backward Item 5',
+                        textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        tags: <SemanticsTag>[
-                          RenderViewport.excludeFromScrolling
-                        ],
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Backward Item 4',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Backward Item 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Backward Item 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Backward Item 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Backward Item 0',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
+                    tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
+                    children: <TestSemantics>[
+                      TestSemantics(),
+                      TestSemantics(
                         children: <TestSemantics>[
-                          TestSemantics(),
                           TestSemantics(
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.namesRoute,
-                                  SemanticsFlag.isHeader,
-                                ],
-                                label: 'Backward app bar',
-                                textDirection: TextDirection.ltr,
-                              ),
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
                             ],
+                            label: 'Backward app bar',
+                            textDirection: TextDirection.ltr,
                           ),
                         ],
                       ),
@@ -1189,11 +1123,11 @@ void _tests() {
               ),
             ],
           ),
-          ignoreTransform: true,
-          ignoreRect: true,
-          ignoreId: true,
-        ));
+        ],
+      ), ignoreTransform: true, ignoreRect: true, ignoreId: true,
+    ));
 
     semantics.dispose();
   });
+
 }

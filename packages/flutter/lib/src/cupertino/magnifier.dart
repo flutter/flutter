@@ -64,13 +64,15 @@ class CupertinoTextMagnifier extends StatefulWidget {
 
   /// [CupertinoTextMagnifier] will determine its own positioning
   /// based on the [MagnifierInfo] of this notifier.
-  final ValueNotifier<MagnifierInfo> magnifierInfo;
+  final ValueNotifier<MagnifierInfo>
+      magnifierInfo;
 
   /// The duration that the magnifier drags behind its final position.
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
 
   @override
-  State<CupertinoTextMagnifier> createState() => _CupertinoTextMagnifierState();
+  State<CupertinoTextMagnifier> createState() =>
+      _CupertinoTextMagnifierState();
 }
 
 class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
@@ -93,7 +95,8 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     )..addListener(() => setState(() {}));
 
     widget.controller.animationController = _ioAnimationController;
-    widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
+    widget.magnifierInfo
+        .addListener(_determineMagnifierPositionAndFocalPoint);
 
     _ioAnimation = Tween<double>(
       begin: 0.0,
@@ -116,10 +119,8 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   @override
   void didUpdateWidget(CupertinoTextMagnifier oldWidget) {
     if (oldWidget.magnifierInfo != widget.magnifierInfo) {
-      oldWidget.magnifierInfo
-          .removeListener(_determineMagnifierPositionAndFocalPoint);
-      widget.magnifierInfo
-          .addListener(_determineMagnifierPositionAndFocalPoint);
+      oldWidget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
+      widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -131,7 +132,8 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   }
 
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierInfo textEditingContext = widget.magnifierInfo.value;
+    final MagnifierInfo textEditingContext =
+        widget.magnifierInfo.value;
 
     // The exact Y of the center of the current line.
     final double verticalCenterOfCurrentLine =
@@ -176,8 +178,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
     // Adjust the magnifier position so that it never exists outside the horizontal
     // padding.
-    final Offset adjustedMagnifierPosition =
-        MagnifierController.shiftWithinBounds(
+    final Offset adjustedMagnifierPosition = MagnifierController.shiftWithinBounds(
       bounds: Rect.fromLTRB(
           screenRect.left + widget.horizontalScreenEdgePadding,
           // iOS doesn't reposition for Y, so we should expand the threshold

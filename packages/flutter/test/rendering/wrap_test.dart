@@ -205,30 +205,21 @@ void main() {
   });
 
   test('Wrap respects clipBehavior', () {
-    const BoxConstraints viewport =
-        BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       final RenderWrap wrap;
-      switch (clip) {
+      switch (clip){
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
-          wrap = RenderWrap(
-              textDirection: TextDirection.ltr,
-              children: <RenderBox>[box200x200],
-              clipBehavior: clip!);
+          wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200], clipBehavior: clip!);
         case null:
-          wrap = RenderWrap(
-              textDirection: TextDirection.ltr,
-              children: <RenderBox>[box200x200]);
+          wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
       }
-      layout(wrap,
-          constraints: viewport,
-          phase: EnginePhase.composite,
-          onErrors: expectNoFlutterErrors);
+      layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       context.paintChild(wrap, Offset.zero);
       // By default, clipBehavior should be Clip.none
       expect(context.clipBehavior, equals(clip ?? Clip.none));

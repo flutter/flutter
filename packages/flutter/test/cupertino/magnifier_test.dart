@@ -11,10 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  final Offset basicOffset = Offset(
-      CupertinoMagnifier.kDefaultSize.width / 2,
-      CupertinoMagnifier.kDefaultSize.height -
-          CupertinoMagnifier.kMagnifierAboveFocalPoint);
+  final Offset basicOffset = Offset(CupertinoMagnifier.kDefaultSize.width / 2,
+       CupertinoMagnifier.kDefaultSize.height - CupertinoMagnifier.kMagnifierAboveFocalPoint);
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
   final MagnifierController magnifierController = MagnifierController();
 
@@ -39,7 +37,7 @@ void main() {
   }
 
   tearDown(() async {
-    magnifierController.removeFromOverlay();
+      magnifierController.removeFromOverlay();
   });
 
   group('CupertinoTextEditingMagnifier', () {
@@ -51,9 +49,7 @@ void main() {
             animatedPositioned.left ?? 0, animatedPositioned.top ?? 0);
       }
 
-      testWidgetsWithLeakTracking(
-          'should be at gesture position if does not violate any positioning rules',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should be at gesture position if does not violate any positioning rules', (WidgetTester tester) async {
         final Key fakeTextFieldKey = UniqueKey();
         final Key outerKey = UniqueKey();
 
@@ -80,8 +76,7 @@ void main() {
         final RenderBox tapPointRenderBox =
             tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
         final Rect fakeTextFieldRect =
-            tapPointRenderBox.localToGlobal(Offset.zero) &
-                tapPointRenderBox.size;
+            tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
         final ValueNotifier<MagnifierInfo> magnifier =
             ValueNotifier<MagnifierInfo>(
@@ -105,9 +100,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking(
-          'should never horizontally be outside of Screen Padding',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should never horizontally be outside of Screen Padding', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -115,18 +108,16 @@ void main() {
           ),
         );
 
-        final BuildContext context =
-            tester.firstElement(find.byType(Placeholder));
+        final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierInfo =
-            ValueNotifier<MagnifierInfo>(
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is far out of the right side of the app.
             globalGesturePosition:
-                Offset(MediaQuery.sizeOf(context).width + 100, 0),
+            Offset(MediaQuery.sizeOf(context).width + 100, 0),
           ),
         );
         addTearDown(magnifierInfo.dispose);
@@ -141,10 +132,8 @@ void main() {
             lessThan(MediaQuery.sizeOf(context).width));
       });
 
-      testWidgetsWithLeakTracking('should have some vertical drag',
-          (WidgetTester tester) async {
-        final double dragPositionBelowTextField =
-            reasonableTextField.center.dy + 30;
+      testWidgetsWithLeakTracking('should have some vertical drag', (WidgetTester tester) async {
+        final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
           const MaterialApp(
@@ -163,7 +152,8 @@ void main() {
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
-            globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2,
+            globalGesturePosition: Offset(
+                MediaQuery.sizeOf(context).width / 2,
                 dragPositionBelowTextField),
           ),
         );
@@ -183,9 +173,7 @@ void main() {
     });
 
     group('status', () {
-      testWidgetsWithLeakTracking(
-          'should hide if gesture is far below the text field',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should hide if gesture is far below the text field', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -214,11 +202,10 @@ void main() {
 
         // Move the gesture to one that should hide it.
         magnifierInfo.value = MagnifierInfo(
-          currentLineBoundaries: reasonableTextField,
-          fieldBounds: reasonableTextField,
-          caretRect: reasonableTextField,
-          globalGesturePosition:
-              magnifierInfo.value.globalGesturePosition + const Offset(0, 100),
+            currentLineBoundaries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            globalGesturePosition: magnifierInfo.value.globalGesturePosition + const Offset(0, 100),
         );
         await tester.pumpAndSettle();
 
@@ -245,8 +232,7 @@ void main() {
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
-            globalGesturePosition: Offset(
-                MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
+            globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
         addTearDown(magnifierInfo.dispose);
@@ -259,8 +245,8 @@ void main() {
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition: magnifierInfo.value.globalGesturePosition +
-                const Offset(0, 100));
+            globalGesturePosition:
+                magnifierInfo.value.globalGesturePosition + const Offset(0, 100));
         await tester.pumpAndSettle();
 
         expect(magnifierController.shown, false);
@@ -271,8 +257,8 @@ void main() {
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition: Offset(
-                MediaQuery.sizeOf(context).width / 2, reasonableTextField.top));
+            globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2,
+                reasonableTextField.top));
         await tester.pumpAndSettle();
 
         expect(magnifierController.shown, true);

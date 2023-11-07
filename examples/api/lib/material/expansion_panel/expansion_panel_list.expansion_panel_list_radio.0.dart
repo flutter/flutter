@@ -49,12 +49,10 @@ class ExpansionPanelListRadioExample extends StatefulWidget {
   const ExpansionPanelListRadioExample({super.key});
 
   @override
-  State<ExpansionPanelListRadioExample> createState() =>
-      _ExpansionPanelListRadioExampleState();
+  State<ExpansionPanelListRadioExample> createState() => _ExpansionPanelListRadioExampleState();
 }
 
-class _ExpansionPanelListRadioExampleState
-    extends State<ExpansionPanelListRadioExample> {
+class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadioExample> {
   final List<Item> _data = generateItems(8);
 
   @override
@@ -79,13 +77,11 @@ class _ExpansionPanelListRadioExampleState
             },
             body: ListTile(
                 title: Text(item.expandedValue),
-                subtitle:
-                    const Text('To delete this panel, tap the trash can icon'),
+                subtitle: const Text('To delete this panel, tap the trash can icon'),
                 trailing: const Icon(Icons.delete),
                 onTap: () {
                   setState(() {
-                    _data
-                        .removeWhere((Item currentItem) => item == currentItem);
+                    _data.removeWhere((Item currentItem) => item == currentItem);
                   });
                 }));
       }).toList(),

@@ -58,8 +58,7 @@ class LinearBorderEdge {
   /// then we interpolate to `b` varying [size] from 0.0 to `b.size`. If `b`
   /// is null then we interpolate from `a` varying size from `a.size` to zero.
   /// Otherwise both values are interpolated.
-  static LinearBorderEdge? lerp(
-      LinearBorderEdge? a, LinearBorderEdge? b, double t) {
+  static LinearBorderEdge? lerp(LinearBorderEdge? a, LinearBorderEdge? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -81,9 +80,9 @@ class LinearBorderEdge {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is LinearBorderEdge &&
-        other.size == size &&
-        other.alignment == alignment;
+    return other is LinearBorderEdge
+        && other.size == size
+        && other.alignment == alignment;
   }
 
   @override
@@ -91,9 +90,8 @@ class LinearBorderEdge {
 
   @override
   String toString() {
-    final StringBuffer s =
-        StringBuffer('${objectRuntimeType(this, 'LinearBorderEdge')}(');
-    if (size != 1.0) {
+    final StringBuffer s = StringBuffer('${objectRuntimeType(this, 'LinearBorderEdge')}(');
+    if (size != 1.0 ) {
       s.write('size: $size');
     }
     if (alignment != 0) {
@@ -152,33 +150,45 @@ class LinearBorder extends OutlinedBorder {
 
   /// Creates a rectangular box border with an edge on the left for [TextDirection.ltr]
   /// or on the right for [TextDirection.rtl].
-  LinearBorder.start({super.side, double alignment = 0.0, double size = 1.0})
-      : start = LinearBorderEdge(alignment: alignment, size: size),
-        end = null,
-        top = null,
-        bottom = null;
+  LinearBorder.start({
+    super.side,
+    double alignment = 0.0,
+    double size = 1.0
+  }) : start = LinearBorderEdge(alignment: alignment, size: size),
+       end = null,
+       top = null,
+       bottom = null;
 
   /// Creates a rectangular box border with an edge on the right for [TextDirection.ltr]
   /// or on the left for [TextDirection.rtl].
-  LinearBorder.end({super.side, double alignment = 0.0, double size = 1.0})
-      : start = null,
-        end = LinearBorderEdge(alignment: alignment, size: size),
-        top = null,
-        bottom = null;
+  LinearBorder.end({
+    super.side,
+    double alignment = 0.0,
+    double size = 1.0
+  }) : start = null,
+       end = LinearBorderEdge(alignment: alignment, size: size),
+       top = null,
+       bottom = null;
 
   /// Creates a rectangular box border with an edge on the top.
-  LinearBorder.top({super.side, double alignment = 0.0, double size = 1.0})
-      : start = null,
-        end = null,
-        top = LinearBorderEdge(alignment: alignment, size: size),
-        bottom = null;
+  LinearBorder.top({
+    super.side,
+    double alignment = 0.0,
+    double size = 1.0
+  }) : start = null,
+       end = null,
+       top = LinearBorderEdge(alignment: alignment, size: size),
+       bottom = null;
 
   /// Creates a rectangular box border with an edge on the bottom.
-  LinearBorder.bottom({super.side, double alignment = 0.0, double size = 1.0})
-      : start = null,
-        end = null,
-        top = null,
-        bottom = LinearBorderEdge(alignment: alignment, size: size);
+  LinearBorder.bottom({
+    super.side,
+    double alignment = 0.0,
+    double size = 1.0
+  }) : start = null,
+       end = null,
+       top = null,
+       bottom = LinearBorderEdge(alignment: alignment, size: size);
 
   /// No border.
   static const LinearBorder none = LinearBorder();
@@ -263,24 +273,26 @@ class LinearBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    final Rect adjustedRect =
-        dimensions.resolve(textDirection).deflateRect(rect);
-    return Path()..addRect(adjustedRect);
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    final Rect adjustedRect = dimensions.resolve(textDirection).deflateRect(rect);
+    return Path()
+      ..addRect(adjustedRect);
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    return Path()..addRect(rect);
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+    return Path()
+      ..addRect(rect);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     final EdgeInsets insets = dimensions.resolve(textDirection);
     final bool rtl = textDirection == TextDirection.rtl;
 
     final Path path = Path();
-    final Paint paint = Paint()..strokeWidth = 0.0;
+    final Paint paint = Paint()
+      ..strokeWidth = 0.0;
 
     void drawEdge(Rect rect, Color color) {
       paint.color = color;
@@ -302,47 +314,38 @@ class LinearBorder extends OutlinedBorder {
     }
 
     if (start != null && start!.size != 0.0 && side.style != BorderStyle.none) {
-      final Rect insetRect = Rect.fromLTWH(rect.left, rect.top + insets.top,
-          rect.width, rect.height - insets.vertical);
+      final Rect insetRect = Rect.fromLTWH(rect.left, rect.top + insets.top, rect.width, rect.height - insets.vertical);
       final double x = rtl ? rect.right - insets.right : rect.left;
       final double width = rtl ? insets.right : insets.left;
       final double height = insetRect.height * start!.size;
-      final double y =
-          (insetRect.height - height) * ((start!.alignment + 1.0) / 2.0);
+      final double y = (insetRect.height - height) * ((start!.alignment + 1.0) / 2.0);
       final Rect r = Rect.fromLTWH(x, y, width, height);
       drawEdge(r, side.color);
     }
 
     if (end != null && end!.size != 0.0 && side.style != BorderStyle.none) {
-      final Rect insetRect = Rect.fromLTWH(rect.left, rect.top + insets.top,
-          rect.width, rect.height - insets.vertical);
+      final Rect insetRect = Rect.fromLTWH(rect.left, rect.top + insets.top, rect.width, rect.height - insets.vertical);
       final double x = rtl ? rect.left : rect.right - insets.right;
       final double width = rtl ? insets.left : insets.right;
       final double height = insetRect.height * end!.size;
-      final double y =
-          (insetRect.height - height) * ((end!.alignment + 1.0) / 2.0);
+      final double y = (insetRect.height - height) * ((end!.alignment + 1.0) / 2.0);
       final Rect r = Rect.fromLTWH(x, y, width, height);
       drawEdge(r, side.color);
     }
 
     if (top != null && top!.size != 0.0 && side.style != BorderStyle.none) {
       final double width = rect.width * top!.size;
-      final double startX =
-          (rect.width - width) * ((top!.alignment + 1.0) / 2.0);
+      final double startX = (rect.width - width) * ((top!.alignment + 1.0) / 2.0);
       final double x = rtl ? rect.width - startX - width : startX;
       final Rect r = Rect.fromLTWH(x, rect.top, width, insets.top);
       drawEdge(r, side.color);
     }
 
-    if (bottom != null &&
-        bottom!.size != 0.0 &&
-        side.style != BorderStyle.none) {
+    if (bottom != null && bottom!.size != 0.0 && side.style != BorderStyle.none) {
       final double width = rect.width * bottom!.size;
-      final double startX =
-          (rect.width - width) * ((bottom!.alignment + 1.0) / 2.0);
-      final double x = rtl ? rect.width - startX - width : startX;
-      final Rect r =
-          Rect.fromLTWH(x, rect.bottom - insets.bottom, width, side.width);
+      final double startX = (rect.width - width) * ((bottom!.alignment + 1.0) / 2.0);
+      final double x = rtl ? rect.width - startX - width: startX;
+      final Rect r = Rect.fromLTWH(x, rect.bottom - insets.bottom, width, side.width);
       drawEdge(r, side.color);
     }
   }
@@ -355,12 +358,12 @@ class LinearBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is LinearBorder &&
-        other.side == side &&
-        other.start == start &&
-        other.end == end &&
-        other.top == top &&
-        other.bottom == bottom;
+    return other is LinearBorder
+      && other.side == side
+      && other.start == start
+      && other.end == end
+      && other.top == top
+      && other.bottom == bottom;
   }
 
   @override
@@ -372,19 +375,18 @@ class LinearBorder extends OutlinedBorder {
       return 'LinearBorder.none';
     }
 
-    final StringBuffer s =
-        StringBuffer('${objectRuntimeType(this, 'LinearBorder')}(side: $side');
+    final StringBuffer s = StringBuffer('${objectRuntimeType(this, 'LinearBorder')}(side: $side');
 
-    if (start != null) {
+    if (start != null ) {
       s.write(', start: $start');
     }
-    if (end != null) {
+    if (end != null ) {
       s.write(', end: $end');
     }
-    if (top != null) {
+    if (top != null ) {
       s.write(', top: $top');
     }
-    if (bottom != null) {
+    if (bottom != null ) {
       s.write(', bottom: $bottom');
     }
     s.write(')');

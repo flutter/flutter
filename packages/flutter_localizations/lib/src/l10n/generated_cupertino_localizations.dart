@@ -587,8 +587,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'অগ্ৰাহ্য কৰক';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'এইটোৰ সলনি ব্যৱহাৰ কৰিব পৰা শব্দ পোৱা নগ’ল';
+  String get noSpellCheckReplacementsLabel => 'এইটোৰ সলনি ব্যৱহাৰ কৰিব পৰা শব্দ পোৱা নগ’ল';
 
   @override
   String get pasteButtonLabel => "পে'ষ্ট কৰক";
@@ -1257,8 +1256,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get shareButtonLabel => 'শেয়ার করুন...';
 
   @override
-  String get tabSemanticsLabelRaw =>
-      r'$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব';
+  String get tabSemanticsLabelRaw => r'$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব';
 
   @override
   String? get timerPickerHourLabelFew => null;
@@ -2047,8 +2045,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Afvis';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Der blev ikke fundet nogen erstatninger';
+  String get noSpellCheckReplacementsLabel => 'Der blev ikke fundet nogen erstatninger';
 
   @override
   String get pasteButtonLabel => 'Indsæt';
@@ -2954,8 +2951,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Cerrar';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'No se ha encontrado ninguna sustitución';
+  String get noSpellCheckReplacementsLabel => 'No se ha encontrado ninguna sustitución';
 
   @override
   String get pasteButtonLabel => 'Pegar';
@@ -5034,8 +5030,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Ignorar';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Non se encontrou ningunha substitución';
+  String get noSpellCheckReplacementsLabel => 'Non se encontrou ningunha substitución';
 
   @override
   String get pasteButtonLabel => 'Pegar';
@@ -5683,8 +5678,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'खारिज करें';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'सही वर्तनी वाला कोई शब्द नहीं मिला';
+  String get noSpellCheckReplacementsLabel => 'सही वर्तनी वाला कोई शब्द नहीं मिला';
 
   @override
   String get pasteButtonLabel => 'चिपकाएं';
@@ -7403,19 +7397,16 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   });
 
   @override
-  String get alertDialogLabel =>
-      '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
+  String get alertDialogLabel => '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
 
   @override
-  String get anteMeridiemAbbreviation =>
-      '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+  String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
 
   @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get cutButtonLabel =>
-      '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -7430,12 +7421,10 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerHourSemanticsLabelMany => null;
 
   @override
-  String? get datePickerHourSemanticsLabelOne =>
-      '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
+  String? get datePickerHourSemanticsLabelOne => '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
-  String get datePickerHourSemanticsLabelOther =>
-      '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
+  String get datePickerHourSemanticsLabelOther => '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
   String? get datePickerHourSemanticsLabelTwo => null;
@@ -7450,12 +7439,10 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String? get datePickerMinuteSemanticsLabelOne =>
-      '\u{31}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}';
+  String? get datePickerMinuteSemanticsLabelOne => '\u{31}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}';
 
   @override
-  String get datePickerMinuteSemanticsLabelOther =>
-      '\u{24}\u{6d}\u{69}\u{6e}\u{75}\u{74}\u{65}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{cc1}';
+  String get datePickerMinuteSemanticsLabelOther => '\u{24}\u{6d}\u{69}\u{6e}\u{75}\u{74}\u{65}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String? get datePickerMinuteSemanticsLabelTwo => null;
@@ -7464,20 +7451,16 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel =>
-      '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
+  String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
 
   @override
-  String get menuDismissLabel =>
-      '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cc6}\u{cc2}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+  String get menuDismissLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cc6}\u{cc2}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get modalBarrierDismissLabel =>
-      '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+  String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      '\u{caf}\u{cbe}\u{cb5}\u{cc1}\u{ca6}\u{cc7}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{cb5}\u{ca3}\u{cc6}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c95}\u{c82}\u{ca1}\u{cc1}\u{cac}\u{c82}\u{ca6}\u{cbf}\u{cb2}\u{ccd}\u{cb2}';
+  String get noSpellCheckReplacementsLabel => '\u{caf}\u{cbe}\u{cb5}\u{cc1}\u{ca6}\u{cc7}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{cb5}\u{ca3}\u{cc6}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c95}\u{c82}\u{ca1}\u{cc1}\u{cac}\u{c82}\u{ca6}\u{cbf}\u{cb2}\u{ccd}\u{cb2}';
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
@@ -7486,24 +7469,19 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => '\u{cb8}\u{c82}\u{c9c}\u{cc6}';
 
   @override
-  String get searchTextFieldPlaceholderLabel =>
-      '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
+  String get searchTextFieldPlaceholderLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get searchWebButtonLabel =>
-      '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
+  String get searchWebButtonLabel => '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get selectAllButtonLabel =>
-      '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get shareButtonLabel =>
-      '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}\u{2e}\u{2e}\u{2e}';
+  String get shareButtonLabel => '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}\u{2e}\u{2e}\u{2e}';
 
   @override
-  String get tabSemanticsLabelRaw =>
-      '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
+  String get tabSemanticsLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
 
   @override
   String? get timerPickerHourLabelFew => null;
@@ -7515,8 +7493,7 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get timerPickerHourLabelOne => '\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
-  String get timerPickerHourLabelOther =>
-      '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{cc1}';
+  String get timerPickerHourLabelOther => '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String? get timerPickerHourLabelTwo => null;
@@ -7534,8 +7511,7 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get timerPickerMinuteLabelOne => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
 
   @override
-  String get timerPickerMinuteLabelOther =>
-      '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
+  String get timerPickerMinuteLabelOther => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
 
   @override
   String? get timerPickerMinuteLabelTwo => null;
@@ -7808,8 +7784,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Жабуу';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Алмаштыруу үчүн сөз табылган жок';
+  String get noSpellCheckReplacementsLabel => 'Алмаштыруу үчүн сөз табылган жок';
 
   @override
   String get pasteButtonLabel => 'Чаптоо';
@@ -8295,8 +8270,7 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Nerādīt';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Netika atrasts neviens vārds aizstāšanai';
+  String get noSpellCheckReplacementsLabel => 'Netika atrasts neviens vārds aizstāšanai';
 
   @override
   String get pasteButtonLabel => 'Ielīmēt';
@@ -8620,8 +8594,7 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'നിരസിക്കുക';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'റീപ്ലേസ്‌മെന്റുകളൊന്നും കണ്ടെത്തിയില്ല';
+  String get noSpellCheckReplacementsLabel => 'റീപ്ലേസ്‌മെന്റുകളൊന്നും കണ്ടെത്തിയില്ല';
 
   @override
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
@@ -9593,8 +9566,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'खारेज गर्नुहोस्';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'बदल्नु पर्ने कुनै पनि कुरा भेटिएन';
+  String get noSpellCheckReplacementsLabel => 'बदल्नु पर्ने कुनै पनि कुरा भेटिएन';
 
   @override
   String get pasteButtonLabel => 'टाँस्नुहोस्';
@@ -10671,8 +10643,7 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   String get lookUpButtonLabel => 'Procurar';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Não foram encontradas substituições';
+  String get noSpellCheckReplacementsLabel => 'Não foram encontradas substituições';
 
   @override
   String get menuDismissLabel => 'Ignorar menu';
@@ -12202,8 +12173,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Ondoa';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Hakuna Neno Mbadala Lilopatikana';
+  String get noSpellCheckReplacementsLabel => 'Hakuna Neno Mbadala Lilopatikana';
 
   @override
   String get pasteButtonLabel => 'Bandika';
@@ -12365,8 +12335,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'நிராகரிக்கும்';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'மாற்று வார்த்தைகள் கிடைக்கவில்லை';
+  String get noSpellCheckReplacementsLabel => 'மாற்று வார்த்தைகள் கிடைக்கவில்லை';
 
   @override
   String get pasteButtonLabel => 'ஒட்டு';
@@ -12528,8 +12497,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'విస్మరించు';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'రీప్లేస్‌మెంట్‌లు ఏవీ కనుగొనబడలేదు';
+  String get noSpellCheckReplacementsLabel => 'రీప్లేస్‌మెంట్‌లు ఏవీ కనుగొనబడలేదు';
 
   @override
   String get pasteButtonLabel => 'పేస్ట్ చేయండి';
@@ -13501,8 +13469,7 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Yopish';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Almashtirish uchun soʻz topilmadi';
+  String get noSpellCheckReplacementsLabel => 'Almashtirish uchun soʻz topilmadi';
 
   @override
   String get pasteButtonLabel => 'Joylash';
@@ -13664,8 +13631,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Bỏ qua';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Không tìm thấy phương án thay thế';
+  String get noSpellCheckReplacementsLabel => 'Không tìm thấy phương án thay thế';
 
   @override
   String get pasteButtonLabel => 'Dán';
@@ -14157,8 +14123,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Cashisa';
 
   @override
-  String get noSpellCheckReplacementsLabel =>
-      'Akukho Okuzofakwa Esikhundleni Okutholakele';
+  String get noSpellCheckReplacementsLabel => 'Akukho Okuzofakwa Esikhundleni Okutholakele';
 
   @override
   String get pasteButtonLabel => 'Namathisela';
@@ -14250,8 +14215,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 /// See also:
 ///
 ///  * [getCupertinoTranslation], whose documentation describes these values.
-final Set<String> kCupertinoSupportedLanguages =
-    HashSet<String>.from(const <String>[
+final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <String>[
   'af', // Afrikaans
   'am', // Amharic
   'ar', // Arabic
@@ -14437,1217 +14401,269 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
 ) {
   switch (locale.languageCode) {
     case 'af':
-      return CupertinoLocalizationAf(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationAf(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'am':
-      return CupertinoLocalizationAm(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationAm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ar':
-      return CupertinoLocalizationAr(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'as':
-      return CupertinoLocalizationAs(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationAs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'az':
-      return CupertinoLocalizationAz(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationAz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'be':
-      return CupertinoLocalizationBe(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationBe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bg':
-      return CupertinoLocalizationBg(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationBg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bn':
-      return CupertinoLocalizationBn(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationBn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bs':
-      return CupertinoLocalizationBs(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationBs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ca':
-      return CupertinoLocalizationCa(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'cs':
-      return CupertinoLocalizationCs(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationCs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'cy':
-      return CupertinoLocalizationCy(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationCy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'da':
-      return CupertinoLocalizationDa(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
-    case 'de':
-      {
-        switch (locale.countryCode) {
-          case 'CH':
-            return CupertinoLocalizationDeCh(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-        }
-        return CupertinoLocalizationDe(
-            fullYearFormat: fullYearFormat,
-            dayFormat: dayFormat,
-            mediumDateFormat: mediumDateFormat,
-            singleDigitHourFormat: singleDigitHourFormat,
-            singleDigitMinuteFormat: singleDigitMinuteFormat,
-            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-            singleDigitSecondFormat: singleDigitSecondFormat,
-            decimalFormat: decimalFormat);
+      return CupertinoLocalizationDa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'de': {
+      switch (locale.countryCode) {
+        case 'CH':
+          return CupertinoLocalizationDeCh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
+      return CupertinoLocalizationDe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
     case 'el':
-      return CupertinoLocalizationEl(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
-    case 'en':
-      {
-        switch (locale.countryCode) {
-          case 'AU':
-            return CupertinoLocalizationEnAu(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'CA':
-            return CupertinoLocalizationEnCa(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'GB':
-            return CupertinoLocalizationEnGb(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'IE':
-            return CupertinoLocalizationEnIe(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'IN':
-            return CupertinoLocalizationEnIn(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'NZ':
-            return CupertinoLocalizationEnNz(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'SG':
-            return CupertinoLocalizationEnSg(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'ZA':
-            return CupertinoLocalizationEnZa(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-        }
-        return CupertinoLocalizationEn(
-            fullYearFormat: fullYearFormat,
-            dayFormat: dayFormat,
-            mediumDateFormat: mediumDateFormat,
-            singleDigitHourFormat: singleDigitHourFormat,
-            singleDigitMinuteFormat: singleDigitMinuteFormat,
-            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-            singleDigitSecondFormat: singleDigitSecondFormat,
-            decimalFormat: decimalFormat);
+      return CupertinoLocalizationEl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'en': {
+      switch (locale.countryCode) {
+        case 'AU':
+          return CupertinoLocalizationEnAu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'CA':
+          return CupertinoLocalizationEnCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'GB':
+          return CupertinoLocalizationEnGb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'IE':
+          return CupertinoLocalizationEnIe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'IN':
+          return CupertinoLocalizationEnIn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'NZ':
+          return CupertinoLocalizationEnNz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'SG':
+          return CupertinoLocalizationEnSg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'ZA':
+          return CupertinoLocalizationEnZa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
-    case 'es':
-      {
-        switch (locale.countryCode) {
-          case '419':
-            return CupertinoLocalizationEs419(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'AR':
-            return CupertinoLocalizationEsAr(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'BO':
-            return CupertinoLocalizationEsBo(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'CL':
-            return CupertinoLocalizationEsCl(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'CO':
-            return CupertinoLocalizationEsCo(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'CR':
-            return CupertinoLocalizationEsCr(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'DO':
-            return CupertinoLocalizationEsDo(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'EC':
-            return CupertinoLocalizationEsEc(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'GT':
-            return CupertinoLocalizationEsGt(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'HN':
-            return CupertinoLocalizationEsHn(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'MX':
-            return CupertinoLocalizationEsMx(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'NI':
-            return CupertinoLocalizationEsNi(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'PA':
-            return CupertinoLocalizationEsPa(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'PE':
-            return CupertinoLocalizationEsPe(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'PR':
-            return CupertinoLocalizationEsPr(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'PY':
-            return CupertinoLocalizationEsPy(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'SV':
-            return CupertinoLocalizationEsSv(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'US':
-            return CupertinoLocalizationEsUs(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'UY':
-            return CupertinoLocalizationEsUy(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'VE':
-            return CupertinoLocalizationEsVe(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-        }
-        return CupertinoLocalizationEs(
-            fullYearFormat: fullYearFormat,
-            dayFormat: dayFormat,
-            mediumDateFormat: mediumDateFormat,
-            singleDigitHourFormat: singleDigitHourFormat,
-            singleDigitMinuteFormat: singleDigitMinuteFormat,
-            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-            singleDigitSecondFormat: singleDigitSecondFormat,
-            decimalFormat: decimalFormat);
+      return CupertinoLocalizationEn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
+    case 'es': {
+      switch (locale.countryCode) {
+        case '419':
+          return CupertinoLocalizationEs419(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'AR':
+          return CupertinoLocalizationEsAr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'BO':
+          return CupertinoLocalizationEsBo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'CL':
+          return CupertinoLocalizationEsCl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'CO':
+          return CupertinoLocalizationEsCo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'CR':
+          return CupertinoLocalizationEsCr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'DO':
+          return CupertinoLocalizationEsDo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'EC':
+          return CupertinoLocalizationEsEc(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'GT':
+          return CupertinoLocalizationEsGt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'HN':
+          return CupertinoLocalizationEsHn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'MX':
+          return CupertinoLocalizationEsMx(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'NI':
+          return CupertinoLocalizationEsNi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'PA':
+          return CupertinoLocalizationEsPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'PE':
+          return CupertinoLocalizationEsPe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'PR':
+          return CupertinoLocalizationEsPr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'PY':
+          return CupertinoLocalizationEsPy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'SV':
+          return CupertinoLocalizationEsSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'US':
+          return CupertinoLocalizationEsUs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'UY':
+          return CupertinoLocalizationEsUy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'VE':
+          return CupertinoLocalizationEsVe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
+      return CupertinoLocalizationEs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
     case 'et':
-      return CupertinoLocalizationEt(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationEt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'eu':
-      return CupertinoLocalizationEu(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationEu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fa':
-      return CupertinoLocalizationFa(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationFa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fi':
-      return CupertinoLocalizationFi(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationFi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fil':
-      return CupertinoLocalizationFil(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
-    case 'fr':
-      {
-        switch (locale.countryCode) {
-          case 'CA':
-            return CupertinoLocalizationFrCa(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-        }
-        return CupertinoLocalizationFr(
-            fullYearFormat: fullYearFormat,
-            dayFormat: dayFormat,
-            mediumDateFormat: mediumDateFormat,
-            singleDigitHourFormat: singleDigitHourFormat,
-            singleDigitMinuteFormat: singleDigitMinuteFormat,
-            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-            singleDigitSecondFormat: singleDigitSecondFormat,
-            decimalFormat: decimalFormat);
+      return CupertinoLocalizationFil(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'fr': {
+      switch (locale.countryCode) {
+        case 'CA':
+          return CupertinoLocalizationFrCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
+      return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
     case 'gl':
-      return CupertinoLocalizationGl(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationGl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'gsw':
-      return CupertinoLocalizationGsw(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationGsw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'gu':
-      return CupertinoLocalizationGu(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationGu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'he':
-      return CupertinoLocalizationHe(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationHe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hi':
-      return CupertinoLocalizationHi(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationHi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hr':
-      return CupertinoLocalizationHr(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationHr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hu':
-      return CupertinoLocalizationHu(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationHu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'hy':
-      return CupertinoLocalizationHy(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationHy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'id':
-      return CupertinoLocalizationId(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationId(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'is':
-      return CupertinoLocalizationIs(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationIs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'it':
-      return CupertinoLocalizationIt(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationIt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ja':
-      return CupertinoLocalizationJa(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationJa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ka':
-      return CupertinoLocalizationKa(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationKa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'kk':
-      return CupertinoLocalizationKk(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationKk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'km':
-      return CupertinoLocalizationKm(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationKm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'kn':
-      return CupertinoLocalizationKn(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationKn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ko':
-      return CupertinoLocalizationKo(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationKo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ky':
-      return CupertinoLocalizationKy(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationKy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'lo':
-      return CupertinoLocalizationLo(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationLo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'lt':
-      return CupertinoLocalizationLt(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationLt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'lv':
-      return CupertinoLocalizationLv(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationLv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'mk':
-      return CupertinoLocalizationMk(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationMk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ml':
-      return CupertinoLocalizationMl(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationMl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'mn':
-      return CupertinoLocalizationMn(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationMn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'mr':
-      return CupertinoLocalizationMr(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationMr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ms':
-      return CupertinoLocalizationMs(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationMs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'my':
-      return CupertinoLocalizationMy(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationMy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'nb':
-      return CupertinoLocalizationNb(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationNb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ne':
-      return CupertinoLocalizationNe(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationNe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'nl':
-      return CupertinoLocalizationNl(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationNl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'no':
-      return CupertinoLocalizationNo(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationNo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'or':
-      return CupertinoLocalizationOr(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationOr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'pa':
-      return CupertinoLocalizationPa(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationPa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'pl':
-      return CupertinoLocalizationPl(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
-    case 'pt':
-      {
-        switch (locale.countryCode) {
-          case 'PT':
-            return CupertinoLocalizationPtPt(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-        }
-        return CupertinoLocalizationPt(
-            fullYearFormat: fullYearFormat,
-            dayFormat: dayFormat,
-            mediumDateFormat: mediumDateFormat,
-            singleDigitHourFormat: singleDigitHourFormat,
-            singleDigitMinuteFormat: singleDigitMinuteFormat,
-            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-            singleDigitSecondFormat: singleDigitSecondFormat,
-            decimalFormat: decimalFormat);
+      return CupertinoLocalizationPl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'pt': {
+      switch (locale.countryCode) {
+        case 'PT':
+          return CupertinoLocalizationPtPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
       }
+      return CupertinoLocalizationPt(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
     case 'ro':
-      return CupertinoLocalizationRo(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationRo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ru':
-      return CupertinoLocalizationRu(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationRu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'si':
-      return CupertinoLocalizationSi(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationSi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sk':
-      return CupertinoLocalizationSk(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationSk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sl':
-      return CupertinoLocalizationSl(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationSl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sq':
-      return CupertinoLocalizationSq(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
-    case 'sr':
-      {
-        switch (locale.scriptCode) {
-          case 'Cyrl':
-            {
-              return CupertinoLocalizationSrCyrl(
-                  fullYearFormat: fullYearFormat,
-                  dayFormat: dayFormat,
-                  mediumDateFormat: mediumDateFormat,
-                  singleDigitHourFormat: singleDigitHourFormat,
-                  singleDigitMinuteFormat: singleDigitMinuteFormat,
-                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                  singleDigitSecondFormat: singleDigitSecondFormat,
-                  decimalFormat: decimalFormat);
-            }
-          case 'Latn':
-            {
-              return CupertinoLocalizationSrLatn(
-                  fullYearFormat: fullYearFormat,
-                  dayFormat: dayFormat,
-                  mediumDateFormat: mediumDateFormat,
-                  singleDigitHourFormat: singleDigitHourFormat,
-                  singleDigitMinuteFormat: singleDigitMinuteFormat,
-                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                  singleDigitSecondFormat: singleDigitSecondFormat,
-                  decimalFormat: decimalFormat);
-            }
+      return CupertinoLocalizationSq(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'sr': {
+      switch (locale.scriptCode) {
+        case 'Cyrl': {
+          return CupertinoLocalizationSrCyrl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         }
-        return CupertinoLocalizationSr(
-            fullYearFormat: fullYearFormat,
-            dayFormat: dayFormat,
-            mediumDateFormat: mediumDateFormat,
-            singleDigitHourFormat: singleDigitHourFormat,
-            singleDigitMinuteFormat: singleDigitMinuteFormat,
-            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-            singleDigitSecondFormat: singleDigitSecondFormat,
-            decimalFormat: decimalFormat);
+        case 'Latn': {
+          return CupertinoLocalizationSrLatn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        }
       }
+      return CupertinoLocalizationSr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
     case 'sv':
-      return CupertinoLocalizationSv(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationSv(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'sw':
-      return CupertinoLocalizationSw(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationSw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ta':
-      return CupertinoLocalizationTa(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationTa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'te':
-      return CupertinoLocalizationTe(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationTe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'th':
-      return CupertinoLocalizationTh(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationTh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'tl':
-      return CupertinoLocalizationTl(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationTl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'tr':
-      return CupertinoLocalizationTr(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationTr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'uk':
-      return CupertinoLocalizationUk(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationUk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ur':
-      return CupertinoLocalizationUr(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationUr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'uz':
-      return CupertinoLocalizationUz(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationUz(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'vi':
-      return CupertinoLocalizationVi(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
-    case 'zh':
-      {
-        switch (locale.scriptCode) {
-          case 'Hans':
-            {
-              return CupertinoLocalizationZhHans(
-                  fullYearFormat: fullYearFormat,
-                  dayFormat: dayFormat,
-                  mediumDateFormat: mediumDateFormat,
-                  singleDigitHourFormat: singleDigitHourFormat,
-                  singleDigitMinuteFormat: singleDigitMinuteFormat,
-                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                  singleDigitSecondFormat: singleDigitSecondFormat,
-                  decimalFormat: decimalFormat);
-            }
-          case 'Hant':
-            {
-              switch (locale.countryCode) {
-                case 'HK':
-                  return CupertinoLocalizationZhHantHk(
-                      fullYearFormat: fullYearFormat,
-                      dayFormat: dayFormat,
-                      mediumDateFormat: mediumDateFormat,
-                      singleDigitHourFormat: singleDigitHourFormat,
-                      singleDigitMinuteFormat: singleDigitMinuteFormat,
-                      doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                      singleDigitSecondFormat: singleDigitSecondFormat,
-                      decimalFormat: decimalFormat);
-                case 'TW':
-                  return CupertinoLocalizationZhHantTw(
-                      fullYearFormat: fullYearFormat,
-                      dayFormat: dayFormat,
-                      mediumDateFormat: mediumDateFormat,
-                      singleDigitHourFormat: singleDigitHourFormat,
-                      singleDigitMinuteFormat: singleDigitMinuteFormat,
-                      doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                      singleDigitSecondFormat: singleDigitSecondFormat,
-                      decimalFormat: decimalFormat);
-              }
-              return CupertinoLocalizationZhHant(
-                  fullYearFormat: fullYearFormat,
-                  dayFormat: dayFormat,
-                  mediumDateFormat: mediumDateFormat,
-                  singleDigitHourFormat: singleDigitHourFormat,
-                  singleDigitMinuteFormat: singleDigitMinuteFormat,
-                  doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                  singleDigitSecondFormat: singleDigitSecondFormat,
-                  decimalFormat: decimalFormat);
-            }
+      return CupertinoLocalizationVi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'zh': {
+      switch (locale.scriptCode) {
+        case 'Hans': {
+          return CupertinoLocalizationZhHans(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         }
-        switch (locale.countryCode) {
-          case 'HK':
-            return CupertinoLocalizationZhHantHk(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
-          case 'TW':
-            return CupertinoLocalizationZhHantTw(
-                fullYearFormat: fullYearFormat,
-                dayFormat: dayFormat,
-                mediumDateFormat: mediumDateFormat,
-                singleDigitHourFormat: singleDigitHourFormat,
-                singleDigitMinuteFormat: singleDigitMinuteFormat,
-                doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-                singleDigitSecondFormat: singleDigitSecondFormat,
-                decimalFormat: decimalFormat);
+        case 'Hant': {
+          switch (locale.countryCode) {
+            case 'HK':
+              return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+            case 'TW':
+              return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+          }
+          return CupertinoLocalizationZhHant(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
         }
-        return CupertinoLocalizationZh(
-            fullYearFormat: fullYearFormat,
-            dayFormat: dayFormat,
-            mediumDateFormat: mediumDateFormat,
-            singleDigitHourFormat: singleDigitHourFormat,
-            singleDigitMinuteFormat: singleDigitMinuteFormat,
-            doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-            singleDigitSecondFormat: singleDigitSecondFormat,
-            decimalFormat: decimalFormat);
       }
+      switch (locale.countryCode) {
+        case 'HK':
+          return CupertinoLocalizationZhHantHk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+        case 'TW':
+          return CupertinoLocalizationZhHantTw(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+      }
+      return CupertinoLocalizationZh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    }
     case 'zu':
-      return CupertinoLocalizationZu(
-          fullYearFormat: fullYearFormat,
-          dayFormat: dayFormat,
-          mediumDateFormat: mediumDateFormat,
-          singleDigitHourFormat: singleDigitHourFormat,
-          singleDigitMinuteFormat: singleDigitMinuteFormat,
-          doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-          singleDigitSecondFormat: singleDigitSecondFormat,
-          decimalFormat: decimalFormat);
+      return CupertinoLocalizationZu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
   }
-  assert(false,
-      'getCupertinoTranslation() called for unsupported locale "$locale"');
+  assert(false, 'getCupertinoTranslation() called for unsupported locale "$locale"');
   return null;
 }

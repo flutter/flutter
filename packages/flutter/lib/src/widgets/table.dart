@@ -12,17 +12,16 @@ import 'debug.dart';
 import 'framework.dart';
 import 'image.dart';
 
-export 'package:flutter/rendering.dart'
-    show
-        FixedColumnWidth,
-        FlexColumnWidth,
-        FractionColumnWidth,
-        IntrinsicColumnWidth,
-        MaxColumnWidth,
-        MinColumnWidth,
-        TableBorder,
-        TableCellVerticalAlignment,
-        TableColumnWidth;
+export 'package:flutter/rendering.dart' show
+  FixedColumnWidth,
+  FlexColumnWidth,
+  FractionColumnWidth,
+  IntrinsicColumnWidth,
+  MaxColumnWidth,
+  MinColumnWidth,
+  TableBorder,
+  TableCellVerticalAlignment,
+  TableColumnWidth;
 
 /// A horizontal group of cells in a [Table].
 ///
@@ -33,7 +32,7 @@ export 'package:flutter/rendering.dart'
 @immutable
 class TableRow {
   /// Creates a row in a [Table].
-  const TableRow({this.key, this.decoration, this.children = const <Widget>[]});
+  const TableRow({ this.key, this.decoration, this.children = const <Widget>[]});
 
   /// An identifier for the row.
   final LocalKey? key;
@@ -73,7 +72,7 @@ class TableRow {
 }
 
 class _TableElementRow {
-  const _TableElementRow({this.key, required this.children});
+  const _TableElementRow({ this.key, required this.children });
   final LocalKey? key;
   final List<Element> children;
 }
@@ -122,59 +121,45 @@ class Table extends RenderObjectWidget {
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
-  })  : assert(
-            defaultVerticalAlignment != TableCellVerticalAlignment.baseline ||
-                textBaseline != null,
-            'textBaseline is required if you specify the defaultVerticalAlignment with TableCellVerticalAlignment.baseline'),
-        assert(() {
-          if (children.any((TableRow row1) =>
-              row1.key != null &&
-              children.any(
-                  (TableRow row2) => row1 != row2 && row1.key == row2.key))) {
-            throw FlutterError(
-              'Two or more TableRow children of this Table had the same key.\n'
-              'All the keyed TableRow children of a Table must have different Keys.',
-            );
-          }
-          return true;
-        }()),
-        assert(() {
-          if (children.isNotEmpty) {
-            final int cellCount = children.first.children.length;
-            if (children
-                .any((TableRow row) => row.children.length != cellCount)) {
-              throw FlutterError(
-                'Table contains irregular row lengths.\n'
-                'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
-                'Otherwise, the table will contain holes.',
-              );
-            }
-            if (children.any((TableRow row) => row.children.isEmpty)) {
-              throw FlutterError(
-                'One or more TableRow have no children.\n'
-                'Every TableRow in a Table must have at least one child, so there is no empty row. ',
-              );
-            }
-          }
-          return true;
-        }()),
-        _rowDecorations = children.any((TableRow row) => row.decoration != null)
-            ? children
-                .map<Decoration?>((TableRow row) => row.decoration)
-                .toList(growable: false)
-            : null {
+  }) : assert(defaultVerticalAlignment != TableCellVerticalAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the defaultVerticalAlignment with TableCellVerticalAlignment.baseline'),
+       assert(() {
+         if (children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key))) {
+           throw FlutterError(
+             'Two or more TableRow children of this Table had the same key.\n'
+             'All the keyed TableRow children of a Table must have different Keys.',
+           );
+         }
+         return true;
+       }()),
+       assert(() {
+         if (children.isNotEmpty) {
+           final int cellCount = children.first.children.length;
+           if (children.any((TableRow row) => row.children.length != cellCount)) {
+             throw FlutterError(
+               'Table contains irregular row lengths.\n'
+               'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
+               'Otherwise, the table will contain holes.',
+             );
+           }
+           if (children.any((TableRow row) => row.children.isEmpty)) {
+             throw FlutterError(
+               'One or more TableRow have no children.\n'
+               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
+             );
+           }
+         }
+         return true;
+       }()),
+       _rowDecorations = children.any((TableRow row) => row.decoration != null)
+                              ? children.map<Decoration?>((TableRow row) => row.decoration).toList(growable: false)
+                              : null {
     assert(() {
-      final List<Widget> flatChildren = children
-          .expand<Widget>((TableRow row) => row.children)
-          .toList(growable: false);
-      return !debugChildrenHaveDuplicateKeys(
-        this,
-        flatChildren,
-        message:
-            'Two or more cells in this Table contain widgets with the same key.\n'
-            'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
-            'flattened out for processing, so separate cells cannot have duplicate keys even if they are in '
-            'different rows.',
+      final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children).toList(growable: false);
+      return !debugChildrenHaveDuplicateKeys(this, flatChildren, message:
+        'Two or more cells in this Table contain widgets with the same key.\n'
+        'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
+        'flattened out for processing, so separate cells cannot have duplicate keys even if they are in '
+        'different rows.',
       );
     }());
   }
@@ -260,8 +245,7 @@ class Table extends RenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderTable renderObject) {
     assert(debugCheckHasDirectionality(context));
-    assert(renderObject.columns ==
-        (children.isNotEmpty ? children[0].children.length : 0));
+    assert(renderObject.columns == (children.isNotEmpty ? children[0].children.length : 0));
     assert(renderObject.rows == children.length);
     renderObject
       ..columnWidths = columnWidths
@@ -281,7 +265,7 @@ class _TableElement extends RenderObjectElement {
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
 
-  List<_TableElementRow> _children = const <_TableElementRow>[];
+  List<_TableElementRow> _children = const<_TableElementRow>[];
 
   bool _doingMountOrUpdate = false;
 
@@ -291,8 +275,7 @@ class _TableElement extends RenderObjectElement {
     _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
     int rowIndex = -1;
-    _children =
-        (widget as Table).children.map<_TableElementRow>((TableRow row) {
+    _children = (widget as Table).children.map<_TableElementRow>((TableRow row) {
       int columnIndex = 0;
       rowIndex += 1;
       return _TableElementRow(
@@ -318,8 +301,7 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(
-      RenderBox child, _TableSlot oldSlot, _TableSlot newSlot) {
+  void moveRenderObjectChild(RenderBox child, _TableSlot oldSlot, _TableSlot newSlot) {
     assert(_doingMountOrUpdate);
     // Child gets moved at the end of [update] in [_updateRenderObjectChildren].
   }
@@ -335,15 +317,13 @@ class _TableElement extends RenderObjectElement {
   void update(Table newWidget) {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
-    final Map<LocalKey, List<Element>> oldKeyedRows =
-        <LocalKey, List<Element>>{};
+    final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
     for (final _TableElementRow row in _children) {
       if (row.key != null) {
         oldKeyedRows[row.key!] = row.children;
       }
     }
-    final Iterator<_TableElementRow> oldUnkeyedRows =
-        _children.where((_TableElementRow row) => row.key == null).iterator;
+    final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
     for (int rowIndex = 0; rowIndex < newWidget.children.length; rowIndex++) {
@@ -363,18 +343,14 @@ class _TableElement extends RenderObjectElement {
       );
       newChildren.add(_TableElementRow(
         key: row.key,
-        children: updateChildren(oldChildren, row.children,
-            forgottenChildren: _forgottenChildren, slots: slots),
+        children: updateChildren(oldChildren, row.children, forgottenChildren: _forgottenChildren, slots: slots),
       ));
     }
     while (oldUnkeyedRows.moveNext()) {
-      updateChildren(oldUnkeyedRows.current.children, const <Widget>[],
-          forgottenChildren: _forgottenChildren);
+      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
     }
-    for (final List<Element> oldChildren in oldKeyedRows.values
-        .where((List<Element> list) => !taken.contains(list))) {
-      updateChildren(oldChildren, const <Widget>[],
-          forgottenChildren: _forgottenChildren);
+    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list))) {
+      updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
     }
 
     _children = newChildren;
@@ -400,8 +376,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    for (final Element child
-        in _children.expand<Element>((_TableElementRow row) => row.children)) {
+    for (final Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
       if (!_forgottenChildren.contains(child)) {
         visitor(child);
       }
@@ -435,8 +410,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TableCellParentData parentData =
-        renderObject.parentData! as TableCellParentData;
+    final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
       final RenderObject? targetParent = renderObject.parent;
@@ -452,8 +426,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<TableCellVerticalAlignment>(
-        'verticalAlignment', verticalAlignment));
+    properties.add(EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
   }
 }
 
@@ -469,7 +442,9 @@ class _TableSlot with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _TableSlot && column == other.column && row == other.row;
+    return other is _TableSlot
+        && column == other.column
+        && row == other.row;
   }
 
   @override

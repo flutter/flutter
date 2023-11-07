@@ -7,9 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking(
-      "builder doesn't get called if app doesn't change",
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Widget app = MaterialApp(
       home: const Placeholder(),
@@ -36,9 +34,7 @@ void main() {
     expect(log, <String>['build']);
   });
 
-  testWidgetsWithLeakTracking(
-      "builder doesn't get called if app doesn't change",
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(

@@ -58,8 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute<MergeThreadTestPage>(
-                  builder: (BuildContext context) =>
-                      const MergeThreadTestPage()),
+                  builder: (BuildContext context) => const MergeThreadTestPage()),
             );
           },
         ),
@@ -119,7 +118,7 @@ class MergeThreadTestPage extends StatelessWidget {
           ElevatedButton(
             key: button,
             child: const Text('button'),
-            onPressed: () {},
+            onPressed: (){},
           ),
         ],
       ),
@@ -136,6 +135,7 @@ class FocusTestPage extends StatefulWidget {
 }
 
 class _FocusTestPageState extends State<FocusTestPage> {
+
   late TextEditingController _controller;
 
   @override
@@ -218,8 +218,7 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
                   // Since it is covered by the dialog prompt, which removes
                   // semantic nodes underneath.
                   // As a workaround, we show the background with a delay.
-                  Future<void>.delayed(const Duration(seconds: 1))
-                      .then((void value) {
+                  Future<void>.delayed(const Duration(seconds: 1)).then((void value) {
                     setState(() {
                       _showBackground = true;
                     });

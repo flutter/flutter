@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
-  const TestUniqueWidget({required super.key});
+  const TestUniqueWidget({ required super.key });
 
   @override
   TestUniqueWidgetState createState() => TestUniqueWidgetState();
@@ -19,10 +19,8 @@ class TestUniqueWidgetState extends State<TestUniqueWidget> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Unique widget control test',
-      (WidgetTester tester) async {
-    final TestUniqueWidget widget =
-        TestUniqueWidget(key: GlobalKey<TestUniqueWidgetState>());
+  testWidgetsWithLeakTracking('Unique widget control test', (WidgetTester tester) async {
+    final TestUniqueWidget widget = TestUniqueWidget(key: GlobalKey<TestUniqueWidgetState>());
 
     await tester.pumpWidget(widget);
 

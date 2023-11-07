@@ -9,16 +9,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('simulatedAccessibilityTraversal - start and end in same view',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - start and end in same view', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
-      tester.semantics
-          .simulatedAccessibilityTraversal(
-            start: find.text('View2Child1'),
-            end: find.text('View2Child3'),
-          )
-          .map((SemanticsNode node) => node.label),
+      tester.semantics.simulatedAccessibilityTraversal(
+        start: find.text('View2Child1'),
+        end: find.text('View2Child3'),
+      ).map((SemanticsNode node) => node.label),
       <String>[
         'View2Child1',
         'View2Child2',
@@ -27,15 +24,12 @@ void main() {
     );
   });
 
-  testWidgets('simulatedAccessibilityTraversal - start not specified',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - start not specified', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
-      tester.semantics
-          .simulatedAccessibilityTraversal(
-            end: find.text('View2Child3'),
-          )
-          .map((SemanticsNode node) => node.label),
+      tester.semantics.simulatedAccessibilityTraversal(
+        end: find.text('View2Child3'),
+      ).map((SemanticsNode node) => node.label),
       <String>[
         'View2Child0',
         'View2Child1',
@@ -45,15 +39,12 @@ void main() {
     );
   });
 
-  testWidgets('simulatedAccessibilityTraversal - end not specified',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - end not specified', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
-      tester.semantics
-          .simulatedAccessibilityTraversal(
-            start: find.text('View2Child1'),
-          )
-          .map((SemanticsNode node) => node.label),
+      tester.semantics.simulatedAccessibilityTraversal(
+        start: find.text('View2Child1'),
+      ).map((SemanticsNode node) => node.label),
       <String>[
         'View2Child1',
         'View2Child2',
@@ -63,13 +54,10 @@ void main() {
     );
   });
 
-  testWidgets('simulatedAccessibilityTraversal - nothing specified',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - nothing specified', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
-      tester.semantics
-          .simulatedAccessibilityTraversal()
-          .map((SemanticsNode node) => node.label),
+      tester.semantics.simulatedAccessibilityTraversal().map((SemanticsNode node) => node.label),
       <String>[
         'View1Child0',
         'View1Child1',
@@ -82,15 +70,12 @@ void main() {
     expect(tester.viewOf(find.text('View1Child0')), tester.view);
   });
 
-  testWidgets('simulatedAccessibilityTraversal - only view specified',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - only view specified', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
-      tester.semantics
-          .simulatedAccessibilityTraversal(
-            view: tester.viewOf(find.text('View2Child1')),
-          )
-          .map((SemanticsNode node) => node.label),
+      tester.semantics.simulatedAccessibilityTraversal(
+        view: tester.viewOf(find.text('View2Child1')),
+      ).map((SemanticsNode node) => node.label),
       <String>[
         'View2Child0',
         'View2Child1',
@@ -101,17 +86,14 @@ void main() {
     );
   });
 
-  testWidgets('simulatedAccessibilityTraversal - everything specified',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - everything specified', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
-      tester.semantics
-          .simulatedAccessibilityTraversal(
-            start: find.text('View2Child1'),
-            end: find.text('View2Child3'),
-            view: tester.viewOf(find.text('View2Child1')),
-          )
-          .map((SemanticsNode node) => node.label),
+      tester.semantics.simulatedAccessibilityTraversal(
+        start: find.text('View2Child1'),
+        end: find.text('View2Child3'),
+        view: tester.viewOf(find.text('View2Child1')),
+      ).map((SemanticsNode node) => node.label),
       <String>[
         'View2Child1',
         'View2Child2',
@@ -120,9 +102,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'simulatedAccessibilityTraversal - start and end not in same view',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - start and end not in same view', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
       () => tester.semantics.simulatedAccessibilityTraversal(
@@ -137,8 +117,7 @@ void main() {
     );
   });
 
-  testWidgets('simulatedAccessibilityTraversal - start is not in view',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - start is not in view', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
       () => tester.semantics.simulatedAccessibilityTraversal(
@@ -154,8 +133,7 @@ void main() {
     );
   });
 
-  testWidgets('simulatedAccessibilityTraversal - end is not in view',
-      (WidgetTester tester) async {
+  testWidgets('simulatedAccessibilityTraversal - end is not in view', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
       () => tester.semantics.simulatedAccessibilityTraversal(
@@ -178,12 +156,10 @@ void main() {
     expect(tester.viewOf(find.text('View2Child2')).viewId, 102);
   });
 
-  testWidgets('layers includes layers from all views',
-      (WidgetTester tester) async {
+  testWidgets('layers includes layers from all views', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     const int numberOfViews = 3;
-    expect(tester.binding.renderViews.length,
-        numberOfViews); // One RenderView for each FlutterView.
+    expect(tester.binding.renderViews.length, numberOfViews); // One RenderView for each FlutterView.
 
     final List<Layer> layers = tester.layers;
     // Each RenderView contributes a TransformLayer and a PictureLayer.
@@ -191,7 +167,7 @@ void main() {
     expect(layers.whereType<TransformLayer>(), hasLength(numberOfViews));
     expect(layers.whereType<PictureLayer>(), hasLength(numberOfViews));
     expect(
-      layers.whereType<TransformLayer>().map((TransformLayer l) => l.owner),
+      layers.whereType<TransformLayer>().map((TransformLayer l ) => l.owner),
       containsAll(tester.binding.renderViews),
     );
   });
@@ -200,52 +176,19 @@ void main() {
     await pumpViews(tester: tester);
     // Not specifying a viewId hit tests on tester.view:
     HitTestResult result = tester.hitTestOnBinding(Offset.zero);
-    expect(
-        result.path
-            .map((HitTestEntry h) => h.target)
-            .whereType<RenderView>()
-            .single
-            .flutterView,
-        tester.view);
+    expect(result.path.map((HitTestEntry h) => h.target).whereType<RenderView>().single.flutterView, tester.view);
     // Specifying a viewId is respected:
     result = tester.hitTestOnBinding(Offset.zero, viewId: 100);
-    expect(
-        result.path
-            .map((HitTestEntry h) => h.target)
-            .whereType<RenderView>()
-            .single
-            .flutterView
-            .viewId,
-        100);
+    expect(result.path.map((HitTestEntry h) => h.target).whereType<RenderView>().single.flutterView.viewId, 100);
     result = tester.hitTestOnBinding(Offset.zero, viewId: 102);
-    expect(
-        result.path
-            .map((HitTestEntry h) => h.target)
-            .whereType<RenderView>()
-            .single
-            .flutterView
-            .viewId,
-        102);
+    expect(result.path.map((HitTestEntry h) => h.target).whereType<RenderView>().single.flutterView.viewId, 102);
   });
 
-  testWidgets('hitTestable works in different Views',
-      (WidgetTester tester) async {
+  testWidgets('hitTestable works in different Views', (WidgetTester tester) async {
     await pumpViews(tester: tester);
-    expect(
-        (find.text('View0Child0').hitTestable().evaluate().single.widget
-                as Text)
-            .data,
-        'View0Child0');
-    expect(
-        (find.text('View1Child1').hitTestable().evaluate().single.widget
-                as Text)
-            .data,
-        'View1Child1');
-    expect(
-        (find.text('View2Child2').hitTestable().evaluate().single.widget
-                as Text)
-            .data,
-        'View2Child2');
+    expect((find.text('View0Child0').hitTestable().evaluate().single.widget as Text).data, 'View0Child0');
+    expect((find.text('View1Child1').hitTestable().evaluate().single.widget as Text).data, 'View1Child1');
+    expect((find.text('View2Child2').hitTestable().evaluate().single.widget as Text).data, 'View2Child2');
   });
 }
 
@@ -277,13 +220,12 @@ Future<void> pumpViews({required WidgetTester tester}) {
   return tester.binding.pump();
 }
 
-class FakeView extends TestFlutterView {
-  FakeView(FlutterView view, {this.viewId = 100})
-      : super(
-          view: view,
-          platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-          display: view.display as TestDisplay,
-        );
+class FakeView extends TestFlutterView{
+  FakeView(FlutterView view, { this.viewId = 100 }) : super(
+    view: view,
+    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
+    display: view.display as TestDisplay,
+  );
 
   @override
   final int viewId;

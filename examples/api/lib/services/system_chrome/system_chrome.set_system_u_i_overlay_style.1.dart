@@ -30,8 +30,7 @@ class SystemOverlayStyleExample extends StatefulWidget {
   const SystemOverlayStyleExample({super.key});
 
   @override
-  State<SystemOverlayStyleExample> createState() =>
-      _SystemOverlayStyleExampleState();
+  State<SystemOverlayStyleExample> createState() => _SystemOverlayStyleExampleState();
 }
 
 class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {

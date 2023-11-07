@@ -63,25 +63,23 @@ class DropdownMenuThemeData with Diagnosticable {
   }
 
   /// Linearly interpolates between two dropdown menu themes.
-  static DropdownMenuThemeData lerp(
-      DropdownMenuThemeData? a, DropdownMenuThemeData? b, double t) {
+  static DropdownMenuThemeData lerp(DropdownMenuThemeData? a, DropdownMenuThemeData? b, double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
     return DropdownMenuThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
-      inputDecorationTheme:
-          t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
+      inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       menuStyle: MenuStyle.lerp(a?.menuStyle, b?.menuStyle, t),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        textStyle,
-        inputDecorationTheme,
-        menuStyle,
-      );
+    textStyle,
+    inputDecorationTheme,
+    menuStyle,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -91,22 +89,18 @@ class DropdownMenuThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DropdownMenuThemeData &&
-        other.textStyle == textStyle &&
-        other.inputDecorationTheme == inputDecorationTheme &&
-        other.menuStyle == menuStyle;
+    return other is DropdownMenuThemeData
+        && other.textStyle == textStyle
+        && other.inputDecorationTheme == inputDecorationTheme
+        && other.menuStyle == menuStyle;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<InputDecorationTheme>(
-        'inputDecorationTheme', inputDecorationTheme,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle,
-        defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
   }
 }
 
@@ -171,9 +165,7 @@ class DropdownMenuTheme extends InheritedTheme {
   ///  * [of], which will return [ThemeData.dropdownMenuTheme] if it doesn't
   ///    find a [DropdownMenuTheme] ancestor, instead of returning null.
   static DropdownMenuThemeData? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()
-        ?.data;
+    return context.dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()?.data;
   }
 
   @override
@@ -182,6 +174,5 @@ class DropdownMenuTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(DropdownMenuTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(DropdownMenuTheme oldWidget) => data != oldWidget.data;
 }

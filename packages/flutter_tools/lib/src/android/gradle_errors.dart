@@ -46,7 +46,6 @@ class GradleHandledError {
 enum GradleBuildStatus {
   /// The tool cannot recover from the failure and should exit.
   exit,
-
   /// The tool can retry the exact same build.
   retry,
 }
@@ -55,8 +54,7 @@ enum GradleBuildStatus {
 /// `errorMessages` is contained in the error message.
 GradleErrorTest _lineMatcher(List<String> errorMessages) {
   return (String line) {
-    return errorMessages
-        .any((String errorMessage) => line.contains(errorMessage));
+    return errorMessages.any((String errorMessage) => line.contains(errorMessage));
   };
 }
 
@@ -103,9 +101,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printStatus(
-        '${globals.logger.terminal.warningMark} App requires Multidex support',
-        emphasis: true);
+    globals.printStatus('${globals.logger.terminal.warningMark} App requires Multidex support', emphasis: true);
     if (multidexEnabled) {
       globals.printStatus(
         'Multidex support is required for your android app to build since the number of methods has exceeded 64k. '
@@ -120,8 +116,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
           'Add the `android:name="\${applicationName}"` attribute to your AndroidManifest.xml to enable Flutter\'s multidex support:\n',
           indent: 4,
         );
-        globals.printStatus(
-          r'''
+        globals.printStatus(r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   ...
   <application
@@ -131,10 +126,8 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
           newline: false,
           color: TerminalColor.grey,
         );
-        globals.printStatus(r'"${applicationName}"',
-            color: TerminalColor.green, newline: true);
-        globals.printStatus(
-          r'''
+        globals.printStatus(r'"${applicationName}"', color: TerminalColor.green, newline: true);
+        globals.printStatus(r'''
     ...>
 ''',
           indent: 8,
@@ -162,8 +155,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
           selection = await globals.terminal.promptForCharInput(
             <String>['y', 'n'],
             logger: globals.logger,
-            prompt:
-                'Do you want to continue with adding multidex support for Android?',
+            prompt: 'Do you want to continue with adding multidex support for Android?',
             defaultChoiceIndex: 0,
           );
         } on StateError catch (e) {
@@ -235,8 +227,10 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printError('${globals.logger.terminal.warningMark} '
-        'Gradle threw an error while downloading artifacts from the network.');
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
     return GradleBuildStatus.retry;
   },
   eventLabel: 'network',
@@ -264,16 +258,17 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printError('${globals.logger.terminal.warningMark} '
-        'Your .gradle directory under the home directory might be corrupted.');
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Your .gradle directory under the home directory might be corrupted.'
+    );
     bool shouldDeleteUserGradle = await globals.botDetector.isRunningOnBot;
     if (!shouldDeleteUserGradle && globals.terminal.stdinHasTerminal) {
       try {
         final String selection = await globals.terminal.promptForCharInput(
           <String>['y', 'n'],
           logger: globals.logger,
-          prompt:
-              'Do you want to delete the .gradle directory under the home directory?',
+          prompt: 'Do you want to delete the .gradle directory under the home directory?',
           defaultChoiceIndex: 0,
         );
         shouldDeleteUserGradle = selection == 'y';
@@ -287,12 +282,10 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
     if (shouldDeleteUserGradle) {
       final String? homeDir = globals.platform.environment['HOME'];
       if (homeDir == null) {
-        globals.logger.printStatus(
-            "Could not delete .gradle directory because there isn't a HOME env variable");
+        globals.logger.printStatus("Could not delete .gradle directory because there isn't a HOME env variable");
         return GradleBuildStatus.retry;
       }
-      final Directory userGradle =
-          globals.fs.directory(globals.fs.path.join(homeDir, '.gradle'));
+      final Directory userGradle = globals.fs.directory(globals.fs.path.join(homeDir, '.gradle'));
       globals.logger.printStatus('Deleting ${userGradle.path}');
       try {
         ErrorHandlingFileSystem.deleteIfExists(userGradle, recursive: true);
@@ -343,10 +336,9 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     required bool multidexEnabled,
   }) async {
     const String licenseNotAcceptedMatcher =
-        r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
+      r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
-    final RegExp licenseFailure =
-        RegExp(licenseNotAcceptedMatcher, multiLine: true);
+    final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
@@ -361,8 +353,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
   eventLabel: 'license-not-accepted',
 );
 
-final RegExp _undefinedTaskPattern =
-    RegExp(r'Task .+ not found in root project.');
+final RegExp _undefinedTaskPattern = RegExp(r'Task .+ not found in root project.');
 
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
@@ -381,7 +372,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
         globals.gradleUtils!.getExecutable(project),
-        'app:tasks',
+        'app:tasks' ,
         '--all',
         '--console=auto',
       ],
@@ -411,12 +402,8 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
         }
       }
     }
-    final String errorMessage =
-        '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
-    final File buildGradle = project.directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childFile('build.gradle');
+    final String errorMessage = '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
+    final File buildGradle = project.directory.childDirectory('android').childDirectory('app').childFile('build.gradle');
     if (productFlavors.isEmpty) {
       globals.printBox(
         '$errorMessage\n\n'
@@ -439,8 +426,8 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
   eventLabel: 'flavor-undefined',
 );
 
-final RegExp _minSdkVersionPattern = RegExp(
-    r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[\:(.+)\]');
+
+final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[\:(.+)\]');
 
 /// Handler when a plugin requires a higher Android API level.
 @visibleForTesting
@@ -463,12 +450,13 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
     assert(minSdkVersionMatch?.groupCount == 3);
 
     final String textInBold = globals.logger.terminal.bolden(
-        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
-        'android {\n'
-        '  defaultConfig {\n'
-        '    minSdkVersion ${minSdkVersionMatch?.group(2)}\n'
-        '  }\n'
-        '}\n');
+      'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+      'android {\n'
+      '  defaultConfig {\n'
+      '    minSdkVersion ${minSdkVersionMatch?.group(2)}\n'
+      '  }\n'
+      '}\n'
+    );
     globals.printBox(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
       '$textInBold\n'
@@ -500,12 +488,13 @@ final GradleHandledError transformInputIssueHandler = GradleHandledError(
         .childDirectory('app')
         .childFile('build.gradle');
     final String textInBold = globals.logger.terminal.bolden(
-        'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
-        'android {\n'
-        '  lintOptions {\n'
-        '    checkReleaseBuilds false\n'
-        '  }\n'
-        '}');
+      'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+      'android {\n'
+      '  lintOptions {\n'
+      '    checkReleaseBuilds false\n'
+      '  }\n'
+      '}'
+    );
     globals.printBox(
       'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
       '$textInBold',
@@ -528,11 +517,13 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final File gradleFile =
-        project.directory.childDirectory('android').childFile('build.gradle');
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
     final String textInBold = globals.logger.terminal.bolden(
-        'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
-        'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}');
+      'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
+    );
     globals.printBox(
       'You need to update the lockfile, or disable Gradle dependency locking.\n'
       '$textInBold',
@@ -554,8 +545,9 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final File gradleFile =
-        project.directory.childDirectory('android').childFile('build.gradle');
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
       'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update ${gradleFile.path}:\n'
@@ -567,8 +559,7 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
   eventLabel: 'incompatible-kotlin-version',
 );
 
-final RegExp _outdatedGradlePattern = RegExp(
-    r'The current Gradle version (.+) is not compatible with the Kotlin Gradle plugin');
+final RegExp _outdatedGradlePattern = RegExp(r'The current Gradle version (.+) is not compatible with the Kotlin Gradle plugin');
 
 @visibleForTesting
 final GradleHandledError outdatedGradleHandler = GradleHandledError(
@@ -579,8 +570,9 @@ final GradleHandledError outdatedGradleHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final File gradleFile =
-        project.directory.childDirectory('android').childFile('build.gradle');
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
     final File gradlePropertiesFile = project.directory
         .childDirectory('android')
         .childDirectory('gradle')
@@ -602,8 +594,7 @@ final GradleHandledError outdatedGradleHandler = GradleHandledError(
   eventLabel: 'outdated-gradle-version',
 );
 
-final RegExp _minCompileSdkVersionPattern =
-    RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
+final RegExp _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
 
 @visibleForTesting
 final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
@@ -614,8 +605,7 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final Match? minCompileSdkVersionMatch =
-        _minCompileSdkVersionPattern.firstMatch(line);
+    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
     assert(minCompileSdkVersionMatch?.groupCount == 1);
 
     final File gradleFile = project.directory
@@ -670,8 +660,10 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printError('${globals.logger.terminal.warningMark} '
-        'Gradle threw an error while downloading artifacts from the network.');
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
     return GradleBuildStatus.retry;
   },
   eventLabel: 'ssl-exception-tag-mismatch',
@@ -680,12 +672,10 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
 /// If an incompatible Java and Gradle versions error is caught, we expect an
 /// error specifying that the Java major class file version, one of
 /// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
-final RegExp _unsupportedClassFileMajorVersionPattern =
-    RegExp(r'Unsupported class file major version\s+\d+');
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+\d+');
 
 @visibleForTesting
-final GradleHandledError incompatibleJavaAndGradleVersionsHandler =
-    GradleHandledError(
+final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
   test: (String line) {
     return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
   },
@@ -717,8 +707,10 @@ final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printError('${globals.logger.terminal.warningMark} '
-        'Gradle threw an error while downloading artifacts from the network.');
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
 
     return GradleBuildStatus.retry;
   },
@@ -734,8 +726,10 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printError('${globals.logger.terminal.warningMark} '
-        'Gradle threw an error while resolving dependencies.');
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while resolving dependencies.'
+    );
 
     return GradleBuildStatus.retry;
   },

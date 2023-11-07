@@ -8,8 +8,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 typedef DriverTestCallBack = Future<void> Function(FlutterDriver driver);
 
-Future<void> runDriverTestForRoute(
-    String routeName, DriverTestCallBack body) async {
+Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) async {
   final FlutterDriver driver = await FlutterDriver.connect();
 
   // The slight initial delay avoids starting the timing during a

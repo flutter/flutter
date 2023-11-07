@@ -5,9 +5,10 @@
 import 'template.dart';
 
 class ChipTemplate extends TokenTemplate {
-  const ChipTemplate(super.blockName, super.fileName, super.tokens,
-      {super.colorSchemePrefix = '_colors.',
-      super.textThemePrefix = '_textTheme.'});
+  const ChipTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   static const String tokenGroup = 'md.comp.assist-chip';
   static const String variant = '.flat';

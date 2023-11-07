@@ -7,23 +7,21 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class DrawPointsPage extends StatefulWidget {
+class DrawPointsPage extends StatefulWidget  {
   const DrawPointsPage({super.key});
 
   @override
   State<DrawPointsPage> createState() => _DrawPointsPageState();
 }
 
-class _DrawPointsPageState extends State<DrawPointsPage>
-    with SingleTickerProviderStateMixin {
+class _DrawPointsPageState extends State<DrawPointsPage> with SingleTickerProviderStateMixin {
   late final AnimationController controller;
   double tick = 0.0;
 
   @override
   void initState() {
     super.initState();
-    controller =
-        AnimationController(vsync: this, duration: const Duration(hours: 1));
+    controller = AnimationController(vsync: this, duration: const Duration(hours: 1));
     controller.addListener(() {
       setState(() {
         tick += 1;
@@ -37,6 +35,7 @@ class _DrawPointsPageState extends State<DrawPointsPage>
     controller.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {

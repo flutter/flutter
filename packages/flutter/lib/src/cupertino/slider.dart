@@ -71,8 +71,8 @@ class CupertinoSlider extends StatefulWidget {
     this.divisions,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
-  })  : assert(value >= min && value <= max),
-        assert(divisions == null || divisions > 0);
+  }) : assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0);
 
   /// The currently selected value for this slider.
   ///
@@ -217,8 +217,7 @@ class CupertinoSlider extends StatefulWidget {
   }
 }
 
-class _CupertinoSliderState extends State<CupertinoSlider>
-    with TickerProviderStateMixin {
+class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
     final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
@@ -284,8 +283,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       activeColor: activeColor,
       thumbColor: CupertinoDynamicColor.resolve(thumbColor, context),
-      trackColor:
-          CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
+      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -296,16 +294,14 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, _RenderCupertinoSlider renderObject) {
+  void updateRenderObject(BuildContext context, _RenderCupertinoSlider renderObject) {
     assert(debugCheckHasDirectionality(context));
     renderObject
       ..value = value
       ..divisions = divisions
       ..activeColor = activeColor
       ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
-      ..trackColor =
-          CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -320,11 +316,9 @@ const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
 const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
 
-const double _kAdjustmentUnit =
-    0.1; // Matches iOS implementation of material slider.
+const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 
-class _RenderCupertinoSlider extends RenderConstrainedBox
-    implements MouseTrackerAnnotation {
+class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTrackerAnnotation {
   _RenderCupertinoSlider({
     required double value,
     int? divisions,
@@ -337,18 +331,16 @@ class _RenderCupertinoSlider extends RenderConstrainedBox
     required TickerProvider vsync,
     required TextDirection textDirection,
     MouseCursor cursor = MouseCursor.defer,
-  })  : assert(value >= 0.0 && value <= 1.0),
-        _cursor = cursor,
-        _value = value,
-        _divisions = divisions,
-        _activeColor = activeColor,
-        _thumbColor = thumbColor,
-        _trackColor = trackColor,
-        _onChanged = onChanged,
-        _textDirection = textDirection,
-        super(
-            additionalConstraints: const BoxConstraints.tightFor(
-                width: _kSliderWidth, height: _kSliderHeight)) {
+  }) : assert(value >= 0.0 && value <= 1.0),
+       _cursor = cursor,
+       _value = value,
+       _divisions = divisions,
+       _activeColor = activeColor,
+       _thumbColor = thumbColor,
+       _trackColor = trackColor,
+       _onChanged = onChanged,
+       _textDirection = textDirection,
+       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
@@ -465,19 +457,16 @@ class _RenderCupertinoSlider extends RenderConstrainedBox
       case TextDirection.ltr:
         visualPosition = _value;
     }
-    return lerpDouble(_trackLeft + CupertinoThumbPainter.radius,
-        _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
+    return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
 
   bool get isInteractive => onChanged != null;
 
-  void _handleDragStart(DragStartDetails details) =>
-      _startInteraction(details.globalPosition);
+  void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      final double extent = math.max(_kPadding,
-          size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
+      final double extent = math.max(_kPadding, size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
       final double valueDelta = details.primaryDelta! / extent;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -506,8 +495,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox
 
   @override
   bool hitTestSelf(Offset position) {
-    return (position.dx - _thumbCenter).abs() <
-        CupertinoThumbPainter.radius + _kPadding;
+    return (position.dx - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
   }
 
   @override
@@ -545,25 +533,16 @@ class _RenderCupertinoSlider extends RenderConstrainedBox
 
     if (visualPosition > 0.0) {
       final Paint paint = Paint()..color = rightColor;
-      canvas.drawRRect(
-          RRect.fromLTRBXY(
-              trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0),
-          paint);
+      canvas.drawRRect(RRect.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0), paint);
     }
 
     if (visualPosition < 1.0) {
       final Paint paint = Paint()..color = leftColor;
-      canvas.drawRRect(
-          RRect.fromLTRBXY(
-              trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0),
-          paint);
+      canvas.drawRRect(RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0), paint);
     }
 
     final Offset thumbCenter = Offset(trackActive, trackCenter);
-    CupertinoThumbPainter(color: thumbColor).paint(
-        canvas,
-        Rect.fromCircle(
-            center: thumbCenter, radius: CupertinoThumbPainter.radius));
+    CupertinoThumbPainter(color: thumbColor).paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override
@@ -577,15 +556,12 @@ class _RenderCupertinoSlider extends RenderConstrainedBox
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
       config.value = '${(value * 100).round()}%';
-      config.increasedValue =
-          '${(clampDouble(value + _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
-      config.decreasedValue =
-          '${(clampDouble(value - _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
+      config.increasedValue = '${(clampDouble(value + _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${(clampDouble(value - _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
     }
   }
 
-  double get _semanticActionUnit =>
-      divisions != null ? 1.0 / divisions! : _kAdjustmentUnit;
+  double get _semanticActionUnit => divisions != null ? 1.0 / divisions! : _kAdjustmentUnit;
 
   void _increaseAction() {
     if (isInteractive) {

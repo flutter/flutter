@@ -34,6 +34,7 @@ class TestScrollPhysics extends ScrollPhysics {
   }
 }
 
+
 void main() {
   test('ScrollPhysics applyTo()', () {
     const TestScrollPhysics a = TestScrollPhysics(name: 'a');
@@ -65,12 +66,9 @@ void main() {
     const ScrollPhysics never = NeverScrollableScrollPhysics();
     const ScrollPhysics always = AlwaysScrollableScrollPhysics();
     const ScrollPhysics page = PageScrollPhysics();
-    const ScrollPhysics bounceDesktop =
-        BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+    const ScrollPhysics bounceDesktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
-    String types(ScrollPhysics? value) => value!.parent == null
-        ? '${value.runtimeType}'
-        : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -98,14 +96,12 @@ void main() {
     );
 
     expect(
-        bounceDesktop.applyTo(always),
-        (BouncingScrollPhysics x) =>
-            x.decelerationRate == ScrollDecelerationRate.fast);
+      bounceDesktop.applyTo(always),
+      (BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast
+    );
   });
 
-  test(
-      "ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0",
-      () {
+  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
     final ScrollMetrics position = FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 100.0,
@@ -121,12 +117,9 @@ void main() {
 
     // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
     // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0),
-        moreOrLessEquals(1000));
-    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0),
-        moreOrLessEquals(1000));
-    expect(page.createBallisticSimulation(position, 1000)!.dx(0),
-        moreOrLessEquals(1000));
+    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
   });
 
   group('BouncingScrollPhysics test', () {
@@ -155,11 +148,11 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double lessOverscrollApplied = physicsUnderTest
-          .applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
+      final double lessOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
 
-      final double moreOverscrollApplied = physicsUnderTest
-          .applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
+      final double moreOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
 
       expect(lessOverscrollApplied, greaterThan(1.0));
       expect(lessOverscrollApplied, lessThan(20.0));
@@ -184,8 +177,8 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
-          overscrolledPosition, -10.0);
+      final double easingApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
 
       expect(easingApplied, lessThan(-1.0));
       expect(easingApplied, greaterThan(-10.0));
@@ -221,8 +214,8 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
-          overscrolledPosition, -10.0);
+      final double easingApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
       final double tensioningApplied =
           physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
 
@@ -230,8 +223,7 @@ void main() {
     });
 
     test('no easing resistance for ScrollDecelerationRate.fast', () {
-      const BouncingScrollPhysics desktop =
-          BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
       final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
@@ -269,11 +261,11 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double smallListOverscrollApplied = physicsUnderTest
-          .applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
+      final double smallListOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
 
-      final double bigListOverscrollApplied = physicsUnderTest
-          .applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
+      final double bigListOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
 
       expect(smallListOverscrollApplied, equals(bigListOverscrollApplied));
 
@@ -283,8 +275,7 @@ void main() {
 
     test('frictionFactor', () {
       const BouncingScrollPhysics mobile = BouncingScrollPhysics();
-      const BouncingScrollPhysics desktop =
-          BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
       expect(desktop.frictionFactor(0), 0.26);
       expect(mobile.frictionFactor(0), 0.52);
@@ -349,8 +340,7 @@ FlutterError
     }
   });
 
-  testWidgetsWithLeakTracking('PageScrollPhysics work with NestedScrollView',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(Material(
       child: Directionality(
@@ -359,8 +349,7 @@ FlutterError
           physics: const PageScrollPhysics(),
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              SliverToBoxAdapter(
-                  child: Container(height: 300, color: Colors.blue)),
+              SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
             ];
           },
           body: ListView.builder(
@@ -372,7 +361,6 @@ FlutterError
         ),
       ),
     ));
-    await tester.fling(
-        find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
+    await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
 }

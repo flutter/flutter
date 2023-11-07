@@ -17,8 +17,7 @@ void main() {
     await tester.tap(find.text('Open Drawer'));
     await tester.pumpAndSettle();
 
-    final NavigationDrawer navigationDrawerWidget =
-        tester.firstWidget(find.byType(NavigationDrawer));
+    final NavigationDrawer navigationDrawerWidget = tester.firstWidget(find.byType(NavigationDrawer));
 
     /// NavigationDestinations must be rendered
     expect(find.text('Messages'), findsNWidgets(2));
@@ -30,14 +29,12 @@ void main() {
     expect(find.text('Page Index = 0'), findsOneWidget);
 
     /// Switch to second tab
-    await tester.tap(find.ancestor(
-        of: find.text('Profile'), matching: find.byType(InkWell)));
+    await tester.tap(find.ancestor(of: find.text('Profile'), matching: find.byType(InkWell)));
     await tester.pumpAndSettle();
     expect(find.text('Page Index = 1'), findsOneWidget);
 
     /// Switch to fourth tab
-    await tester.tap(find.ancestor(
-        of: find.text('Settings'), matching: find.byType(InkWell)));
+    await tester.tap(find.ancestor(of: find.text('Settings'), matching: find.byType(InkWell)));
     await tester.pumpAndSettle();
     expect(find.text('Page Index = 2'), findsOneWidget);
   });

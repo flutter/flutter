@@ -102,30 +102,23 @@ class Theme extends StatelessWidget {
   /// }
   /// ```
   static ThemeData of(BuildContext context) {
-    final _InheritedTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
-    final MaterialLocalizations? localizations =
-        Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
-    final ScriptCategory category =
-        localizations?.scriptCategory ?? ScriptCategory.englishLike;
+    final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+    final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
     final ThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;
-    return ThemeData.localize(
-        theme, theme.typography.geometryThemeFor(category));
+    return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
   // The inherited themes in widgets library can not infer their values from
   // Theme in material library. Wraps the child with these inherited themes to
   // overrides their values directly.
   Widget _wrapsWidgetThemes(BuildContext context, Widget child) {
-    final DefaultSelectionStyle selectionStyle =
-        DefaultSelectionStyle.of(context);
+    final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
     return IconTheme(
       data: data.iconTheme,
       child: DefaultSelectionStyle(
-        selectionColor: data.textSelectionTheme.selectionColor ??
-            selectionStyle.selectionColor,
-        cursorColor:
-            data.textSelectionTheme.cursorColor ?? selectionStyle.cursorColor,
+        selectionColor: data.textSelectionTheme.selectionColor ?? selectionStyle.selectionColor,
+        cursorColor: data.textSelectionTheme.cursorColor ?? selectionStyle.cursorColor,
         child: child,
       ),
     );
@@ -150,8 +143,7 @@ class Theme extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<ThemeData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<ThemeData>('data', data, showName: false));
   }
 }
 
@@ -184,7 +176,7 @@ class ThemeDataTween extends Tween<ThemeData> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  ThemeDataTween({super.begin, super.end});
+  ThemeDataTween({ super.begin, super.end });
 
   @override
   ThemeData lerp(double t) => ThemeData.lerp(begin!, end!, t);
@@ -234,9 +226,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _data = visitor(_data, widget.data,
-            (dynamic value) => ThemeDataTween(begin: value as ThemeData))!
-        as ThemeDataTween;
+    _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData))! as ThemeDataTween;
   }
 
   @override
@@ -250,7 +240,6 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<ThemeDataTween>('data', _data,
-        showName: false, defaultValue: null));
+    description.add(DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null));
   }
 }

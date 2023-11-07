@@ -9,8 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart'
-    show TestDefaultBinaryMessengerBinding;
+import 'package:flutter_test/flutter_test.dart' show TestDefaultBinaryMessengerBinding;
 
 class _TestHitTester extends RenderBox {
   _TestHitTester(this.hitTestOverride);
@@ -26,13 +25,7 @@ class _TestHitTester extends RenderBox {
 // A binding used to test MouseTracker, allowing the test to override hit test
 // searching.
 class TestMouseTrackerFlutterBinding extends BindingBase
-    with
-        SchedulerBinding,
-        ServicesBinding,
-        GestureBinding,
-        SemanticsBinding,
-        RendererBinding,
-        TestDefaultBinaryMessengerBinding {
+    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding, TestDefaultBinaryMessengerBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -44,9 +37,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
   );
 
   late final PipelineOwner _pipelineOwner = PipelineOwner(
-    onSemanticsUpdate: (ui.SemanticsUpdate _) {
-      assert(false);
-    },
+    onSemanticsUpdate: (ui.SemanticsUpdate _) { assert(false); },
   );
 
   void setHitTest(BoxHitTest hitTest) {
@@ -75,13 +66,11 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     _overridePhase = lastPhase;
   }
 
-  List<void Function(Duration)> postFrameCallbacks =
-      <void Function(Duration)>[];
+  List<void Function(Duration)> postFrameCallbacks = <void Function(Duration)>[];
 
   // Proxy post-frame callbacks.
   @override
-  void addPostFrameCallback(void Function(Duration) callback,
-      {String debugLabel = 'callback'}) {
+  void addPostFrameCallback(void Function(Duration) callback, {String debugLabel = 'callback'}) {
     postFrameCallbacks.add(callback);
   }
 
@@ -94,15 +83,8 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 }
 
 // An object that mocks the behavior of a render object with [MouseTrackerAnnotation].
-class TestAnnotationTarget
-    with Diagnosticable
-    implements MouseTrackerAnnotation, HitTestTarget {
-  const TestAnnotationTarget(
-      {this.onEnter,
-      this.onHover,
-      this.onExit,
-      this.cursor = MouseCursor.defer,
-      this.validForMouseTracker = true});
+class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget {
+  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
 
   @override
   final PointerEnterEventListener? onEnter;
@@ -130,7 +112,7 @@ class TestAnnotationTarget
 // optional transform matrix.
 class TestAnnotationEntry extends HitTestEntry<TestAnnotationTarget> {
   TestAnnotationEntry(super.target, [Matrix4? transform])
-      : transform = transform ?? Matrix4.identity();
+    : transform = transform ?? Matrix4.identity();
 
   @override
   final Matrix4 transform;

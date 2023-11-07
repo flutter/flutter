@@ -27,15 +27,13 @@ void main() {
 
         // Scroll down
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(
-              stockList, 0.0, -300.0, const Duration(milliseconds: 300));
+          await driver.scroll(stockList, 0.0, -300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(
-              stockList, 0.0, 300.0, const Duration(milliseconds: 300));
+          await driver.scroll(stockList, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       });

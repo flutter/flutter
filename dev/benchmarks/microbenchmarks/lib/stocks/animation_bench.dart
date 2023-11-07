@@ -30,8 +30,7 @@ class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
 }
 
 Future<void> main() async {
-  assert(false,
-      "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   final Stopwatch wallClockWatch = Stopwatch();
@@ -103,8 +102,7 @@ Future<void> main() async {
   if (totalSubsequentFramesIterationCount > 0) {
     printer.addResult(
       description: '  Subsequent frames average time',
-      value: totalSubsequentFramesElapsedMicroseconds /
-          totalSubsequentFramesIterationCount,
+      value: totalSubsequentFramesElapsedMicroseconds / totalSubsequentFramesIterationCount,
       unit: 'µs per frame ($totalSubsequentFramesIterationCount frames)',
       name: 'stock_animation_subsequent_frame_average',
     );

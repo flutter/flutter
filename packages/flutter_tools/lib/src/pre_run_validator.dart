@@ -10,8 +10,7 @@ import 'cache.dart';
 abstract class PreRunValidator {
   factory PreRunValidator({
     required FileSystem fileSystem,
-  }) =>
-      _DefaultPreRunValidator(fileSystem: fileSystem);
+  }) => _DefaultPreRunValidator(fileSystem: fileSystem);
 
   void validate();
 }
@@ -24,7 +23,7 @@ class _DefaultPreRunValidator implements PreRunValidator {
   final FileSystem fileSystem;
 
   late final Directory _toolsDir = fileSystem.directory(
-    fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
+      fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
   );
 
   @override

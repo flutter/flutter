@@ -8,22 +8,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking(
-      '!pinned && !floating && !bottom ==> fade opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('!pinned && !floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: false,
-        floating: false,
-        bottom: false,
-        controller: controller,
-      ),
+        _TestWidget(
+          pinned: false,
+          floating: false,
+          bottom: false,
+          controller: controller,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -31,21 +28,19 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('!pinned && !floating && bottom ==> fade opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: false,
-        floating: false,
-        bottom: true,
-        controller: controller,
-      ),
+        _TestWidget(
+          pinned: false,
+          floating: false,
+          bottom: true,
+          controller: controller,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -53,21 +48,19 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('!pinned && floating && !bottom ==> fade opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('!pinned && floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: false,
-        floating: true,
-        bottom: false,
-        controller: controller,
-      ),
+        _TestWidget(
+          pinned: false,
+          floating: true,
+          bottom: false,
+          controller: controller,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -75,21 +68,19 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('!pinned && floating && bottom ==> fade opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('!pinned && floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: false,
-        floating: true,
-        bottom: true,
-        controller: controller,
-      ),
+        _TestWidget(
+          pinned: false,
+          floating: true,
+          bottom: true,
+          controller: controller,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -97,21 +88,19 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && !floating && !bottom ==> 1.0 opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pinned && !floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: true,
-        floating: false,
-        bottom: false,
-        controller: controller,
-      ),
+        _TestWidget(
+          pinned: true,
+          floating: false,
+          bottom: false,
+          controller: controller,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -119,21 +108,19 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && !floating && bottom ==> 1.0 opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pinned && !floating && bottom ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: true,
-        floating: false,
-        bottom: true,
-        controller: controller,
-      ),
+        _TestWidget(
+          pinned: true,
+          floating: false,
+          bottom: true,
+          controller: controller,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -141,23 +128,21 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking('pinned && floating && !bottom ==> 1.0 opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pinned && floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25000.
 
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: true,
-        floating: true,
-        bottom: false,
-        controller: controller,
-      ),
+        _TestWidget(
+          pinned: true,
+          floating: true,
+          bottom: false,
+          controller: controller,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -165,9 +150,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking(
-      'pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25993.
 
     final ScrollController controller = ScrollController();
@@ -181,8 +164,7 @@ void main() {
       ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -190,9 +172,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgetsWithLeakTracking(
-      'pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -205,8 +185,7 @@ void main() {
       ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(200.0);
@@ -214,24 +193,21 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking(
-      '!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     const double collapsedHeight = 100.0;
     await tester.pumpWidget(
-      _TestWidget(
-        pinned: false,
-        floating: false,
-        bottom: false,
-        controller: controller,
-        collapsedHeight: collapsedHeight,
-      ),
+        _TestWidget(
+          pinned: false,
+          floating: false,
+          bottom: false,
+          controller: controller,
+          collapsedHeight: collapsedHeight,
+        ),
     );
 
-    final RenderParagraph render =
-        tester.renderObject(find.text('Hallo Welt!!1'));
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
     expect(render.text.style!.color!.opacity, 1.0);
 
     controller.jumpTo(collapsedHeight);
@@ -241,6 +217,7 @@ void main() {
 }
 
 class _TestWidget extends StatelessWidget {
+
   const _TestWidget({
     required this.pinned,
     required this.floating,
@@ -267,16 +244,13 @@ class _TestWidget extends StatelessWidget {
             expandedHeight: 120.0,
             collapsedHeight: collapsedHeight,
             title: const Text('Hallo Welt!!1'),
-            bottom: !bottom
-                ? null
-                : PreferredSize(
-                    preferredSize: const Size.fromHeight(35.0),
-                    child: Container(),
-                  ),
+            bottom: !bottom ? null :  PreferredSize(
+              preferredSize: const Size.fromHeight(35.0),
+              child: Container(),
+            ),
           ),
           SliverList(
-            delegate:
-                SliverChildListDelegate(List<Widget>.generate(20, (int i) {
+            delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
               return SizedBox(
                 height: 100.0,
                 child: Text('Tile $i'),
@@ -287,4 +261,5 @@ class _TestWidget extends StatelessWidget {
       ),
     );
   }
+
 }

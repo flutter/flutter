@@ -26,9 +26,10 @@ class Net {
     HttpClientFactory? httpClientFactory,
     required Logger logger,
     required Platform platform,
-  })  : _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
-        _logger = logger,
-        _platform = platform;
+  }) :
+    _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
+    _logger = logger,
+    _platform = platform;
 
   final HttpClientFactory _httpClientFactory;
 
@@ -44,8 +45,7 @@ class Net {
   /// returns an empty list.
   ///
   /// If [maxAttempts] is exceeded, returns null.
-  Future<List<int>?> fetchUrl(
-    Uri url, {
+  Future<List<int>?> fetchUrl(Uri url, {
     int? maxAttempts,
     File? destFile,
     @visibleForTesting Duration? durationOverride,
@@ -77,10 +77,9 @@ class Net {
       }
       _logger.printStatus(
         'Download failed -- attempting retry $attempts in '
-        '$durationSeconds second${durationSeconds == 1 ? "" : "s"}...',
+        '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...',
       );
-      await Future<void>.delayed(
-          durationOverride ?? Duration(seconds: durationSeconds));
+      await Future<void>.delayed(durationOverride ?? Duration(seconds: durationSeconds));
       if (durationSeconds < 64) {
         durationSeconds *= 2;
       }
@@ -91,8 +90,7 @@ class Net {
   Future<bool> doesRemoteFileExist(Uri url) => _attempt(url, onlyHeaders: true);
 
   // Returns true on success and false on failure.
-  Future<bool> _attempt(
-    Uri url, {
+  Future<bool> _attempt(Uri url, {
     IOSink? destSink,
     bool onlyHeaders = false,
   }) async {
@@ -153,8 +151,7 @@ class Net {
         );
       }
       // 5xx errors are server errors and we can try again
-      _logger.printTrace(
-          'Download error: ${response.statusCode} ${response.reasonPhrase}');
+      _logger.printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
       return false;
     }
     _logger.printTrace('Received response from server, collecting bytes...');
@@ -202,12 +199,12 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([Object? obj = '']) {
+  void writeln([ Object? obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
@@ -219,7 +216,7 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [StackTrace? stackTrace]) {
+  void addError(dynamic error, [ StackTrace? stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -227,10 +224,10 @@ class _MemoryIOSink implements IOSink {
   Future<void> get done => close();
 
   @override
-  Future<void> close() async {}
+  Future<void> close() async { }
 
   @override
-  Future<void> flush() async {}
+  Future<void> flush() async { }
 }
 
 /// Returns [true] if [address] is an IPv6 address.

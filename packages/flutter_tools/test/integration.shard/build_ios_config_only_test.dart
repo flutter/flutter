@@ -10,17 +10,14 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  test(
-      'flutter build ios --config only updates generated xcconfig file without performing build',
-      () async {
+  test('flutter build ios --config only updates generated xcconfig file without performing build', () async {
     final String workingDirectory = fileSystem.path.join(
       getFlutterRoot(),
       'dev',
       'integration_tests',
       'flutter_gallery',
     );
-    final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     await processManager.run(<String>[
       flutterBin,
@@ -38,11 +35,9 @@ void main() {
       '--split-debug-info=info',
       '--no-codesign',
     ];
-    final ProcessResult firstRunResult = await processManager.run(buildCommand,
-        workingDirectory: workingDirectory);
+    final ProcessResult firstRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
 
-    expect(firstRunResult,
-        const ProcessResultMatcher(stdoutPattern: 'Running pod install'));
+    expect(firstRunResult, const ProcessResultMatcher(stdoutPattern: 'Running pod install'));
 
     final File generatedConfig = fileSystem.file(fileSystem.path.join(
       workingDirectory,
@@ -53,8 +48,7 @@ void main() {
 
     // Config is updated if command succeeded.
     expect(generatedConfig, exists);
-    expect(
-        generatedConfig.readAsStringSync(), contains('DART_OBFUSCATION=true'));
+    expect(generatedConfig.readAsStringSync(), contains('DART_OBFUSCATION=true'));
 
     // file that only exists if app was fully built.
     final File frameworkPlist = fileSystem.file(fileSystem.path.join(
@@ -69,8 +63,7 @@ void main() {
     expect(frameworkPlist, isNot(exists));
 
     // Run again with no changes.
-    final ProcessResult secondRunResult = await processManager.run(buildCommand,
-        workingDirectory: workingDirectory);
+    final ProcessResult secondRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
     final String secondRunStdout = secondRunResult.stdout.toString();
 
     expect(secondRunResult, const ProcessResultMatcher());

@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('debugCheckHasCupertinoLocalizations throws',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasCupertinoLocalizations throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -23,18 +22,12 @@ void main() {
       ),
     );
 
-    expect(
-        () => debugCheckHasCupertinoLocalizations(
-            noLocalizationsAvailable.currentContext!),
-        throwsA(isAssertionError.having(
-          (AssertionError e) => e.message,
-          'message',
-          contains('No CupertinoLocalizations found'),
-        )));
+    expect(() => debugCheckHasCupertinoLocalizations(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      contains('No CupertinoLocalizations found'),
+    )));
 
-    expect(
-        debugCheckHasCupertinoLocalizations(
-            localizationsAvailable.currentContext!),
-        isTrue);
+    expect(debugCheckHasCupertinoLocalizations(localizationsAvailable.currentContext!), isTrue);
   });
 }

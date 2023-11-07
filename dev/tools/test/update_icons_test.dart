@@ -41,8 +41,7 @@ void main() {
   });
 
   test('no double underscores', () {
-    expect(Icon(codepointsUnderscore.entries.first).usage,
-        'Icon(Icons.airplane_123),');
+    expect(Icon(codepointsUnderscore.entries.first).usage, 'Icon(Icons.airplane_123),');
   });
 
   test('usage string is correct', () {
@@ -93,29 +92,24 @@ void main() {
     );
     // Common suffixes + variant
     expect(
-      Icon(const MapEntry<String, String>('help_alt_rounded', ''))
-          .isMirroredInRTL,
+      Icon(const MapEntry<String, String>('help_alt_rounded', '')).isMirroredInRTL,
       true,
     );
     expect(
-      Icon(const MapEntry<String, String>('help_new_rounded', ''))
-          .isMirroredInRTL,
+      Icon(const MapEntry<String, String>('help_new_rounded', '')).isMirroredInRTL,
       true,
     );
     expect(
-      Icon(const MapEntry<String, String>('help_off_rounded', ''))
-          .isMirroredInRTL,
+      Icon(const MapEntry<String, String>('help_off_rounded', '')).isMirroredInRTL,
       true,
     );
     expect(
-      Icon(const MapEntry<String, String>('help_on_rounded', ''))
-          .isMirroredInRTL,
+      Icon(const MapEntry<String, String>('help_on_rounded', '')).isMirroredInRTL,
       true,
     );
     // No match
     expect(
-      Icon(const MapEntry<String, String>('help_center_rounded', ''))
-          .isMirroredInRTL,
+      Icon(const MapEntry<String, String>('help_center_rounded', '')).isMirroredInRTL,
       false,
     );
     // No match

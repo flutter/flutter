@@ -186,11 +186,12 @@ class _SelectionContainerState extends State<SelectionContainer>
     return widget.delegate!.getLocalTextSelection();
   }
 
-  @override
+ @override
   int? getContentLength() {
     assert(!widget._disabled);
     return widget.delegate!.getContentLength();
   }
+
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {

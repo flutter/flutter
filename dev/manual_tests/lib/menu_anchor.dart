@@ -65,8 +65,7 @@ class _HomeState extends State<Home> {
       );
       menuBarTheme = const MenuBarThemeData(
         style: MenuStyle(
-          shape: MaterialStatePropertyAll<OutlinedBorder>(
-              RoundedRectangleBorder()),
+          shape: MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
           backgroundColor: MaterialStatePropertyAll<Color?>(Colors.blue),
           elevation: MaterialStatePropertyAll<double?>(10),
           padding: MaterialStatePropertyAll<EdgeInsetsDirectional>(
@@ -237,8 +236,7 @@ class _ControlsState extends State<_Controls> {
                   child: MenuAcceleratorLabel(TestMenu.standaloneMenu2.label),
                 ),
               ],
-              builder: (BuildContext context, MenuController controller,
-                  Widget? child) {
+              builder: (BuildContext context, MenuController controller, Widget? child) {
                 return TextButton(
                   focusNode: _focusNode,
                   onPressed: () {
@@ -259,8 +257,7 @@ class _ControlsState extends State<_Controls> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   _ControlSlider(
-                    label:
-                        'Extra Padding: ${widget.extraPadding.toStringAsFixed(1)}',
+                    label: 'Extra Padding: ${widget.extraPadding.toStringAsFixed(1)}',
                     value: widget.extraPadding,
                     max: 40,
                     divisions: 20,
@@ -269,8 +266,7 @@ class _ControlsState extends State<_Controls> {
                     },
                   ),
                   _ControlSlider(
-                    label:
-                        'Horizontal Density: ${widget.density.horizontal.toStringAsFixed(1)}',
+                    label: 'Horizontal Density: ${widget.density.horizontal.toStringAsFixed(1)}',
                     value: widget.density.horizontal,
                     max: 4,
                     min: -4,
@@ -285,8 +281,7 @@ class _ControlsState extends State<_Controls> {
                     },
                   ),
                   _ControlSlider(
-                    label:
-                        'Vertical Density: ${widget.density.vertical.toStringAsFixed(1)}',
+                    label: 'Vertical Density: ${widget.density.vertical.toStringAsFixed(1)}',
                     value: widget.density.vertical,
                     max: 4,
                     min: -4,
@@ -498,8 +493,7 @@ class _TestMenusState extends State<_TestMenus> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _shortcutsEntry?.dispose();
-    final Map<ShortcutActivator, Intent> shortcuts =
-        <ShortcutActivator, Intent>{};
+    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
     for (final TestMenu item in TestMenu.values) {
       if (item.shortcut == null) {
         continue;
@@ -529,8 +523,7 @@ class _TestMenusState extends State<_TestMenus> {
         case TestMenu.testButton:
         case TestMenu.standaloneMenu1:
         case TestMenu.standaloneMenu2:
-          shortcuts[item.shortcut!] =
-              VoidCallbackIntent(() => _itemSelected(item));
+          shortcuts[item.shortcut!] = VoidCallbackIntent(() => _itemSelected(item));
       }
     }
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
@@ -577,8 +570,7 @@ List<Widget> createTestMenus({
   void Function(TestMenu?)? onRadioChanged,
   void Function(TestMenu)? onOpen,
   void Function(TestMenu)? onClose,
-  Map<TestMenu, MenuSerializableShortcut> shortcuts =
-      const <TestMenu, MenuSerializableShortcut>{},
+  Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
   bool? checkboxValue,
   TestMenu? radioValue,
   MenuController? menuController,
@@ -594,9 +586,7 @@ List<Widget> createTestMenus({
       onOpen: onOpen != null ? () => onOpen(menu) : null,
       onClose: onClose != null ? () => onClose(menu) : null,
       menuChildren: menuChildren,
-      child: accelerators
-          ? MenuAcceleratorLabel(menu.acceleratorLabel)
-          : Text(menu.label),
+      child: accelerators ? MenuAcceleratorLabel(menu.acceleratorLabel) : Text(menu.label),
     );
   }
 
@@ -613,9 +603,7 @@ List<Widget> createTestMenus({
       shortcut: shortcuts[menu],
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
-      child: accelerators
-          ? MenuAcceleratorLabel(menu.acceleratorLabel)
-          : Text(menu.label),
+      child: accelerators ? MenuAcceleratorLabel(menu.acceleratorLabel) : Text(menu.label),
     );
   }
 
@@ -631,14 +619,10 @@ List<Widget> createTestMenus({
       key: key,
       value: checkboxValue,
       tristate: tristate,
-      onChanged: enabled && onCheckboxChanged != null
-          ? (bool? value) => onCheckboxChanged(menu, value)
-          : null,
+      onChanged: enabled && onCheckboxChanged != null ? (bool? value) => onCheckboxChanged(menu, value) : null,
       shortcut: menu.shortcut,
       trailingIcon: trailingIcon,
-      child: accelerators
-          ? MenuAcceleratorLabel(menu.acceleratorLabel)
-          : Text(menu.label),
+      child: accelerators ? MenuAcceleratorLabel(menu.acceleratorLabel) : Text(menu.label),
     );
   }
 
@@ -658,9 +642,7 @@ List<Widget> createTestMenus({
       onChanged: enabled && onRadioChanged != null ? onRadioChanged : null,
       shortcut: menu.shortcut,
       trailingIcon: trailingIcon,
-      child: accelerators
-          ? MenuAcceleratorLabel(menu.acceleratorLabel)
-          : Text(menu.label),
+      child: accelerators ? MenuAcceleratorLabel(menu.acceleratorLabel) : Text(menu.label),
     );
   }
 
@@ -737,8 +719,7 @@ List<Widget> createTestMenus({
       menuChildren: <Widget>[
         MenuItemButton(
           onPressed: () {
-            debugPrint(
-                'Activated text input item with ${textEditingController?.text} as a value.');
+            debugPrint('Activated text input item with ${textEditingController?.text} as a value.');
           },
           child: SizedBox(
             width: 200,
@@ -759,7 +740,7 @@ List<Widget> createTestMenus({
               submenuButton(
                 TestMenu.subSubMenu3,
                 menuChildren: <Widget>[
-                  for (int i = 0; i < 100; ++i)
+                  for (int i=0; i < 100; ++i)
                     MenuItemButton(
                       onPressed: () {},
                       child: Text('Menu Item $i'),
@@ -783,38 +764,28 @@ enum TestMenu {
   mainMenu2('M&enu &2'),
   mainMenu3('Me&nu &3'),
   mainMenu4('Men&u &4'),
-  radioMenu1('Radio Menu One',
-      SingleActivator(LogicalKeyboardKey.digit1, control: true)),
-  radioMenu2('Radio Menu Two',
-      SingleActivator(LogicalKeyboardKey.digit2, control: true)),
-  radioMenu3('Radio Menu Three',
-      SingleActivator(LogicalKeyboardKey.digit3, control: true)),
-  subMenu1(
-      'Sub Menu &1', SingleActivator(LogicalKeyboardKey.keyB, control: true)),
+  radioMenu1('Radio Menu One', SingleActivator(LogicalKeyboardKey.digit1, control: true)),
+  radioMenu2('Radio Menu Two', SingleActivator(LogicalKeyboardKey.digit2, control: true)),
+  radioMenu3('Radio Menu Three', SingleActivator(LogicalKeyboardKey.digit3, control: true)),
+  subMenu1('Sub Menu &1', SingleActivator(LogicalKeyboardKey.keyB, control: true)),
   subMenu2('Sub Menu &2'),
-  subMenu3(
-      'Sub Menu &3', SingleActivator(LogicalKeyboardKey.enter, control: true)),
+  subMenu3('Sub Menu &3', SingleActivator(LogicalKeyboardKey.enter, control: true)),
   subMenu4('Sub Menu &4'),
   subMenu5('Sub Menu &5'),
-  subMenu6(
-      'Sub Menu &6', SingleActivator(LogicalKeyboardKey.tab, control: true)),
+  subMenu6('Sub Menu &6', SingleActivator(LogicalKeyboardKey.tab, control: true)),
   subMenu7('Sub Menu &7'),
   subMenu8('Sub Menu &8'),
-  subSubMenu1('Sub Sub Menu &1',
-      SingleActivator(LogicalKeyboardKey.f10, control: true)),
+  subSubMenu1('Sub Sub Menu &1', SingleActivator(LogicalKeyboardKey.f10, control: true)),
   subSubMenu2('Sub Sub Menu &2'),
   subSubMenu3('Sub Sub Menu &3'),
-  subSubSubMenu1('Sub Sub Sub Menu &1',
-      SingleActivator(LogicalKeyboardKey.f11, control: true)),
+  subSubSubMenu1('Sub Sub Sub Menu &1', SingleActivator(LogicalKeyboardKey.f11, control: true)),
   testButton('&TEST && &&& Button &'),
-  standaloneMenu1('Standalone Menu &1',
-      SingleActivator(LogicalKeyboardKey.keyC, control: true)),
+  standaloneMenu1('Standalone Menu &1', SingleActivator(LogicalKeyboardKey.keyC, control: true)),
   standaloneMenu2('Standalone Menu &2');
 
   const TestMenu(this.acceleratorLabel, [this.shortcut]);
   final MenuSerializableShortcut? shortcut;
   final String acceleratorLabel;
   // Strip the accelerator markers.
-  String get label =>
-      MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
+  String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
 }

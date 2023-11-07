@@ -25,8 +25,7 @@ void main() {
       fail('This test _must_ be run with --enable-vmservice.');
     }
 
-    vmService = await vmServiceConnectUri(
-        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
+    vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
     await vmService.streamListen(EventStreams.kExtension);
 
     // Initialize bindings
@@ -45,9 +44,9 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent
-        .firstWhere((Event event) =>
-            event.extensionKind == 'Flutter.ImageSizesForFrame')
+    vmService
+        .onExtensionEvent
+        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
@@ -75,16 +74,15 @@ void main() {
     expect(event.extensionKind, 'Flutter.ImageSizesForFrame');
     expect(
       jsonEncode(event.extensionData!.data),
-      contains(
-          '"test.png":{"source":"test.png","displaySize":{"width":600.0,"height":300.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":960000,"decodedSizeInBytes":480000}'),
+      contains('"test.png":{"source":"test.png","displaySize":{"width":600.0,"height":300.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":960000,"decodedSizeInBytes":480000}'),
     );
   }, skip: isBrowser); // [intended] uses dart:isolate and io.
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent
-        .firstWhere((Event event) =>
-            event.extensionKind == 'Flutter.ImageSizesForFrame')
+    vmService
+        .onExtensionEvent
+        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
@@ -108,8 +106,7 @@ void main() {
     expect(event.extensionKind, 'Flutter.ImageSizesForFrame');
     expect(
       jsonEncode(event.extensionData!.data),
-      contains(
-          '"test.png":{"source":"test.png","displaySize":{"width":900.0,"height":900.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":4320000,"decodedSizeInBytes":480000}'),
+      contains('"test.png":{"source":"test.png","displaySize":{"width":900.0,"height":900.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":4320000,"decodedSizeInBytes":480000}'),
     );
   }, skip: isBrowser); // [intended] uses dart:isolate and io.
 }

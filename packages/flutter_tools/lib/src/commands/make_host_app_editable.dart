@@ -27,8 +27,7 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   bool get deprecated => true;
 
   @override
-  final String description =
-      'Moves host apps from generated directories to non-generated directories so that they can be edited by developers.';
+  final String description = 'Moves host apps from generated directories to non-generated directories so that they can be edited by developers.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

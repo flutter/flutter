@@ -42,7 +42,8 @@ class Spacer extends StatelessWidget {
   /// Creates a flexible space to insert into a [Flexible] widget.
   ///
   /// The [flex] parameter may not be null or less than one.
-  const Spacer({super.key, this.flex = 1}) : assert(flex > 0);
+  const Spacer({super.key, this.flex = 1})
+    : assert(flex > 0);
 
   /// The flex factor to use in determining how much space to take up.
   ///

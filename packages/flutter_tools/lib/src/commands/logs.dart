@@ -13,8 +13,7 @@ import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
   LogsCommand() {
-    argParser.addFlag(
-      'clear',
+    argParser.addFlag('clear',
       negatable: false,
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
@@ -36,8 +35,7 @@ class LogsCommand extends FlutterCommand {
   bool get refreshWirelessDevices => true;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device? device;
 
@@ -57,8 +55,7 @@ class LogsCommand extends FlutterCommand {
       cachedDevice.clearLogs();
     }
 
-    final ApplicationPackage? app =
-        await applicationPackages?.getPackageForPlatform(
+    final ApplicationPackage? app = await applicationPackages?.getPackageForPlatform(
       await cachedDevice.targetPlatform,
     );
 

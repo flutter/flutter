@@ -31,8 +31,7 @@ class SlideTransitionExample extends StatefulWidget {
   State<SlideTransitionExample> createState() => _SlideTransitionExampleState();
 }
 
-class _SlideTransitionExampleState extends State<SlideTransitionExample>
-    with SingleTickerProviderStateMixin {
+class _SlideTransitionExampleState extends State<SlideTransitionExample> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
     vsync: this,

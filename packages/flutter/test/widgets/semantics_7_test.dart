@@ -10,8 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Semantics 7 - Merging',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics 7 - Merging', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     String label;
@@ -51,30 +50,26 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                label: label,
-                rect: TestSemantics.fullScreen,
-              ),
-              // IDs 2 and 3 are used up by the nodes that get merged in
-              TestSemantics.rootChild(
-                id: 4,
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                label: label,
-                rect: TestSemantics.fullScreen,
-              ),
-              // IDs 5 and 6 are used up by the nodes that get merged in
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            label: label,
+            rect: TestSemantics.fullScreen,
           ),
-        ));
+          // IDs 2 and 3 are used up by the nodes that get merged in
+          TestSemantics.rootChild(
+            id: 4,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            label: label,
+            rect: TestSemantics.fullScreen,
+          ),
+          // IDs 5 and 6 are used up by the nodes that get merged in
+        ],
+      ),
+    ));
 
     label = '2';
     await tester.pumpWidget(
@@ -111,30 +106,26 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                label: label,
-                rect: TestSemantics.fullScreen,
-              ),
-              // IDs 2 and 3 are used up by the nodes that get merged in
-              TestSemantics.rootChild(
-                id: 4,
-                flags: SemanticsFlag.hasCheckedState.index |
-                    SemanticsFlag.isChecked.index,
-                label: label,
-                rect: TestSemantics.fullScreen,
-              ),
-              // IDs 5 and 6 are used up by the nodes that get merged in
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            label: label,
+            rect: TestSemantics.fullScreen,
           ),
-        ));
+          // IDs 2 and 3 are used up by the nodes that get merged in
+          TestSemantics.rootChild(
+            id: 4,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
+            label: label,
+            rect: TestSemantics.fullScreen,
+          ),
+          // IDs 5 and 6 are used up by the nodes that get merged in
+        ],
+      ),
+    ));
 
     semantics.dispose();
   });

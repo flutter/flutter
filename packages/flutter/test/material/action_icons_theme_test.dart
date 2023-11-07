@@ -14,14 +14,11 @@ void main() {
         const ActionIconThemeData().copyWith().hashCode);
   });
 
-  testWidgetsWithLeakTracking(
-      'ActionIconThemeData copyWith overrides all properties',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionIconThemeData copyWith overrides all properties', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/126762.
     Widget originalButtonBuilder(BuildContext context) {
       return const SizedBox();
     }
-
     Widget newButtonBuilder(BuildContext context) {
       return const Icon(Icons.add);
     }
@@ -74,8 +71,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking(
-      'ActionIconThemeData implements debugFillProperties',
+  testWidgetsWithLeakTracking('ActionIconThemeData implements debugFillProperties',
       (WidgetTester tester) async {
     Widget actionButtonIconBuilder(BuildContext context) {
       return const Icon(IconData(0));
@@ -94,8 +90,7 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    final Matcher containsBuilderCallback =
-        contains('Closure: (BuildContext) =>');
+    final Matcher containsBuilderCallback = contains('Closure: (BuildContext) =>');
     expect(description, <dynamic>[
       allOf(startsWith('backButtonIconBuilder:'), containsBuilderCallback),
       allOf(startsWith('closeButtonIconBuilder:'), containsBuilderCallback),
@@ -104,8 +99,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Action buttons use ThemeData action icon theme',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action buttons use ThemeData action icon theme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 
@@ -142,28 +136,20 @@ void main() {
       ),
     );
 
-    final Icon backButtonIcon = tester.widget(find.descendant(
-        of: find.byType(BackButton), matching: find.byType(Icon)));
-    final Icon closeButtonIcon = tester.widget(find.descendant(
-        of: find.byType(CloseButton), matching: find.byType(Icon)));
-    final Icon drawerButtonIcon = tester.widget(find.descendant(
-        of: find.byType(DrawerButton), matching: find.byType(Icon)));
-    final Icon endDrawerButtonIcon = tester.widget(find.descendant(
-        of: find.byType(EndDrawerButton), matching: find.byType(Icon)));
+    final Icon backButtonIcon = tester.widget(find.descendant(of: find.byType(BackButton), matching: find.byType(Icon)));
+    final Icon closeButtonIcon = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(Icon)));
+    final Icon drawerButtonIcon = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(Icon)));
+    final Icon endDrawerButtonIcon = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(Icon)));
 
     expect(backButtonIcon.icon == icon, isTrue);
     expect(closeButtonIcon.icon == icon, isTrue);
     expect(drawerButtonIcon.icon == icon, isTrue);
     expect(endDrawerButtonIcon.icon == icon, isTrue);
 
-    final RichText backButtonIconText = tester.widget(find.descendant(
-        of: find.byType(BackButton), matching: find.byType(RichText)));
-    final RichText closeButtonIconText = tester.widget(find.descendant(
-        of: find.byType(CloseButton), matching: find.byType(RichText)));
-    final RichText drawerButtonIconText = tester.widget(find.descendant(
-        of: find.byType(DrawerButton), matching: find.byType(RichText)));
-    final RichText endDrawerButtonIconText = tester.widget(find.descendant(
-        of: find.byType(EndDrawerButton), matching: find.byType(RichText)));
+    final RichText backButtonIconText = tester.widget(find.descendant(of: find.byType(BackButton), matching: find.byType(RichText)));
+    final RichText closeButtonIconText = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(RichText)));
+    final RichText drawerButtonIconText = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(RichText)));
+    final RichText endDrawerButtonIconText = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(RichText)));
 
     expect(backButtonIconText.text.style!.color, green);
     expect(closeButtonIconText.text.style!.color, green);
@@ -174,8 +160,7 @@ void main() {
   // This test is essentially the same as 'Action buttons use ThemeData action icon theme'. In
   // this case the theme is introduced with the ActionIconTheme widget instead of
   // ThemeData.actionIconTheme.
-  testWidgetsWithLeakTracking('Action buttons use ActionIconTheme',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action buttons use ActionIconTheme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 
@@ -212,28 +197,20 @@ void main() {
       ),
     );
 
-    final Icon backButtonIcon = tester.widget(find.descendant(
-        of: find.byType(BackButton), matching: find.byType(Icon)));
-    final Icon closeButtonIcon = tester.widget(find.descendant(
-        of: find.byType(CloseButton), matching: find.byType(Icon)));
-    final Icon drawerButtonIcon = tester.widget(find.descendant(
-        of: find.byType(DrawerButton), matching: find.byType(Icon)));
-    final Icon endDrawerButtonIcon = tester.widget(find.descendant(
-        of: find.byType(EndDrawerButton), matching: find.byType(Icon)));
+    final Icon backButtonIcon = tester.widget(find.descendant(of: find.byType(BackButton), matching: find.byType(Icon)));
+    final Icon closeButtonIcon = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(Icon)));
+    final Icon drawerButtonIcon = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(Icon)));
+    final Icon endDrawerButtonIcon = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(Icon)));
 
     expect(backButtonIcon.icon == icon, isTrue);
     expect(closeButtonIcon.icon == icon, isTrue);
     expect(drawerButtonIcon.icon == icon, isTrue);
     expect(endDrawerButtonIcon.icon == icon, isTrue);
 
-    final RichText backButtonIconText = tester.widget(find.descendant(
-        of: find.byType(BackButton), matching: find.byType(RichText)));
-    final RichText closeButtonIconText = tester.widget(find.descendant(
-        of: find.byType(CloseButton), matching: find.byType(RichText)));
-    final RichText drawerButtonIconText = tester.widget(find.descendant(
-        of: find.byType(DrawerButton), matching: find.byType(RichText)));
-    final RichText endDrawerButtonIconText = tester.widget(find.descendant(
-        of: find.byType(EndDrawerButton), matching: find.byType(RichText)));
+    final RichText backButtonIconText = tester.widget(find.descendant(of: find.byType(BackButton), matching: find.byType(RichText)));
+    final RichText closeButtonIconText = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(RichText)));
+    final RichText drawerButtonIconText = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(RichText)));
+    final RichText endDrawerButtonIconText = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(RichText)));
 
     expect(backButtonIconText.text.style!.color, green);
     expect(closeButtonIconText.text.style!.color, green);

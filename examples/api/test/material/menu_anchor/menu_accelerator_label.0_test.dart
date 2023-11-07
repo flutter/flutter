@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/menu_anchor/menu_accelerator_label.0.dart'
-    as example;
+import 'package:flutter_api_samples/material/menu_anchor/menu_accelerator_label.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -65,7 +64,6 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(MenuBar)),
-        const Offset(0.0, safeAreaPadding));
+    expect(tester.getTopLeft(find.byType(MenuBar)), const Offset(0.0, safeAreaPadding));
   });
 }

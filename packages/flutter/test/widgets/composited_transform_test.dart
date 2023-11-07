@@ -12,10 +12,9 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   final LayerLink link = LayerLink();
 
-  testWidgetsWithLeakTracking('Change link during layout',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Change link during layout', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    Widget build({LayerLink? linkToUse}) {
+    Widget build({ LayerLink? linkToUse }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         // The LayoutBuilder forces the CompositedTransformTarget widget to
@@ -24,27 +23,27 @@ void main() {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(
-              children: <Widget>[
-                Positioned(
-                  left: 123.0,
-                  top: 456.0,
-                  child: CompositedTransformTarget(
-                    link: linkToUse ?? link,
-                    child: const SizedBox(height: 10.0, width: 10.0),
-                  ),
+            children: <Widget>[
+              Positioned(
+                left: 123.0,
+                top: 456.0,
+                child: CompositedTransformTarget(
+                  link: linkToUse ?? link,
+                  child: const SizedBox(height: 10.0, width: 10.0),
                 ),
-                Positioned(
-                  left: 787.0,
-                  top: 343.0,
-                  child: CompositedTransformFollower(
-                    link: linkToUse ?? link,
-                    targetAnchor: Alignment.center,
-                    followerAnchor: Alignment.center,
-                    child: SizedBox(key: key, height: 20.0, width: 20.0),
-                  ),
+              ),
+              Positioned(
+                left: 787.0,
+                top: 343.0,
+                child: CompositedTransformFollower(
+                  link: linkToUse ?? link,
+                  targetAnchor: Alignment.center,
+                  followerAnchor: Alignment.center,
+                  child: SizedBox(key: key, height: 20.0, width: 20.0),
                 ),
-              ],
-            );
+              ),
+            ],
+          );
           },
         ),
       );
@@ -58,8 +57,7 @@ void main() {
     expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
   });
 
-  testWidgetsWithLeakTracking('LeaderLayer should not cause error',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LeaderLayer should not cause error', (WidgetTester tester) async {
     final LayerLink link = LayerLink();
 
     Widget buildWidget({
@@ -74,13 +72,10 @@ void main() {
               padding: EdgeInsets.only(left: paddingLeft),
               child: CompositedTransformTarget(
                 link: link,
-                child: RepaintBoundary(
-                    child: ClipRect(
-                        child: Container(color: const Color(0x00ff0000)))),
+                child: RepaintBoundary(child: ClipRect(child: Container(color: const Color(0x00ff0000)))),
               ),
             ),
-            Positioned.fill(
-                child: RepaintBoundary(child: ColoredBox(color: siblingColor))),
+            Positioned.fill(child: RepaintBoundary(child: ColoredBox(color: siblingColor))),
           ],
         ),
       );
@@ -88,16 +83,13 @@ void main() {
 
     await tester.pumpWidget(buildWidget(paddingLeft: 10));
     await tester.pumpWidget(buildWidget(paddingLeft: 0));
-    await tester.pumpWidget(
-        buildWidget(paddingLeft: 0, siblingColor: const Color(0x0000ff00)));
+    await tester.pumpWidget(buildWidget(paddingLeft: 0, siblingColor: const Color(0x0000ff00)));
   });
 
   group('Composited transforms - only offsets', () {
     final GlobalKey key = GlobalKey();
 
-    Widget build(
-        {required Alignment targetAlignment,
-        required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -126,30 +118,20 @@ void main() {
     }
 
     testWidgetsWithLeakTracking('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.topLeft,
-          followerAlignment: Alignment.topLeft));
-      final RenderBox box =
-          key.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
     });
 
     testWidgetsWithLeakTracking('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.center,
-          followerAlignment: Alignment.center));
-      final RenderBox box =
-          key.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
     });
 
-    testWidgetsWithLeakTracking('bottomRight - topRight',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.bottomRight,
-          followerAlignment: Alignment.topRight));
-      final RenderBox box =
-          key.currentContext!.findRenderObject()! as RenderBox;
+    testWidgetsWithLeakTracking('bottomRight - topRight', (WidgetTester tester) async {
+      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(113.0, 466.0));
     });
   });
@@ -158,9 +140,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build(
-        {required Alignment targetAlignment,
-        required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -193,42 +173,28 @@ void main() {
         ),
       );
     }
-
     testWidgetsWithLeakTracking('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.topLeft,
-          followerAlignment: Alignment.topLeft));
-      final RenderBox box1 =
-          key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 =
-          key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
     testWidgetsWithLeakTracking('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.center,
-          followerAlignment: Alignment.center));
-      final RenderBox box1 =
-          key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 =
-          key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(40, 5));
       final Offset position2 = box2.localToGlobal(const Offset(20, 10));
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
-    testWidgetsWithLeakTracking('bottomRight - topRight',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.bottomRight,
-          followerAlignment: Alignment.topRight));
-      final RenderBox box1 =
-          key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 =
-          key2.currentContext!.findRenderObject()! as RenderBox;
+    testWidgetsWithLeakTracking('bottomRight - topRight', (WidgetTester tester) async {
+      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(80, 10));
       final Offset position2 = box2.localToGlobal(const Offset(40, 0));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -239,9 +205,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build(
-        {required Alignment targetAlignment,
-        required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -286,48 +250,30 @@ void main() {
         ),
       );
     }
-
     testWidgetsWithLeakTracking('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.topLeft,
-          followerAlignment: Alignment.topLeft));
-      final RenderBox box1 =
-          key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 =
-          key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
     testWidgetsWithLeakTracking('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.center,
-          followerAlignment: Alignment.center));
-      final RenderBox box1 =
-          key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 =
-          key2.currentContext!.findRenderObject()! as RenderBox;
-      final Offset position1 =
-          box1.localToGlobal(Alignment.center.alongSize(const Size(80, 10)));
-      final Offset position2 =
-          box2.localToGlobal(Alignment.center.alongSize(const Size(40, 20)));
+      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final Offset position1 = box1.localToGlobal(Alignment.center.alongSize(const Size(80, 10)));
+      final Offset position2 = box2.localToGlobal(Alignment.center.alongSize(const Size(40, 20)));
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
-    testWidgetsWithLeakTracking('bottomRight - topRight',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(build(
-          targetAlignment: Alignment.bottomRight,
-          followerAlignment: Alignment.topRight));
-      final RenderBox box1 =
-          key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 =
-          key2.currentContext!.findRenderObject()! as RenderBox;
-      final Offset position1 = box1
-          .localToGlobal(Alignment.bottomRight.alongSize(const Size(80, 10)));
-      final Offset position2 =
-          box2.localToGlobal(Alignment.topRight.alongSize(const Size(40, 20)));
+    testWidgetsWithLeakTracking('bottomRight - topRight', (WidgetTester tester) async {
+      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
+      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final Offset position1 = box1.localToGlobal(Alignment.bottomRight.alongSize(const Size(80, 10)));
+      final Offset position2 = box2.localToGlobal(Alignment.topRight.alongSize(const Size(40, 20)));
       expect(position1, offsetMoreOrLessEquals(position2));
     });
   });
@@ -339,9 +285,7 @@ void main() {
 
     bool tapped = false;
 
-    Widget build(
-        {required Alignment targetAlignment,
-        required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -359,9 +303,7 @@ void main() {
               child: GestureDetector(
                 key: key2,
                 behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  tapped = true;
-                },
+                onTap: () { tapped = true; },
                 child: SizedBox(key: key3, height: 2.0, width: 2.0),
               ),
             ),
@@ -371,39 +313,28 @@ void main() {
     }
 
     const List<Alignment> alignments = <Alignment>[
-      Alignment.topLeft,
-      Alignment.topRight,
+      Alignment.topLeft, Alignment.topRight,
       Alignment.center,
-      Alignment.bottomLeft,
-      Alignment.bottomRight,
+      Alignment.bottomLeft, Alignment.bottomRight,
     ];
 
-    setUp(() {
-      tapped = false;
-    });
+    setUp(() { tapped = false; });
 
     for (final Alignment targetAlignment in alignments) {
       for (final Alignment followerAlignment in alignments) {
-        testWidgetsWithLeakTracking('$targetAlignment - $followerAlignment',
-            (WidgetTester tester) async {
-          await tester.pumpWidget(build(
-              targetAlignment: targetAlignment,
-              followerAlignment: followerAlignment));
-          final RenderBox box2 =
-              key2.currentContext!.findRenderObject()! as RenderBox;
+        testWidgetsWithLeakTracking('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
+          await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
+          final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));
           expect(tapped, isFalse);
-          await tester.tap(find.byKey(key3),
-              warnIfMissed:
-                  false); // the container itself is transparent to hits
+          await tester.tap(find.byKey(key3), warnIfMissed: false); // the container itself is transparent to hits
           expect(tapped, isTrue);
         });
       }
     }
   });
 
-  testWidgetsWithLeakTracking('Leader after Follower asserts',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Leader after Follower asserts', (WidgetTester tester) async {
     final LayerLink link = LayerLink();
     await tester.pumpWidget(
       CompositedTransformFollower(
@@ -417,8 +348,7 @@ void main() {
 
     expect(
       (tester.takeException() as AssertionError).message,
-      contains(
-          'LeaderLayer anchor must come before FollowerLayer in paint order'),
+      contains('LeaderLayer anchor must come before FollowerLayer in paint order'),
     );
   });
 
@@ -442,12 +372,10 @@ class _CustomWidget extends SingleChildRenderObjectWidget {
   const _CustomWidget();
 
   @override
-  _CustomRenderObject createRenderObject(BuildContext context) =>
-      _CustomRenderObject();
+  _CustomRenderObject createRenderObject(BuildContext context) => _CustomRenderObject();
 
   @override
-  void updateRenderObject(
-      BuildContext context, _CustomRenderObject renderObject) {}
+  void updateRenderObject(BuildContext context, _CustomRenderObject renderObject) {}
 }
 
 class _CustomRenderObject extends RenderProxyBox {

@@ -8,8 +8,7 @@ import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 
 String adbPath() {
-  final String? androidHome = io.Platform.environment['ANDROID_HOME'] ??
-      io.Platform.environment['ANDROID_SDK_ROOT'];
+  final String? androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null) {
     return 'adb';
   } else {
@@ -18,16 +17,14 @@ String adbPath() {
 }
 
 Future<Version> getTalkbackVersion() async {
-  final io.ProcessResult result =
-      await io.Process.run(adbPath(), const <String>[
+  final io.ProcessResult result = await io.Process.run(adbPath(), const <String>[
     'shell',
     'dumpsys',
     'package',
     'com.google.android.marvin.talkback',
   ]);
   if (result.exitCode != 0) {
-    throw Exception(
-        'Failed to get TalkBack version: ${result.stdout as String}\n${result.stderr as String}');
+    throw Exception('Failed to get TalkBack version: ${result.stdout as String}\n${result.stderr as String}');
   }
   final List<String> lines = (result.stdout as String).split('\n');
   String? version;
@@ -42,8 +39,7 @@ Future<Version> getTalkbackVersion() async {
   }
 
   // Android doesn't quite use semver, so convert the version string to semver form.
-  final RegExp startVersion =
-      RegExp(r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?');
+  final RegExp startVersion = RegExp(r'(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?');
   final RegExpMatch? match = startVersion.firstMatch(version);
   if (match == null) {
     return Version(0, 0, 0);

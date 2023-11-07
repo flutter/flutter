@@ -16,23 +16,18 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:platform/platform.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('IconData object test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconData object test', (WidgetTester tester) async {
     expect(Icons.account_balance, isNot(equals(Icons.account_box)));
-    expect(Icons.account_balance.hashCode,
-        isNot(equals(Icons.account_box.hashCode)));
+    expect(Icons.account_balance.hashCode, isNot(equals(Icons.account_box.hashCode)));
     expect(Icons.account_balance, hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('Icons specify the material font',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icons specify the material font', (WidgetTester tester) async {
     expect(Icons.clear.fontFamily, 'MaterialIcons');
     expect(Icons.search.fontFamily, 'MaterialIcons');
   });
 
-  testWidgetsWithLeakTracking(
-      'Certain icons (and their variants) match text direction',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Certain icons (and their variants) match text direction', (WidgetTester tester) async {
     expect(Icons.arrow_back.matchTextDirection, true);
     expect(Icons.arrow_back_rounded.matchTextDirection, true);
     expect(Icons.arrow_back_outlined.matchTextDirection, true);
@@ -44,9 +39,7 @@ void main() {
     expect(Icons.access_time_sharp.matchTextDirection, false);
   });
 
-  testWidgetsWithLeakTracking(
-    'Adaptive icons are correct on cupertino platforms',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adaptive icons are correct on cupertino platforms', (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
     },
@@ -56,9 +49,7 @@ void main() {
     }),
   );
 
-  testWidgetsWithLeakTracking(
-    'Adaptive icons are correct on non-cupertino platforms',
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adaptive icons are correct on non-cupertino platforms', (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_outlined);
     },
@@ -70,8 +61,7 @@ void main() {
     }),
   );
 
-  testWidgetsWithLeakTracking('A sample of icons look as expected',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('A sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
     await tester.pumpWidget(const MaterialApp(
@@ -91,13 +81,11 @@ void main() {
       ),
     ));
 
-    await expectLater(
-        find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
   // Regression test for https://github.com/flutter/flutter/issues/95886
-  testWidgetsWithLeakTracking('Another sample of icons look as expected',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Another sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
     await tester.pumpWidget(const MaterialApp(
@@ -114,12 +102,10 @@ void main() {
       ),
     ));
 
-    await expectLater(
-        find.byType(Wrap), matchesGoldenFile('test.icons.sample2.png'));
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample2.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
-  testWidgetsWithLeakTracking('Another sample of icons look as expected',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Another sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
     await tester.pumpWidget(const MaterialApp(
@@ -136,13 +122,11 @@ void main() {
       ),
     ));
 
-    await expectLater(
-        find.byType(Wrap), matchesGoldenFile('test.icons.sample3.png'));
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample3.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
   // Regression test for https://github.com/flutter/flutter/issues/103202.
-  testWidgetsWithLeakTracking('Another sample of icons look as expected',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Another sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
 
     await tester.pumpWidget(const MaterialApp(
@@ -159,8 +143,7 @@ void main() {
       ),
     ));
 
-    await expectLater(
-        find.byType(Wrap), matchesGoldenFile('test.icons.sample4.png'));
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample4.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
@@ -170,8 +153,7 @@ void main() {
 Future<void> _loadIconFont() async {
   const FileSystem fs = LocalFileSystem();
   const Platform platform = LocalPlatform();
-  final Directory flutterRoot =
-      fs.directory(platform.environment['FLUTTER_ROOT']);
+  final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
 
   final File iconFont = flutterRoot.childFile(
     fs.path.join(
@@ -184,7 +166,7 @@ Future<void> _loadIconFont() async {
   );
 
   final Future<ByteData> bytes = Future<ByteData>.value(
-    iconFont.readAsBytesSync().buffer.asByteData(),
+      iconFont.readAsBytesSync().buffer.asByteData(),
   );
 
   await (FontLoader('MaterialIcons')..addFont(bytes)).load();

@@ -183,8 +183,7 @@ Future<ProcessTestResult> runFlutter(
   final Process process = await processManager.start(
     <String>[
       // In a container with no X display, use the virtual framebuffer.
-      if (platform.isLinux && (platform.environment['DISPLAY'] ?? '').isEmpty)
-        '/usr/bin/xvfb-run',
+      if (platform.isLinux && (platform.environment['DISPLAY'] ?? '').isEmpty) '/usr/bin/xvfb-run',
       flutterBin,
       ...arguments,
     ],

@@ -175,12 +175,10 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 ///   the render tree.
 /// * [TapRegionRegistry.of], which can find the nearest ancestor
 ///   [RenderTapRegionSurface], which is a [TapRegionRegistry].
-class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
-    implements TapRegionRegistry {
+class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implements TapRegionRegistry {
   final Expando<BoxHitTestResult> _cachedResults = Expando<BoxHitTestResult>();
   final Set<RenderTapRegion> _registeredRegions = <RenderTapRegion>{};
-  final Map<Object?, Set<RenderTapRegion>> _groupIdToRegions =
-      <Object?, Set<RenderTapRegion>>{};
+  final Map<Object?, Set<RenderTapRegion>> _groupIdToRegions = <Object?, Set<RenderTapRegion>>{};
 
   @override
   void registerTapRegion(RenderTapRegion region) {
@@ -213,8 +211,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       return false;
     }
 
-    final bool hitTarget =
-        hitTestChildren(result, position: position) || hitTestSelf(position);
+    final bool hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
 
     if (hitTarget) {
       final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
@@ -242,25 +239,21 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
     }
 
     if (_registeredRegions.isEmpty) {
-      assert(_tapRegionDebug(
-          'Ignored tap event because no regions are registered.'));
+      assert(_tapRegionDebug('Ignored tap event because no regions are registered.'));
       return;
     }
 
     final BoxHitTestResult? result = _cachedResults[entry];
 
     if (result == null) {
-      assert(_tapRegionDebug(
-          'Ignored tap event because no surface descendants were hit.'));
+      assert(_tapRegionDebug('Ignored tap event because no surface descendants were hit.'));
       return;
     }
 
     // A child was hit, so we need to call onTapOutside for those regions or
     // groups of regions that were not hit.
     final Set<RenderTapRegion> hitRegions =
-        _getRegionsHit(_registeredRegions, result.path)
-            .cast<RenderTapRegion>()
-            .toSet();
+        _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
     final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{};
     assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
 
@@ -274,15 +267,13 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       insideRegions.addAll(_groupIdToRegions[region.groupId]!);
     }
     // If they're not inside, then they're outside.
-    final Set<RenderTapRegion> outsideRegions =
-        _registeredRegions.difference(insideRegions);
+    final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(insideRegions);
 
     bool consumeOutsideTaps = false;
     for (final RenderTapRegion region in outsideRegions) {
       assert(_tapRegionDebug('Calling onTapOutside for $region'));
       if (region.consumeOutsideTaps) {
-        assert(_tapRegionDebug(
-            'Stopping tap propagation for $region (and all of ${region.groupId})'));
+        assert(_tapRegionDebug('Stopping tap propagation for $region (and all of ${region.groupId})'));
         consumeOutsideTaps = true;
       }
       region.onTapOutside?.call(event);
@@ -296,15 +287,12 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
     // the propagation of the event through the gesture recognizer by adding it
     // to the recognizer and immediately resolving it.
     if (consumeOutsideTaps) {
-      GestureBinding.instance.gestureArena
-          .add(event.pointer, _DummyTapRecognizer())
-          .resolve(GestureDisposition.accepted);
+      GestureBinding.instance.gestureArena.add(event.pointer, _DummyTapRecognizer()).resolve(GestureDisposition.accepted);
     }
   }
 
   // Returns the registered regions that are in the hit path.
-  Iterable<HitTestTarget> _getRegionsHit(
-      Set<RenderTapRegion> detectors, Iterable<HitTestEntry> hitTestPath) {
+  Iterable<HitTestTarget> _getRegionsHit(Set<RenderTapRegion> detectors, Iterable<HitTestEntry> hitTestPath) {
     final Set<HitTestTarget> hitRegions = <HitTestTarget>{};
     for (final HitTestEntry<HitTestTarget> entry in hitTestPath) {
       final HitTestTarget target = entry.target;
@@ -321,10 +309,10 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
 // anyhow.
 class _DummyTapRecognizer extends GestureArenaMember {
   @override
-  void acceptGesture(int pointer) {}
+  void acceptGesture(int pointer) { }
 
   @override
-  void rejectGesture(int pointer) {}
+  void rejectGesture(int pointer) { }
 }
 
 /// A widget that defines a region that can detect taps inside or outside of
@@ -428,8 +416,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, covariant RenderTapRegion renderObject) {
+  void updateRenderObject(BuildContext context, covariant RenderTapRegion renderObject) {
     renderObject
       ..registry = TapRegionRegistry.maybeOf(context)
       ..enabled = enabled
@@ -445,14 +432,10 @@ class TapRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('enabled',
-        value: enabled, ifFalse: 'DISABLED', defaultValue: true));
-    properties.add(DiagnosticsProperty<HitTestBehavior>('behavior', behavior,
-        defaultValue: HitTestBehavior.deferToChild));
-    properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel,
-        defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
+    properties.add(DiagnosticsProperty<HitTestBehavior>('behavior', behavior, defaultValue: HitTestBehavior.deferToChild));
+    properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
   }
 }
 
@@ -615,12 +598,9 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String?>('debugLabel', debugLabel,
-        defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
-    properties.add(FlagProperty('enabled',
-        value: enabled, ifFalse: 'DISABLED', defaultValue: true));
+    properties.add(DiagnosticsProperty<String?>('debugLabel', debugLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }
 }
 

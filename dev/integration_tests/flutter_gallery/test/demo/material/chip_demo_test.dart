@@ -14,27 +14,23 @@ void main() {
       home: const ChipDemo(),
     ));
 
-    expect(
-        tester.getSemantics(find.byIcon(Icons.vignette)),
-        matchesSemantics(
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isFocusable: true,
-          hasTapAction: true,
-          label: 'Update border shape',
-        ));
+    expect(tester.getSemantics(find.byIcon(Icons.vignette)), matchesSemantics(
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      hasTapAction: true,
+      label: 'Update border shape',
+    ));
 
-    expect(
-        tester.getSemantics(find.byIcon(Icons.refresh)),
-        matchesSemantics(
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isFocusable: true,
-          hasTapAction: true,
-          label: 'Reset chips',
-        ));
+    expect(tester.getSemantics(find.byIcon(Icons.refresh)), matchesSemantics(
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      hasTapAction: true,
+      label: 'Reset chips',
+    ));
 
     handle.dispose();
   });

@@ -40,14 +40,15 @@ typedef _DartDomEventListener = JSVoid Function(web.Event event);
 class TestHttpRequest {
   TestHttpRequest() {
     _mock = DomXMLHttpRequestMock(
-      open: open.toJS,
-      send: send.toJS,
-      setRequestHeader: setRequestHeader.toJS,
-      addEventListener: addEventListener.toJS,
+        open: open.toJS,
+        send: send.toJS,
+        setRequestHeader: setRequestHeader.toJS,
+        addEventListener: addEventListener.toJS,
     );
     final JSAny mock = _mock as JSAny;
     createGetter(mock, 'headers', () => headers.jsify());
-    createGetter(mock, 'responseHeaders', () => responseHeaders.jsify());
+    createGetter(mock,
+        'responseHeaders', () => responseHeaders.jsify());
     createGetter(mock, 'status', () => status.toJS);
     createGetter(mock, 'response', () => response.jsify());
   }

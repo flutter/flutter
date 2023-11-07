@@ -5,9 +5,10 @@
 import 'template.dart';
 
 class TimePickerTemplate extends TokenTemplate {
-  const TimePickerTemplate(super.blockName, super.fileName, super.tokens,
-      {super.colorSchemePrefix = '_colors.',
-      super.textThemePrefix = '_textTheme.'});
+  const TimePickerTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   static const String tokenGroup = 'md.comp.time-picker';
   static const String hourMinuteComponent = '$tokenGroup.time-selector';

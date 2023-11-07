@@ -5,15 +5,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-export 'dart:typed_data'
-    show
-        ByteData,
-        Endian,
-        Float32List,
-        Float64List,
-        Int32List,
-        Int64List,
-        Uint8List;
+export 'dart:typed_data' show ByteData, Endian, Float32List, Float64List, Int32List, Int64List, Uint8List;
 
 /// Write-only buffer for incrementally building a [ByteData] instance.
 ///
@@ -30,8 +22,7 @@ class WriteBuffer {
     assert(startCapacity > 0);
     final ByteData eightBytes = ByteData(8);
     final Uint8List eightBytesAsList = eightBytes.buffer.asUint8List();
-    return WriteBuffer._(
-        Uint8List(startCapacity), eightBytes, eightBytesAsList);
+    return WriteBuffer._(Uint8List(startCapacity), eightBytes, eightBytesAsList);
   }
 
   WriteBuffer._(this._buffer, this._eightBytes, this._eightBytesAsList);
@@ -165,8 +156,7 @@ class WriteBuffer {
   /// Finalize and return the written [ByteData].
   ByteData done() {
     if (_isDone) {
-      throw StateError(
-          'done() must not be called more than once on the same $runtimeType.');
+      throw StateError('done() must not be called more than once on the same $runtimeType.');
     }
     final ByteData result = _buffer.buffer.asByteData(0, _currentSize);
     _buffer = Uint8List(0);
@@ -234,8 +224,7 @@ class ReadBuffer {
 
   /// Reads the given number of Uint8s from the buffer.
   Uint8List getUint8List(int length) {
-    final Uint8List list =
-        data.buffer.asUint8List(data.offsetInBytes + _position, length);
+    final Uint8List list = data.buffer.asUint8List(data.offsetInBytes + _position, length);
     _position += length;
     return list;
   }
@@ -243,8 +232,7 @@ class ReadBuffer {
   /// Reads the given number of Int32s from the buffer.
   Int32List getInt32List(int length) {
     _alignTo(4);
-    final Int32List list =
-        data.buffer.asInt32List(data.offsetInBytes + _position, length);
+    final Int32List list = data.buffer.asInt32List(data.offsetInBytes + _position, length);
     _position += 4 * length;
     return list;
   }
@@ -252,8 +240,7 @@ class ReadBuffer {
   /// Reads the given number of Int64s from the buffer.
   Int64List getInt64List(int length) {
     _alignTo(8);
-    final Int64List list =
-        data.buffer.asInt64List(data.offsetInBytes + _position, length);
+    final Int64List list = data.buffer.asInt64List(data.offsetInBytes + _position, length);
     _position += 8 * length;
     return list;
   }
@@ -261,8 +248,7 @@ class ReadBuffer {
   /// Reads the given number of Float32s from the buffer
   Float32List getFloat32List(int length) {
     _alignTo(4);
-    final Float32List list =
-        data.buffer.asFloat32List(data.offsetInBytes + _position, length);
+    final Float32List list = data.buffer.asFloat32List(data.offsetInBytes + _position, length);
     _position += 4 * length;
     return list;
   }
@@ -270,8 +256,7 @@ class ReadBuffer {
   /// Reads the given number of Float64s from the buffer.
   Float64List getFloat64List(int length) {
     _alignTo(8);
-    final Float64List list =
-        data.buffer.asFloat64List(data.offsetInBytes + _position, length);
+    final Float64List list = data.buffer.asFloat64List(data.offsetInBytes + _position, length);
     _position += 8 * length;
     return list;
   }

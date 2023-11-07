@@ -18,8 +18,7 @@ class ProjectBuildLocationMigration extends ProjectMigrator {
   @override
   void migrate() {
     if (!_xcodeProjectWorkspaceData.existsSync()) {
-      logger.printTrace(
-          'Xcode project workspace data not found, skipping build location migration.');
+      logger.printTrace('Xcode project workspace data not found, skipping build location migration.');
       return;
     }
 

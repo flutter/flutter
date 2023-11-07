@@ -16,9 +16,9 @@ void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
     WidgetsBinding.instance
-      ..resetEpoch()
-      ..platformDispatcher.onBeginFrame = null
-      ..platformDispatcher.onDrawFrame = null;
+        ..resetEpoch()
+        ..platformDispatcher.onBeginFrame = null
+        ..platformDispatcher.onDrawFrame = null;
   });
 
   test('AnimationController dispatches memory events', () async {
@@ -90,22 +90,12 @@ void main() {
 
     controller.reverse();
 
-    expect(
-        log,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.dismissed
-        ]));
+    expect(log, equals(<AnimationStatus>[AnimationStatus.forward, AnimationStatus.dismissed]));
     expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.reverse();
 
-    expect(
-        log,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.dismissed
-        ]));
+    expect(log, equals(<AnimationStatus>[AnimationStatus.forward, AnimationStatus.dismissed]));
     expect(valueLog, equals(<AnimationStatus>[]));
 
     log.clear();
@@ -153,20 +143,15 @@ void main() {
       });
 
     controller.reverse(from: 0.2);
-    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.reverse]));
-    expect(valueLog, equals(<double>[0.2]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse ]));
+    expect(valueLog, equals(<double>[ 0.2 ]));
     expect(controller.value, equals(0.2));
     statusLog.clear();
     valueLog.clear();
 
     controller.forward(from: 0.0);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.dismissed,
-          AnimationStatus.forward
-        ]));
-    expect(valueLog, equals(<double>[0.0]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.dismissed, AnimationStatus.forward ]));
+    expect(valueLog, equals(<double>[ 0.0 ]));
     expect(controller.value, equals(0.0));
     controller.dispose();
   });
@@ -249,8 +234,8 @@ void main() {
       });
 
     controller.forward(from: 0.2);
-    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.forward]));
-    expect(valueLog, equals(<double>[0.2]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward ]));
+    expect(valueLog, equals(<double>[ 0.2 ]));
     expect(controller.value, equals(0.2));
     controller.dispose();
   });
@@ -321,8 +306,7 @@ void main() {
     tick(const Duration(milliseconds: 20));
     tick(const Duration(milliseconds: 30));
     tick(const Duration(milliseconds: 40));
-    expect(controller.lastElapsedDuration,
-        equals(const Duration(milliseconds: 20)));
+    expect(controller.lastElapsedDuration, equals(const Duration(milliseconds: 20)));
     controller.stop();
     controller.dispose();
   });
@@ -407,9 +391,7 @@ void main() {
 
     expect(controller.forward, throwsFlutterError);
     expect(controller.reverse, throwsFlutterError);
-    expect(() {
-      controller.animateTo(0.5);
-    }, throwsFlutterError);
+    expect(() { controller.animateTo(0.5); }, throwsFlutterError);
     expect(controller.repeat, throwsFlutterError);
 
     controller.dispose();
@@ -434,8 +416,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     result.debugFillProperties(builder);
     final DiagnosticsNode controllerProperty = builder.properties.last;
-    expect(controllerProperty.name,
-        'The following AnimationController object was disposed multiple times');
+    expect(controllerProperty.name, 'The following AnimationController object was disposed multiple times');
     expect(controllerProperty.value, controller);
   });
 
@@ -443,12 +424,8 @@ void main() {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
-    expect(() {
-      controller.repeat();
-    }, throwsFlutterError);
-    expect(() {
-      controller.repeat();
-    }, throwsFlutterError);
+    expect(() { controller.repeat(); }, throwsFlutterError);
+    expect(() { controller.repeat(); }, throwsFlutterError);
     controller.dispose();
   });
 
@@ -462,7 +439,7 @@ void main() {
 
     expect(controller.value, equals(0.5));
     controller.animateTo(0.5, duration: const Duration(milliseconds: 100));
-    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.completed]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
     expect(controller.value, equals(0.5));
     controller.dispose();
   });
@@ -477,7 +454,7 @@ void main() {
 
     expect(controller.value, equals(1.0));
     controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
-    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.completed]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
     expect(controller.value, equals(1.0));
     controller.dispose();
   });
@@ -492,7 +469,7 @@ void main() {
 
     expect(controller.value, equals(0.0));
     controller.animateTo(0.0, duration: const Duration(milliseconds: 100));
-    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.completed]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
     expect(controller.value, equals(0.0));
     controller.dispose();
   });
@@ -511,17 +488,11 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 500));
     expect(controller.value, inInclusiveRange(0.4, 0.6));
-    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.forward]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward ]));
 
     final double currentValue = controller.value;
-    controller.animateTo(currentValue,
-        duration: const Duration(milliseconds: 100));
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     expect(controller.value, currentValue);
     controller.dispose();
   });
@@ -540,17 +511,11 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 500));
     expect(controller.value, inInclusiveRange(0.4, 0.6));
-    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.reverse]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse ]));
 
     final double currentValue = controller.value;
-    controller.animateTo(currentValue,
-        duration: const Duration(milliseconds: 100));
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.reverse,
-          AnimationStatus.completed
-        ]));
+    controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.completed ]));
     expect(controller.value, currentValue);
     controller.dispose();
   });
@@ -564,8 +529,7 @@ void main() {
     controller.forward(from: 0.2);
     expect(controller.value, 0.2);
     controller.animateTo(1.0, duration: Duration.zero);
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0),
-        reason: 'Expected no animation.');
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
     controller.dispose();
   });
@@ -595,12 +559,7 @@ void main() {
 
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.dismissed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.dismissed ]));
 
     controller.value = 1.0;
     statusLog.clear();
@@ -612,12 +571,7 @@ void main() {
 
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.reverse,
-          AnimationStatus.dismissed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
 
     statusLog.clear();
     controller.forward();
@@ -628,13 +582,7 @@ void main() {
 
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed,
-          AnimationStatus.dismissed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed, AnimationStatus.dismissed ]));
     controller.dispose();
   });
 
@@ -681,12 +629,7 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
 
     // Animate from 0.5 to 1.0
@@ -694,12 +637,7 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 1.0);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
 
     // Animate from 1.0 to 0.5
@@ -707,12 +645,7 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
 
     // Animate from 0.5 to 1.0
@@ -720,12 +653,7 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.0);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
     controller.dispose();
   });
@@ -745,24 +673,14 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.0);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.reverse,
-          AnimationStatus.dismissed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
     statusLog.clear();
 
     controller.animateTo(0.5);
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
     controller.dispose();
   });
@@ -782,24 +700,14 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 1.0);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
 
     controller.animateTo(0.5);
     tick(Duration.zero);
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
-    expect(
-        statusLog,
-        equals(<AnimationStatus>[
-          AnimationStatus.forward,
-          AnimationStatus.completed
-        ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
     controller.dispose();
   });
@@ -897,19 +805,16 @@ void main() {
 
   group('AnimationBehavior', () {
     test('Default values for constructor', () {
-      final AnimationController controller =
-          AnimationController(vsync: const TestVSync());
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
       expect(controller.animationBehavior, AnimationBehavior.normal);
 
-      final AnimationController repeating =
-          AnimationController.unbounded(vsync: const TestVSync());
+      final AnimationController repeating = AnimationController.unbounded(vsync: const TestVSync());
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
       controller.dispose();
       repeating.dispose();
     });
 
-    test('AnimationBehavior.preserve runs at normal speed when animatingTo',
-        () {
+    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
@@ -960,9 +865,7 @@ void main() {
       controller.dispose();
     });
 
-    test(
-        'AnimationBehavior.normal runs "faster" than AnimationBehavior.preserve',
-        () {
+    test('AnimationBehavior.normal runs "faster" than AnimationBehavior.preserve', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
@@ -993,8 +896,7 @@ void main() {
 
     expect(() => controller.animateBack(0), throwsAssertionError);
     expect(() => controller.animateTo(0), throwsAssertionError);
-    expect(() => controller.animateWith(GravitySimulation(0, 0, 0, 0)),
-        throwsAssertionError);
+    expect(() => controller.animateWith(GravitySimulation(0, 0, 0, 0)), throwsAssertionError);
     expect(() => controller.stop(), throwsAssertionError);
     expect(() => controller.forward(), throwsAssertionError);
     expect(() => controller.reverse(), throwsAssertionError);
@@ -1006,8 +908,8 @@ void main() {
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     )..addStatusListener((AnimationStatus status) {
-        statuses.add(status);
-      });
+      statuses.add(status);
+    });
 
     controller.animateWith(TestSimulation());
     tick(Duration.zero);
@@ -1022,16 +924,12 @@ void main() {
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     )..addStatusListener((AnimationStatus status) {
-        statuses.add(status);
-      });
+      statuses.add(status);
+    });
     controller.reverse(from: 1.0);
     tick(Duration.zero);
     tick(const Duration(seconds: 2));
-    expect(statuses, <AnimationStatus>[
-      AnimationStatus.completed,
-      AnimationStatus.reverse,
-      AnimationStatus.dismissed
-    ]);
+    expect(statuses, <AnimationStatus>[AnimationStatus.completed, AnimationStatus.reverse, AnimationStatus.dismissed]);
     statuses.clear();
 
     controller.animateWith(TestSimulation());
@@ -1041,15 +939,14 @@ void main() {
     controller.dispose();
   });
 
-  test('Repeating animation with reverse: true report as forward and reverse',
-      () {
+  test('Repeating animation with reverse: true report as forward and reverse', () {
     final List<AnimationStatus> statuses = <AnimationStatus>[];
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     )..addStatusListener((AnimationStatus status) {
-        statuses.add(status);
-      });
+      statuses.add(status);
+    });
 
     controller.repeat(reverse: true);
     tick(Duration.zero);
@@ -1061,16 +958,14 @@ void main() {
     controller.dispose();
   });
 
-  test(
-      'AnimateBack can runs successfully with just "reverseDuration" property set',
-      () {
+  test('AnimateBack can runs successfully with just "reverseDuration" property set', () {
     final List<AnimationStatus> statuses = <AnimationStatus>[];
     final AnimationController controller = AnimationController(
       reverseDuration: const Duration(seconds: 2),
       vsync: const TestVSync(),
     )..addStatusListener((AnimationStatus status) {
-        statuses.add(status);
-      });
+      statuses.add(status);
+    });
 
     controller.animateBack(0.8);
 
@@ -1084,9 +979,7 @@ void main() {
   });
 
   group('AnimationController "duration" error test', () {
-    test(
-        'AnimationController forward() will throw an error if there is no default duration',
-        () {
+    test('AnimationController forward() will throw an error if there is no default duration', () {
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
       );
@@ -1141,9 +1034,7 @@ void main() {
       },
     );
 
-    test(
-        'AnimationController reverse() will throw an error if there is no default duration or reverseDuration',
-        () {
+    test('AnimationController reverse() will throw an error if there is no default duration or reverseDuration', () {
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
       );
@@ -1200,6 +1091,7 @@ void main() {
       },
     );
   });
+
 }
 
 class TestSimulation extends Simulation {

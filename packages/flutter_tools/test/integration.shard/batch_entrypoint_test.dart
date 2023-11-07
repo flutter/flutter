@@ -31,11 +31,13 @@ Future<void> main() async {
       // avoid printing in a test but this is an exception because it's useful
       // ambient information.
       // ignore: avoid_print
-      print('The Dart batch entrypoint did not complete after 5 minutes. '
-          'Historically this is a sign that 7-Zip zip extraction is waiting for '
-          'the user to confirm they would like to overwrite files. '
-          "This likely means the test isn't a flake and will fail. "
-          'See: https://github.com/flutter/flutter/issues/132592');
+      print(
+        'The Dart batch entrypoint did not complete after 5 minutes. '
+        'Historically this is a sign that 7-Zip zip extraction is waiting for '
+        'the user to confirm they would like to overwrite files. '
+        "This likely means the test isn't a flake and will fail. "
+        'See: https://github.com/flutter/flutter/issues/132592'
+      );
     });
 
     final String output = await runFuture;
@@ -48,27 +50,29 @@ Future<void> main() async {
     expect(dartSdkStamp.existsSync(), true);
     expect(output, contains('Downloading Dart SDK from Flutter engine ...'));
     // Do not assert on the exact unzipping method, as this could change on CI
-    expect(
-        output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
+    expect(output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
   },
-      skip: !platform
-          .isWindows); // [intended] Only Windows uses the batch entrypoint
+  skip: !platform.isWindows); // [intended] Only Windows uses the batch entrypoint
 }
 
 Future<String> runDartBatch() async {
   String output = '';
   final Process process = await processManager.start(
-    <String>[dartBatch.path],
+    <String>[
+      dartBatch.path
+    ],
   );
-  final Future<Object?> stdoutFuture =
-      process.stdout.transform<String>(utf8.decoder).forEach((String str) {
-    output += str;
-  });
-  final Future<Object?> stderrFuture =
-      process.stderr.transform<String>(utf8.decoder).forEach((String str) {
-    output += str;
-  });
+  final Future<Object?> stdoutFuture = process.stdout
+    .transform<String>(utf8.decoder)
+    .forEach((String str) {
+      output += str;
+    });
+  final Future<Object?> stderrFuture = process.stderr
+    .transform<String>(utf8.decoder)
+    .forEach((String str) {
+      output += str;
+    });
 
   // Wait for the output to complete
   await Future.wait(<Future<Object?>>[stdoutFuture, stderrFuture]);
@@ -77,7 +81,7 @@ Future<String> runDartBatch() async {
     await process.exitCode,
     0,
     reason: 'child process exited with code ${await process.exitCode}, and '
-        'output:\n$output',
+    'output:\n$output',
   );
 
   // Check the Dart tool prints the expected output.
@@ -89,14 +93,17 @@ Future<String> runDartBatch() async {
 
 // The executable batch entrypoint for the Dart binary.
 File get dartBatch {
-  return flutterRoot.childDirectory('bin').childFile('dart.bat').absolute;
+  return flutterRoot
+    .childDirectory('bin')
+    .childFile('dart.bat')
+    .absolute;
 }
 
 // The Dart SDK's stamp file.
 File get dartSdkStamp {
   return flutterRoot
-      .childDirectory('bin')
-      .childDirectory('cache')
-      .childFile('engine-dart-sdk.stamp')
-      .absolute;
+    .childDirectory('bin')
+    .childDirectory('cache')
+    .childFile('engine-dart-sdk.stamp')
+    .absolute;
 }

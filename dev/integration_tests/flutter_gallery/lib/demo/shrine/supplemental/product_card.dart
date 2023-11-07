@@ -10,7 +10,7 @@ import '../model/app_state_model.dart';
 import '../model/product.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({super.key, this.imageAspectRatio = 33 / 49, this.product})
+  const ProductCard({ super.key, this.imageAspectRatio = 33 / 49, this.product })
       : assert(imageAspectRatio > 0);
 
   final double imageAspectRatio;
@@ -53,8 +53,7 @@ class ProductCard extends StatelessWidget {
               ),
               SizedBox(
                 // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
-                height: kTextBoxHeight *
-                    MediaQuery.textScalerOf(context).textScaleFactor,
+                height: kTextBoxHeight * MediaQuery.textScalerOf(context).textScaleFactor,
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,

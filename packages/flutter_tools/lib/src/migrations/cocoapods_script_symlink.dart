@@ -27,8 +27,7 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
   @override
   void migrate() {
     if (!_podRunnerFrameworksScript.existsSync()) {
-      logger.printTrace(
-          'CocoaPods Pods-Runner-frameworks.sh script not found, skipping "readlink -f" workaround.');
+      logger.printTrace('CocoaPods Pods-Runner-frameworks.sh script not found, skipping "readlink -f" workaround.');
       return;
     }
 
@@ -36,8 +35,7 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
 
     // If Xcode not installed or less than 14.3 with readlink behavior change, skip this migration.
     if (version == null || version < Version(14, 3, 0)) {
-      logger.printTrace(
-          'Detected Xcode version is $version, below 14.3, skipping "readlink -f" workaround.');
+      logger.printTrace('Detected Xcode version is $version, below 14.3, skipping "readlink -f" workaround.');
       return;
     }
 
@@ -47,8 +45,7 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
   @override
   String? migrateLine(String line) {
     const String originalReadLinkLine = r'source="$(readlink "${source}")"';
-    const String replacementReadLinkLine =
-        r'source="$(readlink -f "${source}")"';
+    const String replacementReadLinkLine = r'source="$(readlink -f "${source}")"';
 
     return line.replaceAll(originalReadLinkLine, replacementReadLinkLine);
   }

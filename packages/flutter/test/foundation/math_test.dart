@@ -11,7 +11,6 @@ void main() {
     expect(clampDouble(2.0, 0.0, 1.0), equals(1.0));
     expect(clampDouble(double.infinity, 0.0, 1.0), equals(1.0));
     expect(clampDouble(-double.infinity, 0.0, 1.0), equals(0.0));
-    expect(
-        clampDouble(double.nan, 0.0, double.infinity), equals(double.infinity));
+    expect(clampDouble(double.nan, 0.0, double.infinity), equals(double.infinity));
   });
 }

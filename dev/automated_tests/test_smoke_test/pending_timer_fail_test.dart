@@ -11,8 +11,7 @@ void main() {
 }
 
 void failingPendingTimerTest() {
-  testWidgets('flutter_test pending timer - negative',
-      (WidgetTester tester) async {
+  testWidgets('flutter_test pending timer - negative', (WidgetTester tester) async {
     Timer(const Duration(minutes: 10), () {});
   });
 }

@@ -46,8 +46,7 @@ class _ChildEntry {
 ///
 /// The function should return a widget which wraps the given `child`. It may
 /// also use the `animation` to inform its transition. It must not return null.
-typedef AnimatedSwitcherTransitionBuilder = Widget Function(
-    Widget child, Animation<double> animation);
+typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animation<double> animation);
 
 /// Signature for builders used to generate custom layouts for
 /// [AnimatedSwitcher].
@@ -59,8 +58,7 @@ typedef AnimatedSwitcherTransitionBuilder = Widget Function(
 /// The `previousChildren` list is an unmodifiable list, sorted with the oldest
 /// at the beginning and the newest at the end. It does not include the
 /// `currentChild`.
-typedef AnimatedSwitcherLayoutBuilder = Widget Function(
-    Widget? currentChild, List<Widget> previousChildren);
+typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, List<Widget> previousChildren);
 
 /// A widget that by default does a cross-fade between a new widget and the
 /// widget previously set on the [AnimatedSwitcher] as a child.
@@ -213,8 +211,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// reversed.
   ///
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
-  static Widget defaultTransitionBuilder(
-      Widget child, Animation<double> animation) {
+  static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return FadeTransition(
       key: ValueKey<Key?>(child.key),
       opacity: animation,
@@ -229,8 +226,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// each other.
   ///
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
-  static Widget defaultLayoutBuilder(
-      Widget? currentChild, List<Widget> previousChildren) {
+  static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
@@ -243,16 +239,12 @@ class AnimatedSwitcher extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
-    properties.add(IntProperty(
-        'reverseDuration', reverseDuration?.inMilliseconds,
-        unit: 'ms', defaultValue: null));
+    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }
 
-class _AnimatedSwitcherState extends State<AnimatedSwitcher>
-    with TickerProviderStateMixin {
+class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
   _ChildEntry? _currentEntry;
   final Set<_ChildEntry> _outgoingEntries = <_ChildEntry>{};
   List<Widget>? _outgoingWidgets = const <Widget>[];
@@ -281,8 +273,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
     final bool hasNewChild = widget.child != null;
     final bool hasOldChild = _currentEntry != null;
     if (hasNewChild != hasOldChild ||
-        hasNewChild &&
-            !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
+        hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
       // Child has changed, fade current entry out and add new entry.
       _childNumber += 1;
       _addEntryForNewChild(animate: true);
@@ -299,7 +290,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
     }
   }
 
-  void _addEntryForNewChild({required bool animate}) {
+  void _addEntryForNewChild({ required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
@@ -378,8 +369,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
       _outgoingEntries.map<Widget>((_ChildEntry entry) => entry.transition),
     );
     assert(_outgoingEntries.length == _outgoingWidgets!.length);
-    assert(_outgoingEntries.isEmpty ||
-        _outgoingEntries.last.transition == _outgoingWidgets!.last);
+    assert(_outgoingEntries.isEmpty || _outgoingEntries.last.transition == _outgoingWidgets!.last);
   }
 
   @override
@@ -396,12 +386,6 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher>
   @override
   Widget build(BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(
-        _currentEntry?.transition,
-        _outgoingWidgets!
-            .where((Widget outgoing) =>
-                outgoing.key != _currentEntry?.transition.key)
-            .toSet()
-            .toList());
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
   }
 }

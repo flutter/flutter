@@ -9,24 +9,21 @@ void main() {
   group('lerp Duration', () {
     test('linearly interpolates between positive Durations', () {
       expect(
-        lerpDuration(
-            const Duration(seconds: 1), const Duration(seconds: 2), 0.5),
+        lerpDuration(const Duration(seconds: 1), const Duration(seconds: 2), 0.5),
         const Duration(milliseconds: 1500),
       );
     });
 
     test('linearly interpolates between negative Durations', () {
       expect(
-        lerpDuration(
-            const Duration(seconds: -1), const Duration(seconds: -2), 0.5),
+        lerpDuration(const Duration(seconds: -1), const Duration(seconds: -2), 0.5),
         const Duration(milliseconds: -1500),
       );
     });
 
     test('linearly interpolates between positive and negative Durations', () {
       expect(
-        lerpDuration(
-            const Duration(seconds: -1), const Duration(seconds: 2), 0.5),
+        lerpDuration(const Duration(seconds: -1), const Duration(seconds:2), 0.5),
         const Duration(milliseconds: 500),
       );
     });
@@ -52,8 +49,7 @@ void main() {
       );
 
       expect(
-        lerpDuration(
-            const Duration(seconds: -1), const Duration(seconds: -2), 5),
+        lerpDuration(const Duration(seconds: -1), const Duration(seconds: -2), 5),
         const Duration(seconds: -6),
       );
     });

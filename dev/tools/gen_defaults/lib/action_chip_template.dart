@@ -5,9 +5,10 @@
 import 'template.dart';
 
 class ActionChipTemplate extends TokenTemplate {
-  const ActionChipTemplate(super.blockName, super.fileName, super.tokens,
-      {super.colorSchemePrefix = '_colors.',
-      super.textThemePrefix = '_textTheme.'});
+  const ActionChipTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   static const String tokenGroup = 'md.comp.assist-chip';
   static const String flatVariant = '.flat';

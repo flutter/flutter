@@ -15,8 +15,7 @@ class _CustomEndDrawerIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localization =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localization = MaterialLocalizations.of(context);
     return Icon(
       Icons.more_horiz,
       semanticLabel: localization.openAppDrawerTooltip,
@@ -29,8 +28,7 @@ class _CustomDrawerIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localization =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localization = MaterialLocalizations.of(context);
     return Icon(
       Icons.segment,
       semanticLabel: localization.openAppDrawerTooltip,

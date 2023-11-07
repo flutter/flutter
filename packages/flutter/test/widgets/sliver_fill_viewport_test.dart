@@ -8,12 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SliverFillViewport control test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFillViewport control test', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return ColoredBox(
-          color: Colors.green,
-          child: Text('$i', textDirection: TextDirection.ltr));
+      return ColoredBox(color: Colors.green, child: Text('$i', textDirection: TextDirection.ltr));
     });
 
     await tester.pumpWidget(
@@ -22,16 +19,14 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverFillViewport(
-              delegate: SliverChildListDelegate(children,
-                  addAutomaticKeepAlives: false, addSemanticIndexes: false),
+              delegate: SliverChildListDelegate(children, addAutomaticKeepAlives: false, addSemanticIndexes: false),
             ),
           ],
         ),
       ),
     );
 
-    final RenderBox box =
-        tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box.size.height, equals(600.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -58,8 +53,7 @@ void main() {
     await tester.drag(find.byType(Scrollable), const Offset(0.0, 700.0));
     await tester.pump();
 
-    final RenderBox box2 =
-        tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
+    final RenderBox box2 = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box2.size.height, equals(600.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -67,8 +61,7 @@ void main() {
     expect(find.text('2'), findsNothing);
     expect(find.text('3'), findsNothing);
 
-    final RenderObject viewport = tester
-        .renderObject<RenderObject>(find.byType(SliverFillViewport).first);
+    final RenderObject viewport = tester.renderObject<RenderObject>(find.byType(SliverFillViewport).first);
     expect(viewport, hasAGoodToStringDeep);
     expect(
       viewport.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -166,8 +159,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SliverFillViewport padding test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFillViewport padding test', (WidgetTester tester) async {
     final SliverChildListDelegate delegate = SliverChildListDelegate(
       <Widget>[
         const Text('0'),
@@ -190,8 +182,7 @@ void main() {
       ),
     );
 
-    final RenderSliver boxWithPadding =
-        tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
+    final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
     expect(boxWithPadding.geometry!.paintExtent, equals(600.0));
 
     await tester.pumpWidget(
@@ -209,8 +200,7 @@ void main() {
       ),
     );
 
-    final RenderSliver boxWithoutPadding =
-        tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
+    final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
     expect(boxWithoutPadding.geometry!.paintExtent, equals(300.0));
   });
 }

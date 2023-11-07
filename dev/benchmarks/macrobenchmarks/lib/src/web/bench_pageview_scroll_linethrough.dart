@@ -36,7 +36,7 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
   static const Duration stepDuration = Duration(milliseconds: 500);
 
   late PageController pageController;
-  final _CustomPainter _painter = _CustomPainter('aa');
+  final _CustomPainter _painter =  _CustomPainter('aa');
   int pageNumber = 0;
 
   @override

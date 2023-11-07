@@ -23,8 +23,7 @@ class ShoppingCartPage extends StatefulWidget {
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
   List<Widget> _createShoppingCartRows(AppStateModel model) {
     return model.productsInCart.keys
-        .map(
-          (int id) => ShoppingCartRow(
+        .map((int id) => ShoppingCartRow(
             product: model.getProductById(id),
             quantity: model.productsInCart[id],
             onPressed: () {
@@ -54,14 +53,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                           width: _leftColumnWidth,
                           child: IconButton(
                             icon: const Icon(Icons.keyboard_arrow_down),
-                            onPressed: () =>
-                                ExpandingBottomSheet.of(context)!.close(),
+                            onPressed: () => ExpandingBottomSheet.of(context)!.close(),
                           ),
                         ),
                         Text(
                           'CART',
-                          style: localTheme.textTheme.titleMedium!
-                              .copyWith(fontWeight: FontWeight.w600),
+                          style: localTheme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 16.0),
                         Text('${model.totalCartQuantity} ITEMS'),
@@ -112,12 +109,8 @@ class ShoppingCartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(context)
-        .textTheme
-        .bodyMedium!
-        .copyWith(color: kShrineBrown600);
-    final TextStyle? largeAmountStyle =
-        Theme.of(context).textTheme.headlineMedium;
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: kShrineBrown600);
+    final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headlineMedium;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
@@ -250,8 +243,7 @@ class ShoppingCartRow extends StatelessWidget {
                             ),
                             Text(
                               product.name,
-                              style: localTheme.textTheme.titleMedium!
-                                  .copyWith(fontWeight: FontWeight.w600),
+                              style: localTheme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),

@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('nearEquals', () {
     expect(nearEqual(double.infinity, double.infinity, 0.1), isTrue);
-    expect(nearEqual(double.negativeInfinity, double.negativeInfinity, 0.1),
-        isTrue);
+    expect(nearEqual(double.negativeInfinity, double.negativeInfinity, 0.1), isTrue);
 
     expect(nearEqual(double.infinity, double.negativeInfinity, 0.1), isFalse);
 

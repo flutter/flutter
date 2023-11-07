@@ -32,19 +32,14 @@ Future<void> copyNativeAssetsMacOSHost(
   FileSystem fileSystem,
 ) async {
   if (assetTargetLocations.isNotEmpty) {
-    globals.logger
-        .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+    globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
     final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
     if (!buildDir.existsSync()) {
       buildDir.createSync(recursive: true);
     }
-    for (final MapEntry<AssetPath, List<Asset>> assetMapping
-        in assetTargetLocations.entries) {
+    for (final MapEntry<AssetPath, List<Asset>> assetMapping in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
-      final List<Uri> sources = <Uri>[
-        for (final Asset source in assetMapping.value)
-          (source.path as AssetAbsolutePath).uri
-      ];
+      final List<Uri> sources = <Uri>[for (final Asset source in assetMapping.value) (source.path as AssetAbsolutePath).uri];
       final Uri targetUri = buildUri.resolveUri(target);
       final String targetFullPath = targetUri.toFilePath();
       await lipoDylibs(targetFullPath, sources);
@@ -94,8 +89,7 @@ Future<void> setInstallNameDylib(Uri targetUri) async {
     ],
   );
   if (installNameResult.exitCode != 0) {
-    throwToolExit(
-        'Failed to change the install name of $targetUri:\n${installNameResult.stderr}');
+    throwToolExit('Failed to change the install name of $targetUri:\n${installNameResult.stderr}');
   }
 }
 
@@ -119,8 +113,7 @@ Future<void> codesignDylib(
     targetFullPath,
   ];
   globals.logger.printTrace(codesignCommand.join(' '));
-  final ProcessResult codesignResult =
-      await globals.processManager.run(codesignCommand);
+  final ProcessResult codesignResult = await globals.processManager.run(codesignCommand);
   if (codesignResult.exitCode != 0) {
     throwToolExit('Failed to code sign binary:\n${codesignResult.stderr}');
   }
@@ -132,15 +125,14 @@ Future<void> codesignDylib(
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
 Future<CCompilerConfig> cCompilerConfigMacOS() async {
-  final ProcessResult xcrunResult =
-      await globals.processManager.run(<String>['xcrun', 'clang', '--version']);
+  final ProcessResult xcrunResult = await globals.processManager.run(<String>['xcrun', 'clang', '--version']);
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
   final String installPath = LineSplitter.split(xcrunResult.stdout as String)
-      .firstWhere((String s) => s.startsWith('InstalledDir: '))
-      .split(' ')
-      .last;
+    .firstWhere((String s) => s.startsWith('InstalledDir: '))
+    .split(' ')
+    .last;
   return CCompilerConfig(
     cc: Uri.file('$installPath/clang'),
     ar: Uri.file('$installPath/ar'),

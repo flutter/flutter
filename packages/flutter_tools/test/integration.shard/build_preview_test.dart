@@ -20,16 +20,15 @@ void main() {
   final FileSystem fs = LocalFileSystemBlockingSetCurrentDirectory();
   final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
   final File previewBin = fs
-      .directory(getFlutterRoot())
-      .childDirectory('bin')
-      .childDirectory('cache')
-      .childDirectory('artifacts')
-      .childDirectory('flutter_preview')
-      .childFile('flutter_preview.exe');
+          .directory(getFlutterRoot())
+          .childDirectory('bin')
+          .childDirectory('cache')
+          .childDirectory('artifacts')
+          .childDirectory('flutter_preview')
+          .childFile('flutter_preview.exe');
 
   setUp(() {
-    tempDir = fs.systemTempDirectory
-        .createTempSync('flutter_tools_preview_integration_test.');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_preview_integration_test.');
   });
 
   tearDown(() {
@@ -50,7 +49,5 @@ void main() {
       previewBin,
       exists,
     );
-  },
-      skip: !const LocalPlatform()
-          .isWindows); // [intended] Flutter Preview only supported on Windows currently
+  }, skip: !const LocalPlatform().isWindows); // [intended] Flutter Preview only supported on Windows currently
 }

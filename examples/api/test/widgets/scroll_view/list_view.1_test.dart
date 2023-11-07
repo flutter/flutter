@@ -17,8 +17,7 @@ void main() {
       expect(listView, findsOneWidget);
       expect(reverseFinder, findsOneWidget);
       final Finder keepAliveItemFinder = find.byType(example.KeepAliveItem);
-      example.KeepAliveItem firstWidget =
-          tester.firstWidget(keepAliveItemFinder);
+      example.KeepAliveItem firstWidget = tester.firstWidget(keepAliveItemFinder);
       expect(firstWidget.data, '1');
       await tester.tap(reverseFinder);
       await tester.pump();

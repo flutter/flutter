@@ -65,8 +65,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                     constraints: const BoxConstraints(minWidth: 100),
                     child: Text(
                       item,
-                      style: const TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
                     ),
                   );
                 }).toList();

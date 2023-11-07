@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Can tap a hyperlink',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can tap a hyperlink', (WidgetTester tester) async {
     bool didTapLeft = false;
     final TapGestureRecognizer tapLeft = TapGestureRecognizer()
       ..onTap = () {
@@ -58,16 +57,14 @@ void main() {
 
     didTapLeft = false;
 
-    await tester
-        .tapAt(box.localToGlobal(Offset.zero) + const Offset(30.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Offset.zero) + const Offset(30.0, 2.0));
 
     expect(didTapLeft, isTrue);
     expect(didTapRight, isFalse);
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(Offset(box.size.width, 0.0)) +
-        const Offset(-2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Offset(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
 
     expect(didTapLeft, isFalse);
     expect(didTapRight, isTrue);

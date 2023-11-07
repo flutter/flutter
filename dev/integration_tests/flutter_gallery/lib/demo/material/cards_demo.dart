@@ -64,8 +64,7 @@ const List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  const TravelDestinationItem(
-      {super.key, required this.destination, this.shape});
+  const TravelDestinationItem({ super.key, required this.destination, this.shape });
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 338.0;
@@ -99,8 +98,7 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class TappableTravelDestinationItem extends StatelessWidget {
-  const TappableTravelDestinationItem(
-      {super.key, required this.destination, this.shape});
+  const TappableTravelDestinationItem({ super.key, required this.destination, this.shape });
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
@@ -128,8 +126,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
                     print('Card was tapped');
                   },
                   // Generally, material cards use onSurface with 12% opacity for the pressed state.
-                  splashColor:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                  splashColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   // Generally, material cards do not have a highlight overlay.
                   highlightColor: Colors.transparent,
                   child: TravelDestinationContent(destination: destination),
@@ -144,19 +141,17 @@ class TappableTravelDestinationItem extends StatelessWidget {
 }
 
 class SelectableTravelDestinationItem extends StatefulWidget {
-  const SelectableTravelDestinationItem(
-      {super.key, required this.destination, this.shape});
+  const SelectableTravelDestinationItem({ super.key, required this.destination, this.shape });
 
   final TravelDestination destination;
   final ShapeBorder? shape;
 
   @override
-  State<SelectableTravelDestinationItem> createState() =>
-      _SelectableTravelDestinationItemState();
+  State<SelectableTravelDestinationItem> createState() => _SelectableTravelDestinationItemState();
 }
 
-class _SelectableTravelDestinationItemState
-    extends State<SelectableTravelDestinationItem> {
+class _SelectableTravelDestinationItemState extends State<SelectableTravelDestinationItem> {
+
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
   bool _isSelected = false;
@@ -194,10 +189,10 @@ class _SelectableTravelDestinationItemState
                     children: <Widget>[
                       Container(
                         color: _isSelected
-                            // Generally, material cards use primary with 8% opacity for the selected state.
-                            // See: https://material.io/design/interaction/states.html#anatomy
-                            ? colorScheme.primary.withOpacity(0.08)
-                            : Colors.transparent,
+                          // Generally, material cards use primary with 8% opacity for the selected state.
+                          // See: https://material.io/design/interaction/states.html#anatomy
+                          ? colorScheme.primary.withOpacity(0.08)
+                          : Colors.transparent,
                       ),
                       TravelDestinationContent(destination: widget.destination),
                       Align(
@@ -206,9 +201,7 @@ class _SelectableTravelDestinationItemState
                           padding: const EdgeInsets.all(8.0),
                           child: Icon(
                             Icons.check_circle,
-                            color: _isSelected
-                                ? colorScheme.primary
-                                : Colors.transparent,
+                            color: _isSelected ? colorScheme.primary : Colors.transparent,
                           ),
                         ),
                       ),
@@ -245,18 +238,16 @@ class SectionTitle extends StatelessWidget {
 }
 
 class TravelDestinationContent extends StatelessWidget {
-  const TravelDestinationContent({super.key, required this.destination});
+  const TravelDestinationContent({ super.key, required this.destination });
 
   final TravelDestination destination;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle titleStyle =
-        theme.textTheme.headlineSmall!.copyWith(color: Colors.white);
+    final TextStyle titleStyle = theme.textTheme.headlineSmall!.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
-    final ButtonStyle textButtonStyle =
-        TextButton.styleFrom(foregroundColor: Colors.amber.shade500);
+    final ButtonStyle textButtonStyle = TextButton.styleFrom(foregroundColor: Colors.amber.shade500);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,8 +263,7 @@ class TravelDestinationContent extends StatelessWidget {
                 // of the Material and display ink effects above it. Using a
                 // standard Image will obscure the ink splash.
                 child: Ink.image(
-                  image: AssetImage(destination.assetName,
-                      package: destination.assetPackage),
+                  image: AssetImage(destination.assetName, package: destination.assetPackage),
                   fit: BoxFit.cover,
                   child: Container(),
                 ),
@@ -328,19 +318,13 @@ class TravelDestinationContent extends StatelessWidget {
               children: <Widget>[
                 TextButton(
                   style: textButtonStyle,
-                  onPressed: () {
-                    print('pressed');
-                  },
-                  child: Text('SHARE',
-                      semanticsLabel: 'Share ${destination.title}'),
+                  onPressed: () { print('pressed'); },
+                  child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                 ),
                 TextButton(
                   style: textButtonStyle,
-                  onPressed: () {
-                    print('pressed');
-                  },
-                  child: Text('EXPLORE',
-                      semanticsLabel: 'Explore ${destination.title}'),
+                  onPressed: () { print('pressed'); },
+                  child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                 ),
               ],
             ),
@@ -376,16 +360,14 @@ class _CardsDemoState extends State<CardsDemo> {
             ),
             onPressed: () {
               setState(() {
-                _shape = _shape != null
-                    ? null
-                    : const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16.0),
-                          topRight: Radius.circular(16.0),
-                          bottomLeft: Radius.circular(2.0),
-                          bottomRight: Radius.circular(2.0),
-                        ),
-                      );
+                _shape = _shape != null ? null : const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                    bottomLeft: Radius.circular(2.0),
+                    bottomRight: Radius.circular(2.0),
+                  ),
+                );
               });
             },
           ),
@@ -399,14 +381,11 @@ class _CardsDemoState extends State<CardsDemo> {
             Widget? child;
             switch (destination.type) {
               case CardDemoType.standard:
-                child = TravelDestinationItem(
-                    destination: destination, shape: _shape);
+                child = TravelDestinationItem(destination: destination, shape: _shape);
               case CardDemoType.tappable:
-                child = TappableTravelDestinationItem(
-                    destination: destination, shape: _shape);
+                child = TappableTravelDestinationItem(destination: destination, shape: _shape);
               case CardDemoType.selectable:
-                child = SelectableTravelDestinationItem(
-                    destination: destination, shape: _shape);
+                child = SelectableTravelDestinationItem(destination: destination, shape: _shape);
             }
 
             return Container(

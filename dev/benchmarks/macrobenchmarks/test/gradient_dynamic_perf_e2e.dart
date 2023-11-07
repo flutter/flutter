@@ -11,8 +11,7 @@ void main() {
     'gradient_dynamic_perf',
     <ScrollableButtonRoute>[
       ScrollableButtonRoute(kScrollableName, kGradientPerfRouteName),
-      ScrollableButtonRoute(
-          kGradientPerfScrollableName, kGradientPerfRecreateDynamicRouteName),
+      ScrollableButtonRoute(kGradientPerfScrollableName, kGradientPerfRecreateDynamicRouteName),
     ],
     pageDelay: const Duration(seconds: 1),
     duration: const Duration(seconds: 10),

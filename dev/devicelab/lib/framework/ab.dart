@@ -25,10 +25,7 @@ enum FieldJustification { LEFT, RIGHT, CENTER }
 ///
 /// See [printSummary] for more.
 class ABTest {
-  ABTest(
-      {required this.localEngine,
-      required this.localEngineHost,
-      required this.taskName})
+  ABTest({required this.localEngine, required this.localEngineHost, required this.taskName})
       : runStart = DateTime.now(),
         _aResults = <String, List<double>>{},
         _bResults = <String, List<double>>{};
@@ -39,10 +36,8 @@ class ABTest {
         taskName = jsonResults[kTaskNameKeyName] as String,
         runStart = DateTime.parse(jsonResults[kRunStartKeyName] as String),
         _runEnd = DateTime.parse(jsonResults[kRunEndKeyName] as String),
-        _aResults =
-            _convertFrom(jsonResults[kAResultsKeyName] as Map<String, dynamic>),
-        _bResults =
-            _convertFrom(jsonResults[kBResultsKeyName] as Map<String, dynamic>);
+        _aResults = _convertFrom(jsonResults[kAResultsKeyName] as Map<String, dynamic>),
+        _bResults = _convertFrom(jsonResults[kBResultsKeyName] as Map<String, dynamic>);
 
   final String localEngine;
   final String localEngineHost;
@@ -56,7 +51,7 @@ class ABTest {
 
   static Map<String, List<double>> _convertFrom(dynamic results) {
     final Map<String, dynamic> resultMap = results as Map<String, dynamic>;
-    return <String, List<double>>{
+    return <String, List<double>> {
       for (final String key in resultMap.keys)
         key: (resultMap[key] as List<dynamic>).cast<double>(),
     };
@@ -91,28 +86,29 @@ class ABTest {
   }
 
   Map<String, dynamic> get jsonMap => <String, dynamic>{
-        kBenchmarkTypeKeyName: kBenchmarkResultsType,
-        kBenchmarkVersionKeyName: kBenchmarkABVersion,
-        kLocalEngineKeyName: localEngine,
-        kLocalEngineHostKeyName: localEngineHost,
-        kTaskNameKeyName: taskName,
-        kRunStartKeyName: runStart.toIso8601String(),
-        kRunEndKeyName: runEnd!.toIso8601String(),
-        kAResultsKeyName: _aResults,
-        kBResultsKeyName: _bResults,
-      };
+    kBenchmarkTypeKeyName:     kBenchmarkResultsType,
+    kBenchmarkVersionKeyName:  kBenchmarkABVersion,
+    kLocalEngineKeyName:       localEngine,
+    kLocalEngineHostKeyName:   localEngineHost,
+    kTaskNameKeyName:          taskName,
+    kRunStartKeyName:          runStart.toIso8601String(),
+    kRunEndKeyName:            runEnd!.toIso8601String(),
+    kAResultsKeyName:          _aResults,
+    kBResultsKeyName:          _bResults,
+  };
 
   static void updateColumnLengths(List<int> lengths, List<String?> results) {
     for (int column = 0; column < lengths.length; column++) {
       if (results[column] != null) {
-        lengths[column] =
-            math.max(lengths[column], results[column]?.length ?? 0);
+        lengths[column] = math.max(lengths[column], results[column]?.length ?? 0);
       }
     }
   }
 
-  static void formatResult(StringBuffer buffer, List<int> lengths,
-      List<FieldJustification> aligns, List<String?> values) {
+  static void formatResult(StringBuffer buffer,
+                           List<int> lengths,
+                           List<FieldJustification> aligns,
+                           List<String?> values) {
     for (int column = 0; column < lengths.length; column++) {
       final int len = lengths[column];
       String? value = values[column];
@@ -125,12 +121,12 @@ class ABTest {
           case FieldJustification.RIGHT:
             value = value.padLeft(len);
           case FieldJustification.CENTER:
-            value = value.padLeft((len + value.length) ~/ 2);
+            value = value.padLeft((len + value.length) ~/2);
             value = value.padRight(len);
         }
       }
       if (column > 0) {
-        value = value.padLeft(len + 1);
+        value = value.padLeft(len+1);
       }
       buffer.write(value);
     }
@@ -145,34 +141,25 @@ class ABTest {
     final Map<String, _ScoreSummary> summariesB = _summarize(_bResults);
 
     final List<List<String?>> tableRows = <List<String?>>[
-      for (final String scoreKey in <String>{
-        ...summariesA.keys,
-        ...summariesB.keys
-      })
+      for (final String scoreKey in <String>{...summariesA.keys, ...summariesB.keys})
         <String?>[
           scoreKey,
-          summariesA[scoreKey]?.averageString,
-          summariesA[scoreKey]?.noiseString,
-          summariesB[scoreKey]?.averageString,
-          summariesB[scoreKey]?.noiseString,
+          summariesA[scoreKey]?.averageString, summariesA[scoreKey]?.noiseString,
+          summariesB[scoreKey]?.averageString, summariesB[scoreKey]?.noiseString,
           summariesA[scoreKey]?.improvementOver(summariesB[scoreKey]),
         ],
     ];
 
     final List<String> titles = <String>[
       'Score',
-      'Average A',
-      '(noise)',
-      'Average B',
-      '(noise)',
+      'Average A', '(noise)',
+      'Average B', '(noise)',
       'Speed-up',
     ];
     final List<FieldJustification> alignments = <FieldJustification>[
       FieldJustification.LEFT,
-      FieldJustification.RIGHT,
-      FieldJustification.LEFT,
-      FieldJustification.RIGHT,
-      FieldJustification.LEFT,
+      FieldJustification.RIGHT, FieldJustification.LEFT,
+      FieldJustification.RIGHT, FieldJustification.LEFT,
       FieldJustification.CENTER,
     ];
 
@@ -183,14 +170,11 @@ class ABTest {
     }
 
     final StringBuffer buffer = StringBuffer();
-    formatResult(
-        buffer,
-        lengths,
+    formatResult(buffer, lengths,
         <FieldJustification>[
           FieldJustification.CENTER,
           ...alignments.skip(1),
-        ],
-        titles);
+        ], titles);
     for (final List<String?> row in tableRows) {
       formatResult(buffer, lengths, alignments, row);
     }
@@ -290,9 +274,7 @@ class _ScoreSummary {
   String get noiseString => '(${_ratioToPercent(noise)})';
 
   String improvementOver(_ScoreSummary? other) {
-    return other == null
-        ? ''
-        : '${(average / other.average).toStringAsFixed(2)}x';
+    return other == null ? '' : '${(average / other.average).toStringAsFixed(2)}x';
   }
 }
 
@@ -304,18 +286,15 @@ void _addResult(TaskResult result, Map<String, List<double>> results) {
 }
 
 Map<String, _ScoreSummary> _summarize(Map<String, List<double>> results) {
-  return results
-      .map<String, _ScoreSummary>((String scoreKey, List<double> values) {
+  return results.map<String, _ScoreSummary>((String scoreKey, List<double> values) {
     final double average = _computeAverage(values);
-    return MapEntry<String, _ScoreSummary>(
-        scoreKey,
-        _ScoreSummary(
-          average: average,
-          // If the average is zero, the benchmark got the perfect score with no noise.
-          noise: average > 0
-              ? _computeStandardDeviationForPopulation(values) / average
-              : 0.0,
-        ));
+    return MapEntry<String, _ScoreSummary>(scoreKey, _ScoreSummary(
+      average: average,
+      // If the average is zero, the benchmark got the perfect score with no noise.
+      noise: average > 0
+        ? _computeStandardDeviationForPopulation(values) / average
+        : 0.0,
+    ));
   });
 }
 

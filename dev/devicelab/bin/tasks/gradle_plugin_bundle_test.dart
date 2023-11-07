@@ -13,13 +13,11 @@ Future<void> main() async {
     'base/dex/classes.dex',
     'base/manifest/AndroidManifest.xml',
   ];
-  final Iterable<String> flutterAabAssets =
-      flutterAssets.map((String file) => 'base/$file');
+  final Iterable<String> flutterAabAssets = flutterAssets.map((String file) => 'base/$file');
   await task(() async {
     try {
       await runProjectTest((FlutterProject project) async {
-        section(
-            'App bundle content for task bundleRelease without explicit target platform');
+        section('App bundle content for task bundleRelease without explicit target platform');
 
         await inDirectory(project.rootPath, () {
           return flutter('build', options: <String>[
@@ -47,10 +45,9 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
-        section(
-            'App bundle content using flavors without explicit target platform');
+        section('App bundle content using flavors without explicit target platform');
         // Add a few flavors.
-        await project.addProductFlavors(<String>[
+        await project.addProductFlavors(<String> [
           'production',
           'staging',
           'development',
@@ -83,10 +80,9 @@ Future<void> main() async {
           'base/lib/armeabi-v7a/libflutter.so',
         ], await getFilesInAppBundle(bundleFromGradlePath));
 
-        section(
-            'Build app bundle using the flutter tool - flavor: flavor_underscore');
+        section('Build app bundle using the flutter tool - flavor: flavor_underscore');
 
-        int exitCode = await inDirectory(project.rootPath, () {
+        int exitCode = await inDirectory(project.rootPath, ()  {
           return flutter(
             'build',
             options: <String>[
@@ -98,8 +94,7 @@ Future<void> main() async {
         });
 
         if (exitCode != 0) {
-          throw TaskResult.failure(
-              'flutter build appbundle command exited with code: $exitCode');
+          throw TaskResult.failure('flutter build appbundle command exited with code: $exitCode');
         }
 
         final String flavorUnderscoreBundlePath = path.join(
@@ -134,8 +129,7 @@ Future<void> main() async {
         });
 
         if (exitCode != 0) {
-          throw TaskResult.failure(
-              'flutter build appbundle command exited with code: $exitCode');
+          throw TaskResult.failure('flutter build appbundle command exited with code: $exitCode');
         }
 
         final String productionBundlePath = path.join(
@@ -158,8 +152,7 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
-        section(
-            'App bundle content for task bundleRelease with target platform = android-arm');
+        section('App bundle content for task bundleRelease with target platform = android-arm');
 
         await inDirectory(project.rootPath, () {
           return flutter(
@@ -181,8 +174,7 @@ Future<void> main() async {
           'app-release.aab',
         );
 
-        final Iterable<String> bundleFiles =
-            await getFilesInAppBundle(releaseBundle);
+        final Iterable<String> bundleFiles = await getFilesInAppBundle(releaseBundle);
         checkCollectionContains<String>(<String>[
           ...baseAabFiles,
           ...flutterAabAssets,

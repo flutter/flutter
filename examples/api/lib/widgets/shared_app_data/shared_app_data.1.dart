@@ -21,15 +21,13 @@ class SharedObject {
 
   static void reset(BuildContext context) {
     // Calling SharedAppData.setValue() causes dependent widgets to be rebuilt.
-    SharedAppData.setValue<Object, SharedObject>(
-        context, _sharedObjectKey, SharedObject._());
+    SharedAppData.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
   }
 
   static SharedObject of(BuildContext context) {
     // If a value for _sharedObjectKey has never been set then the third
     // callback parameter is used to generate an initial value.
-    return SharedAppData.getValue<Object, SharedObject>(
-        context, _sharedObjectKey, () => SharedObject._());
+    return SharedAppData.getValue<Object, SharedObject>(context, _sharedObjectKey, () => SharedObject._());
   }
 }
 

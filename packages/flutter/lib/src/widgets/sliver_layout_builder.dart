@@ -8,8 +8,7 @@ import 'framework.dart';
 import 'layout_builder.dart';
 
 /// The signature of the [SliverLayoutBuilder] builder function.
-typedef SliverLayoutWidgetBuilder = Widget Function(
-    BuildContext context, SliverConstraints constraints);
+typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, SliverConstraints constraints);
 
 /// Builds a sliver widget tree that can depend on its own [SliverConstraints].
 ///
@@ -32,14 +31,10 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderSliverLayoutBuilder();
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
 }
 
-class _RenderSliverLayoutBuilder extends RenderSliver
-    with
-        RenderObjectWithChildMixin<RenderSliver>,
-        RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
+class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
   double childMainAxisPosition(RenderObject child) {
     assert(child == this.child);
@@ -68,12 +63,9 @@ class _RenderSliverLayoutBuilder extends RenderSliver
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result,
-      {required double mainAxisPosition, required double crossAxisPosition}) {
-    return child != null &&
-        child!.geometry!.hitTestExtent > 0 &&
-        child!.hitTest(result,
-            mainAxisPosition: mainAxisPosition,
-            crossAxisPosition: crossAxisPosition);
+  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
+    return child != null
+        && child!.geometry!.hitTestExtent > 0
+        && child!.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
   }
 }

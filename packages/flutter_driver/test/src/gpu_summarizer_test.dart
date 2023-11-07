@@ -8,10 +8,12 @@ import 'package:flutter_driver/src/driver/gpu_sumarizer.dart';
 import '../common.dart';
 
 TimelineEvent newGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic>{
-      'name': 'GPUStart',
-      'ph': 'b',
-      'args': <String, String>{'FrameTimeMS': ms.toString()},
-    });
+  'name': 'GPUStart',
+  'ph': 'b',
+  'args': <String, String>{
+    'FrameTimeMS': ms.toString()
+  },
+});
 
 void main() {
   test('Can process GPU frame times.', () {

@@ -21,10 +21,12 @@ import '../../src/fake_process_manager.dart';
 
 const String home = '/home/me';
 
-final Platform linuxPlatform =
-    FakePlatform(environment: <String, String>{'HOME': home});
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{'HOME': home}
+);
 
 void main() {
+
   late FileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
 
@@ -34,9 +36,7 @@ void main() {
   });
 
   group(NoAndroidStudioValidator, () {
-    testWithoutContext(
-        'shows Android Studio as "not available" when not available.',
-        () async {
+    testWithoutContext('shows Android Studio as "not available" when not available.', () async {
       final Config config = Config.test();
       final NoAndroidStudioValidator validator = NoAndroidStudioValidator(
         config: config,
@@ -44,8 +44,7 @@ void main() {
         userMessages: UserMessages(),
       );
 
-      expect((await validator.validate()).type,
-          equals(ValidationType.notAvailable));
+      expect((await validator.validate()).type, equals(ValidationType.notAvailable));
     });
   });
 
@@ -68,16 +67,11 @@ void main() {
       // This checks that running the validator doesn't throw an unhandled
       // exception and that the ProcessException makes it into the error
       // message list.
-      for (final DoctorValidator validator
-          in AndroidStudioValidator.allValidators(globals.config,
-              globals.platform, globals.fs, globals.userMessages)) {
+      for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
         final ValidationResult result = await validator.validate();
-        expect(
-            result.messages.where((ValidationMessage message) {
-              return message.isError &&
-                  message.message.contains('ProcessException');
-            }).isNotEmpty,
-            true);
+        expect(result.messages.where((ValidationMessage message) {
+          return message.isError && message.message.contains('ProcessException');
+        }).isNotEmpty, true);
       }
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -85,21 +79,16 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Platform: () => linuxPlatform,
       FileSystemUtils: () => FileSystemUtils(
-            fileSystem: fileSystem,
-            platform: linuxPlatform,
-          ),
+        fileSystem: fileSystem,
+        platform: linuxPlatform,
+      ),
     });
 
-    testWithoutContext(
-        'warns if version of Android Studio could not be determined', () async {
+    testWithoutContext('warns if version of Android Studio could not be determined', () async {
       final AndroidStudio studio = _FakeAndroidStudio();
-      final AndroidStudioValidator validator = AndroidStudioValidator(studio,
-          fileSystem: fileSystem, userMessages: UserMessages());
+      final AndroidStudioValidator validator = AndroidStudioValidator(studio, fileSystem: fileSystem, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
-      expect(
-          result.messages,
-          contains(const ValidationMessage.error(
-              'Unable to determine Android Studio version.')));
+      expect(result.messages, contains(const ValidationMessage.error('Unable to determine Android Studio version.')));
       expect(result.statusInfo, 'version unknown');
     });
   });

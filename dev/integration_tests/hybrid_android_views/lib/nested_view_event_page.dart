@@ -13,9 +13,7 @@ import 'page.dart';
 
 class NestedViewEventPage extends PageWidget {
   const NestedViewEventPage({Key? key})
-      : super('Nested View Event Tests',
-            const ValueKey<String>('NestedViewEventTile'),
-            key: key);
+      : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'), key: key);
 
   @override
   Widget build(BuildContext context) => const NestedViewEventBody();
@@ -28,7 +26,11 @@ class NestedViewEventBody extends StatefulWidget {
   State<NestedViewEventBody> createState() => NestedViewEventBodyState();
 }
 
-enum _LastTestStatus { pending, success, error }
+enum _LastTestStatus {
+  pending,
+  success,
+  error
+}
 
 class NestedViewEventBodyState extends State<NestedViewEventBody> {
   MethodChannel? viewChannel;
@@ -67,8 +69,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
                 // rendering operations throughout the framework and engine.
                 const Positioned(
                   top: 50,
-                  child: Text(
-                    'overlapping widget',
+                  child: Text('overlapping widget',
                     style: TextStyle(color: Colors.yellow),
                   ),
                 ),
@@ -76,7 +77,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
             ),
           ),
           if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
-          if (viewChannel != null) ...<Widget>[
+          if (viewChannel != null) ... <Widget>[
             Row(
               children: <Widget>[
                 Expanded(
@@ -137,18 +138,14 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
 
   Widget _statusWidget() {
     assert(_lastTestStatus != _LastTestStatus.pending);
-    final String message =
-        _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError!;
+    final String message = _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError!;
     return ColoredBox(
-      color: _lastTestStatus == _LastTestStatus.success
-          ? Colors.green
-          : Colors.red,
+      color: _lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
       child: Text(
         message,
         key: const ValueKey<String>('Status'),
         style: TextStyle(
-          color:
-              _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
+          color: _lastTestStatus == _LastTestStatus.error ? Colors.yellow : null,
         ),
       ),
     );
@@ -211,7 +208,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
     setState(() {
       viewChannel = MethodChannel('simple_view/$id');
     });
-    driverDataHandler.registerHandler('hierarchy').complete(
-        () async => (await channel.invokeMethod<String>('getViewHierarchy'))!);
+    driverDataHandler.registerHandler('hierarchy')
+      .complete(() async => (await channel.invokeMethod<String>('getViewHierarchy'))!);
   }
 }

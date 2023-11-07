@@ -7,96 +7,88 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   PointerEvent createSimulatedPointerAddedEvent(
-    int timeStampUs,
-    double x,
-    double y,
+      int timeStampUs,
+      double x,
+      double y,
   ) {
     return PointerAddedEvent(
-      timeStamp: Duration(microseconds: timeStampUs),
-      position: Offset(x, y),
+        timeStamp: Duration(microseconds: timeStampUs),
+        position: Offset(x, y),
     );
   }
 
   PointerEvent createSimulatedPointerRemovedEvent(
-    int timeStampUs,
-    double x,
-    double y,
+      int timeStampUs,
+      double x,
+      double y,
   ) {
     return PointerRemovedEvent(
-      timeStamp: Duration(microseconds: timeStampUs),
-      position: Offset(x, y),
+        timeStamp: Duration(microseconds: timeStampUs),
+        position: Offset(x, y),
     );
   }
 
   PointerEvent createSimulatedPointerDownEvent(
-    int timeStampUs,
-    double x,
-    double y,
+      int timeStampUs,
+      double x,
+      double y,
   ) {
     return PointerDownEvent(
-      timeStamp: Duration(microseconds: timeStampUs),
-      position: Offset(x, y),
+        timeStamp: Duration(microseconds: timeStampUs),
+        position: Offset(x, y),
     );
   }
 
   PointerEvent createSimulatedPointerMoveEvent(
-    int timeStampUs,
-    double x,
-    double y,
-    double deltaX,
-    double deltaY,
+      int timeStampUs,
+      double x,
+      double y,
+      double deltaX,
+      double deltaY,
   ) {
     return PointerMoveEvent(
-      timeStamp: Duration(microseconds: timeStampUs),
-      position: Offset(x, y),
-      delta: Offset(deltaX, deltaY),
+        timeStamp: Duration(microseconds: timeStampUs),
+        position: Offset(x, y),
+        delta: Offset(deltaX, deltaY),
     );
   }
 
   PointerEvent createSimulatedPointerHoverEvent(
-    int timeStampUs,
-    double x,
-    double y,
-    double deltaX,
-    double deltaY,
+      int timeStampUs,
+      double x,
+      double y,
+      double deltaX,
+      double deltaY,
   ) {
     return PointerHoverEvent(
-      timeStamp: Duration(microseconds: timeStampUs),
-      position: Offset(x, y),
-      delta: Offset(deltaX, deltaY),
+        timeStamp: Duration(microseconds: timeStampUs),
+        position: Offset(x, y),
+        delta: Offset(deltaX, deltaY),
     );
   }
 
   PointerEvent createSimulatedPointerUpEvent(
-    int timeStampUs,
-    double x,
-    double y,
+      int timeStampUs,
+      double x,
+      double y,
   ) {
     return PointerUpEvent(
-      timeStamp: Duration(microseconds: timeStampUs),
-      position: Offset(x, y),
+        timeStamp: Duration(microseconds: timeStampUs),
+        position: Offset(x, y),
     );
   }
 
   test('basic', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
-    final PointerEvent event1 =
-        createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
-    final PointerEvent event2 =
-        createSimulatedPointerDownEvent(2000, 10.0, 40.0);
-    final PointerEvent event3 =
-        createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
-    final PointerEvent event4 =
-        createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
+    final PointerEvent event1 = createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
+    final PointerEvent event2 = createSimulatedPointerDownEvent(2000, 10.0, 40.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
+    final PointerEvent event4 = createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
     final PointerEvent event5 = createSimulatedPointerUpEvent(4000, 30.0, 20.0);
-    final PointerEvent event6 =
-        createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
-    final PointerEvent event7 =
-        createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
-    final PointerEvent event8 =
-        createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
+    final PointerEvent event6 = createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
+    final PointerEvent event7 = createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
+    final PointerEvent event8 = createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -111,14 +103,12 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 500), Duration.zero, result.add);
 
     // No pointer event should have been returned yet.
     expect(result.isEmpty, true);
 
-    resampler.sample(
-        const Duration(microseconds: 1500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1500), Duration.zero, result.add);
 
     // Add pointer event should have been returned.
     expect(result.length, 1);
@@ -127,8 +117,7 @@ void main() {
     expect(result[0].position.dx, 5.0);
     expect(result[0].position.dy, 45.0);
 
-    resampler.sample(
-        const Duration(microseconds: 2500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 2500), Duration.zero, result.add);
 
     // Hover and down pointer events should have been returned.
     expect(result.length, 3);
@@ -143,8 +132,7 @@ void main() {
     expect(result[2].position.dx, 15.0);
     expect(result[2].position.dy, 35.0);
 
-    resampler.sample(
-        const Duration(microseconds: 3500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 3500), Duration.zero, result.add);
 
     // Move pointer event should have been returned.
     expect(result.length, 4);
@@ -155,8 +143,7 @@ void main() {
     expect(result[3].delta.dx, 10.0);
     expect(result[3].delta.dy, -10.0);
 
-    resampler.sample(
-        const Duration(microseconds: 4500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 4500), Duration.zero, result.add);
 
     // Move and up pointer events should have been returned.
     expect(result.length, 6);
@@ -173,8 +160,7 @@ void main() {
     expect(result[5].position.dx, 35.0);
     expect(result[5].position.dy, 15.0);
 
-    resampler.sample(
-        const Duration(microseconds: 5500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 5500), Duration.zero, result.add);
 
     // Hover pointer event should have been returned.
     expect(result.length, 7);
@@ -185,8 +171,7 @@ void main() {
     expect(result[6].delta.dx, 10.0);
     expect(result[6].delta.dy, -10.0);
 
-    resampler.sample(
-        const Duration(microseconds: 6500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 6500), Duration.zero, result.add);
 
     // Hover and removed pointer events should have been returned.
     expect(result.length, 9);
@@ -201,8 +186,7 @@ void main() {
     expect(result[8].position.dx, 50.0);
     expect(result[8].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 7500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 7500), Duration.zero, result.add);
 
     // No pointer event should have been returned.
     expect(result.length, 9);
@@ -210,23 +194,15 @@ void main() {
 
   test('stream', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
-    final PointerEvent event1 =
-        createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
-    final PointerEvent event2 =
-        createSimulatedPointerDownEvent(2000, 10.0, 40.0);
-    final PointerEvent event3 =
-        createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
-    final PointerEvent event4 =
-        createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 50.0);
+    final PointerEvent event1 = createSimulatedPointerHoverEvent(2000, 10.0, 40.0, 10.0, -10.0);
+    final PointerEvent event2 = createSimulatedPointerDownEvent(2000, 10.0, 40.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 30.0, 10.0, -10.0);
+    final PointerEvent event4 = createSimulatedPointerMoveEvent(4000, 30.0, 20.0, 10.0, -10.0);
     final PointerEvent event5 = createSimulatedPointerUpEvent(4000, 30.0, 20.0);
-    final PointerEvent event6 =
-        createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
-    final PointerEvent event7 =
-        createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
-    final PointerEvent event8 =
-        createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
+    final PointerEvent event6 = createSimulatedPointerHoverEvent(5000, 40.0, 10.0, 10.0, -10.0);
+    final PointerEvent event7 = createSimulatedPointerHoverEvent(6000, 50.0, 0.0, 10.0, -10.0);
+    final PointerEvent event8 = createSimulatedPointerRemovedEvent(6000, 50.0, 0.0);
 
     resampler.addEvent(event0);
 
@@ -236,8 +212,7 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 500), Duration.zero, result.add);
 
     // No pointer event should have been returned yet.
     expect(result.isEmpty, true);
@@ -246,8 +221,7 @@ void main() {
       ..addEvent(event1)
       ..addEvent(event2);
 
-    resampler.sample(
-        const Duration(microseconds: 500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 500), Duration.zero, result.add);
 
     // No pointer event should have been returned yet.
     expect(result.isEmpty, true);
@@ -256,8 +230,7 @@ void main() {
     // Advance sample time to 1.5 ms.
     //
 
-    resampler.sample(
-        const Duration(microseconds: 1500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1500), Duration.zero, result.add);
 
     // Added pointer event should have been returned.
     expect(result.length, 1);
@@ -268,8 +241,7 @@ void main() {
 
     resampler.addEvent(event3);
 
-    resampler.sample(
-        const Duration(microseconds: 1500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1500), Duration.zero, result.add);
 
     // No more pointer events should have been returned.
     expect(result.length, 1);
@@ -278,8 +250,7 @@ void main() {
     // Advance sample time to 2.5 ms.
     //
 
-    resampler.sample(
-        const Duration(microseconds: 2500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 2500), Duration.zero, result.add);
 
     // Hover and down pointer events should have been returned.
     expect(result.length, 3);
@@ -298,8 +269,7 @@ void main() {
       ..addEvent(event4)
       ..addEvent(event5);
 
-    resampler.sample(
-        const Duration(microseconds: 2500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 2500), Duration.zero, result.add);
 
     // No more pointer events should have been returned.
     expect(result.length, 3);
@@ -308,8 +278,7 @@ void main() {
     // Advance sample time to 3.5 ms.
     //
 
-    resampler.sample(
-        const Duration(microseconds: 3500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 3500), Duration.zero, result.add);
 
     // Move pointer event should have been returned.
     expect(result.length, 4);
@@ -322,8 +291,7 @@ void main() {
 
     resampler.addEvent(event6);
 
-    resampler.sample(
-        const Duration(microseconds: 3500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 3500), Duration.zero, result.add);
 
     // No more pointer events should have been returned.
     expect(result.length, 4);
@@ -332,8 +300,7 @@ void main() {
     // Advance sample time to 4.5 ms.
     //
 
-    resampler.sample(
-        const Duration(microseconds: 4500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 4500), Duration.zero, result.add);
 
     // Move and up pointer events should have been returned.
     expect(result.length, 6);
@@ -352,8 +319,7 @@ void main() {
       ..addEvent(event7)
       ..addEvent(event8);
 
-    resampler.sample(
-        const Duration(microseconds: 4500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 4500), Duration.zero, result.add);
 
     // No more pointer events should have been returned.
     expect(result.length, 6);
@@ -362,8 +328,7 @@ void main() {
     // Advance sample time to 5.5 ms.
     //
 
-    resampler.sample(
-        const Duration(microseconds: 5500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 5500), Duration.zero, result.add);
 
     // Hover pointer event should have been returned.
     expect(result.length, 7);
@@ -378,8 +343,7 @@ void main() {
     // Advance sample time to 6.5 ms.
     //
 
-    resampler.sample(
-        const Duration(microseconds: 6500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 6500), Duration.zero, result.add);
 
     // Hover and removed pointer event should have been returned.
     expect(result.length, 9);
@@ -398,8 +362,7 @@ void main() {
     // Advance sample time to 7.5 ms.
     //
 
-    resampler.sample(
-        const Duration(microseconds: 7500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 7500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 9);
@@ -407,12 +370,10 @@ void main() {
 
   test('quick tap', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
     final PointerEvent event2 = createSimulatedPointerUpEvent(1000, 0.0, 0.0);
-    final PointerEvent event3 =
-        createSimulatedPointerRemovedEvent(1000, 0.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerRemovedEvent(1000, 0.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -422,8 +383,7 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 1500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1500), Duration.zero, result.add);
 
     // All pointer events should have been returned.
     expect(result.length, 4);
@@ -447,16 +407,12 @@ void main() {
 
   test('advance slowly', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 =
-        createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 =
-        createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
     final PointerEvent event4 = createSimulatedPointerUpEvent(3000, 20.0, 0.0);
-    final PointerEvent event5 =
-        createSimulatedPointerRemovedEvent(3000, 20.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerRemovedEvent(3000, 20.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -468,8 +424,7 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 1500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1500), Duration.zero, result.add);
 
     // Added and down pointer events should have been returned.
     expect(result.length, 2);
@@ -482,14 +437,12 @@ void main() {
     expect(result[1].position.dx, 5.0);
     expect(result[1].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 1500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 2);
 
-    resampler.sample(
-        const Duration(microseconds: 1750), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1750), Duration.zero, result.add);
 
     // Move pointer event should have been returned.
     expect(result.length, 3);
@@ -500,8 +453,7 @@ void main() {
     expect(result[2].delta.dx, 2.5);
     expect(result[2].delta.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 2000), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 2000), Duration.zero, result.add);
 
     // Another move pointer event should have been returned.
     expect(result.length, 4);
@@ -512,8 +464,7 @@ void main() {
     expect(result[3].delta.dx, 2.5);
     expect(result[3].delta.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 3000), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 3000), Duration.zero, result.add);
 
     // Move, up and removed pointer events should have been returned.
     expect(result.length, 7);
@@ -535,16 +486,12 @@ void main() {
 
   test('advance fast', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 =
-        createSimulatedPointerMoveEvent(2000, 5.0, 0.0, 5.0, 0.0);
-    final PointerEvent event3 =
-        createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 15.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 5.0, 0.0, 5.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 15.0, 0.0);
     final PointerEvent event4 = createSimulatedPointerUpEvent(4000, 30.0, 0.0);
-    final PointerEvent event5 =
-        createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -556,8 +503,7 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 2500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 2500), Duration.zero, result.add);
 
     // Added and down pointer events should have been returned.
     expect(result.length, 2);
@@ -570,8 +516,7 @@ void main() {
     expect(result[1].position.dx, 12.5);
     expect(result[1].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 5500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 5500), Duration.zero, result.add);
 
     // Move, up and removed pointer events should have been returned.
     expect(result.length, 5);
@@ -590,8 +535,7 @@ void main() {
     expect(result[4].position.dx, 30.0);
     expect(result[4].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 6500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 6500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 5);
@@ -599,21 +543,15 @@ void main() {
 
   test('skip', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 =
-        createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
     final PointerEvent event3 = createSimulatedPointerUpEvent(3000, 10.0, 0.0);
-    final PointerEvent event4 =
-        createSimulatedPointerHoverEvent(4000, 20.0, 0.0, 10.0, 0.0);
-    final PointerEvent event5 =
-        createSimulatedPointerDownEvent(4000, 20.0, 0.0);
-    final PointerEvent event6 =
-        createSimulatedPointerMoveEvent(5000, 30.0, 0.0, 10.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerHoverEvent(4000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerDownEvent(4000, 20.0, 0.0);
+    final PointerEvent event6 = createSimulatedPointerMoveEvent(5000, 30.0, 0.0, 10.0, 0.0);
     final PointerEvent event7 = createSimulatedPointerUpEvent(5000, 30.0, 0.0);
-    final PointerEvent event8 =
-        createSimulatedPointerRemovedEvent(5000, 30.0, 0.0);
+    final PointerEvent event8 = createSimulatedPointerRemovedEvent(5000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -628,8 +566,7 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 1500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 1500), Duration.zero, result.add);
 
     // Added and down pointer events should have been returned.
     expect(result.length, 2);
@@ -642,8 +579,7 @@ void main() {
     expect(result[1].position.dx, 5.0);
     expect(result[1].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 5500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 5500), Duration.zero, result.add);
 
     // All remaining pointer events should have been returned.
     expect(result.length, 7);
@@ -670,8 +606,7 @@ void main() {
     expect(result[6].position.dx, 30.0);
     expect(result[6].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 6500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 6500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 7);
@@ -679,14 +614,11 @@ void main() {
 
   test('skip all', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 =
-        createSimulatedPointerMoveEvent(4000, 30.0, 0.0, 30.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(4000, 30.0, 0.0, 30.0, 0.0);
     final PointerEvent event3 = createSimulatedPointerUpEvent(4000, 30.0, 0.0);
-    final PointerEvent event4 =
-        createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -697,14 +629,12 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.isEmpty, true);
 
-    resampler.sample(
-        const Duration(microseconds: 5500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 5500), Duration.zero, result.add);
 
     // All remaining pointer events should have been returned.
     expect(result.length, 4);
@@ -725,8 +655,7 @@ void main() {
     expect(result[3].position.dx, 30.0);
     expect(result[3].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 6500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 6500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 4);
@@ -734,16 +663,12 @@ void main() {
 
   test('stop', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(2000, 0.0, 0.0);
-    final PointerEvent event2 =
-        createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 =
-        createSimulatedPointerMoveEvent(4000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(4000, 20.0, 0.0, 10.0, 0.0);
     final PointerEvent event4 = createSimulatedPointerUpEvent(4000, 20.0, 0.0);
-    final PointerEvent event5 =
-        createSimulatedPointerRemovedEvent(5000, 20.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerRemovedEvent(5000, 20.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -755,8 +680,7 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.isEmpty, true);
@@ -795,8 +719,7 @@ void main() {
     expect(result[5].position.dx, 20.0);
     expect(result[5].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 10000), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 10000), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 6);
@@ -804,14 +727,11 @@ void main() {
 
   test('synthetic move', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(2000, 0.0, 0.0);
-    final PointerEvent event2 =
-        createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(3000, 10.0, 0.0, 10.0, 0.0);
     final PointerEvent event3 = createSimulatedPointerUpEvent(4000, 10.0, 0.0);
-    final PointerEvent event4 =
-        createSimulatedPointerRemovedEvent(5000, 10.0, 0.0);
+    final PointerEvent event4 = createSimulatedPointerRemovedEvent(5000, 10.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -822,14 +742,12 @@ void main() {
 
     final List<PointerEvent> result = <PointerEvent>[];
 
-    resampler.sample(
-        const Duration(microseconds: 500), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 500), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.isEmpty, true);
 
-    resampler.sample(
-        const Duration(microseconds: 2000), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 2000), Duration.zero, result.add);
 
     // Added and down pointer events should have been returned.
     expect(result.length, 2);
@@ -842,8 +760,7 @@ void main() {
     expect(result[1].position.dx, 0.0);
     expect(result[1].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 5000), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 5000), Duration.zero, result.add);
 
     // All remaining pointer events and a synthetic move event should
     // have been returned.
@@ -863,8 +780,7 @@ void main() {
     expect(result[4].position.dx, 10.0);
     expect(result[4].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 10000), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 10000), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 5);
@@ -872,18 +788,13 @@ void main() {
 
   test('next sample time', () {
     final PointerEventResampler resampler = PointerEventResampler();
-    final PointerEvent event0 =
-        createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
+    final PointerEvent event0 = createSimulatedPointerAddedEvent(1000, 0.0, 0.0);
     final PointerEvent event1 = createSimulatedPointerDownEvent(1000, 0.0, 0.0);
-    final PointerEvent event2 =
-        createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
-    final PointerEvent event3 =
-        createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
+    final PointerEvent event2 = createSimulatedPointerMoveEvent(2000, 10.0, 0.0, 10.0, 0.0);
+    final PointerEvent event3 = createSimulatedPointerMoveEvent(3000, 20.0, 0.0, 10.0, 0.0);
     final PointerEvent event4 = createSimulatedPointerUpEvent(3000, 20.0, 0.0);
-    final PointerEvent event5 =
-        createSimulatedPointerHoverEvent(4000, 30.0, 0.0, 10.0, 0.0);
-    final PointerEvent event6 =
-        createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
+    final PointerEvent event5 = createSimulatedPointerHoverEvent(4000, 30.0, 0.0, 10.0, 0.0);
+    final PointerEvent event6 = createSimulatedPointerRemovedEvent(4000, 30.0, 0.0);
 
     resampler
       ..addEvent(event0)
@@ -952,8 +863,7 @@ void main() {
     expect(result[5].position.dx, 25.0);
     expect(result[5].position.dy, 0.0);
 
-    resampler.sample(
-        const Duration(microseconds: 10000), Duration.zero, result.add);
+    resampler.sample(const Duration(microseconds: 10000), Duration.zero, result.add);
 
     // No pointer events should have been returned.
     expect(result.length, 6);

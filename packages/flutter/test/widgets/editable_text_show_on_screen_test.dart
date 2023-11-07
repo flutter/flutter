@@ -9,8 +9,7 @@ import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class _TestSliverPersistentHeaderDelegate
-    extends SliverPersistentHeaderDelegate {
+class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
     required this.minExtent,
     required this.maxExtent,
@@ -30,13 +29,10 @@ class _TestSliverPersistentHeaderDelegate
   final TickerProvider? vsync;
 
   @override
-  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration =
-      const PersistentHeaderShowOnScreenConfiguration();
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration();
 
   @override
-  Widget build(
-          BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      child;
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
 
   @override
   bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
@@ -59,9 +55,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'tapping on a partly visible editable brings it fully on screen',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -99,9 +93,7 @@ void main() {
     expect(scrollController.offset, 0.0);
   });
 
-  testWidgetsWithLeakTracking(
-      'tapping on a partly visible editable brings it fully on screen with scrollInsets',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('tapping on a partly visible editable brings it fully on screen with scrollInsets', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -146,11 +138,8 @@ void main() {
     expect(scrollController.offset, greaterThan(200.0 - 50.0 - 5.0));
   });
 
-  testWidgetsWithLeakTracking(
-      'editable comes back on screen when entering text while it is off-screen',
-      (WidgetTester tester) async {
-    final ScrollController scrollController =
-        ScrollController(initialScrollOffset: 100.0);
+  testWidgetsWithLeakTracking('editable comes back on screen when entering text while it is off-screen', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController(initialScrollOffset: 100.0);
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(MaterialApp(
@@ -195,12 +184,9 @@ void main() {
     expect(find.byType(EditableText), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking(
-      'entering text does not scroll when scrollPhysics.allowImplicitScrolling = false',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('entering text does not scroll when scrollPhysics.allowImplicitScrolling = false', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
-    final ScrollController scrollController =
-        ScrollController(initialScrollOffset: 100.0);
+    final ScrollController scrollController = ScrollController(initialScrollOffset: 100.0);
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(MaterialApp(
@@ -246,9 +232,7 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
-      'entering text does not scroll a surrounding PageView',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
     final PageController pageController = PageController(initialPage: 1);
     addTearDown(pageController.dispose);
@@ -296,9 +280,7 @@ void main() {
     expect(controller.text, 'H');
   });
 
-  testWidgetsWithLeakTracking(
-      'focused multi-line editable scrolls caret back into view when typing',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     controller.text = "Start${'\n' * 39}End";
@@ -347,15 +329,11 @@ void main() {
     expect(scrollController.offset, greaterThan(0.0));
   });
 
-  testWidgetsWithLeakTracking(
-      'focused multi-line editable does not scroll to old position when non-collapsed selection set',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('focused multi-line editable does not scroll to old position when non-collapsed selection set', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     final String text = "Start${'\n' * 39}End";
-    controller.value = TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: text.length - 3));
+    controller.value = TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length - 3));
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -402,9 +380,7 @@ void main() {
     expect(scrollController.offset, 28.0);
   });
 
-  testWidgetsWithLeakTracking(
-      'scrolls into view with scrollInserts after the keyboard pops up',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     const Key container = Key('container');
@@ -464,30 +440,30 @@ void main() {
                 controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
-                      ? SliverPersistentHeader(
-                          pinned: true,
-                          delegate: _TestSliverPersistentHeaderDelegate(
-                            minExtent: 50,
-                            maxExtent: 50,
-                            child: Container(
-                              alignment: Alignment.topCenter,
-                              child: EditableText(
-                                key: headerKey,
-                                backgroundCursorColor: Colors.grey,
-                                controller: controller,
-                                focusNode: focusNode,
-                                style: textStyle,
-                                cursorColor: cursorColor,
-                              ),
-                            ),
-                          ),
-                        )
-                      : SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: 100.0,
-                            child: Text('Tile $i'),
-                          ),
-                        );
+                  ? SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      minExtent: 50,
+                      maxExtent: 50,
+                      child: Container(
+                        alignment: Alignment.topCenter,
+                        child: EditableText(
+                          key: headerKey,
+                          backgroundCursorColor: Colors.grey,
+                          controller: controller,
+                          focusNode: focusNode,
+                          style: textStyle,
+                          cursorColor: cursorColor,
+                        ),
+                      ),
+                    ),
+                  )
+                  : SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 100.0,
+                      child: Text('Tile $i'),
+                    ),
+                  );
                 }),
               ),
             ),
@@ -525,31 +501,31 @@ void main() {
                 controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
-                      ? SliverPersistentHeader(
-                          pinned: true,
-                          delegate: _TestSliverPersistentHeaderDelegate(
-                            minExtent: 50,
-                            maxExtent: 50,
-                            vsync: null,
-                            child: Container(
-                              alignment: Alignment.topCenter,
-                              child: EditableText(
-                                key: headerKey,
-                                backgroundCursorColor: Colors.grey,
-                                controller: controller,
-                                focusNode: focusNode,
-                                style: textStyle,
-                                cursorColor: cursorColor,
-                              ),
-                            ),
+                    ? SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _TestSliverPersistentHeaderDelegate(
+                        minExtent: 50,
+                        maxExtent: 50,
+                        vsync: null,
+                        child: Container(
+                          alignment: Alignment.topCenter,
+                          child: EditableText(
+                            key: headerKey,
+                            backgroundCursorColor: Colors.grey,
+                            controller: controller,
+                            focusNode: focusNode,
+                            style: textStyle,
+                            cursorColor: cursorColor,
                           ),
-                        )
-                      : SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: 100.0,
-                            child: Text('Tile $i'),
-                          ),
-                        );
+                        ),
+                      ),
+                    )
+                    : SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 100.0,
+                        child: Text('Tile $i'),
+                      ),
+                    );
                 }),
               ),
             ),
@@ -569,24 +545,19 @@ void main() {
     },
   );
 
-  void testShowCaretOnScreen({required bool readOnly}) {
+  void testShowCaretOnScreen({ required bool readOnly }) {
     group('EditableText._showCaretOnScreen, readOnly=$readOnly', () {
-      final TextInputFormatter rejectEverythingFormatter =
-          TextInputFormatter.withFunction(
-              (TextEditingValue old, TextEditingValue value) => old);
+      final TextInputFormatter rejectEverythingFormatter = TextInputFormatter.withFunction((TextEditingValue old, TextEditingValue value) => old);
 
       bool isCaretOnScreen(WidgetTester tester) {
         final EditableTextState state = tester.state<EditableTextState>(
           find.byType(EditableText, skipOffstage: false),
         );
         final RenderEditable renderEditable = state.renderEditable;
-        final Rect localRect = renderEditable
-            .getLocalRectForCaret(state.textEditingValue.selection.base);
-        final Offset caretOrigin =
-            renderEditable.localToGlobal(localRect.topLeft);
+        final Rect localRect = renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base);
+        final Offset caretOrigin = renderEditable.localToGlobal(localRect.topLeft);
         final Rect caretRect = caretOrigin & localRect.size;
-        return const Rect.fromLTWH(0, 0, 800, 600).intersect(caretRect) ==
-            caretRect;
+        return const Rect.fromLTWH(0, 0,  800, 600).intersect(caretRect) == caretRect;
       }
 
       Widget buildEditableText({
@@ -606,9 +577,7 @@ void main() {
                   backgroundCursorColor: Colors.grey,
                   controller: controller,
                   scrollController: editableScrollController,
-                  inputFormatters: <TextInputFormatter>[
-                    if (rejectUserInputs) rejectEverythingFormatter
-                  ],
+                  inputFormatters: <TextInputFormatter>[if (rejectUserInputs) rejectEverythingFormatter],
                   focusNode: focusNode,
                   style: textStyle,
                   cursorColor: cursorColor,
@@ -620,8 +589,7 @@ void main() {
         );
       }
 
-      testWidgetsWithLeakTracking('focus-triggered showCaretOnScreen',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('focus-triggered showCaretOnScreen', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 100);
         final ScrollController scrollController = ScrollController();
@@ -649,13 +617,10 @@ void main() {
         // is visible on the screen.
         expect(isCaretOnScreen(tester), !readOnly && !kIsWeb);
         expect(scrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
-        expect(
-            editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
+        expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
       });
 
-      testWidgetsWithLeakTracking(
-          'selection-triggered showCaretOnScreen: virtual keyboard',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('selection-triggered showCaretOnScreen: virtual keyboard', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 80);
         final ScrollController scrollController = ScrollController();
@@ -687,14 +652,11 @@ void main() {
         // Change the selection. Show caret on screen when readyOnly is true,
         // as a read-only text field rejects everything from the software
         // keyboard (except for web).
-        state.updateEditingValue(state.textEditingValue
-            .copyWith(selection: const TextSelection.collapsed(offset: 90)));
+        state.updateEditingValue(state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 90)));
         await tester.pumpAndSettle();
         expect(isCaretOnScreen(tester), !readOnly || kIsWeb);
-        expect(scrollController.offset,
-            readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
-        expect(editableScrollController.offset,
-            readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+        expect(scrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+        expect(editableScrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
 
         // Reject user input.
         await tester.pumpWidget(
@@ -711,19 +673,14 @@ void main() {
         await tester.pumpAndSettle();
         expect(isCaretOnScreen(tester), isFalse);
 
-        state.updateEditingValue(state.textEditingValue
-            .copyWith(selection: const TextSelection.collapsed(offset: 100)));
+        state.updateEditingValue(state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 100)));
         await tester.pumpAndSettle();
         expect(isCaretOnScreen(tester), !readOnly || kIsWeb);
-        expect(scrollController.offset,
-            readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
-        expect(editableScrollController.offset,
-            readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+        expect(scrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+        expect(editableScrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
       });
 
-      testWidgetsWithLeakTracking(
-          'selection-triggered showCaretOnScreen: text selection delegate',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('selection-triggered showCaretOnScreen: text selection delegate', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 80);
         final ScrollController scrollController = ScrollController();
@@ -755,8 +712,7 @@ void main() {
         // Change the selection. Show caret on screen even when readyOnly is
         // false.
         state.userUpdateTextEditingValue(
-          state.textEditingValue
-              .copyWith(selection: const TextSelection.collapsed(offset: 90)),
+          state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 90)),
           null,
         );
         await tester.pumpAndSettle();
@@ -780,8 +736,7 @@ void main() {
         expect(isCaretOnScreen(tester), isFalse);
 
         state.userUpdateTextEditingValue(
-          state.textEditingValue
-              .copyWith(selection: const TextSelection.collapsed(offset: 100)),
+          state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 100)),
           null,
         );
         await tester.pumpAndSettle();
@@ -791,9 +746,7 @@ void main() {
       });
 
       // Regression text for https://github.com/flutter/flutter/pull/74722.
-      testWidgetsWithLeakTracking(
-          'does NOT randomly trigger when cursor blinks',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('does NOT randomly trigger when cursor blinks', (WidgetTester tester) async {
         controller.text = 'a' * 100;
         controller.selection = const TextSelection.collapsed(offset: 0);
         final ScrollController editableScrollController = ScrollController();
@@ -854,7 +807,7 @@ void main() {
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const NoImplicitScrollPhysics({super.parent});
+  const NoImplicitScrollPhysics({ super.parent });
 
   @override
   bool get allowImplicitScrolling => false;

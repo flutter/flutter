@@ -29,17 +29,15 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     testUsage = TestUsage();
     logger = BufferLogger.test();
-    flutterVersion =
-        FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
+    flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
 
-    flutterProject =
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     fileSystem.file('.packages').createSync();
   });
 
   testUsingContext('WebBuilder sets environment on success', () async {
-    final TestBuildSystem buildSystem = TestBuildSystem.all(
-        BuildResult(success: true), (Target target, Environment environment) {
+    final TestBuildSystem buildSystem =
+        TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
       expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
       expect(webServiceWorker.webRenderer, WebRendererMode.auto);
@@ -92,14 +90,14 @@ void main() {
       testUsage.events,
       unorderedEquals(
         <TestUsageEvent>[
-          const TestUsageEvent(
-            'build',
-            'web',
-            label: 'web-compile',
+      const TestUsageEvent(
+        'build',
+        'web',
+        label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
                   'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
-            ),
+      ),
           ),
         ],
       ),
@@ -137,15 +135,11 @@ void main() {
               'target',
               BuildInfo.debug,
               ServiceWorkerStrategy.offlineFirst,
-              compilerConfig:
-                  const JsCompilerConfig.run(nativeNullAssertions: true),
+              compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 
-    expect(
-        logger.errorText,
-        contains(
-            'Target hello failed: FormatException: illegal character in input string'));
+    expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
   });
 }

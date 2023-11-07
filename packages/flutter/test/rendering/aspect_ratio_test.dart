@@ -112,8 +112,7 @@ void main() {
 
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     layout(box, onErrors: () {
-      errors.addAll(
-          TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails());
+      errors.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails());
     });
     expect(errors, hasLength(2));
     expect(errors.first.exception, isFlutterError);

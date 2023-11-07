@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -9,13 +10,10 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('SystemChrome overlay style test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SystemChrome overlay style test', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -27,21 +25,19 @@ void main() {
     // Flush all microtasks
     await tester.idle();
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setSystemUIOverlayStyle',
-          arguments: <String, dynamic>{
-            'systemNavigationBarColor': 4278190080,
-            'systemNavigationBarDividerColor': null,
-            'systemStatusBarContrastEnforced': null,
-            'statusBarColor': null,
-            'statusBarBrightness': 'Brightness.dark',
-            'statusBarIconBrightness': 'Brightness.light',
-            'systemNavigationBarIconBrightness': 'Brightness.light',
-            'systemNavigationBarContrastEnforced': null,
-          },
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setSystemUIOverlayStyle',
+      arguments: <String, dynamic>{
+        'systemNavigationBarColor': 4278190080,
+        'systemNavigationBarDividerColor': null,
+        'systemStatusBarContrastEnforced': null,
+        'statusBarColor': null,
+        'statusBarBrightness': 'Brightness.dark',
+        'statusBarIconBrightness': 'Brightness.light',
+        'systemNavigationBarIconBrightness': 'Brightness.light',
+        'systemNavigationBarContrastEnforced': null,
+      },
+    ));
     log.clear();
     expect(tester.binding.microtaskCount, equals(0));
     expect(log.isEmpty, isTrue);
@@ -57,29 +53,25 @@ void main() {
     expect(tester.binding.microtaskCount, equals(1));
     await tester.idle();
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setSystemUIOverlayStyle',
-          arguments: <String, dynamic>{
-            'systemNavigationBarColor': null,
-            'systemNavigationBarDividerColor': null,
-            'systemStatusBarContrastEnforced': false,
-            'statusBarColor': null,
-            'statusBarBrightness': null,
-            'statusBarIconBrightness': null,
-            'systemNavigationBarIconBrightness': null,
-            'systemNavigationBarContrastEnforced': true,
-          },
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setSystemUIOverlayStyle',
+      arguments: <String, dynamic>{
+        'systemNavigationBarColor': null,
+        'systemNavigationBarDividerColor': null,
+        'systemStatusBarContrastEnforced': false,
+        'statusBarColor': null,
+        'statusBarBrightness': null,
+        'statusBarIconBrightness': null,
+        'systemNavigationBarIconBrightness': null,
+        'systemNavigationBarContrastEnforced': true,
+      },
+    ));
   });
 
   test('setPreferredOrientations control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -89,64 +81,51 @@ void main() {
     ]);
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setPreferredOrientations',
-          arguments: <String>['DeviceOrientation.portraitUp'],
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setPreferredOrientations',
+      arguments: <String>['DeviceOrientation.portraitUp'],
+    ));
   });
 
   test('setApplicationSwitcherDescription control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(
-          label: 'Example label', primaryColor: 0xFF00FF00),
+      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00),
     );
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setApplicationSwitcherDescription',
-          arguments: <String, dynamic>{
-            'label': 'Example label',
-            'primaryColor': 4278255360
-          },
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'Example label', 'primaryColor': 4278255360},
+    ));
   });
 
   test('setApplicationSwitcherDescription missing plugin', () async {
     final List<ByteData?> log = <ByteData>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMessageHandler('flutter/platform', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
       return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(
-          label: 'Example label', primaryColor: 0xFF00FF00),
+      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00),
     );
 
     expect(log, isNotEmpty);
   });
 
+
   test('setEnabledSystemUIMode control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -154,59 +133,45 @@ void main() {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setEnabledSystemUIMode',
-          arguments: 'SystemUiMode.leanBack',
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setEnabledSystemUIMode',
+      arguments: 'SystemUiMode.leanBack',
+    ));
   });
 
-  test('setEnabledSystemUIMode asserts for overlays in manual configuration',
-      () async {
+  test('setEnabledSystemUIMode asserts for overlays in manual configuration', () async {
     expect(
       () async {
         await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual);
       },
       throwsA(
-        isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('mode == SystemUiMode.manual && overlays != null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+            'description', contains('mode == SystemUiMode.manual && overlays != null')),
       ),
     );
   });
 
-  test(
-      'setEnabledSystemUIMode passes correct overlays for manual configuration',
-      () async {
+  test('setEnabledSystemUIMode passes correct overlays for manual configuration', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
 
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-        overlays: <SystemUiOverlay>[SystemUiOverlay.top]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.top]);
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setEnabledSystemUIOverlays',
-          arguments: <String>['SystemUiOverlay.top'],
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setEnabledSystemUIOverlays',
+      arguments: <String>['SystemUiOverlay.top'],
+    ));
   });
 
   test('setSystemUIChangeCallback control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform,
-            (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -214,23 +179,18 @@ void main() {
     await SystemChrome.setSystemUIChangeCallback(null);
     expect(log, hasLength(0));
 
-    await SystemChrome.setSystemUIChangeCallback(
-        (bool overlaysAreVisible) async {});
+    await SystemChrome.setSystemUIChangeCallback((bool overlaysAreVisible) async {});
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setSystemUIChangeListener',
-          arguments: null,
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setSystemUIChangeListener',
+      arguments: null,
+    ));
   });
 
   test('toString works as intended', () async {
     const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
 
-    expect(
-      systemUiOverlayStyle.toString(),
-      'SystemUiOverlayStyle({'
+    expect(systemUiOverlayStyle.toString(), 'SystemUiOverlayStyle({'
       'systemNavigationBarColor: null, '
       'systemNavigationBarDividerColor: null, '
       'systemStatusBarContrastEnforced: null, '

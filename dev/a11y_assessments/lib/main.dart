@@ -26,10 +26,9 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, WidgetBuilder> routes =
-        Map<String, WidgetBuilder>.fromEntries(
-      useCases.map((UseCase useCase) =>
-          MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
+
+    final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromEntries(
+      useCases.map((UseCase useCase) => MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
     );
     return MaterialApp(
       title: 'Accessibility Assessments',
@@ -37,7 +36,10 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
+      routes: <String, WidgetBuilder>{
+        '/': (_) => const HomePage(),
+        ...routes
+      },
     );
   }
 }
@@ -60,15 +62,18 @@ class HomePageState extends State<HomePage> {
 
   Widget _buildUseCaseItem(int index, UseCase useCase) {
     return Padding(
-        padding: const EdgeInsets.all(10),
-        child: Builder(builder: (BuildContext context) {
-          return TextButton(
-            autofocus: index == 0,
-            key: Key(useCase.name),
-            onPressed: () => Navigator.of(context).pushNamed(useCase.route),
-            child: Text(useCase.name),
-          );
-        }));
+      padding: const EdgeInsets.all(10),
+      child: Builder(
+          builder: (BuildContext context) {
+            return TextButton(
+              autofocus: index == 0,
+              key: Key(useCase.name),
+              onPressed: () => Navigator.of(context).pushNamed(useCase.route),
+              child: Text(useCase.name),
+            );
+          }
+      )
+    );
   }
 
   @override

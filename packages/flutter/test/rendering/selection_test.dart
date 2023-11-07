@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+
 void main() {
   const Rect rect = Rect.fromLTWH(100, 100, 200, 500);
   const Offset outsideTopLeft = Offset(50, 50);
@@ -59,58 +60,25 @@ void main() {
 
     test('adjustDragOffset works', () {
       // ltr
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideTopLeft), rect.topLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopLeft), rect.topLeft);
       expect(SelectionUtils.adjustDragOffset(rect, outsideLeft), rect.topLeft);
-      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomLeft),
-          rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomLeft), rect.bottomRight);
       expect(SelectionUtils.adjustDragOffset(rect, outsideTop), rect.topLeft);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideTopRight), rect.topLeft);
-      expect(SelectionUtils.adjustDragOffset(rect, outsideRight),
-          rect.bottomRight);
-      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomRight),
-          rect.bottomRight);
-      expect(SelectionUtils.adjustDragOffset(rect, outsideBottom),
-          rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopRight), rect.topLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideRight), rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomRight), rect.bottomRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottom), rect.bottomRight);
       expect(SelectionUtils.adjustDragOffset(rect, center), center);
       // rtl
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideTopLeft,
-              direction: TextDirection.rtl),
-          rect.topRight);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideLeft,
-              direction: TextDirection.rtl),
-          rect.topRight);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideBottomLeft,
-              direction: TextDirection.rtl),
-          rect.bottomLeft);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideTop,
-              direction: TextDirection.rtl),
-          rect.topRight);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideTopRight,
-              direction: TextDirection.rtl),
-          rect.topRight);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideRight,
-              direction: TextDirection.rtl),
-          rect.bottomLeft);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideBottomRight,
-              direction: TextDirection.rtl),
-          rect.bottomLeft);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, outsideBottom,
-              direction: TextDirection.rtl),
-          rect.bottomLeft);
-      expect(
-          SelectionUtils.adjustDragOffset(rect, center,
-              direction: TextDirection.rtl),
-          center);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopLeft, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideLeft, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomLeft, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTop, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideTopRight, direction: TextDirection.rtl), rect.topRight);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideRight, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottomRight, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, outsideBottom, direction: TextDirection.rtl), rect.bottomLeft);
+      expect(SelectionUtils.adjustDragOffset(rect, center, direction: TextDirection.rtl), center);
     });
   });
 }

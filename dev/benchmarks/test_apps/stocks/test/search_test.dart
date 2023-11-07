@@ -11,16 +11,14 @@ void main() {
   stock_data.StockData.actuallyFetchData = false;
 
   testWidgets('Search', (WidgetTester tester) async {
-    stocks
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    stocks.main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
     expect(find.text('AAPL'), findsNothing);
     expect(find.text('BANA'), findsNothing);
 
-    final stocks.StocksAppState app =
-        tester.state<stocks.StocksAppState>(find.byType(stocks.StocksApp));
+    final stocks.StocksAppState app = tester.state<stocks.StocksAppState>(find.byType(stocks.StocksApp));
     app.stocks.add(<List<String>>[
       // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote"
       <String>['AAPL', 'Apple', '', '', '', '', '', ''],

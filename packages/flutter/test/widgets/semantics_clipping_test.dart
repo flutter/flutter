@@ -10,8 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SemanticNode.rect is clipped',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticNode.rect is clipped', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const Directionality(
@@ -48,33 +47,28 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics(
-                label: '1',
-                rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
-              ),
-              TestSemantics(
-                label: '2',
-                rect: const Rect.fromLTRB(
-                    0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
-              ),
-              // node with Text 3 not present.
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            label: '1',
+            rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
-          ignoreTransform: true,
-          ignoreId: true,
-        ));
+          TestSemantics(
+            label: '2',
+            rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
+          ),
+          // node with Text 3 not present.
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking(
-      'SemanticsNode is not removed if out of bounds and merged into something within bounds',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticsNode is not removed if out of bounds and merged into something within bounds', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const Directionality(
@@ -118,25 +112,22 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics(
-                label: '1',
-                rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
-              ),
-              TestSemantics(
-                label: '2\n3',
-                rect: const Rect.fromLTRB(
-                    0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
-              ),
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            label: '1',
+            rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
-          ignoreTransform: true,
-          ignoreId: true,
-        ));
+          TestSemantics(
+            label: '2\n3',
+            rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
+          ),
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
 
     semantics.dispose();
   });

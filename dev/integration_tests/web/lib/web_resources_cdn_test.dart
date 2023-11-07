@@ -6,8 +6,7 @@ import 'dart:html' as html;
 
 // Attempt to load CanvasKit resources hosted on gstatic.
 Future<void> main() async {
-  const String engineVersion =
-      String.fromEnvironment('TEST_FLUTTER_ENGINE_VERSION');
+  const String engineVersion = String.fromEnvironment('TEST_FLUTTER_ENGINE_VERSION');
   if (engineVersion.isEmpty) {
     print('--- TEST FAILED ---');
     return;

@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('InvertColors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InvertColors',  (WidgetTester tester) async {
     await tester.pumpWidget(const RepaintBoundary(
       child: SizedBox(
         width: 200.0,
@@ -30,16 +30,14 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('InvertColors and ColorFilter',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InvertColors and ColorFilter',  (WidgetTester tester) async {
     await tester.pumpWidget(const RepaintBoundary(
       child: SizedBox(
         width: 200.0,
         height: 200.0,
         child: InvertColorTestWidget(
           color: Color.fromRGBO(255, 0, 0, 1.0),
-          filter:
-              ColorFilter.mode(Color.fromRGBO(0, 255, 0, 0.5), BlendMode.plus),
+          filter: ColorFilter.mode(Color.fromRGBO(0, 255, 0, 0.5), BlendMode.plus),
         ),
       ),
     ));
@@ -67,14 +65,13 @@ class InvertColorTestWidget extends LeafRenderObjectWidget {
   RenderInvertColorTest createRenderObject(BuildContext context) {
     return RenderInvertColorTest(color, filter);
   }
-
   @override
-  void updateRenderObject(
-      BuildContext context, covariant RenderInvertColorTest renderObject) {
+  void updateRenderObject(BuildContext context, covariant RenderInvertColorTest renderObject) {
     renderObject
       ..color = color
       ..filter = filter;
   }
+
 }
 
 class RenderInvertColorTest extends RenderProxyBox {
@@ -89,6 +86,7 @@ class RenderInvertColorTest extends RenderProxyBox {
     _color = value;
     markNeedsPaint();
   }
+
 
   ColorFilter? get filter => _filter;
   ColorFilter? _filter;

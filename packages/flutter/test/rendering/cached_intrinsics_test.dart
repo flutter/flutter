@@ -15,7 +15,6 @@ class RenderTestBox extends RenderBox {
     value += 1.0;
     return value;
   }
-
   @override
   double computeMinIntrinsicWidth(double height) => next();
   @override
@@ -85,11 +84,12 @@ void main() {
     expect(test.getMinIntrinsicWidth(200.0), equals(3.0));
     expect(test.getMinIntrinsicWidth(100.0), equals(2.0));
     expect(test.getMinIntrinsicWidth(0.0), equals(1.0));
+
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101179
   test('Cached baselines should be cleared if its parent re-layout', () {
-    double viewHeight = 200.0;
+    double viewHeight =  200.0;
     final RenderTestBox test = RenderTestBox();
     final RenderBox baseline = RenderBaseline(
       baseline: 0.0,
@@ -97,8 +97,7 @@ void main() {
       child: test,
     );
     final RenderConstrainedBox root = RenderConstrainedBox(
-      additionalConstraints:
-          BoxConstraints.tightFor(width: 200.0, height: viewHeight),
+      additionalConstraints: BoxConstraints.tightFor(width: 200.0, height: viewHeight),
       child: baseline,
     );
 
@@ -112,14 +111,12 @@ void main() {
 
     // Trigger the root render re-layout.
     viewHeight = 300.0;
-    root.additionalConstraints =
-        BoxConstraints.tightFor(width: 200.0, height: viewHeight);
+    root.additionalConstraints = BoxConstraints.tightFor(width: 200.0, height: viewHeight);
     pumpFrame();
 
     parentData = test.parentData as BoxParentData?;
     expect(parentData!.offset.dy, -(viewHeight / 2.0));
-    expect(test.calls,
-        2); // The layout constraints change will clear the cached data.
+    expect(test.calls, 2); // The layout constraints change will clear the cached data.
 
     final RenderObject parent = test.parent!;
     expect(parent.debugNeedsLayout, false);
@@ -135,7 +132,6 @@ void main() {
     parent.markNeedsLayout();
     pumpFrame();
 
-    expect(test.calls,
-        3); // Use the cached data if the layout constraints do not change.
+    expect(test.calls, 3); // Use the cached data if the layout constraints do not change.
   });
 }

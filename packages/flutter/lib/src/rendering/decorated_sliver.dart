@@ -23,9 +23,9 @@ class RenderDecoratedSliver extends RenderProxySliver {
     required Decoration decoration,
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,
-  })  : _decoration = decoration,
-        _position = position,
-        _configuration = configuration;
+  }) : _decoration = decoration,
+       _position = position,
+       _configuration = configuration;
 
   /// What decoration to paint.
   ///
@@ -94,19 +94,15 @@ class RenderDecoratedSliver extends RenderProxySliver {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
-      final SliverPhysicalParentData childParentData =
-          child!.parentData! as SliverPhysicalParentData;
+      final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
       final Size childSize;
       final Offset scrollOffset;
 
       // In the case where the child sliver has infinite scroll extent, the decoration
       // should only extend down to the bottom cache extent.
-      final double cappedMainAxisExtent =
-          child!.geometry!.scrollExtent.isInfinite
-              ? constraints.scrollOffset +
-                  child!.geometry!.cacheExtent +
-                  constraints.cacheOrigin
-              : child!.geometry!.scrollExtent;
+      final double cappedMainAxisExtent = child!.geometry!.scrollExtent.isInfinite
+        ? constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin
+        : child!.geometry!.scrollExtent;
       switch (constraints.axis) {
         case Axis.vertical:
           childSize = Size(constraints.crossAxisExtent, cappedMainAxisExtent);
@@ -117,13 +113,11 @@ class RenderDecoratedSliver extends RenderProxySliver {
       }
       final Offset childOffset = offset + childParentData.paintOffset;
       if (position == DecorationPosition.background) {
-        _painter!.paint(context.canvas, childOffset + scrollOffset,
-            configuration.copyWith(size: childSize));
+        _painter!.paint(context.canvas, childOffset + scrollOffset, configuration.copyWith(size: childSize));
       }
       context.paintChild(child!, childOffset);
       if (position == DecorationPosition.foreground) {
-        _painter!.paint(context.canvas, childOffset + scrollOffset,
-            configuration.copyWith(size: childSize));
+        _painter!.paint(context.canvas, childOffset + scrollOffset, configuration.copyWith(size: childSize));
       }
     }
   }

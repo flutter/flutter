@@ -18,17 +18,18 @@ Future<void> main() async {
 
         await inDirectory(flutterProject.rootPath, () async {
           final File appIconFile = File(path.join(
-            flutterProject.rootPath,
-            'ios',
-            'Runner',
-            'Assets.xcassets',
-            'AppIcon.appiconset',
-            'Icon-App-20x20@1x.png',
+              flutterProject.rootPath,
+              'ios',
+              'Runner',
+              'Assets.xcassets',
+              'AppIcon.appiconset',
+              'Icon-App-20x20@1x.png',
           ));
           // Resizes app icon to 123x456 (it is supposed to be 20x20).
           appIconFile.writeAsBytesSync(appIconFile.readAsBytesSync()
             ..buffer.asByteData().setInt32(16, 123)
-            ..buffer.asByteData().setInt32(20, 456));
+            ..buffer.asByteData().setInt32(20, 456)
+          );
 
           final String output = await evalFlutter('build', options: <String>[
             'xcarchive',
@@ -56,10 +57,8 @@ Future<void> main() async {
             '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
             'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
           ];
-          if (expectedValidationMessages
-              .any((String message) => !output.contains(message))) {
-            throw TaskResult.failure(
-                'Must have the expected validation message');
+          if (expectedValidationMessages.any((String message) => !output.contains(message))) {
+            throw TaskResult.failure('Must have the expected validation message');
           }
         });
 
@@ -80,14 +79,12 @@ Future<void> main() async {
           'dSYMs',
           'Runner.app.dSYM',
         ));
-        final Directory applications =
-            Directory(path.join(products, 'Applications'));
+        final Directory applications = Directory(path.join(products, 'Applications'));
 
         final Directory appBundle = applications
             .listSync()
             .whereType<Directory>()
-            .singleWhere((Directory directory) =>
-                path.extension(directory.path) == '.app');
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app');
 
         final String flutterFramework = path.join(
           appBundle.path,

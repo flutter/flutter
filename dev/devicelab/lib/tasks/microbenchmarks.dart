@@ -36,8 +36,7 @@ TaskFunction createMicrobenchmarkTask({
             '--profile',
             '--no-publish-port',
             if (enableImpeller != null && enableImpeller) '--enable-impeller',
-            if (enableImpeller != null && !enableImpeller)
-              '--no-enable-impeller',
+            if (enableImpeller != null && !enableImpeller) '--no-enable-impeller',
             '-d',
             device.deviceId,
           ];
@@ -59,12 +58,10 @@ TaskFunction createMicrobenchmarkTask({
       ...await runMicrobench('lib/foundation/change_notifier_bench.dart'),
       ...await runMicrobench('lib/foundation/clamp.dart'),
       ...await runMicrobench('lib/foundation/platform_asset_bundle.dart'),
-      ...await runMicrobench(
-          'lib/foundation/standard_message_codec_bench.dart'),
+      ...await runMicrobench('lib/foundation/standard_message_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/standard_method_codec_bench.dart'),
       ...await runMicrobench('lib/foundation/timeline_bench.dart'),
-      ...await runMicrobench(
-          'lib/foundation/decode_and_parse_asset_manifest.dart'),
+      ...await runMicrobench('lib/foundation/decode_and_parse_asset_manifest.dart'),
       ...await runMicrobench('lib/geometry/matrix_utils_transform_bench.dart'),
       ...await runMicrobench('lib/geometry/rrect_contains_bench.dart'),
       ...await runMicrobench('lib/gestures/gesture_detector_bench.dart'),

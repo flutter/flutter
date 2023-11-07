@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Sends the same platform channel message that the engine sends when it
 /// receives a system back.
 Future<void> simulateSystemBack() {
-  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .handlePlatformMessage(
+  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/navigation',
     const JSONMessageCodec().encodeMessage(<String, dynamic>{
       'method': 'popRoute',

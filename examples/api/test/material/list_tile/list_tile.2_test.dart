@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/list_tile/list_tile.2.dart'
-    as example;
+import 'package:flutter_api_samples/material/list_tile/list_tile.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTile leading and trailing widgets are aligned appropriately',
-      (WidgetTester tester) async {
+  testWidgets('ListTile leading and trailing widgets are aligned appropriately', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListTileApp(),
     );

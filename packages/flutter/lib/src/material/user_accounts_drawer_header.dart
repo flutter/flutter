@@ -35,9 +35,7 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           end: 0.0,
           child: Row(
-            children: (otherAccountsPictures ?? <Widget>[])
-                .take(3)
-                .map<Widget>((Widget picture) {
+            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
               return Padding(
                 padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: Semantics(
@@ -88,12 +86,11 @@ class _AccountDetails extends StatefulWidget {
   _AccountDetailsState createState() => _AccountDetailsState();
 }
 
-class _AccountDetailsState extends State<_AccountDetails>
-    with SingleTickerProviderStateMixin {
+class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
   late Animation<double> _animation;
   late AnimationController _controller;
   @override
-  void initState() {
+  void initState () {
     super.initState();
     _controller = AnimationController(
       value: widget.isOpen ? 1.0 : 0.0,
@@ -104,9 +101,10 @@ class _AccountDetailsState extends State<_AccountDetails>
       parent: _controller,
       curve: Curves.fastOutSlowIn,
       reverseCurve: Curves.fastOutSlowIn.flipped,
-    )..addListener(() => setState(() {
-          // [animation]'s value has changed here.
-        }));
+    )
+      ..addListener(() => setState(() {
+        // [animation]'s value has changed here.
+      }));
   }
 
   @override
@@ -116,7 +114,7 @@ class _AccountDetailsState extends State<_AccountDetails>
   }
 
   @override
-  void didUpdateWidget(_AccountDetails oldWidget) {
+  void didUpdateWidget (_AccountDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the state of the arrow did not change, there is no need to trigger the animation
     if (oldWidget.isOpen == widget.isOpen) {
@@ -137,8 +135,7 @@ class _AccountDetailsState extends State<_AccountDetails>
     assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     Widget accountDetails = CustomMultiChildLayout(
       delegate: _AccountDetailsLayout(
@@ -215,7 +212,8 @@ class _AccountDetailsState extends State<_AccountDetails>
 const double _kAccountDetailsHeight = 56.0;
 
 class _AccountDetailsLayout extends MultiChildLayoutDelegate {
-  _AccountDetailsLayout({required this.textDirection});
+
+  _AccountDetailsLayout({ required this.textDirection });
 
   static const String accountName = 'accountName';
   static const String accountEmail = 'accountEmail';
@@ -232,29 +230,21 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       positionChild(dropdownIcon, _offsetForIcon(size, iconSize));
     }
 
-    final String? bottomLine = hasChild(accountEmail)
-        ? accountEmail
-        : (hasChild(accountName) ? accountName : null);
+    final String? bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize = iconSize == null
-          ? size
-          : Size(size.width - iconSize.width, size.height);
+      final Size constraintSize = iconSize == null ? size : Size(size.width - iconSize.width, size.height);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
 
       // place bottom line center at same height as icon center
-      final Size bottomLineSize =
-          layoutChild(bottomLine, BoxConstraints.loose(constraintSize));
-      final Offset bottomLineOffset =
-          _offsetForBottomLine(size, iconSize, bottomLineSize);
+      final Size bottomLineSize = layoutChild(bottomLine, BoxConstraints.loose(constraintSize));
+      final Offset bottomLineOffset = _offsetForBottomLine(size, iconSize, bottomLineSize);
       positionChild(bottomLine, bottomLineOffset);
 
       // place account name above account email
       if (bottomLine == accountEmail && hasChild(accountName)) {
-        final Size nameSize =
-            layoutChild(accountName, BoxConstraints.loose(constraintSize));
-        positionChild(
-            accountName, _offsetForName(size, nameSize, bottomLineOffset));
+        final Size nameSize = layoutChild(accountName, BoxConstraints.loose(constraintSize));
+        positionChild(accountName, _offsetForName(size, nameSize, bottomLineOffset));
       }
     }
   }
@@ -265,16 +255,14 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   Offset _offsetForIcon(Size size, Size iconSize) {
     switch (textDirection) {
       case TextDirection.ltr:
-        return Offset(
-            size.width - iconSize.width, size.height - iconSize.height);
+        return Offset(size.width - iconSize.width, size.height - iconSize.height);
       case TextDirection.rtl:
         return Offset(0.0, size.height - iconSize.height);
     }
   }
 
   Offset _offsetForBottomLine(Size size, Size iconSize, Size bottomLineSize) {
-    final double y =
-        size.height - 0.5 * iconSize.height - 0.5 * bottomLineSize.height;
+    final double y = size.height - 0.5 * iconSize.height - 0.5 * bottomLineSize.height;
     switch (textDirection) {
       case TextDirection.ltr:
         return Offset(0.0, y);
@@ -358,8 +346,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   final Color arrowColor;
 
   @override
-  State<UserAccountsDrawerHeader> createState() =>
-      _UserAccountsDrawerHeaderState();
+  State<UserAccountsDrawerHeader> createState() => _UserAccountsDrawerHeaderState();
 }
 
 class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
@@ -380,8 +367,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
-        decoration: widget.decoration ??
-            BoxDecoration(color: Theme.of(context).colorScheme.primary),
+        decoration: widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: SafeArea(
@@ -404,9 +390,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                 accountName: widget.accountName,
                 accountEmail: widget.accountEmail,
                 isOpen: _isOpen,
-                onTap: widget.onDetailsPressed == null
-                    ? null
-                    : _handleDetailsPressed,
+                onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
                 arrowColor: widget.arrowColor,
               ),
             ],

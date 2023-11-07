@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Flex overflow indicator',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Flex overflow indicator', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Column(

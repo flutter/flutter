@@ -44,14 +44,12 @@ void _encodeBundleTranslations(Map<String, dynamic> bundle) {
   }
 }
 
-void _checkEncodedTranslations(
-    Map<String, dynamic> encodedBundle, Map<String, dynamic> bundle) {
+void _checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, dynamic> bundle) {
   bool errorFound = false;
   const JsonDecoder decoder = JsonDecoder();
   for (final String key in bundle.keys) {
     if (decoder.convert('"${encodedBundle[key]}"') != bundle[key]) {
-      stderr.writeln(
-          '  encodedTranslation for $key does not match original value "${bundle[key]}"');
+      stderr.writeln('  encodedTranslation for $key does not match original value "${bundle[key]}"');
       errorFound = true;
     }
   }
@@ -64,8 +62,7 @@ void _rewriteBundle(File file, Map<String, dynamic> bundle) {
   final StringBuffer contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {
-    contents.writeln(
-        '  "$key": "${bundle[key]}"${key == bundle.keys.last ? '' : ','}');
+    contents.writeln('  "$key": "${bundle[key]}"${key == bundle.keys.last ? '' : ','}');
   }
   contents.writeln('}');
   file.writeAsStringSync(contents.toString());
@@ -73,10 +70,8 @@ void _rewriteBundle(File file, Map<String, dynamic> bundle) {
 
 void encodeKnArbFiles(Directory directory) {
   final File widgetsArbFile = File(path.join(directory.path, 'widgets_kn.arb'));
-  final File materialArbFile =
-      File(path.join(directory.path, 'material_kn.arb'));
-  final File cupertinoArbFile =
-      File(path.join(directory.path, 'cupertino_kn.arb'));
+  final File materialArbFile = File(path.join(directory.path, 'material_kn.arb'));
+  final File cupertinoArbFile = File(path.join(directory.path, 'cupertino_kn.arb'));
 
   final Map<String, dynamic> widgetsBundle = _loadBundle(widgetsArbFile);
   final Map<String, dynamic> materialBundle = _loadBundle(materialArbFile);

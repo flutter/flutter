@@ -26,9 +26,7 @@ void main() {
         'bin',
         'flutter',
       );
-      ProcessResult result = processManager.runSync(<String>[
-        flutterBin,
-        'config',
+      ProcessResult result = processManager.runSync(<String>[flutterBin, 'config',
         '--enable-windows-desktop',
       ]);
       expect(result, const ProcessResultMatcher());
@@ -102,8 +100,7 @@ void main() {
       expect(productVersion, equals('1.2.3'));
     });
 
-    testWithoutContext('flutter build windows sets build name and build number',
-        () {
+    testWithoutContext('flutter build windows sets build name and build number', () {
       final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
@@ -130,11 +127,12 @@ String _getFileVersion(File file) {
   // FileVersionInfo's FileVersion property excludes the private part,
   // so this recreates the file version using the individual parts.
   final ProcessResult result = Process.runSync(
-      'powershell.exe -command " '
-      '\$v = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\"); '
-      r'Write-Output \"$($v.FileMajorPart).$($v.FileMinorPart).$($v.FileBuildPart).$($v.FilePrivatePart)\" '
-      '"',
-      <String>[]);
+    'powershell.exe -command " '
+    '\$v = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\"); '
+    r'Write-Output \"$($v.FileMajorPart).$($v.FileMinorPart).$($v.FileBuildPart).$($v.FilePrivatePart)\" '
+    '"',
+    <String>[]
+  );
 
   expect(result, const ProcessResultMatcher());
 
@@ -145,8 +143,9 @@ String _getFileVersion(File file) {
 
 String _getProductVersion(File file) {
   final ProcessResult result = Process.runSync(
-      'powershell.exe -command "[System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\").ProductVersion"',
-      <String>[]);
+    'powershell.exe -command "[System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\").ProductVersion"',
+    <String>[]
+  );
 
   expect(result, const ProcessResultMatcher());
 

@@ -16,8 +16,7 @@ void main() {
       ),
     );
 
-    final _RestorableWidgetState state =
-        tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
     expect(find.text('Hello World 100'), findsOneWidget);
     expect(state.doubleValue, 1.0);
 
@@ -31,14 +30,12 @@ void main() {
 
     expect(find.text('Guten Morgen 200'), findsOneWidget);
     expect(find.text('Hello World 100'), findsNothing);
-    final _RestorableWidgetState restoredState =
-        tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState restoredState = tester.state(find.byType(_RestorableWidget));
     expect(restoredState, isNot(same(state)));
     expect(restoredState.doubleValue, 1.0);
   });
 
-  testWidgets('restore from previous restoration data',
-      (WidgetTester tester) async {
+  testWidgets('restore from previous restoration data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -48,8 +45,7 @@ void main() {
       ),
     );
 
-    final _RestorableWidgetState state =
-        tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
     expect(find.text('Hello World 100'), findsOneWidget);
     expect(state.doubleValue, 1.0);
 
@@ -84,8 +80,7 @@ class _RestorableWidget extends StatefulWidget {
   State<_RestorableWidget> createState() => _RestorableWidgetState();
 }
 
-class _RestorableWidgetState extends State<_RestorableWidget>
-    with RestorationMixin {
+class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMixin {
   final RestorableString stringValue = RestorableString('Hello World');
   final RestorableInt intValue = RestorableInt(100);
 
@@ -107,8 +102,7 @@ class _RestorableWidgetState extends State<_RestorableWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Text('${stringValue.value} ${intValue.value}',
-        textDirection: TextDirection.ltr);
+    return Text('${stringValue.value} ${intValue.value}', textDirection: TextDirection.ltr);
   }
 
   @override

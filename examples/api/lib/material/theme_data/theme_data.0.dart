@@ -35,7 +35,7 @@ void main() {
 // for readability/accessibility.
 
 class ThemeDataExampleApp extends StatelessWidget {
-  const ThemeDataExampleApp({super.key});
+  const ThemeDataExampleApp({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class ThemeDataExampleApp extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({ super.key });
 
   @override
   State<Home> createState() => _HomeState();
@@ -88,7 +88,10 @@ class _HomeState extends State<Home> {
             points: pointCount,
             pointRounding: 0.4,
             valleyRounding: 0.6,
-            side: BorderSide(width: 9, color: colorScheme.tertiary),
+            side: BorderSide(
+              width: 9,
+              color: colorScheme.tertiary
+            ),
           ),
         ),
         child: Text(

@@ -18,15 +18,14 @@ void main() {
     late FlutterErrorDetails errorDetails;
     final RenderBox root = TestReentrantPaintingErrorRenderBox();
     layout(root, onErrors: () {
-      errorDetails =
-          TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+      errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
     });
     pumpFrame(phase: EnginePhase.paint);
 
     expect(errorDetails, isNotNull);
     expect(errorDetails.stack, isNotNull);
     // Check the ErrorDetails without the stack trace
-    final List<String> lines = errorDetails.toString().split('\n');
+    final List<String> lines =  errorDetails.toString().split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
     expect(lines.length, greaterThan(12));
@@ -64,12 +63,10 @@ void main() {
 
   test('needsCompositingBitsUpdate paint error', () {
     late FlutterError flutterError;
-    final RenderBox root =
-        RenderRepaintBoundary(child: RenderSizedBox(const Size(100, 100)));
+    final RenderBox root = RenderRepaintBoundary(child: RenderSizedBox(const Size(100, 100)));
     try {
       layout(root);
-      PaintingContext.repaintCompositedChild(root,
-          debugAlsoPaintedParent: true);
+      PaintingContext.repaintCompositedChild(root, debugAlsoPaintedParent: true);
     } on FlutterError catch (exception) {
       flutterError = exception;
     }
@@ -100,10 +97,7 @@ void main() {
       ),
     );
     expect(
-      flutterError.diagnostics
-          .singleWhere(
-              (DiagnosticsNode node) => node.level == DiagnosticLevel.hint)
-          .toString(),
+      flutterError.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
       'This usually indicates an error in the Flutter framework itself.',
     );
   });

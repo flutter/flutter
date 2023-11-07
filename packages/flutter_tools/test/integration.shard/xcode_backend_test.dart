@@ -12,8 +12,7 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 const String xcodeBackendPath = 'bin/xcode_backend.sh';
-const String xcodeBackendErrorHeader =
-    '========================================================================';
+const String xcodeBackendErrorHeader = '========================================================================';
 
 // Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
 const Map<String, String> unknownConfiguration = <String, String>{
@@ -46,15 +45,11 @@ void main() {
         'FLUTTER_ROOT': '../..',
       },
     );
-    expect(
-        result.stderr,
-        startsWith(
-            'error: Your Xcode project is incompatible with this version of Flutter.'));
+    expect(result.stderr, startsWith('error: Your Xcode project is incompatible with this version of Flutter.'));
     expect(result.exitCode, isNot(0));
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
-  test('Xcode backend fails for on unsupported configuration combinations',
-      () async {
+  test('Xcode backend fails for on unsupported configuration combinations', () async {
     await expectXcodeBackendFails(unknownConfiguration);
     await expectXcodeBackendFails(unknownFlutterBuildMode);
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
@@ -68,8 +63,7 @@ void main() {
         'ACTION': 'install',
       },
     );
-    expect(result.stdout,
-        contains('warning: Flutter archive not built in Release mode.'));
+    expect(result.stdout, contains('warning: Flutter archive not built in Release mode.'));
     expect(result.exitCode, isNot(0));
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
@@ -78,8 +72,7 @@ void main() {
     late File infoPlist;
 
     setUp(() {
-      buildDirectory = globals.fs.systemTempDirectory
-          .createTempSync('flutter_tools_xcode_backend_test.');
+      buildDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_tools_xcode_backend_test.');
       infoPlist = buildDirectory.childFile('Info.plist');
     });
 
@@ -93,10 +86,7 @@ void main() {
           'INFOPLIST_PATH': 'Info.plist',
         },
       );
-      expect(
-          result,
-          const ProcessResultMatcher(
-              stdoutPattern: 'Info.plist does not exist.'));
+      expect(result, const ProcessResultMatcher(stdoutPattern: 'Info.plist does not exist.'));
     });
 
     const String emptyPlist = '''
@@ -123,8 +113,7 @@ void main() {
       final String actualInfoPlist = infoPlist.readAsStringSync();
       expect(actualInfoPlist, isNot(contains('NSBonjourServices')));
       expect(actualInfoPlist, isNot(contains('dartVmService')));
-      expect(
-          actualInfoPlist, isNot(contains('NSLocalNetworkUsageDescription')));
+      expect(actualInfoPlist, isNot(contains('NSLocalNetworkUsageDescription')));
 
       expect(result, const ProcessResultMatcher());
     });
@@ -152,9 +141,7 @@ void main() {
       });
     }
 
-    test(
-        'adds to existing Bonjour services, does not override network usage description',
-        () async {
+    test('adds to existing Bonjour services, does not override network usage description', () async {
       infoPlist.writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -197,8 +184,7 @@ void main() {
       expect(result, const ProcessResultMatcher());
     });
 
-    test('does not add bonjour settings when port publication is disabled',
-        () async {
+    test('does not add bonjour settings when port publication is disabled', () async {
       infoPlist.writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -218,13 +204,8 @@ void main() {
         },
       );
 
-      expect(
-          infoPlist.readAsStringSync().contains('NSBonjourServices'), isFalse);
-      expect(
-          infoPlist
-              .readAsStringSync()
-              .contains('NSLocalNetworkUsageDescription'),
-          isFalse);
+      expect(infoPlist.readAsStringSync().contains('NSBonjourServices'), isFalse);
+      expect(infoPlist.readAsStringSync().contains('NSLocalNetworkUsageDescription'), isFalse);
       expect(result, const ProcessResultMatcher());
     });
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.

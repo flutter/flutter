@@ -107,21 +107,19 @@ class InkSparkle extends InteractiveInkFeature {
     double? radius,
     super.onRemoved,
     double? turbulenceSeed,
-  })  : assert(containedInkWell || rectCallback == null),
-        _color = color,
-        _position = position,
-        _borderRadius = borderRadius ?? BorderRadius.zero,
-        _textDirection = textDirection,
-        _targetRadius = (radius ??
-                _getTargetRadius(
-                  referenceBox,
-                  containedInkWell,
-                  rectCallback,
-                  position,
-                )) *
-            _targetRadiusMultiplier,
-        _clipCallback =
-            _getClipCallback(referenceBox, containedInkWell, rectCallback) {
+  }) : assert(containedInkWell || rectCallback == null),
+       _color = color,
+       _position = position,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
+       _textDirection = textDirection,
+       _targetRadius = (radius ?? _getTargetRadius(
+                                    referenceBox,
+                                    containedInkWell,
+                                    rectCallback,
+                                    position,
+                                  )
+                       ) * _targetRadiusMultiplier,
+       _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback) {
     // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.initializeShader();
     controller.addInkFeature(this);
@@ -130,10 +128,9 @@ class InkSparkle extends InteractiveInkFeature {
     _animationController = AnimationController(
       duration: _animationDuration,
       vsync: controller.vsync,
-    )
-      ..addListener(controller.markNeedsPaint)
-      ..addStatusListener(_handleStatusChanged)
-      ..forward();
+    )..addListener(controller.markNeedsPaint)
+     ..addStatusListener(_handleStatusChanged)
+     ..forward();
 
     _radiusScale = TweenSequence<double>(
       <TweenSequenceItem<double>>[
@@ -152,8 +149,7 @@ class InkSparkle extends InteractiveInkFeature {
     //`return mix(u_touch, u_resolution, saturate(in_radius_scale * 2.0))`
     final Tween<Vector2> centerTween = Tween<Vector2>(
       begin: Vector2.array(<double>[_position.dx, _position.dy]),
-      end: Vector2.array(
-          <double>[referenceBox.size.width / 2, referenceBox.size.height / 2]),
+      end: Vector2.array(<double>[referenceBox.size.width / 2, referenceBox.size.height / 2]),
     );
     final Animation<double> centerProgress = TweenSequence<double>(
       <TweenSequenceItem<double>>[
@@ -248,17 +244,14 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// Since no [turbulenceSeed] is passed, the effect will be random for
   /// subsequent presses in the same position.
-  static const InteractiveInkFeatureFactory splashFactory =
-      _InkSparkleFactory();
+  static const InteractiveInkFeatureFactory splashFactory = _InkSparkleFactory();
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
   /// material [Theme], or [ButtonStyle].
   ///
   /// Since a [turbulenceSeed] is passed, the effect will not be random for
   /// subsequent presses in the same position. This can be used for testing.
-  static const InteractiveInkFeatureFactory
-      constantTurbulenceSeedSplashFactory =
-      _InkSparkleFactory.constantTurbulenceSeed();
+  static const InteractiveInkFeatureFactory constantTurbulenceSeedSplashFactory = _InkSparkleFactory.constantTurbulenceSeed();
 
   @override
   void dispose() {
@@ -313,6 +306,7 @@ class InkSparkle extends InteractiveInkFeature {
   double get _width => referenceBox.size.width;
   double get _height => referenceBox.size.height;
 
+
   /// All double values for uniforms come from the Android 12 ripple
   /// implementation from the following files:
   /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
@@ -351,32 +345,14 @@ class InkSparkle extends InteractiveInkFeature {
       // uNoisePhase
       ..setFloat(15, noisePhase / 1000.0)
       // uCircle1
-      ..setFloat(
-          16,
-          turbulenceScale * 0.5 +
-              (turbulencePhase * 0.01 * math.cos(turbulenceScale * 0.55)))
-      ..setFloat(
-          17,
-          turbulenceScale * 0.5 +
-              (turbulencePhase * 0.01 * math.sin(turbulenceScale * 0.55)))
+      ..setFloat(16, turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.cos(turbulenceScale * 0.55)))
+      ..setFloat(17, turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.sin(turbulenceScale * 0.55)))
       // uCircle2
-      ..setFloat(
-          18,
-          turbulenceScale * 0.2 +
-              (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.45)))
-      ..setFloat(
-          19,
-          turbulenceScale * 0.2 +
-              (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.45)))
+      ..setFloat(18, turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.45)))
+      ..setFloat(19, turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.45)))
       // uCircle3
-      ..setFloat(
-          20,
-          turbulenceScale +
-              (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.35)))
-      ..setFloat(
-          21,
-          turbulenceScale +
-              (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.35)))
+      ..setFloat(20, turbulenceScale + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.35)))
+      ..setFloat(21, turbulenceScale + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.35)))
       // uRotation1
       ..setFloat(22, math.cos(rotation1))
       ..setFloat(23, math.sin(rotation1))
@@ -523,10 +499,8 @@ double _getTargetRadius(
   RectCallback? rectCallback,
   Offset position,
 ) {
-  final Size size =
-      rectCallback != null ? rectCallback().size : referenceBox.size;
+  final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
   final double d1 = size.bottomRight(Offset.zero).distance;
-  final double d2 =
-      (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
+  final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
   return math.max(d1, d2) / 2.0;
 }

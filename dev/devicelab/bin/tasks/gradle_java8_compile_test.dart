@@ -14,6 +14,7 @@ Future<void> main() async {
   await task(() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+
         section('check main plugin file exists');
         final File pluginMainKotlinFile = File(
           path.join(
@@ -32,8 +33,7 @@ Future<void> main() async {
         );
 
         if (!pluginMainKotlinFile.existsSync()) {
-          throw TaskResult.failure(
-              "Expected ${pluginMainKotlinFile.path} to exist, but it doesn't");
+          throw TaskResult.failure("Expected ${pluginMainKotlinFile.path} to exist, but it doesn't");
         }
 
         section('add java 8 feature');
@@ -94,6 +94,7 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
             ],
           );
         });
+
       });
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {

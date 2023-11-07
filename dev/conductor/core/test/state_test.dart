@@ -22,12 +22,16 @@ void main() {
         ..candidateBranch = candidateBranch
         ..upstream = (pb.Remote.create()
           ..name = 'upstream'
-          ..url = 'git@github.com:flutter/engine.git'))
+          ..url = 'git@github.com:flutter/engine.git'
+        )
+      )
       ..framework = (pb.Repository.create()
         ..candidateBranch = candidateBranch
         ..upstream = (pb.Remote.create()
           ..name = 'upstream'
-          ..url = 'git@github.com:flutter/flutter.git'));
+          ..url = 'git@github.com:flutter/flutter.git'
+        )
+      );
     writeStateToFile(
       stateFile,
       state,

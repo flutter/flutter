@@ -23,6 +23,7 @@ class OrderSwitcher extends StatefulWidget {
 }
 
 class OrderSwitcherState extends State<OrderSwitcher> {
+
   bool _aFirst = true;
 
   void switchChildren() {
@@ -36,14 +37,14 @@ class OrderSwitcherState extends State<OrderSwitcher> {
     return Stack(
       textDirection: TextDirection.ltr,
       children: _aFirst
-          ? <Widget>[
-              KeyedSubtree(child: widget.a),
-              widget.b,
-            ]
-          : <Widget>[
-              KeyedSubtree(child: widget.b),
-              widget.a,
-            ],
+        ? <Widget>[
+            KeyedSubtree(child: widget.a),
+            widget.b,
+          ]
+        : <Widget>[
+            KeyedSubtree(child: widget.b),
+            widget.a,
+          ],
     );
   }
 }
@@ -57,8 +58,7 @@ class DummyStatefulWidget extends StatefulWidget {
 
 class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
   @override
-  Widget build(BuildContext context) =>
-      const Text('LEAF', textDirection: TextDirection.ltr);
+  Widget build(BuildContext context) => const Text('LEAF', textDirection: TextDirection.ltr);
 }
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
@@ -68,12 +68,10 @@ class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
   });
   final GlobalKey initialKey;
   @override
-  RekeyableDummyStatefulWidgetWrapperState createState() =>
-      RekeyableDummyStatefulWidgetWrapperState();
+  RekeyableDummyStatefulWidgetWrapperState createState() => RekeyableDummyStatefulWidgetWrapperState();
 }
 
-class RekeyableDummyStatefulWidgetWrapperState
-    extends State<RekeyableDummyStatefulWidgetWrapper> {
+class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyStatefulWidgetWrapper> {
   GlobalKey? _key;
 
   @override
@@ -95,8 +93,8 @@ class RekeyableDummyStatefulWidgetWrapperState
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Handle GlobalKey reparenting in weird orders',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
+
     // This is a bit of a weird test so let's try to explain it a bit.
     //
     // Basically what's happening here is that we have a complicated tree, and
@@ -141,8 +139,7 @@ void main() {
                 return Builder(
                   builder: (BuildContext context) {
                     return LayoutBuilder(
-                      builder:
-                          (BuildContext context, BoxConstraints constraints) {
+                      builder: (BuildContext context, BoxConstraints constraints) {
                         return RekeyableDummyStatefulWidgetWrapper(
                           initialKey: keyD,
                         );
@@ -165,14 +162,10 @@ void main() {
     expect(find.byType(DummyStatefulWidget), findsNWidgets(2));
 
     keyRoot.currentState!.switchChildren();
-    final List<State> states = tester
-        .stateList(find.byType(RekeyableDummyStatefulWidgetWrapper))
-        .toList();
-    final RekeyableDummyStatefulWidgetWrapperState a =
-        states[0] as RekeyableDummyStatefulWidgetWrapperState;
+    final List<State> states = tester.stateList(find.byType(RekeyableDummyStatefulWidgetWrapper)).toList();
+    final RekeyableDummyStatefulWidgetWrapperState a = states[0] as RekeyableDummyStatefulWidgetWrapperState;
     a._setChild(null);
-    final RekeyableDummyStatefulWidgetWrapperState b =
-        states[1] as RekeyableDummyStatefulWidgetWrapperState;
+    final RekeyableDummyStatefulWidgetWrapperState b = states[1] as RekeyableDummyStatefulWidgetWrapperState;
     b._setChild(keyC);
     await tester.pump();
 

@@ -18,18 +18,15 @@ class SelectableRegionToolbarBuilderExampleApp extends StatefulWidget {
   const SelectableRegionToolbarBuilderExampleApp({super.key});
 
   @override
-  State<SelectableRegionToolbarBuilderExampleApp> createState() =>
-      _SelectableRegionToolbarBuilderExampleAppState();
+  State<SelectableRegionToolbarBuilderExampleApp> createState() => _SelectableRegionToolbarBuilderExampleAppState();
 }
 
-class _SelectableRegionToolbarBuilderExampleAppState
-    extends State<SelectableRegionToolbarBuilderExampleApp> {
+class _SelectableRegionToolbarBuilderExampleAppState extends State<SelectableRegionToolbarBuilderExampleApp> {
   void _showDialog(BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) =>
-            const AlertDialog(title: Text('You clicked print!')),
+        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
       ),
     );
   }

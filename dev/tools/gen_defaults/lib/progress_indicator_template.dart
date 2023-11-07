@@ -5,10 +5,7 @@
 import 'template.dart';
 
 class ProgressIndicatorTemplate extends TokenTemplate {
-  const ProgressIndicatorTemplate(
-    super.blockName,
-    super.fileName,
-    super.tokens, {
+  const ProgressIndicatorTemplate(super.blockName, super.fileName, super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 

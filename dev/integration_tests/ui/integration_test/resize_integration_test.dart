@@ -29,10 +29,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final widgets.Size sizeAfter = tester.getSize(root);
-      expect(
-          sizeAfter.width, equals(sizeBefore.width + app.ResizeApp.resizeBy));
-      expect(
-          sizeAfter.height, equals(sizeBefore.height + app.ResizeApp.resizeBy));
+      expect(sizeAfter.width, equals(sizeBefore.width + app.ResizeApp.resizeBy));
+      expect(sizeAfter.height, equals(sizeBefore.height + app.ResizeApp.resizeBy));
 
       final Finder widthLabel = find.byKey(app.ResizeApp.widthLabel);
       expect(widthLabel, findsOneWidget);
@@ -44,8 +42,7 @@ void main() {
     });
   });
 
-  testWidgets(
-      'resize window after calling runApp twice, the second with no content',
+  testWidgets('resize window after calling runApp twice, the second with no content',
       timeout: const Timeout(Duration(seconds: 5)),
       (WidgetTester tester) async {
     const app.ResizeApp root = app.ResizeApp();

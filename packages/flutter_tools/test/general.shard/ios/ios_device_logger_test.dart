@@ -33,40 +33,38 @@ void main() {
     fakeCache = Cache.test(processManager: FakeProcessManager.any());
     artifacts = Artifacts.test();
     logger = BufferLogger.test();
-    ideviceSyslogPath =
-        artifacts.getHostArtifact(HostArtifact.idevicesyslog).path;
+    ideviceSyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path;
   });
 
   group('syslog stream', () {
     testWithoutContext('decodeSyslog decodes a syslog-encoded line', () {
-      final String decoded = decodeSyslog(r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
+      final String decoded = decodeSyslog(
+          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
           r'\M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
 
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
     });
 
-    testWithoutContext('decodeSyslog passes through un-decodeable lines as-is',
-        () {
+    testWithoutContext('decodeSyslog passes through un-decodeable lines as-is', () {
       final String decoded = decodeSyslog(r'I \M-b\M^O syslog!');
 
       expect(decoded, r'I \M-b\M^O syslog!');
     });
 
-    testWithoutContext(
-        'IOSDeviceLogReader suppresses non-Flutter lines from output with syslog',
-        () async {
+    testWithoutContext('IOSDeviceLogReader suppresses non-Flutter lines from output with syslog', () async {
       processManager.addCommand(
-        FakeCommand(command: <String>[
-          ideviceSyslogPath,
-          '-u',
-          '1234',
-        ], stdout: '''
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
 Runner(Flutter)[297] <Notice>: A is for ari
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
 Runner(Flutter)[297] <Notice>: I is for ichigo
 Runner(UIKit)[297] <Notice>: E is for enpitsu"
-'''),
+'''
+        ),
       );
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
@@ -81,21 +79,20 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
       expect(lines, <String>['A is for ari', 'I is for ichigo']);
     });
 
-    testWithoutContext(
-        'IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog',
-        () async {
+    testWithoutContext('IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog', () async {
       processManager.addCommand(
-        FakeCommand(command: <String>[
-          ideviceSyslogPath,
-          '-u',
-          '1234',
-        ], stdout: '''
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with another Flutter message following it.
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with a non-Flutter log message following it.
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
-'''),
+'''
+        ),
       );
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
@@ -115,14 +112,11 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       ]);
     });
 
-    testWithoutContext('includes multi-line Flutter logs in the output',
-        () async {
+    testWithoutContext('includes multi-line Flutter logs in the output', () async {
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ideviceSyslogPath,
-            '-u',
-            '1234',
+            ideviceSyslogPath, '-u', '1234',
           ],
           stdout: '''
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
@@ -154,8 +148,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   });
 
   group('VM service', () {
-    testWithoutContext('IOSDeviceLogReader can listen to VM Service logs',
-        () async {
+    testWithoutContext('IOSDeviceLogReader can listen to VM Service logs', () async {
       final Event stdoutEvent = Event(
         kind: 'Stdout',
         timestamp: 0,
@@ -166,23 +159,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         timestamp: 0,
         bytes: base64.encode(utf8.encode('  And this is an error ')),
       );
-      final FlutterVmService vmService =
-          FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Debug',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stdout',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stderr',
-            }),
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
         FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
         FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
       ]).vmService;
@@ -198,17 +184,13 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       logReader.connectedVMService = vmService;
 
       // Wait for stream listeners to fire.
-      await expectLater(
-          logReader.logLines,
-          emitsInAnyOrder(<Matcher>[
-            equals('  This is a message '),
-            equals('  And this is an error '),
-          ]));
+      await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
+        equals('  This is a message '),
+        equals('  And this is an error '),
+      ]));
     });
 
-    testWithoutContext(
-        'IOSDeviceLogReader ignores VM Service logs when attached to and received flutter logs from debugger',
-        () async {
+    testWithoutContext('IOSDeviceLogReader ignores VM Service logs when attached to and received flutter logs from debugger', () async {
       final Event stdoutEvent = Event(
         kind: 'Stdout',
         timestamp: 0,
@@ -219,23 +201,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         timestamp: 0,
         bytes: base64.encode(utf8.encode('  And this is an error ')),
       );
-      final FlutterVmService vmService =
-          FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Debug',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stdout',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stderr',
-            }),
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
         FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
         FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
       ]).vmService;
@@ -260,18 +235,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       logReader.debuggerStream = iosDeployDebugger;
 
       // Wait for stream listeners to fire.
-      await expectLater(
-          logReader.logLines,
-          emitsInAnyOrder(<Matcher>[
-            equals('flutter: Message from debugger'),
-          ]));
+      await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
+        equals('flutter: Message from debugger'),
+      ]));
     });
   });
 
   group('debugger stream', () {
-    testWithoutContext(
-        'IOSDeviceLogReader removes metadata prefix from lldb output',
-        () async {
+    testWithoutContext('IOSDeviceLogReader removes metadata prefix from lldb output', () async {
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
@@ -302,8 +273,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     testWithoutContext('errors on debugger stream closes log stream', () async {
-      final Stream<String> debuggingLogs =
-          Stream<String>.error('ios-deploy error');
+      final Stream<String> debuggingLogs = Stream<String>.error('ios-deploy error');
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -316,8 +286,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       final Completer<void> streamComplete = Completer<void>();
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;
-      logReader.logLines
-          .listen(null, onError: (Object error) => streamComplete.complete());
+      logReader.logLines.listen(null, onError: (Object error) => streamComplete.complete());
       logReader.debuggerStream = iosDeployDebugger;
 
       await streamComplete.future;
@@ -340,9 +309,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(iosDeployDebugger.detached, true);
     });
 
-    testWithoutContext(
-        'Does not throw if debuggerStream set after logReader closed',
-        () async {
+    testWithoutContext('Does not throw if debuggerStream set after logReader closed', () async {
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
@@ -361,16 +328,19 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
       Object? exception;
       StackTrace? trace;
-      await asyncGuard(() async {
-        await logReader.linesController.close();
-        final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
-        iosDeployDebugger.logLines = debuggingLogs;
-        logReader.debuggerStream = iosDeployDebugger;
-        await logReader.logLines.drain<void>();
-      }, onError: (Object err, StackTrace stackTrace) {
-        exception = err;
-        trace = stackTrace;
-      });
+      await asyncGuard(
+          () async {
+            await logReader.linesController.close();
+            final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+            iosDeployDebugger.logLines = debuggingLogs;
+            logReader.debuggerStream = iosDeployDebugger;
+            await logReader.logLines.drain<void>();
+          },
+          onError: (Object err, StackTrace stackTrace) {
+            exception = err;
+            trace = stackTrace;
+          }
+      );
       expect(
         exception,
         isNull,
@@ -395,10 +365,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
-      expect(
-          logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
-      expect(logReader.logSources.fallbackSource,
-          IOSDeviceLogSource.unifiedLogging);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
     testWithoutContext('for wirelessly attached CoreDevice', () {
@@ -417,8 +385,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
-      expect(logReader.logSources.primarySource,
-          IOSDeviceLogSource.unifiedLogging);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.unifiedLogging);
       expect(logReader.logSources.fallbackSource, isNull);
     });
 
@@ -436,14 +403,11 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isFalse);
       expect(logReader.useIOSDeployLogging, isFalse);
-      expect(
-          logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
       expect(logReader.logSources.fallbackSource, isNull);
     });
 
-    testWithoutContext(
-        'for iOS 13 or greater non-CoreDevice and _iosDeployDebugger not attached',
-        () {
+    testWithoutContext('for iOS 13 or greater non-CoreDevice and _iosDeployDebugger not attached', () {
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -458,13 +422,10 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isTrue);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-      expect(logReader.logSources.fallbackSource,
-          IOSDeviceLogSource.unifiedLogging);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
-    testWithoutContext(
-        'for iOS 13 or greater non-CoreDevice, _iosDeployDebugger not attached, and VM is connected',
-        () {
+    testWithoutContext('for iOS 13 or greater non-CoreDevice, _iosDeployDebugger not attached, and VM is connected', () {
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -475,23 +436,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         majorSdkVersion: 13,
       );
 
-      final FlutterVmService vmService =
-          FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Debug',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stdout',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stderr',
-            }),
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
       ]).vmService;
 
       logReader.connectedVMService = vmService;
@@ -499,14 +453,11 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isTrue);
-      expect(logReader.logSources.primarySource,
-          IOSDeviceLogSource.unifiedLogging);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.unifiedLogging);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.iosDeploy);
     });
 
-    testWithoutContext(
-        'for iOS 13 or greater non-CoreDevice and _iosDeployDebugger is attached',
-        () {
+    testWithoutContext('for iOS 13 or greater non-CoreDevice and _iosDeployDebugger is attached', () {
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -521,23 +472,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       iosDeployDebugger.debuggerAttached = true;
       logReader.debuggerStream = iosDeployDebugger;
 
-      final FlutterVmService vmService =
-          FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Debug',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stdout',
-            }),
-        const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{
-              'streamId': 'Stderr',
-            }),
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
       ]).vmService;
 
       logReader.connectedVMService = vmService;
@@ -546,8 +490,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isTrue);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-      expect(logReader.logSources.fallbackSource,
-          IOSDeviceLogSource.unifiedLogging);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
     testWithoutContext('for iOS 16 or greater non-CoreDevice', () {
@@ -569,8 +512,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isTrue);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-      expect(logReader.logSources.fallbackSource,
-          IOSDeviceLogSource.unifiedLogging);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
     testWithoutContext('for iOS 16 or greater non-CoreDevice in CI', () {
@@ -589,25 +531,25 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useUnifiedLogging, isFalse);
       expect(logReader.useIOSDeployLogging, isTrue);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-      expect(logReader.logSources.fallbackSource,
-          IOSDeviceLogSource.idevicesyslog);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
     });
 
     group('when useSyslogLogging', () {
-      testWithoutContext('is true syslog sends flutter messages to stream',
-          () async {
+
+      testWithoutContext('is true syslog sends flutter messages to stream', () async {
         processManager.addCommand(
-          FakeCommand(command: <String>[
-            ideviceSyslogPath,
-            '-u',
-            '1234',
-          ], stdout: '''
+          FakeCommand(
+              command: <String>[
+                ideviceSyslogPath, '-u', '1234',
+              ],
+              stdout: '''
   Runner(Flutter)[297] <Notice>: A is for ari
   Runner(Flutter)[297] <Notice>: I is for ichigo
   May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/
   May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: This is a test
   May 30 13:56:28 Runner(Flutter)[2037] <Notice>: [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.
-  '''),
+  '''
+          ),
         );
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
@@ -629,8 +571,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ]);
       });
 
-      testWithoutContext(
-          'is false syslog does not send flutter messages to stream', () async {
+      testWithoutContext('is false syslog does not send flutter messages to stream', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -642,7 +583,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
 
         final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
-        iosDeployDebugger.logLines = Stream<String>.fromIterable(<String>[]);
+        iosDeployDebugger.logLines =  Stream<String>.fromIterable(<String>[]);
         logReader.debuggerStream = iosDeployDebugger;
 
         final List<String> lines = await logReader.logLines.toList();
@@ -654,8 +595,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('when useIOSDeployLogging', () {
-      testWithoutContext('is true ios-deploy sends flutter messages to stream',
-          () async {
+
+      testWithoutContext('is true ios-deploy sends flutter messages to stream', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -667,8 +608,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
 
         final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
-        final Stream<String> debuggingLogs =
-            Stream<String>.fromIterable(<String>[
+        final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
           'flutter: Message from debugger',
         ]);
         iosDeployDebugger.logLines = debuggingLogs;
@@ -683,9 +623,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         ]);
       });
 
-      testWithoutContext(
-          'is false ios-deploy does not send flutter messages to stream',
-          () async {
+      testWithoutContext('is false ios-deploy does not send flutter messages to stream', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -697,8 +635,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
 
         final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
-        final Stream<String> debuggingLogs =
-            Stream<String>.fromIterable(<String>[
+        final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
           'flutter: Message from debugger',
         ]);
         iosDeployDebugger.logLines = debuggingLogs;
@@ -713,8 +650,9 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('when useUnifiedLogging', () {
-      testWithoutContext('is true Dart VM sends flutter messages to stream',
-          () async {
+
+
+      testWithoutContext('is true Dart VM sends flutter messages to stream', () async {
         final Event stdoutEvent = Event(
           kind: 'Stdout',
           timestamp: 0,
@@ -723,26 +661,18 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         final Event stderrEvent = Event(
           kind: 'Stderr',
           timestamp: 0,
-          bytes:
-              base64.encode(utf8.encode('flutter: A second flutter message')),
+          bytes: base64.encode(utf8.encode('flutter: A second flutter message')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(requests: <VmServiceExpectation>[
-          const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{
-                'streamId': 'Debug',
-              }),
-          const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{
-                'streamId': 'Stdout',
-              }),
-          const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{
-                'streamId': 'Stderr',
-              }),
+        final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+            'streamId': 'Debug',
+          }),
+          const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+            'streamId': 'Stdout',
+          }),
+          const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+            'streamId': 'Stderr',
+          }),
           FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
           FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
         ]).vmService;
@@ -760,17 +690,13 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         // Wait for stream listeners to fire.
         expect(logReader.useUnifiedLogging, isTrue);
         expect(processManager, hasNoRemainingExpectations);
-        await expectLater(
-            logReader.logLines,
-            emitsInAnyOrder(<Matcher>[
-              equals('flutter: A flutter message'),
-              equals('flutter: A second flutter message'),
-            ]));
+        await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
+          equals('flutter: A flutter message'),
+          equals('flutter: A second flutter message'),
+        ]));
       });
 
-      testWithoutContext(
-          'is false Dart VM does not send flutter messages to stream',
-          () async {
+      testWithoutContext('is false Dart VM does not send flutter messages to stream', () async {
         final Event stdoutEvent = Event(
           kind: 'Stdout',
           timestamp: 0,
@@ -779,26 +705,18 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         final Event stderrEvent = Event(
           kind: 'Stderr',
           timestamp: 0,
-          bytes:
-              base64.encode(utf8.encode('flutter: A second flutter message')),
+          bytes: base64.encode(utf8.encode('flutter: A second flutter message')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(requests: <VmServiceExpectation>[
-          const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{
-                'streamId': 'Debug',
-              }),
-          const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{
-                'streamId': 'Stdout',
-              }),
-          const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{
-                'streamId': 'Stderr',
-              }),
+        final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+            'streamId': 'Debug',
+          }),
+          const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+            'streamId': 'Stdout',
+          }),
+          const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+            'streamId': 'Stderr',
+          }),
           FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
           FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
         ]).vmService;
@@ -823,9 +741,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     group('and when to exclude logs:', () {
-      testWithoutContext(
-          'all primary messages are included except if fallback sent flutter message first',
-          () async {
+
+      testWithoutContext('all primary messages are included except if fallback sent flutter message first', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -839,10 +756,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
         expect(logReader.useSyslogLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
-        expect(
-            logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-        expect(logReader.logSources.fallbackSource,
-            IOSDeviceLogSource.idevicesyslog);
+        expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+        expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
         final Future<List<String>> logLines = logReader.logLines.toList();
 
@@ -865,18 +780,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
         final List<String> lines = await logLines;
 
-        expect(
-            lines,
-            containsAllInOrder(<String>[
-              'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/', // from idevicesyslog
-              'A second non-flutter message', // from iosDeploy
-              'flutter: Another flutter message', // from iosDeploy
-            ]));
+        expect(lines, containsAllInOrder(<String>[
+          'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/', // from idevicesyslog
+          'A second non-flutter message', // from iosDeploy
+          'flutter: Another flutter message', // from iosDeploy
+        ]));
       });
 
-      testWithoutContext(
-          'all primary messages are included when there is no fallback',
-          () async {
+      testWithoutContext('all primary messages are included when there is no fallback', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -888,8 +799,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
 
         expect(logReader.useSyslogLogging, isTrue);
-        expect(logReader.logSources.primarySource,
-            IOSDeviceLogSource.idevicesyslog);
+        expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
         expect(logReader.logSources.fallbackSource, isNull);
 
         final Future<List<String>> logLines = logReader.logLines.toList();
@@ -916,20 +826,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
         final List<String> lines = await logLines;
 
-        expect(
-            lines,
-            containsAllInOrder(<String>[
-              'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
-              'A non-flutter message',
-              'A non-flutter message',
-              'flutter: A flutter message',
-              'flutter: A flutter message',
-            ]));
+        expect(lines, containsAllInOrder(<String>[
+          'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+          'A non-flutter message',
+          'A non-flutter message',
+          'flutter: A flutter message',
+          'flutter: A flutter message',
+        ]));
       });
 
-      testWithoutContext(
-          'primary messages are not added if fallback already added them, otherwise duplicates are allowed',
-          () async {
+      testWithoutContext('primary messages are not added if fallback already added them, otherwise duplicates are allowed', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -943,10 +849,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
         expect(logReader.useSyslogLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
-        expect(
-            logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-        expect(logReader.logSources.fallbackSource,
-            IOSDeviceLogSource.idevicesyslog);
+        expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+        expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
         final Future<List<String>> logLines = logReader.logLines.toList();
 
@@ -985,20 +889,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
         final List<String> lines = await logLines;
 
-        expect(
-            lines,
-            containsAllInOrder(<String>[
-              'flutter: A flutter message', // from idevicesyslog
-              'flutter: A flutter message', // from idevicesyslog
-              'A non-flutter message', // from iosDeploy
-              'A non-flutter message', // from iosDeploy
-              'flutter: A flutter message', // from iosDeploy
-            ]));
+        expect(lines, containsAllInOrder(<String>[
+          'flutter: A flutter message', // from idevicesyslog
+          'flutter: A flutter message', // from idevicesyslog
+          'A non-flutter message', // from iosDeploy
+          'A non-flutter message', // from iosDeploy
+          'flutter: A flutter message', // from iosDeploy
+        ]));
       });
 
-      testWithoutContext(
-          'flutter fallback messages are included until a primary flutter message is received',
-          () async {
+      testWithoutContext('flutter fallback messages are included until a primary flutter message is received', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -1012,10 +912,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
         expect(logReader.useSyslogLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
-        expect(
-            logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-        expect(logReader.logSources.fallbackSource,
-            IOSDeviceLogSource.idevicesyslog);
+        expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+        expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
         final Future<List<String>> logLines = logReader.logLines.toList();
 
@@ -1047,17 +945,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
         final List<String> lines = await logLines;
 
-        expect(
-            lines,
-            containsAllInOrder(<String>[
-              'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/', // from idevicesyslog
-              'A second non-flutter message', // from iosDeploy
-              'flutter: A flutter message', // from idevicesyslog
-            ]));
+        expect(lines, containsAllInOrder(<String>[
+          'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/', // from idevicesyslog
+          'A second non-flutter message', // from iosDeploy
+          'flutter: A flutter message', // from idevicesyslog
+        ]));
       });
 
-      testWithoutContext('non-flutter fallback messages are not included',
-          () async {
+      testWithoutContext('non-flutter fallback messages are not included', () async {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -1071,10 +966,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
         expect(logReader.useSyslogLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
-        expect(
-            logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
-        expect(logReader.logSources.fallbackSource,
-            IOSDeviceLogSource.idevicesyslog);
+        expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+        expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
         final Future<List<String>> logLines = logReader.logLines.toList();
 
@@ -1090,11 +983,9 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
         final List<String> lines = await logLines;
 
-        expect(
-            lines,
-            containsAllInOrder(<String>[
-              'flutter: A flutter message',
-            ]));
+        expect(lines, containsAllInOrder(<String>[
+          'flutter: A flutter message',
+        ]));
       });
     });
   });

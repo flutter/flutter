@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Size _kTestViewSize = Size(800.0, 600.0);
 
 class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
-  ScheduledFrameTrackingPlatformDispatcher({required super.platformDispatcher});
+  ScheduledFrameTrackingPlatformDispatcher({ required super.platformDispatcher });
 
   int _scheduledFrameCount = 0;
   int get scheduledFrameCount => _scheduledFrameCount;
@@ -27,22 +27,17 @@ class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
   }
 }
 
-class ScheduledFrameTrackingBindings
-    extends AutomatedTestWidgetsFlutterBinding {
-  late final ScheduledFrameTrackingPlatformDispatcher _platformDispatcher =
-      ScheduledFrameTrackingPlatformDispatcher(
-          platformDispatcher: super.platformDispatcher);
+class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding {
+  late final ScheduledFrameTrackingPlatformDispatcher _platformDispatcher = ScheduledFrameTrackingPlatformDispatcher(platformDispatcher: super.platformDispatcher);
 
   @override
-  ScheduledFrameTrackingPlatformDispatcher get platformDispatcher =>
-      _platformDispatcher;
+  ScheduledFrameTrackingPlatformDispatcher get platformDispatcher => _platformDispatcher;
 }
 
 class OffscreenRenderView extends RenderView {
-  OffscreenRenderView({required super.view})
-      : super(
-          configuration: const ViewConfiguration(size: _kTestViewSize),
-        );
+  OffscreenRenderView({required super.view}) : super(
+    configuration: const ViewConfiguration(size: _kTestViewSize),
+  );
 
   @override
   void compositeFrame() {
@@ -81,6 +76,7 @@ class OffscreenWidgetTree {
     pipelineOwner.flushSemantics();
     buildOwner.finalizeTree();
   }
+
 }
 
 class Counter {
@@ -172,12 +168,9 @@ void main() {
   // of times a frame has been scheduled.
   ScheduledFrameTrackingBindings();
 
-  testWidgets(
-      'RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame',
-      (WidgetTester tester) async {
+  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
     expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
-    final ScheduledFrameTrackingPlatformDispatcher platformDispatcher =
-        tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
+    final ScheduledFrameTrackingPlatformDispatcher platformDispatcher = tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
     platformDispatcher.resetScheduledFrameCount();
     expect(platformDispatcher.scheduledFrameCount, isZero);
     final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
@@ -185,8 +178,7 @@ void main() {
     expect(platformDispatcher.scheduledFrameCount, isZero);
   });
 
-  testWidgets('no crosstalk between widget build owners',
-      (WidgetTester tester) async {
+  testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
     final Trigger trigger1 = Trigger();
     final Counter counter1 = Counter();
     final Trigger trigger2 = Trigger();
@@ -196,8 +188,7 @@ void main() {
     expect(counter1.count, equals(0));
     expect(counter2.count, equals(0));
     // Lay out the "onscreen" in the default test binding
-    await tester
-        .pumpWidget(TriggerableWidget(trigger: trigger1, counter: counter1));
+    await tester.pumpWidget(TriggerableWidget(trigger: trigger1, counter: counter1));
     // Only the "onscreen" widget should have built
     expect(counter1.count, equals(1));
     expect(counter2.count, equals(0));
@@ -267,8 +258,7 @@ void main() {
     expect(states, <WidgetState>[WidgetState.initialized]);
     expect(tree.renderView.child, isNotNull);
     tree.pumpWidget(null); // The root node should be allowed to have no child.
-    expect(
-        states, <WidgetState>[WidgetState.initialized, WidgetState.disposed]);
+    expect(states, <WidgetState>[WidgetState.initialized, WidgetState.disposed]);
     expect(tree.renderView.child, isNull);
   });
 }

@@ -43,8 +43,7 @@ void main() {
   }
 
   group('Raw Magnifier', () {
-    testWidgetsWithLeakTracking(
-        'should render with correct focal point and decoration',
+    testWidgetsWithLeakTracking('should render with correct focal point and decoration',
         (WidgetTester tester) async {
       final Key appKey = UniqueKey();
       const Size magnifierSize = Size(100, 100);
@@ -104,7 +103,7 @@ void main() {
         find.byKey(appKey),
         matchesGoldenFile('widgets.magnifier.styled.png'),
       );
-    }, skip: kIsWeb); // [intended] Bdf does not display on web.
+    }, skip: kIsWeb);  // [intended] Bdf does not display on web.
 
     group('transition states', () {
       final AnimationController animationController = AnimationController(
@@ -151,8 +150,7 @@ void main() {
         });
       });
 
-      testWidgetsWithLeakTracking(
-          'should update shown based on animation status',
+      testWidgetsWithLeakTracking('should update shown based on animation status',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final MagnifierController magnifierController =
@@ -217,8 +215,7 @@ void main() {
     });
 
     group('show', () {
-      testWidgetsWithLeakTracking('should insert below below widget',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should insert below below widget', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Text('text'),
         ));
@@ -230,9 +227,7 @@ void main() {
 
         final OverlayEntry fakeBeforeOverlayEntry =
             OverlayEntry(builder: (_) => fakeBefore);
-        addTearDown(() => fakeBeforeOverlayEntry
-          ..remove()
-          ..dispose());
+        addTearDown(() => fakeBeforeOverlayEntry..remove()..dispose());
 
         Overlay.of(context).insert(fakeBeforeOverlayEntry);
         magnifierController.show(
@@ -254,8 +249,7 @@ void main() {
         expect(allOverlayChildren.first.widget.key, fakeMagnifier.key);
       });
 
-      testWidgetsWithLeakTracking(
-          'should insert newly built widget without animating out if overlay != null',
+      testWidgetsWithLeakTracking('should insert newly built widget without animating out if overlay != null',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =
@@ -287,8 +281,7 @@ void main() {
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          magnifierController.show(
-              context: context, builder: (_) => testMagnifier2);
+          magnifierController.show(context: context, builder: (_) => testMagnifier2);
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();

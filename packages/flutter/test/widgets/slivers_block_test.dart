@@ -56,124 +56,85 @@ Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
 }
 
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
-  final List<Offset> testAnswers = tester
-      .renderObjectList<RenderBox>(find.byType(SizedBox))
-      .map<Offset>(
-        (RenderBox target) => target.localToGlobal(Offset.zero),
-      )
-      .toList();
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(Offset.zero),
+  ).toList();
   expect(testAnswers, equals(answerKey));
-  final String foundText = tester
-      .widgetList<Text>(find.byType(Text))
-      .map<String>((Text widget) => widget.data!)
-      .reduce((String value, String element) => value + element);
+  final String foundText =
+    tester.widgetList<Text>(find.byType(Text))
+    .map<String>((Text widget) => widget.data!)
+    .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Viewport+SliverBlock basic test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport+SliverBlock basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
-    expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size,
-        equals(const Size(800.0, 600.0)));
-    verify(
-        tester,
-        <Offset>[
-          Offset.zero,
-          const Offset(0.0, 400.0),
-        ],
-        'ab');
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      Offset.zero,
+      const Offset(0.0, 400.0),
+    ], 'ab');
 
     await test(tester, 200.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -200.0),
-          const Offset(0.0, 200.0),
-        ],
-        'ab');
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
+    ], 'ab');
 
     await test(tester, 600.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -200.0),
-          const Offset(0.0, 200.0),
-        ],
-        'bc');
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
+    ], 'bc');
 
     await test(tester, 900.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -100.0),
-          const Offset(0.0, 300.0),
-        ],
-        'cd');
+    verify(tester, <Offset>[
+      const Offset(0.0, -100.0),
+      const Offset(0.0, 300.0),
+    ], 'cd');
 
     await test(tester, 200.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -200.0),
-          const Offset(0.0, 200.0),
-        ],
-        'ab');
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
+    ], 'ab');
   });
 
-  testWidgetsWithLeakTracking(
-      'Viewport+SliverBlock basic test with constant SliverChildListDelegate',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport+SliverBlock basic test with constant SliverChildListDelegate', (WidgetTester tester) async {
     await testWithConstChildDelegate(tester, 0.0);
-    expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size,
-        equals(const Size(800.0, 600.0)));
-    verify(
-        tester,
-        <Offset>[
-          Offset.zero,
-          const Offset(0.0, 400.0),
-        ],
-        'ab');
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      Offset.zero,
+      const Offset(0.0, 400.0),
+    ], 'ab');
 
     await testWithConstChildDelegate(tester, 200.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -200.0),
-          const Offset(0.0, 200.0),
-        ],
-        'ab');
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
+    ], 'ab');
 
     await testWithConstChildDelegate(tester, 600.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -200.0),
-          const Offset(0.0, 200.0),
-        ],
-        'bc');
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
+    ], 'bc');
 
     await testWithConstChildDelegate(tester, 900.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -100.0),
-          const Offset(0.0, 300.0),
-        ],
-        'cd');
+    verify(tester, <Offset>[
+      const Offset(0.0, -100.0),
+      const Offset(0.0, 300.0),
+    ], 'cd');
 
     await testWithConstChildDelegate(tester, 200.0);
-    verify(
-        tester,
-        <Offset>[
-          const Offset(0.0, -200.0),
-          const Offset(0.0, 200.0),
-        ],
-        'ab');
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
+    ], 'ab');
   });
 
-  testWidgetsWithLeakTracking('Viewport with GlobalKey reparenting',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
     final Key key1 = GlobalKey();
     final ViewportOffset offset = ViewportOffset.zero();
     addTearDown(offset.dispose);
@@ -194,14 +155,11 @@ void main() {
         ),
       ),
     );
-    verify(
-        tester,
-        <Offset>[
-          Offset.zero,
-          const Offset(0.0, 251.0),
-          const Offset(0.0, 503.0),
-        ],
-        'abc');
+    verify(tester, <Offset>[
+      Offset.zero,
+      const Offset(0.0, 251.0),
+      const Offset(0.0, 503.0),
+    ], 'abc');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -219,14 +177,11 @@ void main() {
         ),
       ),
     );
-    verify(
-        tester,
-        <Offset>[
-          Offset.zero,
-          const Offset(0.0, 253.0),
-          const Offset(0.0, 504.0),
-        ],
-        'cab');
+    verify(tester, <Offset>[
+      Offset.zero,
+      const Offset(0.0, 253.0),
+      const Offset(0.0, 504.0),
+    ], 'cab');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -244,14 +199,11 @@ void main() {
         ),
       ),
     );
-    verify(
-        tester,
-        <Offset>[
-          Offset.zero,
-          const Offset(0.0, 251.0),
-          const Offset(0.0, 504.0),
-        ],
-        'acb');
+    verify(tester, <Offset>[
+      Offset.zero,
+      const Offset(0.0, 251.0),
+      const Offset(0.0, 504.0),
+    ], 'acb');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -268,13 +220,10 @@ void main() {
         ),
       ),
     );
-    verify(
-        tester,
-        <Offset>[
-          Offset.zero,
-          const Offset(0.0, 251.0),
-        ],
-        'ab');
+    verify(tester, <Offset>[
+      Offset.zero,
+      const Offset(0.0, 251.0),
+    ], 'ab');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -292,19 +241,14 @@ void main() {
         ),
       ),
     );
-    verify(
-        tester,
-        <Offset>[
-          Offset.zero,
-          const Offset(0.0, 251.0),
-          const Offset(0.0, 504.0),
-        ],
-        'acb');
+    verify(tester, <Offset>[
+      Offset.zero,
+      const Offset(0.0, 251.0),
+      const Offset(0.0, 504.0),
+    ], 'acb');
   });
 
-  testWidgetsWithLeakTracking(
-      'Viewport overflow clipping of SliverToBoxAdapter',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
     final ViewportOffset offset1 = ViewportOffset.zero();
     addTearDown(offset1.dispose);
 
@@ -382,8 +326,7 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgetsWithLeakTracking('Viewport overflow clipping of SliverBlock',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport overflow clipping of SliverBlock', (WidgetTester tester) async {
     final ViewportOffset offset1 = ViewportOffset.zero();
     addTearDown(offset1.dispose);
 

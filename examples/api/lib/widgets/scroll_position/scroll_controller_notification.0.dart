@@ -67,7 +67,7 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
       slivers: <Widget>[
         SliverList.separated(
           itemCount: 50,
-          itemBuilder: (_, int index) {
+          itemBuilder: (_,int index) {
             return Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 8.0,
@@ -108,8 +108,7 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                if (!_useController)
-                  Text('Last notification: ${_lastNotification.runtimeType}'),
+                if (!_useController) Text('Last notification: ${_lastNotification.runtimeType}'),
                 if (!_useController) const SizedBox.square(dimension: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

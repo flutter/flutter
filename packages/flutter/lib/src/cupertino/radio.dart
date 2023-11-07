@@ -185,8 +185,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   State<CupertinoRadio<T>> createState() => _CupertinoRadioState<T>();
 }
 
-class _CupertinoRadioState<T> extends State<CupertinoRadio<T>>
-    with TickerProviderStateMixin, ToggleableStateMixin {
+class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProviderStateMixin, ToggleableStateMixin {
   final _RadioPainter _painter = _RadioPainter();
 
   bool focused = false;
@@ -208,8 +207,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>>
   }
 
   @override
-  ValueChanged<bool?>? get onChanged =>
-      widget.onChanged != null ? _handleChanged : null;
+  ValueChanged<bool?>? get onChanged => widget.onChanged != null ? _handleChanged : null;
 
   @override
   bool get tristate => widget.toggleable;
@@ -225,20 +223,20 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>>
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveActiveColor =
-        widget.activeColor ?? CupertinoColors.activeBlue;
-    final Color effectiveInactiveColor =
-        widget.inactiveColor ?? CupertinoColors.white;
+    final Color effectiveActiveColor = widget.activeColor
+      ?? CupertinoColors.activeBlue;
+    final Color effectiveInactiveColor = widget.inactiveColor
+      ?? CupertinoColors.white;
 
-    final Color effectiveFocusOverlayColor = widget.focusColor ??
-        HSLColor.fromColor(
-                effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
-            .withLightness(_kCupertinoFocusColorBrightness)
-            .withSaturation(_kCupertinoFocusColorSaturation)
-            .toColor();
+    final Color effectiveFocusOverlayColor = widget.focusColor
+      ?? HSLColor
+          .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
+          .withLightness(_kCupertinoFocusColorBrightness)
+          .withSaturation(_kCupertinoFocusColorSaturation)
+          .toColor();
 
     final Color effectiveActivePressedOverlayColor =
-        HSLColor.fromColor(effectiveActiveColor).withLightness(0.45).toColor();
+      HSLColor.fromColor(effectiveActiveColor).withLightness(0.45).toColor();
 
     final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
@@ -269,9 +267,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>>
           ..focusColor = effectiveFocusOverlayColor
           ..downPosition = downPosition
           ..isFocused = focused
-          ..activeColor = downPosition != null
-              ? effectiveActivePressedOverlayColor
-              : effectiveActiveColor
+          ..activeColor = downPosition != null ? effectiveActivePressedOverlayColor : effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
           ..fillColor = effectiveFillColor
           ..value = value
@@ -314,12 +310,13 @@ class _RadioPainter extends ToggleablePainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+
     final Offset center = (Offset.zero & size).center;
 
     final Paint paint = Paint()
-      ..color = inactiveColor
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 0.1;
+        ..color = inactiveColor
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 0.1;
 
     if (checkmarkStyle) {
       if (value ?? false) {
@@ -330,8 +327,7 @@ class _RadioPainter extends ToggleablePainter {
           ..strokeWidth = 2
           ..strokeCap = StrokeCap.round;
         final double width = _size.width;
-        final Offset origin =
-            Offset(center.dx - (width / 2), center.dy - (width / 2));
+        final Offset origin = Offset(center.dx - (width/2), center.dy - (width/2));
         final Offset start = Offset(width * 0.25, width * 0.52);
         final Offset mid = Offset(width * 0.46, width * 0.75);
         final Offset end = Offset(width * 0.85, width * 0.29);

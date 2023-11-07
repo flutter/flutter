@@ -28,8 +28,7 @@ class ScaleTransitionExample extends StatefulWidget {
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _ScaleTransitionExampleState extends State<ScaleTransitionExample>
-    with TickerProviderStateMixin {
+class _ScaleTransitionExampleState extends State<ScaleTransitionExample> with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
     vsync: this,

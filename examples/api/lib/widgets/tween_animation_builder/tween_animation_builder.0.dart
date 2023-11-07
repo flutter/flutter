@@ -28,12 +28,10 @@ class TweenAnimationBuilderExample extends StatefulWidget {
   const TweenAnimationBuilderExample({super.key});
 
   @override
-  State<TweenAnimationBuilderExample> createState() =>
-      _TweenAnimationBuilderExampleState();
+  State<TweenAnimationBuilderExample> createState() => _TweenAnimationBuilderExampleState();
 }
 
-class _TweenAnimationBuilderExampleState
-    extends State<TweenAnimationBuilderExample> {
+class _TweenAnimationBuilderExampleState extends State<TweenAnimationBuilderExample> {
   double targetValue = 24.0;
 
   @override

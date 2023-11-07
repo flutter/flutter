@@ -32,8 +32,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   int selectedIndex = 0;
 
   AnimationController buildFaderController() {
-    final AnimationController controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
+    final AnimationController controller =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
     controller.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
         setState(() {}); // Rebuild unselected destinations offstage.
@@ -45,15 +45,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   @override
   void initState() {
     super.initState();
-    navigatorKeys = List<GlobalKey<NavigatorState>>.generate(
-        allDestinations.length, (int index) => GlobalKey()).toList();
-    destinationFaders = List<AnimationController>.generate(
-        allDestinations.length, (int index) => buildFaderController()).toList();
+    navigatorKeys =
+        List<GlobalKey<NavigatorState>>.generate(allDestinations.length, (int index) => GlobalKey()).toList();
+    destinationFaders =
+        List<AnimationController>.generate(allDestinations.length, (int index) => buildFaderController()).toList();
     destinationFaders[selectedIndex].value = 1.0;
     destinationViews = allDestinations.map((Destination destination) {
       return FadeTransition(
-        opacity: destinationFaders[destination.index]
-            .drive(CurveTween(curve: Curves.fastOutSlowIn)),
+        opacity: destinationFaders[destination.index].drive(CurveTween(curve: Curves.fastOutSlowIn)),
         child: DestinationView(
           destination: destination,
           navigatorKey: navigatorKeys[destination.index],
@@ -74,8 +73,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
       onPop: () {
-        final NavigatorState navigator =
-            navigatorKeys[selectedIndex].currentState!;
+        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
         navigator.pop();
       },
       child: Scaffold(
@@ -190,8 +188,7 @@ class RootPage extends StatelessWidget {
               onPressed: () {
                 showDialog<void>(
                   context: context,
-                  useRootNavigator:
-                      true, // ignore: avoid_redundant_argument_values
+                  useRootNavigator: true, // ignore: avoid_redundant_argument_values
                   builder: _buildDialog,
                 );
               },
@@ -259,8 +256,7 @@ class ListPage extends StatelessWidget {
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
                   backgroundColor: MaterialStatePropertyAll<Color>(
-                    Color.lerp(destination.color[100], Colors.white,
-                        index / itemCount)!,
+                    Color.lerp(destination.color[100], Colors.white, index / itemCount)!,
                   ),
                 ),
                 onPressed: () {

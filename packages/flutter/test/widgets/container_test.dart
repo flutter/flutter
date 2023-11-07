@@ -38,8 +38,7 @@ void main() {
       ),
     );
 
-    testWidgetsWithLeakTracking('paints as expected',
-        (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('paints as expected', (WidgetTester tester) async {
       await tester.pumpWidget(Align(
         alignment: Alignment.topLeft,
         child: container,
@@ -48,24 +47,15 @@ void main() {
       final RenderBox box = tester.renderObject(find.byType(Container));
       expect(box, isNotNull);
 
-      expect(
-        box,
-        paints
-          ..rect(
-              rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0),
-              color: const Color(0xFF00FF00))
-          ..rect(
-              rect: const Rect.fromLTWH(26.0, 43.0, 25.0, 33.0),
-              color: const Color(0xFFFFFF00))
-          ..rect(
-              rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0),
-              color: const Color(0x7F0000FF)),
+      expect(box, paints
+        ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0xFF00FF00))
+        ..rect(rect: const Rect.fromLTWH(26.0, 43.0, 25.0, 33.0), color: const Color(0xFFFFFF00))
+        ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0x7F0000FF)),
       );
     });
 
     group('diagnostics', () {
-      testWidgetsWithLeakTracking('has reasonable default diagnostics',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('has reasonable default diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -77,8 +67,7 @@ void main() {
         expect(box, hasAGoodToStringDeep);
       });
 
-      testWidgetsWithLeakTracking('has expected info diagnostics',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('has expected info diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -150,8 +139,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('has expected debug diagnostics',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('has expected debug diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -256,8 +244,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('has expected fine diagnostics',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('has expected fine diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -267,129 +254,130 @@ void main() {
 
         expect(
           box.toStringDeep(minLevel: DiagnosticLevel.fine),
-          equalsIgnoringHashCodes('RenderPadding#00000 relayoutBoundary=up1\n'
-              ' │ creator: Padding ← Container ← Align ← MediaQuery ←\n'
-              ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
-              ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-              ' │   [root]\n'
-              ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
-              ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
-              ' │ layer: null\n'
-              ' │ semantics node: null\n'
-              ' │ size: Size(63.0, 88.0)\n'
-              ' │ padding: EdgeInsets.all(5.0)\n'
-              ' │ textDirection: null\n'
-              ' │\n'
-              ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
-              '   │ creator: ConstrainedBox ← Padding ← Container ← Align ←\n'
-              '   │   MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
-              '   │   _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
-              '   │   TestFlutterView#00000] ← View ← [root]\n'
-              '   │ parentData: offset=Offset(5.0, 5.0) (can use size)\n'
-              '   │ constraints: BoxConstraints(0.0<=w<=790.0, 0.0<=h<=590.0)\n'
-              '   │ layer: null\n'
-              '   │ semantics node: null\n'
-              '   │ size: Size(53.0, 78.0)\n'
-              '   │ additionalConstraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '   │\n'
-              '   └─child: RenderDecoratedBox#00000\n'
-              '     │ creator: DecoratedBox ← ConstrainedBox ← Padding ← Container ←\n'
-              '     │   Align ← MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope\n'
-              '     │   ← _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
-              '     │   TestFlutterView#00000] ← View ← [root]\n'
-              '     │ parentData: <none> (can use size)\n'
-              '     │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '     │ layer: null\n'
-              '     │ semantics node: null\n'
-              '     │ size: Size(53.0, 78.0)\n'
-              '     │ decoration: BoxDecoration:\n'
-              '     │   color: Color(0x7f0000ff)\n'
-              '     │   image: null\n'
-              '     │   border: null\n'
-              '     │   borderRadius: null\n'
-              '     │   boxShadow: null\n'
-              '     │   gradient: null\n'
-              '     │   shape: rectangle\n'
-              '     │ configuration: ImageConfiguration(bundle:\n'
-              '     │   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
-              '     │   android)\n'
-              '     │\n'
-              '     └─child: _RenderColoredBox#00000\n'
-              '       │ creator: ColoredBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
-              '       │   Container ← Align ← MediaQuery ← _MediaQueryFromView ←\n'
-              '       │   _PipelineOwnerScope ← _ViewScope ←\n'
-              '       │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-              '       │   ⋯\n'
-              '       │ parentData: <none> (can use size)\n'
-              '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '       │ layer: null\n'
-              '       │ semantics node: null\n'
-              '       │ size: Size(53.0, 78.0)\n'
-              '       │ behavior: opaque\n'
-              '       │\n'
-              '       └─child: RenderPadding#00000\n'
-              '         │ creator: Padding ← ColoredBox ← DecoratedBox ← ConstrainedBox ←\n'
-              '         │   Padding ← Container ← Align ← MediaQuery ← _MediaQueryFromView\n'
-              '         │   ← _PipelineOwnerScope ← _ViewScope ←\n'
-              '         │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← ⋯\n'
-              '         │ parentData: <none> (can use size)\n'
-              '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '         │ layer: null\n'
-              '         │ semantics node: null\n'
-              '         │ size: Size(53.0, 78.0)\n'
-              '         │ padding: EdgeInsets.all(7.0)\n'
-              '         │ textDirection: null\n'
-              '         │\n'
-              '         └─child: RenderPositionedBox#00000\n'
-              '           │ creator: Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
-              '           │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
-              '           │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ← ⋯\n'
-              '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
-              '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
-              '           │ layer: null\n'
-              '           │ semantics node: null\n'
-              '           │ size: Size(39.0, 64.0)\n'
-              '           │ alignment: Alignment.bottomRight\n'
-              '           │ textDirection: null\n'
-              '           │ widthFactor: expand\n'
-              '           │ heightFactor: expand\n'
-              '           │\n'
-              '           └─child: RenderConstrainedBox#00000 relayoutBoundary=up1\n'
-              '             │ creator: SizedBox ← Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
-              '             │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
-              '             │   _MediaQueryFromView ← _PipelineOwnerScope ← ⋯\n'
-              '             │ parentData: offset=Offset(14.0, 31.0) (can use size)\n'
-              '             │ constraints: BoxConstraints(0.0<=w<=39.0, 0.0<=h<=64.0)\n'
-              '             │ layer: null\n'
-              '             │ semantics node: null\n'
-              '             │ size: Size(25.0, 33.0)\n'
-              '             │ additionalConstraints: BoxConstraints(w=25.0, h=33.0)\n'
-              '             │\n'
-              '             └─child: RenderDecoratedBox#00000\n'
-              '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← ColoredBox ←\n'
-              '                   DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
-              '                   MediaQuery ← _MediaQueryFromView ← ⋯\n'
-              '                 parentData: <none> (can use size)\n'
-              '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
-              '                 layer: null\n'
-              '                 semantics node: null\n'
-              '                 size: Size(25.0, 33.0)\n'
-              '                 decoration: BoxDecoration:\n'
-              '                   color: Color(0xffffff00)\n'
-              '                   image: null\n'
-              '                   border: null\n'
-              '                   borderRadius: null\n'
-              '                   boxShadow: null\n'
-              '                   gradient: null\n'
-              '                   shape: rectangle\n'
-              '                 configuration: ImageConfiguration(bundle:\n'
-              '                   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
-              '                   android)\n'),
+          equalsIgnoringHashCodes(
+            'RenderPadding#00000 relayoutBoundary=up1\n'
+            ' │ creator: Padding ← Container ← Align ← MediaQuery ←\n'
+            ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
+            ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+            ' │   [root]\n'
+            ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
+            ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
+            ' │ layer: null\n'
+            ' │ semantics node: null\n'
+            ' │ size: Size(63.0, 88.0)\n'
+            ' │ padding: EdgeInsets.all(5.0)\n'
+            ' │ textDirection: null\n'
+            ' │\n'
+            ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
+            '   │ creator: ConstrainedBox ← Padding ← Container ← Align ←\n'
+            '   │   MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
+            '   │   _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+            '   │   TestFlutterView#00000] ← View ← [root]\n'
+            '   │ parentData: offset=Offset(5.0, 5.0) (can use size)\n'
+            '   │ constraints: BoxConstraints(0.0<=w<=790.0, 0.0<=h<=590.0)\n'
+            '   │ layer: null\n'
+            '   │ semantics node: null\n'
+            '   │ size: Size(53.0, 78.0)\n'
+            '   │ additionalConstraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '   │\n'
+            '   └─child: RenderDecoratedBox#00000\n'
+            '     │ creator: DecoratedBox ← ConstrainedBox ← Padding ← Container ←\n'
+            '     │   Align ← MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope\n'
+            '     │   ← _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+            '     │   TestFlutterView#00000] ← View ← [root]\n'
+            '     │ parentData: <none> (can use size)\n'
+            '     │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '     │ layer: null\n'
+            '     │ semantics node: null\n'
+            '     │ size: Size(53.0, 78.0)\n'
+            '     │ decoration: BoxDecoration:\n'
+            '     │   color: Color(0x7f0000ff)\n'
+            '     │   image: null\n'
+            '     │   border: null\n'
+            '     │   borderRadius: null\n'
+            '     │   boxShadow: null\n'
+            '     │   gradient: null\n'
+            '     │   shape: rectangle\n'
+            '     │ configuration: ImageConfiguration(bundle:\n'
+            '     │   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
+            '     │   android)\n'
+            '     │\n'
+            '     └─child: _RenderColoredBox#00000\n'
+            '       │ creator: ColoredBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
+            '       │   Container ← Align ← MediaQuery ← _MediaQueryFromView ←\n'
+            '       │   _PipelineOwnerScope ← _ViewScope ←\n'
+            '       │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+            '       │   ⋯\n'
+            '       │ parentData: <none> (can use size)\n'
+            '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '       │ layer: null\n'
+            '       │ semantics node: null\n'
+            '       │ size: Size(53.0, 78.0)\n'
+            '       │ behavior: opaque\n'
+            '       │\n'
+            '       └─child: RenderPadding#00000\n'
+            '         │ creator: Padding ← ColoredBox ← DecoratedBox ← ConstrainedBox ←\n'
+            '         │   Padding ← Container ← Align ← MediaQuery ← _MediaQueryFromView\n'
+            '         │   ← _PipelineOwnerScope ← _ViewScope ←\n'
+            '         │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← ⋯\n'
+            '         │ parentData: <none> (can use size)\n'
+            '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '         │ layer: null\n'
+            '         │ semantics node: null\n'
+            '         │ size: Size(53.0, 78.0)\n'
+            '         │ padding: EdgeInsets.all(7.0)\n'
+            '         │ textDirection: null\n'
+            '         │\n'
+            '         └─child: RenderPositionedBox#00000\n'
+            '           │ creator: Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
+            '           │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
+            '           │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ← ⋯\n'
+            '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
+            '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
+            '           │ layer: null\n'
+            '           │ semantics node: null\n'
+            '           │ size: Size(39.0, 64.0)\n'
+            '           │ alignment: Alignment.bottomRight\n'
+            '           │ textDirection: null\n'
+            '           │ widthFactor: expand\n'
+            '           │ heightFactor: expand\n'
+            '           │\n'
+            '           └─child: RenderConstrainedBox#00000 relayoutBoundary=up1\n'
+            '             │ creator: SizedBox ← Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
+            '             │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
+            '             │   _MediaQueryFromView ← _PipelineOwnerScope ← ⋯\n'
+            '             │ parentData: offset=Offset(14.0, 31.0) (can use size)\n'
+            '             │ constraints: BoxConstraints(0.0<=w<=39.0, 0.0<=h<=64.0)\n'
+            '             │ layer: null\n'
+            '             │ semantics node: null\n'
+            '             │ size: Size(25.0, 33.0)\n'
+            '             │ additionalConstraints: BoxConstraints(w=25.0, h=33.0)\n'
+            '             │\n'
+            '             └─child: RenderDecoratedBox#00000\n'
+            '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← ColoredBox ←\n'
+            '                   DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
+            '                   MediaQuery ← _MediaQueryFromView ← ⋯\n'
+            '                 parentData: <none> (can use size)\n'
+            '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
+            '                 layer: null\n'
+            '                 semantics node: null\n'
+            '                 size: Size(25.0, 33.0)\n'
+            '                 decoration: BoxDecoration:\n'
+            '                   color: Color(0xffffff00)\n'
+            '                   image: null\n'
+            '                   border: null\n'
+            '                   borderRadius: null\n'
+            '                   boxShadow: null\n'
+            '                   gradient: null\n'
+            '                   shape: rectangle\n'
+            '                 configuration: ImageConfiguration(bundle:\n'
+            '                   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
+            '                   android)\n'
+          ),
         );
       });
 
-      testWidgetsWithLeakTracking('has expected hidden diagnostics',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('has expected hidden diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -399,160 +387,160 @@ void main() {
 
         expect(
           box.toStringDeep(minLevel: DiagnosticLevel.hidden),
-          equalsIgnoringHashCodes('RenderPadding#00000 relayoutBoundary=up1\n'
-              ' │ needsCompositing: false\n'
-              ' │ creator: Padding ← Container ← Align ← MediaQuery ←\n'
-              ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
-              ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-              ' │   [root]\n'
-              ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
-              ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
-              ' │ layer: null\n'
-              ' │ semantics node: null\n'
-              ' │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              ' │ isSemanticBoundary: false\n'
-              ' │ size: Size(63.0, 88.0)\n'
-              ' │ padding: EdgeInsets.all(5.0)\n'
-              ' │ textDirection: null\n'
-              ' │\n'
-              ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
-              '   │ needsCompositing: false\n'
-              '   │ creator: ConstrainedBox ← Padding ← Container ← Align ←\n'
-              '   │   MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
-              '   │   _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
-              '   │   TestFlutterView#00000] ← View ← [root]\n'
-              '   │ parentData: offset=Offset(5.0, 5.0) (can use size)\n'
-              '   │ constraints: BoxConstraints(0.0<=w<=790.0, 0.0<=h<=590.0)\n'
-              '   │ layer: null\n'
-              '   │ semantics node: null\n'
-              '   │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              '   │ isSemanticBoundary: false\n'
-              '   │ size: Size(53.0, 78.0)\n'
-              '   │ additionalConstraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '   │\n'
-              '   └─child: RenderDecoratedBox#00000\n'
-              '     │ needsCompositing: false\n'
-              '     │ creator: DecoratedBox ← ConstrainedBox ← Padding ← Container ←\n'
-              '     │   Align ← MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope\n'
-              '     │   ← _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
-              '     │   TestFlutterView#00000] ← View ← [root]\n'
-              '     │ parentData: <none> (can use size)\n'
-              '     │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '     │ layer: null\n'
-              '     │ semantics node: null\n'
-              '     │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              '     │ isSemanticBoundary: false\n'
-              '     │ size: Size(53.0, 78.0)\n'
-              '     │ decoration: BoxDecoration:\n'
-              '     │   color: Color(0x7f0000ff)\n'
-              '     │   image: null\n'
-              '     │   border: null\n'
-              '     │   borderRadius: null\n'
-              '     │   boxShadow: null\n'
-              '     │   gradient: null\n'
-              '     │   shape: rectangle\n'
-              '     │ configuration: ImageConfiguration(bundle:\n'
-              '     │   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
-              '     │   android)\n'
-              '     │\n'
-              '     └─child: _RenderColoredBox#00000\n'
-              '       │ needsCompositing: false\n'
-              '       │ creator: ColoredBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
-              '       │   Container ← Align ← MediaQuery ← _MediaQueryFromView ←\n'
-              '       │   _PipelineOwnerScope ← _ViewScope ←\n'
-              '       │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-              '       │   ⋯\n'
-              '       │ parentData: <none> (can use size)\n'
-              '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '       │ layer: null\n'
-              '       │ semantics node: null\n'
-              '       │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              '       │ isSemanticBoundary: false\n'
-              '       │ size: Size(53.0, 78.0)\n'
-              '       │ behavior: opaque\n'
-              '       │\n'
-              '       └─child: RenderPadding#00000\n'
-              '         │ needsCompositing: false\n'
-              '         │ creator: Padding ← ColoredBox ← DecoratedBox ← ConstrainedBox ←\n'
-              '         │   Padding ← Container ← Align ← MediaQuery ← _MediaQueryFromView\n'
-              '         │   ← _PipelineOwnerScope ← _ViewScope ←\n'
-              '         │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← ⋯\n'
-              '         │ parentData: <none> (can use size)\n'
-              '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
-              '         │ layer: null\n'
-              '         │ semantics node: null\n'
-              '         │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              '         │ isSemanticBoundary: false\n'
-              '         │ size: Size(53.0, 78.0)\n'
-              '         │ padding: EdgeInsets.all(7.0)\n'
-              '         │ textDirection: null\n'
-              '         │\n'
-              '         └─child: RenderPositionedBox#00000\n'
-              '           │ needsCompositing: false\n'
-              '           │ creator: Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
-              '           │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
-              '           │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ← ⋯\n'
-              '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
-              '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
-              '           │ layer: null\n'
-              '           │ semantics node: null\n'
-              '           │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              '           │ isSemanticBoundary: false\n'
-              '           │ size: Size(39.0, 64.0)\n'
-              '           │ alignment: Alignment.bottomRight\n'
-              '           │ textDirection: null\n'
-              '           │ widthFactor: expand\n'
-              '           │ heightFactor: expand\n'
-              '           │\n'
-              '           └─child: RenderConstrainedBox#00000 relayoutBoundary=up1\n'
-              '             │ needsCompositing: false\n'
-              '             │ creator: SizedBox ← Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
-              '             │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
-              '             │   _MediaQueryFromView ← _PipelineOwnerScope ← ⋯\n'
-              '             │ parentData: offset=Offset(14.0, 31.0) (can use size)\n'
-              '             │ constraints: BoxConstraints(0.0<=w<=39.0, 0.0<=h<=64.0)\n'
-              '             │ layer: null\n'
-              '             │ semantics node: null\n'
-              '             │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              '             │ isSemanticBoundary: false\n'
-              '             │ size: Size(25.0, 33.0)\n'
-              '             │ additionalConstraints: BoxConstraints(w=25.0, h=33.0)\n'
-              '             │\n'
-              '             └─child: RenderDecoratedBox#00000\n'
-              '                 needsCompositing: false\n'
-              '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← ColoredBox ←\n'
-              '                   DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
-              '                   MediaQuery ← _MediaQueryFromView ← ⋯\n'
-              '                 parentData: <none> (can use size)\n'
-              '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
-              '                 layer: null\n'
-              '                 semantics node: null\n'
-              '                 isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
-              '                 isSemanticBoundary: false\n'
-              '                 size: Size(25.0, 33.0)\n'
-              '                 decoration: BoxDecoration:\n'
-              '                   color: Color(0xffffff00)\n'
-              '                   image: null\n'
-              '                   border: null\n'
-              '                   borderRadius: null\n'
-              '                   boxShadow: null\n'
-              '                   gradient: null\n'
-              '                   shape: rectangle\n'
-              '                 configuration: ImageConfiguration(bundle:\n'
-              '                   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
-              '                   android)\n'),
+          equalsIgnoringHashCodes(
+            'RenderPadding#00000 relayoutBoundary=up1\n'
+            ' │ needsCompositing: false\n'
+            ' │ creator: Padding ← Container ← Align ← MediaQuery ←\n'
+            ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
+            ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+            ' │   [root]\n'
+            ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
+            ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
+            ' │ layer: null\n'
+            ' │ semantics node: null\n'
+            ' │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            ' │ isSemanticBoundary: false\n'
+            ' │ size: Size(63.0, 88.0)\n'
+            ' │ padding: EdgeInsets.all(5.0)\n'
+            ' │ textDirection: null\n'
+            ' │\n'
+            ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
+            '   │ needsCompositing: false\n'
+            '   │ creator: ConstrainedBox ← Padding ← Container ← Align ←\n'
+            '   │   MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
+            '   │   _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+            '   │   TestFlutterView#00000] ← View ← [root]\n'
+            '   │ parentData: offset=Offset(5.0, 5.0) (can use size)\n'
+            '   │ constraints: BoxConstraints(0.0<=w<=790.0, 0.0<=h<=590.0)\n'
+            '   │ layer: null\n'
+            '   │ semantics node: null\n'
+            '   │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            '   │ isSemanticBoundary: false\n'
+            '   │ size: Size(53.0, 78.0)\n'
+            '   │ additionalConstraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '   │\n'
+            '   └─child: RenderDecoratedBox#00000\n'
+            '     │ needsCompositing: false\n'
+            '     │ creator: DecoratedBox ← ConstrainedBox ← Padding ← Container ←\n'
+            '     │   Align ← MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope\n'
+            '     │   ← _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+            '     │   TestFlutterView#00000] ← View ← [root]\n'
+            '     │ parentData: <none> (can use size)\n'
+            '     │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '     │ layer: null\n'
+            '     │ semantics node: null\n'
+            '     │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            '     │ isSemanticBoundary: false\n'
+            '     │ size: Size(53.0, 78.0)\n'
+            '     │ decoration: BoxDecoration:\n'
+            '     │   color: Color(0x7f0000ff)\n'
+            '     │   image: null\n'
+            '     │   border: null\n'
+            '     │   borderRadius: null\n'
+            '     │   boxShadow: null\n'
+            '     │   gradient: null\n'
+            '     │   shape: rectangle\n'
+            '     │ configuration: ImageConfiguration(bundle:\n'
+            '     │   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
+            '     │   android)\n'
+            '     │\n'
+            '     └─child: _RenderColoredBox#00000\n'
+            '       │ needsCompositing: false\n'
+            '       │ creator: ColoredBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
+            '       │   Container ← Align ← MediaQuery ← _MediaQueryFromView ←\n'
+            '       │   _PipelineOwnerScope ← _ViewScope ←\n'
+            '       │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+            '       │   ⋯\n'
+            '       │ parentData: <none> (can use size)\n'
+            '       │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '       │ layer: null\n'
+            '       │ semantics node: null\n'
+            '       │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            '       │ isSemanticBoundary: false\n'
+            '       │ size: Size(53.0, 78.0)\n'
+            '       │ behavior: opaque\n'
+            '       │\n'
+            '       └─child: RenderPadding#00000\n'
+            '         │ needsCompositing: false\n'
+            '         │ creator: Padding ← ColoredBox ← DecoratedBox ← ConstrainedBox ←\n'
+            '         │   Padding ← Container ← Align ← MediaQuery ← _MediaQueryFromView\n'
+            '         │   ← _PipelineOwnerScope ← _ViewScope ←\n'
+            '         │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← ⋯\n'
+            '         │ parentData: <none> (can use size)\n'
+            '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
+            '         │ layer: null\n'
+            '         │ semantics node: null\n'
+            '         │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            '         │ isSemanticBoundary: false\n'
+            '         │ size: Size(53.0, 78.0)\n'
+            '         │ padding: EdgeInsets.all(7.0)\n'
+            '         │ textDirection: null\n'
+            '         │\n'
+            '         └─child: RenderPositionedBox#00000\n'
+            '           │ needsCompositing: false\n'
+            '           │ creator: Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
+            '           │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
+            '           │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ← ⋯\n'
+            '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
+            '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
+            '           │ layer: null\n'
+            '           │ semantics node: null\n'
+            '           │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            '           │ isSemanticBoundary: false\n'
+            '           │ size: Size(39.0, 64.0)\n'
+            '           │ alignment: Alignment.bottomRight\n'
+            '           │ textDirection: null\n'
+            '           │ widthFactor: expand\n'
+            '           │ heightFactor: expand\n'
+            '           │\n'
+            '           └─child: RenderConstrainedBox#00000 relayoutBoundary=up1\n'
+            '             │ needsCompositing: false\n'
+            '             │ creator: SizedBox ← Align ← Padding ← ColoredBox ← DecoratedBox ←\n'
+            '             │   ConstrainedBox ← Padding ← Container ← Align ← MediaQuery ←\n'
+            '             │   _MediaQueryFromView ← _PipelineOwnerScope ← ⋯\n'
+            '             │ parentData: offset=Offset(14.0, 31.0) (can use size)\n'
+            '             │ constraints: BoxConstraints(0.0<=w<=39.0, 0.0<=h<=64.0)\n'
+            '             │ layer: null\n'
+            '             │ semantics node: null\n'
+            '             │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            '             │ isSemanticBoundary: false\n'
+            '             │ size: Size(25.0, 33.0)\n'
+            '             │ additionalConstraints: BoxConstraints(w=25.0, h=33.0)\n'
+            '             │\n'
+            '             └─child: RenderDecoratedBox#00000\n'
+            '                 needsCompositing: false\n'
+            '                 creator: DecoratedBox ← SizedBox ← Align ← Padding ← ColoredBox ←\n'
+            '                   DecoratedBox ← ConstrainedBox ← Padding ← Container ← Align ←\n'
+            '                   MediaQuery ← _MediaQueryFromView ← ⋯\n'
+            '                 parentData: <none> (can use size)\n'
+            '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
+            '                 layer: null\n'
+            '                 semantics node: null\n'
+            '                 isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
+            '                 isSemanticBoundary: false\n'
+            '                 size: Size(25.0, 33.0)\n'
+            '                 decoration: BoxDecoration:\n'
+            '                   color: Color(0xffffff00)\n'
+            '                   image: null\n'
+            '                   border: null\n'
+            '                   borderRadius: null\n'
+            '                   boxShadow: null\n'
+            '                   gradient: null\n'
+            '                   shape: rectangle\n'
+            '                 configuration: ImageConfiguration(bundle:\n'
+            '                   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
+            '                   android)\n'
+          ),
         );
       });
 
-      testWidgetsWithLeakTracking('painting error has expected diagnostics',
-          (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('painting error has expected diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
         ));
 
-        final RenderBox decoratedBox =
-            tester.renderObject(find.byType(DecoratedBox).last);
+        final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
         final PaintingContext context = _MockPaintingContext();
         late FlutterError error;
         try {
@@ -577,8 +565,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can be placed in an infinite box',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can be placed in an infinite box', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -587,8 +574,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Container transformAlignment',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Container transformAlignment', (WidgetTester tester) async {
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -635,11 +621,10 @@ void main() {
     expect(tester.getBottomRight(finder), equals(const Offset(200, 200)));
   });
 
-  testWidgetsWithLeakTracking(
-      'giving clipBehaviour Clip.None, will not add a ClipPath to the tree',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(Container(
-      decoration: const BoxDecoration(
+  testWidgetsWithLeakTracking('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Container(
+        decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(1)),
       ),
       child: const SizedBox(),
@@ -651,9 +636,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'giving clipBehaviour not a Clip.None, will add a ClipPath to the tree',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
@@ -670,9 +653,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'getClipPath() works for lots of kinds of decorations',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
     Future<void> test(Decoration decoration) async {
       await tester.pumpWidget(
         Directionality(
@@ -694,26 +675,18 @@ void main() {
           ),
         ),
       );
-      await expectLater(
-          find.byType(Container),
-          matchesGoldenFile(
-              'container_test.getClipPath.${decoration.runtimeType}.png'));
+      await expectLater(find.byType(Container), matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'));
     }
-
     await test(const BoxDecoration());
     await test(const UnderlineTabIndicator());
     await test(const ShapeDecoration(shape: StadiumBorder()));
     await test(const FlutterLogoDecoration());
   });
 
-  testWidgetsWithLeakTracking(
-      'Container is hittable only when having decorations',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Container is hittable only when having decorations', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(GestureDetector(
-      onTap: () {
-        tapped = true;
-      },
+      onTap: () { tapped = true; },
       child: Container(
         decoration: const BoxDecoration(color: Colors.black),
       ),
@@ -724,9 +697,7 @@ void main() {
     tapped = false;
 
     await tester.pumpWidget(GestureDetector(
-      onTap: () {
-        tapped = true;
-      },
+      onTap: () { tapped = true; },
       child: Container(
         foregroundDecoration: const BoxDecoration(color: Colors.black),
       ),
@@ -737,9 +708,7 @@ void main() {
     tapped = false;
 
     await tester.pumpWidget(GestureDetector(
-      onTap: () {
-        tapped = true;
-      },
+      onTap: () { tapped = true; },
       child: Container(
         color: Colors.black,
       ),
@@ -751,9 +720,7 @@ void main() {
 
     // Everything but color or decorations
     await tester.pumpWidget(GestureDetector(
-      onTap: () {
-        tapped = true;
-      },
+      onTap: () { tapped = true; },
       child: Center(
         child: Container(
           alignment: Alignment.bottomRight,
@@ -770,14 +737,14 @@ void main() {
     expect(tapped, false);
   });
 
-  testWidgetsWithLeakTracking(
-      'Container discards alignment when the child parameter is null and constraints is not Tight',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(Container(
+  testWidgetsWithLeakTracking('Container discards alignment when the child parameter is null and constraints is not Tight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Container(
         decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(1)),
-        ),
-        alignment: Alignment.centerLeft));
+        borderRadius: BorderRadius.all(Radius.circular(1)),
+      ),
+      alignment: Alignment.centerLeft
+    ));
 
     expect(
       find.byType(Align),
@@ -785,9 +752,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
-      'using clipBehaviour and shadow, should not clip the shadow',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
@@ -834,5 +799,5 @@ class _MockCanvas extends Fake implements Canvas {
   }
 
   @override
-  void drawRect(Rect rect, Paint paint) {}
+  void drawRect(Rect rect, Paint paint) { }
 }

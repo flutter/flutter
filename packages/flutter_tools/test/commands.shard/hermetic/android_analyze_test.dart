@@ -22,6 +22,7 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+
   group('Android analyze command', () {
     late FileSystem fileSystem;
     late Platform platform;
@@ -54,51 +55,36 @@ void main() {
         suppressAnalytics: true,
       );
       runner = createTestCommandRunner(command);
-      tempDir = fileSystem.systemTempDirectory
-          .createTempSync('flutter_tools_packages_test.');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       tempDir.childDirectory('android').createSync();
 
       // Setup repo roots
       const String homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
       for (final String dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem
-            .directory(homePath)
-            .childDirectory(dir)
-            .createSync(recursive: true);
+        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
       builder = FakeAndroidBuilder();
+
     });
 
     testUsingContext('can list build variants', () async {
       builder.variants = <String>['debug', 'release'];
-      await runner.run(<String>[
-        'analyze',
-        '--android',
-        '--list-build-variants',
-        tempDir.path
-      ]);
+      await runner.run(<String>['analyze', '--android', '--list-build-variants', tempDir.path]);
       expect(logger.statusText, contains('["debug","release"]'));
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => builder,
     });
 
     testUsingContext('throw if provide multiple path', () async {
-      final Directory anotherTempDir =
-          fileSystem.systemTempDirectory.createTempSync('another');
+      final Directory anotherTempDir = fileSystem.systemTempDirectory.createTempSync('another');
       await expectLater(
-        runner.run(<String>[
-          'analyze',
-          '--android',
-          '--list-build-variants',
-          tempDir.path,
-          anotherTempDir.path
-        ]),
+        runner.run(<String>['analyze', '--android', '--list-build-variants', tempDir.path, anotherTempDir.path]),
         throwsA(
           isA<Exception>().having(
             (Exception e) => e.toString(),
-            'description',
-            contains('The Android analyze can process only one directory path'),
+          'description',
+          contains('The Android analyze can process only one directory path'),
           ),
         ),
       );
@@ -106,27 +92,15 @@ void main() {
 
     testUsingContext('can output app link settings', () async {
       const String buildVariant = 'release';
-      await runner.run(<String>[
-        'analyze',
-        '--android',
-        '--output-app-link-settings',
-        '--build-variant=$buildVariant',
-        tempDir.path
-      ]);
+      await runner.run(<String>['analyze', '--android', '--output-app-link-settings', '--build-variant=$buildVariant', tempDir.path]);
       expect(builder.outputVariant, buildVariant);
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => builder,
     });
 
-    testUsingContext('output app link settings throws if no build variant',
-        () async {
+    testUsingContext('output app link settings throws if no build variant', () async {
       await expectLater(
-        runner.run(<String>[
-          'analyze',
-          '--android',
-          '--output-app-link-settings',
-          tempDir.path
-        ]),
+        runner.run(<String>['analyze', '--android', '--output-app-link-settings', tempDir.path]),
         throwsA(
           isA<Exception>().having(
             (Exception e) => e.toString(),
@@ -144,14 +118,12 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
   String? outputVariant;
 
   @override
-  Future<List<String>> getBuildVariants(
-      {required FlutterProject project}) async {
+  Future<List<String>> getBuildVariants({required FlutterProject project}) async {
     return variants;
   }
 
   @override
-  Future<void> outputsAppLinkSettings(String buildVariant,
-      {required FlutterProject project}) async {
+  Future<void> outputsAppLinkSettings(String buildVariant, {required FlutterProject project}) async {
     outputVariant = buildVariant;
   }
 }

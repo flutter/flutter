@@ -53,14 +53,9 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(logger: BufferLogger.test()),
-      BuildLinuxCommand(
-          logger: BufferLogger.test(),
-          operatingSystemUtils: FakeOperatingSystemUtils()),
+      BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
       BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
-      BuildWebCommand(
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          verboseHelp: false),
+      BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
       BuildApkCommand(logger: BufferLogger.test()),
       BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false),
       BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false),
@@ -113,8 +108,8 @@ void main() {
 
     final BufferLogger logger = BufferLogger.test();
     FakeBuildSubCommand(logger).test(unsound);
-    expect(
-        logger.statusText, contains('Building without sound null safety ⚠️'));
+    expect(logger.statusText,
+        contains('Building without sound null safety ⚠️'));
   });
 
   testUsingContext('Include only supported sub commands', () {
@@ -140,8 +135,7 @@ void main() {
 }
 
 class FakeBuildSubCommand extends BuildSubCommand {
-  FakeBuildSubCommand(Logger logger)
-      : super(logger: logger, verboseHelp: false);
+  FakeBuildSubCommand(Logger logger) : super(logger: logger, verboseHelp: false);
 
   @override
   String get description => throw UnimplementedError();

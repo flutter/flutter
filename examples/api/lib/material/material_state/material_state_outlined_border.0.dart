@@ -19,8 +19,7 @@ class MaterialStateOutlinedBorderExampleApp extends StatelessWidget {
   }
 }
 
-class SelectedBorder extends RoundedRectangleBorder
-    implements MaterialStateOutlinedBorder {
+class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
   const SelectedBorder();
 
   @override
@@ -36,12 +35,10 @@ class MaterialStateOutlinedBorderExample extends StatefulWidget {
   const MaterialStateOutlinedBorderExample({super.key});
 
   @override
-  State<MaterialStateOutlinedBorderExample> createState() =>
-      _MaterialStateOutlinedBorderExampleState();
+  State<MaterialStateOutlinedBorderExample> createState() => _MaterialStateOutlinedBorderExampleState();
 }
 
-class _MaterialStateOutlinedBorderExampleState
-    extends State<MaterialStateOutlinedBorderExample> {
+class _MaterialStateOutlinedBorderExampleState extends State<MaterialStateOutlinedBorderExample> {
   bool isSelected = true;
 
   @override

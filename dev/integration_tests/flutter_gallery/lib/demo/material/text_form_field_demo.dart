@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import '../../gallery/demo.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
-  const TextFormFieldDemo({super.key});
+  const TextFormFieldDemo({ super.key });
 
   static const String routeName = '/material/text-form-field';
 
@@ -84,6 +84,7 @@ class _PasswordFieldState extends State<PasswordField> {
 }
 
 class TextFormFieldDemoState extends State<TextFormFieldDemo> {
+
   PersonData person = PersonData();
 
   void showInSnackBar(String value) {
@@ -96,15 +97,12 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   bool _formWasEdited = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<FormFieldState<String>> _passwordFieldKey =
-      GlobalKey<FormFieldState<String>>();
-  final _UsNumberTextInputFormatter _phoneNumberFormatter =
-      _UsNumberTextInputFormatter();
+  final GlobalKey<FormFieldState<String>> _passwordFieldKey = GlobalKey<FormFieldState<String>>();
+  final _UsNumberTextInputFormatter _phoneNumberFormatter = _UsNumberTextInputFormatter();
   void _handleSubmitted() {
     final FormState form = _formKey.currentState!;
     if (!form.validate()) {
-      _autovalidateMode =
-          AutovalidateMode.always; // Start validating on every change.
+      _autovalidateMode = AutovalidateMode.always; // Start validating on every change.
       showInSnackBar('Please fix the errors in red before submitting.');
     } else {
       form.save();
@@ -135,8 +133,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   String? _validatePassword(String? value) {
     _formWasEdited = true;
-    final FormFieldState<String> passwordField =
-        _passwordFieldKey.currentState!;
+    final FormFieldState<String> passwordField = _passwordFieldKey.currentState!;
     if (passwordField.value == null || passwordField.value!.isEmpty) {
       return 'Please enter a password.';
     }
@@ -157,18 +154,14 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         return AlertDialog(
           title: const Text('This form has errors'),
           content: const Text('Really leave this form?'),
-          actions: <Widget>[
+          actions: <Widget> [
             TextButton(
               child: const Text('YES'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
+              onPressed: () { Navigator.of(context).pop(true); },
             ),
             TextButton(
               child: const Text('NO'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
+              onPressed: () { Navigator.of(context).pop(false); },
             ),
           ],
         );
@@ -190,9 +183,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
       drawerDragStartBehavior: DragStartBehavior.down,
       appBar: AppBar(
         title: const Text('Text fields'),
-        actions: <Widget>[
-          MaterialDemoDocumentationButton(TextFormFieldDemo.routeName)
-        ],
+        actions: <Widget>[MaterialDemoDocumentationButton(TextFormFieldDemo.routeName)],
       ),
       body: SafeArea(
         top: false,
@@ -200,9 +191,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         child: Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode,
-          canPop: _formKey.currentState == null ||
-              !_formWasEdited ||
-              _formKey.currentState!.validate(),
+          canPop: _formKey.currentState == null || !_formWasEdited || _formKey.currentState!.validate(),
           onPopInvoked: _handlePopInvoked,
           child: Scrollbar(
             child: SingleChildScrollView(
@@ -222,9 +211,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                       hintText: 'What do people call you?',
                       labelText: 'Name *',
                     ),
-                    onSaved: (String? value) {
-                      person.name = value;
-                    },
+                    onSaved: (String? value) { person.name = value; },
                     validator: _validateName,
                   ),
                   const SizedBox(height: 24.0),
@@ -238,12 +225,10 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                       prefixText: '+1',
                     ),
                     keyboardType: TextInputType.phone,
-                    onSaved: (String? value) {
-                      person.phoneNumber = value;
-                    },
+                    onSaved: (String? value) { person.phoneNumber = value; },
                     validator: _validatePhoneNumber,
                     // TextInputFormatters are applied in sequence.
-                    inputFormatters: <TextInputFormatter>[
+                    inputFormatters: <TextInputFormatter> [
                       FilteringTextInputFormatter.digitsOnly,
                       // Fit the validating format.
                       _phoneNumberFormatter,
@@ -259,16 +244,13 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                       labelText: 'E-mail',
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    onSaved: (String? value) {
-                      person.email = value;
-                    },
+                    onSaved: (String? value) { person.email = value; },
                   ),
                   const SizedBox(height: 24.0),
                   TextFormField(
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      hintText:
-                          'Tell us about yourself (e.g., write down what you do or what hobbies you have)',
+                      hintText: 'Tell us about yourself (e.g., write down what you do or what hobbies you have)',
                       helperText: 'Keep it short, this is just a demo.',
                       labelText: 'Life story',
                     ),

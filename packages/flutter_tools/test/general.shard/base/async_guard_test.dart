@@ -12,8 +12,7 @@ import '../../src/common.dart';
 Future<void> asyncError() {
   final Completer<void> completer = Completer<void>();
   final Completer<void> errorCompleter = Completer<void>();
-  errorCompleter.completeError(
-      _CustomException('Async Doom'), StackTrace.current);
+  errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
   return completer.future;
 }
 
@@ -27,22 +26,23 @@ class _CustomException implements Exception {
   String toString() => message;
 }
 
+
 Future<void> syncError() {
   throw _CustomException('Sync Doom');
 }
 
 Future<void> syncAndAsyncError() {
   final Completer<void> errorCompleter = Completer<void>();
-  errorCompleter.completeError(
-      _CustomException('Async Doom'), StackTrace.current);
+  errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
   throw _CustomException('Sync Doom');
 }
 
 Future<void> delayedThrow(FakeAsync time) {
   final Future<void> result =
-      Future<void>.delayed(const Duration(milliseconds: 10)).then((_) async {
-    throw _CustomException('Delayed Doom');
-  });
+    Future<void>.delayed(const Duration(milliseconds: 10))
+      .then((_) async {
+        throw _CustomException('Delayed Doom');
+      });
   time.elapse(const Duration(seconds: 1));
   time.flushMicrotasks();
   return result;
@@ -92,8 +92,7 @@ void main() {
     await zone.run(() async {
       try {
         // Completer is required or else we timeout.
-        await Future.any(
-            <Future<void>>[syncAndAsyncError(), caughtInZone.future]);
+        await Future.any(<Future<void>>[syncAndAsyncError(), caughtInZone.future]);
       } on _CustomException {
         caughtByHandler = true;
       }
@@ -129,6 +128,7 @@ void main() {
     expect(caughtByHandler, true);
   });
 
+
   test('asyncError is caught by asyncGuard', () async {
     await zone.run(() async {
       try {
@@ -163,12 +163,13 @@ void main() {
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
       unawaited(runZonedGuarded(() async {
-        final Future<void> f = asyncGuard<void>(() => delayedThrow(time)).then(
-          (Object? obj) => obj,
-          onError: (Object e, StackTrace s) {
-            caughtByCatchError = true;
-          },
-        );
+        final Future<void> f = asyncGuard<void>(() => delayedThrow(time))
+          .then(
+            (Object? obj) => obj,
+            onError: (Object e, StackTrace s) {
+              caughtByCatchError = true;
+            },
+          );
         try {
           await f;
         } on _CustomException {

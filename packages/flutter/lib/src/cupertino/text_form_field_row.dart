@@ -156,8 +156,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
       fontWeight: FontWeight.w400,
       color: CupertinoColors.placeholderText,
     ),
-    EditableTextContextMenuBuilder? contextMenuBuilder =
-        _defaultContextMenuBuilder,
+    EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
   })  : assert(initialValue == null || controller == null),
         assert(obscuringCharacter.length == 1),
         assert(maxLines == null || maxLines > 0),
@@ -170,8 +169,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           !expands || (maxLines == null && minLines == null),
           'minLines and maxLines must be null when expands is true.',
         ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
         assert(maxLength == null || maxLength > 0),
         super(
           initialValue: controller?.text ?? initialValue ?? '',
@@ -263,8 +261,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// {@macro flutter.material.TextFormField.onChanged}
   final ValueChanged<String>? onChanged;
 
-  static Widget _defaultContextMenuBuilder(
-      BuildContext context, EditableTextState editableTextState) {
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return CupertinoAdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -289,8 +286,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     if (_cupertinoTextFormFieldRow.controller == null) {
       _controller = TextEditingController(text: widget.initialValue);
     } else {
-      _cupertinoTextFormFieldRow.controller!
-          .addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller!.addListener(_handleControllerChanged);
     }
   }
 
@@ -299,11 +295,9 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     super.didUpdateWidget(oldWidget);
     if (_cupertinoTextFormFieldRow.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      _cupertinoTextFormFieldRow.controller
-          ?.addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null &&
-          _cupertinoTextFormFieldRow.controller == null) {
+      if (oldWidget.controller != null && _cupertinoTextFormFieldRow.controller == null) {
         _controller =
             TextEditingController.fromValue(oldWidget.controller!.value);
       }
@@ -319,8 +313,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    _cupertinoTextFormFieldRow.controller
-        ?.removeListener(_handleControllerChanged);
+    _cupertinoTextFormFieldRow.controller?.removeListener(_handleControllerChanged);
     _controller?.dispose();
     super.dispose();
   }

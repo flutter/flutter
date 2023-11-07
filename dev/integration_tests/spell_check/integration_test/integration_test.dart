@@ -35,8 +35,7 @@ Future<bool> findTextSpanTree(
     child.visitChildren(recursiveFinder);
   }
 
-  final DateTime endTime =
-      tester.binding.clock.now().add(const Duration(seconds: 20));
+  final DateTime endTime = tester.binding.clock.now().add(const Duration(seconds: 20));
   do {
     if (tester.binding.clock.now().isAfter(endTime)) {
       return false;
@@ -56,7 +55,8 @@ void main() {
     locale = const Locale('en', 'us');
   });
 
-  test('fetchSpellCheckSuggestions returns null with no misspelled words',
+  test(
+      'fetchSpellCheckSuggestions returns null with no misspelled words',
       () async {
     const String text = 'Hello, world!';
 
@@ -64,10 +64,14 @@ void main() {
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans!.length, equals(0));
-    expect(defaultSpellCheckService.lastSavedResults!.spellCheckedText,
-        equals(text));
-    expect(defaultSpellCheckService.lastSavedResults!.suggestionSpans,
-        equals(spellCheckSuggestionSpans));
+    expect(
+      defaultSpellCheckService.lastSavedResults!.spellCheckedText,
+      equals(text)
+    );
+    expect(
+      defaultSpellCheckService.lastSavedResults!.suggestionSpans,
+      equals(spellCheckSuggestionSpans)
+    );
   });
 
   test(
@@ -85,17 +89,25 @@ void main() {
 
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(
-        spellCheckSuggestionSpans!.length, equals(misspelledWordRanges.length));
+        spellCheckSuggestionSpans!.length,
+        equals(misspelledWordRanges.length)
+        );
 
     for (int i = 0; i < misspelledWordRanges.length; i += 1) {
       expect(
-          spellCheckSuggestionSpans[i].range, equals(misspelledWordRanges[i]));
+          spellCheckSuggestionSpans[i].range,
+          equals(misspelledWordRanges[i])
+        );
     }
 
-    expect(defaultSpellCheckService.lastSavedResults!.spellCheckedText,
-        equals(text));
-    expect(defaultSpellCheckService.lastSavedResults!.suggestionSpans,
-        equals(spellCheckSuggestionSpans));
+    expect(
+      defaultSpellCheckService.lastSavedResults!.spellCheckedText,
+      equals(text)
+    );
+    expect(
+      defaultSpellCheckService.lastSavedResults!.suggestionSpans,
+      equals(spellCheckSuggestionSpans)
+    );
   });
 
   test(
@@ -113,7 +125,9 @@ void main() {
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(
-        spellCheckSuggestionSpans, equals(spellCheckSpansWithComposingRegion));
+        spellCheckSuggestionSpans,
+        equals(spellCheckSpansWithComposingRegion)
+      );
   });
 
   test(
@@ -132,38 +146,37 @@ void main() {
     modifiedSpellCheckSuggestionSpans.removeAt(1);
 
     defaultSpellCheckService.lastSavedResults =
-        SpellCheckResults(text, modifiedSpellCheckSuggestionSpans);
+      SpellCheckResults(text, modifiedSpellCheckSuggestionSpans);
 
     final List<SuggestionSpan>? spellCheckSuggestionSpans =
         await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(
-        spellCheckSuggestionSpans, equals(expectedSpellCheckSuggestionSpans));
+      spellCheckSuggestionSpans,
+      equals(expectedSpellCheckSuggestionSpans)
+    );
   });
 
-  testWidgets(
-      'EditableText spell checks when text is entered and spell check enabled',
-      (WidgetTester tester) async {
+  testWidgets('EditableText spell checks when text is entered and spell check enabled', (WidgetTester tester) async {
     const TextStyle style = TextStyle();
     const TextStyle misspelledTextStyle = TextField.materialMisspelledTextStyle;
 
     await tester.pumpWidget(const MyApp());
 
-    await tester.enterText(
-        find.byType(EditableText), 'Hey cfabiueq qocnakoef! Hey!');
+    await tester.enterText(find.byType(EditableText), 'Hey cfabiueq qocnakoef! Hey!');
 
-    const TextSpan expectedTextSpanTree =
-        TextSpan(style: style, children: <TextSpan>[
-      TextSpan(style: style, text: 'Hey '),
-      TextSpan(style: misspelledTextStyle, text: 'cfabiueq'),
-      TextSpan(style: style, text: ' '),
-      TextSpan(style: misspelledTextStyle, text: 'qocnakoef'),
-      TextSpan(style: style, text: '! Hey!'),
+    const TextSpan expectedTextSpanTree = TextSpan(
+      style: style,
+      children: <TextSpan>[
+        TextSpan(style: style, text: 'Hey '),
+        TextSpan(style: misspelledTextStyle, text: 'cfabiueq'),
+        TextSpan(style: style, text: ' '),
+        TextSpan(style: misspelledTextStyle, text: 'qocnakoef'),
+        TextSpan(style: style, text: '! Hey!'),
     ]);
 
-    final bool expectedTextSpanTreeFound =
-        await findTextSpanTree(tester, expectedTextSpanTree);
+    final bool expectedTextSpanTreeFound = await findTextSpanTree(tester, expectedTextSpanTree);
 
     expect(expectedTextSpanTreeFound, isTrue);
   });

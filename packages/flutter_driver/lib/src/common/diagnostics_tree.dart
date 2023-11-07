@@ -15,8 +15,7 @@ enum DiagnosticsType {
   widget,
 }
 
-EnumIndex<DiagnosticsType> _diagnosticsTypeIndex =
-    EnumIndex<DiagnosticsType>(DiagnosticsType.values);
+EnumIndex<DiagnosticsType> _diagnosticsTypeIndex = EnumIndex<DiagnosticsType>(DiagnosticsType.values);
 
 /// A Flutter Driver command to retrieve the JSON-serialized [DiagnosticsNode]
 /// tree of the object identified by [finder].
@@ -25,9 +24,7 @@ EnumIndex<DiagnosticsType> _diagnosticsTypeIndex =
 /// [diagnosticsType].
 class GetDiagnosticsTree extends CommandWithTarget {
   /// Creates a [GetDiagnosticsTree] Flutter Driver command.
-  GetDiagnosticsTree(
-    super.finder,
-    this.diagnosticsType, {
+  GetDiagnosticsTree(super.finder, this.diagnosticsType, {
     this.subtreeDepth = 0,
     this.includeProperties = true,
     super.timeout,
@@ -37,8 +34,7 @@ class GetDiagnosticsTree extends CommandWithTarget {
   GetDiagnosticsTree.deserialize(super.json, super.finderFactory)
       : subtreeDepth = int.parse(json['subtreeDepth']!),
         includeProperties = json['includeProperties'] == 'true',
-        diagnosticsType =
-            _diagnosticsTypeIndex.lookupBySimpleName(json['diagnosticsType']!),
+        diagnosticsType = _diagnosticsTypeIndex.lookupBySimpleName(json['diagnosticsType']!),
         super.deserialize();
 
   /// How many levels of children to include in the JSON result.
@@ -54,12 +50,11 @@ class GetDiagnosticsTree extends CommandWithTarget {
   final DiagnosticsType diagnosticsType;
 
   @override
-  Map<String, String> serialize() => super.serialize()
-    ..addAll(<String, String>{
-      'subtreeDepth': subtreeDepth.toString(),
-      'includeProperties': includeProperties.toString(),
-      'diagnosticsType': _diagnosticsTypeIndex.toSimpleName(diagnosticsType),
-    });
+  Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
+    'subtreeDepth': subtreeDepth.toString(),
+    'includeProperties': includeProperties.toString(),
+    'diagnosticsType': _diagnosticsTypeIndex.toSimpleName(diagnosticsType),
+  });
 
   @override
   String get kind => 'get_diagnostics_tree';

@@ -29,10 +29,8 @@ void main() {
       fakeSuitePlatform = SuitePlatform(Runtime.vm);
     });
 
-    testUsingContext(
-        'ensureConfiguration throws an error if an '
-        'explicitVmServicePort is specified and more than one test file',
-        () async {
+    testUsingContext('ensureConfiguration throws an error if an '
+      'explicitVmServicePort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
         shellPath: '/',
         debuggingOptions: DebuggingOptions.enabled(
@@ -43,16 +41,14 @@ void main() {
       );
       flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
-      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform),
-          throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext(
-        'ensureConfiguration throws an error if a precompiled '
-        'entrypoint is specified and more that one test file', () {
+    testUsingContext('ensureConfiguration throws an error if a precompiled '
+      'entrypoint is specified and more that one test file', () {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         shellPath: '/',
@@ -61,39 +57,32 @@ void main() {
       );
       flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
-      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform),
-          throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('installHook creates a FlutterPlatform', () {
-      expect(
-          () => installHook(
-                shellPath: 'abc',
-                debuggingOptions: DebuggingOptions.enabled(
-                  BuildInfo.debug,
-                  startPaused: true,
-                ),
-              ),
-          throwsAssertionError);
+      expect(() => installHook(
+        shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+        ),
+      ), throwsAssertionError);
 
-      expect(
-          () => installHook(
-                shellPath: 'abc',
-                debuggingOptions: DebuggingOptions.enabled(
-                  BuildInfo.debug,
-                  startPaused: true,
-                  hostVmServicePort: 123,
-                ),
-              ),
-          throwsAssertionError);
+      expect(() => installHook(
+        shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+          hostVmServicePort: 123,
+        ),
+      ), throwsAssertionError);
 
       FlutterPlatform? capturedPlatform;
-      final Map<String, String> expectedPrecompiledDillFiles = <String, String>{
-        'Key': 'Value'
-      };
+      final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
         shellPath: 'abc',
         debuggingOptions: DebuggingOptions.enabled(
@@ -118,18 +107,15 @@ void main() {
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
       expect(flutterPlatform.shellPath, equals('abc'));
-      expect(
-          flutterPlatform.debuggingOptions.buildInfo, equals(BuildInfo.debug));
+      expect(flutterPlatform.debuggingOptions.buildInfo, equals(BuildInfo.debug));
       expect(flutterPlatform.debuggingOptions.startPaused, equals(true));
-      expect(flutterPlatform.debuggingOptions.disableServiceAuthCodes,
-          equals(true));
+      expect(flutterPlatform.debuggingOptions.disableServiceAuthCodes, equals(true));
       expect(flutterPlatform.debuggingOptions.hostVmServicePort, equals(200));
       expect(flutterPlatform.enableVmService, equals(true));
       expect(flutterPlatform.machine, equals(true));
       expect(flutterPlatform.host, InternetAddress.loopbackIPv6);
       expect(flutterPlatform.precompiledDillPath, equals('def'));
-      expect(
-          flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
+      expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));

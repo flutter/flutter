@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Positioned constructors',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Positioned constructors', (WidgetTester tester) async {
     final Widget child = Container();
     final Positioned a = Positioned(
       left: 101.0,
@@ -58,8 +57,7 @@ void main() {
     expect(c.height, null);
   });
 
-  testWidgetsWithLeakTracking('Can animate position data',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can animate position data', (WidgetTester tester) async {
     final RelativeRectTween rect = RelativeRectTween(
       begin: RelativeRect.fromRect(
         const Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
@@ -79,8 +77,7 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     void recordMetrics() {
-      final RenderBox box =
-          key.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       final BoxParentData boxParentData = box.parentData! as BoxParentData;
       sizes.add(box.size);
       positions.add(boxParentData.offset);
@@ -127,26 +124,8 @@ void main() {
     expect(completer.isCompleted, isFalse);
     recordMetrics();
 
-    expect(
-        sizes,
-        equals(<Size>[
-          const Size(10.0, 10.0),
-          const Size(10.0, 10.0),
-          const Size(10.0, 10.0),
-          const Size(10.0, 10.0),
-          const Size(10.0, 10.0),
-          const Size(10.0, 10.0)
-        ]));
-    expect(
-        positions,
-        equals(<Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(10.0, 10.0),
-          const Offset(17.0, 17.0),
-          const Offset(24.0, 24.0),
-          const Offset(45.0, 45.0),
-          const Offset(80.0, 80.0)
-        ]));
+    expect(sizes, equals(<Size>[const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0)]));
+    expect(positions, equals(<Offset>[const Offset(10.0, 10.0), const Offset(10.0, 10.0), const Offset(17.0, 17.0), const Offset(24.0, 24.0), const Offset(45.0, 45.0), const Offset(80.0, 80.0)]));
 
     controller.stop(canceled: false);
     await tester.pump();

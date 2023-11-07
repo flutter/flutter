@@ -5,10 +5,7 @@
 import 'template.dart';
 
 class SwitchTemplate extends TokenTemplate {
-  const SwitchTemplate(
-    super.blockName,
-    super.fileName,
-    super.tokens, {
+  const SwitchTemplate(super.blockName, super.fileName, super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -222,4 +219,5 @@ class _SwitchConfigM3 with _SwitchConfig {
   double? get thumbOffset => null;
 }
 ''';
+
 }

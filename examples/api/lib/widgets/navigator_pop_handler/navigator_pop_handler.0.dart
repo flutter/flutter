@@ -19,8 +19,7 @@ class NavigatorPopHandlerApp extends StatelessWidget {
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => _HomePage(),
-        '/nested_navigators': (BuildContext context) =>
-            const NestedNavigatorsPage(),
+        '/nested_navigators': (BuildContext context) => const NestedNavigatorsPage(),
       },
     );
   }
@@ -42,8 +41,7 @@ class _HomePage extends StatelessWidget {
             const SizedBox(height: 20.0),
             ListTile(
               title: const Text('Nested Navigator route'),
-              subtitle: const Text(
-                  'This route has another Navigator widget in addition to the one inside MaterialApp above.'),
+              subtitle: const Text('This route has another Navigator widget in addition to the one inside MaterialApp above.'),
               onTap: () {
                 Navigator.of(context).pushNamed('/nested_navigators');
               },
@@ -63,8 +61,7 @@ class NestedNavigatorsPage extends StatefulWidget {
 }
 
 class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
-  final GlobalKey<NavigatorState> _nestedNavigatorKey =
-      GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -88,8 +85,8 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
               );
             case 'nested_navigators/one/another_one':
               return MaterialPageRoute<void>(
-                builder: (BuildContext context) =>
-                    const NestedNavigatorsPageTwo(),
+                builder: (BuildContext context) => const NestedNavigatorsPageTwo(
+                ),
               );
             default:
               throw Exception('Invalid route: ${settings.name}');
@@ -120,8 +117,7 @@ class NestedNavigatorsPageOne extends StatelessWidget {
             const Text('A system back here returns to the home page.'),
             TextButton(
               onPressed: () {
-                Navigator.of(context)
-                    .pushNamed('nested_navigators/one/another_one');
+                Navigator.of(context).pushNamed('nested_navigators/one/another_one');
               },
               child: const Text('Go to another route in this nested Navigator'),
             ),
@@ -153,8 +149,7 @@ class NestedNavigatorsPageTwo extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Nested Navigators Page Two'),
-            const Text(
-                'A system back here will go back to Nested Navigators Page One'),
+            const Text('A system back here will go back to Nested Navigators Page One'),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();

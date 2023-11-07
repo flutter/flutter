@@ -16,8 +16,7 @@ class OfExampleApp extends StatefulWidget {
 }
 
 class _OfExampleAppState extends State<OfExampleApp> {
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   int _counter = 0;
 
   void _incrementCounter() {

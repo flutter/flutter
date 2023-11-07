@@ -36,61 +36,42 @@ enum Orientation {
 enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.size].
   size,
-
   /// Specifies the aspect corresponding to [MediaQueryData.orientation].
   orientation,
-
   /// Specifies the aspect corresponding to [MediaQueryData.devicePixelRatio].
   devicePixelRatio,
-
   /// Specifies the aspect corresponding to [MediaQueryData.textScaleFactor].
   textScaleFactor,
-
   /// Specifies the aspect corresponding to [MediaQueryData.textScaler].
   textScaler,
-
   /// Specifies the aspect corresponding to [MediaQueryData.platformBrightness].
   platformBrightness,
-
   /// Specifies the aspect corresponding to [MediaQueryData.padding].
   padding,
-
   /// Specifies the aspect corresponding to [MediaQueryData.viewInsets].
   viewInsets,
-
   /// Specifies the aspect corresponding to [MediaQueryData.systemGestureInsets].
   systemGestureInsets,
-
   /// Specifies the aspect corresponding to [MediaQueryData.viewPadding].
   viewPadding,
-
   /// Specifies the aspect corresponding to [MediaQueryData.alwaysUse24HourFormat].
   alwaysUse24HourFormat,
-
   /// Specifies the aspect corresponding to [MediaQueryData.accessibleNavigation].
   accessibleNavigation,
-
   /// Specifies the aspect corresponding to [MediaQueryData.invertColors].
   invertColors,
-
   /// Specifies the aspect corresponding to [MediaQueryData.highContrast].
   highContrast,
-
   /// Specifies the aspect corresponding to [MediaQueryData.onOffSwitchLabels].
   onOffSwitchLabels,
-
   /// Specifies the aspect corresponding to [MediaQueryData.disableAnimations].
   disableAnimations,
-
   /// Specifies the aspect corresponding to [MediaQueryData.boldText].
   boldText,
-
   /// Specifies the aspect corresponding to [MediaQueryData.navigationMode].
   navigationMode,
-
   /// Specifies the aspect corresponding to [MediaQueryData.gestureSettings].
   gestureSettings,
-
   /// Specifies the aspect corresponding to [MediaQueryData.displayFeatures].
   displayFeatures,
 }
@@ -192,24 +173,24 @@ class MediaQueryData {
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
-  })  : _textScaleFactor = textScaleFactor,
-        _textScaler = textScaler,
-        assert(
-          identical(textScaler, _kUnspecifiedTextScaler) ||
-              textScaleFactor == 1.0,
-          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
-        );
+  }) : _textScaleFactor = textScaleFactor,
+       _textScaler = textScaler,
+       assert(
+         identical(textScaler, _kUnspecifiedTextScaler) || textScaleFactor == 1.0,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+       );
 
   /// Deprecated. Use [MediaQueryData.fromView] instead.
   ///
   /// This constructor was operating on a single window assumption. In
   /// preparation for Flutter's upcoming multi-window support, it has been
   /// deprecated.
-  @Deprecated('Use MediaQueryData.fromView instead. '
-      'This constructor was deprecated in preparation for the upcoming multi-window support. '
-      'This feature was deprecated after v3.7.0-32.0.pre.')
-  factory MediaQueryData.fromWindow(ui.FlutterView window) =>
-      MediaQueryData.fromView(window);
+  @Deprecated(
+    'Use MediaQueryData.fromView instead. '
+    'This constructor was deprecated in preparation for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
+  factory MediaQueryData.fromWindow(ui.FlutterView window) => MediaQueryData.fromView(window);
 
   /// Creates data for a [MediaQuery] based on the given `view`.
   ///
@@ -251,46 +232,29 @@ class MediaQueryData {
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
-      : size = view.physicalSize / view.devicePixelRatio,
-        devicePixelRatio = view.devicePixelRatio,
-        _textScaleFactor = 1.0, // _textScaler is the source of truth.
-        _textScaler = _textScalerFromView(view, platformData),
-        platformBrightness = platformData?.platformBrightness ??
-            view.platformDispatcher.platformBrightness,
-        padding =
-            EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
-        viewPadding =
-            EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
-        viewInsets =
-            EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
-        systemGestureInsets = EdgeInsets.fromViewPadding(
-            view.systemGestureInsets, view.devicePixelRatio),
-        accessibleNavigation = platformData?.accessibleNavigation ??
-            view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
-        invertColors = platformData?.invertColors ??
-            view.platformDispatcher.accessibilityFeatures.invertColors,
-        disableAnimations = platformData?.disableAnimations ??
-            view.platformDispatcher.accessibilityFeatures.disableAnimations,
-        boldText = platformData?.boldText ??
-            view.platformDispatcher.accessibilityFeatures.boldText,
-        highContrast = platformData?.highContrast ??
-            view.platformDispatcher.accessibilityFeatures.highContrast,
-        onOffSwitchLabels = platformData?.onOffSwitchLabels ??
-            view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
-        alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ??
-            view.platformDispatcher.alwaysUse24HourFormat,
-        navigationMode =
-            platformData?.navigationMode ?? NavigationMode.traditional,
-        gestureSettings = DeviceGestureSettings.fromView(view),
-        displayFeatures = view.displayFeatures;
+    : size = view.physicalSize / view.devicePixelRatio,
+      devicePixelRatio = view.devicePixelRatio,
+      _textScaleFactor = 1.0, // _textScaler is the source of truth.
+      _textScaler = _textScalerFromView(view, platformData),
+      platformBrightness = platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
+      padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
+      viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
+      viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio),
+      accessibleNavigation = platformData?.accessibleNavigation ?? view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors = platformData?.invertColors ?? view.platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations = platformData?.disableAnimations ?? view.platformDispatcher.accessibilityFeatures.disableAnimations,
+      boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
+      highContrast = platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
+      onOffSwitchLabels = platformData?.onOffSwitchLabels ?? view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
+      alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
+      navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
+      gestureSettings = DeviceGestureSettings.fromView(view),
+      displayFeatures = view.displayFeatures;
 
-  static TextScaler _textScalerFromView(
-      ui.FlutterView view, MediaQueryData? platformData) {
-    final double scaleFactor = platformData?.textScaleFactor ??
-        view.platformDispatcher.textScaleFactor;
-    return scaleFactor == 1.0
-        ? TextScaler.noScaling
-        : TextScaler.linear(scaleFactor);
+  static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
+    final double scaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor;
+    return scaleFactor == 1.0 ? TextScaler.noScaling : TextScaler.linear(scaleFactor);
   }
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -379,13 +343,12 @@ class MediaQueryData {
       return _textScaler;
     }
     return _textScaleFactor == 1.0
-        // textScaleFactor and textScaler from the constructor are consistent.
-        ? TextScaler.noScaling
-        // The constructor was called with an explicitly specified textScaleFactor,
-        // we assume the caller is unmigrated and ignore _textScaler.
-        : TextScaler.linear(_textScaleFactor);
+      // textScaleFactor and textScaler from the constructor are consistent.
+      ? TextScaler.noScaling
+      // The constructor was called with an explicitly specified textScaleFactor,
+      // we assume the caller is unmigrated and ignore _textScaler.
+      : TextScaler.linear(_textScaleFactor);
   }
-
   final TextScaler _textScaler;
 
   /// The current brightness mode of the host platform.
@@ -601,9 +564,7 @@ class MediaQueryData {
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
-    return size.width > size.height
-        ? Orientation.landscape
-        : Orientation.portrait;
+    return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
   /// Creates a copy of this media query data but with the given fields replaced
@@ -650,8 +611,7 @@ class MediaQueryData {
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      alwaysUse24HourFormat:
-          alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
       onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
@@ -696,15 +656,10 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       viewPadding: viewPadding.copyWith(
-        left:
-            removeLeft ? math.max(0.0, viewPadding.left - padding.left) : null,
+        left: removeLeft ? math.max(0.0, viewPadding.left - padding.left) : null,
         top: removeTop ? math.max(0.0, viewPadding.top - padding.top) : null,
-        right: removeRight
-            ? math.max(0.0, viewPadding.right - padding.right)
-            : null,
-        bottom: removeBottom
-            ? math.max(0.0, viewPadding.bottom - padding.bottom)
-            : null,
+        right: removeRight ? math.max(0.0, viewPadding.right - padding.right) : null,
+        bottom: removeBottom ? math.max(0.0, viewPadding.bottom - padding.bottom) : null,
       ),
     );
   }
@@ -733,16 +688,10 @@ class MediaQueryData {
     }
     return copyWith(
       viewPadding: viewPadding.copyWith(
-        left: removeLeft
-            ? math.max(0.0, viewPadding.left - viewInsets.left)
-            : null,
+        left: removeLeft ? math.max(0.0, viewPadding.left - viewInsets.left) : null,
         top: removeTop ? math.max(0.0, viewPadding.top - viewInsets.top) : null,
-        right: removeRight
-            ? math.max(0.0, viewPadding.right - viewInsets.right)
-            : null,
-        bottom: removeBottom
-            ? math.max(0.0, viewPadding.bottom - viewInsets.bottom)
-            : null,
+        right: removeRight ? math.max(0.0, viewPadding.right - viewInsets.right) : null,
+        bottom: removeBottom ? math.max(0.0, viewPadding.bottom - viewInsets.bottom) : null,
       ),
       viewInsets: viewInsets.copyWith(
         left: removeLeft ? 0.0 : null,
@@ -808,11 +757,8 @@ class MediaQueryData {
   ///    split the screen, from the [MediaQuery] and adds a [Padding] widget to
   ///    position the child to match the selected sub-screen.
   MediaQueryData removeDisplayFeatures(Rect subScreen) {
-    assert(
-        subScreen.left >= 0.0 &&
-            subScreen.top >= 0.0 &&
-            subScreen.right <= size.width &&
-            subScreen.bottom <= size.height,
+    assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
+        subScreen.right <= size.width && subScreen.bottom <= size.height,
         "'subScreen' argument cannot be outside the bounds of the screen");
     if (subScreen.size == size && subScreen.topLeft == Offset.zero) {
       return this;
@@ -838,10 +784,9 @@ class MediaQueryData {
         right: math.max(0.0, viewInsets.right - rightInset),
         bottom: math.max(0.0, viewInsets.bottom - bottomInset),
       ),
-      displayFeatures: displayFeatures
-          .where((ui.DisplayFeature displayFeature) =>
-              subScreen.overlaps(displayFeature.bounds))
-          .toList(),
+      displayFeatures: displayFeatures.where(
+        (ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds)
+      ).toList(),
     );
   }
 
@@ -850,47 +795,47 @@ class MediaQueryData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MediaQueryData &&
-        other.size == size &&
-        other.devicePixelRatio == devicePixelRatio &&
-        other.textScaleFactor == textScaleFactor &&
-        other.platformBrightness == platformBrightness &&
-        other.padding == padding &&
-        other.viewPadding == viewPadding &&
-        other.viewInsets == viewInsets &&
-        other.systemGestureInsets == systemGestureInsets &&
-        other.alwaysUse24HourFormat == alwaysUse24HourFormat &&
-        other.highContrast == highContrast &&
-        other.onOffSwitchLabels == onOffSwitchLabels &&
-        other.disableAnimations == disableAnimations &&
-        other.invertColors == invertColors &&
-        other.accessibleNavigation == accessibleNavigation &&
-        other.boldText == boldText &&
-        other.navigationMode == navigationMode &&
-        other.gestureSettings == gestureSettings &&
-        listEquals(other.displayFeatures, displayFeatures);
+    return other is MediaQueryData
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio
+        && other.textScaleFactor == textScaleFactor
+        && other.platformBrightness == platformBrightness
+        && other.padding == padding
+        && other.viewPadding == viewPadding
+        && other.viewInsets == viewInsets
+        && other.systemGestureInsets == systemGestureInsets
+        && other.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && other.highContrast == highContrast
+        && other.onOffSwitchLabels == onOffSwitchLabels
+        && other.disableAnimations == disableAnimations
+        && other.invertColors == invertColors
+        && other.accessibleNavigation == accessibleNavigation
+        && other.boldText == boldText
+        && other.navigationMode == navigationMode
+        && other.gestureSettings == gestureSettings
+        && listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
   int get hashCode => Object.hash(
-        size,
-        devicePixelRatio,
-        textScaleFactor,
-        platformBrightness,
-        padding,
-        viewPadding,
-        viewInsets,
-        alwaysUse24HourFormat,
-        highContrast,
-        onOffSwitchLabels,
-        disableAnimations,
-        invertColors,
-        accessibleNavigation,
-        boldText,
-        navigationMode,
-        gestureSettings,
-        Object.hashAll(displayFeatures),
-      );
+    size,
+    devicePixelRatio,
+    textScaleFactor,
+    platformBrightness,
+    padding,
+    viewPadding,
+    viewInsets,
+    alwaysUse24HourFormat,
+    highContrast,
+    onOffSwitchLabels,
+    disableAnimations,
+    invertColors,
+    accessibleNavigation,
+    boldText,
+    navigationMode,
+    gestureSettings,
+    Object.hashAll(displayFeatures),
+  );
 
   @override
   String toString() {
@@ -1095,9 +1040,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [FlutterView] the [MediaQuery] is constructed for. The [FlutterView] can,
   /// for example, be obtained from the context via [View.of] or from
   /// [PlatformDispatcher.views].
-  @Deprecated('Use MediaQuery.fromView instead. '
-      'This constructor was deprecated in preparation for the upcoming multi-window support. '
-      'This feature was deprecated after v3.7.0-32.0.pre.')
+  @Deprecated(
+    'Use MediaQuery.fromView instead. '
+    'This constructor was deprecated in preparation for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   static Widget fromWindow({
     Key? key,
     required Widget child,
@@ -1153,8 +1100,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       builder: (BuildContext context) {
         assert(debugCheckHasMediaQuery(context));
         return MediaQuery(
-          data:
-              MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
           child: child,
         );
       },
@@ -1188,8 +1134,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       final MediaQueryData data = MediaQuery.of(context);
       return MediaQuery(
         data: data.copyWith(
-          textScaler: data.textScaler.clamp(
-              minScaleFactor: minScaleFactor, maxScaleFactor: maxScaleFactor),
+          textScaler: data.textScaler.clamp(minScaleFactor: minScaleFactor, maxScaleFactor: maxScaleFactor),
         ),
         child: child,
       );
@@ -1238,8 +1183,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
 
   static MediaQueryData _of(BuildContext context, [_MediaQueryAspect? aspect]) {
     assert(debugCheckHasMediaQuery(context));
-    return InheritedModel.inheritFrom<MediaQuery>(context, aspect: aspect)!
-        .data;
+    return InheritedModel.inheritFrom<MediaQuery>(context, aspect: aspect)!.data;
   }
 
   /// The data from the closest instance of this class that encloses the given
@@ -1281,10 +1225,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     return _maybeOf(context);
   }
 
-  static MediaQueryData? _maybeOf(BuildContext context,
-      [_MediaQueryAspect? aspect]) {
-    return InheritedModel.inheritFrom<MediaQuery>(context, aspect: aspect)
-        ?.data;
+  static MediaQueryData? _maybeOf(BuildContext context, [_MediaQueryAspect? aspect]) {
+    return InheritedModel.inheritFrom<MediaQuery>(context, aspect: aspect)?.data;
   }
 
   /// Returns [MediaQueryData.size] from the nearest [MediaQuery] ancestor or
@@ -1299,8 +1241,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// rebuild the `context` when this specific attribute changes, not when _any_
   /// attribute changes.
   /// {@endtemplate}
-  static Size sizeOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.size).size;
+  static Size sizeOf(BuildContext context) => _of(context, _MediaQueryAspect.size).size;
 
   /// Returns [MediaQueryData.size] from the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
@@ -1314,8 +1255,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// only rebuild the `context` when this specific attribute changes, not when
   /// _any_ attribute changes.
   /// {@endtemplate}
-  static Size? maybeSizeOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.size)?.size;
+  static Size? maybeSizeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.size)?.size;
 
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
   /// throws an exception, if no such ancestor exists.
@@ -1324,8 +1264,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.orientation] property of the ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static Orientation orientationOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.orientation).orientation;
+  static Orientation orientationOf(BuildContext context) => _of(context, _MediaQueryAspect.orientation).orientation;
 
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
@@ -1334,8 +1273,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.orientation] property of the ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static Orientation? maybeOrientationOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.orientation)?.orientation;
+  static Orientation? maybeOrientationOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.orientation)?.orientation;
 
   /// Returns [MediaQueryData.devicePixelRatio] for the nearest [MediaQuery] ancestor or
   /// throws an exception, if no such ancestor exists.
@@ -1344,8 +1282,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static double devicePixelRatioOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.devicePixelRatio).devicePixelRatio;
+  static double devicePixelRatioOf(BuildContext context) => _of(context, _MediaQueryAspect.devicePixelRatio).devicePixelRatio;
 
   /// Returns [MediaQueryData.devicePixelRatio] for the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
@@ -1354,8 +1291,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static double? maybeDevicePixelRatioOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
+  static double? maybeDevicePixelRatioOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [maybeTextScalerOf] instead.
@@ -1372,8 +1308,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
     'This feature was deprecated after v3.12.0-2.0.pre.',
   )
-  static double textScaleFactorOf(BuildContext context) =>
-      maybeTextScaleFactorOf(context) ?? 1.0;
+  static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [maybeTextScalerOf] instead.
@@ -1391,8 +1326,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
     'This feature was deprecated after v3.12.0-2.0.pre.',
   )
-  static double? maybeTextScaleFactorOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
+  static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
 
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
   /// ancestor or null if no such ancestor exists.
@@ -1402,8 +1336,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static TextScaler textScalerOf(BuildContext context) =>
-      maybeTextScalerOf(context) ?? TextScaler.noScaling;
+  static TextScaler textScalerOf(BuildContext context) => maybeTextScalerOf(context) ?? TextScaler.noScaling;
 
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
   /// ancestor or [TextScaler.noScaling] if no such ancestor exists.
@@ -1413,8 +1346,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static TextScaler? maybeTextScalerOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.textScaler)?.textScaler;
+  static TextScaler? maybeTextScalerOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaler)?.textScaler;
 
   /// Returns [MediaQueryData.platformBrightness] for the nearest [MediaQuery]
   /// ancestor or [Brightness.light], if no such ancestor exists.
@@ -1424,8 +1356,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static Brightness platformBrightnessOf(BuildContext context) =>
-      maybePlatformBrightnessOf(context) ?? Brightness.light;
+  static Brightness platformBrightnessOf(BuildContext context) => maybePlatformBrightnessOf(context) ?? Brightness.light;
 
   /// Returns [MediaQueryData.platformBrightness] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1435,9 +1366,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static Brightness? maybePlatformBrightnessOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.platformBrightness)
-          ?.platformBrightness;
+  static Brightness? maybePlatformBrightnessOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.platformBrightness)?.platformBrightness;
 
   /// Returns [MediaQueryData.padding] for the nearest [MediaQuery] ancestor or
   /// throws an exception, if no such ancestor exists.
@@ -1447,8 +1376,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static EdgeInsets paddingOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.padding).padding;
+  static EdgeInsets paddingOf(BuildContext context) => _of(context, _MediaQueryAspect.padding).padding;
 
   /// Returns [MediaQueryData.padding] for the nearest [MediaQuery] ancestor
   /// or null, if no such ancestor exists.
@@ -1458,8 +1386,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static EdgeInsets? maybePaddingOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.padding)?.padding;
+  static EdgeInsets? maybePaddingOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.padding)?.padding;
 
   /// Returns [MediaQueryData.viewInsets] for the nearest [MediaQuery] ancestor
   /// or throws an exception, if no such ancestor exists.
@@ -1469,8 +1396,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static EdgeInsets viewInsetsOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.viewInsets).viewInsets;
+  static EdgeInsets viewInsetsOf(BuildContext context) => _of(context, _MediaQueryAspect.viewInsets).viewInsets;
 
   /// Returns [MediaQueryData.viewInsets] for the nearest [MediaQuery] ancestor
   /// or null, if no such ancestor exists.
@@ -1480,8 +1406,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static EdgeInsets? maybeViewInsetsOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.viewInsets)?.viewInsets;
+  static EdgeInsets? maybeViewInsetsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.viewInsets)?.viewInsets;
 
   /// Returns [MediaQueryData.systemGestureInsets] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
@@ -1491,8 +1416,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static EdgeInsets systemGestureInsetsOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.systemGestureInsets).systemGestureInsets;
+  static EdgeInsets systemGestureInsetsOf(BuildContext context) => _of(context, _MediaQueryAspect.systemGestureInsets).systemGestureInsets;
 
   /// Returns [MediaQueryData.systemGestureInsets] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1502,9 +1426,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static EdgeInsets? maybeSystemGestureInsetsOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.systemGestureInsets)
-          ?.systemGestureInsets;
+  static EdgeInsets? maybeSystemGestureInsetsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.systemGestureInsets)?.systemGestureInsets;
 
   /// Returns [MediaQueryData.viewPadding] for the nearest [MediaQuery] ancestor
   /// or throws an exception, if no such ancestor exists.
@@ -1514,8 +1436,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static EdgeInsets viewPaddingOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.viewPadding).viewPadding;
+  static EdgeInsets viewPaddingOf(BuildContext context) => _of(context, _MediaQueryAspect.viewPadding).viewPadding;
 
   /// Returns [MediaQueryData.viewPadding] for the nearest [MediaQuery] ancestor
   /// or null, if no such ancestor exists.
@@ -1525,8 +1446,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static EdgeInsets? maybeViewPaddingOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.viewPadding)?.viewPadding;
+  static EdgeInsets? maybeViewPaddingOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.viewPadding)?.viewPadding;
 
   /// Returns [MediaQueryData.alwaysUse24HourFormat] for the nearest
   /// [MediaQuery] ancestor or throws an exception, if no such ancestor exists.
@@ -1536,9 +1456,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool alwaysUse24HourFormatOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.alwaysUse24HourFormat)
-          .alwaysUse24HourFormat;
+  static bool alwaysUse24HourFormatOf(BuildContext context) => _of(context, _MediaQueryAspect.alwaysUse24HourFormat).alwaysUse24HourFormat;
 
   /// Returns [MediaQueryData.alwaysUse24HourFormat] for the nearest
   /// [MediaQuery] ancestor or null, if no such ancestor exists.
@@ -1548,9 +1466,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeAlwaysUse24HourFormatOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.alwaysUse24HourFormat)
-          ?.alwaysUse24HourFormat;
+  static bool? maybeAlwaysUse24HourFormatOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.alwaysUse24HourFormat)?.alwaysUse24HourFormat;
 
   /// Returns [MediaQueryData.accessibleNavigation] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
@@ -1560,8 +1476,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool accessibleNavigationOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.accessibleNavigation).accessibleNavigation;
+  static bool accessibleNavigationOf(BuildContext context) => _of(context, _MediaQueryAspect.accessibleNavigation).accessibleNavigation;
 
   /// Returns [MediaQueryData.accessibleNavigation] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1571,9 +1486,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeAccessibleNavigationOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.accessibleNavigation)
-          ?.accessibleNavigation;
+  static bool? maybeAccessibleNavigationOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.accessibleNavigation)?.accessibleNavigation;
 
   /// Returns [MediaQueryData.invertColors] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
@@ -1583,8 +1496,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool invertColorsOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.invertColors).invertColors;
+  static bool invertColorsOf(BuildContext context) => _of(context, _MediaQueryAspect.invertColors).invertColors;
 
   /// Returns [MediaQueryData.invertColors] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1594,8 +1506,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeInvertColorsOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.invertColors)?.invertColors;
+  static bool? maybeInvertColorsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.invertColors)?.invertColors;
 
   /// Returns [MediaQueryData.highContrast] for the nearest [MediaQuery]
   /// ancestor or false, if no such ancestor exists.
@@ -1605,8 +1516,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool highContrastOf(BuildContext context) =>
-      maybeHighContrastOf(context) ?? false;
+  static bool highContrastOf(BuildContext context) => maybeHighContrastOf(context) ?? false;
 
   /// Returns [MediaQueryData.highContrast] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1616,8 +1526,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeHighContrastOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast;
+  static bool? maybeHighContrastOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast;
 
   /// Returns [MediaQueryData.onOffSwitchLabels] for the nearest [MediaQuery]
   /// ancestor or false, if no such ancestor exists.
@@ -1627,8 +1536,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool onOffSwitchLabelsOf(BuildContext context) =>
-      maybeOnOffSwitchLabelsOf(context) ?? false;
+  static bool onOffSwitchLabelsOf(BuildContext context) => maybeOnOffSwitchLabelsOf(context) ?? false;
 
   /// Returns [MediaQueryData.onOffSwitchLabels] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1638,8 +1546,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeOnOffSwitchLabelsOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
+  static bool? maybeOnOffSwitchLabelsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
 
   /// Returns [MediaQueryData.disableAnimations] for the nearest [MediaQuery]
   /// ancestor or false, if no such ancestor exists.
@@ -1649,8 +1556,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool disableAnimationsOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.disableAnimations).disableAnimations;
+  static bool disableAnimationsOf(BuildContext context) => _of(context, _MediaQueryAspect.disableAnimations).disableAnimations;
 
   /// Returns [MediaQueryData.disableAnimations] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1660,8 +1566,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeDisableAnimationsOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.disableAnimations)?.disableAnimations;
+  static bool? maybeDisableAnimationsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.disableAnimations)?.disableAnimations;
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
   /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
@@ -1671,8 +1576,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool boldTextOf(BuildContext context) =>
-      maybeBoldTextOf(context) ?? false;
+  static bool boldTextOf(BuildContext context) => maybeBoldTextOf(context) ?? false;
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
   /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
@@ -1682,8 +1586,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// Deprecated in favor of [boldTextOf].
-  @Deprecated('Migrate to boldTextOf. '
-      'This feature was deprecated after v3.5.0-9.0.pre.')
+  @Deprecated(
+    'Migrate to boldTextOf. '
+    'This feature was deprecated after v3.5.0-9.0.pre.'
+  )
   static bool boldTextOverride(BuildContext context) => boldTextOf(context);
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
@@ -1694,8 +1600,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeBoldTextOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
+  static bool? maybeBoldTextOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
 
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
@@ -1705,8 +1610,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static NavigationMode navigationModeOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.navigationMode).navigationMode;
+  static NavigationMode navigationModeOf(BuildContext context) => _of(context, _MediaQueryAspect.navigationMode).navigationMode;
 
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1716,8 +1620,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static NavigationMode? maybeNavigationModeOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.navigationMode)?.navigationMode;
+  static NavigationMode? maybeNavigationModeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.navigationMode)?.navigationMode;
 
   /// Returns [MediaQueryData.gestureSettings] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
@@ -1727,8 +1630,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static DeviceGestureSettings gestureSettingsOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.gestureSettings).gestureSettings;
+  static DeviceGestureSettings gestureSettingsOf(BuildContext context) => _of(context, _MediaQueryAspect.gestureSettings).gestureSettings;
 
   /// Returns [MediaQueryData.gestureSettings] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1738,8 +1640,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static DeviceGestureSettings? maybeGestureSettingsOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.gestureSettings)?.gestureSettings;
+  static DeviceGestureSettings? maybeGestureSettingsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.gestureSettings)?.gestureSettings;
 
   /// Returns [MediaQueryData.displayFeatures] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
@@ -1749,8 +1650,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static List<ui.DisplayFeature> displayFeaturesOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.displayFeatures).displayFeatures;
+  static List<ui.DisplayFeature> displayFeaturesOf(BuildContext context) => _of(context, _MediaQueryAspect.displayFeatures).displayFeatures;
 
   /// Returns [MediaQueryData.displayFeatures] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
@@ -1760,9 +1660,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static List<ui.DisplayFeature>? maybeDisplayFeaturesOf(
-          BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.displayFeatures)?.displayFeatures;
+  static List<ui.DisplayFeature>? maybeDisplayFeaturesOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.displayFeatures)?.displayFeatures;
 
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
@@ -1770,13 +1668,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-        DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 
   @override
-  bool updateShouldNotifyDependent(
-      MediaQuery oldWidget, Set<Object> dependencies) {
+  bool updateShouldNotifyDependent(MediaQuery oldWidget, Set<Object> dependencies) {
     for (final Object dependency in dependencies) {
       if (dependency is _MediaQueryAspect) {
         switch (dependency) {
@@ -1813,8 +1709,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               return true;
             }
           case _MediaQueryAspect.systemGestureInsets:
-            if (data.systemGestureInsets !=
-                oldWidget.data.systemGestureInsets) {
+            if (data.systemGestureInsets != oldWidget.data.systemGestureInsets) {
               return true;
             }
           case _MediaQueryAspect.viewPadding:
@@ -1822,13 +1717,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               return true;
             }
           case _MediaQueryAspect.alwaysUse24HourFormat:
-            if (data.alwaysUse24HourFormat !=
-                oldWidget.data.alwaysUse24HourFormat) {
+            if (data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat) {
               return true;
             }
           case _MediaQueryAspect.accessibleNavigation:
-            if (data.accessibleNavigation !=
-                oldWidget.data.accessibleNavigation) {
+            if (data.accessibleNavigation != oldWidget.data.accessibleNavigation) {
               return true;
             }
           case _MediaQueryAspect.invertColors:
@@ -1914,8 +1807,7 @@ class _MediaQueryFromView extends StatefulWidget {
   State<_MediaQueryFromView> createState() => _MediaQueryFromViewState();
 }
 
-class _MediaQueryFromViewState extends State<_MediaQueryFromView>
-    with WidgetsBindingObserver {
+class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBindingObserver {
   MediaQueryData? _parentData;
   MediaQueryData? _data;
 
@@ -1947,13 +1839,11 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView>
 
   void _updateParentData() {
     _parentData = widget.ignoreParentData ? null : MediaQuery.maybeOf(context);
-    _data =
-        null; // _updateData must be called again after changing parent data.
+    _data = null; // _updateData must be called again after changing parent data.
   }
 
   void _updateData() {
-    final MediaQueryData newData =
-        MediaQueryData.fromView(widget.view, platformData: _parentData);
+    final MediaQueryData newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
     if (newData != _data) {
       setState(() {
         _data = newData;
@@ -2010,11 +1900,8 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView>
     MediaQueryData effectiveData = _data!;
     // If we get our platformBrightness from the PlatformDispatcher (i.e. we have no parentData) replace it
     // with the debugBrightnessOverride in non-release mode.
-    if (!kReleaseMode &&
-        _parentData == null &&
-        effectiveData.platformBrightness != debugBrightnessOverride) {
-      effectiveData =
-          effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
+    if (!kReleaseMode && _parentData == null && effectiveData.platformBrightness != debugBrightnessOverride) {
+      effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }
     return MediaQuery(
       data: effectiveData,
@@ -2024,17 +1911,13 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView>
 }
 
 const TextScaler _kUnspecifiedTextScaler = _UnspecifiedTextScaler();
-
 // TODO(LongCatIsLooong): Remove once `MediaQueryData.textScaleFactor` is
 // removed: https://github.com/flutter/flutter/issues/128825.
 class _UnspecifiedTextScaler implements TextScaler {
   const _UnspecifiedTextScaler();
 
   @override
-  TextScaler clamp(
-          {double minScaleFactor = 0,
-          double maxScaleFactor = double.infinity}) =>
-      throw UnimplementedError();
+  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) => throw UnimplementedError();
 
   @override
   double scale(double fontSize) => throw UnimplementedError();

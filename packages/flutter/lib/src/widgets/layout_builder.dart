@@ -9,8 +9,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
-typedef LayoutWidgetBuilder = Widget Function(
-    BuildContext context, BoxConstraints constraints);
+typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstraints constraints);
 
 /// An abstract superclass for widgets that defer their building until layout.
 ///
@@ -33,8 +32,7 @@ typedef LayoutWidgetBuilder = Widget Function(
 ///
 /// Subclasses must return a [RenderObject] that mixes in
 /// [RenderConstrainedLayoutBuilder].
-abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints>
-    extends RenderObjectWidget {
+abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   const ConstrainedLayoutBuilder({
     super.key,
@@ -42,14 +40,12 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints>
   });
 
   @override
-  RenderObjectElement createElement() =>
-      _LayoutBuilderElement<ConstraintType>(this);
+  RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
 
   /// Called at layout time to construct the widget tree.
   ///
   /// The builder must not return null.
-  final Widget Function(BuildContext context, ConstraintType constraints)
-      builder;
+  final Widget Function(BuildContext context, ConstraintType constraints) builder;
 
   /// Whether [builder] needs to be called again even if the layout constraints
   /// are the same.
@@ -71,21 +67,16 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints>
   ///  * [Element.update], the method that actually updates the widget's
   ///    configuration.
   @protected
-  bool updateShouldRebuild(
-          covariant ConstrainedLayoutBuilder<ConstraintType> oldWidget) =>
-      true;
+  bool updateShouldRebuild(covariant ConstrainedLayoutBuilder<ConstraintType> oldWidget) => true;
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
 
-class _LayoutBuilderElement<ConstraintType extends Constraints>
-    extends RenderObjectElement {
+class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderObjectElement {
   _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> super.widget);
 
   @override
-  RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>
-      get renderObject => super.renderObject
-          as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
+  RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
 
   Element? _child;
 
@@ -112,8 +103,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
   @override
   void update(ConstrainedLayoutBuilder<ConstraintType> newWidget) {
     assert(widget != newWidget);
-    final ConstrainedLayoutBuilder<ConstraintType> oldWidget =
-        widget as ConstrainedLayoutBuilder<ConstraintType>;
+    final ConstrainedLayoutBuilder<ConstraintType> oldWidget = widget as ConstrainedLayoutBuilder<ConstraintType>;
     super.update(newWidget);
     assert(widget == newWidget);
 
@@ -132,8 +122,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
     // same. This is because that callback may depend on the updated widget
     // configuration, or an inherited widget.
     renderObject.markNeedsBuild();
-    super
-        .performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
+    super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
   }
 
   @override
@@ -147,8 +136,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
     void layoutCallback() {
       Widget built;
       try {
-        built = (widget as ConstrainedLayoutBuilder<ConstraintType>)
-            .builder(this, constraints);
+        built = (widget as ConstrainedLayoutBuilder<ConstraintType>).builder(this, constraints);
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
         built = ErrorWidget.builder(
@@ -157,7 +145,8 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
             e,
             stack,
             informationCollector: () => <DiagnosticsNode>[
-              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+              if (kDebugMode)
+                DiagnosticsDebugCreator(DebugCreator(this)),
             ],
           ),
         );
@@ -172,7 +161,8 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
             e,
             stack,
             informationCollector: () => <DiagnosticsNode>[
-              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+              if (kDebugMode)
+                DiagnosticsDebugCreator(DebugCreator(this)),
             ],
           ),
         );
@@ -185,8 +175,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {
-    final RenderObjectWithChildMixin<RenderObject> renderObject =
-        this.renderObject;
+    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(slot == null);
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
@@ -194,15 +183,13 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
   }
 
   @override
-  void moveRenderObjectChild(
-      RenderObject child, Object? oldSlot, Object? newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false);
   }
 
   @override
   void removeRenderObjectChild(RenderObject child, Object? slot) {
-    final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>
-        renderObject = this.renderObject;
+    final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
@@ -213,10 +200,8 @@ class _LayoutBuilderElement<ConstraintType extends Constraints>
 ///
 /// Provides a callback that should be called at layout time, typically in
 /// [RenderObject.performLayout].
-mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints,
-    ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
+mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
   LayoutCallback<ConstraintType>? _callback;
-
   /// Change the layout callback.
   void updateCallback(LayoutCallback<ConstraintType>? value) {
     if (value == _callback) {
@@ -303,14 +288,10 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderLayoutBuilder();
+  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 }
 
-class _RenderLayoutBuilder extends RenderBox
-    with
-        RenderObjectWithChildMixin<RenderBox>,
-        RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
+class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
@@ -337,10 +318,9 @@ class _RenderLayoutBuilder extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(debugCannotComputeDryLayout(
-      reason:
-          'Calculating the dry layout would require running the layout callback '
-          'speculatively, which might mutate the live render object tree.',
+    assert(debugCannotComputeDryLayout(reason:
+      'Calculating the dry layout would require running the layout callback '
+      'speculatively, which might mutate the live render object tree.',
     ));
     return Size.zero;
   }
@@ -366,7 +346,7 @@ class _RenderLayoutBuilder extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 

@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('setState() overbuild test',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('setState() overbuild test', (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Builder inner = Builder(
       builder: (BuildContext context) {
@@ -44,17 +43,15 @@ void main() {
     await tester.tap(find.text('inner'));
     await tester.pump();
     log.add('---');
-    expect(
-        log,
-        equals(<String>[
-          'outer',
-          'stateful',
-          'middle 0',
-          'inner',
-          '---',
-          'stateful',
-          'middle 1',
-          '---',
-        ]));
+    expect(log, equals(<String>[
+      'outer',
+      'stateful',
+      'middle 0',
+      'inner',
+      '---',
+      'stateful',
+      'middle 1',
+      '---',
+    ]));
   });
 }

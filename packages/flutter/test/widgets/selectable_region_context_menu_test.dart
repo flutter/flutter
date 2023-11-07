@@ -179,10 +179,11 @@ class RenderSelectionSpy extends RenderProxyBox
     return value.hasSelection ? const TextSelection.collapsed(offset: 0) : null;
   }
 
-  @override
+ @override
   int? getContentLength() {
     return 0;
   }
+
 
   @override
   final SelectionGeometry value = const SelectionGeometry(

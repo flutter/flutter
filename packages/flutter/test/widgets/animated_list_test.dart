@@ -9,38 +9,36 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgetsWithLeakTracking(
-      'SliverAnimatedList.builder respects findChildIndexCallback',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAnimatedList.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          stateSetter = setState;
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverAnimatedList(
-                initialItemCount: itemCount,
-                itemBuilder: (BuildContext context, int index,
-                        Animation<double> animation) =>
-                    Container(
-                  key: Key('$index'),
-                  height: 2000.0,
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverAnimatedList(
+                  initialItemCount: itemCount,
+                  itemBuilder: (BuildContext context, int index, Animation<double> animation) => Container(
+                    key: Key('$index'),
+                    height: 2000.0,
+                  ),
+                  findChildIndexCallback: (Key key) {
+                    finderCalled = true;
+                    return null;
+                  },
                 ),
-                findChildIndexCallback: (Key key) {
-                  finderCalled = true;
-                  return null;
-                },
-              ),
-            ],
-          );
-        },
-      ),
-    ));
+              ],
+            );
+          },
+        ),
+      )
+    );
     expect(finderCalled, false);
 
     // Trigger update.
@@ -51,8 +49,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('AnimatedList', (WidgetTester tester) async {
-    Widget builder(
-        BuildContext context, int index, Animation<double> animation) {
+    Widget builder(BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
         height: 100.0,
         child: Center(
@@ -60,7 +57,6 @@ void main() {
         ),
       );
     }
-
     final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
@@ -75,9 +71,9 @@ void main() {
     );
 
     expect(find.byWidgetPredicate((Widget widget) {
-      return widget is SliverAnimatedList &&
-          widget.initialItemCount == 2 &&
-          widget.itemBuilder == builder;
+      return widget is SliverAnimatedList
+         && widget.initialItemCount == 2
+         && widget.itemBuilder == builder;
     }), findsOneWidget);
 
     listKey.currentState!.insertItem(0);
@@ -131,8 +127,7 @@ void main() {
   });
 
   group('SliverAnimatedList', () {
-    testWidgetsWithLeakTracking('initialItemCount',
-        (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('initialItemCount', (WidgetTester tester) async {
       final Map<int, Animation<double>> animations = <int, Animation<double>>{};
 
       await tester.pumpWidget(
@@ -142,8 +137,7 @@ void main() {
             slivers: <Widget>[
               SliverAnimatedList(
                 initialItemCount: 2,
-                itemBuilder: (BuildContext context, int index,
-                    Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   animations[index] = animation;
                   return SizedBox(
                     height: 100.0,
@@ -167,8 +161,7 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('insert', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey =
-          GlobalKey<SliverAnimatedListState>();
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -177,8 +170,7 @@ void main() {
             slivers: <Widget>[
               SliverAnimatedList(
                 key: listKey,
-                itemBuilder: (BuildContext context, int index,
-                    Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return SizeTransition(
                     key: ValueKey<int>(index),
                     sizeFactor: animation,
@@ -194,15 +186,9 @@ void main() {
         ),
       );
 
-      double itemHeight(int index) => tester
-          .getSize(find.byKey(ValueKey<int>(index), skipOffstage: false))
-          .height;
-      double itemTop(int index) => tester
-          .getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false))
-          .dy;
-      double itemBottom(int index) => tester
-          .getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false))
-          .dy;
+      double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
+      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
 
       listKey.currentState!.insertItem(
         0,
@@ -261,8 +247,7 @@ void main() {
 
     // Test for insertAllItems with SliverAnimatedList
     testWidgetsWithLeakTracking('insertAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey =
-          GlobalKey<SliverAnimatedListState>();
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -271,8 +256,7 @@ void main() {
             slivers: <Widget>[
               SliverAnimatedList(
                 key: listKey,
-                itemBuilder: (BuildContext context, int index,
-                    Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return SizeTransition(
                     key: ValueKey<int>(index),
                     sizeFactor: animation,
@@ -288,15 +272,9 @@ void main() {
         ),
       );
 
-      double itemHeight(int index) => tester
-          .getSize(find.byKey(ValueKey<int>(index), skipOffstage: false))
-          .height;
-      double itemTop(int index) => tester
-          .getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false))
-          .dy;
-      double itemBottom(int index) => tester
-          .getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false))
-          .dy;
+      double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
+      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
 
       listKey.currentState!.insertAllItems(
         0,
@@ -326,12 +304,10 @@ void main() {
 
     // Test for removeAllItems with SliverAnimatedList
     testWidgetsWithLeakTracking('remove', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey =
-          GlobalKey<SliverAnimatedListState>();
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
       final List<int> items = <int>[0, 1, 2];
 
-      Widget buildItem(
-          BuildContext context, int item, Animation<double> animation) {
+      Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
           key: ValueKey<int>(item),
           sizeFactor: animation,
@@ -352,8 +328,7 @@ void main() {
               SliverAnimatedList(
                 key: listKey,
                 initialItemCount: 3,
-                itemBuilder: (BuildContext context, int index,
-                    Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return buildItem(context, items[index], animation);
                 },
               ),
@@ -362,10 +337,8 @@ void main() {
         ),
       );
 
-      double itemTop(int index) =>
-          tester.getTopLeft(find.byKey(ValueKey<int>(index))).dy;
-      double itemBottom(int index) =>
-          tester.getBottomLeft(find.byKey(ValueKey<int>(index))).dy;
+      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index))).dy;
+      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index))).dy;
 
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item 1'), findsOneWidget);
@@ -374,8 +347,7 @@ void main() {
       items.removeAt(0);
       listKey.currentState!.removeItem(
         0,
-        (BuildContext context, Animation<double> animation) =>
-            buildItem(context, 0, animation),
+        (BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
         duration: const Duration(milliseconds: 100),
       );
 
@@ -409,12 +381,10 @@ void main() {
 
     // Test for removeAllItems with SliverAnimatedList
     testWidgetsWithLeakTracking('removeAll', (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey =
-          GlobalKey<SliverAnimatedListState>();
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
       final List<int> items = <int>[0, 1, 2];
 
-      Widget buildItem(
-          BuildContext context, int item, Animation<double> animation) {
+      Widget buildItem(BuildContext context, int item, Animation<double> animation) {
         return SizeTransition(
           key: ValueKey<int>(item),
           sizeFactor: animation,
@@ -435,8 +405,7 @@ void main() {
               SliverAnimatedList(
                 key: listKey,
                 initialItemCount: 3,
-                itemBuilder: (BuildContext context, int index,
-                    Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return buildItem(context, items[index], animation);
                 },
               ),
@@ -450,9 +419,7 @@ void main() {
       expect(find.text('item 2'), findsOneWidget);
 
       items.clear();
-      listKey.currentState!.removeAllItems(
-        (BuildContext context, Animation<double> animation) =>
-            buildItem(context, 0, animation),
+      listKey.currentState!.removeAllItems((BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
         duration: const Duration(milliseconds: 100),
       );
 
@@ -463,10 +430,8 @@ void main() {
       expect(find.text('item 2'), findsNothing);
     });
 
-    testWidgetsWithLeakTracking('works in combination with other slivers',
-        (WidgetTester tester) async {
-      final GlobalKey<SliverAnimatedListState> listKey =
-          GlobalKey<SliverAnimatedListState>();
+    testWidgetsWithLeakTracking('works in combination with other slivers', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -482,8 +447,7 @@ void main() {
               SliverAnimatedList(
                 key: listKey,
                 initialItemCount: 3,
-                itemBuilder: (BuildContext context, int index,
-                    Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return SizedBox(
                     height: 100,
                     child: Text('item $index'),
@@ -502,8 +466,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.text('item 3')).dy, 500);
 
-      listKey.currentState!.removeItem(
-        0,
+      listKey.currentState!.removeItem(0,
         (BuildContext context, Animation<double> animation) {
           return SizeTransition(
             sizeFactor: animation,
@@ -532,12 +495,9 @@ void main() {
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
     });
 
-    testWidgetsWithLeakTracking(
-        'passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate',
-        (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
       final List<int> items = <int>[0, 1, 2, 3];
-      final GlobalKey<SliverAnimatedListState> listKey =
-          GlobalKey<SliverAnimatedListState>();
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
         Directionality(
@@ -547,8 +507,7 @@ void main() {
               SliverAnimatedList(
                 key: listKey,
                 initialItemCount: items.length,
-                itemBuilder: (BuildContext context, int index,
-                    Animation<double> animation) {
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
                   return _StatefulListItem(
                     key: ValueKey<int>(items[index]),
                     index: index,
@@ -565,11 +524,7 @@ void main() {
       );
 
       // get all list entries in order
-      final List<Text> listEntries = find
-          .byType(Text)
-          .evaluate()
-          .map((Element e) => e.widget as Text)
-          .toList();
+      final List<Text> listEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
 
       // check that the list is rendered in the correct order
       expect(listEntries[0].data, equals('item 0'));
@@ -577,9 +532,9 @@ void main() {
       expect(listEntries[2].data, equals('item 2'));
       expect(listEntries[3].data, equals('item 3'));
 
+
       // delete one item
-      listKey.currentState?.removeItem(0,
-          (BuildContext context, Animation<double> animation) {
+      listKey.currentState?.removeItem(0, (BuildContext context, Animation<double> animation) {
         return Container();
       });
 
@@ -593,11 +548,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // get all list entries in order
-      final List<Text> reorderedListEntries = find
-          .byType(Text)
-          .evaluate()
-          .map((Element e) => e.widget as Text)
-          .toList();
+      final List<Text> reorderedListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
 
       // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
       expect(reorderedListEntries[0].data, equals('item 3'));
@@ -651,9 +602,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
-      'AnimatedList.clipBehavior is forwarded to its inner CustomScrollView',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
     const Clip clipBehavior = Clip.none;
 
     await tester.pumpWidget(
@@ -674,16 +623,10 @@ void main() {
       ),
     );
 
-    expect(
-        tester
-            .widget<CustomScrollView>(find.byType(CustomScrollView))
-            .clipBehavior,
-        clipBehavior);
+    expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
 
-  testWidgetsWithLeakTracking(
-      'AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/115040
     final ScrollController controller = ScrollController();
 
@@ -708,15 +651,10 @@ void main() {
       ),
     );
 
-    expect(
-        tester
-            .widget<CustomScrollView>(find.byType(CustomScrollView))
-            .shrinkWrap,
-        true);
+    expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).shrinkWrap, true);
   });
 
-  testWidgetsWithLeakTracking('AnimatedList applies MediaQuery padding',
-      (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.all(30.0);
     EdgeInsets? innerMediaQueryPadding;
     await tester.pumpWidget(
@@ -728,8 +666,7 @@ void main() {
           ),
           child: AnimatedList(
             initialItemCount: 3,
-            itemBuilder:
-                (BuildContext context, int index, Animation<double> animation) {
+            itemBuilder: (BuildContext context, int index, Animation<double> animation) {
               innerMediaQueryPadding = MediaQuery.paddingOf(context);
               return const Placeholder();
             },
@@ -745,16 +682,15 @@ void main() {
     await tester.drag(find.byType(AnimatedList), const Offset(0.0, -1000.0));
     await tester.pumpAndSettle();
 
-    final Offset bottomLeft =
-        tester.getBottomLeft(find.byType(Placeholder).last);
+    final Offset bottomLeft = tester.getBottomLeft(find.byType(Placeholder).last);
     // Automatically apply the bottom padding into sliver.
     expect(bottomLeft, Offset(0.0, 600.0 - padding.bottom));
 
     // Verify that the left/right padding is not applied.
-    expect(
-        innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
   });
 }
+
 
 class _StatefulListItem extends StatefulWidget {
   const _StatefulListItem({

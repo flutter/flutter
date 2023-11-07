@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui
-    show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
+import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
 
-export 'dart:ui'
-    show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
+export 'dart:ui' show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 /// The glue between the semantics layer and the Flutter engine.
 mixin SemanticsBinding on BindingBase {
@@ -46,9 +44,7 @@ mixin SemanticsBinding on BindingBase {
     assert(_semanticsEnabled.value == (_outstandingHandles > 0));
     return _semanticsEnabled.value;
   }
-
-  late final ValueNotifier<bool> _semanticsEnabled =
-      ValueNotifier<bool>(platformDispatcher.semanticsEnabled);
+  late final ValueNotifier<bool> _semanticsEnabled = ValueNotifier<bool>(platformDispatcher.semanticsEnabled);
 
   /// Adds a `listener` to be called when [semanticsEnabled] changes.
   ///
@@ -118,9 +114,8 @@ mixin SemanticsBinding on BindingBase {
   void _handleSemanticsActionEvent(ui.SemanticsActionEvent action) {
     final Object? arguments = action.arguments;
     final ui.SemanticsActionEvent decodedAction = arguments is ByteData
-        ? action.copyWith(
-            arguments: const StandardMessageCodec().decodeMessage(arguments))
-        : action;
+      ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
+      : action;
     performSemanticsAction(decodedAction);
   }
 

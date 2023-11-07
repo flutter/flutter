@@ -7,9 +7,8 @@ import 'package:flutter_api_samples/material/switch/switch.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Switch thumb icon supports material states',
-      (WidgetTester tester) async {
-    const Set<MaterialState> selected = <MaterialState>{MaterialState.selected};
+  testWidgets('Switch thumb icon supports material states', (WidgetTester tester) async {
+    const Set<MaterialState> selected = <MaterialState>{ MaterialState.selected };
     const Set<MaterialState> unselected = <MaterialState>{};
 
     await tester.pumpWidget(

@@ -4,8 +4,7 @@
 
 import 'dart:math' as math;
 
-typedef _OutputSender = void Function(String category, String message,
-    {bool? parseStackFrames, int? variablesReference});
+typedef _OutputSender = void Function(String category, String message, {bool? parseStackFrames, int? variablesReference});
 
 /// A formatter for improving the display of Flutter structured errors over DAP.
 ///
@@ -30,13 +29,7 @@ class FlutterErrorFormatter {
     const int assumedTerminalSize = 80;
     const String barChar = '═';
     final String headerPrefix = barChar * 8;
-    final String headerSuffix = barChar *
-        math.max(
-            assumedTerminalSize -
-                (data.description?.length ?? 0) -
-                2 -
-                headerPrefix.length,
-            0);
+    final String headerSuffix = barChar * math.max( assumedTerminalSize - (data.description?.length ?? 0) - 2 - headerPrefix.length, 0);
     final String header = '$headerPrefix ${data.description} $headerSuffix';
     _write('');
     _write(header, isError: true);
@@ -78,11 +71,8 @@ class FlutterErrorFormatter {
       final String message = '$indentString${text.trim()}';
 
       _BatchedOutput? output = batchedOutput.lastOrNull;
-      if (output == null ||
-          output.isError != isError ||
-          output.parseStackFrames != parseStackFrames) {
-        batchedOutput.add(output =
-            _BatchedOutput(isError, parseStackFrames: parseStackFrames));
+      if (output == null || output.isError != isError || output.parseStackFrames != parseStackFrames) {
+        batchedOutput.add(output = _BatchedOutput(isError, parseStackFrames: parseStackFrames));
       }
       output.writeln(message);
     }
@@ -99,12 +89,10 @@ class FlutterErrorFormatter {
         (node.description?.startsWith('Exception: ') ?? false);
 
     if (node.showName && node.name != null) {
-      _write('${node.name}: ${node.description}',
-          indent: indent, isError: showAsError);
+      _write('${node.name}: ${node.description}', indent: indent, isError: showAsError);
     } else if (node.description?.startsWith('#') ?? false) {
       // Possible stack frame.
-      _write(node.description,
-          indent: indent, isError: showAsError, parseStackFrames: true);
+      _write(node.description, indent: indent, isError: showAsError, parseStackFrames: true);
     } else {
       _write(node.description, indent: indent, isError: showAsError);
     }
@@ -119,8 +107,7 @@ class FlutterErrorFormatter {
   }
 
   /// Writes [nodes] to the output.
-  void _writeNodes(List<_ErrorNode> nodes,
-      {int indent = 0, bool recursive = true}) {
+  void _writeNodes(List<_ErrorNode> nodes, {int indent = 0, bool recursive = true}) {
     for (final _ErrorNode child in nodes) {
       _writeNode(child, indent: indent, recursive: recursive);
     }
@@ -175,13 +162,11 @@ class _ErrorNode {
 
   List<_ErrorNode> get children => asList('children', _ErrorNode.new);
   String? get description => asString('description');
-  _DiagnosticsNodeLevel? get level =>
-      asEnum('level', _DiagnosticsNodeLevel.values);
+  _DiagnosticsNodeLevel? get level => asEnum('level', _DiagnosticsNodeLevel.values);
   String? get name => asString('name');
   List<_ErrorNode> get properties => asList('properties', _ErrorNode.new);
   bool get showName => data['showName'] != false;
-  _DiagnosticsNodeStyle? get style =>
-      asEnum('style', _DiagnosticsNodeStyle.values);
+  _DiagnosticsNodeStyle? get style => asEnum('style', _DiagnosticsNodeStyle.values);
 
   String? asString(String field) {
     final Object? value = data[field];
@@ -193,12 +178,10 @@ class _ErrorNode {
     return value != null ? enumValues.asNameMap()[value] : null;
   }
 
-  List<T> asList<T>(
-      String field, T Function(Map<Object, Object?>) constructor) {
+  List<T> asList<T>(String field, T Function(Map<Object, Object?>) constructor) {
     final Object? objects = data[field];
-    return objects is List &&
-            objects.every((Object? element) => element is Map<String, Object?>)
-        ? objects.cast<Map<Object, Object?>>().map(constructor).toList()
-        : <T>[];
+    return objects is List && objects.every((Object? element) => element is Map<String, Object?>)
+      ? objects.cast<Map<Object, Object?>>().map(constructor).toList()
+      : <T>[];
   }
 }

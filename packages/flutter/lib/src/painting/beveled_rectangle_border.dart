@@ -49,8 +49,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
     if (a is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius:
-            BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
       );
     }
     return super.lerpFrom(a, t);
@@ -61,8 +60,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
     if (b is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius:
-            BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -71,8 +69,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   /// Returns a copy of this RoundedRectangleBorder with the given fields
   /// replaced with the new values.
   @override
-  BeveledRectangleBorder copyWith(
-      {BorderSide? side, BorderRadiusGeometry? borderRadius}) {
+  BeveledRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
     return BeveledRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -97,32 +94,29 @@ class BeveledRectangleBorder extends OutlinedBorder {
     final List<Offset> vertices = <Offset>[
       Offset(rrect.left, math.min(centerLeft.dy, rrect.top + tlRadiusY)),
       Offset(math.min(centerTop.dx, rrect.left + tlRadiusX), rrect.top),
-      Offset(math.max(centerTop.dx, rrect.right - trRadiusX), rrect.top),
+      Offset(math.max(centerTop.dx, rrect.right -trRadiusX), rrect.top),
       Offset(rrect.right, math.min(centerRight.dy, rrect.top + trRadiusY)),
       Offset(rrect.right, math.max(centerRight.dy, rrect.bottom - brRadiusY)),
       Offset(math.max(centerBottom.dx, rrect.right - brRadiusX), rrect.bottom),
       Offset(math.min(centerBottom.dx, rrect.left + blRadiusX), rrect.bottom),
-      Offset(rrect.left, math.max(centerLeft.dy, rrect.bottom - blRadiusY)),
+      Offset(rrect.left, math.max(centerLeft.dy, rrect.bottom  - blRadiusY)),
     ];
 
     return Path()..addPolygon(vertices, true);
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    return _getPath(borderRadius
-        .resolve(textDirection)
-        .toRRect(rect)
-        .deflate(side.strokeInset));
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.strokeInset));
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     if (rect.isEmpty) {
       return;
     }
@@ -130,12 +124,10 @@ class BeveledRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final RRect borderRect =
-            borderRadius.resolve(textDirection).toRRect(rect);
+        final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
         final RRect adjustedRect = borderRect.inflate(side.strokeOutset);
         final Path path = _getPath(adjustedRect)
-          ..addPath(
-              getInnerPath(rect, textDirection: textDirection), Offset.zero);
+          ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
     }
   }
@@ -145,9 +137,9 @@ class BeveledRectangleBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BeveledRectangleBorder &&
-        other.side == side &&
-        other.borderRadius == borderRadius;
+    return other is BeveledRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius;
   }
 
   @override

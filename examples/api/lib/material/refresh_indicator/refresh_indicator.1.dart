@@ -15,8 +15,7 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scrollBehavior: const MaterialScrollBehavior()
-          .copyWith(dragDevices: PointerDeviceKind.values.toSet()),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(dragDevices: PointerDeviceKind.values.toSet()),
       home: const RefreshIndicatorExample(),
     );
   }
@@ -85,13 +84,14 @@ class RefreshIndicatorExample extends StatelessWidget {
               ),
             ),
             SliverList.builder(
-                itemCount: 20,
-                itemBuilder: (BuildContext context, int index) {
-                  return const ListTile(
-                    title: Text('Pull down here'),
-                    subtitle: Text("Refresh indicator won't trigger"),
-                  );
-                })
+              itemCount: 20,
+              itemBuilder: (BuildContext context, int index) {
+                return const ListTile(
+                  title: Text('Pull down here'),
+                  subtitle: Text("Refresh indicator won't trigger"),
+                );
+              }
+            )
           ],
         ),
       ),

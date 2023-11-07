@@ -13,10 +13,9 @@ import 'recorder.dart';
 const String benchmarkViewType = 'benchmark_element';
 
 void _registerFactory() {
-  ui_web.platformViewRegistry.registerViewFactory(benchmarkViewType,
-      (int viewId) {
+  ui_web.platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
     final web.HTMLElement htmlElement =
-        web.document.createElement('div') as web.HTMLDivElement;
+      web.document.createElement('div') as web.HTMLDivElement;
     htmlElement.id = '${benchmarkViewType}_$viewId';
     htmlElement.innerText = 'Google';
     htmlElement.style
@@ -67,12 +66,10 @@ class _InfiniteScrollPlatformViews extends StatefulWidget {
   final double finalOffset;
 
   @override
-  State<_InfiniteScrollPlatformViews> createState() =>
-      _InfiniteScrollPlatformViewsState();
+  State<_InfiniteScrollPlatformViews> createState() => _InfiniteScrollPlatformViewsState();
 }
 
-class _InfiniteScrollPlatformViewsState
-    extends State<_InfiniteScrollPlatformViews> {
+class _InfiniteScrollPlatformViewsState extends State<_InfiniteScrollPlatformViews> {
   static const Duration stepDuration = Duration(seconds: 20);
 
   late ScrollController scrollController;

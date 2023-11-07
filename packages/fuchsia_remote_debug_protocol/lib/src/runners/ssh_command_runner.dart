@@ -83,11 +83,11 @@ class SshCommandRunner {
   Future<List<String>> run(String command) async {
     final List<String> args = <String>[
       'ssh',
-      if (sshConfigPath != null) ...<String>['-F', sshConfigPath!],
-      if (isIpV6Address(address)) ...<String>[
-        '-6',
-        if (interface.isEmpty) address else '$address%$interface'
-      ] else
+      if (sshConfigPath != null)
+        ...<String>['-F', sshConfigPath!],
+      if (isIpV6Address(address))
+        ...<String>['-6', if (interface.isEmpty) address else '$address%$interface']
+      else
         address,
       command,
     ];

@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.0.dart'
-    as example;
+import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -45,8 +44,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(example.MenuApp.kMessage), findsOneWidget);
-    expect(find.text('Last Selected: ${example.MenuEntry.showMessage.label}'),
-        findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.showMessage.label}'), findsOneWidget);
   });
 
   testWidgets('Shortcuts work', (WidgetTester tester) async {
@@ -90,28 +88,24 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text('Last Selected: ${example.MenuEntry.colorRed.label}'),
-        findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.colorRed.label}'), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyG);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text('Last Selected: ${example.MenuEntry.colorGreen.label}'),
-        findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.colorGreen.label}'), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text('Last Selected: ${example.MenuEntry.colorBlue.label}'),
-        findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.colorBlue.label}'), findsOneWidget);
   });
 
-  testWidgets('MenuAnchor is wrapped in a SafeArea',
-      (WidgetTester tester) async {
+  testWidgets('MenuAnchor is wrapped in a SafeArea', (WidgetTester tester) async {
     const double safeAreaPadding = 100.0;
     await tester.pumpWidget(
       const MediaQuery(
@@ -122,7 +116,6 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(MenuAnchor)),
-        const Offset(0.0, safeAreaPadding));
+    expect(tester.getTopLeft(find.byType(MenuAnchor)), const Offset(0.0, safeAreaPadding));
   });
 }

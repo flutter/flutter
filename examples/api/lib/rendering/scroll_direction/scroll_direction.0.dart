@@ -29,32 +29,8 @@ class MyWidget extends StatefulWidget {
 
 class _MyWidgetState extends State<MyWidget> {
   final List<String> alphabet = <String>[
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+    'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   ];
   final Widget spacer = const SizedBox.square(dimension: 10);
   ScrollDirection scrollDirection = ScrollDirection.idle;
@@ -209,8 +185,7 @@ class _MyWidgetState extends State<MyWidget> {
                   child = _getLeading();
                 } else {
                   child = Container(
-                    color:
-                        index.isEven ? Colors.amber[100] : Colors.amberAccent,
+                    color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
                     padding: const EdgeInsets.all(8.0),
                     child: Center(child: Text(alphabet[index - 1])),
                   );

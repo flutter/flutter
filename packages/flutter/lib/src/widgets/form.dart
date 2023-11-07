@@ -61,9 +61,8 @@ class Form extends StatefulWidget {
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  })  : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-        assert((onPopInvoked == null && canPop == null) || onWillPop == null,
-            'onWillPop is deprecated; use canPop and/or onPopInvoked.');
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
+       assert((onPopInvoked == null && canPop == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvoked.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -83,8 +82,7 @@ class Form extends StatefulWidget {
   /// * [Form.of], which is similar to this method, but asserts if no [Form]
   ///   ancestor is found.
   static FormState? maybeOf(BuildContext context) {
-    final _FormScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_FormScope>();
+    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
 
@@ -213,8 +211,8 @@ class FormState extends State<Form> {
   void _fieldDidChange() {
     widget.onChanged?.call();
 
-    _hasInteractedByUser = _fields.any(
-        (FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
+    _hasInteractedByUser = _fields
+        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
     _forceRebuild();
   }
 
@@ -312,12 +310,10 @@ class FormState extends State<Form> {
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(Future<void>(() async {
           await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-          SemanticsService.announce(errorMessage, directionality,
-              assertiveness: Assertiveness.assertive);
+          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
         }));
       } else {
-        SemanticsService.announce(errorMessage, directionality,
-            assertiveness: Assertiveness.assertive);
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
       }
     }
     return !hasError;
@@ -329,8 +325,8 @@ class _FormScope extends InheritedWidget {
     required super.child,
     required FormState formState,
     required int generation,
-  })  : _formState = formState,
-        _generation = generation;
+  }) : _formState = formState,
+       _generation = generation;
 
   final FormState _formState;
 
