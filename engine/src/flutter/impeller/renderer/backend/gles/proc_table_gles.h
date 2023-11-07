@@ -184,6 +184,7 @@ struct GLProc {
   PROC(UseProgram);                          \
   PROC(VertexAttribPointer);                 \
   PROC(Viewport);                            \
+  PROC(GetShaderSource);                     \
   PROC(ReadPixels);
 
 #define FOR_EACH_IMPELLER_GLES3_PROC(PROC) PROC(BlitFramebuffer);
@@ -231,7 +232,14 @@ class ProcTableGLES {
 
   bool IsValid() const;
 
-  void ShaderSourceMapping(GLuint shader, const fml::Mapping& mapping) const;
+  /// @brief Set the source for the attached [shader].
+  ///
+  /// Optionally, [defines] may contain a string value that will be
+  /// append to the shader source after the version marker. This can be used to
+  /// support static specialization. For example, setting "#define Foo 1".
+  void ShaderSourceMapping(GLuint shader,
+                           const fml::Mapping& mapping,
+                           const std::vector<int32_t>& defines = {}) const;
 
   const DescriptionGLES* GetDescription() const;
 
@@ -250,6 +258,11 @@ class ProcTableGLES {
   void PushDebugGroup(const std::string& string) const;
 
   void PopDebugGroup() const;
+
+  // Visible For testing.
+  std::optional<std::string> ComputeShaderWithDefines(
+      const fml::Mapping& mapping,
+      const std::vector<int32_t>& defines) const;
 
  private:
   bool is_valid_ = false;

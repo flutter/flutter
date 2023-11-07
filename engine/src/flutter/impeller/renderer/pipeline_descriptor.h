@@ -4,17 +4,10 @@
 
 #pragma once
 
-#include <functional>
-#include <future>
 #include <map>
 #include <memory>
 #include <string>
-#include <string_view>
-#include <type_traits>
-#include <unordered_map>
 
-#include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
@@ -131,6 +124,10 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   PolygonMode GetPolygonMode() const;
 
+  void SetSpecializationConstants(std::vector<int32_t> values);
+
+  const std::vector<int32_t>& GetSpecializationConstants() const;
+
  private:
   std::string label_;
   SampleCount sample_count_ = SampleCount::kCount1;
@@ -149,6 +146,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       back_stencil_attachment_descriptor_;
   PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
   PolygonMode polygon_mode_ = PolygonMode::kFill;
+  std::vector<int32_t> specialization_constants_;
 };
 
 }  // namespace impeller

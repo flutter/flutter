@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "fml/closure.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/validation.h"
@@ -138,12 +139,51 @@ bool ProcTableGLES::IsValid() const {
   return is_valid_;
 }
 
-void ProcTableGLES::ShaderSourceMapping(GLuint shader,
-                                        const fml::Mapping& mapping) const {
+void ProcTableGLES::ShaderSourceMapping(
+    GLuint shader,
+    const fml::Mapping& mapping,
+    const std::vector<int32_t>& defines) const {
+  if (defines.empty()) {
+    const GLchar* sources[] = {
+        reinterpret_cast<const GLchar*>(mapping.GetMapping())};
+    const GLint lengths[] = {static_cast<GLint>(mapping.GetSize())};
+    ShaderSource(shader, 1u, sources, lengths);
+    return;
+  }
+  const auto& shader_source = ComputeShaderWithDefines(mapping, defines);
+  if (!shader_source.has_value()) {
+    VALIDATION_LOG << "Failed to append constant data to shader";
+    return;
+  }
+
   const GLchar* sources[] = {
-      reinterpret_cast<const GLchar*>(mapping.GetMapping())};
-  const GLint lengths[] = {static_cast<GLint>(mapping.GetSize())};
+      reinterpret_cast<const GLchar*>(shader_source->c_str())};
+  const GLint lengths[] = {static_cast<GLint>(shader_source->size())};
   ShaderSource(shader, 1u, sources, lengths);
+}
+
+// Visible For testing.
+std::optional<std::string> ProcTableGLES::ComputeShaderWithDefines(
+    const fml::Mapping& mapping,
+    const std::vector<int32_t>& defines) const {
+  auto shader_source = std::string{
+      reinterpret_cast<const char*>(mapping.GetMapping()), mapping.GetSize()};
+
+  // Look for the first newline after the '#version' header, which impellerc
+  // will always emit as the first line of a compiled shader.
+  auto index = shader_source.find('\n');
+  if (index == std::string::npos) {
+    VALIDATION_LOG << "Failed to append constant data to shader";
+    return std::nullopt;
+  }
+
+  std::stringstream ss;
+  for (auto i = 0u; i < defines.size(); i++) {
+    ss << "#define SPIRV_CROSS_CONSTANT_ID_" << i << " " << defines[i] << '\n';
+  }
+  auto define_string = ss.str();
+  shader_source.insert(index + 1, define_string);
+  return shader_source;
 }
 
 const DescriptionGLES* ProcTableGLES::GetDescription() const {
