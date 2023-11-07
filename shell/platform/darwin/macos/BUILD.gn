@@ -125,7 +125,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/graphics:graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 
   public_configs = [ "//flutter:config" ]

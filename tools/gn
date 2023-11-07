@@ -541,10 +541,6 @@ def to_gn_args(args):
     gn_args['skia_use_gl'] = False
     gn_args['shell_enable_metal'] = True
     gn_args['skia_use_metal'] = True
-    # Bitcode enabled builds using the current version of the toolchain leak
-    # C++ symbols decorated with the availability attribute. Disable these
-    # attributes in release modes till the toolchain is updated.
-    gn_args['skia_enable_api_available_macro'] = args.runtime_mode != 'release'
   else:
     gn_args['skia_use_gl'] = args.target_os != 'fuchsia'
 
@@ -772,7 +768,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_enable_fontmgr_custom_embedded'] = True
   gn_args['skia_enable_fontmgr_custom_empty'] = True
   gn_args['skia_fontmgr_factory'
-         ] = '//third_party/skia:fontmgr_custom_empty_factory'
+         ] = '//flutter/skia:fontmgr_custom_empty_factory'
   gn_args['skia_enable_skshaper'] = True
   gn_args['skia_enable_skparagraph'] = True
   gn_args['skia_canvaskit_force_tracing'] = False

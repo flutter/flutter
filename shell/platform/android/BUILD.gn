@@ -29,7 +29,7 @@ source_set("image_generator") {
   deps = [
     "//flutter/fml",
     "//flutter/lib/ui:ui",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 
   libs = [
@@ -153,8 +153,8 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/platform_view_android_delegate",
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
+    "//flutter/skia",
     "//flutter/vulkan",
-    "//third_party/skia",
   ]
 
   public_configs = [ "//flutter:config" ]

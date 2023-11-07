@@ -15,8 +15,8 @@ source_set("display_list_testing") {
   ]
 
   deps = [
+    "//flutter/skia",
     "//flutter/testing:testing_lib",
-    "//third_party/skia",
   ]
 
   public_deps = [ "//flutter/display_list:display_list" ]

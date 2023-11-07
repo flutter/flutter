@@ -36,7 +36,7 @@ source_set("graphics") {
 
   frameworks = [ "CoreVideo.framework" ]
 
-  public_deps = [ "//third_party/skia" ]
+  public_deps = [ "//flutter/skia" ]
 
   public_configs = [ "//flutter:config" ]
 }
