@@ -171,8 +171,7 @@ void main() {
       '#l10n 115 (ES 419 - Hello World)\n'
       '#l10n 116 (ES 419 - Hello two worlds)\n'
       '#l10n END\n'
-      
-      );
+    );
   }
 
   // TODO(jsimmons): need a localization test that uses deferred loading
