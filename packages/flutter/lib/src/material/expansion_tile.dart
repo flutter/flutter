@@ -541,7 +541,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   void _disposeTileController(ExpansionTile widget) {
-    if(widget.controller == null) {
+    if (widget.controller == null) {
       // Only dispose if this state created the controller.
       _tileController.dispose();
     } else {
@@ -703,7 +703,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       || widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
       _updateBackgroundColor(expansionTileTheme);
     }
-    if(widget.controller != oldWidget.controller) {
+    if (widget.controller != oldWidget.controller) {
       _disposeTileController(oldWidget);
       _tileController = _chooseTileController();
       _tileController.addListener(_onToggledExpansion);
