@@ -119,7 +119,7 @@ dependencies:
       await inDirectory(Directory(path.join(projectDir.path, '.android')),
           () async {
         final StringBuffer stderr = StringBuffer();
-        final exitCode = await exec(
+        final int exitCode = await exec(
           gradlewExecutable,
           <String>['flutter:assembleDebug', '-d'],
           environment: <String, String>{'JAVA_HOME': javaHome},
