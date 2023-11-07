@@ -127,6 +127,12 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
   }
 
   @override
+  MaterialStateProperty<MouseCursor> get mouseCursor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states)
+      => MaterialStateMouseCursor.clickable.resolve(states));
+  }
+
+  @override
   MaterialStatePropertyAll<double> get trackOutlineWidth => const MaterialStatePropertyAll<double>(${getToken('md.comp.switch.track.outline.width')});
 
   @override
