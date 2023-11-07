@@ -75,7 +75,7 @@ public class KeyData {
     kJoystick(3),
     kHdmi(4);
 
-    private long value;
+    private final long value;
 
     private DeviceType(long value) {
       this.value = value;
