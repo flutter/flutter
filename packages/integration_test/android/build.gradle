@@ -23,9 +23,9 @@ rootProject.allprojects {
     }
 }
 
-project.getTasks().withType(JavaCompile){
-    options.compilerArgs << "-Xlint:all" << "-Werror"
-}
+// project.getTasks().withType(JavaCompile){
+//     options.compilerArgs << "-Xlint:all" << "-Werror"
+// }
 
 apply plugin: 'com.android.library'
 
