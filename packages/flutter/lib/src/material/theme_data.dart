@@ -388,7 +388,12 @@ class ThemeData with Diagnosticable {
       : InkSplash.splashFactory;
 
     // COLOR
-    assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
+    assert(
+      colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness,
+      'ThemeData.brightness does not match ColorScheme.brightness. '
+      'Either override ColorScheme.brightness or ThemeData.brightness to '
+      'match the other.'
+    );
     assert(colorSchemeSeed == null || colorScheme == null);
     assert(colorSchemeSeed == null || primarySwatch == null);
     assert(colorSchemeSeed == null || primaryColor == null);
