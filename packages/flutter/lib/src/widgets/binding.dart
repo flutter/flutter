@@ -1195,7 +1195,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// as soon as it is displayed again.
 ///
 /// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
-/// and use it call [runApp] with a widget such as [SizedBox.shrink] when
+/// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
 /// the framework should dispose of the active widget tree.
 /// {@endtemplate}
 ///
