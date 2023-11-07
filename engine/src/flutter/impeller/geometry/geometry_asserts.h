@@ -39,7 +39,8 @@ inline ::testing::AssertionResult MatrixNear(impeller::Matrix a,
                && NumberNear(a.m[15], b.m[15]);
 
   return equal ? ::testing::AssertionSuccess()
-               : ::testing::AssertionFailure() << "Matrixes are not equal.";
+               : ::testing::AssertionFailure()
+                     << "Matrixes are not equal " << a << " " << b;
 }
 
 inline ::testing::AssertionResult QuaternionNear(impeller::Quaternion a,

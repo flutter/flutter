@@ -61,6 +61,7 @@ impeller_component("geometry_unittests") {
   testonly = true
   sources = [
     "geometry_unittests.cc",
+    "matrix_unittests.cc",
     "rect_unittests.cc",
   ]
 
