@@ -1210,7 +1210,7 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
-  /// {@macro flutter.widgets.editableText.autoFocus}
+  /// {@macro flutter.widgets.editableText.autofocus}
   final bool autoFocus;
 
   @override
