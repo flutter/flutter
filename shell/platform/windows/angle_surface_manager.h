@@ -65,7 +65,7 @@ class AngleSurfaceManager {
 
   // Binds |egl_context_| to the current rendering thread and to the draw and
   // read surfaces returning a boolean result reflecting success.
-  bool MakeCurrent();
+  virtual bool MakeCurrent();
 
   // Unbinds the current EGL context from the current thread.
   bool ClearCurrent();

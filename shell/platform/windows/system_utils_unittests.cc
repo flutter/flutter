@@ -25,8 +25,8 @@ TEST(SystemUtils, GetPreferredLanguageInfo) {
 
 TEST(SystemUtils, GetPreferredLanguages) {
   MockWindowsProcTable proc_table;
-  ON_CALL(proc_table, GetThreadPreferredUILanguages)
-      .WillByDefault(
+  EXPECT_CALL(proc_table, GetThreadPreferredUILanguages)
+      .WillRepeatedly(
           [](DWORD flags, PULONG count, PZZWSTR languages, PULONG size) {
             // Languages string ends in a double-null.
             static const wchar_t lang[] = L"en-US\0";
