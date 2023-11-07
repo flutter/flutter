@@ -715,10 +715,6 @@ class _ViewContentState extends State<_ViewContent> {
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
     _controller.addListener(updateSuggestions);
-
-    if (!_focusNode.hasFocus) {
-      _focusNode.requestFocus();
-    }
   }
 
   @override
@@ -865,6 +861,7 @@ class _ViewContentState extends State<_ViewContent> {
                           top: false,
                           bottom: false,
                           child: SearchBar(
+                            autoFocus: true,
                             constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
                             focusNode: _focusNode,
                             leading: widget.viewLeading ?? defaultLeading,
@@ -1091,6 +1088,7 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
+    this.autoFocus = false,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1212,6 +1210,9 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// {@macro flutter.widgets.editableText.autoFocus}
+  final bool autoFocus;
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1328,9 +1329,9 @@ class _SearchBarState extends State<SearchBar> {
                   child: Padding(
                     padding: effectivePadding,
                     child: TextField(
+                      autofocus: widget.autoFocus,
                       onTap: () {
                         widget.onTap?.call();
-                        _focusNode.requestFocus();
                       },
                       onTapAlwaysCalled: true,
                       focusNode: _focusNode,
