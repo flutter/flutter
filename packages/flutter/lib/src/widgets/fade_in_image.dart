@@ -275,7 +275,7 @@ class FadeInImage extends StatefulWidget {
   ///  * [placeholderColor], The color which applies to the [placeholder].
   final Color? color;
 
-  /// Used to combine [color] with this image.
+  /// Used to combine [color] with this [image].
   ///
   /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
   /// the source and this image is the destination.
