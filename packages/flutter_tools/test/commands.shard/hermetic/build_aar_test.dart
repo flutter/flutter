@@ -25,6 +25,7 @@ void main() {
   late Artifacts artifacts;
   late FakeProcessManager processManager;
   late Platform platform;
+  late Cache cache;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -32,10 +33,17 @@ void main() {
 
   setUp(() {
     fs = MemoryFileSystem.test();
+    final Directory flutterRoot = fs.directory('flutter');
+    Cache.flutterRoot = flutterRoot.path;
     artifacts = Artifacts.test(fileSystem: fs);
     logger = BufferLogger.test();
-    platform = FakePlatform();
+    platform = FakePlatform(environment: const <String, String>{'PATH': ''});
     processManager = FakeProcessManager.empty();
+    cache = Cache.test(
+      rootOverride: flutterRoot,
+      logger: logger,
+      processManager: processManager,
+    );
   });
 
   testUsingContext('will not build an AAR for a plugin', () async {
@@ -68,6 +76,7 @@ flutter:
     );
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Cache: () => cache,
     FileSystem: () => fs,
     Platform: () => platform,
     ProcessManager: () => processManager,
@@ -81,10 +90,27 @@ flutter:
   module:
     foo: bar
 ''');
+    final Directory dotAndroidDir = fs.directory('.android')..createSync(recursive: true);
+    dotAndroidDir.childFile('gradlew').createSync();
 
-    processManager.addCommands(const <FakeCommand>[
-      FakeCommand(command: <String>['which', 'java']),
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(command: <String>['chmod', '755', 'flutter/bin/cache/artifacts']),
+      const FakeCommand(command: <String>['which', 'java']),
+      ...<String>['Debug', 'Profile', 'Release'].map((String buildMode) => FakeCommand(
+        command: <Pattern>[
+          '/.android/gradlew',
+          '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle',
+          ...List<RegExp>.filled(4, RegExp(r'-P[a-zA-Z-]+=.*')),
+          '-q',
+          ...List<RegExp>.filled(5, RegExp(r'-P[a-zA-Z-]+=.*')),
+          'assembleAar$buildMode',
+        ],
+        onRun: () => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
+      )),
     ]);
+
+    cache.getArtifactDirectory('gradle_wrapper').createSync(recursive: true);
+
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       artifacts: artifacts,
