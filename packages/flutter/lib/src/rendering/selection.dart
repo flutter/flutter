@@ -107,6 +107,12 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   ///
   /// Return `null` if nothing is selected, or is not supported by the selectable
   TextSelection? getLocalTextSelection();
+
+  /// Gets the content length of the selectable
+  ///
+  /// Return `null` if the content length is not supported by the selectable
+  int? getContentLength();
+
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
@@ -232,6 +238,9 @@ mixin SelectionRegistrant on Selectable {
   // not applicable since don't know the type here
   @override
   TextSelection? getLocalTextSelection() => null;
+
+
+
 }
 
 /// A utility class that provides useful methods for handling selection events.

@@ -122,6 +122,11 @@ class _RenderSelectableAdapter extends RenderProxyBox
     return value.hasSelection ? const TextSelection.collapsed(offset: 0) : null;
   }
 
+   @override
+  int? getContentLength() {
+    return 0;
+  }
+
   // Selectable APIs.
 
   // Adjust this value to enlarge or shrink the selection highlight.

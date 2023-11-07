@@ -1910,38 +1910,50 @@ abstract class MultiSelectableSelectionContainerDelegate
   }
 
   @override
+  int? getContentLength() {
+    int length = 0;
+    for (final Selectable selectable in selectables) {
+      length += selectable.getContentLength() ?? 0;
+    }
+    return length;
+  }
+
+
+
+  @override
   TextSelection? getLocalTextSelection() {
     int start = 0;
     int? end;
 
-    final StringBuffer buffer = StringBuffer();
+    int numSelected = 0;
 
     bool enteredSelectedRegion = false;
     for (final Selectable selectable in selectables) {
       final SelectedContent? data = selectable.getSelectedContent();
       if (data != null) {
+        final TextSelection? selection = selectable.getLocalTextSelection();
+        if(!enteredSelectedRegion) {
+          start += selection!.start;
+        }
         enteredSelectedRegion = true;
-        buffer.write(selectable.getSelectedContent()!.plainText);
+        numSelected += selection!.extentOffset - selection.baseOffset;
       } else {
         if (!enteredSelectedRegion) {
-          start += selectable.getLocalTextSelection()!.end;
+          start += selectable.getContentLength() ?? 0;
         }
       }
     }
-    end = start + buffer.length;
-    if (buffer.isNotEmpty) {
-      start += 1;
-    } else {
-      return null;
+    if (numSelected == 0) {
+     return null;
     }
+    end = numSelected + start;
+
 
     return TextSelection(
       baseOffset: start,
       extentOffset: end,
     );
   }
-
-
 
   /// Called when this delegate finishes updating the selectables.
   @protected

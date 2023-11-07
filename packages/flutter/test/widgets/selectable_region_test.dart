@@ -607,12 +607,142 @@ void main() {
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
 
+  group('Selection Offsets are correctly gathered for disjoint Text Widgets',
+      () {
+    const List<String> texts = <String>[
+      'How are you',
+      'you doing on this',
+      'fine day?'
+    ];
+
+      // init
+
+
+    testWidgets(
+        'iterively gather offsets 0 through the last character of each Text widget',
+        (WidgetTester tester) async {
+ TextSelection? currentSelection = null;
+
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final widget = MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (content) {
+            currentSelection = content?.textSelection;
+          },
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: Column(
+            children: List<Widget>.from(
+                texts.map((String text) => Text(text)).toList())
+              ..insert(
+                  2,
+                  const SizedBox(
+                      height:
+                          20)), // Inserting SizedBox after the second Text widget
+          ),
+        ),
+      );
+
+
+      await tester.pumpWidget(widget);
+
+      final List<RenderParagraph> paragraphs = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .toList();
+
+      expect(paragraphs.length,
+          texts.length); // Ensure we have a paragraph for each text
+
+// Start the gesture at the beginning of the first Text widget
+      final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraphs.first, 0),
+          kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      int runningOffset =
+          0; // Initialize the baseOffset for the first text widget.
+
+      for (int i = 0; i < paragraphs.length; i++) {
+        final RenderParagraph paragraph = paragraphs[i];
+        final int textLength = paragraph.text.toPlainText().length;
+
+        // Move to the last character of the current Text widget.
+        await gesture.moveTo(textOffsetToPosition(paragraph, textLength - 1));
+        await tester.pump();
+
+        // Check that the selection is updated to include the entire current Text widget.
+        expect(currentSelection, isNotNull);
+        expect(
+            currentSelection,
+            TextSelection(
+                baseOffset: 0, extentOffset: runningOffset + textLength - 1));
+
+        // Update the baseOffset for the next text widget, if there is one.
+        runningOffset += textLength;
+      }
+
+      await gesture.up();
+    }, variant: TargetPlatformVariant.all());
+
+   testWidgets(
+        'iterively gather offsets 1 through the last character - 1 of each Text widget',
+        (WidgetTester tester) async {
+ TextSelection? currentSelection = null;
+
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final widget = MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (content) {
+            currentSelection = content?.textSelection;
+          },
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: Column(
+            children: List<Widget>.from(
+                texts.map((String text) => Text(text)).toList())
+              ..insert(
+                  2,
+                  const SizedBox(
+                      height:
+                          20)), // Inserting SizedBox after the second Text widget
+          ),
+        ),
+      );
+
+
+      await tester.pumpWidget(widget);
+
+      final List<RenderParagraph> paragraphs = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .toList();
+
+      expect(paragraphs.length,
+          texts.length); // Ensure we have a paragraph for each text
+
+// Start the gesture at the beginning of the first Text widget
+      final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraphs.first, 9),
+          kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraphs[2], 5));
+      await tester.pump();
+
+      print(currentSelection);
+
+      await gesture.up();
+    }, variant: TargetPlatformVariant.all());
+
+  });
+
   group('SelectionArea integration', () {
     testWidgets('mouse can select single text on desktop platforms',
         (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -4288,6 +4418,13 @@ class RenderSelectionSpy extends RenderProxyBox
     return const TextSelection(baseOffset: 0, extentOffset: 0);
   }
 
+   @override
+  int? getContentLength() {
+    return 0;
+  }
+
+
+
   @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
@@ -4371,6 +4508,11 @@ class RenderSelectAll extends RenderProxyBox
   @override
   TextSelection? getLocalTextSelection() {
     return const TextSelection(baseOffset: 0, extentOffset: 0);
+  }
+
+    @override
+  int? getContentLength() {
+    return 0;
   }
 
   @override
