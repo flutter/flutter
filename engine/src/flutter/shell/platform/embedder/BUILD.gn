@@ -108,10 +108,10 @@ template("embedder_source_set") {
       "//flutter/lib/ui",
       "//flutter/runtime:libdart",
       "//flutter/shell/common",
+      "//flutter/skia",
       "//flutter/third_party/tonic",
       "//third_party/dart/runtime/bin:dart_io_api",
       "//third_party/dart/runtime/bin:elf_loader",
-      "//third_party/skia",
     ]
 
     if (embedder_enable_gl) {
@@ -288,12 +288,12 @@ if (enable_unittests) {
       "//flutter/lib/snapshot",
       "//flutter/lib/ui",
       "//flutter/runtime",
+      "//flutter/skia",
       "//flutter/testing",
       "//flutter/testing:dart",
       "//flutter/testing:skia",
       "//flutter/third_party/tonic",
       "//third_party/dart/runtime/bin:elf_loader",
-      "//third_party/skia",
     ]
 
     if (test_enable_gl) {
@@ -410,7 +410,7 @@ if (enable_unittests) {
       #"//flutter/testing:skia",
       #"//flutter/third_party/tonic",
       #"//third_party/dart/runtime/bin:elf_loader",
-      #"//third_party/skia",
+      #"//flutter/skia",
     ]
   }
 }

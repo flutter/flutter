@@ -82,14 +82,14 @@ source_set("txt") {
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+    "//flutter/skia",
     "//third_party/harfbuzz",
     "//third_party/icu",
-    "//third_party/skia",
   ]
 
   deps = [
-    "//third_party/skia",
-    "//third_party/skia/modules/skparagraph",
+    "//flutter/skia",
+    "//flutter/skia/modules/skparagraph",
   ]
 
   libs = []
@@ -136,9 +136,9 @@ if (enable_unittests) {
       ":txt",
       ":txt_fixtures",
       "//flutter/fml",
+      "//flutter/skia/modules/skparagraph",
       "//flutter/testing:testing_lib",
       "//flutter/third_party/benchmark",
-      "//third_party/skia/modules/skparagraph",
     ]
   }
 
@@ -164,9 +164,9 @@ if (enable_unittests) {
       ":txt_fixtures",
       "//flutter/fml",
       "//flutter/runtime:test_font",
+      "//flutter/skia/modules/skparagraph:skparagraph",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
-      "//third_party/skia/modules/skparagraph:skparagraph",
     ]
 
     # This is needed for //third_party/googletest for linking zircon symbols.

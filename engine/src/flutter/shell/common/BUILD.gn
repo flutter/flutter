@@ -145,8 +145,8 @@ source_set("common") {
     "//flutter/runtime",
     "//flutter/shell/common:base64",
     "//flutter/shell/profiling",
+    "//flutter/skia",
     "//third_party/dart/runtime:dart_api",
-    "//third_party/skia",
   ]
 
   if (impeller_supports_rendering) {
@@ -256,10 +256,10 @@ if (enable_unittests) {
       "//flutter/assets",
       "//flutter/common",
       "//flutter/lib/ui",
+      "//flutter/skia",
       "//flutter/testing:dart",
       "//flutter/testing:fixture_test",
       "//flutter/third_party/rapidjson",
-      "//third_party/skia",
     ]
 
     public_configs = [

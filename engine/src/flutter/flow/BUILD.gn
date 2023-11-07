@@ -96,7 +96,7 @@ source_set("flow") {
     "//flutter/fml",
   ]
 
-  deps = [ "//third_party/skia" ]
+  deps = [ "//flutter/skia" ]
 
   if (impeller_supports_rendering) {
     deps += [
@@ -190,11 +190,11 @@ if (enable_unittests) {
       "//flutter/display_list/testing:display_list_testing",
       "//flutter/fml",
       "//flutter/shell/common:base64",
+      "//flutter/skia",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
       "//third_party/dart/runtime:libdart_jit",  # for tracing
       "//third_party/googletest:gtest",
-      "//third_party/skia",
     ]
 
     if (!defined(defines)) {

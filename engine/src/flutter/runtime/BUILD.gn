@@ -10,7 +10,7 @@ source_set("test_font") {
     "test_font_data.cc",
     "test_font_data.h",
   ]
-  deps = [ "//third_party/skia" ]
+  deps = [ "//flutter/skia" ]
   public_configs = [ "//flutter:config" ]
   defines = []
   if (flutter_runtime_mode == "debug" || current_toolchain == host_toolchain) {
@@ -106,11 +106,11 @@ source_set("runtime") {
     "//flutter/fml",
     "//flutter/lib/io",
     "//flutter/shell/common:display",
+    "//flutter/skia",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/bin:dart_io_api",
-    "//third_party/skia",
   ]
 
   if (flutter_runtime_mode != "release" && !is_fuchsia) {
@@ -147,12 +147,12 @@ if (enable_unittests) {
       "//flutter/common",
       "//flutter/fml",
       "//flutter/lib/snapshot",
+      "//flutter/skia",
       "//flutter/testing",
       "//flutter/testing:dart",
       "//flutter/testing:fixture_test",
       "//flutter/third_party/tonic",
       "//third_party/dart/runtime/bin:elf_loader",
-      "//third_party/skia",
     ]
   }
 

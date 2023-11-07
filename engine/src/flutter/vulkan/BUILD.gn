@@ -45,7 +45,7 @@ source_set("vulkan") {
     "procs",
     "//flutter/flutter_vma:flutter_skia_vma",
     "//flutter/fml",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 
   public_configs = [ "//flutter:config" ]

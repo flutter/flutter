@@ -23,7 +23,7 @@ wasm_toolchain("canvaskit") {
 
 copy("canvaskit_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [ "//third_party/skia/modules/canvaskit(:canvaskit)" ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit)" ]
 
   sources = [
     "$root_out_dir/canvaskit/canvaskit.js",
@@ -58,7 +58,7 @@ wasm_toolchain("canvaskit_chromium") {
 
 copy("canvaskit_chromium_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [ "//third_party/skia/modules/canvaskit(:canvaskit_chromium)" ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_chromium)" ]
 
   sources = [
     "$root_out_dir/canvaskit_chromium/canvaskit.js",

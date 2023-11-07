@@ -1,0 +1,17 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+_skia_root = "//third_party/skia"
+
+import("$_skia_root/modules/skcms/skcms.gni")
+
+static_library("skcms") {
+  cflags = []
+  if (!is_win || is_clang) {
+    cflags += [ "-std=c11" ]
+  }
+
+  public = skcms_public_headers
+  sources = skcms_sources
+}

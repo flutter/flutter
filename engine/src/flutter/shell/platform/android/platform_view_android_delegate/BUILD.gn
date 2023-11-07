@@ -19,7 +19,7 @@ source_set("platform_view_android_delegate") {
     "//flutter/lib/ui",
     "//flutter/shell/common",
     "//flutter/shell/platform/android/jni",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 }
 
