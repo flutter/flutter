@@ -1028,6 +1028,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
       case Artifact.flutterPreviewDevice:
+        //return _backupCache.getArtifactPath(
+        //  artifact,
+        //  platform: platform,
+        //  mode: mode,
+        //  environmentType: environmentType,
+        //);
         throw UnimplementedError('The preview device is not supported with local engine builds');
     }
   }

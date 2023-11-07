@@ -329,6 +329,11 @@ void main() {
           'snapshots', 'frontend_server_aot.dart.snapshot')
       );
 
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterPreviewDevice),
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
+          'snapshots', 'frontend_server_aot.dart.snapshot')
+      );
 
       fileSystem.file(fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'))
         .createSync(recursive: true);
