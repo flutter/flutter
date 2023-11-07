@@ -278,15 +278,7 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   //----------------------------------------------------------------------------
   /// Shader Stages
   ///
-  const auto& constants = desc.GetSpecializationConstants();
-
-  std::vector<std::vector<vk::SpecializationMapEntry>> map_entries(
-      desc.GetStageEntrypoints().size());
-  std::vector<vk::SpecializationInfo> specialization_infos(
-      desc.GetStageEntrypoints().size());
   std::vector<vk::PipelineShaderStageCreateInfo> shader_stages;
-
-  size_t entrypoint_count = 0;
   for (const auto& entrypoint : desc.GetStageEntrypoints()) {
     auto stage = ToVKShaderStageFlagBits(entrypoint.first);
     if (!stage.has_value()) {
@@ -294,31 +286,12 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
                      << desc.GetLabel();
       return nullptr;
     }
-
-    std::vector<vk::SpecializationMapEntry>& entries =
-        map_entries[entrypoint_count];
-    for (auto i = 0u; i < constants.size(); i++) {
-      vk::SpecializationMapEntry entry;
-      entry.offset = (i * sizeof(int32_t));
-      entry.size = sizeof(int32_t);
-      entry.constantID = i;
-      entries.emplace_back(entry);
-    }
-
-    vk::SpecializationInfo& specialization_info =
-        specialization_infos[entrypoint_count];
-    specialization_info.setMapEntries(map_entries[entrypoint_count]);
-    specialization_info.setPData(constants.data());
-    specialization_info.setDataSize(sizeof(int32_t) * constants.size());
-
     vk::PipelineShaderStageCreateInfo info;
     info.setStage(stage.value());
     info.setPName("main");
     info.setModule(
         ShaderFunctionVK::Cast(entrypoint.second.get())->GetModule());
-    info.setPSpecializationInfo(&specialization_info);
     shader_stages.push_back(info);
-    entrypoint_count++;
   }
   pipeline_info.setStages(shader_stages);
 
