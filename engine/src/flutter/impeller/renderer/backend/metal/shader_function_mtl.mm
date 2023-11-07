@@ -8,12 +8,36 @@ namespace impeller {
 
 ShaderFunctionMTL::ShaderFunctionMTL(UniqueID parent_library_id,
                                      id<MTLFunction> function,
+                                     id<MTLLibrary> library,
                                      std::string name,
                                      ShaderStage stage)
     : ShaderFunction(parent_library_id, std::move(name), stage),
-      function_(function) {}
+      function_(function),
+      library_(library) {}
 
 ShaderFunctionMTL::~ShaderFunctionMTL() = default;
+
+void ShaderFunctionMTL::GetMTLFunctionSpecialized(
+    const std::vector<int>& constants,
+    const CompileCallback& callback) const {
+  MTLFunctionConstantValues* constantValues =
+      [[MTLFunctionConstantValues alloc] init];
+  size_t index = 0;
+  for (const auto value : constants) {
+    int copied_value = value;
+    [constantValues setConstantValue:&copied_value
+                                type:MTLDataTypeInt
+                             atIndex:index];
+    index++;
+  }
+  CompileCallback callback_value = callback;
+  [library_ newFunctionWithName:@(GetName().data())
+                 constantValues:constantValues
+              completionHandler:^(id<MTLFunction> _Nullable function,
+                                  NSError* _Nullable error) {
+                callback_value(function);
+              }];
+}
 
 id<MTLFunction> ShaderFunctionMTL::GetMTLFunction() const {
   return function_;
