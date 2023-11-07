@@ -240,6 +240,9 @@ Future<bool> nativeBuildRequired(NativeAssetsBuildRunner buildRunner) async {
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
+    globals.logger.printTrace(
+      'No packages with native assets. Skipping native assets compilation.',
+    );
     return false;
   }
 
@@ -268,6 +271,9 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
+    globals.logger.printTrace(
+      'No packages with native assets. Skipping native assets compilation.',
+    );
     return;
   }
   final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');

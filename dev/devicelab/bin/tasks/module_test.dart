@@ -58,12 +58,8 @@ Future<void> main() async {
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
-        'dependencies:\n',
-        '''
-dependencies:
-  $ffiPackageName:
-    path: ../$ffiPackageName
-''',
+        'dependencies:$platformLineSep',
+        'dependencies:$platformLineSep  $ffiPackageName:$platformLineSep    path: ..${Platform.pathSeparator}$ffiPackageName$platformLineSep',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -75,12 +71,7 @@ dependencies:
 
       section('Add read-only asset');
 
-      final File readonlyTxtAssetFile = await File(path.join(
-        projectDir.path,
-        'assets',
-        'read-only.txt'
-      ))
-      .create(recursive: true);
+      final File readonlyTxtAssetFile = await File(path.join(projectDir.path, 'assets', 'read-only.txt')).create(recursive: true);
 
       if (!exists(readonlyTxtAssetFile)) {
         return TaskResult.failure('Failed to create read-only asset');
@@ -141,10 +132,7 @@ exitCode: $exitCode
       section('Remove FFI package');
 
       content = content.replaceFirst(
-        '''
-  $ffiPackageName:
-    path: ../$ffiPackageName
-''',
+        '  $ffiPackageName:$platformLineSep    path: ../$ffiPackageName$platformLineSep',
         '',
       );
       await pubspec.writeAsString(content, flush: true);
