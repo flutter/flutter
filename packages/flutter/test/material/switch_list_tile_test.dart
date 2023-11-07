@@ -150,6 +150,7 @@ void main() {
       find.byType(Switch),
       paints
         ..rrect(color: Colors.blue[500])
+        ..rrect()
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -163,6 +164,7 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(color: Colors.green[500])
+        ..rrect()
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -221,7 +223,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SwitchListTile.adaptive delegates to', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile.adaptive only uses material switch', (WidgetTester tester) async {
     bool value = false;
 
     Widget buildFrame(TargetPlatform platform) {
@@ -246,23 +248,15 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS,
+      TargetPlatform.macOS, TargetPlatform.android, TargetPlatform.fuchsia,
+      TargetPlatform.linux, TargetPlatform.windows ]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
-      expect(value, isFalse, reason: 'on ${platform.name}');
-
-      await tester.tap(find.byType(SwitchListTile));
-      expect(value, isTrue, reason: 'on ${platform.name}');
-    }
-
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
-      value = false;
-      await tester.pumpWidget(buildFrame(platform));
-      await tester.pumpAndSettle(); // Finish the theme change animation.
-
       expect(find.byType(CupertinoSwitch), findsNothing);
+      expect(find.byType(Switch), findsOneWidget);
       expect(value, isFalse, reason: 'on ${platform.name}');
+
       await tester.tap(find.byType(SwitchListTile));
       expect(value, isTrue, reason: 'on ${platform.name}');
     }
@@ -714,14 +708,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveDisabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveDisabledThumbColor)
     );
 
     await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: true));
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: activeDisabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: activeDisabledThumbColor)
     );
 
     await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: false));
@@ -729,7 +723,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveEnabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveEnabledThumbColor)
     );
 
     await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: true));
@@ -737,7 +731,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: activeEnabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: activeEnabledThumbColor)
     );
   });
 
@@ -853,7 +847,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: hoveredThumbColor),
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: hoveredThumbColor),
     );
 
     // On pressed state
@@ -861,7 +855,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: pressedThumbColor),
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: pressedThumbColor),
     );
   });
 
@@ -1188,7 +1182,7 @@ void main() {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF2196F3)),
@@ -1196,7 +1190,7 @@ void main() {
 
       await tester.pumpWidget(buildSwitchListTile(false, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF34C759)),
@@ -1224,7 +1218,7 @@ void main() {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF6750A4)),
@@ -1232,7 +1226,7 @@ void main() {
 
       await tester.pumpWidget(buildSwitchListTile(false, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF34C759)),
