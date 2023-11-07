@@ -119,18 +119,22 @@ dependencies:
       await inDirectory(Directory(path.join(projectDir.path, '.android')),
           () async {
         final StringBuffer stderr = StringBuffer();
-        await exec(
+        final exitCode = await exec(
           gradlewExecutable,
-          <String>['flutter:assembleDebug'],
+          <String>['flutter:assembleDebug', '-d'],
           environment: <String, String>{'JAVA_HOME': javaHome},
           canFail: true,
           stderr: stderr,
         );
         const String errorString =
             'Native assets are not yet supported in Android add2app.';
-        if (!stderr.toString().contains(errorString)) {
+        if (!stderr.toString().contains(errorString) || exitCode == 0) {
           throw TaskResult.failure(
-              'Expected to find `$errorString` in stderr.');
+              '''
+Expected to find `$errorString` in stderr and nonZero exit code.
+$stderr
+exitCode: $exitCode
+''');
         }
       });
 
