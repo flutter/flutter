@@ -487,7 +487,7 @@ Future<Iterable<Asset>> dryRunNativeAssetsSingleArchitectureInternal(
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
 
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  
+
   final DryRunResult dryRunResult = await buildRunner.dryRun(
     linkModePreference: LinkModePreference.dynamic,
     targetOS: targetOS,
