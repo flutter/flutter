@@ -39,8 +39,8 @@ String findCommit({
       throw StateError('Branch $primaryBranch does not seem to have a common history with trunk $primaryTrunk.');
     }
     anchor = _parseTimestamp(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, '--max-count=1', mergeBase, '--']));
-    final int missingTrunkCommits = _countLines(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, primaryTrunk, '^$primaryBranch', '--']));
-    final int extraCommits = _countLines(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, primaryBranch, '^$primaryTrunk', '--']));
+    final int missingTrunkCommits = _countLines(git(primaryRepoDirectory, <String>['rev-list', primaryTrunk, '^$primaryBranch', '--']));
+    final int extraCommits = _countLines(git(primaryRepoDirectory, <String>['rev-list', primaryBranch, '^$primaryTrunk', '--']));
     if (missingTrunkCommits == 0 && extraCommits == 0) {
       log('$primaryBranch is even with $primaryTrunk at $mergeBase');
     } else {
