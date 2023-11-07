@@ -18,7 +18,7 @@ void log(String message) {
   }
 }
 
-const _commitTimestampFormat = '--format=%cI';
+const String _commitTimestampFormat = '--format=%cI';
 DateTime _parseTimestamp(String line) => DateTime.parse(line.trim());
 int _countLines(String output) => output.trim().split('/n').where((String line) => line.isNotEmpty).length;
 
