@@ -16,7 +16,7 @@ std::optional<Rect> Snapshot::GetCoverage() const {
 }
 
 std::optional<Matrix> Snapshot::GetUVTransform() const {
-  if (!texture || texture->GetSize().IsZero()) {
+  if (!texture || texture->GetSize().IsEmpty()) {
     return std::nullopt;
   }
   return Matrix::MakeScale(1 / Vector2(texture->GetSize())) *

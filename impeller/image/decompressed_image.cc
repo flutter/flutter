@@ -18,7 +18,7 @@ DecompressedImage::DecompressedImage(
     Format format,
     std::shared_ptr<const fml::Mapping> allocation)
     : size_(size), format_(format), allocation_(std::move(allocation)) {
-  if (!allocation_ || !size.IsPositive() || format_ == Format::kInvalid) {
+  if (!allocation_ || size.IsEmpty() || format_ == Format::kInvalid) {
     return;
   }
   is_valid_ = true;
