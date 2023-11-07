@@ -6,6 +6,19 @@
 
 namespace fml {
 
-//
+namespace internal {
 
+id ScopedNSProtocolTraitsRetain(id obj) {
+  return [obj retain];
+}
+
+id ScopedNSProtocolTraitsAutoRelease(id obj) {
+  return [obj autorelease];
+}
+
+void ScopedNSProtocolTraitsRelease(id obj) {
+  return [obj release];
+}
+
+}  // namespace internal
 }  // namespace fml

@@ -243,7 +243,6 @@ source_set("ios_test_flutter_mrc") {
     "framework/Source/FlutterViewTest.mm",
     "framework/Source/SemanticsObjectTestMocks.h",
     "framework/Source/SemanticsObjectTest_mrc.mm",
-    "framework/Source/VsyncWaiterIosTest.mm",
     "framework/Source/accessibility_bridge_test.mm",
     "platform_message_handler_ios_test.mm",
   ]
@@ -314,6 +313,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/SemanticsObjectTest.mm",
     "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
+    "framework/Source/VsyncWaiterIosTest.mm",
     "framework/Source/connection_collection_test.mm",
   ]
   deps = [

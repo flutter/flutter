@@ -88,8 +88,8 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewLayerPool::GetLayer
     const std::shared_ptr<IOSContext>& ios_context) {
   if (available_layer_index_ >= layers_.size()) {
     std::shared_ptr<FlutterPlatformViewLayer> layer;
-    fml::scoped_nsobject<FlutterOverlayView> overlay_view;
-    fml::scoped_nsobject<FlutterOverlayView> overlay_view_wrapper;
+    fml::scoped_nsobject<UIView> overlay_view;
+    fml::scoped_nsobject<UIView> overlay_view_wrapper;
 
     if (!gr_context) {
       overlay_view.reset([[FlutterOverlayView alloc] init]);

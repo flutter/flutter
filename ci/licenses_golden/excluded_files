@@ -101,6 +101,8 @@
 ../../../flutter/fml/message_loop_unittests.cc
 ../../../flutter/fml/paths_unittests.cc
 ../../../flutter/fml/platform/darwin/cf_utils_unittests.mm
+../../../flutter/fml/platform/darwin/scoped_nsobject_arc_unittests.mm
+../../../flutter/fml/platform/darwin/scoped_nsobject_unittests.mm
 ../../../flutter/fml/platform/darwin/string_range_sanitization_unittests.mm
 ../../../flutter/fml/platform/win/file_win_unittests.cc
 ../../../flutter/fml/platform/win/wstring_conversion_unittests.cc
